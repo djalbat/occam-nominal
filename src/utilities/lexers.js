@@ -1,21 +1,17 @@
 "use strict";
 
 import { NominalLexer } from "occam-grammars";
-import { lexerUtilities } from "occam-lexers";
+import { lexersUtilities } from "occam-custom-grammars";
 
-import CombinedCustomGrammar from "../customGrammar/combined";
-
-const { lexerFromRules, rulesFromEntries } = lexerUtilities;
+const { lexerFromNothing, lexerFromCombinedCustomGrammar, lexerFromEntriesAndCombinedCustomGrammar } = lexersUtilities;
 
 export function nominalLexerFromNothing(Class) {
   if (Class === undefined) {
     Class = NominalLexer; ///
   }
 
-  const { entries } = Class,
-        combinedCustomGrammar = CombinedCustomGrammar.fromNothing(),
-        rules = rulesFromEntriesAndCombinedCustomGrammar(entries, combinedCustomGrammar),
-        nominalLexer = lexerFromRules(Class, rules);
+  const lexer = lexerFromNothing(Class),
+        nominalLexer = lexer; ///
 
   return nominalLexer;
 }
@@ -27,9 +23,8 @@ export function nominalLexerFromCombinedCustomGrammar(Class, combinedCustomGramm
     Class = NominalLexer; ///
   }
 
-  const { entries } = Class,
-        rules = rulesFromEntriesAndCombinedCustomGrammar(entries, combinedCustomGrammar),
-        nominalLexer = lexerFromRules(Class, rules);
+  const lexer = lexerFromCombinedCustomGrammar(Class, combinedCustomGrammar),
+        nominalLexer = lexer; ///
 
   return nominalLexer;
 }
@@ -43,8 +38,8 @@ export function nominalLexerFromEntriesAndCombinedCustomGrammar(Class, entries, 
     Class = NominalLexer; ///
   }
 
-  const rules = rulesFromEntriesAndCombinedCustomGrammar(entries, combinedCustomGrammar),
-        nominalLexer = lexerFromRules(Class, rules);
+  const lexer = lexerFromEntriesAndCombinedCustomGrammar(Class, entries, combinedCustomGrammar),
+        nominalLexer = lexer; ///
 
   return nominalLexer;
 }
@@ -54,16 +49,3 @@ export default {
   nominalLexerFromCombinedCustomGrammar,
   nominalLexerFromEntriesAndCombinedCustomGrammar
 };
-
-function rulesFromEntriesAndCombinedCustomGrammar(entries, combinedCustomGrammar) {
-  const customGrammarEntries = combinedCustomGrammar.getEntries();
-
-  entries = [ ///
-    ...customGrammarEntries,
-    ...entries
-  ];
-
-  const rules = rulesFromEntries(entries);
-
-  return rules;
-}
