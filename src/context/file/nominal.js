@@ -2,41 +2,39 @@
 
 import { arrayUtilities } from "necessary";
 import { FileContext, contextUtilities } from "occam-languages";
-import { lexersUtilities, parsersUtilities } from "occam-nominal";
 
-import elements from "../../elements";
+import { nominalLexerFromCombinedCustomGrammar } from "../../utilities/lexers";
+import { nominalParserFromCombinedCustomGrammar } from "../../utilities/parsers";
 
-import { verifyFile } from "../../process/verify";
-import { baseTypeFromNothing } from "../../utilities/type";
-import { typesFromJSON,
-         rulesFromJSON,
-         axiomsFromJSON,
-         typesToTypesJSON,
-         rulesToRulesJSON,
-         theoremsFromJSON,
-         variablesFromJSON,
-         lemmasFromNothing,
-         axiomsToAxiomsJSON,
-         conjecturesFromJSON,
-         combinatorsFromJSON,
-         typePrefixesFromJSON,
-         constructorsFromJSON,
-         metatheoremsFromJSON,
-         metavariablesFromJSON,
-         metaLemmasFromNothing,
-         theoremsToTheoremsJSON,
-         variablesToVariablesJSON,
-         conjecturesToConjecturesJSON,
-         combinatorsToCombinatorsJSON,
-         typePrefixesToTypePrefixesJSON,
-         constructorsToConstructorsJSON,
-         metatheoremsToMetatheoremsJSON,
-         metavariablesToMetavariablesJSON } from "../../utilities/json";
+// import { verifyFile } from "../../process/verify";
+// import { baseTypeFromNothing } from "../../utilities/type";
+// import { typesFromJSON,
+//          rulesFromJSON,
+//          axiomsFromJSON,
+//          typesToTypesJSON,
+//          rulesToRulesJSON,
+//          theoremsFromJSON,
+//          variablesFromJSON,
+//          lemmasFromNothing,
+//          axiomsToAxiomsJSON,
+//          conjecturesFromJSON,
+//          combinatorsFromJSON,
+//          typePrefixesFromJSON,
+//          constructorsFromJSON,
+//          metatheoremsFromJSON,
+//          metavariablesFromJSON,
+//          metaLemmasFromNothing,
+//          theoremsToTheoremsJSON,
+//          variablesToVariablesJSON,
+//          conjecturesToConjecturesJSON,
+//          combinatorsToCombinatorsJSON,
+//          typePrefixesToTypePrefixesJSON,
+//          constructorsToConstructorsJSON,
+//          metatheoremsToMetatheoremsJSON,
+//          metavariablesToMetavariablesJSON } from "../../utilities/json";
 
 const { push, filter } = arrayUtilities,
-      { chainContext } = contextUtilities,
-      { nominalLexerFromCombinedCustomGrammar } = lexersUtilities,
-      { nominalParserFromCombinedCustomGrammar } = parsersUtilities;
+      { chainContext } = contextUtilities;
 
 export default class NominalFileContext extends FileContext {
   constructor(context, filePath, tokens, node, types, rules, axioms, lemmas, theorems, variables, metaLemmas, conjectures, combinators, typePrefixes, constructors, metatheorems, metavariables) {
@@ -70,8 +68,7 @@ export default class NominalFileContext extends FileContext {
   }
 
   getEquivalences() {
-    const { Equivalences } = elements,
-          equivalences = Equivalences.fromNothing(context);
+    const equivalences = [];
 
     return equivalences;
   }
