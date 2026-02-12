@@ -1,7 +1,7 @@
 "use strict";
 
+import { FileContext } from "occam-languages";
 import { arrayUtilities } from "necessary";
-import { FileContext, contextUtilities } from "occam-languages";
 
 import { nominalLexerFromCombinedCustomGrammar } from "../../utilities/lexers";
 import { nominalParserFromCombinedCustomGrammar } from "../../utilities/parsers";
@@ -33,8 +33,7 @@ import { nominalParserFromCombinedCustomGrammar } from "../../utilities/parsers"
 //          metatheoremsToMetatheoremsJSON,
 //          metavariablesToMetavariablesJSON } from "../../utilities/json";
 
-const { push, filter } = arrayUtilities,
-      { chainContext } = contextUtilities;
+const { push, filter } = arrayUtilities;
 
 export default class NominalFileContext extends FileContext {
   constructor(context, filePath, tokens, node, types, rules, axioms, lemmas, theorems, variables, metaLemmas, conjectures, combinators, typePrefixes, constructors, metatheorems, metavariables) {
@@ -57,8 +56,6 @@ export default class NominalFileContext extends FileContext {
     this.constructors = constructors;
     this.metatheorems = metatheorems;
     this.metavariables = metavariables;
-
-    return chainContext(this);
   }
 
   getJudgements() {
