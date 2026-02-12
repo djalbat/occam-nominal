@@ -745,6 +745,13 @@ export default class NominalFileContext extends FileContext {
     return topLevelMetaAssertionPresent;
   }
 
+  getCombinedCustomGrammar() {
+    const releaseContext = this.getReleaseContext(),
+          combinedCustomGrammar = releaseContext.getCombinedCustomGrammar();
+
+    return combinedCustomGrammar;
+  }
+
   getLexer() {
     const combinedCustomGrammar = this.getCombinedCustomGrammar(),
           nominalLexer = nominalLexerFromCombinedCustomGrammar(combinedCustomGrammar),
