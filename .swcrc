@@ -3,6 +3,10 @@
         "type": "commonjs"
     },
     "jsc": {
-        "target": "es2022"
+        "target": "es2022",
+        "parser": {
+            "syntax": "ecmascript",
+            "jsx": true
+        }
     }
 }
