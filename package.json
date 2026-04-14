@@ -1,7 +1,7 @@
 {
   "name": "occam-nominal",
   "author": "James Smith",
-  "version": "1.0.103",
+  "version": "1.0.104",
   "license": "MIT, Anti-996",
   "homepage": "https://github.com/djalbat/occam-nominal",
   "description": "Occam's Nominal language.",
@@ -13,7 +13,7 @@
     "necessary": "^17.1.7",
     "occam-custom-grammars": "^6.0.32",
     "occam-grammars": "^1.3.524",
-    "occam-languages": "^0.0.199"
+    "occam-languages": "^0.0.201"
   },
   "devDependencies": {
     "@swc/core": "1.13.20",
