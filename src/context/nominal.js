@@ -1,7 +1,6 @@
 "use strict";
 
 import { Context } from "occam-languages";
-import { lexersUtilities, parsersUtilities } from "occam-nominal";
 
 import NominalLexer from "../nominal/lexer";
 import NominalParser from "../nominal/parser";
@@ -9,8 +8,8 @@ import NominalParser from "../nominal/parser";
 import { baseTypeFromNothing } from "../utilities/type";
 import { findMetaTypeByMetaTypeName } from "../metaTypes";
 
-const { nominalLexerFromNothing } = lexersUtilities,
-      { nominalParserFromNothing } = parsersUtilities;
+import { nominalLexerFromNothing } from "../utilities/lexers";
+import { nominalParserFromNothing } from "../utilities/parsers";
 
 const nominalLexer = nominalLexerFromNothing(NominalLexer),
       nominalParser = nominalParserFromNothing(NominalParser); ///
