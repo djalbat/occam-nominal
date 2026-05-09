@@ -3,42 +3,45 @@
 import { FileContext } from "occam-languages";
 import { arrayUtilities } from "necessary";
 
+import NominalLexer from "../../nominal/lexer";
+import NominalParser from "../../nominal/parser";
+
+import { verifyFile } from "../../process/verify";
+import { baseTypeFromNothing } from "../../utilities/type";
+import { findMetaTypeByMetaTypeName } from "../../metaTypes";
 import { nominalLexerFromCombinedCustomGrammar } from "../../utilities/lexers";
 import { nominalParserFromCombinedCustomGrammar } from "../../utilities/parsers";
-
-// import { verifyFile } from "../../process/verify";
-// import { baseTypeFromNothing } from "../../utilities/type";
-// import { typesFromJSON,
-//          rulesFromJSON,
-//          axiomsFromJSON,
-//          typesToTypesJSON,
-//          rulesToRulesJSON,
-//          theoremsFromJSON,
-//          variablesFromJSON,
-//          lemmasFromNothing,
-//          axiomsToAxiomsJSON,
-//          conjecturesFromJSON,
-//          combinatorsFromJSON,
-//          typePrefixesFromJSON,
-//          constructorsFromJSON,
-//          metatheoremsFromJSON,
-//          metavariablesFromJSON,
-//          metaLemmasFromNothing,
-//          theoremsToTheoremsJSON,
-//          variablesToVariablesJSON,
-//          conjecturesToConjecturesJSON,
-//          combinatorsToCombinatorsJSON,
-//          typePrefixesToTypePrefixesJSON,
-//          constructorsToConstructorsJSON,
-//          metatheoremsToMetatheoremsJSON,
-//          metavariablesToMetavariablesJSON } from "../../utilities/json";
+import { typesFromJSON,
+         rulesFromJSON,
+         axiomsFromJSON,
+         typesToTypesJSON,
+         theoremsFromJSON,
+         rulesToRulesJSON,
+         axiomsToAxiomsJSON,
+         conjecturesFromJSON,
+         combinatorsFromJSON,
+         typePrefixesFromJSON,
+         constructorsFromJSON,
+         metatheoremsFromJSON,
+         theoremsToTheoremsJSON,
+         declaredVariablesFromJSON,
+         conjecturesToConjecturesJSON,
+         combinatorsToCombinatorsJSON,
+         declaredMetavariablesFromJSON,
+         typePrefixesToTypePrefixesJSON,
+         constructorsToConstructorsJSON,
+         metatheoremsToMetatheoremsJSON,
+         declaredVariablesToDeclaredVariablesJSON,
+         declaredMetavariablesToDeclaredMetavariablesJSON } from "../../utilities/json";
 
 const { push, filter } = arrayUtilities;
 
 export default class NominalFileContext extends FileContext {
-  constructor(context, filePath, tokens, node, types, rules, axioms, lemmas, theorems, variables, metaLemmas, conjectures, combinators, typePrefixes, constructors, metatheorems, metavariables) {
-    super(context, filePath, tokens, node);
+  constructor(context, fileContent, filePath, tokens, node, json, lexer, parser, types, rules, axioms, lemmas, theorems, metaLemmas, conjectures, combinators, typePrefixes, constructors, metatheorems, declaredVariables, declaredMetavariables) {
+    super(context, fileContent, filePath, tokens, node, json);
 
+    this.lexer = lexer;
+    this.parser = parser;
     this.context = context;
     this.filePath = filePath;
     this.tokens = tokens;
@@ -48,20 +51,22 @@ export default class NominalFileContext extends FileContext {
     this.axioms = axioms;
     this.lemmas = lemmas;
     this.theorems = theorems;
-    this.variables = variables;
     this.metaLemmas = metaLemmas;
     this.conjectures = conjectures;
     this.combinators = combinators;
     this.typePrefixes = typePrefixes;
     this.constructors = constructors;
     this.metatheorems = metatheorems;
-    this.metavariables = metavariables;
+    this.declaredVariables = declaredVariables;
+    this.declaredMetavariables = declaredMetavariables;
   }
 
-  getJudgements() {
-    const judgements = [];
+  getLexer() {
+    return this.lexer;
+  }
 
-    return judgements;
+  getParser() {
+    return this.parser;
   }
 
   getEquivalences() {
@@ -124,9 +129,9 @@ export default class NominalFileContext extends FileContext {
     return labels;
   }
 
-  getTypes(includeRelease = true, includeDependencies = true) {
+  getTypes(includeRelease = true) {
     const types = includeRelease ?
-                    this.context.getTypes(includeDependencies) :
+                    this.context.getTypes() :
                       this.types;
 
     return types;
@@ -162,10 +167,6 @@ export default class NominalFileContext extends FileContext {
                          this.theorems;
 
     return theorems;
-  }
-
-  getVariables(includeRelease = true) {
-    return this.variables;
   }
 
   getProcedures(includeRelease = true) {
@@ -224,108 +225,214 @@ export default class NominalFileContext extends FileContext {
     return metatheorems;
   }
 
-  getMetavariables(includeRelease = true) {
-    return this.metavariables;
+  getDeclaredVariables() {
+    return this.declaredVariables;
+  }
+
+  getDeclaredMetavariables() {
+    return this.declaredMetavariables;
+  }
+
+  getDeclaredJudgements() {
+    const declaredJudgements = [];
+
+    return declaredJudgements;
+  }
+
+  getTerms(terms = []) {
+    return terms;
+  }
+
+  getFrames(frames = []) {
+    return frames;
+  }
+
+  getProperties(properties = []) {
+    return properties;
+  }
+
+  getEqualities(equalities = []) {
+    return equalities;
+  }
+
+  getJudgements(judgements = []) {
+    return judgements;
+  }
+
+  getAssertions(assertions = []) {
+    return assertions;
+  }
+
+  getStatements(statements = []) {
+    return statements;
+  }
+
+  getSignatures(signatures = []) {
+    return signatures;
+  }
+
+  getReferences(references = []) {
+    return references;
+  }
+
+  getAssumptions(assumptions = []) {
+    return assumptions;
+  }
+
+  getMetavariables(metavariables = []) {
+    return metavariables;
+  }
+
+  getSubstitutions(substitutions = []) {
+    return substitutions;
+  }
+
+  getPropertyRelations(propertyRelations = []) {
+    return propertyRelations;
+  }
+
+  getDerivedSubstitutions(derivedSubstitutions = []) {
+    return derivedSubstitutions;
   }
 
   addType(type) {
     this.types.push(type);
+
+    const filePath = this.getFilePath(),
+          typeString = type.getString();
+
+    this.trace(`Added the '${typeString}' type to the '${filePath}' file context.`)
   }
 
   addRule(rule) {
     this.rules.push(rule);
+
+    const filePath = this.getFilePath(),
+          ruleString = rule.getString();
+
+    this.trace(`Added the '${ruleString}' rule to the '${filePath}' file context.`)
   }
 
   addAxiom(axiom) {
     this.axioms.push(axiom);
+
+    const filePath = this.getFilePath(),
+          axiomString = axiom.getString();
+
+    this.trace(`Added the '${axiomString}' axiom to the '${filePath}' file context.`)
   }
 
   addLemma(lemma) {
     this.lemmas.push(lemma);
+
+    const filePath = this.getFilePath(),
+          lemmaString = lemma.getString();
+
+    this.trace(`Added the '${lemmaString}' lemma to the '${filePath}' file context.`)
   }
 
   addTheorem(theorem) {
     this.theorems.push(theorem);
-  }
 
-  addVariable(variable) {
-    this.variables.push(variable);
+    const filePath = this.getFilePath(),
+          theoremString = theorem.getString();
+
+    this.trace(`Added the '${theoremString}' theorem to the '${filePath}' file context.`)
   }
 
   addMetaLemma(metaLemma) {
     this.metaLemmas.push(metaLemma);
+
+    const filePath = this.getFilePath(),
+          metaLemmaString = metaLemma.getString();
+
+    this.trace(`Added the '${metaLemmaString}' meta-lemma to the '${filePath}' file context.`)
   }
 
   addConjecture(conjecture) {
     this.conjectures.push(conjecture);
+
+    const filePath = this.getFilePath(),
+          ocnjectureString = conjecture.getString();
+
+    this.trace(`Added the '${ocnjectureString}' ocnjecture to the '${filePath}' file context.`)
   }
 
   addCombinator(combinator) {
     this.combinators.push(combinator);
+
+    const filePath = this.getFilePath(),
+          combinatorString = combinator.getString();
+
+    this.trace(`Added the '${combinatorString}' combinator to the '${filePath}' file context.`)
   }
 
   addTypePrefix(typePrefix) {
     this.typePrefixes.push(typePrefix);
+
+    const filePath = this.getFilePath(),
+          typePrefixString = typePrefix.getString();
+
+    this.trace(`Added the '${typePrefixString}' type-prefix to the '${filePath}' file context.`)
   }
 
   addConstructor(constructor) {
     this.constructors.push(constructor);
+
+    const filePath = this.getFilePath(),
+          constructorString = constructor.getString();
+
+    this.trace(`Added the '${constructorString}' constructor to the '${filePath}' file context.`)
   }
 
   addMetatheorem(metatheorem) {
     this.metatheorems.push(metatheorem);
+
+    const filePath = this.getFilePath(),
+          metatheoremString = metatheorem.getString();
+
+    this.trace(`Added the '${metatheoremString}' metatheorem to the '${filePath}' file context.`)
   }
 
-  addMetavariable(metavariable) {
-    this.metavariables.push(metavariable);
+  addDeclaredVariable(declaredVariable) {
+    this.declaredVariables.push(declaredVariable);
+
+    const filePath = this.getFilePath(),
+          declaredVariableString = declaredVariable.getString();
+
+    this.trace(`Added the '${declaredVariableString}' declared variable to the '${filePath}' file context.`)
   }
 
-  findLabelByReference(reference, context) {
-    const labels = this.getLabels(),
-          label = labels.find((label) => {
-            const metavariableUnifies = label.unifyReference(reference, context);
+  addDeclaredMetavariable(declaredMetavariable) {
+    this.declaredMetavariables.push(declaredMetavariable);
 
-            if (metavariableUnifies) {
-              return true;
-            }
-          }) || null;
+    const filePath = this.getFilePath(),
+          declaredMetavariableString = declaredMetavariable.getString();
 
-    return label;
+    this.trace(`Added the '${declaredMetavariableString}' declared metavariable to the '${filePath}' file context.`)
   }
 
-  findMetaLemmaByReference(reference) {
-    const metaLemmas = this.getMetaLemmas(),
-          metaLemma = metaLemmas.find((metaLemma) => {
-            const metaLemmaComparesToReference = metaLemma.compareReference(reference);
+  findMetavariable(metavariable, context) {
+    const declaredMetavariables = this.getDeclaredMetavariables();
 
-            if (metaLemmaComparesToReference) {
-              return true;
-            }
-          }) || null;
+    metavariable = declaredMetavariables.find((declaredMetavariable) => {
+      const metavariableUnifies = declaredMetavariable.unifyMetavariable(metavariable, context);
 
-    return metaLemma;
-  }
+      if (metavariableUnifies) {
+        return true;
+      }
+    }) || null;
 
-  findMetatheoremByReference(reference) {
-    const metatheorems = this.getMetatheorems(),
-          metatheorem = metatheorems.find((metatheorem) => {
-            const metatheoremComparesToReference = metatheorem.compareReference(reference);
-
-            if (metatheoremComparesToReference) {
-              return true;
-            }
-          }) || null;
-
-    return metatheorem;
+    return metavariable;
   }
 
   findRuleByReference(reference) {
     const rules = this.getRules(),
-          metavariableName = reference.getMetavariableName(),
+          metavariableNode = reference.getMetavariableNode(),
           rule = rules.find((rule) => {
-            const ruleComparesToMetavariableName = rule.compareMetavariableName(metavariableName);
+            const metavariableNodeMatches = rule.matchMetavariableNode(metavariableNode);
 
-            if (ruleComparesToMetavariableName) {
+            if (metavariableNodeMatches) {
               return true;
             }
           }) || null;
@@ -335,11 +442,11 @@ export default class NominalFileContext extends FileContext {
 
   findAxiomByReference(reference) {
     const axioms = this.getAxioms(),
-          metavariableName = reference.getMetavariableName(),
+          metavariableNode = reference.getMetavariableNode(),
           axiom = axioms.find((axiom) => {
-            const axiomComparesToMetavariableName = axiom.compareMetavariableName(metavariableName);
+            const metavariableNodeMatches = axiom.matchMetavariableNode(metavariableNode);
 
-            if (axiomComparesToMetavariableName) {
+            if (metavariableNodeMatches) {
               return true;
             }
           }) || null;
@@ -349,11 +456,11 @@ export default class NominalFileContext extends FileContext {
 
   findLemmaByReference(reference) {
     const lemmas = this.getLemmas(),
-          metavariableName = reference.getMetavariableName(),
+          metavariableNode = reference.getMetavariableNode(),
           lemma = lemmas.find((lemma) => {
-            const lemmaComparesToMetavariableName = lemma.compareMetavariableName(metavariableName);
+            const metavariableNodeMatches = lemma.matchMetavariableNode(metavariableNode);
 
-            if (lemmaComparesToMetavariableName) {
+            if (metavariableNodeMatches) {
               return true;
             }
           }) || null;
@@ -363,11 +470,11 @@ export default class NominalFileContext extends FileContext {
 
   findTheoremByReference(reference) {
     const theorems = this.getTheorems(),
-          metavariableName = reference.getMetavariableName(),
+          metavariableNode = reference.getMetavariableNode(),
           theorem = theorems.find((theorem) => {
-            const theoremComparesToMetavariableName = theorem.compareMetavariableName(metavariableName);
+            const metavariableNodeMatches = theorem.matchMetavariableNode(metavariableNode);
 
-            if (theoremComparesToMetavariableName) {
+            if (metavariableNodeMatches) {
               return true;
             }
           }) || null;
@@ -375,26 +482,13 @@ export default class NominalFileContext extends FileContext {
     return theorem;
   }
 
-  findProcedureByName(name) {
-    const procedures = this.getProcedures(),
-          procedure = procedures.find((procedure) => {
-            const nameMatches = procedure.matchName(name);
-
-            if (nameMatches) {
-              return true;
-            }
-          }) || null;
-
-    return procedure;
-  }
-
   findConjectureByReference(reference) {
     const conjectures = this.getConjectures(),
-          metavariableName = reference.getMetavariableName(),
+          metavariableNode = reference.getMetavariableNode(),
           conjecture = conjectures.find((conjecture) => {
-            const conjectureComparesToMetavariableName = conjecture.compareMetavariableName(metavariableName);
+            const metavariableNodeMatches = conjecture.matchMetavariableNode(metavariableNode);
 
-            if (conjectureComparesToMetavariableName) {
+            if (metavariableNodeMatches) {
               return true;
             }
           }) || null;
@@ -406,11 +500,10 @@ export default class NominalFileContext extends FileContext {
     const metaLemmas = this.getMetaLemmas();
 
     filter(metaLemmas, (metaLemma) => {
-      const context = this, ///
-            topLevelMetaAssertion = metaLemma, ///
-            topLevelMetaAssertionUnifies = reference.unifyTopLevelMetaAssertion(topLevelMetaAssertion, context);
+      const topLevelMetaAssertion = metaLemma, ///
+            topLevelMetaAssertionCompares = reference.compareTopLevelMetaAssertion(topLevelMetaAssertion);
 
-      if (topLevelMetaAssertionUnifies) {
+      if (topLevelMetaAssertionCompares) {
         return true;
       }
     });
@@ -422,16 +515,25 @@ export default class NominalFileContext extends FileContext {
     const metatheorems = this.getMetatheorems();
 
     filter(metatheorems, (metatheorem) => {
-      const context = this, ///
-            topLevelMetaAssertion = metatheorem, ///
-            topLevelMetaAssertionUnifies = reference.unifyTopLevelMetaAssertion(topLevelMetaAssertion, context);
+      const topLevelMetaAssertion = metatheorem, ///
+            topLevelMetaAssertionCompares = reference.compareTopLevelMetaAssertion(topLevelMetaAssertion);
 
-      if (topLevelMetaAssertionUnifies) {
+      if (topLevelMetaAssertionCompares) {
         return true;
       }
     });
 
     return metatheorems;
+  }
+
+  findTopLevelAssertionByReference(reference) {
+    const axiom = this.findAxiomByReference(reference),
+          lemma = this.findLemmaByReference(reference),
+          theorem = this.findTheoremByReference(reference),
+          conjecture = this.findConjectureByReference(reference),
+          topLevelAssertion = (axiom || lemma || theorem || conjecture);
+
+    return topLevelAssertion;
   }
 
   findTopLevelMetaAssertionByReference(reference) {
@@ -453,35 +555,8 @@ export default class NominalFileContext extends FileContext {
     return topLevelMetaAssertions;
   }
 
-  findTopLevelAssertionByReference(reference) {
-    const axiom = this.findAxiomByReference(reference),
-          lemma = this.findLemmaByReference(reference),
-          theorem = this.findTheoremByReference(reference),
-          conjecture = this.findConjectureByReference(reference),
-          topLevelAssertion = (axiom || lemma || theorem || conjecture);
-
-    return topLevelAssertion;
-  }
-
-  findMetavariable(metavariable) {
-    const metavariables = this.getMetavariables(),
-          specificMetavariable = metavariable;  ///
-
-    metavariable = metavariables.find((metavariable) => {
-      const context = this, ///
-            generalMetavariable = metavariable, ///
-            metavariableUnifies = generalMetavariable.unifyMetavariable(specificMetavariable, context);
-
-      if (metavariableUnifies) {
-        return true;
-      }
-    }) || null;
-
-    return metavariable;
-  }
-
-  findTypeByTypeName(typeName, includeRelease = true, includeDependencies = true) {
-    let types = this.getTypes(includeRelease, includeDependencies);
+  findTypeByTypeName(typeName, includeRelease = true) {
+    let types = this.getTypes(includeRelease);
 
     const baseType = baseTypeFromNothing();
 
@@ -543,19 +618,6 @@ export default class NominalFileContext extends FileContext {
     return type;
   }
 
-  findMetaTypeByMetaTypeName(metaTypeName) {
-    const metaTypes = this.getMetaTypes(),
-          metaType = metaTypes.find((metaType) => {
-            const metaTypeComparesToMetaTypeName = metaType.compareMetaTypeName(metaTypeName);
-
-            if (metaTypeComparesToMetaTypeName) {
-              return true;
-            }
-          }) || null;
-
-    return metaType;
-  }
-
   findTypePrefixByTypePrefixName(typePrefixName) {
     const typePrefixes = this.getTypePrefixes(),
           typePrefix = typePrefixes.find((typePrefix) => {
@@ -569,86 +631,120 @@ export default class NominalFileContext extends FileContext {
     return typePrefix;
   }
 
-  findVariableByVariableIdentifier(variableIdentifier) {
-    const variables = this.getVariables(),
-          variable = variables.find((variable) => {
-            const variableComparesToVariableIdentifier = variable.compareVariableIdentifier(variableIdentifier);
+  findDeclaredVariableByVariableIdentifier(VariableIdentitifer) {
+    const declaredVariables = this.getDeclaredVariables(),
+          declaredVariable = declaredVariables.find((declaredVariable) => {
+            const declaredVariableComparesToVariableIdentitifer = declaredVariable.compareVariableIdentifier(VariableIdentitifer);
 
-            if (variableComparesToVariableIdentifier) {
+            if (declaredVariableComparesToVariableIdentitifer) {
               return true;
             }
           }) || null;
 
-    return variable;
+    return declaredVariable;
   }
 
-  findLabelByMetavariableName(metavariableName) {
-    const labels = this.getLabels(),
-          label = labels.find((label) => {
-            const labelComparesToMetavariableName = label.compareMetavariableName(metavariableName);
+  findDeclaredMetavariableByMetavariableName(metavariableName) {
+    const declaredMetavariables = this.getDeclaredMetavariables(),
+          declaredMetavariable = declaredMetavariables.find((declaredMetavariable) => {
+            const declaredMetavariableComparesToMetavariableName = declaredMetavariable.compareMetavariableName(metavariableName);
 
-            if (labelComparesToMetavariableName) {
+            if (declaredMetavariableComparesToMetavariableName) {
               return true;
             }
           }) || null;
 
-    return label;
+    return declaredMetavariable;
   }
 
-  findLabelByMetavariable(metavariable) {
-    const labels = this.getLabels(),
-          label = labels.find((label) => {
-            const metavariableEqualToLabelMetavariable = label.isMetavariableEqualToMetavariable(metavariable);
+  findTermByTermNode(termNode) {
+    const term = null;
 
-            if (metavariableEqualToLabelMetavariable) {
-              return true;
-            }
-          }) || null;
-
-    return label;
+    return term;
   }
 
-  findJudgementByMetavariable(metavariable) {
-    const judgements = this.getJudgements(),
-          judgement = judgements.find((judgement) => {
-            const judgementSingular = judgement.isSingular();
+  findStatementByStatementNode(statementNode) {
+    const statement = null;
 
-            if (judgementSingular) {
-              const judgementMetavariable = judgement.getMetavariable(),
-                    judgementMetavariableEqualToMetavariable = judgementMetavariable.isEqualTo(metavariable);
-
-              if (judgementMetavariableEqualToMetavariable) {
-                return true;
-              }
-            }
-          }) || null;
-
-    return judgement;
+    return statement;
   }
 
-  findMetavariableByMetavariableName(metavariableName) {
-    const metavariables = this.getMetavariables(),
-          metavariable = metavariables.find((metavariable) => {
-            const metavariableComparesToMetavariableName = metavariable.compareMetavariableName(metavariableName);
-
-            if (metavariableComparesToMetavariableName) {
-              return true;
-            }
-          }) || null;
+  findMetavariableByMetavariableNode(metavariableNode) {
+    const metavariable = null;
 
     return metavariable;
   }
 
-  isMetavariablePresent(metavariable) {
-    metavariable = this.findMetavariable(metavariable);
+  findSubstitutionBySubstitutionNode(substitutionNode) {
+    const substitution = null;
+
+    return substitution;
+  }
+
+  findMetaLevelAssumptionByMetaLevelAssumptionNode(metaLevelAssumptionNode) {
+    const metaLevelAssumption = null;
+
+    return metaLevelAssumption;
+  }
+
+  findProcedureByProcedureName(procedureName) {
+    const procedures = this.getProcedures(),
+          procedure = procedures.find((procedure) => {
+            const procedureComparesToProcedureName = procedure.compareProcedureName(procedureName);
+
+            if (procedureComparesToProcedureName) {
+              return true;
+            }
+          }) || null;
+
+    return procedure;
+  }
+
+  findMetaTypeByMetaTypeName(metaTypeName) { return findMetaTypeByMetaTypeName(metaTypeName); }
+
+  isMetavariablePresent(metavariable, context) {
+    metavariable = this.findMetavariable(metavariable, context);  ///
 
     const metavariablePresent = (metavariable !== null);
 
     return metavariablePresent;
   }
 
-  isTypePresentByTypeName(typeName, includeRelease = true, includeDependencies = true) {
-    const type = this.findTypeByTypeName(typeName, includeRelease, includeDependencies),
+  isLabelPresentByReference(reference, context = null) {
+    const labels = this.getLabels(),
+          labelPresent = labels.some((label) => {
+            const labelUnifies = reference.unifyLabel(label, context);
+
+            if (labelUnifies) {
+              return true;
+            }
+          });
+
+    return labelPresent;
+  }
+
+  isTopLevelMetaAssertionPresentByReference(reference) {
+    const topLevelMetaAssertion = this.findTopLevelMetaAssertionByReference(reference),
+          topLevelMetaAssertionPresent = (topLevelMetaAssertion !== null);
+
+    return topLevelMetaAssertionPresent;
+  }
+
+  isLabelPresentByLabelNode(labelNode) {
+    const labels = this.getLabels(),
+          labelPresent = labels.some((label) => {
+            const labelNodeMatches = label.matchLabelNode(labelNode);
+
+            if (labelNodeMatches) {
+              return true;
+            }
+          });
+
+    return labelPresent;
+  }
+
+  isTypePresentByTypeName(typeName, includeRelease = true) {
+    const type = this.findTypeByTypeName(typeName, includeRelease),
           typePresent = (type !== null);
 
     return typePresent;
@@ -675,90 +771,31 @@ export default class NominalFileContext extends FileContext {
     return typePrefixPresent;
   }
 
-  isVariablePresentByVariableIdentifier(variableIdentifier) {
-    const variable = this.findVariableByVariableIdentifier(variableIdentifier),
-          variablePresent = (variable !== null);
+  isDeclaredVariablePresentByVariableIdentifier(variableIdentifier) {
+    const declaredVariable = this.findDeclaredVariableByVariableIdentifier(variableIdentifier),
+          declaredVariablePresent = (declaredVariable !== null);
 
-    return variablePresent;
+    return declaredVariablePresent;
   }
 
-  isLabelPresentByMetavariableName(metavariableName) {
-    const label = this.findLabelByMetavariableName(metavariableName),
-          labelPresent = (label !== null);
+  isDeclaredMetavariablePresentByMetavariableName(metavariableName) {
+    const declaredMetavariable = this.findDeclaredMetavariableByMetavariableName(metavariableName),
+          declaredMetavariablePresent = (declaredMetavariable !== null);
 
-    return labelPresent;
+    return declaredMetavariablePresent;
   }
 
-  isLabelPresentByMetavariable(metavariable) {
-    const label = this.findLabelByMetavariable(metavariable),
-          labelPresent = (label !== null);
-
-    return labelPresent;
-  }
-
-  isMetavariablePresentByMetavariableName(metavariableName) {
-    const metavariable = this.findMetavariableByMetavariableName(metavariableName),
-          metavariablePresent = (metavariable !== null);
-
-    return metavariablePresent;
-  }
-
-  isLabelPresentByReference(reference) {
-    const labels = this.getLabels(),
-          labelPresent = labels.some((label) => {
-            const context = this, ///
-                  labelUnifies = reference.unifyLabel(label, context);
-
-            if (labelUnifies) {
-              return true;
-            }
-          });
-
-    return labelPresent;
-  }
-
-  isProcedurePresentByName(name) {
-    const procedure = this.findProcedureByName(name),
+  isProcedurePresentByProcedureName(procedureName) {
+    const procedure = this.findProcedureByProcedureName(procedureName),
           procedurePresent = (procedure !== null);
 
     return procedurePresent;
   }
 
-  isMetavariablePresentByReference(reference) {
-    const metavariables = this.getMetavariables(),
-          metavariablePresent = metavariables.some((metavariable) => {
-            const context = this, ///
-                  metavariableUnifies = reference.unifyMetavariable(metavariable, context);
+  isMetaLevel() {
+    const metaLEvel = false;
 
-            if (metavariableUnifies) {
-              return true;
-            }
-          });
-
-    return metavariablePresent;
-  }
-
-  isTopLevelMetaAssertionPresentByReference(reference) {
-    const topLevelMetaAssertion = this.findTopLevelMetaAssertionByReference(reference),
-          topLevelMetaAssertionPresent = (topLevelMetaAssertion !== null);
-
-    return topLevelMetaAssertionPresent;
-  }
-
-  getLexer() {
-    const combinedCustomGrammar = this.getCombinedCustomGrammar(),
-          nominalLexer = nominalLexerFromCombinedCustomGrammar(combinedCustomGrammar),
-          lexer = nominalLexer; ///
-
-    return lexer;
-  }
-
-  getParser() {
-    const combinedCustomGrammar = this.getCombinedCustomGrammar(),
-          nominalParser = nominalParserFromCombinedCustomGrammar(combinedCustomGrammar),
-          parser = nominalParser; ///
-
-    return parser;
+    return metaLEvel;
   }
 
   clear() {
@@ -767,59 +804,58 @@ export default class NominalFileContext extends FileContext {
     this.axioms = [];
     this.lemmas = [];
     this.theorems = [];
-    this.variables = [];
     this.metaLemmas = [];
     this.conjectures = [];
     this.combinators = [];
     this.typePrefixes = [];
     this.constructors = [];
     this.metatheorems = [];
-    this.metavariables = [];
+    this.declaredVariables = [];
+    this.declaredMetavariables = [];
   }
 
   complete() {
     ///
   }
 
-  initialise(json) {
+  async verifyFile() {
+    const node = this.getNode(),
+          context = this, ///
+          fileNode = node,  ///
+          fileVerifies = await verifyFile(fileNode, context);
+
+    return fileVerifies;
+  }
+
+  initialise() {
+    const json = this.getJSON();
+
+    if (json === null) {
+      super.initialise();
+
+      return;
+    }
+
     const fileContext = this; ///
 
     this.types = [];
 
     typesFromJSON(json, this.types, fileContext);
 
-    this.rules = rulesFromJSON(json, fileContext);
+    this.lemmas = [];
+    this.metaLemmas = [];
 
-    this.axioms = axiomsFromJSON(json, fileContext);
-
-    this.lemmas = lemmasFromNothing();
-
-    this.theorems = theoremsFromJSON(json, fileContext);
-
-    this.variables = variablesFromJSON(json, fileContext);
-
-    this.metaLemmas = metaLemmasFromNothing();
-
-    this.conjectures = conjecturesFromJSON(json, fileContext);
-
-    this.combinators = combinatorsFromJSON(json, fileContext);
-
+    this.declaredMetavariables = declaredMetavariablesFromJSON(json, fileContext);
+    this.declaredVariables = declaredVariablesFromJSON(json, fileContext);
     this.typePrefixes = typePrefixesFromJSON(json, fileContext);
-
+    this.combinators = combinatorsFromJSON(json, fileContext);
     this.constructors = constructorsFromJSON(json, fileContext);
 
+    this.rules = rulesFromJSON(json, fileContext);
+    this.axioms = axiomsFromJSON(json, fileContext);
+    this.theorems = theoremsFromJSON(json, fileContext);
+    this.conjectures = conjecturesFromJSON(json, fileContext);
     this.metatheorems = metatheoremsFromJSON(json, fileContext);
-
-    this.metavariables = metavariablesFromJSON(json, fileContext);
-  }
-
-  async verifyFile() {
-    const node = this.getNode(),
-          context = this,
-          fileNode = node,  ///
-          fileVerifies = await verifyFile(fileNode, context);
-
-    return fileVerifies;
   }
 
   toJSON() {
@@ -827,77 +863,91 @@ export default class NominalFileContext extends FileContext {
           rulesJSON = rulesToRulesJSON(this.rules),
           axiomsJSON = axiomsToAxiomsJSON(this.axioms),
           theoremsJSON = theoremsToTheoremsJSON(this.theorems),
-          variablesJSON = variablesToVariablesJSON(this.variables),
           conjecturesJSON = conjecturesToConjecturesJSON(this.conjectures),
           combinatorsJSON = combinatorsToCombinatorsJSON(this.combinators),
           typePrefixesJSON = typePrefixesToTypePrefixesJSON(this.typePrefixes),
           constructorsJSON = constructorsToConstructorsJSON(this.constructors),
           metatheoremsJSON = metatheoremsToMetatheoremsJSON(this.metatheorems),
-          metavariablesJSON = metavariablesToMetavariablesJSON(this.metavariables),
+          declaredVariablesJSON = declaredVariablesToDeclaredVariablesJSON(this.declaredVariables),
+          declaredMetavariablesJSON = declaredMetavariablesToDeclaredMetavariablesJSON(this.declaredMetavariables),
+          fileContent = this.fileContent,
           filePath = this.filePath,
           types = typesJSON,  ///
           rules = rulesJSON,  ///
           axioms = axiomsJSON,  ///
           theorems = theoremsJSON,  ///
-          variables = variablesJSON,  ///
           conjectures = conjecturesJSON,  ///
           combinators = combinatorsJSON,  ///
           typePrefixes = typePrefixesJSON,  ///
           constructors = constructorsJSON,  ///
           metatheorems = metatheoremsJSON,  ///
-          metavariables = metavariablesJSON,  ///
+          declaredVariables = declaredVariablesJSON,  ///
+          declaredMetavariables = declaredMetavariablesJSON,  ///
           json = {
+            fileContent,
             filePath,
             types,
             rules,
             axioms,
             theorems,
-            variables,
             conjectures,
             combinators,
             typePrefixes,
             constructors,
             metatheorems,
-            metavariables
+            declaredVariables,
+            declaredMetavariables
           };
 
     return json;
   }
 
   static fromFile(file, context) {
-    const types = [],
+    const releaseContext = context, ///
+          combinedCustomGrammar = releaseContext.getCombinedCustomGrammar(),
+          nominalLexer = nominalLexerFromCombinedCustomGrammar(NominalLexer, combinedCustomGrammar),
+          nominalParser = nominalParserFromCombinedCustomGrammar(NominalParser, combinedCustomGrammar),
+          lexer = nominalLexer, ///
+          parser = nominalParser, ///
+          types = [],
           rules = [],
           axioms = [],
           lemmas = [],
           theorems = [],
-          variables = [],
           metaLemmas = [],
           conjectures = [],
           combinators = [],
           typePrefixes = [],
           constructors = [],
           metatheorems = [],
-          metavariables = [],
-          nominalFileContext = FileContext.fromFile(NominalFileContext, file, types, rules, axioms, lemmas, theorems, variables, metaLemmas, conjectures, combinators, typePrefixes, constructors, metatheorems, metavariables, context);
+          declaredVariables = [],
+          declaredMetavariables = [],
+          nominalFileContext = FileContext.fromFile(NominalFileContext, file, lexer, parser, types, rules, axioms, lemmas, theorems, metaLemmas, conjectures, combinators, typePrefixes, constructors, metatheorems, declaredVariables, declaredMetavariables, context);
 
     return nominalFileContext;
   }
 
-  static fromFilePath(filePath, context) {
-    const types = null,
+  static fromJSON(json, context) {
+    const releaseContext = context, ///
+          combinedCustomGrammar = releaseContext.getCombinedCustomGrammar(),
+          nominalLexer = nominalLexerFromCombinedCustomGrammar(NominalLexer, combinedCustomGrammar),
+          nominalParser = nominalParserFromCombinedCustomGrammar(NominalParser, combinedCustomGrammar),
+          lexer = nominalLexer, ///
+          parser = nominalParser, ///
+          types = null,
           rules = null,
           axioms = null,
           lemmas = null,
           theorems = null,
-          variables = null,
           metaLemmas = null,
           conjectures = null,
           combinators = null,
           typePrefixes = null,
           constructors = null,
           metatheorems = null,
-          metavariables = null,
-          nominalFileContext = FileContext.fromFilePath(NominalFileContext, filePath, types, rules, axioms, lemmas, theorems, variables, metaLemmas, conjectures, combinators, typePrefixes, constructors, metatheorems, metavariables, context);
+          declaredVariables = null,
+          declaredMetavariables = null,
+          nominalFileContext = FileContext.fromJSON(NominalFileContext, json, lexer, parser, types, rules, axioms, lemmas, theorems, metaLemmas, conjectures, combinators, typePrefixes, constructors, metatheorems, declaredVariables, declaredMetavariables, context);
 
     return nominalFileContext;
   }
