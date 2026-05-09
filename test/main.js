@@ -2,12 +2,12 @@
 
 const { Dependency } =require("occam-model"),
       { arrayUtilities } =require("necessary"),
-      { Log, verificationUtilities, ReleaseContext} =require("occam-languages"),
-      { fileContextUtilities, releaseContextUtilities } =require("../lib/index"); ///
+      { Log, ReleaseContext, verificationUtilities } =require("occam-languages");
+
+const { FileContextFromFilePath } = require("./utilities/fileContext"),
+      { releaseContextFromDependency } = require("./utilities/releaseContext");
 
 const { first } = arrayUtilities,
-      { FileContextFromFilePath } = fileContextUtilities,
-      { releaseContextFromDependency } = releaseContextUtilities,
       { createReleaseContexts, verifyReleaseContexts, initialiseReleaseContexts } = verificationUtilities;
 
 describe("first-order-logic", () => {
@@ -37,7 +37,9 @@ describe("first-order-logic", () => {
   });
 
   before(async () => {
-    await createReleaseContexts(dependency, context);
+    const dependencyName = name;  ///
+
+    await createReleaseContexts(dependencyName, context);
 
     initialiseReleaseContexts(context);
   });
@@ -57,7 +59,9 @@ describe("first-order-logic", () => {
           releaseContext = firstReleaseContext; ///
 
     json = releaseContext.toJSON();
+
     entries = releaseContext.getEntries();
+
     customGrammar = releaseContext.getCustomGrammar();
   });
 
