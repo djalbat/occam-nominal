@@ -91,7 +91,7 @@ export default define(class ProcedureCall extends Element {
     let term = null;
 
     try {
-      term = await evaluate(procedure, terms);
+      term = await evaluate(procedure, terms, context);
     } catch (exception) {
       const message = exception.getMessage();
 
