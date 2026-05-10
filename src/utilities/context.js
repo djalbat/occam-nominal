@@ -22,7 +22,7 @@ export function evaluate(procedure, terms, context) {
 
   const literalContext = LiteralContext.fromTokens(tokens, context);
 
-  context =- literalContext;  ///
+  context = literalContext;  ///
 
   return procedure.call(terms, context);
 }
