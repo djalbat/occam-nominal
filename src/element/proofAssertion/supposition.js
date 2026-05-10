@@ -147,7 +147,7 @@ export default define(class Supposition extends ProofAssertion {
     const suppositionString = this.getString(), ///
           procedureCallString = this.procedureCall.getString();
 
-    context.trace(`Validatting the '${suppositionString}' supposition's '${procedureCallString}' nominal procedure call...`);
+    context.trace(`Validatting the '${suppositionString}' supposition's '${procedureCallString}' procedure call...`);
 
     const procedureCall = this.procedureCall.validate(context);
 
@@ -156,7 +156,7 @@ export default define(class Supposition extends ProofAssertion {
     }
 
     if (procedureCallValidates) {
-      context.debug(`...validated the '${suppositionString}' supposition's '${procedureCallString}' nominal procedure call.`);
+      context.debug(`...validated the '${suppositionString}' supposition's '${procedureCallString}' procedure call.`);
     }
 
     return procedureCallValidates;
