@@ -2,6 +2,8 @@
 
 import { Element } from "occam-languages";
 
+import Value from "../value";
+
 import { define } from "../elements";
 import { instantiate } from "../utilities/context";
 import { instantiateParameter } from "../process/instantiate";
@@ -31,8 +33,8 @@ export default define(class Parameter extends Element {
     return parameterNode;
   }
 
-  findNode(substitutions) {
-    let node = null;
+  findValue(substitutions) {
+    let value = null;
 
     const parameter = this, ///
           substitution = substitutions.find((substitution) => {
@@ -44,12 +46,10 @@ export default define(class Parameter extends Element {
           }) || null;
 
     if (substitution !== null) {
-      const replacementNode = substitution.getReplacementNode();
-
-      node = replacementNode; ///
+      value = Value.fromSubstitution(substitution);
     }
 
-    return node;
+    return value;
   }
 
   static name = "Parameter";

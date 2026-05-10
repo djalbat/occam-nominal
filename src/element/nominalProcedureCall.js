@@ -3,7 +3,7 @@
 import { Element } from "occam-languages";
 
 import { define } from "../elements";
-import { evaluate, instantiate } from "../utilities/context";
+import { instantiate } from "../utilities/context";
 import { instantiateNominalProcedureCall } from "../process/instantiate";
 import { breakPointFromJSON, breakPointToBreakPointJSON } from "../utilities/breakPoint";
 import { parametersFromNominalProcedureCallNode, procedureReferenceFromNominalProcedureCallNode } from "../utilities/element";
@@ -33,15 +33,15 @@ export default define(class NominalProcedureCall extends Element {
 
   getProcedureName() { return this.procedureReference.getProcedureName(); }
 
-  findNodes(context) {
+  findValues(context) {
     const substitutions = context.getSubstitutions(),
-          nodes = this.parameters.map((parameter) => {
-            const node = parameter.findNode(substitutions);
+          values = this.parameters.map((parameter) => {
+            const value = parameter.findValue(substitutions);
 
-            return node;
+            return value;
           });
 
-    return nodes;
+    return values;
   }
 
   validate(context) {
@@ -86,12 +86,12 @@ export default define(class NominalProcedureCall extends Element {
 
     const procedureName = this.getProcedureName(),
           procedure = context.findProcedureByProcedureName(procedureName),
-          nodes = this.findNodes(context);
+          values = this.findValues(context);
 
     let term = null;
 
     try {
-      term = await evaluate(procedure, nodes, context);
+      term = await procedure.callNominally(values, context);
     } catch (exception) {
       const message = exception.getMessage();
 
