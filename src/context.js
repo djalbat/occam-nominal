@@ -170,6 +170,20 @@ export default class Context extends ContextBase {
     return constructors;
   }
 
+  getProcedures(includeRelease) {
+    const context = this.getContext(),
+          procedures = context.getProcedures(includeRelease);
+
+    return procedures;
+  }
+
+  getVariables(nested) {
+    const context = this.getContext(),
+          variables = context.getVariables(nested);
+
+    return variables;
+  }
+
   getDeclaredVariables() {
     const context = this.getContext(),
           declaredVariables = context.getDeclaredVariables();
