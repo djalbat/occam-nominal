@@ -225,12 +225,6 @@ export default class NominalFileContext extends FileContext {
     return procedures;
   }
 
-  getVariables(nested = true) {
-    const variables = [];
-
-    return variables;
-  }
-
   getDeclaredVariables() {
     return this.declaredVariables;
   }
