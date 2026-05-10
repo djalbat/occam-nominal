@@ -33,7 +33,7 @@ export default define(class NominalProcedureCall extends Element {
 
   getProcedureName() { return this.procedureReference.getProcedureName(); }
 
-  findNodes() {
+  findNodes(context) {
     const substitutions = context.getSubstitutions(),
           nodes = this.parameters.map((parameter) => {
             const node = parameter.findNode(substitutions);
@@ -82,7 +82,7 @@ export default define(class NominalProcedureCall extends Element {
 
     const procedureName = this.getProcedureName(),
           procedure = context.findProcedureByProcedureName(procedureName),
-          nodes = this.findNodes();
+          nodes = this.findNodes(context);
 
     let term = null;
 
