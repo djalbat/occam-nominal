@@ -25,7 +25,7 @@ import { TERM_RULE_NAME,
          EQUIVALENCE_RULE_NAME,
          METAVARIABLE_RULE_NAME,
          TYPE_ASSERTION_RULE_NAME,
-         PROCEDURE_CALL_RULE_NAME,
+         NOMINAL_PROCEDURE_CALL_RULE_NAME,
          PROPERTY_RELATION_RULE_NAME,
          DEFINED_ASSERTION_RULE_NAME,
          TERM_SUBSTITUTION_RULE_NAME,
@@ -63,7 +63,6 @@ const termPlaceholderRule = ruleFromRuleName(TERM_RULE_NAME),
       equivalencePlaceholderRule = ruleFromRuleName(EQUIVALENCE_RULE_NAME),
       metavariablePlaceholderRule = ruleFromRuleName(METAVARIABLE_RULE_NAME),
       typeAssertionPlaceholderRule = ruleFromRuleName(TYPE_ASSERTION_RULE_NAME),
-      procedureCallPlaceholderRule = ruleFromRuleName(PROCEDURE_CALL_RULE_NAME),
       propertyRelationlaceholderRule = ruleFromRuleName(PROPERTY_RELATION_RULE_NAME),
       definedAssertionPlaceholderRule = ruleFromRuleName(DEFINED_ASSERTION_RULE_NAME),
       termSubstitutionPlaceholderRule = ruleFromRuleName(TERM_SUBSTITUTION_RULE_NAME),
@@ -74,6 +73,7 @@ const termPlaceholderRule = ruleFromRuleName(TERM_RULE_NAME),
       containedAssertionPlaceholderRule = ruleFromRuleName(CONTAINED_ASSERTION_RULE_NAME),
       signatureAssertionPlaceholderRule = ruleFromRuleName(SIGNATURE_ASSERTION_RULE_NAME),
       metaLevelAssumptionPlaceholderRule = ruleFromRuleName(META_LEVEL_ASSUMPTION_RULE_NAME),
+      nominalProcedureCallPlaceholderRule = ruleFromRuleName(NOMINAL_PROCEDURE_CALL_RULE_NAME),
       statementSubstitutionPlaceholderRule = ruleFromRuleName(STATEMENT_SUBSTITUTION_RULE_NAME),
       referenceSubstitutionPlaceholderRule = ruleFromRuleName(REFERENCE_SUBSTITUTION_RULE_NAME);
 
@@ -145,8 +145,6 @@ export function instantiateMetavariable(string, context) { return instantiate(me
 
 export function instantiateTypeAssertion(string, context) { return instantiate(typeAssertionPlaceholderRule, string, context); }
 
-export function instantiateProcedureCall(string, context) { return instantiate(procedureCallPlaceholderRule, string, context); }
-
 export function instantiatePropertyRelation(string, context) { return instantiate(propertyRelationlaceholderRule, string, context); }
 
 export function instantiateDefinedAssertion(string, context) { return instantiate(definedAssertionPlaceholderRule, string, context); }
@@ -166,6 +164,8 @@ export function instantiateContainedAssertion(string, context) { return instanti
 export function instantiateSignatureAssertion(string, context) { return instantiate(signatureAssertionPlaceholderRule, string, context); }
 
 export function instantiateMetaLevelAssumption(string, context) { return instantiate(metaLevelAssumptionPlaceholderRule, string, context); }
+
+export function instantiateNominalProcedureCall(string, context) { return instantiate(nominalProcedureCallPlaceholderRule, string, context); }
 
 export function instantiateStatementSubstitution(string, context) { return instantiate(statementSubstitutionPlaceholderRule, string, context); }
 

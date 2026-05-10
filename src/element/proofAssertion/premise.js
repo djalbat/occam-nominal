@@ -4,19 +4,19 @@ import ProofAssertion from "../proofAssertion";
 
 import { define } from "../../elements";
 import { instantiatePremise } from "../../process/instantiate";
-import { procedureCallFromPremiseNode } from "../../utilities/element";
+import { nominalProcedureCallFromPremiseNode } from "../../utilities/element";
 import { breakPointFromJSON, breakPointToBreakPointJSON } from "../../utilities/breakPoint";
 import { declare, attempt, reconcile, serialise, unserialise, instantiate } from "../../utilities/context";
 
 export default define(class Premise extends ProofAssertion {
-  constructor(context, string, node, breakPoint, statement, procedureCall) {
+  constructor(context, string, node, breakPoint, statement, nominalProcedureCall) {
     super(context, string, node, breakPoint, statement);
 
-    this.procedureCall = procedureCall;
+    this.nominalProcedureCall = nominalProcedureCall;
   }
 
-  getProcedureCall() {
-    return this.procedureCall;
+  getNominalProcedureCall() {
+    return this.nominalProcedureCall;
   }
 
   getPremiseNode() {
@@ -61,9 +61,9 @@ export default define(class Premise extends ProofAssertion {
     context.trace(`Verifying the '${premiseString}' premise...`);
 
     const statement = this.getStatement(),
-          procedureCall = this.getProcedureCall();
+          nominalProcedureCall = this.getNominalProcedureCall();
 
-    if ((statement !== null) || (procedureCall !== null)) {
+    if ((statement !== null) || (nominalProcedureCall !== null)) {
       declare((context) => {
         const validates = this.validate(context);
 
@@ -87,7 +87,7 @@ export default define(class Premise extends ProofAssertion {
 
     attempt((context) => {
       const statement = this.getStatement(),
-            procedureCall = this.getProcedureCall();
+            nominalProcedureCall = this.getNominalProcedureCall();
 
       if (statement !== null) {
         const statementValidates = this.validateStatement(context);
@@ -97,10 +97,10 @@ export default define(class Premise extends ProofAssertion {
         }
       }
 
-      if (procedureCall !== null) {
-        const procedureCallValidates = this.validateProcedureCall(context);
+      if (nominalProcedureCall !== null) {
+        const nominalProcedureCallValidates = this.validateNominalProcedureCall(context);
 
-        if (procedureCallValidates) {
+        if (nominalProcedureCallValidates) {
           validates = true;
         }
       }
@@ -141,24 +141,24 @@ export default define(class Premise extends ProofAssertion {
     return statementValidates;
   }
 
-  validateProcedureCall(context) {
-    let procedureCallValidates = false;
+  validateNominalProcedureCall(context) {
+    let nominalProcedureCallValidates = false;
 
     const premiseString = this.getString(); ///
 
-    context.trace(`Validatting the '${premiseString}' premise's procedure call...`);
+    context.trace(`Validatting the '${premiseString}' premise's nominal procedure call...`);
 
-    const procedureCall = this.procedureCall.validate(context);
+    const nominalProcedureCall = this.nominalProcedureCall.validate(context);
 
-    if (procedureCall !== null) {
-      procedureCallValidates = true;
+    if (nominalProcedureCall !== null) {
+      nominalProcedureCallValidates = true;
     }
 
-    if (procedureCallValidates) {
-      context.debug(`...validated the '${premiseString}' premise's procedure call.`);
+    if (nominalProcedureCallValidates) {
+      context.debug(`...validated the '${premiseString}' premise's nominal procedure call.`);
     }
 
-    return procedureCallValidates;
+    return nominalProcedureCallValidates;
   }
 
   async unifyIndependently(context) {
@@ -170,7 +170,7 @@ export default define(class Premise extends ProofAssertion {
 
     await reconcile(async (context) => {
       const statement = this.getStatement(),
-            procedureCall = this.getProcedureCall();
+            nominalProcedureCall = this.getNominalProcedureCall();
 
       if (statement !== null) {
         const premiseContext = this.getContext(),
@@ -183,10 +183,10 @@ export default define(class Premise extends ProofAssertion {
         }
       }
 
-      if (procedureCall !== null) {
-        const procedureCallResolvedIndependently = await procedureCall.unifyIndependently(context);
+      if (nominalProcedureCall !== null) {
+        const nominalProcedureCallResolvedIndependently = await nominalProcedureCall.unifyIndependently(context);
 
-        if (procedureCallResolvedIndependently) {
+        if (nominalProcedureCallResolvedIndependently) {
           unifiesIndependently = true;
         }
       }
@@ -336,9 +336,9 @@ export default define(class Premise extends ProofAssertion {
               node = premiseNode,  ///
               breakPoint = breakPointFromJSON(json),
               statement = statementFromPremiseNode(premiseNode, context),
-              procedureCall = procedureCallFromPremiseNode(premiseNode, context);
+              nominalProcedureCall = nominalProcedureCallFromPremiseNode(premiseNode, context);
 
-        premise = new Premise(context, string, node, breakPoint, statement, procedureCall);
+        premise = new Premise(context, string, node, breakPoint, statement, nominalProcedureCall);
       }, json, context);
     }, context);
 

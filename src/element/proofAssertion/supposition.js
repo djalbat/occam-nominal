@@ -4,19 +4,19 @@ import ProofAssertion from "../proofAssertion";
 
 import { define } from "../../elements";
 import { instantiateSupposition} from "../../process/instantiate";
-import { procedureCallFromSuppositionNode } from "../../utilities/element";
+import { nominalProcedureCallFromSuppositionNode } from "../../utilities/element";
 import { breakPointFromJSON, breakPointToBreakPointJSON } from "../../utilities/breakPoint";
 import { declare, attempt, reconcile, serialise, unserialise, instantiate } from "../../utilities/context";
 
 export default define(class Supposition extends ProofAssertion {
-  constructor(context, string, node, breakPoint, statement, procedureCall) {
+  constructor(context, string, node, breakPoint, statement, nominalProcedureCall) {
     super(context, string, node, breakPoint, statement);
 
-    this.procedureCall = procedureCall;
+    this.nominalProcedureCall = nominalProcedureCall;
   }
 
-  getProcedureCall() {
-    return this.procedureCall;
+  getNominalProcedureCall() {
+    return this.nominalProcedureCall;
   }
 
   getSuppositionNode() {
@@ -61,9 +61,9 @@ export default define(class Supposition extends ProofAssertion {
     context.trace(`Verifying the '${suppositionString}' supposition...`);
 
     const statement = this.getStatement(),
-          procedureCall = this.getProcedureCall();
+          nominalProcedureCall = this.getNominalProcedureCall();
 
-    if ((statement !== null) || (procedureCall !== null)) {
+    if ((statement !== null) || (nominalProcedureCall !== null)) {
       declare((context) => {
         const validates = this.validate(context);
 
@@ -87,7 +87,7 @@ export default define(class Supposition extends ProofAssertion {
 
     attempt((context) => {
       const statement = this.getStatement(),
-            procedureCall = this.getProcedureCall();
+            nominalProcedureCall = this.getNominalProcedureCall();
 
       if (statement !== null) {
         const statementValidates = this.validateStatement(context);
@@ -97,10 +97,10 @@ export default define(class Supposition extends ProofAssertion {
         }
       }
 
-      if (procedureCall !== null) {
-        const procedureCallValidates = this.validateProcedureCall(context);
+      if (nominalProcedureCall !== null) {
+        const nominalProcedureCallValidates = this.validateNominalProcedureCall(context);
 
-        if (procedureCallValidates) {
+        if (nominalProcedureCallValidates) {
           validates = true;
         }
       }
@@ -141,25 +141,25 @@ export default define(class Supposition extends ProofAssertion {
     return statementValidates;
   }
 
-  validateProcedureCall(context) {
-    let procedureCallValidates = false;
+  validateNominalProcedureCall(context) {
+    let nominalProcedureCallValidates = false;
 
     const suppositionString = this.getString(), ///
-          procedureCallString = this.procedureCall.getString();
+          nominalProcedureCallString = this.nominalProcedureCall.getString();
 
-    context.trace(`Validatting the '${suppositionString}' supposition's '${procedureCallString}' procedure call...`);
+    context.trace(`Validatting the '${suppositionString}' supposition's '${nominalProcedureCallString}' nominal procedure call...`);
 
-    const procedureCall = this.procedureCall.validate(context);
+    const nominalProcedureCall = this.nominalProcedureCall.validate(context);
 
-    if (procedureCall !== null) {
-      procedureCallValidates =true;
+    if (nominalProcedureCall !== null) {
+      nominalProcedureCallValidates =true;
     }
 
-    if (procedureCallValidates) {
-      context.debug(`...validated the '${suppositionString}' supposition's '${procedureCallString}' procedure call.`);
+    if (nominalProcedureCallValidates) {
+      context.debug(`...validated the '${suppositionString}' supposition's '${nominalProcedureCallString}' nominal procedure call.`);
     }
 
-    return procedureCallValidates;
+    return nominalProcedureCallValidates;
   }
 
   unifySupposition(supposition, generalContext, specificContext) {
@@ -193,7 +193,7 @@ export default define(class Supposition extends ProofAssertion {
 
     await reconcile(async (context) => {
       const statement = this.getStatement(),
-            procedureCall = this.getProcedureCall();
+            nominalProcedureCall = this.getNominalProcedureCall();
 
       if (statement !== null) {
         const suppositionContext = this.getContext(),
@@ -206,10 +206,10 @@ export default define(class Supposition extends ProofAssertion {
         }
       }
 
-      if (procedureCall !== null) {
-        const procedureCallResolvedIndependently = await procedureCall.unifyIndependently(context);
+      if (nominalProcedureCall !== null) {
+        const nominalProcedureCallResolvedIndependently = await nominalProcedureCall.unifyIndependently(context);
 
-        if (procedureCallResolvedIndependently) {
+        if (nominalProcedureCallResolvedIndependently) {
           unifiesIndependently = true;
         }
       }
@@ -359,9 +359,9 @@ export default define(class Supposition extends ProofAssertion {
               node = suppositionNode,  ///
               breakPoint = breakPointFromJSON(json),
               statement = statementFromSuppositionNode(suppositionNode, context),
-              procedureCall = procedureCallFromSuppositionNode(suppositionNode, context);
+              nominalProcedureCall = nominalProcedureCallFromSuppositionNode(suppositionNode, context);
 
-        supposition = new Supposition(context, string, node, breakPoint, statement, procedureCall);
+        supposition = new Supposition(context, string, node, breakPoint, statement, nominalProcedureCall);
       }, json, context);
     }, context);
 

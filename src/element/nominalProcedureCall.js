@@ -1,17 +1,14 @@
 "use strict";
 
 import { Element } from "occam-languages";
-import { termsUtilities } from "occam-furtle";
 
 import { define } from "../elements";
 import { evaluate, instantiate } from "../utilities/context";
-import { instantiateProcedureCall } from "../process/instantiate";
+import { instantiateNominalProcedureCall } from "../process/instantiate";
 import { breakPointFromJSON, breakPointToBreakPointJSON } from "../utilities/breakPoint";
-import { parametersFromProcedureCallNode, procedureReferenceFromProcedureCallNode } from "../utilities/element";
+import { parametersFromNominalProcedureCallNode, procedureReferenceFromNominalProcedureCallNode } from "../utilities/element";
 
-const { termsFromPrimitives } = termsUtilities;
-
-export default define(class ProcedureCall extends Element {
+export default define(class NominalProcedureCall extends Element {
   constructor(context, string, node, breakPoint, parameters, procedureReference) {
     super(context, string, node, breakPoint);
 
@@ -27,32 +24,32 @@ export default define(class ProcedureCall extends Element {
     return this.procedureReference;
   }
 
-  getProcedureCallNode() {
+  getNominalProcedureCallNode() {
     const node = this.getNode(),
-          procedureCallNode = node;
+          nominalProcedureCallNode = node;
 
-    return procedureCallNode;
+    return nominalProcedureCallNode;
   }
 
   getProcedureName() { return this.procedureReference.getProcedureName(); }
 
-  findPrimitives(context) {
+  findNodes() {
     const substitutions = context.getSubstitutions(),
-          primitives = this.parameters.map((parameter) => {
-            const primitive = parameter.findPrimitive(substitutions, context);
+          nodes = this.parameters.map((parameter) => {
+            const node = parameter.findNode(substitutions);
 
-            return primitive;
+            return node;
           });
 
-    return primitives;
+    return nodes;
   }
 
   validate(context) {
     let validates = false;
 
-    const procedureCallString = this.getString(); ///
+    const nominalProcedureCallString = this.getString(); ///
 
-    context.trace(`Validating the '${procedureCallString}' procedure call...`);
+    context.trace(`Validating the '${nominalProcedureCallString}' nominal procedure call...`);
 
     const procedureName = this.getProcedureName(),
           procedure = context.findProcedureByProcedureName(procedureName);
@@ -63,14 +60,14 @@ export default define(class ProcedureCall extends Element {
       if (procedureBoolean) {
         validates = true;
       } else {
-        context.debug(`The '${procedureCallString}' procedure is not boolean.`);
+        context.debug(`The '${nominalProcedureCallString}' procedure is not boolean.`);
       }
     } else {
-      context.debug(`The '${procedureCallString}' procedure is not present.`);
+      context.debug(`The '${nominalProcedureCallString}' procedure is not present.`);
     }
 
     if (validates) {
-      context.debug(`...validated the '${procedureCallString}' procedure call.`);
+      context.debug(`...validated the '${nominalProcedureCallString}' nominal procedure call.`);
     }
 
     return validates;
@@ -79,19 +76,18 @@ export default define(class ProcedureCall extends Element {
   async unifyIndependently(context) {
     let unifiesIndependently = false;
 
-    const procedureCallString = this.getString(); ///
+    const nominalProcedureCallString = this.getString(); ///
 
-    context.trace(`Unifying the '${procedureCallString}' procedure call independently...`);
+    context.trace(`Unifying the '${nominalProcedureCallString}' nominal procedure call independently...`);
 
     const procedureName = this.getProcedureName(),
-          primitives = this.findPrimitives(context),
           procedure = context.findProcedureByProcedureName(procedureName),
-          terms = termsFromPrimitives(primitives);
+          nodes = this.findNodes();
 
     let term = null;
 
     try {
-      term = await evaluate(procedure, terms, context);
+      term = await evaluate(procedure, nodes, context);
     } catch (exception) {
       const message = exception.getMessage();
 
@@ -102,7 +98,7 @@ export default define(class ProcedureCall extends Element {
       const boolean = term.isBoolean();
 
       if (!boolean) {
-        context.info(`The '${procedureCallString}' procedure call did not return a boolean.`);
+        context.info(`The '${nominalProcedureCallString}' nominal procedure call did not return a boolean.`);
       } else {
         const primitiveValue = term.getPrimitiveValue();
 
@@ -113,13 +109,13 @@ export default define(class ProcedureCall extends Element {
     }
 
     if (unifiesIndependently) {
-      context.debug(`...unified the '${procedureCallString}' procedure call independently.`);
+      context.debug(`...unified the '${nominalProcedureCallString}' nominal procedure call independently.`);
     }
 
     return unifiesIndependently;
   }
 
-  static name = "ProcedureCall";
+  static name = "NominalProcedureCall";
 
   toJSON() {
     const string = this.getString();
@@ -143,17 +139,17 @@ export default define(class ProcedureCall extends Element {
   static fromJSON(json, context) {
     return instantiate((context) => {
       const { string } = json,
-            procedureCallNode = instantiateProcedureCall(string, context),
-            node = procedureCallNode,  ///
+            nominalProcedureCallNode = instantiateNominalProcedureCall(string, context),
+            node = nominalProcedureCallNode,  ///
             breakPoint = breakPointFromJSON(json),
-            parameters = parametersFromProcedureCallNode(json, context),
-            procedureReference = procedureReferenceFromProcedureCallNode(json, context);
+            parameters = parametersFromNominalProcedureCallNode(json, context),
+            procedureReference = procedureReferenceFromNominalProcedureCallNode(json, context);
 
       context = null;
 
-      const procedureCall = new ProcedureCall(context, string, node, breakPoint, parameters, procedureReference);
+      const nominalProcedureCall = new NominalProcedureCall(context, string, node, breakPoint, parameters, procedureReference);
 
-      return procedureCall;
+      return nominalProcedureCall;
     }, context);
   }
 });

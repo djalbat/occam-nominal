@@ -52,7 +52,6 @@ import EquivalencesNode from "./node/equivalences";
 import MetaArgumentNode from "./node/metaArgument";
 import MetavariableNode from "./node/metavariable";
 import QualificationNode from "./node/qualification";
-import ProcedureCallNode from "./node/procedureCall";
 import SubDerivationNode from "./node/subDerivation";
 import TheoremHeaderNode from "./node/header/theorem";
 import MetaLemmaBodyNode from "./node/body/metaLemma";
@@ -75,6 +74,7 @@ import SignatureAssertionNode from "./node/assertion/signature";
 import ParenthesisedLabelsNode from "./node/parenthesisedLabels"
 import PropertyDeclarationNode from "./node/declaration/property";
 import VariableDeclarationNode from "./node/declaration/variable";
+import NominalProcedureCallNode from "./node/nominalProcedureCall";
 import MetaLevelAssumptionpNode from "./node/assumption/metaLevel";
 import SimpleTypeDeclarationNode from "./node/declaration/simpleType";
 import CombinatorDeclarationNode from "./node/declaration/combinator";
@@ -141,7 +141,6 @@ import {
   THEOREM_HEADER_RULE_NAME,
   SUB_DERIVATION_RULE_NAME,
   TYPE_ASSERTION_RULE_NAME,
-  PROCEDURE_CALL_RULE_NAME,
   CONJECTURE_BODY_RULE_NAME,
   META_LEMMA_BODY_RULE_NAME,
   METATHEOREM_BODY_RULE_NAME,
@@ -162,6 +161,7 @@ import {
   PROPERTY_DECLARATION_RULE_NAME,
   VARIABLE_DECLARATION_RULE_NAME,
   META_LEVEL_ASSUMPTION_RULE_NAME,
+  NOMINAL_PROCEDURE_CALL_RULE_NAME,
   COMBINATOR_DECLARATION_RULE_NAME,
   REFERENCE_SUBSTITUTION_RULE_NAME,
   STATEMENT_SUBSTITUTION_RULE_NAME,
@@ -225,7 +225,6 @@ const NonTerminalNodeMap = {
   [META_ARGUMENT_RULE_NAME]: MetaArgumentNode,
   [QUALIFICATION_RULE_NAME]: QualificationNode,
   [TYPE_ASSERTION_RULE_NAME]: TypeAssertionNode,
-  [PROCEDURE_CALL_RULE_NAME]: ProcedureCallNode,
   [SUB_DERIVATION_RULE_NAME]: SubDerivationNode,
   [THEOREM_HEADER_RULE_NAME]: TheoremHeaderNode,
   [META_LEMMA_BODY_RULE_NAME]: MetaLemmaBodyNode,
@@ -248,6 +247,7 @@ const NonTerminalNodeMap = {
   [VARIABLE_DECLARATION_RULE_NAME]: VariableDeclarationNode,
   [PROPERTY_DECLARATION_RULE_NAME]: PropertyDeclarationNode,
   [META_LEVEL_ASSUMPTION_RULE_NAME]: MetaLevelAssumptionpNode,
+  [NOMINAL_PROCEDURE_CALL_RULE_NAME]: NominalProcedureCallNode,
   [COMBINATOR_DECLARATION_RULE_NAME]: CombinatorDeclarationNode,
   [STATEMENT_SUBSTITUTION_RULE_NAME]: StatementSubstitutionNode,
   [REFERENCE_SUBSTITUTION_RULE_NAME]: ReferenceSubstitutionNode,

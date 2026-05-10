@@ -31,8 +31,8 @@ export default define(class Parameter extends Element {
     return parameterNode;
   }
 
-  findPrimitive(substitutions, context) {
-    let primitive = null;
+  findNode(substitutions) {
+    let node = null;
 
     const parameter = this, ///
           substitution = substitutions.find((substitution) => {
@@ -44,10 +44,12 @@ export default define(class Parameter extends Element {
           }) || null;
 
     if (substitution !== null) {
-      primitive = substitution.getPrimitive(context);
+      const replacementNode = substitution.getReplacementNode();
+
+      node = replacementNode; ///
     }
 
-    return primitive;
+    return node;
   }
 
   static name = "Parameter";

@@ -15,7 +15,7 @@ import NominalFileContext from "../context/file/nominal";
 
 import { mnemicContextFromJSON, mnemicContextsFromJSON, mnemicContextToMnemicContextJSON, mnemicContextsToMnemicContextsJSON } from "../utilities/json";
 
-export function evaluate(procedure, terms, context) {
+export function evaluate(procedure, nodes, context) {
   const tokens = context.getTokens();
 
   context = procedure.getContext();
@@ -24,7 +24,7 @@ export function evaluate(procedure, terms, context) {
 
   context = literalContext;  ///
 
-  return procedure.call(terms, context);
+  return procedure.callNominally(nodes, context);
 }
 
 export function ground(innerFunction) {

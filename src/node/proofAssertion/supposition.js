@@ -2,14 +2,14 @@
 
 import ProofAssertionNode from "../../node/proofAssertion";
 
-import { PROCEDURE_CALL_RULE_NAME } from "../../ruleNames";
+import { NOMINAL_PROCEDURE_CALL_RULE_NAME } from "../../ruleNames";
 
 export default class SuppositionNode extends ProofAssertionNode {
-  getProcedureCallNode() {
-    const ruleName = PROCEDURE_CALL_RULE_NAME,
-          procedureCallNode = this.getNodeByRuleName(ruleName);
+  getNominalProcedureCallNode() {
+    const ruleName = NOMINAL_PROCEDURE_CALL_RULE_NAME,
+          nominalProcedureCallNode = this.getNodeByRuleName(ruleName);
 
-    return procedureCallNode;
+    return nominalProcedureCallNode;
   }
 
   static fromRuleNameChildNodesOpacityAndPrecedence(ruleName, childNodes, opacity, precedence) { return ProofAssertionNode.fromRuleNameChildNodesOpacityAndPrecedence(SuppositionNode, ruleName, childNodes, opacity, precedence); }

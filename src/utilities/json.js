@@ -206,19 +206,19 @@ export function mnemicContextFromJSON(json, context) {
   return mnemicContext;
 }
 
-export function procedureCallFromJSON(json, context) {
-  let { procedureCall = null } = json;
+export function nominalProcedureCallFromJSON(json, context) {
+  let { nominalProcedureCall = null } = json;
 
-  if (procedureCall !== null) {
-    const { ProcedureCall } = elements,
-          procedureCallJSON = procedureCall;  ///
+  if (nominalProcedureCall !== null) {
+    const { NominalProcedureCall } = elements,
+          nominalProcedureCallJSON = nominalProcedureCall;  ///
 
-    json = procedureCallJSON; ///
+    json = nominalProcedureCallJSON; ///
 
-    procedureCall = ProcedureCall.fromJSON(json, context);
+    nominalProcedureCall = NominalProcedureCall.fromJSON(json, context);
   }
 
-  return procedureCall;
+  return nominalProcedureCall;
 }
 
 export function procedureReferenceFromJSON(json, context) {
@@ -885,14 +885,6 @@ export function metavariableToMetavariableJSON(metavariable) {
   return metavariableJSON;
 }
 
-export function procedureCallToProcedureCallJSON(procedureCall) {
-  const procedureCallJSON = (procedureCall !== null) ?
-                              procedureCall.toJSON() :
-                                null;
-
-  return procedureCallJSON;
-}
-
 export function mnemicContextToMnemicContextJSON(mnemicContext) {
   const mnemicContextJSON = mnemicContext.toJSON();
 
@@ -909,6 +901,14 @@ export function declaredMetavariableToDEclaredMetavariableJSON(declaredMetavaria
   const declaredMetavariableJSON = declaredMetavariable.toJSON();
 
   return declaredMetavariableJSON;
+}
+
+export function nominalProcedureCallToNominalProcedureCallJSON(nominalProcedureCall) {
+  const nominalProcedureCallJSON = (nominalProcedureCall !== null) ?
+                                      nominalProcedureCall.toJSON() :
+                                        null;
+
+  return nominalProcedureCallJSON;
 }
 
 export function substitutionFromSubstitutionJSON(json, context) {

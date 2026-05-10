@@ -3,11 +3,9 @@
 import { arrayUtilities } from "necessary";
 
 import { serialises } from "../utilities/context";
-import { primitiveUtilities } from "occam-furtle";
 import { breakPointToBreakPointJSON } from "../utilities/breakPoint";
 
-const { first, second } = arrayUtilities,
-      { primitiveFromNode } =primitiveUtilities;
+const { first, second } = arrayUtilities;
 
 class Element {
   constructor(contexts, string, node, breakPoint) {
@@ -61,14 +59,6 @@ export default class Substitution extends Element {
     const { name } = this.constructor;
 
     return name;
-  }
-
-  getPrimitive(context) {
-    const replacementNode = this.getReplacementNode(),
-          node = replacementNode, ///
-          primitive = primitiveFromNode(node, context);
-
-    return primitive;
   }
 
   getSubstitutionNode() {
