@@ -169,14 +169,6 @@ export default class NominalFileContext extends FileContext {
     return theorems;
   }
 
-  getProcedures(includeRelease = true) {
-    const procedures = includeRelease ?
-                         this.context.getProcedures() :
-                           null;  ///
-
-    return procedures;
-  }
-
   getMetaLemmas(includeRelease = true) {
     const metaLemmas = includeRelease ?
                          this.context.getMetaLemmas() :
@@ -223,6 +215,14 @@ export default class NominalFileContext extends FileContext {
                              this.metatheorems;
 
     return metatheorems;
+  }
+
+  getProcedures(includeRelease = true) {
+    const procedures = includeRelease ?
+                          this.context.getProcedures() :
+                            null;  ///
+
+    return procedures;
   }
 
   getDeclaredVariables() {

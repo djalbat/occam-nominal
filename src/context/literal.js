@@ -33,6 +33,12 @@ export default class LiteralContext extends Context {
     return string;
   }
 
+  static fromTokens(tokens, context) {
+    const literalContext = new LiteralContext(context, tokens);
+
+    return literalContext;
+  }
+
   static fromNothing(context) {
     const tokens = null,
           literalContext = new LiteralContext(context, tokens);

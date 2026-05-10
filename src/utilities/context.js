@@ -15,8 +15,14 @@ import NominalFileContext from "../context/file/nominal";
 
 import { mnemicContextFromJSON, mnemicContextsFromJSON, mnemicContextToMnemicContextJSON, mnemicContextsToMnemicContextsJSON } from "../utilities/json";
 
-export function evaluate(procedure, terms) {
-  const context = procedure.getContext();
+export function evaluate(procedure, terms, context) {
+  const tokens = context.getTokens();
+
+  context = procedure.getContext();
+
+  const literalContext = LiteralContext.fromTokens(tokens, context);
+
+  context =- literalContext;  ///
 
   return procedure.call(terms, context);
 }
@@ -200,6 +206,23 @@ export function ablates(innerFunction, ...contexts) {
 
   return innerFunction(...contexts);
 }
+
+export default {
+  encapsulate,
+  choose,
+  descend,
+  ablate,
+  attempt,
+  reconcile,
+  serialise,
+  unserialise,
+  unserialises,
+  instantiate,
+  manifest,
+  attempts,
+  serialises,
+  ablates
+};
 
 function ablateContext(context) {
     let contextGroundedContext = isContextGroundedContext(context);
