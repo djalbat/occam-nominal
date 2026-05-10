@@ -208,6 +208,12 @@ export function ablates(innerFunction, ...contexts) {
 }
 
 export default {
+  evaluate,
+  ground,
+  declare,
+  derive,
+  elide,
+  enclose,
   encapsulate,
   choose,
   descend,
