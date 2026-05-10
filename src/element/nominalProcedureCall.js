@@ -45,11 +45,13 @@ export default define(class NominalProcedureCall extends Element {
   }
 
   validate(context) {
-    let validates = false;
+    let nominalProcedureCall = null;
 
     const nominalProcedureCallString = this.getString(); ///
 
     context.trace(`Validating the '${nominalProcedureCallString}' nominal procedure call...`);
+
+    let validates = false;
 
     const procedureName = this.getProcedureName(),
           procedure = context.findProcedureByProcedureName(procedureName);
@@ -58,6 +60,8 @@ export default define(class NominalProcedureCall extends Element {
       const procedureBoolean = procedure.isBoolean();
 
       if (procedureBoolean) {
+        nominalProcedureCall = this;  ///
+
         validates = true;
       } else {
         context.debug(`The '${nominalProcedureCallString}' procedure is not boolean.`);
@@ -70,7 +74,7 @@ export default define(class NominalProcedureCall extends Element {
       context.debug(`...validated the '${nominalProcedureCallString}' nominal procedure call.`);
     }
 
-    return validates;
+    return nominalProcedureCall;
   }
 
   async unifyIndependently(context) {

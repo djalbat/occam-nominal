@@ -152,7 +152,7 @@ export default define(class Supposition extends ProofAssertion {
     const nominalProcedureCall = this.nominalProcedureCall.validate(context);
 
     if (nominalProcedureCall !== null) {
-      nominalProcedureCallValidates =true;
+      nominalProcedureCallValidates = true;
     }
 
     if (nominalProcedureCallValidates) {
