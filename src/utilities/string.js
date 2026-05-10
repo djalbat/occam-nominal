@@ -205,6 +205,14 @@ export function metaLevelAssumptionStringFromReferenceAndStatement(reference, st
   return metaLevelAssumptionString;
 }
 
+export function procedureCallStringFromProcedureReferenceAndParameters(procedureReference, parameters) {
+  const procedureReferenceName = procedureReference.getName(),
+        parametersString = parametersStringFromParameters(parameters),
+        procedureCallString = `@${procedureReferenceName}(${parametersString})`;
+
+  return procedureCallString;
+}
+
 export function statementSubstitutionStringFromStatementAndMetavariable(statement, metavariable) {
   const statementString = statement.getString(),
         metavariableString = metavariable.getString(),
@@ -239,14 +247,6 @@ export function topLevelMetaAssertionStringFromLabelSuppositionsAndDeduction(lab
                                          `${labelString} :: ${deductionString}`;
 
   return topLevelMetaAssertionString;
-}
-
-export function nominalProcedureCallStringFromProcedureReferenceAndParameters(procedureReference, parameters) {
-  const procedureReferenceName = procedureReference.getName(),
-        parametersString = parametersStringFromParameters(parameters),
-        nominalProcedureCallString = `@${procedureReferenceName}(${parametersString})`;
-
-  return nominalProcedureCallString;
 }
 
 export function topLevelAssertionStringFromLabelsSignatureSuppositionsAndDeduction(labels, signature, suppositions, deduction) {

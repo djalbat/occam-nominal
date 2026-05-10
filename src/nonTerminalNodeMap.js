@@ -74,7 +74,7 @@ import SignatureAssertionNode from "./node/assertion/signature";
 import ParenthesisedLabelsNode from "./node/parenthesisedLabels"
 import PropertyDeclarationNode from "./node/declaration/property";
 import VariableDeclarationNode from "./node/declaration/variable";
-import NominalProcedureCallNode from "./node/nominalProcedureCall";
+import ProcedureCallNode from "./node/procedureCall";
 import MetaLevelAssumptionpNode from "./node/assumption/metaLevel";
 import SimpleTypeDeclarationNode from "./node/declaration/simpleType";
 import CombinatorDeclarationNode from "./node/declaration/combinator";
@@ -138,6 +138,7 @@ import {
   METAVARIABLE_RULE_NAME,
   QUALIFICATION_RULE_NAME,
   META_ARGUMENT_RULE_NAME,
+  PROCEDURE_CALL_RULE_NAME,
   THEOREM_HEADER_RULE_NAME,
   SUB_DERIVATION_RULE_NAME,
   TYPE_ASSERTION_RULE_NAME,
@@ -161,7 +162,6 @@ import {
   PROPERTY_DECLARATION_RULE_NAME,
   VARIABLE_DECLARATION_RULE_NAME,
   META_LEVEL_ASSUMPTION_RULE_NAME,
-  NOMINAL_PROCEDURE_CALL_RULE_NAME,
   COMBINATOR_DECLARATION_RULE_NAME,
   REFERENCE_SUBSTITUTION_RULE_NAME,
   STATEMENT_SUBSTITUTION_RULE_NAME,
@@ -224,6 +224,7 @@ const NonTerminalNodeMap = {
   [EQUIVALENCES_RULE_NAME]: EquivalencesNode,
   [META_ARGUMENT_RULE_NAME]: MetaArgumentNode,
   [QUALIFICATION_RULE_NAME]: QualificationNode,
+  [PROCEDURE_CALL_RULE_NAME]: ProcedureCallNode,
   [TYPE_ASSERTION_RULE_NAME]: TypeAssertionNode,
   [SUB_DERIVATION_RULE_NAME]: SubDerivationNode,
   [THEOREM_HEADER_RULE_NAME]: TheoremHeaderNode,
@@ -247,7 +248,6 @@ const NonTerminalNodeMap = {
   [VARIABLE_DECLARATION_RULE_NAME]: VariableDeclarationNode,
   [PROPERTY_DECLARATION_RULE_NAME]: PropertyDeclarationNode,
   [META_LEVEL_ASSUMPTION_RULE_NAME]: MetaLevelAssumptionpNode,
-  [NOMINAL_PROCEDURE_CALL_RULE_NAME]: NominalProcedureCallNode,
   [COMBINATOR_DECLARATION_RULE_NAME]: CombinatorDeclarationNode,
   [STATEMENT_SUBSTITUTION_RULE_NAME]: StatementSubstitutionNode,
   [REFERENCE_SUBSTITUTION_RULE_NAME]: ReferenceSubstitutionNode,

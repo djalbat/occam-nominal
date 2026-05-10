@@ -206,19 +206,19 @@ export function mnemicContextFromJSON(json, context) {
   return mnemicContext;
 }
 
-export function nominalProcedureCallFromJSON(json, context) {
-  let { nominalProcedureCall = null } = json;
+export function procedureCallFromJSON(json, context) {
+  let { procedureCall = null } = json;
 
-  if (nominalProcedureCall !== null) {
-    const { NominalProcedureCall } = elements,
-          nominalProcedureCallJSON = nominalProcedureCall;  ///
+  if (procedureCall !== null) {
+    const { ProcedureCall } = elements,
+          procedureCallJSON = procedureCall;  ///
 
-    json = nominalProcedureCallJSON; ///
+    json = procedureCallJSON; ///
 
-    nominalProcedureCall = NominalProcedureCall.fromJSON(json, context);
+    procedureCall = ProcedureCall.fromJSON(json, context);
   }
 
-  return nominalProcedureCall;
+  return procedureCall;
 }
 
 export function procedureReferenceFromJSON(json, context) {
@@ -891,6 +891,24 @@ export function mnemicContextToMnemicContextJSON(mnemicContext) {
   return mnemicContextJSON;
 }
 
+export function procedureCallToProcedureCallJSON(procedureCall) {
+  const procedureCallJSON = (procedureCall !== null) ?
+                               procedureCall.toJSON() :
+                                 null;
+
+  return procedureCallJSON;
+}
+
+export function substitutionFromSubstitutionJSON(json, context) {
+  const { TermSubstitution, FrameSubstitution, StatementSubstitution, ReferenceSubstitution } = elements,
+        substitution = TermSubstitution.fromJSON(json, context) ||
+                        FrameSubstitution.fromJSON(json, context) ||
+                        StatementSubstitution.fromJSON(json, context) ||
+                        ReferenceSubstitution.fromJSON(json, context);
+
+  return substitution;
+}
+
 export function procedureReferenceToProcedureReferenceJSON(procedureReference) {
   const procedureReferenceJSON = procedureReference.toJSON();
 
@@ -901,24 +919,6 @@ export function declaredMetavariableToDEclaredMetavariableJSON(declaredMetavaria
   const declaredMetavariableJSON = declaredMetavariable.toJSON();
 
   return declaredMetavariableJSON;
-}
-
-export function nominalProcedureCallToNominalProcedureCallJSON(nominalProcedureCall) {
-  const nominalProcedureCallJSON = (nominalProcedureCall !== null) ?
-                                      nominalProcedureCall.toJSON() :
-                                        null;
-
-  return nominalProcedureCallJSON;
-}
-
-export function substitutionFromSubstitutionJSON(json, context) {
-  const { TermSubstitution, FrameSubstitution, StatementSubstitution, ReferenceSubstitution } = elements,
-        substitution = TermSubstitution.fromJSON(json, context) ||
-                       FrameSubstitution.fromJSON(json, context) ||
-                       StatementSubstitution.fromJSON(json, context) ||
-                       ReferenceSubstitution.fromJSON(json, context);
-
-  return substitution;
 }
 
 export function termsToTermsJSON(terms) {

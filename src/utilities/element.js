@@ -8,9 +8,9 @@ import { equivalenceStringFromTerms,
          rulsStringFromLabelsPremisesAndConclusion,
          subproofStringFromSuppositionsAndSubDerivation,
          sectionStringFromHypothesesAndTopLevelAssertion,
+         procedureCallStringFromProcedureReferenceAndParameters,
          topLevelMetaAssertionStringFromLabelSuppositionsAndDeduction,
          complexTypeDeclarationStringFromTypeSuperTypesAndProvisional,
-         nominalProcedureCallStringFromProcedureReferenceAndParameters,
          topLevelAssertionStringFromLabelsSignatureSuppositionsAndDeduction } from "../utilities/string";
 
 export function typeFromTypeNode(typeNode, context) {
@@ -208,8 +208,8 @@ export function premiseFromPremiseNode(premiseNode, context) {
         string = context.nodeAsString(node),
         breakPoint = null,
         statement = statementFromPremiseNode(premiseNode, context),
-        nominalProcedureCall = nominalProcedureCallFromPremiseNode(premiseNode, context),
-        premise = new Premise(context, string, node, breakPoint, statement, nominalProcedureCall);
+        procedureCall = procedureCallFromPremiseNode(premiseNode, context),
+        premise = new Premise(context, string, node, breakPoint, statement, procedureCall);
 
   return premise
 }
@@ -519,8 +519,8 @@ export function suppositionFromSuppositionNode(suppositionNode, context) {
         string = context.nodeAsString(node),
         breakPoint = null,
         statement = statementFromSuppositionNode(suppositionNode, context),
-        nominalProcedureCall = nominalProcedureCallFromSuppositionNode(suppositionNode, context),
-        supposition = new Supposition(context, string, node, breakPoint, statement, nominalProcedureCall);
+        procedureCall = procedureCallFromSuppositionNode(suppositionNode, context),
+        supposition = new Supposition(context, string, node, breakPoint, statement, procedureCall);
 
   return supposition
 }
@@ -576,6 +576,22 @@ export function metavariableFromMetavariableNode(metavariableNode, context) {
   const metavariable = new Metavariable(context, string, node, breakPoint, name, term, type, metaType);
 
   return metavariable;
+}
+
+export function procedureCallFromProcedureCallNode(procedureCallNode, context) {
+  const { ProcedureCall } = elements,
+        parameters = parametersFromProcedureCallNode(procedureCallNode, context),
+        procedureReference = procedureReferenceFromProcedureCallNode(procedureCallNode, context),
+        procedureCallString = procedureCallStringFromProcedureReferenceAndParameters(procedureReference, parameters),
+        node = procedureCallNode, ///
+        string = procedureCallString, ///
+        breakPoint = null;
+
+  context = null;
+
+  const procedureCall = new ProcedureCall(context, string, node, breakPoint, parameters, procedureReference);
+
+  return procedureCall;
 }
 
 export function subDerivationFromSubDerivationNode(subDerivationNode, context) {
@@ -819,22 +835,6 @@ export function bracketedConstructorFromBracketedConstructorNode(bracketedConstr
         bracketedConstructor = new BracketedConstructor(context, string, node, breakPoint, term, type);
 
   return bracketedConstructor;
-}
-
-export function nominalProcedureCallFromNominalProcedureCallNode(nominalProcedureCallNode, context) {
-  const { NominalProcedureCall } = elements,
-        parameters = parametersFromNominalProcedureCallNode(nominalProcedureCallNode, context),
-        procedureReference = procedureReferenceFromNominalProcedureCallNode(nominalProcedureCallNode, context),
-        nominalProcedureCallString = nominalProcedureCallStringFromProcedureReferenceAndParameters(procedureReference, parameters),
-        node = nominalProcedureCallNode, ///
-        string = nominalProcedureCallString, ///
-        breakPoint = null;
-
-  context = null;
-
-  const nominalProcedureCall = new NominalProcedureCall(context, string, node, breakPoint, parameters, procedureReference);
-
-  return nominalProcedureCall;
 }
 
 export function typePrefixDeclarationFromTypePrefixDeclarationNode(typePrefixDeclarationNode, context) {
@@ -1445,6 +1445,18 @@ export function statementFromHypothesisNode(hypothesisNode, context) {
   return statement;
 }
 
+export function procedureCallFromPremiseNode(premiseNode, context) {
+  let procedureCall = null;
+
+  const procedureCallNode = premiseNode.getProcedureCallNode();
+
+  if (procedureCallNode !== null) {
+    procedureCall = procedureCallFromProcedureCallNode(procedureCallNode, context);
+  }
+
+  return procedureCall;
+}
+
 export function suppositionsFromSubproofNode(subproofNode, context) {
   const suppositionNodes = subproofNode.getSuppositionNodes(),
         suppositions = suppositionsFromSuppositionNodes(suppositionNodes, context);
@@ -1629,6 +1641,13 @@ export function nameFromProcedureReferenceNode(procedureReferenceNode, context) 
   return name;
 }
 
+export function parametersFromProcedureCallNode(procedureCallNode, context) {
+  const parameterNodes = procedureCallNode.getParameterNodes(),
+        parameters = parametersFromParameterNodes(parameterNodes, context);
+
+  return parameters;
+}
+
 export function frameFromContainedAssertionNode(containedAssertionNode, context) {
   let frame = null;
 
@@ -1660,6 +1679,18 @@ export function typeFromVariableDeclarationNode(variableDeclarationNode, context
         type = typeFromTypeNode(typeNode, context);
 
   return type;
+}
+
+export function procedureCallFromSuppositionNode(suppositionNode, context) {
+  let procedureCall = null;
+
+  const procedureCallNode = suppositionNode.getProcedureCallNode();
+
+  if (procedureCallNode !== null) {
+    procedureCall = procedureCallFromProcedureCallNode(procedureCallNode, context);
+  }
+
+  return procedureCall;
 }
 
 export function topLevelAssertionFromSectionNode(sectionNode, context) {
@@ -1881,18 +1912,6 @@ export function variableFromVariableDeclarationNode(variableDeclarationNode, con
   return variable;
 }
 
-export function nominalProcedureCallFromPremiseNode(premiseNode, context) {
-  let nominalProcedureCall = null;
-
-  const nominalProcedureCallNode = premiseNode.getNominalProcedureCallNode();
-
-  if (nominalProcedureCallNode !== null) {
-    nominalProcedureCall = nominalProcedureCallFromNominalProcedureCallNode(nominalProcedureCallNode, context);
-  }
-
-  return nominalProcedureCall;
-}
-
 export function statementFromBracketedCombinatorNode(bracketedCombinatorNode, context) {
   const statementNode = bracketedCombinatorNode.getStatementNode(),
         statement = statementFromStatementNode(statementNode, context);
@@ -1955,30 +1974,18 @@ export function provisionalFromVariableDeclarationNode(variableDeclarationNode, 
   return provisional;
 }
 
-export function parametersFromNominalProcedureCallNode(nominalProcedureCallNode, context) {
-  const parameterNodes = nominalProcedureCallNode.getParameterNodes(),
-    parameters = parametersFromParameterNodes(parameterNodes, context);
-
-  return parameters;
-}
-
-export function nominalProcedureCallFromSuppositionNode(suppositionNode, context) {
-  let nominalProcedureCall = null;
-
-  const nominalProcedureCallNode = suppositionNode.getNominalProcedureCallNode();
-
-  if (nominalProcedureCallNode !== null) {
-    nominalProcedureCall = nominalProcedureCallFromNominalProcedureCallNode(nominalProcedureCallNode, context);
-  }
-
-  return nominalProcedureCall;
-}
-
 export function replacementTermFromTermSubstitutionNode(termSubstitutionNode, context) {
   const replacementTermNode = termSubstitutionNode.getReplacementTermNode(),
         replacementTerm = termFromTermNode(replacementTermNode, context);
 
   return replacementTerm;
+}
+
+export function procedureReferenceFromProcedureCallNode(procedureCallNode, context) {
+  const procedureReferenceNode = procedureCallNode.getProcedureReferenceNode(),
+        procedureReference = procedureReferenceFromProcedureReferenceNode(procedureReferenceNode, context);
+
+  return procedureReference;
 }
 
 export function superTypesFromSimpleTypeDeclarationNode(simpleTypeDeclarationNode, context) {
@@ -2117,13 +2124,6 @@ export function termSubstitutionFromStatementSubstitutionNode(statementSubstitut
   }
 
   return termSubstitution;
-}
-
-export function procedureReferenceFromNominalProcedureCallNode(nominalProcedureCallNode, context) {
-  const procedureReferenceNode = nominalProcedureCallNode.getProcedureReferenceNode(),
-        procedureReference = procedureReferenceFromProcedureReferenceNode(procedureReferenceNode, context);
-
-  return procedureReference;
 }
 
 export function frameSubstitutionFromStatementSubstitutionNode(statementSubstitutionNode, generalContext, specificContext) {

@@ -195,29 +195,6 @@ export function ablates(innerFunction, ...contexts) {
   return innerFunction(...contexts);
 }
 
-export default {
-  evaluate,
-  ground,
-  declare,
-  derive,
-  elide,
-  enclose,
-  encapsulate,
-  choose,
-  descend,
-  ablate,
-  attempt,
-  reconcile,
-  serialise,
-  unserialise,
-  unserialises,
-  instantiate,
-  manifest,
-  attempts,
-  serialises,
-  ablates
-};
-
 function ablateContext(context) {
     let contextGroundedContext = isContextGroundedContext(context);
 
