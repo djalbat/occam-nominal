@@ -1,6 +1,7 @@
 "use strict";
 
 export const S = "s";
+export const NULL = "null";
 export const MISSING = "missing";
 export const UNDEFINED = "undefined";
 export const PROVISIONAL = "Provisional";

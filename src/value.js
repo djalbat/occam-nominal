@@ -1,5 +1,7 @@
 "use strict";
 
+import { NULL } from "./constants";
+
 export default class Value {
   constructor(context, string, node) {
     this.context = context;
@@ -31,6 +33,15 @@ export default class Value {
 
   static fromNode(node, context) {
     const string = context.nodeAsString(node),
+          value = new Value(context, string, node);
+
+    return value;
+  }
+
+  static fromNothing() {
+    const context = null,
+          string = NULL,
+          node = null,
           value = new Value(context, string, node);
 
     return value;
