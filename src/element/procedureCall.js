@@ -91,7 +91,7 @@ export default define(class ProcedureCall extends Element {
     let term = null;
 
     try {
-      term = await procedure.callNominally(values, context);
+      term = await procedure.callNominally(values);
     } catch (exception) {
       const message = exception.getMessage();
 
