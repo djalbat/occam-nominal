@@ -19,6 +19,16 @@ export default class Value {
     return this.node;
   }
 
+  match(value) {
+    const node = value.getNode(),
+          nodeA = node, ///
+          nodeB = this.node,  ///
+          nodesMatch = matchNodes(nodeA, nodeB),
+          matches = nodesMatch; ///
+
+    return matches;
+  }
+
   static fromNode(node, context) {
     const string = context.nodeAsString(node),
           value = new Value(context, string, node);
@@ -36,4 +46,18 @@ export default class Value {
 
     return value;
   }
+}
+
+function matchNodes(nodeA, nodeB) {
+  let nodesMatch;
+
+  if ((nodeA === null) || (nodeB === null)) {
+    nodesMatch = (nodeA === nodeB);
+  } else {
+    const nodeAMatchesNodeB = nodeA.match(nodeB);
+
+    nodesMatch = nodeAMatchesNodeB;  ///
+  }
+
+  return nodesMatch;
 }
