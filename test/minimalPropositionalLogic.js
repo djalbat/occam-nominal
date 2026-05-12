@@ -1,6 +1,7 @@
 "use strict";
 
-const { Dependency } =require("occam-model"),
+const { levels } = require("necessary"),
+      { Dependency } =require("occam-model"),
       { arrayUtilities } =require("necessary"),
       { Log, ReleaseContext, verificationUtilities } =require("occam-languages");
 
@@ -8,10 +9,12 @@ const { FileContextFromFilePath } = require("./utilities/fileContext"),
       { releaseContextFromDependency } = require("./utilities/releaseContext");
 
 const { first } = arrayUtilities,
+      { ERROR_LEVEL } = levels,
       { createReleaseContexts, verifyReleaseContexts, initialiseReleaseContexts } = verificationUtilities;
 
 describe("first-order-logic", () => {
-  const log = Log.fromNothing(),
+  const logLevel = ERROR_LEVEL,
+        log = Log.fromLogLevel(logLevel),
         name = "first-order-logic",
         callback = async (context, breakPoint) => {
           ///
