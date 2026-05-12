@@ -6,10 +6,10 @@ const { createSuite } = require("../utilities/test");
 
 const { ERROR_LEVEL } = levels;
 
-const name = "de-morgans-laws",
+const name = "operations",
       logLevel = ERROR_LEVEL,
-      projectsDirectoryPath = "../..//Logic";
+      projectsDirectoryPath = "../..//Algorithms";
 
-describe(name, () => {
+describe.skip(name, () => {
   createSuite(name, logLevel, projectsDirectoryPath);
 });

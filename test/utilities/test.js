@@ -45,6 +45,8 @@ function createSuite(name, logLevel, projectsDirectoryPath) {
     const releaseContextsVerify = await verifyReleaseContexts(context);
 
     assert.isTrue(releaseContextsVerify);
+
+    releaseContexts.reverse();
   });
 
   let json,
@@ -63,8 +65,6 @@ function createSuite(name, logLevel, projectsDirectoryPath) {
   });
 
   it("unserialises", () => {
-    releaseContexts.reverse();
-
     const releaseContxt = ReleaseContext.fromLogNameJSONEntriesCallbackAndCustomGrammar(log, name, json, entries, callback, customGrammar);
 
     releaseContxt.initialise(releaseContexts, FileContextFromFilePath);

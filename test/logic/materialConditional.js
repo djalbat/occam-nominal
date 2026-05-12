@@ -8,7 +8,7 @@ const { ERROR_LEVEL } = levels;
 
 const name = "material-conditional",
       logLevel = ERROR_LEVEL,
-      projectsDirectoryPath = "/Users/djalbat/Logic";
+      projectsDirectoryPath = "../..//Logic";
 
 describe(name, () => {
   createSuite(name, logLevel, projectsDirectoryPath);

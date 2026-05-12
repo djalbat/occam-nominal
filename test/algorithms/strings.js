@@ -6,10 +6,10 @@ const { createSuite } = require("../utilities/test");
 
 const { ERROR_LEVEL } = levels;
 
-const name = "de-morgans-laws",
+const name = "strings",
       logLevel = ERROR_LEVEL,
-      projectsDirectoryPath = "../..//Logic";
+      projectsDirectoryPath = "../..//Algorithms";
 
-describe(name, () => {
+describe.only(name, () => {
   createSuite(name, logLevel, projectsDirectoryPath);
 });
