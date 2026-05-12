@@ -9,13 +9,13 @@ const { FileContextFromFilePath } = require("./utilities/fileContext"),
       { releaseContextFromDependency } = require("./utilities/releaseContext");
 
 const { first } = arrayUtilities,
-      { ERROR_LEVEL } = levels,
+      { TRACE_LEVEL } = levels,
       { createReleaseContexts, verifyReleaseContexts, initialiseReleaseContexts } = verificationUtilities;
 
-describe("first-order-logic", () => {
-  const logLevel = ERROR_LEVEL,
+describe("minimal-propositional-logic", () => {
+  const logLevel = TRACE_LEVEL,
         log = Log.fromLogLevel(logLevel),
-        name = "first-order-logic",
+        name = "minimal-propositional-logic",
         callback = async (context, breakPoint) => {
           ///
         },
