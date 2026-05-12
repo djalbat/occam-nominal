@@ -1,21 +1,17 @@
 "use strict";
 
-const { levels } = require("necessary"),
-      { Dependency } =require("occam-model"),
+const { Dependency } =require("occam-model"),
       { arrayUtilities } =require("necessary"),
       { Log, ReleaseContext, verificationUtilities } =require("occam-languages");
 
-const { FileContextFromFilePath } = require("./utilities/fileContext"),
-      { releaseContextFromDependency } = require("./utilities/releaseContext");
+const { FileContextFromFilePath } = require("../utilities/fileContext"),
+      { releaseContextFromDependency } = require("../utilities/releaseContext");
 
 const { first } = arrayUtilities,
-      { TRACE_LEVEL } = levels,
       { createReleaseContexts, verifyReleaseContexts, initialiseReleaseContexts } = verificationUtilities;
 
-describe("minimal-propositional-logic", () => {
-  const logLevel = TRACE_LEVEL,
-        log = Log.fromLogLevel(logLevel),
-        name = "minimal-propositional-logic",
+function createSuite(name, logLevel, projectsDirectoryPath) {
+  const log = Log.fromLogLevel(logLevel),
         callback = async (context, breakPoint) => {
           ///
         },
@@ -25,8 +21,6 @@ describe("minimal-propositional-logic", () => {
       dependency;
 
   before(() => {
-    const projectsDirectoryPath = "/Users/djalbat/logic";
-
     context = {
       log,
       callback,
@@ -75,4 +69,8 @@ describe("minimal-propositional-logic", () => {
 
     releaseContxt.initialise(releaseContexts, FileContextFromFilePath);
   });
-});
+}
+
+module.exports = {
+  createSuite
+};
