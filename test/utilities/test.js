@@ -11,6 +11,8 @@ const { first } = arrayUtilities,
       { createReleaseContexts, verifyReleaseContexts, initialiseReleaseContexts } = verificationUtilities;
 
 function createSuite(name, logLevel, projectsDirectoryPath) {
+  let releaseContext;
+
   const log = Log.fromLogLevel(logLevel),
         callback = async (context, breakPoint) => {
           ///
@@ -47,6 +49,10 @@ function createSuite(name, logLevel, projectsDirectoryPath) {
     assert.isTrue(releaseContextsVerify);
 
     releaseContexts.reverse();
+
+    const firstReleaseContext = first(releaseContexts);
+
+    releaseContext = firstReleaseContext; ///
   });
 
   let json,
@@ -54,9 +60,6 @@ function createSuite(name, logLevel, projectsDirectoryPath) {
       customGrammar;
 
   it("serialises", () => {
-    const firstReleaseContext = first(releaseContexts),
-          releaseContext = firstReleaseContext; ///
-
     json = releaseContext.toJSON();
 
     entries = releaseContext.getEntries();
@@ -69,6 +72,10 @@ function createSuite(name, logLevel, projectsDirectoryPath) {
 
     releaseContxt.initialise(releaseContexts, FileContextFromFilePath);
   });
+
+  return () => {
+    return releaseContext;
+  };
 }
 
 module.exports = {

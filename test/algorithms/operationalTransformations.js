@@ -10,6 +10,6 @@ const name = "operational-transformations",
       logLevel = ERROR_LEVEL,
       projectsDirectoryPath = "../..//Algorithms";
 
-describe.skip(name, () => {
+describe(name, () => {
   createSuite(name, logLevel, projectsDirectoryPath);
 });

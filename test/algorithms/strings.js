@@ -10,6 +10,6 @@ const name = "strings",
       logLevel = ERROR_LEVEL,
       projectsDirectoryPath = "../..//Algorithms";
 
-describe.only(name, () => {
+describe(name, () => {
   createSuite(name, logLevel, projectsDirectoryPath);
 });
