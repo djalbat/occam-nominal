@@ -1,6 +1,6 @@
 "use strict";
 
-import { queryUtilities } from "occam-dom";
+import { queryUtilities } from "occam-query";
 import { ZipPass as ZipPassBase } from "occam-languages";
 
 import ZipPass from "../pass/zip";
