@@ -1,6 +1,7 @@
 "use strict";
 
-import { AsyncPass, queryUtilities } from "occam-languages"
+import { AsyncPass } from "occam-languages"
+import { queryUtilities } from "occam-dom"
 
 import { ruleFromRuleNode,
          errorFromErrorNode,

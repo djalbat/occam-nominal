@@ -1,6 +1,7 @@
 "use strict";
 
-import { queryUtilities, EquivalencePass } from "occam-languages";
+import { queryUtilities } from "occam-dom";
+import { EquivalencePass } from "occam-languages";
 
 import { findEquivalenceByTermNodes } from "../utilities/equivalences";
 
