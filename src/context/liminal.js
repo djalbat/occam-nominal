@@ -238,21 +238,20 @@ export default class LiminalContext extends Context {
     return complexDerivedSubstitution;
   }
 
-  findDerivedSubstitutionByMetavariableNodeAndSubstitution(metavariableNode, derivedSubstitution) {
-    const derivedSubstitutionA = derivedSubstitution; ///
+  findDerivedSubstitutionByMetavariableNodeAndSubstitution(metavariableNode, substitution) {
+    const substitutionA = substitution, ///
+          derivedSubstitution = this.findDerivedSubstitution((derivedSubstitution) => {  ///
+            const metavariableNodeMatches = derivedSubstitution.matchMetavariableNode(metavariableNode);
 
-    derivedSubstitution = this.findDerivedSubstitution((derivedSubstitution) => {  ///
-      const metavariableNodeMatches = derivedSubstitution.matchMetavariableNode(metavariableNode);
+            if (metavariableNodeMatches) {
+              const substitutionB = derivedSubstitution, ///
+                    substitutionBEqualToSubstitutionA = substitutionB.isEqualTo(substitutionA);
 
-      if (metavariableNodeMatches) {
-        const derivedSubstitutionB = derivedSubstitution, ///
-              derivedSubstitutionBEqualToDerivedSubstitutionA = derivedSubstitutionB.isEqualTo(derivedSubstitutionA);
-
-        if (derivedSubstitutionBEqualToDerivedSubstitutionA) {
-          return true;
-        }
-      }
-    }) || null;
+              if (substitutionBEqualToSubstitutionA) {
+                return true;
+              }
+            }
+          }) || null;
 
     return derivedSubstitution;
   }

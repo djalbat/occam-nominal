@@ -8,12 +8,20 @@ import BoundedContext from "../context/bounded";
 import NominalContext from "../context/nominal";
 import LiteralContext from "../context/literal";
 import LiminalContext from "../context/liminal";
+import SynopsisContext from "../context/synoptic";
 import PhanericContext from "../context/phaneric";
 import IllativeContext from "../context/illative";
 import BranchingContext from "../context/branching";
 import NominalFileContext from "../context/file/nominal";
 
 import { mnemicContextFromJSON, mnemicContextsFromJSON, mnemicContextToMnemicContextJSON, mnemicContextsToMnemicContextsJSON } from "../utilities/json";
+
+export function join(innerFunction, ...contexts) {
+  const synopticContext = SynopsisContext.fromContexts(contexts),
+        context = synopticContext;  ///
+
+  return innerFunction(context);
+}
 
 export function ground(innerFunction) {
   let context;

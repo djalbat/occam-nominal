@@ -6,7 +6,7 @@ import { define } from "../../elements";
 import { instantiateSupposition} from "../../process/instantiate";
 import { procedureCallFromSuppositionNode } from "../../utilities/element";
 import { breakPointFromJSON, breakPointToBreakPointJSON } from "../../utilities/breakPoint";
-import { declare, attempt, reconcile, serialise, unserialise, instantiate } from "../../utilities/context";
+import { join, declare, attempt, reconcile, serialise, unserialise, instantiate } from "../../utilities/context";
 
 export default define(class Supposition extends ProofAssertion {
   constructor(context, string, node, breakPoint, statement, procedureCall) {
@@ -235,9 +235,9 @@ export default define(class Supposition extends ProofAssertion {
     if (subproofAssertion !== null) {
       const suppositionContext = this.getContext(),
             generalContext = suppositionContext, ///
-            spsecfiicContext = context; ///
+            specificContext = context; ///
 
-      subproofUnifies = subproofAssertion.unifySubproof(subproof, generalContext, spsecfiicContext);
+      subproofUnifies = subproofAssertion.unifySubproof(subproof, generalContext, specificContext);
     }
 
     if (subproofUnifies) {
@@ -260,16 +260,14 @@ export default define(class Supposition extends ProofAssertion {
           generalContext = suppositionContext, ///
           specificContext = proofAssertionContext;  ///
 
-    reconcile((specificContext) => {
+    join((specificContext) => {
       const statement = proofAssertion.getStatement(),
             statementUnifies = this.unifyStatement(statement, generalContext, specificContext);
 
       if (statementUnifies) {
-        specificContext.commit(context);
-
         proofAssertionUnifies = true;
       }
-    }, specificContext);
+    }, specificContext, context);
 
     if (proofAssertionUnifies) {
       context.debug(`...unified the '${proofAssertionString}' proof assertion with the '${suppositionString}' supposition.`);
@@ -287,12 +285,12 @@ export default define(class Supposition extends ProofAssertion {
     context.trace(`Unifying the '${subproofOrProofAssertionString}' subproof or proof assertion with the '${suppositionString}' supposition...`);
 
     const subproofOrProofAssertionProofAssertion = subproofOrProofAssertion.isProofAssertion(),
-                                                   proofAssertion = subproofOrProofAssertionProofAssertion ?
-                                                                      subproofOrProofAssertion :
-                                                                        null,
-                                                   subproof = subproofOrProofAssertionProofAssertion ?
-                                                               null :
-                                                                 subproofOrProofAssertion;
+          proofAssertion = subproofOrProofAssertionProofAssertion ?
+                             subproofOrProofAssertion :
+                               null,
+          subproof = subproofOrProofAssertionProofAssertion ?
+                      null :
+                        subproofOrProofAssertion;
 
     reconcile((context) => {
       if (proofAssertion !== null) {

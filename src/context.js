@@ -380,6 +380,13 @@ export default class Context extends ContextBase {
     return declaredJudgements;
   }
 
+  findDerivedSubstitutionByMetavariableNode(metavariableNode) {
+    const context = this.getContext(),
+          derivedSubstitution = context.findDerivedSubstitutionByMetavariableNode(metavariableNode);
+
+    return derivedSubstitution;
+  }
+
   findMetaLevelAssumptionByMetaLevelAssumptionNode(metaLevelAssumptionNode) {
     const context = this.getContext(),
           metaLevelAssumption = context.findMetaLevelAssumptionByMetaLevelAssumptionNode(metaLevelAssumptionNode);

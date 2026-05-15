@@ -6,7 +6,7 @@ import { define } from "../../elements";
 import { instantiatePremise } from "../../process/instantiate";
 import { procedureCallFromPremiseNode } from "../../utilities/element";
 import { breakPointFromJSON, breakPointToBreakPointJSON } from "../../utilities/breakPoint";
-import { declare, attempt, reconcile, serialise, unserialise, instantiate } from "../../utilities/context";
+import { join, declare, attempt, reconcile, serialise, unserialise, instantiate } from "../../utilities/context";
 
 export default define(class Premise extends ProofAssertion {
   constructor(context, string, node, breakPoint, statement, procedureCall) {
@@ -212,9 +212,9 @@ export default define(class Premise extends ProofAssertion {
     if (subproofAssertion !== null) {
       const premiseContext = this.getContext(),
             generalContext = premiseContext, ///
-            spsecfiicContext = context; ///
+            specificContext = context; ///
 
-      subproofUnifies = subproofAssertion.unifySubproof(subproof, generalContext, spsecfiicContext);
+      subproofUnifies = subproofAssertion.unifySubproof(subproof, generalContext, specificContext);
     }
 
     if (subproofUnifies) {
@@ -237,16 +237,14 @@ export default define(class Premise extends ProofAssertion {
           generalContext = premiseContext, ///
           specificContext = proofAssertionContext;  ///
 
-    reconcile((specificContext) => {
+    join((specificContext) => {
       const statement = proofAssertion.getStatement(),
             statementUnifies = this.unifyStatement(statement, generalContext, specificContext);
 
       if (statementUnifies) {
-        specificContext.commit(context);
-
         proofAssertionUnifies = true;
       }
-    }, specificContext);
+    }, specificContext, context);
 
     if (proofAssertionUnifies) {
       context.debug(`...unified the '${proofAssertionString}' proof assertion with the '${premiseString}' premise.`);
