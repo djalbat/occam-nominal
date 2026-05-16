@@ -1,7 +1,6 @@
 "use strict";
 
-const { Dependency } =require("occam-model"),
-      { arrayUtilities } =require("necessary"),
+const { arrayUtilities } =require("necessary"),
       { Log, ReleaseContext, verificationUtilities } =require("occam-languages");
 
 const { FileContextFromFilePath } = require("../utilities/fileContext"),
@@ -19,8 +18,7 @@ function createSuite(name, logLevel, projectsDirectoryPath) {
         },
         releaseContexts = [];
 
-  let context,
-      dependency;
+  let context;
 
   before(() => {
     context = {
@@ -31,8 +29,6 @@ function createSuite(name, logLevel, projectsDirectoryPath) {
       FileContextFromFilePath,
       releaseContextFromDependency
     }
-
-    dependency = Dependency.fromName(name);
   });
 
   before(async () => {
