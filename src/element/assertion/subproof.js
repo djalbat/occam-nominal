@@ -6,9 +6,9 @@ import Assertion from "../assertion";
 
 import { define } from "../../elements";
 import { breakPointFromJSON } from "../../utilities/breakPoint";
+import { join, descend, instantiate } from "../../utilities/context";
 import { instantiateSubproofAssertion } from "../../process/instantiate";
 import { subproofAssertionFromStatementNode } from "../../utilities/element";
-import { join, descend, reconcile, instantiate } from "../../utilities/context";
 
 const { last, front, backwardsEvery } = arrayUtilities;
 
@@ -256,23 +256,22 @@ export default define(class SubproofAssertion extends Assertion {
 
     context.trace(`Unifying the '${topLevelMetaAssertionString}' top level meta-assertion with the '${subproofAssertionString}' subproof assertion...`);
 
-    reconcile((context) => {
-      const deduction = topLevelMetaAssertion.getDeduction(),
-            generalContext = context, ///
-            specificContext = context,  ///
-            deductionUnifies = this.unifyDeduction(deduction, generalContext, specificContext);
+    const deduction = topLevelMetaAssertion.getDeduction(),
+          generalContext = context, ///
+          specificContext = context;  ///
+
+    join((specificContext) => {
+      const deductionUnifies = this.unifyDeduction(deduction, generalContext, specificContext);
 
       if (deductionUnifies) {
         const suppositions = topLevelMetaAssertion.getSuppositions(),
               suppositionsUnify = this.unifySuppositions(suppositions, generalContext, specificContext);
 
         if (suppositionsUnify) {
-          specificContext.commit();
-
           topLevelMetaAssertionUnifies = true;
         }
       }
-    }, context);
+    }, specificContext, context);
 
     if (topLevelMetaAssertionUnifies) {
       context.debug(`...unified the '${topLevelMetaAssertionString}' top level meta-assertion with the '${subproofAssertionString}' subproof assertion.`);

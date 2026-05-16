@@ -5,7 +5,7 @@ import { Element, asynchronousUtilities } from "occam-languages";
 import { define } from "../elements";
 import { enclose } from "../utilities/context";
 
-const { asyncEvery } = asynchronousUtilities;
+const { match, asyncEvery } = asynchronousUtilities;
 
 export default define(class Subproof extends Element {
   constructor(context, string, node, breakPoint, suppositions, subDerivation) {
@@ -55,9 +55,70 @@ export default define(class Subproof extends Element {
   }
 
   compareStep(step, context) {
-    const comparesToStep = false;
+    let comparesToStep;
+
+    const stepString = step.getString(),
+          subproofString = step.getString();
+
+    context.trace(`Comparing the '${stepString}' step to the '${subproofString}' subproof...`);
+
+    comparesToStep = false;
+
+    if (comparesToStep) {
+      context.trace(`...compared the '${stepString}' step to the '${subproofString}' subproof.`);
+    }
 
     return comparesToStep;
+  }
+
+  compareStatement(statement, context) {
+    let comparesToStatement;
+
+    const subproofString = this.getString(),  ///
+          statementString = statement.getString();
+
+    context.trace(`Comparing the '${statementString}' statement to the '${subproofString}' subproof...`);
+
+    comparesToStatement = false;
+
+    if (comparesToStatement) {
+      context.trace(`...compared the '${statementString}' statement to the '${subproofString}' subproof.`);
+    }
+
+    return comparesToStatement;
+  }
+
+  compareSubproofAssertion(subproofAssertion, context) {
+    let comparesTouSbproofAssertion = false;
+
+    const subproofString = this.getString(),  ///
+          subproofAssertionString = subproofAssertion.getString();
+
+    context.trace(`Comparing the '${subproofAssertionString}' subproof assertion to the '${subproofString}' subproof...`);
+
+    const lastStep = this.getLastStep(),
+          proofAssertions = [ ///
+            ...this.suppositions,
+            lastStep,
+          ],
+          subproofAssertionStatements = subproofAssertion.getStatements(),
+          proofAssertionsMatchsubproofAssertionStatements = match(proofAssertions, subproofAssertionStatements, (proofAssertion, subproofAssertionStatement) => {
+            const proofAssertionComparesToSubproofAssertionStatement = proofAssertion.compareStatement(subproofAssertionStatement, context);
+
+            if (proofAssertionComparesToSubproofAssertionStatement) {
+              return true;
+            }
+          });
+
+    if (proofAssertionsMatchsubproofAssertionStatements) {
+      comparesTouSbproofAssertion = true;
+    }
+
+    if (comparesTouSbproofAssertion) {
+      context.trace(`...compared the '${subproofAssertionString}' subproof assertion to the '${subproofString}' subproof.`);
+    }
+
+    return comparesTouSbproofAssertion;
   }
 
   async verify(context) {

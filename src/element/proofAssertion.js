@@ -37,11 +37,9 @@ export default class ProofAssertion extends Element {
     context.trace(`Comparing the '${stepString}' step to the '${proofAssertionString}' proof assertion...`);
 
     const statement = step.getStatement(),
-          leftStatement = statement,  ///
-          rightStatement = this.statement,  ///
-          statementsEquate = equateStatements(leftStatement, rightStatement, context);
+          comparesToStatement = this.compareStatement(statement, step);
 
-    if (statementsEquate) {
+    if (comparesToStatement) {
       comparesToStep = true;
     }
 
@@ -50,6 +48,46 @@ export default class ProofAssertion extends Element {
     }
 
     return comparesToStep;
+  }
+
+  compareStatement(statement, context) {
+    let comparesToStatement = false;
+
+    const statementString = statement.getString(),
+          proofAssertionString = this.getString();  ///
+
+    context.trace(`Comparing the '${statementString}' statement to the '${proofAssertionString}' proof assertion...`);
+
+    const leftStatement = statement,  ///
+          rightStatement = this.statement,  ///
+          statementsEquate = equateStatements(leftStatement, rightStatement, context);
+
+    if (statementsEquate) {
+      comparesToStatement = true;
+    }
+
+    if (comparesToStatement) {
+      context.debug(`...compared the '${statementString}' statement to the '${proofAssertionString}' proof assertion.`);
+    }
+
+    return comparesToStatement;
+  }
+
+  compareSubproofAssertion(subproofAssertion, context) {
+    let comparesToSubproofAssertion;
+
+    const proofAssertionString = this.getString(),  ///
+          subproofAssertionString = subproofAssertion.getString();
+
+    context.trace(`Comparing the '${proofAssertionString}' proof assertion to the '${subproofAssertionString}' subproof assertion...`);
+
+    comparesToSubproofAssertion = false;
+
+    if (comparesToSubproofAssertion) {
+      context.debug(`...compared the '${proofAssertionString}' proof assertion to the '${subproofAssertionString}' subproof assertion.`);
+    }
+
+    return comparesToSubproofAssertion;
   }
 
   unifyStatement(statement, generalContext, specificContext) {

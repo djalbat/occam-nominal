@@ -290,14 +290,8 @@ export default define(class Frame extends Element {
 
           this.assumptions.push(assumption);
         });
-
-        validatesWhenDerived = true;
-      } else {
-        const metavariableString = this.metavariable.getString();
-
-        context.trace(`The '${frameString}' frame's '${metavariableString}' metavariable does not match any declared judgements...`);
       }
-    } else {
+
       validatesWhenDerived = true;
     }
 

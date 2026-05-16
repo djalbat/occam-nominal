@@ -6,7 +6,7 @@ import { define } from "../elements";
 import { instantiateReference } from "../process/instantiate";
 import { REFERENCE_META_TYPE_NAME } from "../metaTypeNames";
 import { breakPointFromJSON, breakPointToBreakPointJSON } from "../utilities/breakPoint";
-import { ablate, attempt, serialise, reconcile, unserialise, instantiate } from "../utilities/context";
+import { join, ablate, attempt, serialise, reconcile, unserialise, instantiate } from "../utilities/context";
 import { referenceFromReferenceNode, metavariableFromReferenceNode, topLevelMetaAssertionFromReferenceNode } from "../utilities/element";
 
 export default define(class Reference extends Element {
@@ -263,18 +263,16 @@ export default define(class Reference extends Element {
           generalContext = referenceContext, ///
           specificContext = labelContext; ///
 
-    reconcile((specificContext) => {
+    join((specificContext) => {
       const metavariable = label.getMetavariable(),
             metavariableUnifies = this.unifyMetavariable(metavariable, generalContext, specificContext);
 
       if (metavariableUnifies) {
         this.topLevelMetaAssertion = topLevelMetaAssertion;
 
-        specificContext.commit(context);
-
         topLevelMetaAssertionUUnifies = true;
       }
-    }, specificContext);
+    }, specificContext, context);
 
     if (topLevelMetaAssertionUUnifies) {
       context.debug(`...unified the '${topLevelMetaAssertionString}' top level meta-assertion's label with the '${referenceString}' reference.`);

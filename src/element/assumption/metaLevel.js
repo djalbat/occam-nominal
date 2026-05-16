@@ -230,9 +230,9 @@ export default define(class MetaLevelAssumption extends Element {
 
       if (referneceUnifies) {
         const statement = assumption.getStatement(),
-              statementUnifieds = this.unifyStatement(statement, generalContext, specificContext);
+              statementUnified = this.unifyStatement(statement, generalContext, specificContext);
 
-        if (statementUnifieds) {
+        if (statementUnified) {
           specificContext.commit(context);
 
           assumptionUnifies = true;

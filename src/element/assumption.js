@@ -4,7 +4,7 @@ import { Element } from "occam-languages";
 
 import { define } from "../elements";
 import { instantiateAssumption } from "../process/instantiate";
-import { reconcile, instantiate } from "../utilities/context";
+import { join, reconcile, instantiate } from "../utilities/context";
 import { breakPointFromJSON, breakPointToBreakPointJSON } from "../utilities/breakPoint";
 
 export default define(class Assumption extends Element {
@@ -251,16 +251,14 @@ export default define(class Assumption extends Element {
           generalContext = context, ///
           specificContext = deductionContext; ///
 
-    reconcile((specificContext) => {
+    join((specificContext) => {
       const statement = deduction.getStatement(),
             statementUnifies = this.unifyStatement(statement, generalContext, specificContext);
 
       if (statementUnifies) {
-        specificContext.commit(context);
-
         deductionUnifies = true;
       }
-    }, specificContext);
+    }, specificContext, context);
 
     if (deductionUnifies) {
       context.debug(`...unified the '${deductionString}' deduction with the '${assumptionString}' assumption's statement.`);

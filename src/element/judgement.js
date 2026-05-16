@@ -47,13 +47,45 @@ export default define(class Judgement extends Element {
     return equalTo;
   }
 
-  getAssumptions() { return this.frame.getAssumptions(); }
+  getAssumptions() {
+    let assumptions;
+
+    const implicit = this.isImplicit();
+
+    if (implicit) {
+      assumptions = [ ///
+        this.assumption
+      ];
+    } else {
+      const frameAssumptions = this.getFrameAssumptions();
+
+      assumptions = frameAssumptions; ///
+    }
+
+    return assumptions;
+  }
+
+  getStatement() { return this.assumption.getStatement(); }
 
   getMetavariable() { return this.frame.getMetavariable(); }
 
   getMetavariableNode() { return this.frame.getMetavariableNode(); }
 
   getTopLevelMetaAssertion() { return this.assumption.getTopLevelMetaAssertion(); }
+
+  getFrameAssumptions() {
+    const frameAssumptions = this.frame.getAssumptions();
+
+    return frameAssumptions;
+  }
+
+  isImplicit() {
+    const frameAssumptions = this.getFrameAssumptions(),
+          frameAssumptionsLength = frameAssumptions.length,
+          implicit = (frameAssumptionsLength === 0);
+
+    return implicit;
+  }
 
   matchJudgementNode(judgementNode) {
     const node = judgementNode, ///
@@ -66,6 +98,8 @@ export default define(class Judgement extends Element {
   matchMetavariableNode(metavariableNode) { return this.frame.matchMetavariableNode(metavariableNode); }
 
   compareMetavariableName(metavariableName) { return this.frame.compareMetavariableName(metavariableName); }
+
+  findSubproofAssertion(context) { return this.assumption.findSubproofAssertion(context); }
 
   findValidJudgement(context) {
     const judgementNode = this.getJudgementNode(),
@@ -154,6 +188,56 @@ export default define(class Judgement extends Element {
     return frameValidates;
   }
 
+  validateImplicitly(context) {
+    let validatesImplicitly = false;
+
+    const implicit = this.isImplicit();
+
+    if (implicit) {
+      const judgementString = this.getString();
+
+      context.trace(`Validating the '${judgementString}' judgement implicitly...`);
+
+      const statement = this.getStatement(),
+            subproofOrProofAssertions = context.getSubproofOrProofAssertions(),
+            statementCompares = subproofOrProofAssertions.some((subproofOrProofAssertion) => {
+              let subproofOrProofAssertionCompares = false;
+
+              const subproofAssertion = this.findSubproofAssertion(context);
+
+              if (subproofAssertion !== null) {
+                const subproofOrProofAssertionCompareToSubproofAssertion = subproofOrProofAssertion.compareSubproofAssertion(subproofAssertion, context);
+
+                if (subproofOrProofAssertionCompareToSubproofAssertion) {
+                  subproofOrProofAssertionCompares = true;
+                }
+              } else {
+                const subproofOrProofAssertionCompareToStatement = subproofOrProofAssertion.compareStatement(statement, context);
+
+                if (subproofOrProofAssertionCompareToStatement) {
+                  subproofOrProofAssertionCompares = true;
+                }
+              }
+
+              if (subproofOrProofAssertionCompares) {
+                return true;
+              }
+            });
+
+      if (statementCompares) {
+        validatesImplicitly = true;
+      }
+
+      if (validatesImplicitly) {
+        context.debug(`...validated the '${judgementString}' judgement implicitly.`);
+      }
+    } else {
+      validatesImplicitly = true; ///
+    }
+
+    return validatesImplicitly;
+  }
+
   validateAssumption(context) {
     let assumptionValidates = false;
 
@@ -199,28 +283,32 @@ export default define(class Judgement extends Element {
 
     context.trace(`Validating the '${judgementString}' derived judgement...`);
 
-    reconcile((context) => {
-      const assumptions = this.getAssumptions(),
-            topLevelMetaAssertion = this.getTopLevelMetaAssertion(),
-            metaLevelAssumptions = topLevelMetaAssertion.getMetaLevelAssumptions(),
-            metaLevelAssumptionsUnify = metaLevelAssumptions.every((metaLevelAssumption) => {
-              const assumptionUnifies = assumptions.some((assumption) => {
-                const assumptionUnifies = metaLevelAssumption.unifyAssumption(assumption, context);
+    const validatedImplicitly = this.validateImplicitly(context);
+
+    if (validatedImplicitly) {
+      reconcile((context) => {
+        const assumptions = this.getAssumptions(),
+              topLevelMetaAssertion = this.getTopLevelMetaAssertion(),
+              metaLevelAssumptions = topLevelMetaAssertion.getMetaLevelAssumptions(),
+              metaLevelAssumptionsUnify = metaLevelAssumptions.every((metaLevelAssumption) => {
+                const assumptionUnifies = assumptions.some((assumption) => {
+                  const assumptionUnifies = metaLevelAssumption.unifyAssumption(assumption, context);
+
+                  if (assumptionUnifies) {
+                    return true;
+                  }
+                });
 
                 if (assumptionUnifies) {
                   return true;
                 }
               });
 
-              if (assumptionUnifies) {
-                return true;
-              }
-            });
-
-      if (metaLevelAssumptionsUnify) {
-        validatesWhenDerived = true;
-      }
-    }, context);
+        if (metaLevelAssumptionsUnify) {
+          validatesWhenDerived = true;
+        }
+      }, context);
+    }
 
     if (validatesWhenDerived) {
       context.debug(`...validated the '${judgementString}' derived judgement.`);
