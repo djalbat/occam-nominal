@@ -3,8 +3,8 @@
 import { Element } from "occam-languages";
 
 import { define } from "../elements";
+import { instantiate } from "../utilities/context";
 import { instantiateAssumption } from "../process/instantiate";
-import { join, reconcile, instantiate } from "../utilities/context";
 import { breakPointFromJSON, breakPointToBreakPointJSON } from "../utilities/breakPoint";
 
 export default define(class Assumption extends Element {
@@ -33,8 +33,6 @@ export default define(class Assumption extends Element {
   getStatementNode() { return this.statement.getStatementNode(); }
 
   getMetavariable() { return this.reference.getMetavariable(); }
-
-  getTopLevelMetaAssertion() { return this.reference.getTopLevelMetaAssertion(); }
 
   isEqualTo(assumption) {
     const assumptionNode = assumption.getNode(),
@@ -138,22 +136,9 @@ export default define(class Assumption extends Element {
     const reference = this.reference.validate(context);
 
     if (reference !== null) {
-      const metavariable = reference.getMetavariable(),
-            metavariablePresent = context.isMetavariablePresent(metavariable, context);
+      this.reference = reference;
 
-      if (metavariablePresent) {
-        this.reference = reference;
-
-        referenceValidates = true;
-      } else {
-        const topLevelMetaAssertionsUnify = this.unifyTopLevelMetaAssertions(reference, context);
-
-        if (topLevelMetaAssertionsUnify) {
-          this.reference = reference;
-
-          referenceValidates = true;
-        }
-      }
+      referenceValidates = true;
     }
 
     if (referenceValidates) {
@@ -200,19 +185,13 @@ export default define(class Assumption extends Element {
   }
 
   validateWhenDerived(context) {
-    let validatesWhenDerived = false;
+    let validatesWhenDerived;
 
     const assumptionString = this.getString();  ///
 
     context.trace(`Validating the '${assumptionString}' derived assumption...`);
 
-    const topLevelMetaAssertion = this.getTopLevelMetaAssertion();
-
-    if (topLevelMetaAssertion !== null) {
-      validatesWhenDerived = true;
-    } else {
-      context.debug(`The '${assumptionString}' asumption did not unify a top level meta-assumption.`);
-    }
+    validatesWhenDerived = true;
 
     if (validatesWhenDerived) {
       context.debug(`...validated the '${assumptionString}' derived assumption.`);
@@ -237,88 +216,6 @@ export default define(class Assumption extends Element {
     }
 
     return statementUnifies;
-  }
-
-  unifyDeduction(deduction, context) {
-    let deductionUnifies = false;
-
-    const deductionString = deduction.getString(),
-          assumptionString = this.getString();  ///
-
-    context.trace(`Unifying the '${deductionString}' deduction with the '${assumptionString}' assumption's statement...`);
-
-    const deductionContext = deduction.getContext(),
-          generalContext = context, ///
-          specificContext = deductionContext; ///
-
-    join((specificContext) => {
-      const statement = deduction.getStatement(),
-            statementUnifies = this.unifyStatement(statement, generalContext, specificContext);
-
-      if (statementUnifies) {
-        deductionUnifies = true;
-      }
-    }, specificContext, context);
-
-    if (deductionUnifies) {
-      context.debug(`...unified the '${deductionString}' deduction with the '${assumptionString}' assumption's statement.`);
-    }
-
-    return deductionUnifies;
-  }
-
-  unifyTopLevelMetaAssertion(topLevelMetaAssertion, context) {
-    let topLevelMetaAssertionUnifies = false;
-
-    const assumptionString = this.getString(),  ///
-          topLevelMetaAssertionString = topLevelMetaAssertion.getString();
-
-    context.trace(`Unifying the '${topLevelMetaAssertionString}' top level meta-assertion with the '${assumptionString}' assumption...`);
-
-    reconcile((context) => {
-      topLevelMetaAssertionUnifies = this.reference.unifyTopLevelMetaAssertion(topLevelMetaAssertion, context);
-
-      if (topLevelMetaAssertionUnifies) {
-        const subproofAssertion = this.findSubproofAssertion(context);
-
-        if (subproofAssertion !== null) {
-          topLevelMetaAssertionUnifies = subproofAssertion.unifyTopLevelMetaAssertion(topLevelMetaAssertion, context);
-        } else {
-          const unconditional = topLevelMetaAssertion.isUnconditional();
-
-          if (unconditional) {
-            const deduction = topLevelMetaAssertion.getDeduction(),
-                  deductionUnifies = this.unifyDeduction(deduction, context);
-
-            if (deductionUnifies) {
-              topLevelMetaAssertionUnifies = true;
-            }
-          }
-        }
-      }
-    }, context);
-
-    if (topLevelMetaAssertionUnifies) {
-      context.trace(`...unified the '${topLevelMetaAssertionString}' top level meta-assertion with the '${assumptionString}' assumption...`);
-    }
-
-    return topLevelMetaAssertionUnifies;
-  }
-
-  unifyTopLevelMetaAssertions(reference, context) {
-    let topLevelMetaAssertionsUnify;
-
-    const topLevelMetaAssertions = context.findTopLevelMetaAssertionsByReference(reference);
-
-    topLevelMetaAssertionsUnify = topLevelMetaAssertions.some((topLevelMetaAssertion) => {
-      const topLevelMetaAssertionUnifies = this.unifyTopLevelMetaAssertion(topLevelMetaAssertion, context);
-
-      if (topLevelMetaAssertionUnifies) {
-        return true;
-      }
-    });
-
-    return topLevelMetaAssertionsUnify;
   }
 
   static name = "Assumption";

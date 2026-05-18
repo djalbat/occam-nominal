@@ -233,12 +233,6 @@ export default class NominalFileContext extends FileContext {
     return this.declaredMetavariables;
   }
 
-  getDeclaredJudgements() {
-    const declaredJudgements = [];
-
-    return declaredJudgements;
-  }
-
   getTerms(terms = []) {
     return terms;
   }
@@ -701,14 +695,6 @@ export default class NominalFileContext extends FileContext {
   }
 
   findMetaTypeByMetaTypeName(metaTypeName) { return findMetaTypeByMetaTypeName(metaTypeName); }
-
-  isMetavariablePresent(metavariable, context) {
-    metavariable = this.findMetavariable(metavariable, context);  ///
-
-    const metavariablePresent = (metavariable !== null);
-
-    return metavariablePresent;
-  }
 
   isLabelPresentByReference(reference, context = null) {
     const labels = this.getLabels(),

@@ -10,16 +10,6 @@ export function equalityAssignmentFromEquality(equality, context) {
   return equalityAssignment;
 }
 
-export function judgementAssignmentFromJudgement(judgement, context) {
-  const judgementAssignment = (context) => {
-    const declaredJudgement = judgement;  ///
-
-    context.addDeclaredJudgement(declaredJudgement);
-  };
-
-  return judgementAssignment;
-}
-
 export function leftVariableAssignmentFromEquality(equality, context) {
   const type = equality.getType(),
         leftTerm = equality.getLeftTerm(),

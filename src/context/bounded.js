@@ -9,15 +9,14 @@ import { mergeEquivalences, equivalencesFromEquality, separateGroundedTermsAndDe
 const { last, clear, filter } = arrayUtilities;
 
 class BoundedContext extends Context {
-  constructor(context, assignments, equivalences, declaredVariables, declaredJudgements, subproofOrProofAssertions, metaLevelAssumptions) {
+  constructor(context, assignments, equivalences, declaredVariables, metaLevelAssumptions, subproofOrProofAssertions) {
     super(context);
 
     this.assignments = assignments;
     this.equivalences = equivalences;
     this.declaredVariables = declaredVariables;
-    this.declaredJudgements = declaredJudgements;
-    this.subproofOrProofAssertions = subproofOrProofAssertions;
     this.metaLevelAssumptions = metaLevelAssumptions;
+    this.subproofOrProofAssertions = subproofOrProofAssertions;
   }
 
   getAssignments() {
@@ -55,19 +54,8 @@ class BoundedContext extends Context {
     return declaredVariables;
   }
 
-  getDeclaredJudgements() {
-    let declaredJudgements;
-
-    const context = this.getContext();
-
-    declaredJudgements = context.getDeclaredJudgements();
-
-    declaredJudgements = [ ///
-      ...this.declaredJudgements,
-      ...declaredJudgements
-    ]
-
-    return declaredJudgements;
+  getMetaLevelAssumptions() {
+    return this.metaLevelAssumptions;
   }
 
   getSubproofOrProofAssertions() {
@@ -83,10 +71,6 @@ class BoundedContext extends Context {
     ];
 
     return subproofOrProofAssertions;
-  }
-
-  getMetaLevelAssumptions() {
-    return this.metaLevelAssumptions;
   }
 
   getProofAssertions() {
@@ -175,17 +159,6 @@ class BoundedContext extends Context {
     context.debug(`...added the '${declaredVariableString}' declared variable to the bounded context.`);
   }
 
-  addDeclaredJudgement(declaredJudgement) {
-    const context = this, ///
-          declaredJudgementString = declaredJudgement.getString();
-
-    context.trace(`Adding the '${declaredJudgementString}' declared judgement to the bounded context...`);
-
-    this.declaredJudgements.push(declaredJudgement);
-
-    context.debug(`...added the '${declaredJudgementString}' declared judgement to the bounded context.`);
-  }
-
   addMetaLevelAssumption(metaLevelAssumption) {
     if (this.metaLevelAssumptions === null) {
       super.addMetaLevelAssumption(metaLevelAssumption);
@@ -242,33 +215,6 @@ class BoundedContext extends Context {
     return comparesToTermAndPropertyRelation;
   }
 
-  findDeclaredJudgementByMetavariableNode(metavariableNode) {
-    const declaredJudgements = this.getDeclaredJudgements(),
-          declaredJudgement = declaredJudgements.find((declaredJudgement) => {
-            const metavariableNodeMatches = declaredJudgement.matchMetavariableNode(metavariableNode);
-
-            if (metavariableNodeMatches) {
-              return true;
-            }
-          }) || null;
-
-    return declaredJudgement;
-  }
-
-  findDeclaredJudgementsByMetavariableNode(metavariableNode) {
-    const declaredJudgements = this.getDeclaredJudgements();
-
-    filter(declaredJudgements, (declaredJudgement) => {
-      const metavariableNodeMatches = declaredJudgement.matchMetavariableNode(metavariableNode);
-
-      if (metavariableNodeMatches) {
-        return true;
-      }
-    });
-
-    return declaredJudgements;
-  }
-
   findDeclaredVariableByVariableIdentifier(variableIdentifier) {
     const declaredVariables = this.getDeclaredVariables(),
           declaredVariable = declaredVariables.find((declaredVariable) => {
@@ -298,13 +244,6 @@ class BoundedContext extends Context {
     }
 
     return metaLevelAssumption;
-  }
-
-  isDeclaredJudgementPresentByMetavariableNode(metavariableNode) {
-    const declaredJudgement = this.findDeclaredJudgementByMetavariableNode(metavariableNode),
-          declaredJudgementPresent = (declaredJudgement !== null);
-
-    return declaredJudgementPresent;
   }
 
   isDeclaredVariablePresentByVariableIdentifier(variableIdentifier) {
@@ -339,10 +278,9 @@ class BoundedContext extends Context {
     const assignments = [],
           equivalences = [],
           declaredVariables = [],
-          declaredJudgements = [],
           metaLevelAssumptions = null,
           subproofOrProofAssertions = [],
-          boundedContext = new BoundedContext(context, assignments, equivalences, declaredVariables, declaredJudgements, subproofOrProofAssertions, metaLevelAssumptions);
+          boundedContext = new BoundedContext(context, assignments, equivalences, declaredVariables, metaLevelAssumptions, subproofOrProofAssertions);
 
     return boundedContext;
   }
@@ -351,9 +289,8 @@ class BoundedContext extends Context {
     const assignments = [],
           equivalences = [],
           declaredVariables = [],
-          declaredJudgements = [],
           subproofOrProofAssertions = [],
-          boundedContext = new BoundedContext(context, assignments, equivalences, declaredVariables, declaredJudgements, subproofOrProofAssertions, metaLevelAssumptions);
+          boundedContext = new BoundedContext(context, assignments, equivalences, declaredVariables, metaLevelAssumptions, subproofOrProofAssertions);
 
     return boundedContext;
   }

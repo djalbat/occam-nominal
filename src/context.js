@@ -198,13 +198,6 @@ export default class Context extends ContextBase {
     return declaredMetavariables;
   }
 
-  getDeclaredJudgements() {
-    const context = this.getContext(),
-          declaredJudgements = context.getDeclaredJudgements();
-
-    return declaredJudgements;
-  }
-
   getSubproofOrProofAssertions() {
     const context = this.getContext(),
           subproofOrProofAssertions = context.getSubproofOrProofAssertions();
@@ -373,13 +366,6 @@ export default class Context extends ContextBase {
     return derivedSubstitution;
   }
 
-  findDeclaredJudgementsByMetavariableNode(metavariableNode) {
-    const context = this.getContext(),
-          declaredJudgements = context.findDeclaredJudgementsByMetavariableNode(metavariableNode);
-
-    return declaredJudgements;
-  }
-
   findDerivedSubstitutionByMetavariableNode(metavariableNode) {
     const context = this.getContext(),
           derivedSubstitution = context.findDerivedSubstitutionByMetavariableNode(metavariableNode);
@@ -434,20 +420,6 @@ export default class Context extends ContextBase {
           declaredMetavariable = context.findDeclaredMetavariableByMetavariableName(metavariableName);
 
     return declaredMetavariable;
-  }
-
-  isMetavariablePresent(metavariable, context) {
-    const childContext = context; ///
-
-    context = this.getContext();
-
-    const parentContext = context;  ///
-
-    context = childContext; ///
-
-    const metavariablePresent = parentContext.isMetavariablePresent(metavariable, context);
-
-    return metavariablePresent;
   }
 
   isLabelPresentByReference(reference, context = null) {
@@ -567,13 +539,6 @@ export default class Context extends ContextBase {
           derivedSubstitutionPresent = context.isDerivedSubstitutionPresentByMetavariableNode(metavariableNode);
 
     return derivedSubstitutionPresent;
-  }
-
-  isDeclaredJudgementPresentByMetavariableNode(metavariableNode) {
-    const context = this.getContext(),
-          declaredJudgementPresent = context.isDeclaredJudgementPresentByMetavariableNode(metavariableNode);
-
-    return declaredJudgementPresent;
   }
 
   isDerivedSubstitutionPresentByMetavariableNodeAndSubstitution(metavariableNode, substitution) {

@@ -36,8 +36,6 @@ export default define(class MetaLevelAssumption extends Element {
 
   getMetavariable() { return this.reference.getMetavariable(); }
 
-  getTopLevelMetaAssertion() { return this.reference.getTopLevelMetaAssertion(); }
-
   isEqualTo(metaLevelAssumption) {
     const metaLevelAssumptionNode = metaLevelAssumption.getNode(),
           metaLevelAssumptionNodeMatches = this.matchMetaLevelAssumptionNode(metaLevelAssumptionNode),
@@ -139,11 +137,10 @@ export default define(class MetaLevelAssumption extends Element {
     const reference = this.reference.validate(context);
 
     if (reference !== null) {
-      const context = reference.getContext(),
-            metavariable = this.reference.getMetavariable(),
-            metavariablePresent = context.isMetavariablePresent(metavariable, context);
+      const metavariable = this.reference.getMetavariable(),
+            metavariableDeclared = metavariable.isDeclared();
 
-      if (metavariablePresent) {
+      if (metavariableDeclared) {
         this.reference = reference;
 
         referenceValidates = true;

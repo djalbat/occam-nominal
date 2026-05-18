@@ -267,11 +267,7 @@ function isVariableDefined(variable, context) {
 }
 
 function isMetavariableDefined(metavariable, context) {
-  const metavariableNode = metavariable.getNode(),
-        declaredJudgementPresent = context.isDeclaredJudgementPresentByMetavariableNode(metavariableNode),
-        metavariableDefined = declaredJudgementPresent; ///
-
-  return metavariableDefined
+  debugger
 }
 
 function validateWhenDerived(term, frame, negated, context) {

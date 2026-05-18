@@ -59,6 +59,12 @@ export default define(class Frame extends Element {
     return equalTo;
   }
 
+  isImplicit() {
+    const implicit = (this.metavariable !== null);
+
+    return implicit;
+  }
+
   isSingular() {
     const frameNode = this.getFrameNode(),
           singular = frameNode.isSingular();
@@ -273,27 +279,13 @@ export default define(class Frame extends Element {
   }
 
   validateWhenDerived(context) {
-    let validatesWhenDerived = false;
+    let validatesWhenDerived;
 
     const frameString = this.getString();  ///
 
     context.trace(`Verifying the '${frameString}' derived frame...`);
 
-    if (this.metavariable !== null) {
-      const metavariableNode = this.getMetavariableNode(),
-            declaredJudgements = context.findDeclaredJudgementsByMetavariableNode(metavariableNode),
-            declaredJudgementsLength = declaredJudgements.length;
-
-      if (declaredJudgementsLength > 0) {
-        declaredJudgements.forEach((declaredJudgement) => {
-          const assumption = declaredJudgement.getAssumption();
-
-          this.assumptions.push(assumption);
-        });
-      }
-
-      validatesWhenDerived = true;
-    }
+    validatesWhenDerived = true;
 
     if (validatesWhenDerived) {
       context.debug(`...verified the '${frameString}' derived frame.`);

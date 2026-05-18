@@ -57,10 +57,8 @@ export default define(class Metavariable extends Element {
     return metavariableName;
   }
 
-  isDeclared(context) {
-    const metavariableName = this.getMetavariableName(),
-          declaredMetavariable = context.findDeclaredMetavariableByMetavariableName(metavariableName),
-          declared = (declaredMetavariable !== null);
+  isDeclared() {
+    const declared = (this.metaType !== null);
 
     return declared;
   }
@@ -211,9 +209,10 @@ export default define(class Metavariable extends Element {
       if (validates) {
         metavariable = this;  ///
 
-        const declared = this.isDeclared(context);
+        const metavariableName = this.getMetavariableName(),  ///
+              declaredMetavariable = context.findDeclaredMetavariableByMetavariableName(metavariableName);
 
-        if (declared) {
+        if (declaredMetavariable !== null) {
           context.addMetavariable(metavariable);
         }
       }

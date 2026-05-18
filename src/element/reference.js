@@ -6,23 +6,18 @@ import { define } from "../elements";
 import { instantiateReference } from "../process/instantiate";
 import { REFERENCE_META_TYPE_NAME } from "../metaTypeNames";
 import { breakPointFromJSON, breakPointToBreakPointJSON } from "../utilities/breakPoint";
+import { referenceFromReferenceNode, metavariableFromReferenceNode } from "../utilities/element";
 import { join, ablate, attempt, serialise, reconcile, unserialise, instantiate } from "../utilities/context";
-import { referenceFromReferenceNode, metavariableFromReferenceNode, topLevelMetaAssertionFromReferenceNode } from "../utilities/element";
 
 export default define(class Reference extends Element {
-  constructor(context, string, node, breakPoint, metavariable, topLevelMetaAssertion) {
+  constructor(context, string, node, breakPoint, metavariable) {
     super(context, string, node, breakPoint);
 
     this.metavariable = metavariable;
-    this.topLevelMetaAssertion = topLevelMetaAssertion;
   }
 
   getMetavariable() {
     return this.metavariable;
-  }
-
-  getTopLevelMetaAssertion() {
-    return this.topLevelMetaAssertion;
   }
 
   getReferenceNode() {
@@ -268,8 +263,6 @@ export default define(class Reference extends Element {
             metavariableUnifies = this.unifyMetavariable(metavariable, generalContext, specificContext);
 
       if (metavariableUnifies) {
-        this.topLevelMetaAssertion = topLevelMetaAssertion;
-
         topLevelMetaAssertionUUnifies = true;
       }
     }, specificContext, context);
@@ -316,10 +309,9 @@ export default define(class Reference extends Element {
               referenceNode = instantiateReference(string, context),
               node = referenceNode,  ///
               breakPoint = breakPointFromJSON(json),
-              metavariable = metavariableFromReferenceNode(referenceNode, context),
-              topLevelMetaAssertion = topLevelMetaAssertionFromReferenceNode(referenceNode, context);
+              metavariable = metavariableFromReferenceNode(referenceNode, context);
 
-        reference = new Reference(context, string, node, breakPoint, metavariable, topLevelMetaAssertion);
+        reference = new Reference(context, string, node, breakPoint, metavariable);
       }, json, context);
     }, context);
 
