@@ -8,7 +8,7 @@ const { ERROR_LEVEL } = levels;
 
 const name = "operational-transformations",
       logLevel = ERROR_LEVEL,
-      projectsDirectoryPath = "../..//Algorithms";
+      projectsDirectoryPath = "../../Algorithms";
 
 describe(name, () => {
   createSuite(name, logLevel, projectsDirectoryPath);

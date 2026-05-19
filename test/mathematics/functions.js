@@ -8,7 +8,7 @@ const { ERROR_LEVEL } = levels;
 
 const name = "functions",
       logLevel = ERROR_LEVEL,
-      projectsDirectoryPath = "../..//Mathematics";
+      projectsDirectoryPath = "../../Mathematics";
 
 describe(name, () => {
   createSuite(name, logLevel, projectsDirectoryPath);

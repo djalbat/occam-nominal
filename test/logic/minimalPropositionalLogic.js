@@ -8,7 +8,7 @@ const { ERROR_LEVEL } = levels;
 
 const name = "minimal-propositional-logic",
       logLevel = ERROR_LEVEL,
-      projectsDirectoryPath = "../..//Logic";
+      projectsDirectoryPath = "../../Logic";
 
 describe(name, () => {
   createSuite(name, logLevel, projectsDirectoryPath);

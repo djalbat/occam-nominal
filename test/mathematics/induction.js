@@ -8,7 +8,7 @@ const { TRACE_LEVEL } = levels;
 
 const name = "induction",
       logLevel = TRACE_LEVEL,
-      projectsDirectoryPath = "../..//Mathematics";
+      projectsDirectoryPath = "../../Mathematics";
 
 describe.only(name, () => {
   createSuite(name, logLevel, projectsDirectoryPath);
