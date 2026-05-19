@@ -149,25 +149,39 @@ export default class Context extends ContextBase {
     return derivedSubstitutions;
   }
 
-  getCombinators(includeRelease) {
+  getProcedures(includeRelease = true) {
+    const context = this.getContext(),
+          procedures = context.getProcedures(includeRelease);
+
+    return procedures;
+  }
+
+  getCombinators(includeRelease = true) {
     const context = this.getContext(),
           combinators = context.getCombinators(includeRelease);
 
     return combinators;
   }
 
-  getConstructors(includeRelease) {
+  getConstructors(includeRelease = true) {
     const context = this.getContext(),
           constructors = context.getConstructors(includeRelease);
 
     return constructors;
   }
 
-  getProcedures(includeRelease) {
+  getTopLevelAssertions(includeRelease = true) {
     const context = this.getContext(),
-          procedures = context.getProcedures(includeRelease);
+          topLevelAssertions = context.getTopLevelAssertions(includeRelease);
 
-    return procedures;
+    return topLevelAssertions;
+  }
+
+  getTopLevelMetaAssertions(includeRelease = true) {
+    const context = this.getContext(),
+          topLevelMetaAssertions = context.getTopLevelMetaAssertions(includeRelease);
+
+    return topLevelMetaAssertions;
   }
 
   getVariables(nested) {
@@ -441,13 +455,6 @@ export default class Context extends ContextBase {
     const labelPresent = parentContext.isLabelPresentByReference(reference, context);
 
     return labelPresent;
-  }
-
-  isTopLevelMetaAssertionPresentByReference(reference) {
-    const context = this.getContext(),
-          topLevelMetaAssertionPresent = context.isTopLevelMetaAssertionPresentByReference(reference);
-
-    return topLevelMetaAssertionPresent;
   }
 
   isTermPresentByTermNode(termNode) {

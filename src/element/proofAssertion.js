@@ -79,23 +79,6 @@ export default class ProofAssertion extends Element {
     return comparesToStatement;
   }
 
-  compareSubproofAssertion(subproofAssertion, context) {
-    let comparesToSubproofAssertion;
-
-    const proofAssertionString = this.getString(),  ///
-          subproofAssertionString = subproofAssertion.getString();
-
-    context.trace(`Comparing the '${proofAssertionString}' proof assertion to the '${subproofAssertionString}' subproof assertion...`);
-
-    comparesToSubproofAssertion = false;
-
-    if (comparesToSubproofAssertion) {
-      context.debug(`...compared the '${proofAssertionString}' proof assertion to the '${subproofAssertionString}' subproof assertion.`);
-    }
-
-    return comparesToSubproofAssertion;
-  }
-
   unifyStatement(statement, generalContext, specificContext) {
     let statementUnifies = false;
 

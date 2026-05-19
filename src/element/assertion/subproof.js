@@ -23,10 +23,11 @@ export default define(class SubproofAssertion extends Assertion {
     return this.statements;
   }
 
-  getLastStatement() {
-    const lastStatement = last(this.statements);
+  getDeducedStatement() {
+    const lastStatement = last(this.statements),
+          deducedStatement = lastStatement; ///
 
-    return lastStatement;
+    return deducedStatement;
   }
 
   getSupposedStatement(index) {
@@ -142,11 +143,11 @@ export default define(class SubproofAssertion extends Assertion {
     let lastStepUnifies = false;
 
     const context = specificContext,  ///
-          lastStatement = this.getLastStatement(),
           lastStepString = lastStep.getString(),
-          lastStatementString = lastStatement.getString();
+          deducedStatement = this.getDeducedStatement(),
+          deducedStatementString = deducedStatement.getString();
 
-    context.trace(`Unifying the '${lastStepString}' last step with the '${lastStatementString}' last statement...`)
+    context.trace(`Unifying the '${lastStepString}' last step with the '${deducedStatementString}' deduced statement...`)
 
     const lastStepContext = lastStep.getContext();
 
@@ -154,7 +155,7 @@ export default define(class SubproofAssertion extends Assertion {
 
     join((specificContext) => {
       const lastStepStatement = lastStep.getStatement(),
-            lastStepStatementUnifies = lastStatement.unifyStatement(lastStepStatement, generalContext, specificContext);
+            lastStepStatementUnifies = deducedStatement.unifyStatement(lastStepStatement, generalContext, specificContext);
 
       if (lastStepStatementUnifies) {
         lastStepUnifies = true;
@@ -162,40 +163,10 @@ export default define(class SubproofAssertion extends Assertion {
     }, specificContext, context);
 
     if (lastStepUnifies) {
-      context.debug(`...unified the '${lastStepString}' last step with the '${lastStatementString}' last statement.`)
+      context.debug(`...unified the '${lastStepString}' last step with the '${deducedStatementString}' deduced statement.`)
     }
 
     return lastStepUnifies;
-  }
-
-  unifyDeduction(deduction, generalContext, specificContext) {
-    let deductionUnifies = false;
-
-    const context = specificContext,  ///
-          lastStatement = this.getLastStatement(),
-          deductionString = deduction.getString(),
-          lastStatementString = lastStatement.getString();
-
-    context.trace(`Unifying the '${deductionString}' deduction with the '${lastStatementString}' last statement...`)
-
-    const deductionContext = deduction.getContext();
-
-    specificContext = deductionContext;  ///
-
-    join((specificContext) => {
-      const deductionStatement = deduction.getStatement(),
-            deductionStatementUnifies = lastStatement.unifyStatement(deductionStatement, generalContext, specificContext);
-
-      if (deductionStatementUnifies) {
-        deductionUnifies = true;
-      }
-    }, specificContext, context);
-
-    if (deductionUnifies) {
-      context.debug(`...unified the '${deductionString}' deduction with the '${lastStatementString}' last statement.`)
-    }
-
-    return deductionUnifies;
   }
 
   unifySupposition(supposition, index, generalContext, specificContext) {
@@ -246,38 +217,6 @@ export default define(class SubproofAssertion extends Assertion {
     }
 
     return suppositionsUnify;
-  }
-
-  unifyTopLevelMetaAssertion(topLevelMetaAssertion, context) {
-    let topLevelMetaAssertionUnifies = false;
-
-    const subproofAssertionString = this.getString(),  ///
-          topLevelMetaAssertionString = topLevelMetaAssertion.getString();
-
-    context.trace(`Unifying the '${topLevelMetaAssertionString}' top level meta-assertion with the '${subproofAssertionString}' subproof assertion...`);
-
-    const deduction = topLevelMetaAssertion.getDeduction(),
-          generalContext = context, ///
-          specificContext = context;  ///
-
-    join((specificContext) => {
-      const deductionUnifies = this.unifyDeduction(deduction, generalContext, specificContext);
-
-      if (deductionUnifies) {
-        const suppositions = topLevelMetaAssertion.getSuppositions(),
-              suppositionsUnify = this.unifySuppositions(suppositions, generalContext, specificContext);
-
-        if (suppositionsUnify) {
-          topLevelMetaAssertionUnifies = true;
-        }
-      }
-    }, specificContext, context);
-
-    if (topLevelMetaAssertionUnifies) {
-      context.debug(`...unified the '${topLevelMetaAssertionString}' top level meta-assertion with the '${subproofAssertionString}' subproof assertion.`);
-    }
-
-    return topLevelMetaAssertionUnifies;
   }
 
   static name = "SubproofAssertion";

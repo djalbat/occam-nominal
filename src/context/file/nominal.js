@@ -224,6 +224,32 @@ export default class NominalFileContext extends FileContext {
     return procedures;
   }
 
+  getTopLevelAssertions(includeRelease = true) {
+    const lemmas = this.getLemmas(includeRelease),
+          axioms = this.getAxioms(includeRelease),
+          theorems = this.getTheorems(includeRelease),
+          conjectures = this.getConjectures(includeRelease),
+          topLevelAssertions = [
+            ...lemmas,
+            ...axioms,
+            ...theorems,
+            ...conjectures
+          ];
+
+    return topLevelAssertions;
+  }
+
+  getTopLevelMetaAssertions(includeRelease = true) {
+    const metaLemmas = this.getMetaLemmas(includeRelease),
+          metatheorems = this.getMetatheorems(includeRelease),
+          topLevelMetaAssertions = [
+            ...metaLemmas,
+            ...metatheorems
+          ];
+
+    return topLevelMetaAssertions;
+  }
+
   getDeclaredVariables() {
     return this.declaredVariables;
   }
@@ -520,32 +546,31 @@ export default class NominalFileContext extends FileContext {
   }
 
   findTopLevelAssertionByReference(reference) {
-    const axiom = this.findAxiomByReference(reference),
-          lemma = this.findLemmaByReference(reference),
-          theorem = this.findTheoremByReference(reference),
-          conjecture = this.findConjectureByReference(reference),
-          topLevelAssertion = (axiom || lemma || theorem || conjecture);
+    const topLEvelAssertions = this.getTopLevelAssertions(),
+          metavariableNode = reference.getMetavariableNode(),
+          topLevelAssertion = topLEvelAssertions.find((topLevelAssertion) => {
+            const metavariableNodeMatches = topLevelAssertion.matchMetavariableNode(metavariableNode);
+
+            if (metavariableNodeMatches) {
+              return true;
+            }
+          }) || null;
 
     return topLevelAssertion;
   }
 
-  findTopLevelMetaAssertionByReference(reference) {
-    const metaLemma = this.findMetaLemmaByReference(reference),
-          metatheorem = this.findMetatheoremByReference(reference),
-          topLevelMetaAssertion = (metaLemma || metatheorem);  ///
+  findTopLevelMetaAssertionsByReference(reference) {
+    const topLEvelMetaAssertions = this.getTopLevelMetaAssertions(),
+          metavariableNode = reference.getMetavariableNode(),
+          topLevelMetaAssertion = topLEvelMetaAssertions.find((topLevelMetaAssertion) => {
+            const metavariableNodeMatches = topLevelMetaAssertion.matchMetavariableNode(metavariableNode);
+
+            if (metavariableNodeMatches) {
+              return true;
+            }
+          }) || null;
 
     return topLevelMetaAssertion;
-  }
-
-  findTopLevelMetaAssertionsByReference(reference) {
-    const metaLemmas = this.findMetaLemmasByReference(reference),
-          metatheorems = this.findMetatheoremsByReference(reference),
-          topLevelMetaAssertions = [
-            ...metaLemmas,
-            ...metatheorems
-          ];
-
-    return topLevelMetaAssertions;
   }
 
   findTypeByTypeName(typeName, includeRelease = true) {
@@ -706,13 +731,6 @@ export default class NominalFileContext extends FileContext {
           });
 
     return labelPresent;
-  }
-
-  isTopLevelMetaAssertionPresentByReference(reference) {
-    const topLevelMetaAssertion = this.findTopLevelMetaAssertionByReference(reference),
-          topLevelMetaAssertionPresent = (topLevelMetaAssertion !== null);
-
-    return topLevelMetaAssertionPresent;
   }
 
   isLabelPresentByLabelNode(labelNode) {

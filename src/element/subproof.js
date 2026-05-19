@@ -5,7 +5,7 @@ import { Element, asynchronousUtilities } from "occam-languages";
 import { define } from "../elements";
 import { enclose } from "../utilities/context";
 
-const { match, asyncEvery } = asynchronousUtilities;
+const { asyncEvery } = asynchronousUtilities;
 
 export default define(class Subproof extends Element {
   constructor(context, string, node, breakPoint, suppositions, subDerivation) {
@@ -86,39 +86,6 @@ export default define(class Subproof extends Element {
     }
 
     return comparesToStatement;
-  }
-
-  compareSubproofAssertion(subproofAssertion, context) {
-    let comparesTouSbproofAssertion = false;
-
-    const subproofString = this.getString(),  ///
-          subproofAssertionString = subproofAssertion.getString();
-
-    context.trace(`Comparing the '${subproofAssertionString}' subproof assertion to the '${subproofString}' subproof...`);
-
-    const lastStep = this.getLastStep(),
-          proofAssertions = [ ///
-            ...this.suppositions,
-            lastStep,
-          ],
-          subproofAssertionStatements = subproofAssertion.getStatements(),
-          proofAssertionsMatchsubproofAssertionStatements = match(proofAssertions, subproofAssertionStatements, (proofAssertion, subproofAssertionStatement) => {
-            const proofAssertionComparesToSubproofAssertionStatement = proofAssertion.compareStatement(subproofAssertionStatement, context);
-
-            if (proofAssertionComparesToSubproofAssertionStatement) {
-              return true;
-            }
-          });
-
-    if (proofAssertionsMatchsubproofAssertionStatements) {
-      comparesTouSbproofAssertion = true;
-    }
-
-    if (comparesTouSbproofAssertion) {
-      context.trace(`...compared the '${subproofAssertionString}' subproof assertion to the '${subproofString}' subproof.`);
-    }
-
-    return comparesTouSbproofAssertion;
   }
 
   async verify(context) {

@@ -1,12 +1,15 @@
 "use strict";
 
 import { Element } from "occam-languages";
+import { arrayUtilities } from "necessary";
 
 import { define } from "../elements";
+import { instantiate,} from "../utilities/context";
 import { instantiateJudgement } from "../process/instantiate";
-import { reconcile, instantiate,} from "../utilities/context";
 import { judgementFromStatementNode } from "../utilities/element";
 import { breakPointFromJSON, breakPointToBreakPointJSON } from "../utilities/breakPoint";
+
+const { one } = arrayUtilities;
 
 export default define(class Judgement extends Element {
   constructor(context, string, node, breakPoint, frame, assumption) {
@@ -48,37 +51,15 @@ export default define(class Judgement extends Element {
 
   isMetavariableDefined(metavariable) { return this.frame.isMetavariableDefined(metavariable); }
 
-  getAssumptions() {
-    let assumptions;
-
-    const implicit = this.isImplicit();
-
-    if (implicit) {
-      assumptions = [ ///
-        this.assumption
-      ];
-    } else {
-      const frameAssumptions = this.getFrameAssumptions();
-
-      assumptions = frameAssumptions; ///
-    }
-
-    return assumptions;
-  }
-
   isImplicit() { return this.frame.isImplicit(); }
+
+  getReference() { return this.assumption.getReference(); }
 
   getStatement() { return this.assumption.getStatement(); }
 
   getMetavariable() { return this.frame.getMetavariable(); }
 
   getMetavariableNode() { return this.frame.getMetavariableNode(); }
-
-  getFrameAssumptions() {
-    const frameAssumptions = this.frame.getAssumptions();
-
-    return frameAssumptions;
-  }
 
   matchJudgementNode(judgementNode) {
     const node = judgementNode, ///
@@ -224,31 +205,18 @@ export default define(class Judgement extends Element {
 
     context.trace(`Validating the '${judgementString}' derived judgement...`);
 
-    const validatedImplicitly = this.validateImplicitly(context);
+    const judgement = this, ///
+          topLevelMetaAssertions = context.getTopLevelMetaAssertions(),
+          judgementUnifies = one(topLevelMetaAssertions, (topLevelMetaAssertion) => {
+            const judgementUnifies = topLevelMetaAssertion.unifyJudgement(judgement, context);
 
-    if (validatedImplicitly) {
-      reconcile((context) => {
-        const assumptions = this.getAssumptions(),
-              topLevelMetaAssertion = this.getTopLevelMetaAssertion(),
-              metaLevelAssumptions = topLevelMetaAssertion.getMetaLevelAssumptions(),
-              metaLevelAssumptionsUnify = metaLevelAssumptions.every((metaLevelAssumption) => {
-                const assumptionUnifies = assumptions.some((assumption) => {
-                  const assumptionUnifies = metaLevelAssumption.unifyAssumption(assumption, context);
+            if (judgementUnifies) {
+              return true;
+            }
+          });
 
-                  if (assumptionUnifies) {
-                    return true;
-                  }
-                });
-
-                if (assumptionUnifies) {
-                  return true;
-                }
-              });
-
-        if (metaLevelAssumptionsUnify) {
-          validatesWhenDerived = true;
-        }
-      }, context);
+    if (judgementUnifies) {
+      validatesWhenDerived = true;
     }
 
     if (validatesWhenDerived) {
@@ -317,84 +285,3 @@ function assumptionFromJudgementNode(judgementNode, context) {
 
   return assumption;
 }
-
-// unifyTopLevelMetaAssertion(topLevelMetaAssertion, context) {
-//   let topLevelMetaAssertionUnifies = false;
-//
-//   const assumptionString = this.getString(),  ///
-//     topLevelMetaAssertionString = topLevelMetaAssertion.getString();
-//
-//   context.trace(`Unifying the '${topLevelMetaAssertionString}' top level meta-assertion with the '${assumptionString}' assumption...`);
-//
-//   reconcile((context) => {
-//     topLevelMetaAssertionUnifies = this.reference.unifyTopLevelMetaAssertion(topLevelMetaAssertion, context);
-//
-//     if (topLevelMetaAssertionUnifies) {
-//       const subproofAssertion = this.findSubproofAssertion(context);
-//
-//       if (subproofAssertion !== null) {
-//         topLevelMetaAssertionUnifies = subproofAssertion.unifyTopLevelMetaAssertion(topLevelMetaAssertion, context);
-//       } else {
-//         const unconditional = topLevelMetaAssertion.isUnconditional();
-//
-//         if (unconditional) {
-//           const deduction = topLevelMetaAssertion.getDeduction(),
-//             deductionUnifies = this.unifyDeduction(deduction, context);
-//
-//           if (deductionUnifies) {
-//             topLevelMetaAssertionUnifies = true;
-//           }
-//         }
-//       }
-//     }
-//   }, context);
-//
-//   if (topLevelMetaAssertionUnifies) {
-//     context.trace(`...unified the '${topLevelMetaAssertionString}' top level meta-assertion with the '${assumptionString}' assumption...`);
-//   }
-//
-//   return topLevelMetaAssertionUnifies;
-// }
-//
-// unifyTopLevelMetaAssertions(reference, context) {
-//   let topLevelMetaAssertionsUnify;
-//
-//   const topLevelMetaAssertions = context.findTopLevelMetaAssertionsByReference(reference);
-//
-//   topLevelMetaAssertionsUnify = topLevelMetaAssertions.some((topLevelMetaAssertion) => {
-//     const topLevelMetaAssertionUnifies = this.unifyTopLevelMetaAssertion(topLevelMetaAssertion, context);
-//
-//     if (topLevelMetaAssertionUnifies) {
-//       return true;
-//     }
-//   });
-//
-//   return topLevelMetaAssertionsUnify;
-// }
-// unifyDeduction(deduction, context) {
-//   let deductionUnifies = false;
-//
-//   const deductionString = deduction.getString(),
-//         assumptionString = this.getString();  ///
-//
-//   context.trace(`Unifying the '${deductionString}' deduction with the '${assumptionString}' assumption's statement...`);
-//
-//   const deductionContext = deduction.getContext(),
-//     generalContext = context, ///
-//     specificContext = deductionContext; ///
-//
-//   join((specificContext) => {
-//     const statement = deduction.getStatement(),
-//       statementUnifies = this.unifyStatement(statement, generalContext, specificContext);
-//
-//     if (statementUnifies) {
-//       deductionUnifies = true;
-//     }
-//   }, specificContext, context);
-//
-//   if (deductionUnifies) {
-//     context.debug(`...unified the '${deductionString}' deduction with the '${assumptionString}' assumption's statement.`);
-//   }
-//
-//   return deductionUnifies;
-// }
