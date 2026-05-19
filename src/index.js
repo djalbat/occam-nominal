@@ -3,6 +3,6 @@
 import "./preamble";
 
 export { default as NominalValue } from "./value";  ///
-export { default as lexersUtilities } from "./utilities/lexers";
-export { default as parsersUtilities } from "./utilities/parsers";
+export { default as NominalLexer } from "./nominal/lexer";
+export { default as NominalParser } from "./nominal/parser";
 export { default as NominalFileContext } from "./context/file/nominal";
