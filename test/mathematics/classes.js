@@ -10,6 +10,6 @@ const name = "classes",
       logLevel = ERROR_LEVEL,
       projectsDirectoryPath = "../../Mathematics";
 
-describe(name, () => {
+describe.only(name, () => {
   createSuite(name, logLevel, projectsDirectoryPath);
 });

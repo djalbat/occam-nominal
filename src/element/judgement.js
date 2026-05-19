@@ -46,6 +46,8 @@ export default define(class Judgement extends Element {
     return equalTo;
   }
 
+  isMetavariableDefined(metavariable) { return this.frame.isMetavariableDefined(metavariable); }
+
   getAssumptions() {
     let assumptions;
 

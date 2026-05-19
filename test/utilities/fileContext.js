@@ -1,16 +1,22 @@
 "use strict";
 
 const { filePathUtilities } = require("occam-model"),
+      { FurtleFileContext } = require("occam-furtle"),
       { NominalFileContext } = require("../../lib/index");  ///
 
-const { isFilePathNominalFilePath } = filePathUtilities;
+const { isFilePathFurtleFilePath, isFilePathNominalFilePath } = filePathUtilities;
 
 function FileContextFromFilePath(filePath) {
   let FileContext = null;
 
-  const filePathNominalFilePath = isFilePathNominalFilePath(filePath);
+  const filePathFurtleFilePath = isFilePathFurtleFilePath(filePath),
+        filePathNominalFilePath = isFilePathNominalFilePath(filePath);
 
-  if (filePathNominalFilePath) {
+  if (false) {
+    ///
+  } else if (filePathFurtleFilePath) {
+    FileContext = FurtleFileContext;  ///
+  } else if (filePathNominalFilePath) {
     FileContext = NominalFileContext; ///
   }
 

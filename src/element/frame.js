@@ -72,6 +72,22 @@ export default define(class Frame extends Element {
     return singular;
   }
 
+  isMetavariableDefined(metavariable) {
+    let metavariableDefined = false;
+
+    if (this.metavariable !== null) {
+      const metavariableA = metavariable,  ///
+            metavariableB = this.metavariable,
+            metavariableAEqualToMetavariableB = metavariableA.isEqualTo(metavariableB);
+
+      if (metavariableAEqualToMetavariableB) {
+        metavariableDefined = true;
+      }
+    }
+
+    return metavariableDefined;
+  }
+
   matchFrameNode(frameNode) {
     const node = frameNode, ///
           nodeMatches = this.matchNode(node),

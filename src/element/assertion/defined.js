@@ -267,7 +267,16 @@ function isVariableDefined(variable, context) {
 }
 
 function isMetavariableDefined(metavariable, context) {
-  debugger
+  const steps = context.getSteps(),
+        metavariableDefined = steps.some((step) => {
+          const metavariableDefined = step.isMetavariableDefined(metavariable, context);
+
+          if (metavariableDefined) {
+            return true;
+          }
+        });
+
+  return metavariableDefined;
 }
 
 function validateWhenDerived(term, frame, negated, context) {

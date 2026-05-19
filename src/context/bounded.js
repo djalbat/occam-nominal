@@ -6,7 +6,7 @@ import Context from "../context";
 
 import { mergeEquivalences, equivalencesFromEquality, separateGroundedTermsAndDefinedVariables } from "../utilities/equivalences";
 
-const { last, clear, filter } = arrayUtilities;
+const { last, clear } = arrayUtilities;
 
 class BoundedContext extends Context {
   constructor(context, assignments, equivalences, declaredVariables, metaLevelAssumptions, subproofOrProofAssertions) {
@@ -86,16 +86,27 @@ class BoundedContext extends Context {
     return proofAssertions;
   }
 
+  getSteps() {
+    const proofAssertions = this.getProofAssertions(),
+          steps = proofAssertions.filter((proofAssertion) => {
+            const proofAssertionStep = proofAssertion.isStep();
+
+            if (proofAssertionStep) {
+              return true;
+            }
+          });
+
+    return steps;
+  }
+
   getLastStep() {
     let lastStep = null;
 
-    const proofAssertions = this.getProofAssertions(),
-          proofAssertionsLength = proofAssertions.length;
+    const steps = this.getSteps(),
+          stepsLength = steps.length;
 
-    if (proofAssertionsLength > 0) {
-      const lastProofAssertion = last(proofAssertions);
-
-      lastStep = lastProofAssertion;  ///
+    if (stepsLength > 0) {
+      lastStep = last(steps);
     }
 
     return lastStep;

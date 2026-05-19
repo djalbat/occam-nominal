@@ -43,6 +43,12 @@ export default define(class Step extends ProofAssertion {
     return statementNode;
   }
 
+  isStep() {
+    const step = true;
+
+    return step;
+  }
+
   isQualified() {
     const qualified = ((this.reference !== null) || (this.signatureAssertion !== null));
 
@@ -54,6 +60,23 @@ export default define(class Step extends ProofAssertion {
           unqualified = !qualified;
 
     return unqualified;
+  }
+
+  isMetavariableDefined(metavariable, context) {
+    let metavariableDefined = false;
+
+    const unqualified = this.isUnqualified();
+
+    if (unqualified) {
+      const { Judgement } = elements,
+            judgement = Judgement.fromStatement(this.statement, context);
+
+      if (judgement !== null) {
+        metavariableDefined = judgement.isMetavariableDefined(metavariable);
+      }
+    }
+
+    return metavariableDefined;
   }
 
   compareTermAndPropertyRelation(term, propertyRelation, context) {

@@ -1229,8 +1229,8 @@ export function termsFromEquivalenceNode(equivalenceNode, context) {
 }
 
 export function nameFromMetavariableNode(metavariableNode, context) {
-  const metavaraibleName = metavariableNode.getMetavariableName(),
-        name = metavaraibleName;  ///
+  const metametavariableName = metavariableNode.getMetavariableName(),
+        name = metametavariableName;  ///
 
   return name;
 }

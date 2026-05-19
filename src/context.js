@@ -149,13 +149,6 @@ export default class Context extends ContextBase {
     return derivedSubstitutions;
   }
 
-  getEquivalences() {
-    const context = this.getContext(),
-          equivalences = context.getEquivalences();
-
-    return equivalences;
-  }
-
   getCombinators(includeRelease) {
     const context = this.getContext(),
           combinators = context.getCombinators(includeRelease);
@@ -182,6 +175,20 @@ export default class Context extends ContextBase {
           variables = context.getVariables(nested);
 
     return variables;
+  }
+
+  getSteps() {
+    const context = this.getContext(),
+          steps = context.getSteps();
+
+    return steps;
+  }
+
+  getEquivalences() {
+    const context = this.getContext(),
+          equivalences = context.getEquivalences();
+
+    return equivalences;
   }
 
   getDeclaredVariables() {

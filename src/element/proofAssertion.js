@@ -28,6 +28,12 @@ export default class ProofAssertion extends Element {
     return proofAssertion;
   }
 
+  isStep() {
+    const step = false;
+
+    return step;
+  }
+
   compareStep(step, context) {
     let comparesToStep = false;
 
@@ -37,7 +43,7 @@ export default class ProofAssertion extends Element {
     context.trace(`Comparing the '${stepString}' step to the '${proofAssertionString}' proof assertion...`);
 
     const statement = step.getStatement(),
-          comparesToStatement = this.compareStatement(statement, step);
+          comparesToStatement = this.compareStatement(statement, context);
 
     if (comparesToStatement) {
       comparesToStep = true;

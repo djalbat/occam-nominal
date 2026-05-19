@@ -10,6 +10,6 @@ const name = "parity",
       logLevel = ERROR_LEVEL,
       projectsDirectoryPath = "../../Mathematics";
 
-describe.skip(name, () => {
+describe(name, () => {
   createSuite(name, logLevel, projectsDirectoryPath);
 });

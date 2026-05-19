@@ -10,6 +10,6 @@ const name = "induction",
       logLevel = TRACE_LEVEL,
       projectsDirectoryPath = "../../Mathematics";
 
-describe.only(name, () => {
+describe(name, () => {
   createSuite(name, logLevel, projectsDirectoryPath);
 });

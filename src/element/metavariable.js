@@ -266,12 +266,12 @@ export default define(class Metavariable extends Element {
       context.trace(`Validating the '${metavariableString}' metavariable's term...`);
 
       const metavariableName = this.getMetavariableName(),
-            declaredMetavaraible = context.findDeclaredMetavariableByMetavariableName(metavariableName);
+            declaredMetavariable = context.findDeclaredMetavariableByMetavariableName(metavariableName);
 
       let term = null;
 
-      if (declaredMetavaraible !== null) {
-        const type = declaredMetavaraible.getType();
+      if (declaredMetavariable !== null) {
+        const type = declaredMetavariable.getType();
 
         if (type !== null) {
           term = this.term.validateGivenType(type, context);
