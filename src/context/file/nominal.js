@@ -1,6 +1,6 @@
 "use strict";
 
-import { FileContext } from "occam-languages";
+import { FileContext, nominalUtilities } from "occam-languages";
 import { arrayUtilities } from "necessary";
 
 import NominalLexer from "../../nominal/lexer";
@@ -9,8 +9,6 @@ import NominalParser from "../../nominal/parser";
 import { verifyFile } from "../../process/verify";
 import { baseTypeFromNothing } from "../../utilities/type";
 import { findMetaTypeByMetaTypeName } from "../../metaTypes";
-import { nominalLexerFromCombinedCustomGrammar } from "../../utilities/lexers";
-import { nominalParserFromCombinedCustomGrammar } from "../../utilities/parsers";
 import { typesFromJSON,
          rulesFromJSON,
          axiomsFromJSON,
@@ -34,7 +32,8 @@ import { typesFromJSON,
          declaredVariablesToDeclaredVariablesJSON,
          declaredMetavariablesToDeclaredMetavariablesJSON } from "../../utilities/json";
 
-const { push, filter } = arrayUtilities;
+const { push, filter } = arrayUtilities,
+      { nominalLexerFromCombinedCustomGrammar, nominalParserFromCombinedCustomGrammar } = nominalUtilities;
 
 export default class NominalFileContext extends FileContext {
   constructor(context, fileContent, filePath, tokens, node, json, lexer, parser, types, rules, axioms, lemmas, theorems, metaLemmas, conjectures, combinators, typePrefixes, constructors, metatheorems, declaredVariables, declaredMetavariables) {
