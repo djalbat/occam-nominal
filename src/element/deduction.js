@@ -110,13 +110,13 @@ export default define(class Deduction extends Element {
     context.trace(`Unifying the '${stepString}' step with the '${deductionString}' deduction...`);
 
     const stepContext = step.getContext(),
-          deductionContext = this.getContext(),
-          generalContext = deductionContext, ///
+          deductionnContext = this.getContext(), ///
+          generalContext = deductionnContext, ///
           specificContext = stepContext;  ///
 
     reconcile((specificContext) => {
       const statement = step.getStatement(),
-            statementUnifies = this.statement.unifyStatement(statement, generalContext, specificContext);
+            statementUnifies = this.unifyStatement(statement, generalContext, specificContext);
 
       if (statementUnifies) {
         specificContext.commit(context);
@@ -130,6 +130,24 @@ export default define(class Deduction extends Element {
     }
 
     return stepUnifies;
+  }
+
+  unifyStatement(statement, generalContext, specificContext) {
+    let statementUnifies;
+
+    const context = specificContext,  ///
+          deductionString = this.getString(), ///
+          statementString = statement.getString();
+
+    context.trace(`Unifying the '${statementString}' statement with the '${deductionString}' deduction's statement...`);
+
+    statementUnifies = this.statement.unifyStatement(statement, generalContext, specificContext);
+
+    if (statementUnifies) {
+      context.debug(`...unified the '${statementString}' statement with the '${deductionString}' deduction's statement.`);
+    }
+
+    return statementUnifies;
   }
 
   toJSON() {
