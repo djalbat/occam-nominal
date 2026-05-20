@@ -9,7 +9,7 @@ import { instantiateMetaLevelAssumption } from "../../process/instantiate";
 import { breakPointFromJSON, breakPointToBreakPointJSON } from "../../utilities/breakPoint";
 import { metaLevelAssumptionFromMetaLevelAssumptionNode } from "../../utilities/element";
 import { metaLevelAssumptionStringFromReferenceAndStatement } from "../../utilities/string";
-import { ablate, attempt, descend, reconcile, serialise, unserialise, instantiate } from "../../utilities/context";
+import { join, ablate, attempt, descend, reconcile, serialise, unserialise, instantiate } from "../../utilities/context";
 
 export default define(class MetaLevelAssumption extends Element {
   constructor(context, string, node, breakPoint, reference, statement) {
@@ -222,19 +222,21 @@ export default define(class MetaLevelAssumption extends Element {
           specificContext = assumptionContext;  ///
 
     reconcile((specificContext) => {
-      const reference = assumption.getReference(),
-            referneceUnifies = this.unifyReference(reference, generalContext, specificContext);
+      join((specificContext) => {
+        const reference = assumption.getReference(),
+              referneceUnifies = this.unifyReference(reference, generalContext, specificContext);
 
-      if (referneceUnifies) {
-        const statement = assumption.getStatement(),
-              statementUnified = this.unifyStatement(statement, generalContext, specificContext);
+        if (referneceUnifies) {
+          const statement = assumption.getStatement(),
+                statementUnified = this.unifyStatement(statement, generalContext, specificContext);
 
-        if (statementUnified) {
-          specificContext.commit(context);
+          if (statementUnified) {
+            specificContext.commit(context);
 
-          assumptionUnifies = true;
+            assumptionUnifies = true;
+          }
         }
-      }
+      }, specificContext, context);
     }, specificContext);
 
     if (assumptionUnifies) {
@@ -244,21 +246,37 @@ export default define(class MetaLevelAssumption extends Element {
     return assumptionUnifies;
   }
 
+  unifyAssumptios(assumptions, context) {
+    const assumptionsUnify = assumptions.some((assumption) => {
+      const assumptionUnifies = this.unifyAssumption(assumption, context);
+
+      if (assumptionUnifies) {
+        return true;
+      }
+    });
+
+    return assumptionsUnify;
+  }
+
   unifyReference(reference, generalContext, specificContext) {
     let referenceUnifies;
 
-    const context = specificContext,  ///
-          referenceString = reference.getString(),
-          metaLevelAssumptionString = this.getString(); ///
+    if (reference !== null) {
+      const context = specificContext,  ///
+            referenceString = reference.getString(),
+            metaLevelAssumptionString = this.getString(); ///
 
-    context.trace(`Unifying the '${referenceString}' reference with the '${metaLevelAssumptionString}' meta-level assumption's reference...`);
+      context.trace(`Unifying the '${referenceString}' reference with the '${metaLevelAssumptionString}' meta-level assumption's reference...`);
 
-    const metavariable = this.getMetavariable();
+      const metavariable = this.getMetavariable();
 
-    referenceUnifies = metavariable.unifyReference(reference, generalContext, specificContext);
+      referenceUnifies = metavariable.unifyReference(reference, generalContext, specificContext);
 
-    if (referenceUnifies) {
-      context.debug(`..unified the '${referenceString}' with the '${metaLevelAssumptionString}' meta-level assumption's reference.`);
+      if (referenceUnifies) {
+        context.debug(`..unified the '${referenceString}' with the '${metaLevelAssumptionString}' meta-level assumption's reference.`);
+      }
+    } else {
+      referenceUnifies = true;  ///
     }
 
     return referenceUnifies;

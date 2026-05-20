@@ -1401,7 +1401,7 @@ export function identifierFromParameterNode(parameterNode, context) {
 
 export function referenceFromAssumptionNode(assumptionNode, context) {
   const metavariableNode = assumptionNode.getMetavariableNode(),
-    reference = referenceFromMetavariableNode(metavariableNode, context);
+        reference = referenceFromMetavariableNode(metavariableNode, context);
 
   return reference;
 }

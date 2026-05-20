@@ -61,6 +61,27 @@ export default define(class Judgement extends Element {
 
   getMetavariableNode() { return this.frame.getMetavariableNode(); }
 
+  getAssumptions(context) {
+    let assumptions;
+
+    const proofAssertions = context.getProofAssertions();
+
+    assumptions = proofAssertions.map((proofAssertion) => {
+      const assumption = assumptionFromProofAssertion(proofAssertion, context);
+
+      return assumption;
+    });
+
+    const frameAssumptions = this.frame.getAssumptions();
+
+    assumptions = [ ///
+      ...frameAssumptions,
+      assumptions
+    ];
+
+    return assumptions;
+  }
+
   matchJudgementNode(judgementNode) {
     const node = judgementNode, ///
           nodeMatches = this.matchNode(node),
@@ -285,3 +306,11 @@ function assumptionFromJudgementNode(judgementNode, context) {
 
   return assumption;
 }
+
+function assumptionFromProofAssertion(proofAssertion, context) {
+  const { Assumption } = elements,
+        assumption = Assumption.fromProofAssertion(proofAssertion, context);
+
+  return assumption;
+}
+

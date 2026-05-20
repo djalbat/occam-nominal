@@ -25,7 +25,6 @@ import { TERM_RULE_NAME,
          EQUIVALENCE_RULE_NAME,
          METAVARIABLE_RULE_NAME,
          TYPE_ASSERTION_RULE_NAME,
-         PROCEDURE_CALL_RULE_NAME,
          PROPERTY_RELATION_RULE_NAME,
          DEFINED_ASSERTION_RULE_NAME,
          TERM_SUBSTITUTION_RULE_NAME,
@@ -63,7 +62,6 @@ const termPlaceholderRule = ruleFromRuleName(TERM_RULE_NAME),
       equivalencePlaceholderRule = ruleFromRuleName(EQUIVALENCE_RULE_NAME),
       metavariablePlaceholderRule = ruleFromRuleName(METAVARIABLE_RULE_NAME),
       typeAssertionPlaceholderRule = ruleFromRuleName(TYPE_ASSERTION_RULE_NAME),
-      procedureCallPlaceholderRule = ruleFromRuleName(PROCEDURE_CALL_RULE_NAME),
       propertyRelationlaceholderRule = ruleFromRuleName(PROPERTY_RELATION_RULE_NAME),
       definedAssertionPlaceholderRule = ruleFromRuleName(DEFINED_ASSERTION_RULE_NAME),
       termSubstitutionPlaceholderRule = ruleFromRuleName(TERM_SUBSTITUTION_RULE_NAME),
@@ -140,8 +138,6 @@ export function instantiateTypePrefix(string, context) { return instantiate(type
 export function instantiateConstructor(string, context) { return instantiate(constructorPlaceholderRule, string, context); }
 
 export function instantiateEquivalence(string, context) { return instantiate(equivalencePlaceholderRule, string, context); }
-
-export function instantiatProcedureCall(string, context) { return instantiate(procedureCallPlaceholderRule, string, context); }
 
 export function instantiateMetavariable(string, context) { return instantiate(metavariablePlaceholderRule, string, context); }
 

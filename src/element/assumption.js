@@ -3,8 +3,10 @@
 import { Element } from "occam-languages";
 
 import { define } from "../elements";
-import { instantiate } from "../utilities/context";
+import { ablate, instantiate } from "../utilities/context";
 import { instantiateAssumption } from "../process/instantiate";
+import { assumptinoStringFromStatement } from "../utilities/string";
+import { assumptioneFromAssumptionNode } from "../utilities/element";
 import { breakPointFromJSON, breakPointToBreakPointJSON } from "../utilities/breakPoint";
 
 export default define(class Assumption extends Element {
@@ -251,6 +253,22 @@ export default define(class Assumption extends Element {
 
       return assumption;
     }, context);
+  }
+
+  static fromStatement(statement, context) {
+    let assumptione;
+
+    ablate((context) => {
+      instantiate((context) => {
+        const assumptionString = assumptinoStringFromStatement(statement),
+              string = assumptioneString,  ///
+              assumptioneNode = instantiateAssumption(string, context);
+
+        assumptione = assumptioneFromAssumptionNode(assumptioneNode, context);
+      }, context);
+    }, context);
+
+    return assumptione;
   }
 });
 

@@ -15,6 +15,7 @@ import { labelFromJSON,
          metaLevelAssumptionsFromJSON,
          suppositionsToSuppositionsJSON,
          metaLevelAssumptionsToMetaLevelAssumptionsJSON } from "../utilities/json";
+import assumption from "./assumption";
 
 const { asyncForwardsEvery } = asynchronousUtilities;
 
@@ -242,7 +243,12 @@ export default class TopLevelMetaAssertion extends Element {
         }
 
         if (statementUnifies) {
-          debugger
+          const assumptions = judgement.getAssumptions(context),
+                assumptionsUnify = this.unifyAssumptions(assumptions, context);
+
+          if (assumptionsUnify) {
+            judgementUnifies = true;
+          }
         }
       }
     }, context);
@@ -286,6 +292,18 @@ export default class TopLevelMetaAssertion extends Element {
     }
 
     return statementUnifies;
+  }
+
+  unifyAssumptions(assumptions, context) {
+    const assumptionsUnify = this.metaLevelAssumptions.every((metaLevelAssumption) => {
+      const assumptionsUnify = metaLevelAssumption.unifyAssumptions(assumptions, context);
+
+      if (assumptionsUnify) {
+        return true;
+      }
+    });
+
+    return assumptionsUnify;
   }
 
   unifyDeducedStatement(deducedStatement, context) {
