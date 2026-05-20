@@ -1400,8 +1400,13 @@ export function identifierFromParameterNode(parameterNode, context) {
 }
 
 export function referenceFromAssumptionNode(assumptionNode, context) {
-  const metavariableNode = assumptionNode.getMetavariableNode(),
-        reference = referenceFromMetavariableNode(metavariableNode, context);
+  let reference = null;
+
+  const metavariableNode = assumptionNode.getMetavariableNode();
+
+  if (metavariableNode !== null) {
+    reference = referenceFromMetavariableNode(metavariableNode, context);
+  }
 
   return reference;
 }

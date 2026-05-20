@@ -3,6 +3,8 @@
 import { Element } from "occam-languages";
 import { arrayUtilities } from "necessary";
 
+import elements from "../elements";
+
 import { define } from "../elements";
 import { instantiate,} from "../utilities/context";
 import { instantiateJudgement } from "../process/instantiate";
@@ -76,7 +78,7 @@ export default define(class Judgement extends Element {
 
     assumptions = [ ///
       ...frameAssumptions,
-      assumptions
+      ...assumptions
     ];
 
     return assumptions;
@@ -309,7 +311,8 @@ function assumptionFromJudgementNode(judgementNode, context) {
 
 function assumptionFromProofAssertion(proofAssertion, context) {
   const { Assumption } = elements,
-        assumption = Assumption.fromProofAssertion(proofAssertion, context);
+        statement = proofAssertion.getStatement(),
+        assumption = Assumption.fromStatement(statement, context);
 
   return assumption;
 }

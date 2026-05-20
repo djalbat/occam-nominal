@@ -142,6 +142,13 @@ export function signatureStringFromSignature(signature) {
   return signatureString;
 }
 
+export function assumptionStringFromStatement(stastement) {
+  const statementString = stastement.getString(),
+        assumptionString = `. :: ${statementString}`;
+
+  return assumptionString;
+}
+
 export function typeStringFromNominalTypeName(nominalTypeName) {
   const typeString = nominalTypeName;  ///
 
