@@ -1,11 +1,7 @@
 "use strict";
 
-import { arrayUtilities } from "necessary";
-
 import { baseTypeFromNothing } from "../utilities/type";
 import { EMPTY_STRING, PROVISIONAL, PROVISIONALLY } from "../constants";
-
-const { front, last } = arrayUtilities;
 
 export function termsStringFromTerms(terms) {
   const termsString = terms.reduce((termsString, term) => {
@@ -47,20 +43,6 @@ export function premisesStringFromPremises(premises) {
   }, null);
 
   return premisesString;
-}
-
-export function statementsStringFromStatements(statements) {
-  const statementsString = statements.reduce((statementsString, statement) => {
-    const statementString = statement.getString();
-
-    statementsString = (statementsString === null) ?
-                         statementString: ///
-                          `${statementsString}, ${statementString}`;
-
-    return statementsString;
-  }, null);
-
-  return statementsString;
 }
 
 export function hypothesesStringFromHypotheses(hypotheses) {
@@ -179,16 +161,6 @@ export function implicitAssumptionStringFromStatement(stastement) {
         implicitAssumptionString = `. :: ${statementString}`;
 
   return implicitAssumptionString;
-}
-
-export function subproofAssertionStringFromStatements(statements) {
-  const lastStatement = last(statements),
-        frontStatements = front(statements),
-        lastStatementString = lastStatement.getString(),
-        frontStatementsString = statementsStringFromStatements(frontStatements),
-        subproofString = `[${frontStatementsString}]...${lastStatementString}`;
-
-  return subproofString;
 }
 
 export function termSubstitutionStringFromTermAndVariable(term, variable) {

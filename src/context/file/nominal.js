@@ -519,36 +519,6 @@ export default class NominalFileContext extends FileContext {
     return conjecture;
   }
 
-  findMetaLemmasByReference(reference) {
-    const metaLemmas = this.getMetaLemmas();
-
-    filter(metaLemmas, (metaLemma) => {
-      const topLevelMetaAssertion = metaLemma, ///
-            topLevelMetaAssertionCompares = reference.compareTopLevelMetaAssertion(topLevelMetaAssertion);
-
-      if (topLevelMetaAssertionCompares) {
-        return true;
-      }
-    });
-
-    return metaLemmas;
-  }
-
-  findMetatheoremsByReference(reference) {
-    const metatheorems = this.getMetatheorems();
-
-    filter(metatheorems, (metatheorem) => {
-      const topLevelMetaAssertion = metatheorem, ///
-            topLevelMetaAssertionCompares = reference.compareTopLevelMetaAssertion(topLevelMetaAssertion);
-
-      if (topLevelMetaAssertionCompares) {
-        return true;
-      }
-    });
-
-    return metatheorems;
-  }
-
   findTopLevelAssertionByReference(reference) {
     const topLEvelAssertions = this.getTopLevelAssertions(),
           metavariableNode = reference.getMetavariableNode(),
@@ -663,18 +633,6 @@ export default class NominalFileContext extends FileContext {
           }) || null;
 
     return declaredMetavariable;
-  }
-
-  findTermByTermNode(termNode) {
-    const term = null;
-
-    return term;
-  }
-
-  findStatementByStatementNode(statementNode) {
-    const statement = null;
-
-    return statement;
   }
 
   findMetavariableByMetavariableNode(metavariableNode) {

@@ -8,7 +8,7 @@ import { instantiateAssumption } from "../process/instantiate";
 import { reconcile, instantiate } from "../utilities/context";
 import { breakPointFromJSON, breakPointToBreakPointJSON } from "../utilities/breakPoint";
 
-const { each, filter } = arrayUtilities;
+const { each, clone, filter } = arrayUtilities;
 
 export default define(class Assumption extends Element {
   constructor(context, string, node, breakPoint, reference, statement) {
@@ -188,45 +188,38 @@ export default define(class Assumption extends Element {
   }
 
   validateWhenDerived(context) {
-    let validatesWhenDerived;
+    let validatesWhenDerived = false;
 
     const assumptionString = this.getString();  ///
 
     context.trace(`Validating the '${assumptionString}' derived assumption...`);
 
-    const topLevelMetaAssertions = context.getTopLevelMetaAssertions();
+    let topLevelMetaAssertions;
+
+    topLevelMetaAssertions = context.getTopLevelMetaAssertions();
+
+    topLevelMetaAssertions = clone(topLevelMetaAssertions); ///
 
     filter(topLevelMetaAssertions, (topLevelMetaAssertion) => {
-      let labelUnifies;
-
-      reconcile((context) => {
-        const label = topLevelMetaAssertion.getLabel();
-
-        labelUnifies = this.unifyLabel(label, context);
-      }, context);
+      const label = topLevelMetaAssertion.getLabel(),
+            labelUnifies = this.unifyLabel(label, context);
 
       if (labelUnifies) {
         return true;
       }
     });
 
-    validatesWhenDerived = each(topLevelMetaAssertions, (topLevelMetaAssertion) => {
-      let statementUnifies;
+    const topLevelMetaAssertionsUnifiy = each(topLevelMetaAssertions, (topLevelMetaAssertion) => {
+      const topLevelMetaAssertionUnifies = this.unifyTopLevelMetaAssertion(topLevelMetaAssertion, context);
 
-      reconcile((context) => {
-        const label = topLevelMetaAssertion.getLabel();
-
-        this.unifyLabel(label, context);
-
-        const statement = topLevelMetaAssertion.getStatement();
-
-        statementUnifies = this.unifyStatement(statement, context);
-      }, context);
-
-      if (statementUnifies) {
+      if (topLevelMetaAssertionUnifies) {
         return true;
       }
-    })
+    });
+
+    if (topLevelMetaAssertionsUnifiy) {
+      validatesWhenDerived = true;
+    }
 
     if (validatesWhenDerived) {
       context.debug(`...validated the '${assumptionString}' derived assumption.`);
@@ -243,7 +236,9 @@ export default define(class Assumption extends Element {
 
     context.trace(`Unifying the '${labelString}' label with the '${assumptionString}' assumption's refernce...`);
 
-    labelUnifies = this.reference.unifyLabel(label, context);
+    reconcile((context) => {
+      labelUnifies = this.reference.unifyLabel(label, context);
+    }, context);
 
     if (labelUnifies) {
       context.debug(`...unified the '${labelString}' label with the '${assumptionString}' assumption's reference.`);
@@ -252,21 +247,30 @@ export default define(class Assumption extends Element {
     return labelUnifies;
   }
 
-  unifyStatement(statement, context) {
-    let statementUnifies;
+  unifyTopLevelMetaAssertion(topLevelMetaAssertion, context) {
+    let topLevelMetaAssertionUnifies;
 
-    const statementString = statement.getString(),
-          assumptionString = this.getString();  ///
+    const assumptionString = this.getString(),
+          topLevelMetaAssertionString = topLevelMetaAssertion.getString();
 
-    context.trace(`Unifying the '${statementString}' statement with the '${assumptionString}' assumption's statement...`);
+    context.trace(`Unifying the '${topLevelMetaAssertionString}' top level meta-assertion with the '${assumptionString}' assumption's refernce...`);
 
-    statementUnifies = this.statement.unifyStatement(statement, generalContext, specificContext);
+    reconcile((context) => {
+      const label = topLevelMetaAssertion.getLabel(),
+            labelUnifies = this.reference.unifyLabel(label, context);
 
-    if (statementUnifies) {
-      context.debug(`...unified the '${statementString}' statement with the '${assumptionString}' assumption's statement.`);
+      if (labelUnifies) {
+        debugger
+      }
+    }, context);
+
+    topLevelMetaAssertionUnifies = this.reference.unifyLabel(topLevelMetaAssertion, context);
+
+    if (topLevelMetaAssertionUnifies) {
+      context.debug(`...unified the '${topLevelMetaAssertionString}' top level meta-assertion with the '${assumptionString}' assumption's reference.`);
     }
 
-    return statementUnifies;
+    return topLevelMetaAssertionUnifies;
   }
 
   static name = "Assumption";

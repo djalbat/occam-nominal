@@ -9,7 +9,6 @@ import { breakPointFromJSON } from "../../utilities/breakPoint";
 import { join, descend, instantiate } from "../../utilities/context";
 import { instantiateSubproofAssertion } from "../../process/instantiate";
 import { subproofAssertionFromStatementNode } from "../../utilities/element";
-import { subproofAssertionStringFromStatements } from "../../utilities/string";
 
 const { last, front, backwardsEvery } = arrayUtilities;
 
@@ -249,24 +248,6 @@ export default define(class SubproofAssertion extends Assertion {
           subproofAssertion = subproofAssertionFromStatementNode(statementNode, context);
 
     return subproofAssertion;
-  }
-
-  static fromStatements(statements, context) {
-    let subproorAssertion;
-
-    instantiate((context) => {
-      const subproofAssertionString = subproofAssertionStringFromStatements(statements),
-            string = subproofAssertionString, ///
-            subproofAssertionNode = instantiateSubproofAssertion(string, context),
-            node = subproofAssertionNode,  ///
-            breakPoint = null;
-
-      context = null;
-
-      subproorAssertion = new SubproofAssertion(context, string, node, breakPoint, statements);
-    }, context)
-
-    return subproorAssertion;
   }
 });
 

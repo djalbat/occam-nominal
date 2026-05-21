@@ -50,24 +50,6 @@ export default class TopLevelMetaAssertion extends Element {
     return this.constraints;
   }
 
-  getStatement() {
-    let statement;
-
-    const deducedStatment = this.getDeducedStatement();
-
-    statement = deducedStatment;  ///
-
-    const conditional = this.isConditional();
-
-    if (conditional) {
-      const context = this.getContext(),
-            statements = this.getStatements(),
-            subproofAssertion = subproofAssertionFromStatements(statements, context);
-    }
-
-    return statement;
-  }
-
   getStatements() {
     const suppositinoStatements = this.getSuppositionStatements(),
           deducedStatement = this.getDeducedStatement(),
@@ -495,6 +477,18 @@ export default class TopLevelMetaAssertion extends Element {
   }
 }
 
+function statementFromStatements(statements, context) {
+  let statement;
+
+  const { Statement } = elements;
+
+  statement = Statement.fromStatements(statements, context);
+
+  statement = statement.validate(context);
+
+  return statement;
+}
+
 function subproofAssertionFromStatement(statement, context) {
   let subproofAssertion;
 
@@ -510,9 +504,3 @@ function subproofAssertionFromStatement(statement, context) {
 
 }
 
-function subproofAssertionFromStatements(statements, context) {
-  const { SubproofAssertion } = elements,
-        subproofAssertion = SubproofAssertion.fromStatements(statements, context);
-
-  return subproofAssertion;
-}

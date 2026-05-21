@@ -92,6 +92,41 @@ async function unifyStepWithSignatureAssertion(step, context) {
   return stepUnifiesWithSignatureAssertion;
 }
 
+async function unifyStepAsQualifiedConstraint(step, context) {
+  let stepUnifiesAsQualifiedConstraint = false;
+
+  const metaLevel = context.isMetaLevel();
+
+  if (metaLevel) {
+    const reference = step.getReference();
+
+    if (reference !== null) {
+      const stepString = step.getString(),
+            referenceString = reference.getString();
+
+      context.trace(`Unifying the '${stepString}' step as a constraint with the '${referenceString}' reference...`);
+
+      let constraint;
+
+      const { Constraint } = elements;
+
+      constraint = Constraint.fromStep(step, context);
+
+      constraint = constraint.validate(context);  ///
+
+      if (constraint !== null) {
+        stepUnifiesAsQualifiedConstraint = true;
+      }
+
+      if (stepUnifiesAsQualifiedConstraint) {
+        context.debug(`...unified the '${stepString}' step as a constraint with the '${referenceString}' reference.`);
+      }
+    }
+  }
+
+  return stepUnifiesAsQualifiedConstraint;
+}
+
 async function unifyStepAsUnqualifiedEquality(step, context) {
   let stepUnifiesAUnqualifiedEquality = false;
 
@@ -222,41 +257,6 @@ async function unifyStepAsUnqualifiedSignatureAssertion(step, context) {
   return stepUnifiesAsUnqualifiedSignatureAssertion;
 }
 
-async function unifyStepAsQualifiedConstraint(step, context) {
-  let stepUnifiesAsQualifiedConstraint = false;
-
-  const metaLevel = context.isMetaLevel();
-
-  if (metaLevel) {
-    const reference = step.getReference();
-
-    if (reference !== null) {
-      const stepString = step.getString(),
-            referenceString = reference.getString();
-
-      context.trace(`Unifying the '${stepString}' step as a constraint with the '${referenceString}' reference...`);
-
-      let constraint;
-
-      const { Constraint } = elements;
-
-      constraint = Constraint.fromStep(step, context);
-
-      constraint = constraint.validate(context);  ///
-
-      if (constraint !== null) {
-        stepUnifiesAsQualifiedConstraint = true;
-      }
-
-      if (stepUnifiesAsQualifiedConstraint) {
-        context.debug(`...unified the '${stepString}' step as a constraint with the '${referenceString}' reference.`);
-      }
-    }
-  }
-
-  return stepUnifiesAsQualifiedConstraint;
-}
-
 async function unifyStepAsQualifiedSignatureAssertion(step, context) {
   let stepUnifiesAsQualifiedSignatureAssertion = false;
 
@@ -321,12 +321,12 @@ export const unifySteps = [
   unifyStepWithRule,
   unifyStepWithTopLevelAssertion,
   unifyStepWithSignatureAssertion,
+  unifyStepAsQualifiedConstraint,
   unifyStepAsUnqualifiedEquality,
   unifyStepAsUNqualifiedJudgement,
   unifyStepAsUnqualifiedTypeAssertion,
   unifyStepAsUnqualifiedPropertyAssertion,
   unifyStepAsUnqualifiedSignatureAssertion,
-  unifyStepAsQualifiedConstraint,
   unifyStepAsQualifiedSignatureAssertion,
   compareStepWithSubproofOrProofAssertions
 ];
