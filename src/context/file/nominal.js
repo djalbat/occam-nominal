@@ -685,10 +685,10 @@ export default class NominalFileContext extends FileContext {
     return substitution;
   }
 
-  findMetaLevelAssumptionByMetaLevelAssumptionNode(metaLevelAssumptionNode) {
-    const metaLevelAssumption = null;
+  findConstraintByConstraintNode(constraintNode) {
+    const constraint = null;
 
-    return metaLevelAssumption;
+    return constraint;
   }
 
   findProcedureByProcedureName(procedureName) {

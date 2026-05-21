@@ -68,7 +68,7 @@ export default define(class PropertyRelation extends Element {
 
     const validPropertyRelation = this.findValidPropertyRelation(context);
 
-    if (validPropertyRelation) {
+    if (validPropertyRelation !== null) {
       validates = true;
 
       propertyRelation = validPropertyRelation; ///

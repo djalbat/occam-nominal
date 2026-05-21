@@ -69,8 +69,8 @@ export function enclose(innerFunction, context) {
   return innerFunction(context);
 }
 
-export function encapsulate(innerFunction, metaLevelAssumptions, context) {
-  const boundedContext = BoundedContext.fromMetaLevelAssumptions(metaLevelAssumptions, context);
+export function encapsulate(innerFunction, constraints, context) {
+  const boundedContext = BoundedContext.fromConstraints(constraints, context);
 
   context = boundedContext;  ///
 

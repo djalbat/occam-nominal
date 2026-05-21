@@ -105,7 +105,7 @@ export default define(class Signature extends Element {
 
     const validSignature = this.findValidSignature(context);
 
-    if (validSignature) {
+    if (validSignature !== null) {
       validates = true;
 
       signature = validSignature;  ///

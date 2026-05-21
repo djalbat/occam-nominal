@@ -62,7 +62,7 @@ export default define(class SubproofAssertion extends Assertion {
 
     const validAssertion = this.findValidAssertion(context);
 
-    if (validAssertion) {
+    if (validAssertion !== null) {
       validates = true;
 
       subproofAssertion = validAssertion; ///

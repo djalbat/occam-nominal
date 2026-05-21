@@ -4,13 +4,13 @@ import { Element } from "occam-languages";
 import { arrayUtilities } from "necessary";
 
 import { define } from "../elements";
-import { instantiateAssumption } from "../process/instantiate";
+import { instantiateGoal } from "../process/instantiate";
 import { reconcile, instantiate } from "../utilities/context";
 import { breakPointFromJSON, breakPointToBreakPointJSON } from "../utilities/breakPoint";
 
 const { each, filter } = arrayUtilities;
 
-export default define(class Assumption extends Element {
+export default define(class Goal extends Element {
   constructor(context, string, node, breakPoint, reference, statement) {
     super(context, string, node, breakPoint);
 
@@ -26,31 +26,31 @@ export default define(class Assumption extends Element {
     return this.statement;
   }
 
-  getAssumptionNode() {
+  getGoalNode() {
     const node = this.getNode(),
-          assumptionNode = node;  ///
+          goalNode = node;  ///
 
-    return assumptionNode;
+    return goalNode;
   }
 
   getStatementNode() { return this.statement.getStatementNode(); }
 
   getMetavariable() { return this.reference.getMetavariable(); }
 
-  isEqualTo(assumption) {
-    const assumptionNode = assumption.getNode(),
-          assumptionNodeMatches = this.matchAssumptionNode(assumptionNode),
-          equalTo = assumptionNodeMatches;  ///
+  isEqualTo(goal) {
+    const goalNode = goal.getNode(),
+          goalNodeMatches = this.matchGoalNode(goalNode),
+          equalTo = goalNodeMatches;  ///
 
     return equalTo;
   }
 
-  matchAssumptionNode(assumptionNode) {
-    const node = assumptionNode, ///
+  matchGoalNode(goalNode) {
+    const node = goalNode, ///
           nodeMatches = this.matchNode(node),
-          assumptionNodeMatches = nodeMatches; ///
+          goalNodeMatches = nodeMatches; ///
 
-    return assumptionNodeMatches;
+    return goalNodeMatches;
   }
 
   findSubproofAssertion(context) {
@@ -66,31 +66,31 @@ export default define(class Assumption extends Element {
     return subproofAssertion;
   }
 
-  findValidAssumption(context) {
-    const assumptionNode = this.getAssumptionNode(),
-          assumption = context.findAssumptionByAssumptionNode(assumptionNode),
-          validAssumption = assumption;  ///
+  findValidGoal(context) {
+    const goalNode = this.getGoalNode(),
+          goal = context.findGoalByGoalNode(goalNode),
+          validGoal = goal;  ///
 
-    return validAssumption;
+    return validGoal;
   }
 
   validate(context) {
-    let assumption = null;
+    let goal = null;
 
-    const assumptionString = this.getString();  ///
+    const goalString = this.getString();  ///
 
-    context.trace(`Validating the '${assumptionString}' assumption...`);
+    context.trace(`Validating the '${goalString}' goal...`);
 
     let validates = false;
 
-    const validAssumption = this.findValidAssumption(context);
+    const validGoal = this.findValidGoal(context);
 
-    if (validAssumption !== null) {
+    if (validGoal !== null) {
       validates = true;
 
-      assumption = validAssumption; ///
+      goal = validGoal; ///
 
-      context.debug(`...the '${assumptionString}' assumption is already valid.`);
+      context.debug(`...the '${goalString}' goal is already valid.`);
     } else {
       const statementValidates = this.validateStatement(context);
 
@@ -116,25 +116,25 @@ export default define(class Assumption extends Element {
       }
 
       if (validates) {
-        assumption = this;  ///
+        goal = this;  ///
 
-        context.addAssumption(assumption);
+        context.addGoal(goal);
       }
     }
 
     if (validates) {
-      context.debug(`...validated the '${assumptionString}' assumption.`);
+      context.debug(`...validated the '${goalString}' goal.`);
     }
 
-    return assumption;
+    return goal;
   }
 
   validateReference(context) {
     let referenceValidates = false;
 
-    const assumptionString = this.getString();  ///
+    const goalString = this.getString();  ///
 
-    context.trace(`Validating the '${assumptionString}' assumption's reference...`);
+    context.trace(`Validating the '${goalString}' goal's reference...`);
 
     const reference = this.reference.validate(context);
 
@@ -145,7 +145,7 @@ export default define(class Assumption extends Element {
     }
 
     if (referenceValidates) {
-      context.debug(`...validated the '${assumptionString}' assumption's reference.`);
+      context.debug(`...validated the '${goalString}' goal's reference.`);
     }
 
     return referenceValidates;
@@ -154,9 +154,9 @@ export default define(class Assumption extends Element {
   validateStatement(context) {
     let statementValidates = false;
 
-    const assumptionString = this.getString();  ///
+    const goalString = this.getString();  ///
 
-    context.trace(`Validating the '${assumptionString}' assumption's statement...`);
+    context.trace(`Validating the '${goalString}' goal's statement...`);
 
     const statement = this.statement.validate(context);
 
@@ -165,7 +165,7 @@ export default define(class Assumption extends Element {
     }
 
     if (statementValidates) {
-      context.debug(`...validated the '${assumptionString}' assumption's statement.`);
+      context.debug(`...validated the '${goalString}' goal's statement.`);
     }
 
     return statementValidates;
@@ -174,14 +174,14 @@ export default define(class Assumption extends Element {
   validateWhenStated(context) {
     let validatesWhenStated;
 
-    const assumptionString = this.getString();  ///
+    const goalString = this.getString();  ///
 
-    context.trace(`Validating the '${assumptionString}' stated assumption...`);
+    context.trace(`Validating the '${goalString}' stated goal...`);
 
     validatesWhenStated = true
 
     if (validatesWhenStated) {
-      context.debug(`...validated the '${assumptionString}' stated assumption.`);
+      context.debug(`...validated the '${goalString}' stated goal.`);
     }
 
     return validatesWhenStated;
@@ -190,34 +190,18 @@ export default define(class Assumption extends Element {
   validateWhenDerived(context) {
     let validatesWhenDerived;
 
-    const assumptionString = this.getString();  ///
+    const goalString = this.getString();  ///
 
-    context.trace(`Validating the '${assumptionString}' derived assumption...`);
+    context.trace(`Validating the '${goalString}' derived goal...`);
 
     const topLevelMetaAssertions = context.getTopLevelMetaAssertions();
 
-    filter(topLevelMetaAssertions, (topLevelMetaAssertion) => {
-      let labelUnifies;
-
-      reconcile((context) => {
-        const label = topLevelMetaAssertion.getLabel();
-
-        labelUnifies = this.reference.unifyLabel(label, context);
-      }, context);
-
-      if (labelUnifies) {
-        return true;
-      }
-    });
+    debugger
 
     validatesWhenDerived = each(topLevelMetaAssertions, (topLevelMetaAssertion) => {
       let statementUnifies;
 
       reconcile((context) => {
-        const label = topLevelMetaAssertion.getLabel();
-
-        this.reference.unifyLabel(label, context);
-
         const statement = topLevelMetaAssertion.getStatement();
       }, context);
 
@@ -227,7 +211,7 @@ export default define(class Assumption extends Element {
     })
 
     if (validatesWhenDerived) {
-      context.debug(`...validated the '${assumptionString}' derived assumption.`);
+      context.debug(`...validated the '${goalString}' derived goal.`);
     }
 
     return validatesWhenDerived;
@@ -238,20 +222,20 @@ export default define(class Assumption extends Element {
 
     const context = specificContext, ///
           statementString = statement.getString(),
-          assumptionString = this.getString();  ///
+          proofAssertionString = this.getString();  ///
 
-    context.trace(`Unifying the '${statementString}' statement with the '${assumptionString}' assumption's statement...`);
+    context.trace(`Unifying the '${statementString}' statement with the '${proofAssertionString}' goal's statement...`);
 
     statementUnifies = this.statement.unifyStatement(statement, generalContext, specificContext);
 
     if (statementUnifies) {
-      context.debug(`...unified the '${statementString}' statement with the '${assumptionString}' assumption's statement.`);
+      context.debug(`...unified the '${statementString}' statement with the '${proofAssertionString}' goal's statement.`);
     }
 
     return statementUnifies;
   }
 
-  static name = "Assumption";
+  static name = "Goal";
 
   toJSON() {
     const string = this.getString();
@@ -275,27 +259,27 @@ export default define(class Assumption extends Element {
   static fromJSON(json, context) {
     return instantiate((context) => {
       const { string } = json,
-            assumptionNode = instantiateAssumption(string, context),
-            node = assumptionNode,  ///
+            goalNode = instantiateGoal(string, context),
+            node = goalNode,  ///
             breakPoint = breakPointFromJSON(json),
-            reference = referenceFromAssumptionNode(assumptionNode, context),
-            statement = statementFromAssumptionNode(assumptionNode, context),
-            assumption = new Assumption(context, string, node, breakPoint, reference, statement);
+            reference = referenceFromGoalNode(goalNode, context),
+            statement = statementFromGoalNode(goalNode, context),
+            goal = new Goal(context, string, node, breakPoint, reference, statement);
 
-      return assumption;
+      return goal;
     }, context);
   }
 });
 
-function referenceFromAssumptionNode(assumptionNode, context) {
-  const metavariableNode = assumptionNode.getMetavariableNode(context),
+function referenceFromGoalNode(goalNode, context) {
+  const metavariableNode = goalNode.getMetavariableNode(context),
         reference = context.findReferenceByMetavariableNode(metavariableNode);
 
   return reference;
 }
 
-function statementFromAssumptionNode(assumptionNode, context) {
-  const statementNode = assumptionNode.getStatementNode(),
+function statementFromGoalNode(goalNode, context) {
+  const statementNode = goalNode.getStatementNode(),
         statement = context.findStatementByStatementNode(statementNode);
 
   return statement;

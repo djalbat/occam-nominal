@@ -142,17 +142,17 @@ export function signatureStringFromSignature(signature) {
   return signatureString;
 }
 
-export function assumptionStringFromStatement(stastement) {
-  const statementString = stastement.getString(),
-        assumptionString = `. :: ${statementString}`;
-
-  return assumptionString;
-}
-
 export function typeStringFromNominalTypeName(nominalTypeName) {
   const typeString = nominalTypeName;  ///
 
   return typeString;
+}
+
+export function implicitAssumptionStringFromStatement(stastement) {
+  const statementString = stastement.getString(),
+        implicitAssumptionString = `. :: ${statementString}`;
+
+  return implicitAssumptionString;
 }
 
 export function termSubstitutionStringFromTermAndVariable(term, variable) {
@@ -161,6 +161,14 @@ export function termSubstitutionStringFromTermAndVariable(term, variable) {
         termSubstitutionString = `[${termString} for ${variableString}]`;
 
   return termSubstitutionString;
+}
+
+export function constraintStringFromReferenceAndStatement(reference, statement) {
+  const statementString = statement.getString(),
+        referneceString = reference.getString(),
+        constraintString = `${referneceString} :: ${statementString}`;
+
+  return constraintString;
 }
 
 export function rulsStringFromLabelsPremisesAndConclusion(labels, premises, conclusion) {
@@ -202,14 +210,6 @@ export function sectionStringFromHypothesesAndTopLevelAssertion(hypotheses, topL
         sectionString = `[${hypothesesString}]::: ${topLevelAssertionString}`;
 
   return sectionString;
-}
-
-export function metaLevelAssumptionStringFromReferenceAndStatement(reference, statement) {
-  const statementString = statement.getString(),
-        referneceString = reference.getString(),
-        metaLevelAssumptionString = `${referneceString} :: ${statementString}`;
-
-  return metaLevelAssumptionString;
 }
 
 export function procedureCallStringFromProcedureReferenceAndParameters(procedureReference, parameters) {

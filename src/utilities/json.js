@@ -251,16 +251,32 @@ export function termsFromJSON(json, context) {
   let { terms } = json;
 
   const { Term } = elements,
-        termsJSON = terms; ///
+    termsJSON = terms; ///
 
   terms = termsJSON.map((termJSON) => {
     const json = termJSON,  ///
-          term = Term.fromJSON(json, context);
+      term = Term.fromJSON(json, context);
 
     return term;
   });
 
   return terms;
+}
+
+export function goalsFromJSON(json, context) {
+  let { goals = [] } = json;
+
+  const { Goal } = elements,
+        goalsJSON = goals; ///
+
+  goals = goalsJSON.map((goalJSON) => {
+    const json = goalJSON,  ///
+          goal = Goal.fromJSON(json, context);
+
+    return goal;
+  });
+
+  return goals;
 }
 
 export function rulesFromJSON(json, context) {
@@ -740,20 +756,20 @@ export function propertyRelationsFromJSON(json, context) {
   return propertyRelations;
 }
 
-export function metaLevelAssumptionsFromJSON(json, context) {
-  let { metaLevelAssumptions } = json;
+export function constraintsFromJSON(json, context) {
+  let { constraints } = json;
 
-  const { MetaLevelAssumption } = elements,
-        metaLevelAssumptionsJSON = metaLevelAssumptions; ///
+  const { Constraint } = elements,
+        constraintsJSON = constraints; ///
 
-  metaLevelAssumptions = metaLevelAssumptionsJSON.map((metaLevelAssumptionJSON) => {
-    const json = metaLevelAssumptionJSON,  ///
-          metaLevelAssumption = MetaLevelAssumption.fromJSON(json, context);
+  constraints = constraintsJSON.map((constraintJSON) => {
+    const json = constraintJSON,  ///
+          constraint = Constraint.fromJSON(json, context);
 
-    return metaLevelAssumption;
+    return constraint;
   });
 
-  return metaLevelAssumptions;
+  return constraints;
 }
 
 export function declaredMetavariablesFromJSON(json, context) {
@@ -785,6 +801,14 @@ export function termToTermJSON(term) {
                        null;
 
   return termJSON;
+}
+
+export function goalToGoalJSON(goal) {
+  const goalJSON = (goal !== null) ?
+                     goal.toJSON() :
+                       null;
+
+  return goalJSON;
 }
 
 export function typeToTypeJSON(type) {
@@ -921,6 +945,16 @@ export function declaredMetavariableToDEclaredMetavariableJSON(declaredMetavaria
   return declaredMetavariableJSON;
 }
 
+export function typesToTypesJSON(types) {
+  const typesJSON = types.map((type) => {
+    const typeJSON = type.toJSON();
+
+    return typeJSON;
+  });
+
+  return typesJSON;
+}
+
 export function termsToTermsJSON(terms) {
   const termsJSON = terms.map((term) => {
     const termJSON = term.toJSON();
@@ -931,14 +965,14 @@ export function termsToTermsJSON(terms) {
   return termsJSON;
 }
 
-export function typesToTypesJSON(types) {
-  const typesJSON = types.map((type) => {
-    const typeJSON = type.toJSON();
+export function goalsToGoalsJSON(goals) {
+  const goalsJSON = goals.map((goal) => {
+    const goalJSON = goal.toJSON();
 
-    return typeJSON;
+    return goalJSON;
   });
 
-  return typesJSON;
+  return goalsJSON;
 }
 
 export function rulesToRulesJSON(rules) {
@@ -1238,14 +1272,14 @@ export function declaredVariablesToDeclaredVariablesJSON(declaredVariables) {
   return declaredVariablesJSON;
 }
 
-export function metaLevelAssumptionsToMetaLevelAssumptionsJSON(metaLevelAssumptions) {
-  const metaLevelAssumptionsJSON = metaLevelAssumptions.map((metaLevelAssumption) => {
-    const metaLevelAssumptionJSON = metaLevelAssumption.toJSON();
+export function constraintsToConstraintsJSON(constraints) {
+  const constraintsJSON = constraints.map((constraint) => {
+    const constraintJSON = constraint.toJSON();
 
-    return metaLevelAssumptionJSON;
+    return constraintJSON;
   });
 
-  return metaLevelAssumptionsJSON;
+  return constraintsJSON;
 }
 
 export function declaredMetavariablesToDeclaredMetavariablesJSON(declaredMetavariables) {

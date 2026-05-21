@@ -14,11 +14,11 @@ import { breakPointFromJSON, breakPointToBreakPointJSON } from "../utilities/bre
 const { one, push } = arrayUtilities;
 
 export default define(class Judgement extends Element {
-  constructor(context, string, node, breakPoint, frame, assumption) {
+  constructor(context, string, node, breakPoint, frame, goal) {
     super(context, string, node, breakPoint);
 
     this.frame = frame;
-    this.assumption = assumption;
+    this.goal = goal;
   }
 
   getFrame() {
@@ -26,7 +26,7 @@ export default define(class Judgement extends Element {
   }
 
   getAssumption() {
-    return this.assumption;
+    return this.goal;
   }
 
   getJudgementNode() {
@@ -55,9 +55,7 @@ export default define(class Judgement extends Element {
 
   isImplicit() { return this.frame.isImplicit(); }
 
-  getReference() { return this.assumption.getReference(); }
-
-  getStatement() { return this.assumption.getStatement(); }
+  getStatement() { return this.goal.getStatement(); }
 
   getMetavariable() { return this.frame.getMetavariable(); }
 
@@ -72,9 +70,9 @@ export default define(class Judgement extends Element {
 
     if (metavariable !== null) {
       const proofAssertions = context.getProofAssertions(),
-            ephemeralAssumptions = ephemeralAssumptionsFromProofAssertions(proofAssertions, context);
+            implicitAssumptions = implicitAssumptionsFromProofAssertions(proofAssertions, context);
 
-      push(assumptions, ephemeralAssumptions);
+      push(assumptions, implicitAssumptions);
     }
 
     return assumptions;
@@ -92,7 +90,7 @@ export default define(class Judgement extends Element {
 
   compareMetavariableName(metavariableName) { return this.frame.compareMetavariableName(metavariableName); }
 
-  findSubproofAssertion(context) { return this.assumption.findSubproofAssertion(context); }
+  findSubproofAssertion(context) { return this.goal.findSubproofAssertion(context); }
 
   findValidJudgement(context) {
     const judgementNode = this.getJudgementNode(),
@@ -184,18 +182,18 @@ export default define(class Judgement extends Element {
 
     const judgementString = this.getString(); ///
 
-    context.trace(`Validating the '${judgementString}' judgement's assumption...`);
+    context.trace(`Validating the '${judgementString}' judgement's goal...`);
 
-    const assumption = this.assumption.validate(context);
+    const goal = this.goal.validate(context);
 
-    if (assumption !== null) {
-      this.assumption = assumption;
+    if (goal !== null) {
+      this.goal = goal;
 
       assumptionValidates = true;
     }
 
     if (assumptionValidates) {
-      context.debug(`...validated the '${judgementString}' judgement's assumption.`);
+      context.debug(`...validated the '${judgementString}' judgement's goal.`);
     }
 
     return assumptionValidates;
@@ -273,11 +271,11 @@ export default define(class Judgement extends Element {
             node = judgementNode,  ///
             breakPoint = breakPointFromJSON(json),
             frame = frameFromJudgementNode(judgementNode, context),
-            assumption = assumptionFromJudgementNode(judgementNode, context);
+            goal = goalFromJudgementNode(judgementNode, context);
 
       context = null;
 
-      const judgement = new Judgement(context, string, node, breakPoint, frame, assumption);
+      const judgement = new Judgement(context, string, node, breakPoint, frame, goal);
 
       return judgement;
     }, context);
@@ -291,6 +289,13 @@ export default define(class Judgement extends Element {
   }
 });
 
+function goalFromJudgementNode(judgementNode, context) {
+  const goalNode = judgementNode.getGoalNode(),
+        goal = context.findGoalByGolaNode(goalNode);
+
+  return goal;
+}
+
 function frameFromJudgementNode(judgementNode, context) {
   const frameNode = judgementNode.getFrameNode(),
         frame = context.findFrameByFrameNode(frameNode);
@@ -298,23 +303,15 @@ function frameFromJudgementNode(judgementNode, context) {
   return frame;
 }
 
-function assumptionFromJudgementNode(judgementNode, context) {
-  const assumptionNode = judgementNode.getAssumptionNode(),
-        assumption = context.findAssumptionByAssumptionNode(assumptionNode);
-
-  return assumption;
-}
-
-function ephemeralAssumptionsFromProofAssertions(proofAssertions, context) {
-  const ephemeralAssumptions = proofAssertions.map((proofAssertion) => {
-    const { Assumption } = elements,
+function implicitAssumptionsFromProofAssertions(proofAssertions, context) {
+  const implicitAssumptions = proofAssertions.map((proofAssertion) => {
+    const { InplicitAssumption } = elements,
           statement = proofAssertion.getStatement(),
-          assumption = Assumption.fromStatement(statement, context),
-          ephemeralAssumption = assumption; ///
+          implicitAssumption = InplicitAssumption.fromStatement(statement, context);
 
-    return ephemeralAssumption;
+    return implicitAssumption;
   });
 
-  return ephemeralAssumptions;
+  return implicitAssumptions;
 }
 

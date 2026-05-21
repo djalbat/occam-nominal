@@ -2,7 +2,7 @@
 
 import { NonTerminalNode } from "occam-languages";
 
-import { FRAME_RULE_NAME, ASSUMPTION_RULE_NAME } from "../ruleNames";
+import { GOAL_RULE_NAME, FRAME_RULE_NAME } from "../ruleNames";
 
 export default class JudgementNode extends NonTerminalNode {
   isSingular() {
@@ -12,18 +12,18 @@ export default class JudgementNode extends NonTerminalNode {
     return singular;
   }
 
+  getGoalNode() {
+    const ruleName = GOAL_RULE_NAME,
+          goalNode = this.getNodeByRuleName(ruleName);
+
+    return goalNode;
+  }
+
   getFrameNode() {
     const ruleName = FRAME_RULE_NAME,
           frameNode = this.getNodeByRuleName(ruleName);
 
     return frameNode;
-  }
-
-  getAssumptionNode() {
-    const ruleName = ASSUMPTION_RULE_NAME,
-          assumptionNodes = this.getNodeByRuleName(ruleName);
-
-    return assumptionNodes;
   }
 
   static fromRuleNameChildNodesOpacityAndPrecedence(ruleName, childNodes, opacity, precedence) { return NonTerminalNode.fromRuleNameChildNodesOpacityAndPrecedence(JudgementNode, ruleName, childNodes, opacity, precedence); }

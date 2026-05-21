@@ -42,7 +42,7 @@ export default define(class SignatureAssertion extends Assertion {
 
     const validAssertion = this.findValidAssertion(context);
 
-    if (validAssertion) {
+    if (validAssertion !== null) {
       validates = true;
 
       signatureAssertion = validAssertion; ///

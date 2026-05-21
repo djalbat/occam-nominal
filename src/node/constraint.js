@@ -2,9 +2,9 @@
 
 import { NonTerminalNode } from "occam-languages";
 
-import { REFERENCE_RULE_NAME, STATEMENT_RULE_NAME } from "../../ruleNames";
+import { REFERENCE_RULE_NAME, STATEMENT_RULE_NAME } from "../ruleNames";
 
-export default class MetaLevelAssumptionpNode extends NonTerminalNode {
+export default class ConstraintNode extends NonTerminalNode {
   getReferenceNode() {
     const ruleName = REFERENCE_RULE_NAME,
           referenceNode = this.getNodeByRuleName(ruleName);
@@ -19,5 +19,5 @@ export default class MetaLevelAssumptionpNode extends NonTerminalNode {
     return statementNode;
   }
 
-  static fromRuleNameChildNodesOpacityAndPrecedence(ruleName, childNodes, opacity, precedence) { return NonTerminalNode.fromRuleNameChildNodesOpacityAndPrecedence(MetaLevelAssumptionpNode, ruleName, childNodes, opacity, precedence); }
+  static fromRuleNameChildNodesOpacityAndPrecedence(ruleName, childNodes, opacity, precedence) { return NonTerminalNode.fromRuleNameChildNodesOpacityAndPrecedence(ConstraintNode, ruleName, childNodes, opacity, precedence); }
 }

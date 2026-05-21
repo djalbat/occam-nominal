@@ -82,7 +82,7 @@ export default define(class FrameSubstitution extends Substitution {
 
     const validSubstitution = this.findValidSubstitution(context);
 
-    if (validSubstitution) {
+    if (validSubstitution !== null) {
       validates = true;
 
       frameSubstitution = validSubstitution;  ///

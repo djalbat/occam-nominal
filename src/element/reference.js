@@ -115,7 +115,7 @@ export default define(class Reference extends Element {
 
     const validReference = this.findValidReference(context);
 
-    if (validReference) {
+    if (validReference !== null) {
       validates = true;
 
       reference = validReference;  ///

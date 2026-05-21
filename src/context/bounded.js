@@ -9,13 +9,13 @@ import { mergeEquivalences, equivalencesFromEquality, separateGroundedTermsAndDe
 const { last, clear } = arrayUtilities;
 
 class BoundedContext extends Context {
-  constructor(context, assignments, equivalences, declaredVariables, metaLevelAssumptions, subproofOrProofAssertions) {
+  constructor(context, assignments, equivalences, declaredVariables, constraints, subproofOrProofAssertions) {
     super(context);
 
     this.assignments = assignments;
     this.equivalences = equivalences;
     this.declaredVariables = declaredVariables;
-    this.metaLevelAssumptions = metaLevelAssumptions;
+    this.constraints = constraints;
     this.subproofOrProofAssertions = subproofOrProofAssertions;
   }
 
@@ -54,8 +54,8 @@ class BoundedContext extends Context {
     return declaredVariables;
   }
 
-  getMetaLevelAssumptions() {
-    return this.metaLevelAssumptions;
+  getConstraints() {
+    return this.constraints;
   }
 
   getSubproofOrProofAssertions() {
@@ -115,7 +115,7 @@ class BoundedContext extends Context {
   isMetaLevel() {
     let metaLevel;
 
-    if (this.metaLevelAssumptions !== null) {
+    if (this.constraints !== null) {
       metaLevel = true;
     } else {
       const context = this.getContext();
@@ -170,35 +170,35 @@ class BoundedContext extends Context {
     context.debug(`...added the '${declaredVariableString}' declared variable to the bounded context.`);
   }
 
-  addMetaLevelAssumption(metaLevelAssumption) {
-    if (this.metaLevelAssumptions === null) {
-      super.addMetaLevelAssumption(metaLevelAssumption);
+  addConstraint(constraint) {
+    if (this.constraints === null) {
+      super.addConstraint(constraint);
 
       return;
     }
 
     const context = this, ///
-          metaLevelAssumptionA = metaLevelAssumption, ///
-          metaLevelAssumptionString = metaLevelAssumption.getString();
+          constraintA = constraint, ///
+          constraintString = constraint.getString();
 
-    context.trace(`Adding the '${metaLevelAssumptionString}' meta-level assumption to the bounded context...`);
+    context.trace(`Adding the '${constraintString}' constraint to the bounded context...`);
 
-    const metaLevelAssumptionB = this.metaLevelAssumptions.find((metaLevelAssumption) => {
-      const metaLevelAssumptionB = metaLevelAssumption, ///
-            metaLevelAssumptionAEqualToAssumptionB = metaLevelAssumptionA.isEqualTo(metaLevelAssumptionB);
+    const constraintB = this.constraints.find((constraint) => {
+      const constraintB = constraint, ///
+            constraintAEqualToAssumptionB = constraintA.isEqualTo(constraintB);
 
-      if (metaLevelAssumptionAEqualToAssumptionB) {
+      if (constraintAEqualToAssumptionB) {
         return true;
       }
     }) || null;
 
-    if (metaLevelAssumptionB !== null) {
-      context.debug(`The '${metaLevelAssumptionString}' metaLevelAssumption has already been added to the bounded context.`);
+    if (constraintB !== null) {
+      context.debug(`The '${constraintString}' constraint has already been added to the bounded context.`);
     } else {
-      this.metaLevelAssumptions.push(metaLevelAssumption);
+      this.constraints.push(constraint);
     }
 
-    context.debug(`...added the '${metaLevelAssumptionString}' meta-level assumption to the bounded context.`);
+    context.debug(`...added the '${constraintString}' constraint to the bounded context.`);
   }
 
   addSubproofOrProofAssertion(subproofOrProofAssertion) {
@@ -239,22 +239,22 @@ class BoundedContext extends Context {
     return declaredVariable;
   }
 
-  findMetaLevelAssumptionByMetaLevelAssumptionNode(metaLevelAssumptionNode) {
-    let metaLevelAssumption;
+  findConstraintByConstraintNode(constraintNode) {
+    let constraint;
 
-    if (this.metaLevelAssumptions === null) {
-      metaLevelAssumption = super.findMetaLevelAssumptionByMetaLevelAssumptionNode(metaLevelAssumptionNode);
+    if (this.constraints === null) {
+      constraint = super.findConstraintByConstraintNode(constraintNode);
     } else {
-      metaLevelAssumption = this.metaLevelAssumptions.find((metaLevelAssumption) => {
-        const metaLevelAssumptionNodeMatches = metaLevelAssumption.matchMetaLevelAssumptionNode(metaLevelAssumptionNode);
+      constraint = this.constraints.find((constraint) => {
+        const constraintNodeMatches = constraint.matchConstraintNode(constraintNode);
 
-        if (metaLevelAssumptionNodeMatches) {
+        if (constraintNodeMatches) {
           return true;
         }
       }) || null;
     }
 
-    return metaLevelAssumption;
+    return constraint;
   }
 
   isDeclaredVariablePresentByVariableIdentifier(variableIdentifier) {
@@ -289,19 +289,19 @@ class BoundedContext extends Context {
     const assignments = [],
           equivalences = [],
           declaredVariables = [],
-          metaLevelAssumptions = null,
+          constraints = null,
           subproofOrProofAssertions = [],
-          boundedContext = new BoundedContext(context, assignments, equivalences, declaredVariables, metaLevelAssumptions, subproofOrProofAssertions);
+          boundedContext = new BoundedContext(context, assignments, equivalences, declaredVariables, constraints, subproofOrProofAssertions);
 
     return boundedContext;
   }
 
-  static fromMetaLevelAssumptions(metaLevelAssumptions, context) {
+  static fromConstraints(constraints, context) {
     const assignments = [],
           equivalences = [],
           declaredVariables = [],
           subproofOrProofAssertions = [],
-          boundedContext = new BoundedContext(context, assignments, equivalences, declaredVariables, metaLevelAssumptions, subproofOrProofAssertions);
+          boundedContext = new BoundedContext(context, assignments, equivalences, declaredVariables, constraints, subproofOrProofAssertions);
 
     return boundedContext;
   }

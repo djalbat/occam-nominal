@@ -45,7 +45,7 @@ export default define(class TypeAssertion extends Assertion {
 
     const validAssertion = this.findValidAssertion(context);
 
-    if (validAssertion) {
+    if (validAssertion !== null) {
       validates = true;
 
       typeAssertion = validAssertion; ///

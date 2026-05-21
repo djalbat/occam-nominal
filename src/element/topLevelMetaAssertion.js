@@ -10,24 +10,23 @@ import { topLevelMetaAssertionStringFromLabelSuppositionsAndDeduction } from "..
 import { labelFromJSON,
          labelToLabelJSON,
          deductionFromJSON,
+         constraintsFromJSON,
          suppositionsFromJSON,
          deductionToDeductionJSON,
-         metaLevelAssumptionsFromJSON,
-         suppositionsToSuppositionsJSON,
-         metaLevelAssumptionsToMetaLevelAssumptionsJSON } from "../utilities/json";
-import assumption from "./assumption";
+         constraintsToMConstraintJSON,
+         suppositionsToSuppositionsJSON } from "../utilities/json";
 
 const { asyncForwardsEvery } = asynchronousUtilities;
 
 export default class TopLevelMetaAssertion extends Element {
-  constructor(context, string, node, breakPoint, label, suppositions, deduction, proof, metaLevelAssumptions) {
+  constructor(context, string, node, breakPoint, label, suppositions, deduction, proof, constraints) {
     super(context, string, node, breakPoint);
 
     this.label = label;
     this.suppositions = suppositions;
     this.deduction = deduction;
     this.proof = proof;
-    this.metaLevelAssumptions = metaLevelAssumptions;
+    this.constraints = constraints;
   }
 
   getLabel() {
@@ -46,8 +45,8 @@ export default class TopLevelMetaAssertion extends Element {
     return this.proof;
   }
 
-  getMetaLevelAssumptions() {
-    return this.metaLevelAssumptions;
+  getMConstraint() {
+    return this.constraints;
   }
 
   getSupposition(index) {
@@ -96,7 +95,7 @@ export default class TopLevelMetaAssertion extends Element {
           }
         }
       }
-    }, this.metaLevelAssumptions, context);
+    }, this.constraints, context);
 
     if (verifies) {
       context.debug(`...verified the '${topLevelMetaAssertionString}' top level meta assertion.`);
@@ -295,8 +294,8 @@ export default class TopLevelMetaAssertion extends Element {
   }
 
   unifyAssumptions(assumptions, context) {
-    const assumptionsUnify = this.metaLevelAssumptions.every((metaLevelAssumption) => {
-      const assumptionsUnify = metaLevelAssumption.unifyAssumptions(assumptions, context);
+    const assumptionsUnify = this.constraints.every((constraint) => {
+      const assumptionsUnify = constraint.unifyAssumptions(assumptions, context);
 
       if (assumptionsUnify) {
         return true;
@@ -407,7 +406,7 @@ export default class TopLevelMetaAssertion extends Element {
     const labelJSON = labelToLabelJSON(this.label),
           deductionJSON = deductionToDeductionJSON(this.deduction),
           suppositionsJSON = suppositionsToSuppositionsJSON(this.suppositions),
-          metaLevelAssumptionsJSON = metaLevelAssumptionsToMetaLevelAssumptionsJSON(this.metaLevelAssumptions),
+          constraintsJSON = constraintsToMConstraintJSON(this.constraints),
           string = this.getString();
 
     let breakPoint;
@@ -421,14 +420,14 @@ export default class TopLevelMetaAssertion extends Element {
     const label = labelJSON,  ///
           deduction = deductionJSON,  ///
           suppositions = suppositionsJSON,  ///
-          metaLevelAssumptions = metaLevelAssumptionsJSON,  ///
+          constraints = constraintsJSON,  ///
           json = {
             string,
             breakPoint,
             label,
             deduction,
             suppositions,
-            metaLevelAssumptions
+            constraints
           };
 
     return json;
@@ -438,12 +437,12 @@ export default class TopLevelMetaAssertion extends Element {
     const label = labelFromJSON(json, context),
           deduction = deductionFromJSON(json, context),
           suppositions = suppositionsFromJSON(json, context),
-          metaLevelAssumptions = metaLevelAssumptionsFromJSON(json, context),
+          constraints = constraintsFromJSON(json, context),
           string = topLevelMetaAssertionStringFromLabelSuppositionsAndDeduction(label, suppositions, deduction),
           node = null,
           breakPoint = breakPointFromJSON(json),
           proof = null,
-          topLevelMetaAssertion = new Class(context, string, node, breakPoint, label, suppositions, deduction, proof, metaLevelAssumptions);
+          topLevelMetaAssertion = new Class(context, string, node, breakPoint, label, suppositions, deduction, proof, constraints);
 
     return topLevelMetaAssertion;
   }

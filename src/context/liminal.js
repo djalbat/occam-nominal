@@ -133,7 +133,7 @@ export default class LiminalContext extends Context {
     return empty;
   }
 
-  qualify(assumption, metaLevelAssumption) {
+  qualify(assumption, constraint) {
     let qualifies = false;
 
     const empty = this.isEmpty();
@@ -146,7 +146,7 @@ export default class LiminalContext extends Context {
       if (soleDerivedSubstitution !== null) {
         const { ReferenceDerivedSubstitution } = elements,
               context = this,
-              referenceDerivedSubstitution = ReferenceDerivedSubstitution.fromAssumptionAndMetaLevelAssumption(assumption, metaLevelAssumption, context),
+              referenceDerivedSubstitution = ReferenceDerivedSubstitution.fromAssumptionAndConstraint(assumption, constraint, context),
               referenceDerivedSubstitutionComparesToSsoleDerivedSubstitution = referenceDerivedSubstitution.compareSubstitution(soleDerivedSubstitution);
 
         if (referenceDerivedSubstitutionComparesToSsoleDerivedSubstitution) {

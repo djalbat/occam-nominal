@@ -85,7 +85,7 @@ export default define(class TermSubstitution extends Substitution {
 
     const validSubstitution = this.findValidSubstitution(context);
 
-    if (validSubstitution) {
+    if (validSubstitution !== null) {
       validates = true;
 
       termSubstitution = validSubstitution; ///

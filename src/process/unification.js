@@ -222,8 +222,8 @@ async function unifyStepAsUnqualifiedSignatureAssertion(step, context) {
   return stepUnifiesAsUnqualifiedSignatureAssertion;
 }
 
-async function unifyStepAsQualifiedMetaLevelAssumption(step, context) {
-  let stepUnifiesAsQualifiedMetaLevelAssumption = false;
+async function unifyStepAsQualifiedConstraint(step, context) {
+  let stepUnifiesAsQualifiedConstraint = false;
 
   const metaLevel = context.isMetaLevel();
 
@@ -234,27 +234,27 @@ async function unifyStepAsQualifiedMetaLevelAssumption(step, context) {
       const stepString = step.getString(),
             referenceString = reference.getString();
 
-      context.trace(`Unifying the '${stepString}' step as a meta-level assumption with the '${referenceString}' reference...`);
+      context.trace(`Unifying the '${stepString}' step as a constraint with the '${referenceString}' reference...`);
 
-      let metaLevelAssumption;
+      let constraint;
 
-      const { MetaLevelAssumption } = elements;
+      const { Constraint } = elements;
 
-      metaLevelAssumption = MetaLevelAssumption.fromStep(step, context);
+      constraint = Constraint.fromStep(step, context);
 
-      metaLevelAssumption = metaLevelAssumption.validate(context);  ///
+      constraint = constraint.validate(context);  ///
 
-      if (metaLevelAssumption !== null) {
-        stepUnifiesAsQualifiedMetaLevelAssumption = true;
+      if (constraint !== null) {
+        stepUnifiesAsQualifiedConstraint = true;
       }
 
-      if (stepUnifiesAsQualifiedMetaLevelAssumption) {
-        context.debug(`...unified the '${stepString}' step as a meta-level assumption with the '${referenceString}' reference.`);
+      if (stepUnifiesAsQualifiedConstraint) {
+        context.debug(`...unified the '${stepString}' step as a constraint with the '${referenceString}' reference.`);
       }
     }
   }
 
-  return stepUnifiesAsQualifiedMetaLevelAssumption;
+  return stepUnifiesAsQualifiedConstraint;
 }
 
 async function unifyStepAsQualifiedSignatureAssertion(step, context) {
@@ -326,7 +326,7 @@ export const unifySteps = [
   unifyStepAsUnqualifiedTypeAssertion,
   unifyStepAsUnqualifiedPropertyAssertion,
   unifyStepAsUnqualifiedSignatureAssertion,
-  unifyStepAsQualifiedMetaLevelAssumption,
+  unifyStepAsQualifiedConstraint,
   unifyStepAsQualifiedSignatureAssertion,
   compareStepWithSubproofOrProofAssertions
 ];

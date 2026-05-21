@@ -18,7 +18,7 @@ import { TERM_RULE_NAME,
          COMBINATOR_RULE_NAME,
          CONCLUSION_RULE_NAME,
          HYPOTHESIS_RULE_NAME,
-         ASSUMPTION_RULE_NAME,
+         CONSTRAINT_RULE_NAME,
          TYPE_PREFIX_RULE_NAME,
          SUPPOSITION_RULE_NAME,
          CONSTRUCTOR_RULE_NAME,
@@ -34,7 +34,7 @@ import { TERM_RULE_NAME,
          PROCEDURE_REFERENCE_RULE_NAME,
          CONTAINED_ASSERTION_RULE_NAME,
          SIGNATURE_ASSERTION_RULE_NAME,
-         META_LEVEL_ASSUMPTION_RULE_NAME,
+         IMPLICIT_ASSUMPTION_RULE_NAME,
          STATEMENT_SUBSTITUTION_RULE_NAME,
          REFERENCE_SUBSTITUTION_RULE_NAME } from "../ruleNames";
 
@@ -52,10 +52,10 @@ const termPlaceholderRule = ruleFromRuleName(TERM_RULE_NAME),
       statementPlaceholderRule = ruleFromRuleName(STATEMENT_RULE_NAME),
       referencePlaceholderRule = ruleFromRuleName(REFERENCE_RULE_NAME),
       signaturePlaceholderRule = ruleFromRuleName(SIGNATURE_RULE_NAME),
+      constraintPlaceholderRule = ruleFromRuleName(CONSTRAINT_RULE_NAME),
       combinatorPlaceholderRule = ruleFromRuleName(COMBINATOR_RULE_NAME),
       conclusionPlaceholderRule = ruleFromRuleName(CONCLUSION_RULE_NAME),
       hypothesisPlaceholderRule = ruleFromRuleName(HYPOTHESIS_RULE_NAME),
-      assumptionPlaceholderRule = ruleFromRuleName(ASSUMPTION_RULE_NAME),
       typePrefixPlaceholderRule = ruleFromRuleName(TYPE_PREFIX_RULE_NAME),
       suppositionPlaceholderRule = ruleFromRuleName(SUPPOSITION_RULE_NAME),
       constructorPlaceholderRule = ruleFromRuleName(CONSTRUCTOR_RULE_NAME),
@@ -71,7 +71,7 @@ const termPlaceholderRule = ruleFromRuleName(TERM_RULE_NAME),
       procedureReferencelaceholderRule = ruleFromRuleName(PROCEDURE_REFERENCE_RULE_NAME),
       containedAssertionPlaceholderRule = ruleFromRuleName(CONTAINED_ASSERTION_RULE_NAME),
       signatureAssertionPlaceholderRule = ruleFromRuleName(SIGNATURE_ASSERTION_RULE_NAME),
-      metaLevelAssumptionPlaceholderRule = ruleFromRuleName(META_LEVEL_ASSUMPTION_RULE_NAME),
+      implicitAssumptionPlaceholderRule = ruleFromRuleName(IMPLICIT_ASSUMPTION_RULE_NAME),
       statementSubstitutionPlaceholderRule = ruleFromRuleName(STATEMENT_SUBSTITUTION_RULE_NAME),
       referenceSubstitutionPlaceholderRule = ruleFromRuleName(REFERENCE_SUBSTITUTION_RULE_NAME);
 
@@ -131,7 +131,7 @@ export function instantiateCombinator(string, context) { return instantiate(comb
 
 export function instantiateHypothesis(string, context) { return instantiate(hypothesisPlaceholderRule, string, context); }
 
-export function instantiateAssumption(string, context) { return instantiate(assumptionPlaceholderRule, string, context); }
+export function instantiateConstraint(string, context) { return instantiate(constraintPlaceholderRule, string, context); }
 
 export function instantiateTypePrefix(string, context) { return instantiate(typePrefixPlaceholderRule, string, context); }
 
@@ -161,7 +161,7 @@ export function instantiateContainedAssertion(string, context) { return instanti
 
 export function instantiateSignatureAssertion(string, context) { return instantiate(signatureAssertionPlaceholderRule, string, context); }
 
-export function instantiateMetaLevelAssumption(string, context) { return instantiate(metaLevelAssumptionPlaceholderRule, string, context); }
+export function instantiateImplicitAssumption(string, context) { return instantiate(implicitAssumptionPlaceholderRule, string, context); }
 
 export function instantiateStatementSubstitution(string, context) { return instantiate(statementSubstitutionPlaceholderRule, string, context); }
 

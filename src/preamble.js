@@ -2,8 +2,9 @@
 
 import Type from "./element/type";
 import Term from "./element/term";
-import Rule from "./element/rule";
 import Step from "./element/proofAssertion/step";
+import Rule from "./element/rule";
+import Goal from "./element/goal";
 import Label from "./element/label";
 import Axiom from "./element/topLevelAssertion/axiom";
 import Lemma from "./element/topLevelAssertion/lemma";
@@ -32,6 +33,7 @@ import Derivation from "./element/derivation";
 import Hypothesis from "./element/hypothesis";
 import Assumption from "./element/assumption";
 import Combinator from "./element/combinator";
+import Constraint from "./element/constraint";
 import Constructor from "./element/constructor";
 import Supposition from "./element/proofAssertion/supposition";
 import Metatheorem from "./element/topLevelMetaAssertion/metatheorem";
@@ -49,7 +51,6 @@ import PropertyAssertion from "./element/assertion/property";
 import ProcedureReference from "./element/procedureReference";
 import ContainedAssertion from "./element/assertion/contained";
 import signatureAssertion from "./element/assertion/signature";
-import MetaLevelAssumption from "./element/assumption/metaLevel";
 import PropertyDeclaration from "./element/declaration/property";
 import VariableDeclaration from "./element/declaration/variable";
 import BracketedCombinator from "./element/combinator/bracketed";

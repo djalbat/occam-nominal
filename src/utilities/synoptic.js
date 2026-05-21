@@ -14,6 +14,16 @@ export function compressTerms(terms) {
   });
 }
 
+export function compressGoals(goals) {
+  compress(goals, (goalA, goalB) => {
+    const goalAEqualToGoalB = goalA.isEqualTo(goalB);
+
+    if (!goalAEqualToGoalB) {
+      return true;
+    }
+  });
+}
+
 export function compressFrames(frames) {
   compress(frames, (frameA, frameB) => {
     const frameAEqualToFrameB = frameA.isEqualTo(frameB);

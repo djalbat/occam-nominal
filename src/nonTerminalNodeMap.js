@@ -4,6 +4,7 @@ import TermNode from "./node/term";
 import RuleNode from "./node/rule";
 import StepNode from "./node/proofAssertion/step";
 import TypeNode from "./node/type";
+import GoalNode from "./node/goal";
 import TypesNode from "./node/types";
 import ErrorNode from "./node/error";
 import FrameNode from "./node/frame";
@@ -32,6 +33,7 @@ import ParameterNode from "./node/parameter";
 import SignatureNode from "./node/signature";
 import AxiomBodyNode from "./node/body/axiom";
 import LemmaBodyNode from "./node/body/lemma";
+import ConstraintNode from "./node/constraint";
 import DerivationNode from "./node/derivation";
 import CombinatorNode from "./node/combinator";
 import ConclusionNode from "./node/conclusion";
@@ -56,6 +58,7 @@ import SubDerivationNode from "./node/subDerivation";
 import TheoremHeaderNode from "./node/header/theorem";
 import MetaLemmaBodyNode from "./node/body/metaLemma";
 import TypeAssertionNode from "./node/assertion/type";
+import ProcedureCallNode from "./node/procedureCall";
 import ConjectureBodyNode from "./node/body/conjecture";
 import MetatheoremBodyNode from "./node/body/metatheorem";
 import MetaLemmaHeaderNode from "./node/header/metaLemma";
@@ -71,11 +74,10 @@ import ParenthesisedLabelNode from "./node/parenthesisedLabel";
 import ProcedureReferenceNode from "./node/procedureReference";
 import ContainedAssertionNode from "./node/assertion/contained";
 import SignatureAssertionNode from "./node/assertion/signature";
+import ImplicitAssumptionNode from "./node/assumption/implicit";
 import ParenthesisedLabelsNode from "./node/parenthesisedLabels"
 import PropertyDeclarationNode from "./node/declaration/property";
 import VariableDeclarationNode from "./node/declaration/variable";
-import ProcedureCallNode from "./node/procedureCall";
-import MetaLevelAssumptionpNode from "./node/assumption/metaLevel";
 import SimpleTypeDeclarationNode from "./node/declaration/simpleType";
 import CombinatorDeclarationNode from "./node/declaration/combinator";
 import ReferenceSubstitutionNode from "./node/substitution/reference";
@@ -90,6 +92,7 @@ import {
   STEP_RULE_NAME,
   TERM_RULE_NAME,
   TYPE_RULE_NAME,
+  GOAL_RULE_NAME,
   TYPES_RULE_NAME,
   PROOF_RULE_NAME,
   ERROR_RULE_NAME,
@@ -124,6 +127,7 @@ import {
   AXIOM_BODY_RULE_NAME,
   LEMMA_BODY_RULE_NAME,
   ASSUMPTION_RULE_NAME,
+  CONSTRAINT_RULE_NAME,
   PLACEHOLDER_RULE_NAME,
   TYPE_PREFIX_RULE_NAME,
   SUPPOSITION_RULE_NAME,
@@ -158,10 +162,10 @@ import {
   CONTAINED_ASSERTION_RULE_NAME,
   SIGNATURE_ASSERTION_RULE_NAME,
   PARENTHESISED_LABEL_RULE_NAME,
+  IMPLICIT_ASSUMPTION_RULE_NAME,
   PARENTHESISED_LABELS_RULE_NAME,
   PROPERTY_DECLARATION_RULE_NAME,
   VARIABLE_DECLARATION_RULE_NAME,
-  META_LEVEL_ASSUMPTION_RULE_NAME,
   COMBINATOR_DECLARATION_RULE_NAME,
   REFERENCE_SUBSTITUTION_RULE_NAME,
   STATEMENT_SUBSTITUTION_RULE_NAME,
@@ -176,6 +180,7 @@ const NonTerminalNodeMap = {
   [STEP_RULE_NAME]: StepNode,
   [TERM_RULE_NAME]: TermNode,
   [TYPE_RULE_NAME]: TypeNode,
+  [GOAL_RULE_NAME]: GoalNode,
   [TYPES_RULE_NAME]: TypesNode,
   [ERROR_RULE_NAME]: ErrorNode,
   [FRAME_RULE_NAME]: FrameNode,
@@ -210,6 +215,7 @@ const NonTerminalNodeMap = {
   [DERIVATION_RULE_NAME]: DerivationNode,
   [HYPOTHESIS_RULE_NAME]: HypothesisNode,
   [ASSUMPTION_RULE_NAME]: AssumptionNode,
+  [CONSTRAINT_RULE_NAME]: ConstraintNode,
   [RULE_HEADER_RULE_NAME]: RuleHeaderNode,
   [TYPE_PREFIX_RULE_NAME]: TypePrefixNode,
   [PLACEHOLDER_RULE_NAME]: PlaceholderNode,
@@ -244,10 +250,10 @@ const NonTerminalNodeMap = {
   [PARENTHESISED_LABEL_RULE_NAME]: ParenthesisedLabelNode,
   [SIGNATURE_ASSERTION_RULE_NAME]: SignatureAssertionNode,
   [CONTAINED_ASSERTION_RULE_NAME]: ContainedAssertionNode,
+  [IMPLICIT_ASSUMPTION_RULE_NAME]: ImplicitAssumptionNode,
   [PARENTHESISED_LABELS_RULE_NAME]: ParenthesisedLabelsNode,
   [VARIABLE_DECLARATION_RULE_NAME]: VariableDeclarationNode,
   [PROPERTY_DECLARATION_RULE_NAME]: PropertyDeclarationNode,
-  [META_LEVEL_ASSUMPTION_RULE_NAME]: MetaLevelAssumptionpNode,
   [COMBINATOR_DECLARATION_RULE_NAME]: CombinatorDeclarationNode,
   [STATEMENT_SUBSTITUTION_RULE_NAME]: StatementSubstitutionNode,
   [REFERENCE_SUBSTITUTION_RULE_NAME]: ReferenceSubstitutionNode,

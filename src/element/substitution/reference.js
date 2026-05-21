@@ -99,7 +99,7 @@ export default define(class ReferenceSubstitution extends Substitution {
 
     const validSubstitution = this.findValidSubstitution(context);
 
-    if (validSubstitution) {
+    if (validSubstitution !== null) {
       validates = true;
 
       referenceSubstitution = validSubstitution;  ///
@@ -237,7 +237,7 @@ export default define(class ReferenceSubstitution extends Substitution {
     return referenceSubstitution;
   }
 
-  static fromAssumptionAndMetaLevelAssumption(assumption, metaLevelAssumption, generalContext, specificContext) {
+  static fromAssumptionAndConstraint(assumption, constraint, generalContext, specificContext) {
     let referenceSubstitution;
 
     ablates((generalContext, specificContext) => {
@@ -246,7 +246,7 @@ export default define(class ReferenceSubstitution extends Substitution {
       instantiate((context) => {
         const specificContext = context,  ///
               metavariable = assumption.getMetavariable(),
-              reference = metaLevelAssumption.getReference(),
+              reference = constraint.getReference(),
               referenceSubstitutionString = referenceSubstitutionStringFromReferenceAndMetavariable(reference, metavariable),
               string = referenceSubstitutionString,  ///
               referenceSubstitutionNode = instantiateReferenceSubstitution(string, context);

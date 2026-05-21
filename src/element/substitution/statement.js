@@ -94,7 +94,7 @@ export default define(class StatementSubstitution extends Substitution {
 
     const validSubstitution = this.findValidSubstitution(context);
 
-    if (validSubstitution) {
+    if (validSubstitution !== null) {
       validates = true;
 
       statementSubstitution = validSubstitution;  ///

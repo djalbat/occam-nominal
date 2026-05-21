@@ -2,16 +2,16 @@
 
 import { Element } from "occam-languages";
 
-import { define } from "../../elements";
-import { unifyStatement } from "../../process/unify";
-import { stripBracketsFromStatement } from "../../utilities/brackets";
-import { instantiateMetaLevelAssumption } from "../../process/instantiate";
-import { breakPointFromJSON, breakPointToBreakPointJSON } from "../../utilities/breakPoint";
-import { metaLevelAssumptionFromMetaLevelAssumptionNode } from "../../utilities/element";
-import { metaLevelAssumptionStringFromReferenceAndStatement } from "../../utilities/string";
-import { join, ablate, attempt, descend, reconcile, serialise, unserialise, instantiate } from "../../utilities/context";
+import { define } from "../elements";
+import { unifyStatement } from "../process/unify";
+import { stripBracketsFromStatement } from "../utilities/brackets";
+import { instantiateConstraint } from "../process/instantiate";
+import { breakPointFromJSON, breakPointToBreakPointJSON } from "../utilities/breakPoint";
+import { constraintFromConstraintNode } from "../utilities/element";
+import { constraintStringFromReferenceAndStatement } from "../utilities/string";
+import { join, ablate, attempt, descend, reconcile, serialise, unserialise, instantiate } from "../utilities/context";
 
-export default define(class MetaLevelAssumption extends Element {
+export default define(class Constraint extends Element {
   constructor(context, string, node, breakPoint, reference, statement) {
     super(context, string, node, breakPoint);
 
@@ -27,56 +27,56 @@ export default define(class MetaLevelAssumption extends Element {
     return this.statement;
   }
 
-  getMetaLevelAssumptionNode() {
+  getConstraintNode() {
     const node = this.getNode(),
-          metaLevelAssumptionNode = node;  ///
+          constraintNode = node;  ///
 
-    return metaLevelAssumptionNode;
+    return constraintNode;
   }
 
   getMetavariable() { return this.reference.getMetavariable(); }
 
-  isEqualTo(metaLevelAssumption) {
-    const metaLevelAssumptionNode = metaLevelAssumption.getNode(),
-          metaLevelAssumptionNodeMatches = this.matchMetaLevelAssumptionNode(metaLevelAssumptionNode),
-          equalTo = metaLevelAssumptionNodeMatches;  ///
+  isEqualTo(constraint) {
+    const constraintNode = constraint.getNode(),
+          constraintNodeMatches = this.matchConstraintNode(constraintNode),
+          equalTo = constraintNodeMatches;  ///
 
     return equalTo;
   }
 
-  matchMetaLevelAssumptionNode(metaLevelAssumptionNode) {
-    const node = metaLevelAssumptionNode, ///
+  matchConstraintNode(constraintNode) {
+    const node = constraintNode, ///
           nodeMatches = this.matchNode(node),
-          metaLevelAssumptionNodeMatches = nodeMatches; ///
+          constraintNodeMatches = nodeMatches; ///
 
-    return metaLevelAssumptionNodeMatches;
+    return constraintNodeMatches;
   }
 
-  findValidMetaLevelAssumption(context) {
-    const metaLevelAssumptionNode = this.getMetaLevelAssumptionNode(),
-          metaLevelAssumption = context.findMetaLevelAssumptionByMetaLevelAssumptionNode(metaLevelAssumptionNode),
-          validMetaLevelAssumption = metaLevelAssumption;  ///
+  findValidConstraint(context) {
+    const constraintNode = this.getConstraintNode(),
+          constraint = context.findConstraintByConstraintNode(constraintNode),
+          validConstraint = constraint;  ///
 
-    return validMetaLevelAssumption;
+    return validConstraint;
   }
 
   validate(context) {
-    let metaLevelAssumption = null;
+    let constraint = null;
 
-    const metaLevelAssumptionString = this.getString();  ///
+    const constraintString = this.getString();  ///
 
-    context.trace(`Validating the '${metaLevelAssumptionString}' meta-lLevel assumption...`);
+    context.trace(`Validating the '${constraintString}' meta-lLevel assumption...`);
 
     let validates = false;
 
-    const validMetaLevelAssumption = this.findValidMetaLevelAssumption(context);
+    const validConstraint = this.findValidConstraint(context);
 
-    if (validMetaLevelAssumption) {
+    if (validConstraint !== null) {
       validates = true;
 
-      metaLevelAssumption = validMetaLevelAssumption; ///
+      constraint = validConstraint; ///
 
-      context.debug(`...the '${metaLevelAssumptionString}' meta-level assumption is already valid.`);
+      context.debug(`...the '${constraintString}' constraint is already valid.`);
     } else {
       const temporaryContext = context; ///
 
@@ -114,25 +114,25 @@ export default define(class MetaLevelAssumption extends Element {
       context = temporaryContext; ///
 
       if (validates) {
-        metaLevelAssumption = this;  ///
+        constraint = this;  ///
 
-        context.addMetaLevelAssumption(metaLevelAssumption);
+        context.addConstraint(constraint);
       }
     }
 
     if (validates) {
-      context.debug(`...validated the '${metaLevelAssumptionString}' meta-level assumption.`);
+      context.debug(`...validated the '${constraintString}' constraint.`);
     }
 
-    return metaLevelAssumption;
+    return constraint;
   }
 
   validateReference(context) {
     let referenceValidates = false;
 
-    const metaLevelAssumptionString = this.getString();  ///
+    const constraintString = this.getString();  ///
 
-    context.trace(`Validating the '${metaLevelAssumptionString}' meta-level assumption's reference...`);
+    context.trace(`Validating the '${constraintString}' constraint's reference...`);
 
     const reference = this.reference.validate(context);
 
@@ -148,7 +148,7 @@ export default define(class MetaLevelAssumption extends Element {
     }
 
     if (referenceValidates) {
-      context.debug(`...validated the '${metaLevelAssumptionString}' meta-level assumption's reference.`);
+      context.debug(`...validated the '${constraintString}' constraint's reference.`);
     }
 
     return referenceValidates;
@@ -157,9 +157,9 @@ export default define(class MetaLevelAssumption extends Element {
   validateStatement(context) {
     let statementValidates = false;
 
-    const metaLevelAssumptionString = this.getString();  ///
+    const constraintString = this.getString();  ///
 
-    context.trace(`Validating the '${metaLevelAssumptionString}' meta-level assumption's statement...`);
+    context.trace(`Validating the '${constraintString}' constraint's statement...`);
 
     descend((context) => {
       const statement = this.statement.validate(context);
@@ -170,7 +170,7 @@ export default define(class MetaLevelAssumption extends Element {
     }, context);
 
     if (statementValidates) {
-      context.debug(`...validated the '${metaLevelAssumptionString}' meta-level assumption's statement.`);
+      context.debug(`...validated the '${constraintString}' constraint's statement.`);
     }
 
     return statementValidates;
@@ -179,14 +179,14 @@ export default define(class MetaLevelAssumption extends Element {
   validateWhenStated(context) {
     let validatesWhenStated;
 
-    const metaLevelAssumptionString = this.getString();  ///
+    const constraintString = this.getString();  ///
 
-    context.trace(`Validating the '${metaLevelAssumptionString}' stated meta-level assumption...`);
+    context.trace(`Validating the '${constraintString}' stated constraint...`);
 
     validatesWhenStated = true
 
     if (validatesWhenStated) {
-      context.debug(`...validated the '${metaLevelAssumptionString}' stated meta-level assumption.`);
+      context.debug(`...validated the '${constraintString}' stated constraint.`);
     }
 
     return validatesWhenStated;
@@ -195,14 +195,14 @@ export default define(class MetaLevelAssumption extends Element {
   validateWhenDerived(context) {
     let validatesWhenDerived;
 
-    const metaLevelAssumptionString = this.getString();  ///
+    const constraintString = this.getString();  ///
 
-    context.trace(`Validating the '${metaLevelAssumptionString}' derived meta-level assumption...`);
+    context.trace(`Validating the '${constraintString}' derived constraint...`);
 
     validatesWhenDerived = true;
 
     if (validatesWhenDerived) {
-      context.debug(`...validated the '${metaLevelAssumptionString}' derived meta-level assumption.`);
+      context.debug(`...validated the '${constraintString}' derived constraint.`);
     }
 
     return validatesWhenDerived;
@@ -214,16 +214,16 @@ export default define(class MetaLevelAssumption extends Element {
     if (reference !== null) {
       const context = specificContext,  ///
             referenceString = reference.getString(),
-            metaLevelAssumptionString = this.getString(); ///
+            constraintString = this.getString(); ///
 
-      context.trace(`Unifying the '${referenceString}' reference with the '${metaLevelAssumptionString}' meta-level assumption's reference...`);
+      context.trace(`Unifying the '${referenceString}' reference with the '${constraintString}' constraint's reference...`);
 
       const metavariable = this.getMetavariable();
 
       referenceUnifies = metavariable.unifyReference(reference, generalContext, specificContext);
 
       if (referenceUnifies) {
-        context.debug(`..unified the '${referenceString}' with the '${metaLevelAssumptionString}' meta-level assumption's reference.`);
+        context.debug(`..unified the '${referenceString}' with the '${constraintString}' constraint's reference.`);
       }
     } else {
       referenceUnifies = true;  ///
@@ -237,9 +237,9 @@ export default define(class MetaLevelAssumption extends Element {
 
     const context = specificContext,  ///
           statementString = statement.getString(),
-          metaLevelAssumptionString = this.getString(); ///
+          constraintString = this.getString(); ///
 
-    context.trace(`Unifying the '${statementString}' statement with the '${metaLevelAssumptionString}' meta-level assumption's statement...`);
+    context.trace(`Unifying the '${statementString}' statement with the '${constraintString}' constraint's statement...`);
 
     const generalStatement = this.statement,  ///
           specificStatement = stripBracketsFromStatement(statement, context);  ///
@@ -247,7 +247,7 @@ export default define(class MetaLevelAssumption extends Element {
     statementUnifies = unifyStatement(generalStatement, specificStatement, generalContext, specificContext);
 
     if (statementUnifies) {
-      context.debug(`...unified the '${statementString}' statement with the '${metaLevelAssumptionString}' meta-level assumption's statement.`);
+      context.debug(`...unified the '${statementString}' statement with the '${constraintString}' constraint's statement.`);
     }
 
     return statementUnifies;
@@ -257,13 +257,13 @@ export default define(class MetaLevelAssumption extends Element {
     let assumptionUnifies = false;
 
     const assumptionString = assumption.getString(),  ///
-          metaLevelAssumptionString = this.getString();
+          constraintString = this.getString();
 
-    context.trace(`Unifying the '${assumptionString}' assumption with the '${metaLevelAssumptionString}' meta-level assumption...`);
+    context.trace(`Unifying the '${assumptionString}' assumption with the '${constraintString}' constraint...`);
 
-    const metaLevelAssumptionContext = this.getContext(), ///
+    const constraintContext = this.getContext(), ///
           assumptionContext = assumption.getContext(), ///
-          generalContext = metaLevelAssumptionContext,
+          generalContext = constraintContext,
           specificContext = assumptionContext;  ///
 
     join((specificContext) => {
@@ -285,7 +285,7 @@ export default define(class MetaLevelAssumption extends Element {
     }, specificContext, context);
 
     if (assumptionUnifies) {
-      context.debug(`...unified the '${assumptionString}' assumption with the '${metaLevelAssumptionString}' meta-level assumption...`);
+      context.debug(`...unified the '${assumptionString}' assumption with the '${constraintString}' constraint...`);
     }
 
     return assumptionUnifies;
@@ -327,29 +327,29 @@ export default define(class MetaLevelAssumption extends Element {
     }, context);
   }
 
-  static name = "MetaLevelAssumption";
+  static name = "Constraint";
 
   static fromJSON(json, context) {
-    let metaLevelAssumption;
+    let constraint;
 
     instantiate((context) => {
       unserialise((json, context) => {
         const { string } = json,
-              metaLevelAssumptionNode = instantiateMetaLevelAssumption(string, context),
-              node = metaLevelAssumptionNode,  ///
+              constraintNode = instantiateConstraint(string, context),
+              node = constraintNode,  ///
               breakPoint = breakPointFromJSON(json),
-              reference = referenceFromMetaLevelAssumptionNode(metaLevelAssumptionNode, context),
-              statement = statementFromMetaLevelAssumptionNode(metaLevelAssumptionNode, context);
+              reference = referenceFromConstraintNode(constraintNode, context),
+              statement = statementFromConstraintNode(constraintNode, context);
 
-        metaLevelAssumption = new MetaLevelAssumption(context, string, node, breakPoint, reference, statement);
+        constraint = new Constraint(context, string, node, breakPoint, reference, statement);
       }, json, context);
     }, context);
 
-    return metaLevelAssumption;
+    return constraint;
   }
 
   static fromStep(step, context) {
-    let metaLevelAssumption;
+    let constraint;
 
     let statement;
 
@@ -361,27 +361,27 @@ export default define(class MetaLevelAssumption extends Element {
 
     ablate((context) => {
       instantiate((context) => {
-        const metaLevelAssumptionString = metaLevelAssumptionStringFromReferenceAndStatement(reference, statement),
-              string = metaLevelAssumptionString,  ///
-              metaLevelAssumptionNode = instantiateMetaLevelAssumption(string, context);
+        const constraintString = constraintStringFromReferenceAndStatement(reference, statement),
+              string = constraintString,  ///
+              constraintNode = instantiateConstraint(string, context);
 
-        metaLevelAssumption = metaLevelAssumptionFromMetaLevelAssumptionNode(metaLevelAssumptionNode, context);
+        constraint = constraintFromConstraintNode(constraintNode, context);
       }, context);
     }, context);
 
-    return metaLevelAssumption;
+    return constraint;
   }
 });
 
-function referenceFromMetaLevelAssumptionNode(metaLevelAssumptionNode, context) {
-  const referenceNode = metaLevelAssumptionNode.getReferenceNode(),
+function referenceFromConstraintNode(constraintNode, context) {
+  const referenceNode = constraintNode.getReferenceNode(),
         refernece = context.findReferenceByReferenceNode(referenceNode);
 
   return refernece;
 }
 
-function statementFromMetaLevelAssumptionNode(metaLevelAssumptionNode, context) {
-  const statementNode = metaLevelAssumptionNode.getStatementNode(),
+function statementFromConstraintNode(constraintNode, context) {
+  const statementNode = constraintNode.getStatementNode(),
         statement = context.findStatementByStatementNode(statementNode);
 
   return statement;

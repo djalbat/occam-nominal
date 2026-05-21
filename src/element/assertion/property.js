@@ -71,7 +71,7 @@ export default define(class PropertyAssertion extends Assertion {
 
     const validAssertion = this.findValidAssertion(context);
 
-    if (validAssertion) {
+    if (validAssertion !== null) {
       validates = true;
 
       propertyAssertion = validAssertion; ///
