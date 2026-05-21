@@ -54,7 +54,7 @@ export default class MnemicContext extends Context {
     super(context);
 
     this.terms = terms;
-    this.gaols = goals;
+    this.goals = goals;
     this.frames = frames;
     this.properties = properties;
     this.equalities = equalities;
@@ -248,7 +248,7 @@ export default class MnemicContext extends Context {
     context.debug(`...added the '${termString}' term to the mnemic context.`);
   }
 
-  addToal(goal) {
+  addGoal(goal) {
     const context = this, ///
           goalString = goal.getString();
 

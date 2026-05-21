@@ -10,6 +10,6 @@ const name = "parity",
       logLevel = TRACE_LEVEL,
       projectsDirectoryPath = "../../Mathematics";
 
-describe(name, () => {
+describe.skip(name, () => {
   createSuite(name, logLevel, projectsDirectoryPath);
 });

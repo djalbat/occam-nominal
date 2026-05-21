@@ -262,6 +262,10 @@ export default class NominalFileContext extends FileContext {
     return terms;
   }
 
+  getGoals(goals = []) {
+    return goals;
+  }
+
   getFrames(frames = []) {
     return frames;
   }
