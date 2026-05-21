@@ -202,7 +202,7 @@ export default define(class Assumption extends Element {
       reconcile((context) => {
         const label = topLevelMetaAssertion.getLabel();
 
-        labelUnifies = this.reference.unifyLabel(label, context);
+        labelUnifies = this.unifyLabel(label, context);
       }, context);
 
       if (labelUnifies) {
@@ -216,9 +216,11 @@ export default define(class Assumption extends Element {
       reconcile((context) => {
         const label = topLevelMetaAssertion.getLabel();
 
-        this.reference.unifyLabel(label, context);
+        this.unifyLabel(label, context);
 
         const statement = topLevelMetaAssertion.getStatement();
+
+        statementUnifies = this.unifyStatement(statement, context);
       }, context);
 
       if (statementUnifies) {
@@ -233,11 +235,27 @@ export default define(class Assumption extends Element {
     return validatesWhenDerived;
   }
 
-  unifyStatement(statement, generalContext, specificContext) {
+  unifyLabel(label, context) {
+    let labelUnifies;
+
+    const labelString = label.getString(),
+          assumptionString = this.getString();  ///
+
+    context.trace(`Unifying the '${labelString}' label with the '${assumptionString}' assumption's refernce...`);
+
+    labelUnifies = this.reference.unifyLabel(label, context);
+
+    if (labelUnifies) {
+      context.debug(`...unified the '${labelString}' label with the '${assumptionString}' assumption's reference.`);
+    }
+
+    return labelUnifies;
+  }
+
+  unifyStatement(statement, context) {
     let statementUnifies;
 
-    const context = specificContext, ///
-          statementString = statement.getString(),
+    const statementString = statement.getString(),
           assumptionString = this.getString();  ///
 
     context.trace(`Unifying the '${statementString}' statement with the '${assumptionString}' assumption's statement...`);

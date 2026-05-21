@@ -1,7 +1,11 @@
 "use strict";
 
+import { arrayUtilities } from "necessary";
+
 import { baseTypeFromNothing } from "../utilities/type";
 import { EMPTY_STRING, PROVISIONAL, PROVISIONALLY } from "../constants";
+
+const { front, last } = arrayUtilities;
 
 export function termsStringFromTerms(terms) {
   const termsString = terms.reduce((termsString, term) => {
@@ -43,6 +47,20 @@ export function premisesStringFromPremises(premises) {
   }, null);
 
   return premisesString;
+}
+
+export function statementsStringFromStatements(statements) {
+  const statementsString = statements.reduce((statementsString, statement) => {
+    const statementString = statement.getString();
+
+    statementsString = (statementsString === null) ?
+                         statementString: ///
+                          `${statementsString}, ${statementString}`;
+
+    return statementsString;
+  }, null);
+
+  return statementsString;
 }
 
 export function hypothesesStringFromHypotheses(hypotheses) {
@@ -118,13 +136,21 @@ export function suppositionsStringFromSuppositions(suppositions) {
     const suppositionString = supposition.getString();
 
     suppositionsString = (suppositionsString === null) ?
-      suppositionString: ///
-      `${suppositionsString}, ${suppositionString}`;
+                           suppositionString: ///
+                            `${suppositionsString}, ${suppositionString}`;
 
     return suppositionsString;
   }, null);
 
   return suppositionsString;
+}
+
+export function stepStringFromStep(step) {
+  const statement = step.getStatement(),
+        statementString = statement.getString(),
+        stepString = statementString; ///
+
+  return stepString;
 }
 
 export function equivalenceStringFromTerms(terms) {
@@ -153,6 +179,16 @@ export function implicitAssumptionStringFromStatement(stastement) {
         implicitAssumptionString = `. :: ${statementString}`;
 
   return implicitAssumptionString;
+}
+
+export function subproofAssertionStringFromStatements(statements) {
+  const lastStatement = last(statements),
+        frontStatements = front(statements),
+        lastStatementString = lastStatement.getString(),
+        frontStatementsString = statementsStringFromStatements(frontStatements),
+        subproofString = `[${frontStatementsString}]...${lastStatementString}`;
+
+  return subproofString;
 }
 
 export function termSubstitutionStringFromTermAndVariable(term, variable) {
@@ -190,7 +226,7 @@ export function rulsStringFromLabelsPremisesAndConclusion(labels, premises, conc
 export function subproofStringFromSuppositionsAndSubDerivation(suppositions, subDerivation) {
   const lastStep = subDerivation.getLastStep(),
         suppositionsString = suppositionsStringFromSuppositions(suppositions),
-        lastStepString = lastStep.getString(),
+        lastStepString = stepStringFromStep(lastStep),
         subproofString = `[${suppositionsString}]...${lastStepString}`;
 
   return subproofString;

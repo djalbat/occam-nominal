@@ -15,6 +15,7 @@ import { labelFromJSON,
          deductionToDeductionJSON,
          constraintsToMConstraintJSON,
          suppositionsToSuppositionsJSON } from "../utilities/json";
+import supposition from "./proofAssertion/supposition";
 
 const { asyncForwardsEvery } = asynchronousUtilities;
 
@@ -47,6 +48,52 @@ export default class TopLevelMetaAssertion extends Element {
 
   getMConstraint() {
     return this.constraints;
+  }
+
+  getStatement() {
+    let statement;
+
+    const deducedStatment = this.getDeducedStatement();
+
+    statement = deducedStatment;  ///
+
+    const conditional = this.isConditional();
+
+    if (conditional) {
+      const context = this.getContext(),
+            statements = this.getStatements(),
+            subproofAssertion = subproofAssertionFromStatements(statements, context);
+    }
+
+    return statement;
+  }
+
+  getStatements() {
+    const suppositinoStatements = this.getSuppositionStatements(),
+          deducedStatement = this.getDeducedStatement(),
+          statements = [
+            ...suppositinoStatements,
+            deducedStatement
+          ];
+
+    return statements;
+  }
+
+  getDeducedStatement() {
+    const statement = this.deduction.getStatement(),
+          deducedStatement = statement; ///
+
+    return deducedStatement;
+  }
+
+  getSuppositionStatements() {
+    const suppositionStatements = this.suppositions.map((supposition) => {
+      const suppositionStatement = supposition.getStatement();
+
+      return suppositionStatement;
+    });
+
+    return suppositionStatements;
   }
 
   getSupposition(index) {
@@ -458,6 +505,14 @@ function subproofAssertionFromStatement(statement, context) {
   if (subproofAssertion !== null) {
     subproofAssertion = subproofAssertion.validate(context);
   }
+
+  return subproofAssertion;
+
+}
+
+function subproofAssertionFromStatements(statements, context) {
+  const { SubproofAssertion } = elements,
+        subproofAssertion = SubproofAssertion.fromStatements(statements, context);
 
   return subproofAssertion;
 }

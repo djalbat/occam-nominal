@@ -385,11 +385,8 @@ export function metaLemmaFromMetaLemmaNode(metaLemmaNode, context) {
         topLevelMetaAssertionString = topLevelMetaAssertionStringFromLabelSuppositionsAndDeduction(label, suppositions, deduction),
         node = metaLemmaMetathoremNode, ///
         string = topLevelMetaAssertionString, ///
-        breakPoint = null;
-
-  context = null;
-
-  const metaLemma = new MetaLemma(context, string, node, breakPoint, label, suppositions, deduction, proof, constraints);
+        breakPoint = null,
+        metaLemma = new MetaLemma(context, string, node, breakPoint, label, suppositions, deduction, proof, constraints);
 
   return metaLemma;
 }
@@ -575,11 +572,8 @@ export function metatheoremFromMetatheoremNode(metatheoremNode, context) {
         topLevelMetaAssertionString = topLevelMetaAssertionStringFromLabelSuppositionsAndDeduction(label, suppositions, deduction),
         node = metaLemmaMetathoremNode, ///
         string = topLevelMetaAssertionString, ///
-        breakPoint = null;
-
-  context = null;
-
-  const metatheorem = new Metatheorem(context, string, node, breakPoint, label, suppositions, deduction, proof, constraints);
+        breakPoint = null,
+        metatheorem = new Metatheorem(context, string, node, breakPoint, label, suppositions, deduction, proof, constraints);
 
   return metatheorem;
 }
