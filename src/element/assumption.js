@@ -1,13 +1,16 @@
 "use strict";
 
 import { Element } from "occam-languages";
+import { arrayUtilities } from "necessary";
 
 import { define } from "../elements";
-import { pare, instantiate } from "../utilities/context";
 import { instantiateAssumption } from "../process/instantiate";
+import { pare, reconcile, instantiate } from "../utilities/context";
 import { assumptionFromAssumptionNode } from "../utilities/element";
 import { assumptionStringFromStatement } from "../utilities/string";
 import { breakPointFromJSON, breakPointToBreakPointJSON } from "../utilities/breakPoint";
+
+const { each, filter } = arrayUtilities;
 
 export default define(class Assumption extends Element {
   constructor(context, string, node, breakPoint, reference, statement) {
@@ -193,7 +196,37 @@ export default define(class Assumption extends Element {
 
     context.trace(`Validating the '${assumptionString}' derived assumption...`);
 
-    validatesWhenDerived = true;
+    const topLevelMetaAssertions = context.getTopLevelMetaAssertions();
+
+    filter(topLevelMetaAssertions, (topLevelMetaAssertion) => {
+      let labelUnifies;
+
+      reconcile((context) => {
+        const label = topLevelMetaAssertion.getLabel();
+
+        labelUnifies = this.reference.unifyLabel(label, context);
+      }, context);
+
+      if (labelUnifies) {
+        return true;
+      }
+    });
+
+    validatesWhenDerived = each(topLevelMetaAssertions, (topLevelMetaAssertion) => {
+      let statementUnifies;
+
+      reconcile((context) => {
+        const label = topLevelMetaAssertion.getLabel();
+
+        this.reference.unifyLabel(label, context);
+
+        const statement = topLevelMetaAssertion.getStatement();
+      }, context);
+
+      if (statementUnifies) {
+        return true;
+      }
+    })
 
     if (validatesWhenDerived) {
       context.debug(`...validated the '${assumptionString}' derived assumption.`);

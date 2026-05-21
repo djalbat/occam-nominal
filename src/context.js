@@ -268,13 +268,6 @@ export default class Context extends ContextBase {
     return topLevelAssertion;
   }
 
-  findTopLevelMetaAssertionsByReference(reference) {
-    const context = this.getContext(),
-          topLevelMetaAssertion = context.findTopLevelMetaAssertionsByReference(reference);
-
-    return topLevelMetaAssertion;
-  }
-
   findTermByTermNode(termNode) {
     const context = this.getContext(),
           term = context.findTermByTermNode(termNode);
@@ -448,20 +441,6 @@ export default class Context extends ContextBase {
           declaredMetavariable = context.findDeclaredMetavariableByMetavariableName(metavariableName);
 
     return declaredMetavariable;
-  }
-
-  isLabelPresentByReference(reference, context = null) {
-    const childContext = context; ///
-
-    context = this.getContext();
-
-    const parentContext = context;  ///
-
-    context = childContext; ///
-
-    const labelPresent = parentContext.isLabelPresentByReference(reference, context);
-
-    return labelPresent;
   }
 
   isTermPresentByTermNode(termNode) {

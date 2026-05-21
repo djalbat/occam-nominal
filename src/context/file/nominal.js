@@ -32,7 +32,7 @@ import { typesFromJSON,
          declaredVariablesToDeclaredVariablesJSON,
          declaredMetavariablesToDeclaredMetavariablesJSON } from "../../utilities/json";
 
-const { push, filter } = arrayUtilities,
+const { find, push, filter } = arrayUtilities,
       { nominalLexerFromCombinedCustomGrammar, nominalParserFromCombinedCustomGrammar } = nominalUtilities;
 
 export default class NominalFileContext extends FileContext {
@@ -559,20 +559,6 @@ export default class NominalFileContext extends FileContext {
     return topLevelAssertion;
   }
 
-  findTopLevelMetaAssertionsByReference(reference) {
-    const topLEvelMetaAssertions = this.getTopLevelMetaAssertions(),
-          metavariableNode = reference.getMetavariableNode(),
-          topLevelMetaAssertion = topLEvelMetaAssertions.find((topLevelMetaAssertion) => {
-            const metavariableNodeMatches = topLevelMetaAssertion.matchMetavariableNode(metavariableNode);
-
-            if (metavariableNodeMatches) {
-              return true;
-            }
-          }) || null;
-
-    return topLevelMetaAssertion;
-  }
-
   findTypeByTypeName(typeName, includeRelease = true) {
     let types = this.getTypes(includeRelease);
 
@@ -719,19 +705,6 @@ export default class NominalFileContext extends FileContext {
   }
 
   findMetaTypeByMetaTypeName(metaTypeName) { return findMetaTypeByMetaTypeName(metaTypeName); }
-
-  isLabelPresentByReference(reference, context = null) {
-    const labels = this.getLabels(),
-          labelPresent = labels.some((label) => {
-            const labelUnifies = reference.unifyLabel(label, context);
-
-            if (labelUnifies) {
-              return true;
-            }
-          });
-
-    return labelPresent;
-  }
 
   isLabelPresentByLabelNode(labelNode) {
     const labels = this.getLabels(),

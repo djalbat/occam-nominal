@@ -11,7 +11,7 @@ import { instantiateJudgement } from "../process/instantiate";
 import { judgementFromStatementNode } from "../utilities/element";
 import { breakPointFromJSON, breakPointToBreakPointJSON } from "../utilities/breakPoint";
 
-const { one } = arrayUtilities;
+const { one, push } = arrayUtilities;
 
 export default define(class Judgement extends Element {
   constructor(context, string, node, breakPoint, frame, assumption) {
@@ -64,22 +64,18 @@ export default define(class Judgement extends Element {
   getMetavariableNode() { return this.frame.getMetavariableNode(); }
 
   getAssumptions(context) {
-    let assumptions;
+    const assumptions = [],
+          metavariable = this.getMetavariable(),
+          frameAssumptions = this.frame.getAssumptions();
 
-    const proofAssertions = context.getProofAssertions();
+    push(assumptions, frameAssumptions);
 
-    assumptions = proofAssertions.map((proofAssertion) => {
-      const assumption = assumptionFromProofAssertion(proofAssertion, context);
+    if (metavariable !== null) {
+      const proofAssertions = context.getProofAssertions(),
+            ephemeralAssumptions = ephemeralAssumptionsFromProofAssertions(proofAssertions, context);
 
-      return assumption;
-    });
-
-    const frameAssumptions = this.frame.getAssumptions();
-
-    assumptions = [ ///
-      ...frameAssumptions,
-      ...assumptions
-    ];
+      push(assumptions, ephemeralAssumptions);
+    }
 
     return assumptions;
   }
@@ -309,11 +305,16 @@ function assumptionFromJudgementNode(judgementNode, context) {
   return assumption;
 }
 
-function assumptionFromProofAssertion(proofAssertion, context) {
-  const { Assumption } = elements,
-        statement = proofAssertion.getStatement(),
-        assumption = Assumption.fromStatement(statement, context);
+function ephemeralAssumptionsFromProofAssertions(proofAssertions, context) {
+  const ephemeralAssumptions = proofAssertions.map((proofAssertion) => {
+    const { Assumption } = elements,
+          statement = proofAssertion.getStatement(),
+          assumption = Assumption.fromStatement(statement, context),
+          ephemeralAssumption = assumption; ///
 
-  return assumption;
+    return ephemeralAssumption;
+  });
+
+  return ephemeralAssumptions;
 }
 

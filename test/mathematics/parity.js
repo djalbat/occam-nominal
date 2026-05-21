@@ -4,10 +4,10 @@ const { levels } = require("necessary");
 
 const { createSuite } = require("../utilities/test");
 
-const { ERROR_LEVEL } = levels;
+const { TRACE_LEVEL } = levels;
 
 const name = "parity",
-      logLevel = ERROR_LEVEL,
+      logLevel = TRACE_LEVEL,
       projectsDirectoryPath = "../../Mathematics";
 
 describe(name, () => {
