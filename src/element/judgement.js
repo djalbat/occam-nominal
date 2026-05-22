@@ -57,9 +57,9 @@ export default define(class Judgement extends Element {
 
   getStatement() { return this.goal.getStatement(); }
 
-  getMetavariable() { return this.frame.getMetavariable(); }
+  getReference() { return this.goal.getReference(); }
 
-  getMetavariableNode() { return this.frame.getMetavariableNode(); }
+  getMetavariable() { return this.frame.getMetavariable(); }
 
   getAssumptions(context) {
     const assumptions = [],

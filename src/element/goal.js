@@ -3,12 +3,14 @@
 import { Element } from "occam-languages";
 import { arrayUtilities } from "necessary";
 
+import elements from "../elements";
+
 import { define } from "../elements";
 import { instantiateGoal } from "../process/instantiate";
-import { reconcile, instantiate } from "../utilities/context";
+import { join, reconcile, instantiate } from "../utilities/context";
 import { breakPointFromJSON, breakPointToBreakPointJSON } from "../utilities/breakPoint";
 
-const { each, filter } = arrayUtilities;
+const { each, clone, filter } = arrayUtilities;
 
 export default define(class Goal extends Element {
   constructor(context, string, node, breakPoint, reference, statement) {
@@ -188,27 +190,38 @@ export default define(class Goal extends Element {
   }
 
   validateWhenDerived(context) {
-    let validatesWhenDerived;
+    let validatesWhenDerived = false;
 
     const goalString = this.getString();  ///
 
     context.trace(`Validating the '${goalString}' derived goal...`);
 
-    const schemas = context.getSchemas();
+    let schemas;
 
-    debugger
+    schemas = context.getSchemas();
 
-    validatesWhenDerived = each(schemas, (schema) => {
-      let statementUnifies;
+    schemas = clone(schemas); ///
 
-      reconcile((context) => {
-        const statement = schema.getStatement();
-      }, context);
+    filter(schemas, (schema) => {
+      const label = schema.getLabel(),
+            labelUnifies = this.unifyLabel(label, context);
 
-      if (statementUnifies) {
+      if (labelUnifies) {
         return true;
       }
-    })
+    });
+
+    const schemasUnifiy = each(schemas, (schema) => {
+      const schemaUnifies = this.unifySchema(schema, context);
+
+      if (schemaUnifies) {
+        return true;
+      }
+    });
+
+    if (schemasUnifiy) {
+      validatesWhenDerived = true;
+    }
 
     if (validatesWhenDerived) {
       context.debug(`...validated the '${goalString}' derived goal.`);
@@ -217,22 +230,89 @@ export default define(class Goal extends Element {
     return validatesWhenDerived;
   }
 
-  unifyStatement(statement, generalContext, specificContext) {
-    let statementUnifies;
+  unifyLabel(label, context) {
+    let labelUnifies;
 
-    const context = specificContext, ///
-          statementString = statement.getString(),
-          proofAssertionString = this.getString();  ///
+    const goalString = this.getString(),  ///
+          labelString = label.getString();
 
-    context.trace(`Unifying the '${statementString}' statement with the '${proofAssertionString}' goal's statement...`);
+    context.trace(`Unifying the '${labelString}' label with the '${goalString}' goal...`);
 
-    statementUnifies = this.statement.unifyStatement(statement, generalContext, specificContext);
+    reconcile((context) => {
+      labelUnifies = this.reference.unifyLabel(label, context);
+    }, context);
 
-    if (statementUnifies) {
-      context.debug(`...unified the '${statementString}' statement with the '${proofAssertionString}' goal's statement.`);
+    if (labelUnifies) {
+      context.debug(`...unified the '${labelString}' label with the '${goalString}' goal's reference.`);
     }
 
-    return statementUnifies;
+    return labelUnifies;
+  }
+
+  unifySchema(schema, context) {
+    let schemaUnifies = false;
+
+    const goalString = this.getString(),
+          schemaString = schema.getString();
+
+    context.trace(`Unifying the '${schemaString}' schema with the '${goalString}' goal...`);
+
+    const generalContext = context, ///
+          specificContext = context;  ///
+
+    reconcile((specificContext) => {
+      const label = schema.getLabel(),
+            context = specificContext,  ///
+            labelUnifies = this.reference.unifyLabel(label, context);
+
+      if (labelUnifies) {
+        const subproofAssertion = subproofAssertionFromStatement(this.statement, context)
+
+        if (subproofAssertion === null) {
+          const deduction = schema.getDeduction(),
+                deductionUnifies = this.unifyDeduction(deduction, generalContext, specificContext);
+
+          if (deductionUnifies) {
+            schemaUnifies = true;
+          }
+        }
+      }
+    }, specificContext);
+
+    if (schemaUnifies) {
+      context.debug(`...unified the '${schemaString}' schema with the '${goalString}' goal.`);
+    }
+
+    return schemaUnifies;
+  }
+
+  unifyDeduction(deduction, generalContext, specificContext) {
+    let deductionUnifies;
+
+    const context = specificContext,  ///
+          goalString = this.getString(),  ///
+          deductionString = deduction.getString();
+
+    context.trace(`Unifying the '${deductionString}' deduction's statement  with the '${goalString}' goal's '${goalString}' statement...`);
+
+    const statement = deduction.getStatement(),
+          deductionContext = deduction.getContext(); ///
+
+    specificContext = deductionContext; ///
+
+    join((specificContext) => {
+      const statementUnifies = this.statement.unifyStatement(statement, generalContext, specificContext);
+
+      if (statementUnifies) {
+        deductionUnifies = true;
+      }
+    }, specificContext, context);
+
+    if (deductionUnifies) {
+      context.debug(`...unified the '${deductionString}' deduction's statement with the '${goalString}' goal's '${goalString}' statement.`);
+    }
+
+    return deductionUnifies;
   }
 
   static name = "Goal";
@@ -283,4 +363,11 @@ function statementFromGoalNode(goalNode, context) {
         statement = context.findStatementByStatementNode(statementNode);
 
   return statement;
+}
+
+function subproofAssertionFromStatement(statement, context) {
+  const { SubproofAssertion } = elements,
+        subproofAssertion = SubproofAssertion.fromStatement(statement, context);
+
+  return subproofAssertion;
 }

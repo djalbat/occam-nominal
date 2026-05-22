@@ -97,7 +97,7 @@ export function goalFromGoalNode(goalNode, context) {
         breakPoint = null,
         reference = referenceFromGoalNode(goalNode, context),
         statement = statementFromGoalNode(goalNode, context),
-        goal = new Goal(context, string, node, breakPoint, statement, reference);
+        goal = new Goal(context, string, node, breakPoint, reference, statement);
 
   return goal;
 }
