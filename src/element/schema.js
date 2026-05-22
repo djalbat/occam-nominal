@@ -14,7 +14,7 @@ import { labelFromJSON,
          constraintsFromJSON,
          suppositionsFromJSON,
          deductionToDeductionJSON,
-         constraintsToMConstraintJSON,
+         constraintsToConstraintsJSON,
          suppositionsToSuppositionsJSON } from "../utilities/json";
 
 const { asyncForwardsEvery } = asynchronousUtilities;
@@ -396,7 +396,7 @@ export default define(class Schema extends Element {
     const labelJSON = labelToLabelJSON(this.label),
           deductionJSON = deductionToDeductionJSON(this.deduction),
           suppositionsJSON = suppositionsToSuppositionsJSON(this.suppositions),
-          constraintsJSON = constraintsToMConstraintJSON(this.constraints),
+          constraintsJSON = constraintsToConstraintsJSON(this.constraints),
           string = this.getString();
 
     let breakPoint;

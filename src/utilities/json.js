@@ -1162,6 +1162,16 @@ export function referencesToReferencesJSON(references) {
   return referencesJSON;
 }
 
+export function constraintsToConstraintsJSON(constraints) {
+  const constraintsJSON = constraints.map((constraint) => {
+    const constraintJSON = constraint.toJSON();
+
+    return constraintJSON;
+  });
+
+  return constraintsJSON;
+}
+
 export function conjecturesToConjecturesJSON(conjectures) {
   const conjecturesJSON = conjectures.map((conjecture) => {
     const conjectureJSON = conjecture.toJSON();
@@ -1270,16 +1280,6 @@ export function declaredVariablesToDeclaredVariablesJSON(declaredVariables) {
   });
 
   return declaredVariablesJSON;
-}
-
-export function constraintsToConstraintsJSON(constraints) {
-  const constraintsJSON = constraints.map((constraint) => {
-    const constraintJSON = constraint.toJSON();
-
-    return constraintJSON;
-  });
-
-  return constraintsJSON;
 }
 
 export function declaredMetavariablesToDeclaredMetavariablesJSON(declaredMetavariables) {

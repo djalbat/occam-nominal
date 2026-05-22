@@ -4,12 +4,12 @@ const { levels } = require("necessary");
 
 const { createSuite } = require("../utilities/test");
 
-const { TRACE_LEVEL } = levels;
+const { ERROR_LEVEL } = levels;
 
 const name = "parity",
-      logLevel = TRACE_LEVEL,
+      logLevel = ERROR_LEVEL,
       projectsDirectoryPath = "../../Mathematics";
 
-describe.skip(name, () => {
+describe(name, () => {
   createSuite(name, logLevel, projectsDirectoryPath);
 });
