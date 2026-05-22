@@ -222,10 +222,10 @@ export default define(class Judgement extends Element {
 
     context.trace(`Validating the '${judgementString}' derived judgement...`);
 
-    const judgement = this, ///
-          topLevelMetaAssertions = context.getTopLevelMetaAssertions(),
-          judgementUnifies = one(topLevelMetaAssertions, (topLevelMetaAssertion) => {
-            const judgementUnifies = topLevelMetaAssertion.unifyJudgement(judgement, context);
+    const schemas = context.getSchemas(),
+          judgement = this, ///
+          judgementUnifies = one(schemas, (schema) => {
+            const judgementUnifies = schema.unifyJudgement(judgement, context);
 
             if (judgementUnifies) {
               return true;

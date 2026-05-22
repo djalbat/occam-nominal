@@ -73,27 +73,27 @@ export default define(class Reference extends Element {
     return comparesToParamter;
   }
 
-  compareTopLevelMetaAssertion(topLevelMetaAssertion) {
-    let topLevelMetaAssertionCompares = false;
+  compareSchema(schema) {
+    let schemaCompares = false;
 
     const context = this.getContext(),
           referenceString = this.getString(), ///
-          topLevelMetaAssertionString = topLevelMetaAssertion.getString();
+          schemaString = schema.getString();
 
-    context.trace(`Comparing the '${topLevelMetaAssertionString}' top level meta-assertion to the '${referenceString}' reference...`);
+    context.trace(`Comparing the '${schemaString}' schema to the '${referenceString}' reference...`);
 
-    const label = topLevelMetaAssertion.getLabel(),
+    const label = schema.getLabel(),
           labelUnifies = this.unifyLabel(label, context);
 
     if (labelUnifies) {
-      topLevelMetaAssertionCompares = true;
+      schemaCompares = true;
     }
 
-    if (topLevelMetaAssertionCompares) {
-      context.trace(`...compared the '${topLevelMetaAssertionString}' top level meta-assertion to the '${referenceString}' reference.`);
+    if (schemaCompares) {
+      context.trace(`...compared the '${schemaString}' schema to the '${referenceString}' reference.`);
     }
 
-    return topLevelMetaAssertionCompares;
+    return schemaCompares;
   }
 
   findValidReference(context) {

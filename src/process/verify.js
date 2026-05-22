@@ -7,11 +7,10 @@ import { ruleFromRuleNode,
          errorFromErrorNode,
          axiomFromAxiomNode,
          lemmaFromLemmaNode,
+         schemaFromSchemaNode,
          sectionFromSectionNode,
          theoremFromTheoremNode,
-         metaLemmaFromMetaLemmaNode,
          conjectureFromConjectureNode,
-         metatheoremFromMetatheoremNode,
          variableDeclarationFromVariableDeclarationNode,
          simpleTypeDeclarationFromSimpleTypeDeclarationNode,
          typePrefixDeclarationFromTypePrefixDeclarationNode,
@@ -26,11 +25,10 @@ const ruleNodeQuery = nodeQuery("/rule"),
       errorNodeQuery = nodeQuery("/error"),
       axiomNodeQuery = nodeQuery("/axiom"),
       lemmaNodeQuery = nodeQuery("/lemma"),
+      schemaNodeQuery = nodeQuery("/schema"),
       sectionNodeQuery = nodeQuery("/section"),
       theoremNodeQuery = nodeQuery("/theorem"),
-      metaLemmaNodeQuery = nodeQuery("/metaLemma"),
       conjectureNodeQuery = nodeQuery("/conjecture"),
-      metatheoremNodeQuery = nodeQuery("/metatheorem"),
       variableDeclarationNodeQuery = nodeQuery("/variableDeclaration"),
       combinatorDeclarationNodeQuery = nodeQuery("/combinatorDeclaration"),
       simpleTypeDeclarationNodeQuery = nodeQuery("/simpleTypeDeclaration"),
@@ -102,6 +100,21 @@ class TopLevelPass extends AsyncPass {
       }
     },
     {
+      nodeQuery: schemaNodeQuery,
+      run: async (schemaNode, context) => {
+        let success = false;
+
+        const schema = schemaFromSchemaNode(schemaNode, context),
+              schemaVerifies = await schema.verify(context);
+
+        if (schemaVerifies) {
+          success = true;
+        }
+
+        return success;
+      }
+    },
+    {
       nodeQuery: sectionNodeQuery,
       run: async (sectionNode, context) => {
         let success = false;
@@ -132,21 +145,6 @@ class TopLevelPass extends AsyncPass {
       }
     },
     {
-      nodeQuery: metaLemmaNodeQuery,
-      run: async (metaLemmaNode, context) => {
-        let success = false;
-
-        const metaLemma = metaLemmaFromMetaLemmaNode(metaLemmaNode, context),
-              metaLemmaVerifies = await metaLemma.verify(context);
-
-        if (metaLemmaVerifies) {
-          success = true;
-        }
-
-        return success;
-      }
-    },
-    {
       nodeQuery: conjectureNodeQuery,
       run: async (conjectureNode, context) => {
         let success = false;
@@ -155,21 +153,6 @@ class TopLevelPass extends AsyncPass {
               conjectureVerifies = await conjecture.verify(context);
 
         if (conjectureVerifies) {
-          success = true;
-        }
-
-        return success;
-      }
-    },
-    {
-      nodeQuery: metatheoremNodeQuery,
-      run: async (metatheoremNode, context) => {
-        let success = false;
-
-        const metatheorem = metatheoremFromMetatheoremNode(metatheoremNode, context),
-              metatheoremVerifies = await metatheorem.verify(context);
-
-        if (metatheoremVerifies) {
           success = true;
         }
 

@@ -195,6 +195,17 @@ export function rulsStringFromLabelsPremisesAndConclusion(labels, premises, conc
   return ruleString;
 }
 
+export function schemaStringFromLabelSuppositionsAndDeduction(label, suppositions, deduction) {
+  const labelString = label.getString(),
+        deductionString = deduction.getString(),
+        suppositionsString = suppositionsStringFromSuppositions(suppositions),
+        schemaString = (suppositionsString !== null) ?
+                        `${labelString} :: [${suppositionsString}]...${deductionString}` :
+                          `${labelString} :: ${deductionString}`;
+
+  return schemaString;
+}
+
 export function subproofStringFromSuppositionsAndSubDerivation(suppositions, subDerivation) {
   const lastStep = subDerivation.getLastStep(),
         suppositionsString = suppositionsStringFromSuppositions(suppositions),
@@ -251,17 +262,6 @@ export function complexTypeDeclarationStringFromTypeSuperTypesAndProvisional(typ
         complexTypeDeclarationString = `${provisionalString}${typeString}${superTypesString}`;
 
   return complexTypeDeclarationString;
-}
-
-export function topLevelMetaAssertionStringFromLabelSuppositionsAndDeduction(label, suppositions, deduction) {
-  const labelString = label.getString(),
-        deductionString = deduction.getString(),
-        suppositionsString = suppositionsStringFromSuppositions(suppositions),
-        topLevelMetaAssertionString = (suppositionsString !== null) ?
-                                       `${labelString} :: [${suppositionsString}]...${deductionString}` :
-                                         `${labelString} :: ${deductionString}`;
-
-  return topLevelMetaAssertionString;
 }
 
 export function topLevelAssertionStringFromLabelsSignatureSuppositionsAndDeduction(labels, signature, suppositions, deduction) {

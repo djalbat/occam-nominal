@@ -185,11 +185,11 @@ export default class Context extends ContextBase {
     return topLevelAssertions;
   }
 
-  getTopLevelMetaAssertions(includeRelease = true) {
+  getSchemas(includeRelease = true) {
     const context = this.getContext(),
-          topLevelMetaAssertions = context.getTopLevelMetaAssertions(includeRelease);
+          schemas = context.getSchemas(includeRelease);
 
-    return topLevelMetaAssertions;
+    return schemas;
   }
 
   getVariables(nested) {

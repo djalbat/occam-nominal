@@ -343,6 +343,22 @@ export function axiomsFromJSON(json, context) {
   return axioms;
 }
 
+export function schemasFromJSON(json, context) {
+  let { schemas = [] } = json;
+
+  const { Schema } = elements,
+        schemasJSON = schemas; ///
+
+  schemas = schemasJSON.map((schemaJSON) => {
+    const json = schemaJSON,  ///
+      schema = Schema.fromJSON(json, context);
+
+    return schema;
+  });
+
+  return schemas;
+}
+
 export function premisesFromJSON(json, context) {
   let { premises } = json;
 
@@ -640,22 +656,6 @@ export function constructorsFromJSON(json, context) {
   });
 
   return constructors;
-}
-
-export function metatheoremsFromJSON(json, context) {
-  let { metatheorems } = json;
-
-  const { Metatheorem } = elements,
-        metatheoremsJSON = metatheorems; ///
-
-  metatheorems = metatheoremsJSON.map((metatheoremJSON) => {
-    const json = metatheoremJSON,  ///
-          metatheorem = Metatheorem.fromJSON(json, context);
-
-    return metatheorem;
-  });
-
-  return metatheorems;
 }
 
 export function suppositionsFromJSON(json, context) {
@@ -1015,6 +1015,16 @@ export function axiomsToAxiomsJSON(axioms) {
   return axiomsJSON;
 }
 
+export function schemasToSchemasJSON(schemas) {
+  const schemasJSON = schemas.map((schema) => {
+    const schemaJSON = schema.toJSON();
+
+    return schemaJSON;
+  });
+
+  return schemasJSON;
+}
+
 export function premisesToPremisesJSON(premises) {
   const premisesJSON = premises.map((premise) => {
     const premiseJSON = premise.toJSON();
@@ -1200,16 +1210,6 @@ export function constructorsToConstructorsJSON(constructors) {
   });
 
   return constructorsJSON;
-}
-
-export function metatheoremsToMetatheoremsJSON(metatheorems) {
-  const metatheoremsJSON = metatheorems.map((metatheorem) => {
-    const metatheoremJSON = metatheorem.toJSON();
-
-    return metatheoremJSON;
-  });
-
-  return metatheoremsJSON;
 }
 
 export function typePrefixesToTypePrefixesJSON(typePrefixes) {

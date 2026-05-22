@@ -194,14 +194,14 @@ export default define(class Assumption extends Element {
 
     context.trace(`Validating the '${assumptionString}' derived assumption...`);
 
-    let topLevelMetaAssertions;
+    let schemas;
 
-    topLevelMetaAssertions = context.getTopLevelMetaAssertions();
+    schemas = context.getSchemas();
 
-    topLevelMetaAssertions = clone(topLevelMetaAssertions); ///
+    schemas = clone(schemas); ///
 
-    filter(topLevelMetaAssertions, (topLevelMetaAssertion) => {
-      const label = topLevelMetaAssertion.getLabel(),
+    filter(schemas, (schema) => {
+      const label = schema.getLabel(),
             labelUnifies = this.unifyLabel(label, context);
 
       if (labelUnifies) {
@@ -209,15 +209,15 @@ export default define(class Assumption extends Element {
       }
     });
 
-    const topLevelMetaAssertionsUnifiy = each(topLevelMetaAssertions, (topLevelMetaAssertion) => {
-      const topLevelMetaAssertionUnifies = this.unifyTopLevelMetaAssertion(topLevelMetaAssertion, context);
+    const schemasUnifiy = each(schemas, (schema) => {
+      const schemaUnifies = this.unifySchema(schema, context);
 
-      if (topLevelMetaAssertionUnifies) {
+      if (schemaUnifies) {
         return true;
       }
     });
 
-    if (topLevelMetaAssertionsUnifiy) {
+    if (schemasUnifiy) {
       validatesWhenDerived = true;
     }
 
@@ -247,44 +247,44 @@ export default define(class Assumption extends Element {
     return labelUnifies;
   }
 
-  unifyTopLevelMetaAssertion(topLevelMetaAssertion, context) {
-    let topLevelMetaAssertionUnifies = false;
+  unifySchema(schema, context) {
+    let schemaUnifies = false;
 
-    const assumptionString = this.getString(),
-          topLevelMetaAssertionString = topLevelMetaAssertion.getString();
+    const schemaString = schema.getString(),
+          assumptionString = this.getString();
 
-    context.trace(`Unifying the '${topLevelMetaAssertionString}' top level meta-assertion with the '${assumptionString}' assumption...`);
+    context.trace(`Unifying the '${schemaString}' schema with the '${assumptionString}' assumption...`);
 
     reconcile((context) => {
-      const label = topLevelMetaAssertion.getLabel(),
+      const label = schema.getLabel(),
             labelUnifies = this.reference.unifyLabel(label, context);
 
       if (labelUnifies) {
-        const conditional = topLevelMetaAssertion.isConditional(),
+        const conditional = schema.isConditional(),
               subproofAssertion = subproofAssertionFromStatement(this.statement, context)
 
         if (conditional) {
           if (subproofAssertion !== null) {
-            topLevelMetaAssertionUnifies = subproofAssertion.unifyTopLevelMetaAssertion(topLevelMetaAssertion, context);
+            schemaUnifies = subproofAssertion.unifySchema(schema, context);
           }
         } else {
           if (subproofAssertion === null) {
-            const deducedStatment = topLevelMetaAssertion.getDeducedStatement(),
+            const deducedStatment = schema.getDeducedStatement(),
                   deducedStatmentUnfifies = this.unifyDeducedStatement(deducedStatment, context);
 
             if (deducedStatmentUnfifies) {
-              topLevelMetaAssertionUnifies =true;
+              schemaUnifies =true;
             }
           }
         }
       }
     }, context);
 
-    if (topLevelMetaAssertionUnifies) {
-      context.debug(`...unified the '${topLevelMetaAssertionString}' top level meta-assertion with the '${assumptionString}' assumption.`);
+    if (schemaUnifies) {
+      context.debug(`...unified the '${schemaString}' schema with the '${assumptionString}' assumption.`);
     }
 
-    return topLevelMetaAssertionUnifies;
+    return schemaUnifies;
   }
 
   static name = "Assumption";

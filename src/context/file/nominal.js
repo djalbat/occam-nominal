@@ -12,6 +12,7 @@ import { findMetaTypeByMetaTypeName } from "../../metaTypes";
 import { typesFromJSON,
          rulesFromJSON,
          axiomsFromJSON,
+         schemasFromJSON,
          typesToTypesJSON,
          theoremsFromJSON,
          rulesToRulesJSON,
@@ -20,7 +21,7 @@ import { typesFromJSON,
          combinatorsFromJSON,
          typePrefixesFromJSON,
          constructorsFromJSON,
-         metatheoremsFromJSON,
+         schemasToSchemasJSON,
          theoremsToTheoremsJSON,
          declaredVariablesFromJSON,
          conjecturesToConjecturesJSON,
@@ -28,15 +29,14 @@ import { typesFromJSON,
          declaredMetavariablesFromJSON,
          typePrefixesToTypePrefixesJSON,
          constructorsToConstructorsJSON,
-         metatheoremsToMetatheoremsJSON,
          declaredVariablesToDeclaredVariablesJSON,
          declaredMetavariablesToDeclaredMetavariablesJSON } from "../../utilities/json";
 
-const { find, push, filter } = arrayUtilities,
+const { push } = arrayUtilities,
       { nominalLexerFromCombinedCustomGrammar, nominalParserFromCombinedCustomGrammar } = nominalUtilities;
 
 export default class NominalFileContext extends FileContext {
-  constructor(context, fileContent, filePath, tokens, node, json, lexer, parser, types, rules, axioms, lemmas, theorems, metaLemmas, conjectures, combinators, typePrefixes, constructors, metatheorems, declaredVariables, declaredMetavariables) {
+  constructor(context, fileContent, filePath, tokens, node, json, lexer, parser, types, rules, axioms, lemmas, schemas, theorems, conjectures, combinators, typePrefixes, constructors, declaredVariables, declaredMetavariables) {
     super(context, fileContent, filePath, tokens, node, json);
 
     this.lexer = lexer;
@@ -49,13 +49,12 @@ export default class NominalFileContext extends FileContext {
     this.rules = rules;
     this.axioms = axioms;
     this.lemmas = lemmas;
+    this.schemas = schemas;
     this.theorems = theorems;
-    this.metaLemmas = metaLemmas;
     this.conjectures = conjectures;
     this.combinators = combinators;
     this.typePrefixes = typePrefixes;
     this.constructors = constructors;
-    this.metatheorems = metatheorems;
     this.declaredVariables = declaredVariables;
     this.declaredMetavariables = declaredMetavariables;
   }
@@ -118,10 +117,10 @@ export default class NominalFileContext extends FileContext {
         push(labels, conjectureLabels);
       });
 
-      this.metatheorems.forEach((metatheorem) => {
-        const metatheoremLabel = metatheorem.getLabel();
+      this.schemas.forEach((schema) => {
+        const schemaLabel = schema.getLabel();
 
-        labels.push(metatheoremLabel);
+        labels.push(schemaLabel);
       });
     }
 
@@ -160,20 +159,20 @@ export default class NominalFileContext extends FileContext {
     return lemmas;
   }
 
+  getSchemas(includeRelease = true) {
+    const schemas = includeRelease ?
+                      this.context.getSchemas() :
+                        this.schemas;
+
+    return schemas;
+  }
+
   getTheorems(includeRelease = true) {
     const theorems = includeRelease ?
                        this.context.getTheorems() :
                          this.theorems;
 
     return theorems;
-  }
-
-  getMetaLemmas(includeRelease = true) {
-    const metaLemmas = includeRelease ?
-                         this.context.getMetaLemmas() :
-                           this.metaLemmas;
-
-    return metaLemmas;
   }
 
   getConjectures(includeRelease = true) {
@@ -208,14 +207,6 @@ export default class NominalFileContext extends FileContext {
     return constructors;
   }
 
-  getMetatheorems(includeRelease = true) {
-    const metatheorems = includeRelease ?
-                           this.context.getMetatheorems() :
-                             this.metatheorems;
-
-    return metatheorems;
-  }
-
   getProcedures(includeRelease = true) {
     const procedures = includeRelease ?
                           this.context.getProcedures() :
@@ -237,17 +228,6 @@ export default class NominalFileContext extends FileContext {
           ];
 
     return topLevelAssertions;
-  }
-
-  getTopLevelMetaAssertions(includeRelease = true) {
-    const metaLemmas = this.getMetaLemmas(includeRelease),
-          metatheorems = this.getMetatheorems(includeRelease),
-          topLevelMetaAssertions = [
-            ...metaLemmas,
-            ...metatheorems
-          ];
-
-    return topLevelMetaAssertions;
   }
 
   getDeclaredVariables() {
@@ -363,13 +343,13 @@ export default class NominalFileContext extends FileContext {
     this.trace(`Added the '${theoremString}' theorem to the '${filePath}' file context.`)
   }
 
-  addMetaLemma(metaLemma) {
-    this.metaLemmas.push(metaLemma);
+  addSchema(schema) {
+    this.schemas.push(schema);
 
     const filePath = this.getFilePath(),
-          metaLemmaString = metaLemma.getString();
+          schemaString = schema.getString();
 
-    this.trace(`Added the '${metaLemmaString}' meta-lemma to the '${filePath}' file context.`)
+    this.trace(`Added the '${schemaString}' schema to the '${filePath}' file context.`)
   }
 
   addConjecture(conjecture) {
@@ -408,13 +388,13 @@ export default class NominalFileContext extends FileContext {
     this.trace(`Added the '${constructorString}' constructor to the '${filePath}' file context.`)
   }
 
-  addMetatheorem(metatheorem) {
-    this.metatheorems.push(metatheorem);
+  addSchema(schema) {
+    this.schemas.push(schema);
 
     const filePath = this.getFilePath(),
-          metatheoremString = metatheorem.getString();
+          schemaString = schema.getString();
 
-    this.trace(`Added the '${metatheoremString}' metatheorem to the '${filePath}' file context.`)
+    this.trace(`Added the '${schemaString}' schema to the '${filePath}' file context.`)
   }
 
   addDeclaredVariable(declaredVariable) {
@@ -741,13 +721,12 @@ export default class NominalFileContext extends FileContext {
     this.rules = [];
     this.axioms = [];
     this.lemmas = [];
+    this.schemas = [];
     this.theorems = [];
-    this.metaLemmas = [];
     this.conjectures = [];
     this.combinators = [];
     this.typePrefixes = [];
     this.constructors = [];
-    this.metatheorems = [];
     this.declaredVariables = [];
     this.declaredMetavariables = [];
   }
@@ -781,7 +760,6 @@ export default class NominalFileContext extends FileContext {
     typesFromJSON(json, this.types, fileContext);
 
     this.lemmas = [];
-    this.metaLemmas = [];
 
     this.declaredMetavariables = declaredMetavariablesFromJSON(json, fileContext);
     this.declaredVariables = declaredVariablesFromJSON(json, fileContext);
@@ -791,21 +769,21 @@ export default class NominalFileContext extends FileContext {
 
     this.rules = rulesFromJSON(json, fileContext);
     this.axioms = axiomsFromJSON(json, fileContext);
+    this.schemas = schemasFromJSON(json, fileContext);
     this.theorems = theoremsFromJSON(json, fileContext);
     this.conjectures = conjecturesFromJSON(json, fileContext);
-    this.metatheorems = metatheoremsFromJSON(json, fileContext);
   }
 
   toJSON() {
     const typesJSON = typesToTypesJSON(this.types),
           rulesJSON = rulesToRulesJSON(this.rules),
           axiomsJSON = axiomsToAxiomsJSON(this.axioms),
+          schemasJSON = schemasToSchemasJSON(this.schemas),
           theoremsJSON = theoremsToTheoremsJSON(this.theorems),
           conjecturesJSON = conjecturesToConjecturesJSON(this.conjectures),
           combinatorsJSON = combinatorsToCombinatorsJSON(this.combinators),
           typePrefixesJSON = typePrefixesToTypePrefixesJSON(this.typePrefixes),
           constructorsJSON = constructorsToConstructorsJSON(this.constructors),
-          metatheoremsJSON = metatheoremsToMetatheoremsJSON(this.metatheorems),
           declaredVariablesJSON = declaredVariablesToDeclaredVariablesJSON(this.declaredVariables),
           declaredMetavariablesJSON = declaredMetavariablesToDeclaredMetavariablesJSON(this.declaredMetavariables),
           fileContent = this.fileContent,
@@ -813,12 +791,12 @@ export default class NominalFileContext extends FileContext {
           types = typesJSON,  ///
           rules = rulesJSON,  ///
           axioms = axiomsJSON,  ///
+          schemas = schemasJSON,  ///
           theorems = theoremsJSON,  ///
           conjectures = conjecturesJSON,  ///
           combinators = combinatorsJSON,  ///
           typePrefixes = typePrefixesJSON,  ///
           constructors = constructorsJSON,  ///
-          metatheorems = metatheoremsJSON,  ///
           declaredVariables = declaredVariablesJSON,  ///
           declaredMetavariables = declaredMetavariablesJSON,  ///
           json = {
@@ -827,12 +805,12 @@ export default class NominalFileContext extends FileContext {
             types,
             rules,
             axioms,
+            schemas,
             theorems,
             conjectures,
             combinators,
             typePrefixes,
             constructors,
-            metatheorems,
             declaredVariables,
             declaredMetavariables
           };
@@ -851,16 +829,15 @@ export default class NominalFileContext extends FileContext {
           rules = [],
           axioms = [],
           lemmas = [],
+          schemas = [],
           theorems = [],
-          metaLemmas = [],
           conjectures = [],
           combinators = [],
           typePrefixes = [],
           constructors = [],
-          metatheorems = [],
           declaredVariables = [],
           declaredMetavariables = [],
-          nominalFileContext = FileContext.fromFile(NominalFileContext, file, lexer, parser, types, rules, axioms, lemmas, theorems, metaLemmas, conjectures, combinators, typePrefixes, constructors, metatheorems, declaredVariables, declaredMetavariables, context);
+          nominalFileContext = FileContext.fromFile(NominalFileContext, file, lexer, parser, types, rules, axioms, lemmas, schemas, theorems, conjectures, combinators, typePrefixes, constructors, declaredVariables, declaredMetavariables, context);
 
     return nominalFileContext;
   }
@@ -876,16 +853,15 @@ export default class NominalFileContext extends FileContext {
           rules = null,
           axioms = null,
           lemmas = null,
+          schemas = null,
           theorems = null,
-          metaLemmas = null,
           conjectures = null,
           combinators = null,
           typePrefixes = null,
           constructors = null,
-          metatheorems = null,
           declaredVariables = null,
           declaredMetavariables = null,
-          nominalFileContext = FileContext.fromJSON(NominalFileContext, json, lexer, parser, types, rules, axioms, lemmas, theorems, metaLemmas, conjectures, combinators, typePrefixes, constructors, metatheorems, declaredVariables, declaredMetavariables, context);
+          nominalFileContext = FileContext.fromJSON(NominalFileContext, json, lexer, parser, types, rules, axioms, lemmas, schemas, theorems, conjectures, combinators, typePrefixes, constructors, declaredVariables, declaredMetavariables, context);
 
     return nominalFileContext;
   }

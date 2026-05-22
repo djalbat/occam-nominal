@@ -6,7 +6,7 @@ import elements from "../elements";
 
 import { reconcile, encapsulate } from "../utilities/context";
 import { breakPointFromJSON, breakPointToBreakPointJSON } from "../utilities/breakPoint";
-import { topLevelMetaAssertionStringFromLabelSuppositionsAndDeduction } from "../utilities/string";
+import { schemaStringFromLabelSuppositionsAndDeduction } from "../utilities/string";
 import { labelFromJSON,
          labelToLabelJSON,
          deductionFromJSON,
@@ -15,11 +15,10 @@ import { labelFromJSON,
          deductionToDeductionJSON,
          constraintsToMConstraintJSON,
          suppositionsToSuppositionsJSON } from "../utilities/json";
-import supposition from "./proofAssertion/supposition";
 
 const { asyncForwardsEvery } = asynchronousUtilities;
 
-export default class TopLevelMetaAssertion extends Element {
+export default class Schema extends Element {
   constructor(context, string, node, breakPoint, label, suppositions, deduction, proof, constraints) {
     super(context, string, node, breakPoint);
 
@@ -100,11 +99,13 @@ export default class TopLevelMetaAssertion extends Element {
   }
 
   async verify(context) {
-    let verifies = false;
+    let verifies;
 
-    const topLevelMetaAssertionString = this.getString(); ///
+    await this.break(context);
 
-    context.trace(`Verifying the '${topLevelMetaAssertionString}' top level meta assertion...`);
+    const schemaString = this.getString(); ///
+
+    context.trace(`Verifying the '${schemaString}' schema...`);
 
     await encapsulate(async (context) => {
       const labelVerifies = this.verifyLabel(context);
@@ -127,7 +128,11 @@ export default class TopLevelMetaAssertion extends Element {
     }, this.constraints, context);
 
     if (verifies) {
-      context.debug(`...verified the '${topLevelMetaAssertionString}' top level meta assertion.`);
+      const schema = this; ///
+
+      context.addSchema(schema);
+
+      context.debug(`...verified the '${schemaString}' schema.`);
     }
 
     return verifies;
@@ -136,15 +141,15 @@ export default class TopLevelMetaAssertion extends Element {
   verifyLabel(context) {
     let labelVerifies;
 
-    const topLevelMetaAssertionString = this.getString(),  ///
+    const schemaString = this.getString(),  ///
           labelString = this.label.getString();
 
-    context.trace(`Verifying the '${topLevelMetaAssertionString}' top level meta-assertion's '${labelString}' label...`);
+    context.trace(`Verifying the '${schemaString}' schema's '${labelString}' label...`);
 
     labelVerifies = this.label.verify();
 
     if (labelVerifies) {
-      context.debug(`...verified the '${topLevelMetaAssertionString}' top level meta-assertion's '${labelString}' label.`);
+      context.debug(`...verified the '${schemaString}' schema's '${labelString}' label.`);
     }
 
     return labelVerifies;
@@ -153,16 +158,16 @@ export default class TopLevelMetaAssertion extends Element {
   async verifyProof(context) {
     let proofVerifies;
 
-    const topLevelMetaAssertionString = this.getString();  ///
+    const schemaString = this.getString();  ///
 
-    context.trace(`Verifying the '${topLevelMetaAssertionString}' top level meta-assertion's proof...`);
+    context.trace(`Verifying the '${schemaString}' schema's proof...`);
 
     const statement = this.deduction.getStatement();
 
     proofVerifies = await this.proof.verify(statement, context);
 
     if (proofVerifies) {
-      context.debug(`...verified the '${topLevelMetaAssertionString}' top level meta-assertion's proof.`);
+      context.debug(`...verified the '${schemaString}' schema's proof.`);
     }
 
     return proofVerifies;
@@ -172,14 +177,14 @@ export default class TopLevelMetaAssertion extends Element {
     let deductionVerifies;
 
     const deductionString = this.deduction.getString(),
-          topLevelMetaAssertionString = this.getString(); ///
+          schemaString = this.getString(); ///
 
-    context.trace(`Verifying the '${topLevelMetaAssertionString}' top level meta assertion's '${deductionString}' deduction...`);
+    context.trace(`Verifying the '${schemaString}' top level meta assertion's '${deductionString}' deduction...`);
 
     deductionVerifies = await this.deduction.verify(context);
 
     if (deductionVerifies) {
-      context.debug(`...verified the '${topLevelMetaAssertionString}' top level meta assertion's '${deductionString}' deduction.`);
+      context.debug(`...verified the '${schemaString}' top level meta assertion's '${deductionString}' deduction.`);
     }
 
     return deductionVerifies;
@@ -189,9 +194,9 @@ export default class TopLevelMetaAssertion extends Element {
     let suppositionVerifies;
 
     const suppositionString = supposition.getString(),
-          topLevelMetaAssertionString = this.getString();  ///
+          schemaString = this.getString();  ///
 
-    context.trace(`Verifying the '${topLevelMetaAssertionString}' top level meta-assertion's '${suppositionString}' supposition...`);
+    context.trace(`Verifying the '${schemaString}' schema's '${suppositionString}' supposition...`);
 
     suppositionVerifies = await supposition.verify(context)
 
@@ -204,7 +209,7 @@ export default class TopLevelMetaAssertion extends Element {
     }
 
     if (suppositionVerifies) {
-      context.debug(`...verified the '${topLevelMetaAssertionString}' top level meta-assertion's '${suppositionString}' supposition.`);
+      context.debug(`...verified the '${schemaString}' schema's '${suppositionString}' supposition.`);
     }
 
     return suppositionVerifies;
@@ -213,9 +218,9 @@ export default class TopLevelMetaAssertion extends Element {
   async verifySuppositions(context) {
     let suppositionsVerify;
 
-    const topLevelMetaAssertionString = this.getString();  ///
+    const schemaString = this.getString();  ///
 
-    context.trace(`Verifying the '${topLevelMetaAssertionString}' top level meta-assertion's suppositions...`);
+    context.trace(`Verifying the '${schemaString}' schema's suppositions...`);
 
     suppositionsVerify = await asyncForwardsEvery(this.suppositions, async (supposition) => {
       const suppositionVerifies = await this.verifySupposition(supposition, context);
@@ -226,7 +231,7 @@ export default class TopLevelMetaAssertion extends Element {
     });
 
     if (suppositionsVerify) {
-      context.debug(`...verified the '${topLevelMetaAssertionString}' top level meta-assertion's suppositions.`);
+      context.debug(`...verified the '${schemaString}' schema's suppositions.`);
     }
 
     return suppositionsVerify;
@@ -236,9 +241,9 @@ export default class TopLevelMetaAssertion extends Element {
     let judgementUnifies = false;
 
     const judgementString = judgement.getString(),
-          topLevelMetaAssertionString = this.getString(); ///
+          schemaString = this.getString(); ///
 
-    context.trace(`Unifying the '${judgementString}' judgement with the '${topLevelMetaAssertionString}' top level meta-assertion...`);
+    context.trace(`Unifying the '${judgementString}' judgement with the '${schemaString}' schema...`);
 
     reconcile((context) => {
       const reference = judgement.getReference(),
@@ -282,7 +287,7 @@ export default class TopLevelMetaAssertion extends Element {
     }, context);
 
     if (judgementUnifies) {
-      context.debug(`...unified the '${judgementString}' judgement with the '${topLevelMetaAssertionString}' top level meta-assertion.`);
+      context.debug(`...unified the '${judgementString}' judgement with the '${schemaString}' schema.`);
     }
 
     return judgementUnifies;
@@ -292,14 +297,14 @@ export default class TopLevelMetaAssertion extends Element {
     let referenceUnifies;
 
     const referenceString = reference.getString(),
-          topLevelMetaAssertionString = this.getString(); ///
+          schemaString = this.getString(); ///
 
-    context.trace(`Unifying the '${referenceString}' reference with the '${topLevelMetaAssertionString}' top level meta-assertion...`);
+    context.trace(`Unifying the '${referenceString}' reference with the '${schemaString}' schema...`);
 
     referenceUnifies = this.label.unifyReference(reference, context);
 
     if (referenceUnifies) {
-      context.debug(`...unified the '${referenceString}' reference with the '${topLevelMetaAssertionString}' top level meta-assertion.`);
+      context.debug(`...unified the '${referenceString}' reference with the '${schemaString}' schema.`);
     }
 
     return referenceUnifies;
@@ -309,14 +314,14 @@ export default class TopLevelMetaAssertion extends Element {
     let statementUnifies;
 
     const statementString = statement.getString(),
-          topLevelMetaAssertionString = this.getString(); ///
+          schemaString = this.getString(); ///
 
-    context.trace(`Unifying the '${statementString}' statement with the '${topLevelMetaAssertionString}' top level meta-assertion...`);
+    context.trace(`Unifying the '${statementString}' statement with the '${schemaString}' schema...`);
 
     debugger
 
     if (statementUnifies) {
-      context.debug(`...unified the '${statementString}' statement with the '${topLevelMetaAssertionString}' top level meta-assertion.`);
+      context.debug(`...unified the '${statementString}' statement with the '${schemaString}' schema.`);
     }
 
     return statementUnifies;
@@ -363,9 +368,9 @@ export default class TopLevelMetaAssertion extends Element {
     let subproofAssertionUnifies = false;
 
     const subproofAssertionString = subproofAssertion.getString(),
-          topLevelMetaAssertionString = this.getString(); ///
+          schemaString = this.getString(); ///
 
-    context.trace(`Unifying the '${subproofAssertionString}' subproof assertion with the '${topLevelMetaAssertionString}' top level meta-assertion...`);
+    context.trace(`Unifying the '${subproofAssertionString}' subproof assertion with the '${schemaString}' schema...`);
 
     const deducedStatement = subproofAssertion.getDeducedStatement(),
           deducedStatementUnifies = this.unifyDeducedStatement(deducedStatement, context);
@@ -380,7 +385,7 @@ export default class TopLevelMetaAssertion extends Element {
     }
 
     if (subproofAssertionUnifies) {
-      context.debug(`...unified the '${subproofAssertionString}' subproof assertion with the '${topLevelMetaAssertionString}' top level meta-assertion.`);
+      context.debug(`...unified the '${subproofAssertionString}' subproof assertion with the '${schemaString}' schema.`);
     }
 
     return subproofAssertionUnifies;
@@ -462,31 +467,19 @@ export default class TopLevelMetaAssertion extends Element {
     return json;
   }
 
-  static fromJSON(Class, json, context) {
+  static fromJSON(json, context) {
     const label = labelFromJSON(json, context),
           deduction = deductionFromJSON(json, context),
           suppositions = suppositionsFromJSON(json, context),
           constraints = constraintsFromJSON(json, context),
-          string = topLevelMetaAssertionStringFromLabelSuppositionsAndDeduction(label, suppositions, deduction),
+          string = schemaStringFromLabelSuppositionsAndDeduction(label, suppositions, deduction),
           node = null,
           breakPoint = breakPointFromJSON(json),
           proof = null,
-          topLevelMetaAssertion = new Class(context, string, node, breakPoint, label, suppositions, deduction, proof, constraints);
+          schema = new Schema(context, string, node, breakPoint, label, suppositions, deduction, proof, constraints);
 
-    return topLevelMetaAssertion;
+    return schema;
   }
-}
-
-function statementFromStatements(statements, context) {
-  let statement;
-
-  const { Statement } = elements;
-
-  statement = Statement.fromStatements(statements, context);
-
-  statement = statement.validate(context);
-
-  return statement;
 }
 
 function subproofAssertionFromStatement(statement, context) {

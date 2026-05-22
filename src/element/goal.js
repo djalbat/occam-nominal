@@ -194,15 +194,15 @@ export default define(class Goal extends Element {
 
     context.trace(`Validating the '${goalString}' derived goal...`);
 
-    const topLevelMetaAssertions = context.getTopLevelMetaAssertions();
+    const schemas = context.getSchemas();
 
     debugger
 
-    validatesWhenDerived = each(topLevelMetaAssertions, (topLevelMetaAssertion) => {
+    validatesWhenDerived = each(schemas, (schema) => {
       let statementUnifies;
 
       reconcile((context) => {
-        const statement = topLevelMetaAssertion.getStatement();
+        const statement = schema.getStatement();
       }, context);
 
       if (statementUnifies) {

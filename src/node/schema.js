@@ -2,10 +2,11 @@
 
 import { NonTerminalNode } from "occam-languages";
 
-export default class TopLevelMetaAssertionNode extends NonTerminalNode {
+import { SCHEMA_BODY_RULE_NAME, SCHEMA_HEADER_RULE_NAME } from "../ruleNames";
+
+export default class SchemaNode extends NonTerminalNode {
   getBodyNode() {
-    const { bodyRuleName } = this.constructor,
-          ruleName = bodyRuleName,  ///
+    const ruleName = SCHEMA_BODY_RULE_NAME,  ///
           axiomBodyNode = this.getNodeByRuleName(ruleName);
 
     return axiomBodyNode;
@@ -26,8 +27,7 @@ export default class TopLevelMetaAssertionNode extends NonTerminalNode {
   }
 
   getHeaderNode() {
-    const { headerRuleName } = this.constructor,
-          ruleName = headerRuleName,  ///
+    const ruleName = SCHEMA_HEADER_RULE_NAME,  ///
           headerNode = this.getNodeByRuleName(ruleName);
 
     return headerNode;
