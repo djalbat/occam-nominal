@@ -76,64 +76,6 @@ export default define(class Statement extends Element {
     return singular;
   }
 
-  matchStatementNode(statementNode) {
-    const node = statementNode, ///
-          nodeMatches = this.matchNode(node),
-          statementNodeMatches = nodeMatches; ///
-
-    return statementNodeMatches;
-  }
-
-  matchMetavariableNode(metavariableNode) {
-    let metavariableNodeMatches = false;
-
-    const singular = this.isSingular();
-
-    if (singular) {
-      const metavariableNodeA = metavariableNode, ///
-            statementNode = this.getStatementNode();
-
-      metavariableNode = statementNode.getMetavariableNode();
-
-      const metavariableNodeB = metavariableNode, ///
-            metavariableNodeAMatchesMetavariableNodeB = metavariableNodeA.match(metavariableNodeB);
-
-      if (metavariableNodeAMatchesMetavariableNodeB) {
-        metavariableNodeMatches = true;
-      }
-    }
-
-    return metavariableNodeMatches;
-  }
-
-  compareParameter(parameter) {
-    let comparesToParamter = false;
-
-    const singular = this.isSingular();
-
-    if (singular) {
-      const parameterName = parameter.getName();
-
-      if (parameterName !== null) {
-        const metavariableName = this.getMetavariableName();
-
-        if (parameterName === metavariableName) {
-          comparesToParamter = true;
-        }
-      }
-    }
-
-    return comparesToParamter;
-  }
-
-  findValidStatement(context) {
-    const statementNode = this.getStatementNode(),
-          statement = context.findStatementByStatementNode(statementNode),
-          validStatement = statement;  ///
-
-    return validStatement;
-  }
-
   isTermContained(term, context) {
     let termContained;
 
@@ -184,6 +126,64 @@ export default define(class Statement extends Element {
     }
 
     return frameContained;
+  }
+
+  matchStatementNode(statementNode) {
+    const node = statementNode, ///
+          nodeMatches = this.matchNode(node),
+          statementNodeMatches = nodeMatches; ///
+
+    return statementNodeMatches;
+  }
+
+  matchMetavariableNode(metavariableNode) {
+    let metavariableNodeMatches = false;
+
+    const singular = this.isSingular();
+
+    if (singular) {
+      const metavariableNodeA = metavariableNode, ///
+            statementNode = this.getStatementNode();
+
+      metavariableNode = statementNode.getMetavariableNode();
+
+      const metavariableNodeB = metavariableNode, ///
+            metavariableNodeAMatchesMetavariableNodeB = metavariableNodeA.match(metavariableNodeB);
+
+      if (metavariableNodeAMatchesMetavariableNodeB) {
+        metavariableNodeMatches = true;
+      }
+    }
+
+    return metavariableNodeMatches;
+  }
+
+  findValidStatement(context) {
+    const statementNode = this.getStatementNode(),
+          statement = context.findStatementByStatementNode(statementNode),
+          validStatement = statement;  ///
+
+    return validStatement;
+  }
+
+  compareParameter(parameter) {
+    let comparesToParamter = false;
+
+    const singular = this.isSingular();
+
+    if (singular) {
+      const parameterName = parameter.getName();
+
+      if (parameterName !== null) {
+        const metavariableName = this.getMetavariableName();
+
+        if (parameterName === metavariableName) {
+          comparesToParamter = true;
+        }
+      }
+    }
+
+    return comparesToParamter;
   }
 
   validate(context) {

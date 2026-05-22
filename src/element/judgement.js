@@ -121,8 +121,6 @@ export default define(class Judgement extends Element {
     return comparesToStep;
   }
 
-  compareMetavariableName(metavariableName) { return this.frame.compareMetavariableName(metavariableName); }
-
   compareStatement(statement, context) {
     let comparesToStatement = false;
 
@@ -148,6 +146,8 @@ export default define(class Judgement extends Element {
 
     return comparesToStatement;
   }
+
+  compareMetavariableName(metavariableName) { return this.frame.compareMetavariableName(metavariableName); }
 
   validate(context) {
     let judgement = null;

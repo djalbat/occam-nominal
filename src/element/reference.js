@@ -53,6 +53,14 @@ export default define(class Reference extends Element {
 
   matchMetavariableNode(metavariableNode) { return this.metavariable.matchMetavariableNode(metavariableNode); }
 
+  findValidReference(context) {
+    const referenceNode = this.getReferenceNode(),
+          reference = context.findReferenceByReferenceNode(referenceNode),
+          validReference = reference;  ///
+
+    return validReference;
+  }
+
   compareParameter(parameter) {
     let comparesToParamter = false;
 
@@ -94,14 +102,6 @@ export default define(class Reference extends Element {
     }
 
     return schemaCompares;
-  }
-
-  findValidReference(context) {
-    const referenceNode = this.getReferenceNode(),
-          reference = context.findReferenceByReferenceNode(referenceNode),
-          validReference = reference;  ///
-
-    return validReference;
   }
 
   validate(context) {

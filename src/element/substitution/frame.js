@@ -57,18 +57,18 @@ export default define(class FrameSubstitution extends Substitution {
 
   matchMetavariableNode(metavariableNode) { return this.targetFrame.matchMetavariableNode(metavariableNode); }
 
-  compareFrame(frame, context) {
-    const frameEqualToReplacementFrame = this.replacementFrame.isEqualTo(frame),
-          comparedToFrame = frameEqualToReplacementFrame; ///
-
-    return comparedToFrame;
-  }
-
   compareParameter(parameter) {
     const targetFrameComparesToParameter = this.targetFrame.compareParameter(parameter),
           comparesToParameter = targetFrameComparesToParameter;  ///
 
     return comparesToParameter;
+  }
+
+  compareFrame(frame, context) {
+    const frameEqualToReplacementFrame = this.replacementFrame.isEqualTo(frame),
+        comparedToFrame = frameEqualToReplacementFrame; ///
+
+    return comparedToFrame;
   }
 
   validate(context) {

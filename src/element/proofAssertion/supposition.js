@@ -162,28 +162,6 @@ export default define(class Supposition extends ProofAssertion {
     return procedureCallValidates;
   }
 
-  unifySupposition(supposition, generalContext, specificContext) {
-    let suppositionUnifies;
-
-    const context = specificContext,  ///
-          specificSupposition = supposition,  ///
-          generalSuppositionString = this.getString(), ///
-          specificSuppositionString = specificSupposition.getString();
-
-    context.trace(`Unifying the '${specificSuppositionString}' supposition with the '${generalSuppositionString}' supposition...`);
-
-    const statement = specificSupposition.getStatement(),
-          statementUnifies = this.unifyStatement(statement, generalContext, specificContext);
-
-    suppositionUnifies = statementUnifies;  ///
-
-    if (suppositionUnifies) {
-      context.debug(`...unified the '${specificSuppositionString}' supposition with the '${generalSuppositionString}' supposition.`);
-    }
-
-    return suppositionUnifies;
-  }
-
   async unifyIndependently(context) {
     let unifiesIndependently = false;
 

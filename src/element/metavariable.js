@@ -81,6 +81,14 @@ export default define(class Metavariable extends Element {
     return metavariableNodeMatches;
   }
 
+  findValidMetavariable(context) {
+    const metavariableNode = this.getMetavariableNode(),
+          metavariable = context.findMetavariableByMetavariableNode(metavariableNode),
+          validMetavariable = metavariable; ///
+
+    return validMetavariable;
+  }
+
   compareMetavariable(metavariable) {
     const metavariableName = metavariable.getName(),
           comparesToMetavariableName = this.compareMetavariableName(metavariableName),
@@ -94,14 +102,6 @@ export default define(class Metavariable extends Element {
           comparesToMetavariableName = nameMetavariableName;  ///
 
     return comparesToMetavariableName;
-  }
-
-  findValidMetavariable(context) {
-    const metavariableNode = this.getMetavariableNode(),
-          metavariable = context.findMetavariableByMetavariableNode(metavariableNode),
-          validMetavariable = metavariable; ///
-
-    return validMetavariable;
   }
 
   verify(context) {
