@@ -3,9 +3,11 @@
 import { Element } from "occam-languages";
 import { arrayUtilities } from "necessary";
 
-import elements, { define } from "../elements";
+import elements from "../elements";
+
+import { define } from "../elements";
 import { instantiateAssumption } from "../process/instantiate";
-import { reconcile, instantiate } from "../utilities/context";
+import { join, reconcile, instantiate } from "../utilities/context";
 import { breakPointFromJSON, breakPointToBreakPointJSON } from "../utilities/breakPoint";
 
 const { each, clone, filter } = arrayUtilities;
@@ -255,8 +257,12 @@ export default define(class Assumption extends Element {
 
     context.trace(`Unifying the '${schemaString}' schema with the '${assumptionString}' assumption...`);
 
-    reconcile((context) => {
+    const generalContext = context, ///
+          specificContext = context;  ///
+
+    reconcile((specificContext) => {
       const label = schema.getLabel(),
+            context = specificContext,  ///
             labelUnifies = this.reference.unifyLabel(label, context);
 
       if (labelUnifies) {
@@ -265,26 +271,55 @@ export default define(class Assumption extends Element {
 
         if (conditional) {
           if (subproofAssertion !== null) {
-            schemaUnifies = subproofAssertion.unifySchema(schema, context);
+            schemaUnifies = subproofAssertion.unifySchema(schema, generalContext, specificContext);
           }
         } else {
           if (subproofAssertion === null) {
-            const deducedStatment = schema.getDeducedStatement(),
-                  deducedStatmentUnfifies = this.unifyDeducedStatement(deducedStatment, context);
+            const deduction = schema.getDeduction(),
+                  deductionUnifies = this.unifyDeduction(deduction, generalContext, specificContext);
 
-            if (deducedStatmentUnfifies) {
-              schemaUnifies =true;
+            if (deductionUnifies) {
+              schemaUnifies = true;
             }
           }
         }
       }
-    }, context);
+    }, specificContext);
 
     if (schemaUnifies) {
       context.debug(`...unified the '${schemaString}' schema with the '${assumptionString}' assumption.`);
     }
 
     return schemaUnifies;
+  }
+
+  unifyDeduction(deduction, generalContext, specificContext) {
+    let deductionUnifies;
+
+    const context = specificContext,  ///
+          deductionString = deduction.getString(),
+          assumptionString = this.getString();
+
+    context.trace(`Unifying the '${deductionString}' deduction's statement  with the '${assumptionString}' assumption's '${assumptionString}' statement...`);
+
+    const statement = deduction.getStatement(),
+          deductionContext = deduction.getContext(); ///
+
+    specificContext = deductionContext; ///
+
+    join((specificContext) => {
+      const statementUnifies = this.statement.unifyStatement(statement, generalContext, specificContext);
+
+      if (statementUnifies) {
+        deductionUnifies = true;
+      }
+    }, specificContext, context);
+
+    if (deductionUnifies) {
+      context.debug(`...unified the '${deductionString}' deduction's statement with the '${assumptionString}' assumption's '${assumptionString}' statement.`);
+    }
+
+    return deductionUnifies;
   }
 
   static name = "Assumption";

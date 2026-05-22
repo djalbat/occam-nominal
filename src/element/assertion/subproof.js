@@ -111,6 +111,34 @@ export default define(class SubproofAssertion extends Assertion {
     return statementsValidate;
   }
 
+  unifySchema(schema, generalContext, specificContext) {
+    let schemaUnifies = false;
+
+    const context = specificContext,  ///
+          schemaString = schema.getString(),
+          subproofAssertionString = this.getString();
+
+    context.trace(`Unifying the '${schemaString}' schema with the '${subproofAssertionString}' subproof assertion...`);
+
+    const deduction = schema.getDeduction(),
+          deductionUnifies = this.unifyDeduction(deduction, generalContext, specificContext);
+
+    if (deductionUnifies) {
+      const suppositions = schema.getSuppositions(),
+            suppositionsUnify = this.unifySuppositions(suppositions, generalContext, specificContext);
+
+      if (suppositionsUnify) {
+        schemaUnifies = true;
+      }
+    }
+
+    if (schemaUnifies) {
+      context.debug(`...unified the '${schemaString}' schema with the '${subproofAssertionString}' subproof assertion.`);
+    }
+
+    return schemaUnifies;
+  }
+
   unifySubproof(subproof, generalContext, specificContext) {
     let subproofUnifies = false;
 
@@ -167,6 +195,36 @@ export default define(class SubproofAssertion extends Assertion {
     }
 
     return lastStepUnifies;
+  }
+
+  unifyDeduction(deduction, generalContext, specificContext) {
+    let deductionUnifies = false;
+
+    const context = specificContext,  ///
+          deductionString = deduction.getString(),
+          deducedStatement = this.getDeducedStatement(),
+          deducedStatementString = deducedStatement.getString();
+
+    context.trace(`Unifying the '${deductionString}' deduction with the '${deducedStatementString}' deduced statement...`)
+
+    const deductionContext = deduction.getContext();
+
+    specificContext = deductionContext;  ///
+
+    join((specificContext) => {
+      const deductionStatement = deduction.getStatement(),
+        deductionStatementUnifies = deducedStatement.unifyStatement(deductionStatement, generalContext, specificContext);
+
+      if (deductionStatementUnifies) {
+        deductionUnifies = true;
+      }
+    }, specificContext, context);
+
+    if (deductionUnifies) {
+      context.debug(`...unified the '${deductionString}' deduction with the '${deducedStatementString}' deduced statement.`)
+    }
+
+    return deductionUnifies;
   }
 
   unifySupposition(supposition, index, generalContext, specificContext) {

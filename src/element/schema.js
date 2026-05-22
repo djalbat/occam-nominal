@@ -50,34 +50,6 @@ export default define(class Schema extends Element {
     return this.constraints;
   }
 
-  getStatements() {
-    const suppositinoStatements = this.getSuppositionStatements(),
-          deducedStatement = this.getDeducedStatement(),
-          statements = [
-            ...suppositinoStatements,
-            deducedStatement
-          ];
-
-    return statements;
-  }
-
-  getDeducedStatement() {
-    const statement = this.deduction.getStatement(),
-          deducedStatement = statement; ///
-
-    return deducedStatement;
-  }
-
-  getSuppositionStatements() {
-    const suppositionStatements = this.suppositions.map((supposition) => {
-      const suppositionStatement = supposition.getStatement();
-
-      return suppositionStatement;
-    });
-
-    return suppositionStatements;
-  }
-
   getSupposition(index) {
     const supposition = this.suppositions[index] || null;
 
