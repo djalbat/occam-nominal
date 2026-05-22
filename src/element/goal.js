@@ -266,14 +266,21 @@ export default define(class Goal extends Element {
             labelUnifies = this.reference.unifyLabel(label, context);
 
       if (labelUnifies) {
-        const subproofAssertion = subproofAssertionFromStatement(this.statement, context)
+        const schemaConditional = schema.isConditional(),
+              subproofAssertion = subproofAssertionFromStatement(this.statement, context);
 
-        if (subproofAssertion === null) {
-          const deduction = schema.getDeduction(),
-                deductionUnifies = this.unifyDeduction(deduction, generalContext, specificContext);
+        if (schemaConditional) {
+          if (subproofAssertion !== null) {
+            schemaUnifies = subproofAssertion.unifySchema(schema, generalContext, specificContext);
+          }
+        } else {
+          if (subproofAssertion === null) {
+            const deduction = schema.getDeduction(),
+                  deductionUnifies = this.unifyDeduction(deduction, generalContext, specificContext);
 
-          if (deductionUnifies) {
-            schemaUnifies = true;
+            if (deductionUnifies) {
+              schemaUnifies = true;
+            }
           }
         }
       }
@@ -366,8 +373,15 @@ function statementFromGoalNode(goalNode, context) {
 }
 
 function subproofAssertionFromStatement(statement, context) {
-  const { SubproofAssertion } = elements,
-        subproofAssertion = SubproofAssertion.fromStatement(statement, context);
+  let subproofAssertion;
+
+  const { SubproofAssertion } = elements;
+
+  subproofAssertion = SubproofAssertion.fromStatement(statement, context);
+
+  if (subproofAssertion !== null) {
+    subproofAssertion = subproofAssertion.validate(context);  ///
+  }
 
   return subproofAssertion;
 }

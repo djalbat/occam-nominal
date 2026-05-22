@@ -47,6 +47,7 @@ import TermSubstitution from "./element/substitution/term";
 import FrameSubstitution from "./element/substitution/frame";
 import SubproofAssertion from "./element/assertion/subproof";
 import PropertyAssertion from "./element/assertion/property";
+import ImplicitAssumption from "./element/assumption/implicit";
 import ProcedureReference from "./element/procedureReference";
 import ContainedAssertion from "./element/assertion/contained";
 import signatureAssertion from "./element/assertion/signature";

@@ -149,8 +149,8 @@ export default define(class Schema extends Element {
   async verifyDeduction(context) {
     let deductionVerifies;
 
-    const deductionString = this.deduction.getString(),
-          schemaString = this.getString(); ///
+    const schemaString = this.getString(),  //
+          deductionString = this.deduction.getString();
 
     context.trace(`Verifying the '${schemaString}' top level meta assertion's '${deductionString}' deduction...`);
 
@@ -166,8 +166,8 @@ export default define(class Schema extends Element {
   async verifySupposition(supposition, context) {
     let suppositionVerifies;
 
-    const suppositionString = supposition.getString(),
-          schemaString = this.getString();  ///
+    const schemaString = this.getString(),  ///
+          suppositionString = supposition.getString();
 
     context.trace(`Verifying the '${schemaString}' schema's '${suppositionString}' supposition...`);
 
@@ -213,8 +213,8 @@ export default define(class Schema extends Element {
   unifyJudgement(judgement, context) {
     let judgementUnifies = false;
 
-    const judgementString = judgement.getString(),
-          schemaString = this.getString(); ///
+    const schemaString = this.getString(),  ///
+          judgementString = judgement.getString();
 
     context.trace(`Unifying the '${judgementString}' judgement with the '${schemaString}' schema...`);
 
@@ -269,8 +269,8 @@ export default define(class Schema extends Element {
   unifyReference(reference, context) {
     let referenceUnifies;
 
-    const referenceString = reference.getString(),
-          schemaString = this.getString(); ///
+    const schemaString = this.getString(),  ///
+          referenceString = reference.getString();
 
     context.trace(`Unifying the '${referenceString}' reference with the '${schemaString}' schema...`);
 
@@ -281,23 +281,6 @@ export default define(class Schema extends Element {
     }
 
     return referenceUnifies;
-  }
-
-  unifyStatement(statement, context) {
-    let statementUnifies;
-
-    const statementString = statement.getString(),
-          schemaString = this.getString(); ///
-
-    context.trace(`Unifying the '${statementString}' statement with the '${schemaString}' schema...`);
-
-    debugger
-
-    if (statementUnifies) {
-      context.debug(`...unified the '${statementString}' statement with the '${schemaString}' schema.`);
-    }
-
-    return statementUnifies;
   }
 
   unifyAssumptions(assumptions, context) {
@@ -340,8 +323,8 @@ export default define(class Schema extends Element {
   unifySubproofAssertion(subproofAssertion, context) {
     let subproofAssertionUnifies = false;
 
-    const subproofAssertionString = subproofAssertion.getString(),
-          schemaString = this.getString(); ///
+    const schemaString = this.getString(),  ///
+          subproofAssertionString = subproofAssertion.getString();
 
     context.trace(`Unifying the '${subproofAssertionString}' subproof assertion with the '${schemaString}' schema...`);
 

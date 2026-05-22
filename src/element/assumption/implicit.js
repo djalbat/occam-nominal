@@ -28,6 +28,12 @@ export default define(class ImplicitAssumption extends Element {
 
   getStatementNode() { return this.statement.getStatementNode(); }
 
+  getReference() {
+    const reference = null;
+
+    return reference;
+  }
+
   isEqualTo(implicitAssumption) {
     const implicitAssumptionNode = implicitAssumption.getNode(),
           implicitAssumptionNodeMatches = this.matchImplicitAssumptionNode(implicitAssumptionNode),

@@ -781,6 +781,17 @@ export function procedureReferenceFromProcedureReferenceNode(procedureReferenceN
   return procedureRefereence;
 }
 
+export function implicitAssumptionFromImplicitAssumptionNode(implicitAssumptionNode, context) {
+  const { ImplicitAssumption } = elements,
+        node = implicitAssumptionNode,  ///
+        string = context.nodeAsString(node),
+        breakPoint = null,
+        statement = statementFromImplicitAssumptionNode(implicitAssumptionNode, context),
+        implicitAssumption = new ImplicitAssumption(context, string, node, breakPoint, statement);
+
+  return implicitAssumption;
+}
+
 export function propertyDeclarationFromPropertyDeclarationNode(propertyDeclarationNode, context) {
   const { PropertyDeclaration } = elements,
         node = propertyDeclarationNode,  ///

@@ -304,13 +304,13 @@ function frameFromJudgementNode(judgementNode, context) {
 }
 
 function implicitAssumptionsFromProofAssertions(proofAssertions, context) {
-  const implicitAssumptions = proofAssertions.map((proofAssertion) => {
-    const { InplicitAssumption } = elements,
-          statement = proofAssertion.getStatement(),
-          implicitAssumption = InplicitAssumption.fromStatement(statement, context);
+  const { ImplicitAssumption } = elements,
+        implicitAssumptions = proofAssertions.map((proofAssertion) => {
+          const statement = proofAssertion.getStatement(),
+                implicitAssumption = ImplicitAssumption.fromStatement(statement, context);
 
-    return implicitAssumption;
-  });
+          return implicitAssumption;
+        });
 
   return implicitAssumptions;
 }

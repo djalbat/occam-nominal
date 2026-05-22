@@ -266,10 +266,10 @@ export default define(class Assumption extends Element {
             labelUnifies = this.reference.unifyLabel(label, context);
 
       if (labelUnifies) {
-        const conditional = schema.isConditional(),
+        const schemaConditional = schema.isConditional(),
               subproofAssertion = subproofAssertionFromStatement(this.statement, context)
 
-        if (conditional) {
+        if (schemaConditional) {
           if (subproofAssertion !== null) {
             schemaUnifies = subproofAssertion.unifySchema(schema, generalContext, specificContext);
           }
