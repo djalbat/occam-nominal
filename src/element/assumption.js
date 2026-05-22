@@ -3,7 +3,7 @@
 import { Element } from "occam-languages";
 import { arrayUtilities } from "necessary";
 
-import { define } from "../elements";
+import elements, { define } from "../elements";
 import { instantiateAssumption } from "../process/instantiate";
 import { reconcile, instantiate } from "../utilities/context";
 import { breakPointFromJSON, breakPointToBreakPointJSON } from "../utilities/breakPoint";
@@ -234,7 +234,7 @@ export default define(class Assumption extends Element {
     const labelString = label.getString(),
           assumptionString = this.getString();  ///
 
-    context.trace(`Unifying the '${labelString}' label with the '${assumptionString}' assumption's refernce...`);
+    context.trace(`Unifying the '${labelString}' label with the '${assumptionString}' assumption...`);
 
     reconcile((context) => {
       labelUnifies = this.reference.unifyLabel(label, context);
@@ -248,26 +248,40 @@ export default define(class Assumption extends Element {
   }
 
   unifyTopLevelMetaAssertion(topLevelMetaAssertion, context) {
-    let topLevelMetaAssertionUnifies;
+    let topLevelMetaAssertionUnifies = false;
 
     const assumptionString = this.getString(),
           topLevelMetaAssertionString = topLevelMetaAssertion.getString();
 
-    context.trace(`Unifying the '${topLevelMetaAssertionString}' top level meta-assertion with the '${assumptionString}' assumption's refernce...`);
+    context.trace(`Unifying the '${topLevelMetaAssertionString}' top level meta-assertion with the '${assumptionString}' assumption...`);
 
     reconcile((context) => {
       const label = topLevelMetaAssertion.getLabel(),
             labelUnifies = this.reference.unifyLabel(label, context);
 
       if (labelUnifies) {
-        debugger
+        const conditional = topLevelMetaAssertion.isConditional(),
+              subproofAssertion = subproofAssertionFromStatement(this.statement, context)
+
+        if (conditional) {
+          if (subproofAssertion !== null) {
+            topLevelMetaAssertionUnifies = subproofAssertion.unifyTopLevelMetaAssertion(topLevelMetaAssertion, context);
+          }
+        } else {
+          if (subproofAssertion === null) {
+            const deducedStatment = topLevelMetaAssertion.getDeducedStatement(),
+                  deducedStatmentUnfifies = this.unifyDeducedStatement(deducedStatment, context);
+
+            if (deducedStatmentUnfifies) {
+              topLevelMetaAssertionUnifies =true;
+            }
+          }
+        }
       }
     }, context);
 
-    topLevelMetaAssertionUnifies = this.reference.unifyLabel(topLevelMetaAssertion, context);
-
     if (topLevelMetaAssertionUnifies) {
-      context.debug(`...unified the '${topLevelMetaAssertionString}' top level meta-assertion with the '${assumptionString}' assumption's reference.`);
+      context.debug(`...unified the '${topLevelMetaAssertionString}' top level meta-assertion with the '${assumptionString}' assumption.`);
     }
 
     return topLevelMetaAssertionUnifies;
@@ -322,3 +336,19 @@ function statementFromAssumptionNode(assumptionNode, context) {
 
   return statement;
 }
+
+function subproofAssertionFromStatement(statement, context) {
+  let subproofAssertion;
+
+  const { SubproofAssertion } = elements;
+
+  subproofAssertion = SubproofAssertion.fromStatement(statement, context);
+
+  if (subproofAssertion !== null) {
+    subproofAssertion = subproofAssertion.validate(context);
+  }
+
+  return subproofAssertion;
+
+}
+

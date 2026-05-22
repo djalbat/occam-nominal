@@ -249,7 +249,7 @@ export default class TopLevelMetaAssertion extends Element {
 
         const statement = judgement.getStatement(),
               conditional = this.isConditional(),
-              subproofAssertion = subproofAssertionFromStatement(statement, context)
+              subproofAssertion = subproofAssertionFromStatement(statement, context);
 
         if (conditional) {
           if (subproofAssertion !== null) {
