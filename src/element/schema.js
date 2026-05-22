@@ -4,6 +4,7 @@ import { Element, asynchronousUtilities } from "occam-languages";
 
 import elements from "../elements";
 
+import { define } from "../elements";
 import { reconcile, encapsulate } from "../utilities/context";
 import { breakPointFromJSON, breakPointToBreakPointJSON } from "../utilities/breakPoint";
 import { schemaStringFromLabelSuppositionsAndDeduction } from "../utilities/string";
@@ -18,7 +19,7 @@ import { labelFromJSON,
 
 const { asyncForwardsEvery } = asynchronousUtilities;
 
-export default class Schema extends Element {
+export default define(class Schema extends Element {
   constructor(context, string, node, breakPoint, label, suppositions, deduction, proof, constraints) {
     super(context, string, node, breakPoint);
 
@@ -467,6 +468,8 @@ export default class Schema extends Element {
     return json;
   }
 
+  static name = "Schema";
+
   static fromJSON(json, context) {
     const label = labelFromJSON(json, context),
           deduction = deductionFromJSON(json, context),
@@ -480,7 +483,7 @@ export default class Schema extends Element {
 
     return schema;
   }
-}
+});
 
 function subproofAssertionFromStatement(statement, context) {
   let subproofAssertion;
@@ -496,4 +499,3 @@ function subproofAssertionFromStatement(statement, context) {
   return subproofAssertion;
 
 }
-
