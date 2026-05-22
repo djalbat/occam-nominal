@@ -292,7 +292,7 @@ async function unifyStepAsQualifiedSignatureAssertion(step, context) {
   return stepUnifiesAsQualifiedSignatureAssertion;
 }
 
-async function compareStepWithSubproofOrProofAssertions(step, context) {
+async function compareStepToSubproofOrProofAssertions(step, context) {
   let stepComparesToSubproofOrProofAssertions = false;
 
   const unqualified = step.isUnqualified();
@@ -300,21 +300,41 @@ async function compareStepWithSubproofOrProofAssertions(step, context) {
   if (unqualified) {
     const stepString = step.getString();
 
-    context.trace(`Comparing the '${stepString}' step with the subproofs or proof asssertions...`);
+    context.trace(`Comparing the '${stepString}' step to subproofs or proof asssertions...`);
 
-    const subproofOrProofAssertions = context.getSubproofOrProofAssertions(),
-          comparesToSubproofOrProofAssertions = step.compareSubproofOrProofAssertions(subproofOrProofAssertions, context);
+    const subproofOrProofAssertions = context.getSubproofOrProofAssertions();
 
-    if (comparesToSubproofOrProofAssertions) {
-      stepComparesToSubproofOrProofAssertions = true;
-    }
+    stepComparesToSubproofOrProofAssertions = step.compareSubproofOrProofAssertions(subproofOrProofAssertions, context);
 
     if (stepComparesToSubproofOrProofAssertions) {
-      context.debug(`...compared the '${stepString}' step with the subproofs or proof asssertions.`);
+      context.debug(`...compared the '${stepString}' step to subproofs or proof asssertions.`);
     }
   }
 
   return stepComparesToSubproofOrProofAssertions;
+}
+
+async function compareStepToJudgements(step, context) {
+  let stepComparesToJudgements = false;
+
+  const unqualified = step.isUnqualified();
+
+  if (unqualified) {
+    const stepString = step.getString();
+
+    context.trace(`Comparing the '${stepString}' step to judgements...`);
+
+    const proofAssertions = context.getProofAssertions(),
+          judgements = judgementsFromProofAssertions(proofAssertions, context);
+
+    stepComparesToJudgements = step.compareJudgements(judgements, context);
+
+    if (stepComparesToJudgements) {
+      context.debug(`...compared the '${stepString}' step to judgements.`);
+    }
+  }
+
+  return stepComparesToJudgements;
 }
 
 export const unifySteps = [
@@ -328,5 +348,26 @@ export const unifySteps = [
   unifyStepAsUnqualifiedPropertyAssertion,
   unifyStepAsUnqualifiedSignatureAssertion,
   unifyStepAsQualifiedSignatureAssertion,
-  compareStepWithSubproofOrProofAssertions
+  compareStepToSubproofOrProofAssertions,
+  compareStepToJudgements
 ];
+
+function judgementsFromProofAssertions(proofAssertions, context) {
+  const judgements = [];
+
+  proofAssertions.forEach((proofAssertion) => {
+    let judgement;
+
+    const { Judgement } = elements;
+
+  judgement = Judgement.fromProofAssertion(proofAssertion, context);
+
+    if (judgement !== null) {
+      judgement = judgement.validate(context);
+
+      judgements.push(judgement);
+    }
+  });
+
+  return judgements;
+}

@@ -93,6 +93,22 @@ export default define(class Step extends ProofAssertion {
     return comparesToTermAndPropertyRelation;
   }
 
+  compareJudgements(judgements, context) {
+    let comparesToJudgements;
+
+    const step = this; ///
+
+    comparesToJudgements = backwardsSome(judgements, (judgement) => {
+      const judgementComparesToStatement = judgement.compareStep(step, context);
+
+      if (judgementComparesToStatement) {
+        return true;
+      }
+    });
+
+    return comparesToJudgements;
+  }
+
   compareSubproofOrProofAssertions(subproofOrProofAssertions, context) {
     let comparesToSubproofOrProofAssertions;
 

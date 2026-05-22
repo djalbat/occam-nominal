@@ -7,6 +7,7 @@ import elements from "../elements";
 
 import { define } from "../elements";
 import { instantiate,} from "../utilities/context";
+import { equateStatements } from "../process/equate";
 import { instantiateJudgement } from "../process/instantiate";
 import { judgementFromStatementNode } from "../utilities/element";
 import { breakPointFromJSON, breakPointToBreakPointJSON } from "../utilities/breakPoint";
@@ -88,8 +89,6 @@ export default define(class Judgement extends Element {
 
   matchMetavariableNode(metavariableNode) { return this.frame.matchMetavariableNode(metavariableNode); }
 
-  compareMetavariableName(metavariableName) { return this.frame.compareMetavariableName(metavariableName); }
-
   findSubproofAssertion(context) { return this.goal.findSubproofAssertion(context); }
 
   findValidJudgement(context) {
@@ -98,6 +97,56 @@ export default define(class Judgement extends Element {
           validJudgemenet = judgement;  ///
 
     return validJudgemenet;
+  }
+
+  compareStep(step, context) {
+    let comparesToStep = false;
+
+    const stepString = step.getString(),
+      judgementString = this.getString();  ///
+
+    context.trace(`Comparing the '${stepString}' step to the '${judgementString}' judgement...`);
+
+    const statement = step.getStatement(),
+      comparesToStatement = this.compareStatement(statement, context);
+
+    if (comparesToStatement) {
+      comparesToStep = true;
+    }
+
+    if (comparesToStep) {
+      context.debug(`...compared the '${stepString}' step to the '${judgementString}' judgement.`);
+    }
+
+    return comparesToStep;
+  }
+
+  compareMetavariableName(metavariableName) { return this.frame.compareMetavariableName(metavariableName); }
+
+  compareStatement(statement, context) {
+    let comparesToStatement = false;
+
+    const judgementString = this.getString(), ///
+          statementString = statement.getString();
+
+    context.trace(`Comparing the '${statementString}' statement to the '${judgementString}' judgement...`);
+
+    const leftStatement = statement;  ///
+
+    statement = this.getStatement();
+
+    const rightStatement = statement,  ///
+          statementsEquate = equateStatements(leftStatement, rightStatement, context);
+
+    if (statementsEquate) {
+      comparesToStatement = true;
+    }
+
+    if (comparesToStatement) {
+      context.debug(`...compared the '${statementString}' statement to the '${judgementString}' judgement.`);
+    }
+
+    return comparesToStatement;
   }
 
   validate(context) {
@@ -283,7 +332,19 @@ export default define(class Judgement extends Element {
 
   static fromStatement(statement, context) {
     const statementNode = statement.getNode(),
-          judgement = judgementFromStatementNode(statementNode, context);
+      judgement = judgementFromStatementNode(statementNode, context);
+
+    return judgement;
+  }
+
+  static fromProofAssertion(proofAssertion, context) {
+    let judgement = null;
+
+    const statementNode = proofAssertion.getStatementNode();
+
+    if (statementNode !== null) {
+      judgement = judgementFromStatementNode(statementNode, context);
+    }
 
     return judgement;
   }
