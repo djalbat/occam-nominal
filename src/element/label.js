@@ -6,7 +6,7 @@ import { define } from "../elements";
 import { instantiateLabel } from "../process/instantiate";
 import { labelFromLabelNode, metavariableFromLabelNode } from "../utilities/element";
 import { breakPointFromJSON, breakPointToBreakPointJSON } from "../utilities/breakPoint";
-import {attempt, ablate, serialise, unserialise, instantiate, reconcile, join} from "../utilities/context";
+import { attempt, serialise, unserialise, instantiate, join} from "../utilities/context";
 
 export default define(class Label extends Element {
   constructor(context, string, node, breakPoint, metavariable) {
@@ -223,13 +223,11 @@ export default define(class Label extends Element {
   static fromLabelString(labelString, context) {
     let label;
 
-    ablate((context) => {
-      instantiate((context) => {
-        const string = labelString,  ///
-              labelNode = instantiateLabel(string, context);
+    instantiate((context) => {
+      const string = labelString,  ///
+            labelNode = instantiateLabel(string, context);
 
-        label = labelFromLabelNode(labelNode, context);
-      }, context);
+      label = labelFromLabelNode(labelNode, context);
     }, context);
 
     return label;

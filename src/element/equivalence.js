@@ -4,7 +4,7 @@ import { Element } from "occam-languages";
 import { arrayUtilities } from "necessary";
 
 import { define } from "../elements";
-import { ablate, instantiate } from "../utilities/context";
+import { instantiate } from "../utilities/context";
 import { instantiateEquivalence } from "../process/instantiate";
 import { stripBracketsFromTermNode } from "../utilities/brackets";
 import { equivalenceStringFromTerms } from "../utilities/string";
@@ -217,15 +217,13 @@ export default define(class Equivalence extends Element {
 
     type = combinedType;  ///
 
-    ablate((context) => {
-      instantiate((context) => {
-        const terms = combinedTerms,  ///
-              equivalenceString = equivalenceStringFromTerms(terms),
-              string = equivalenceString,  ///
-              equivalenceNode = instantiateEquivalence(string, context);
+    instantiate((context) => {
+      const terms = combinedTerms,  ///
+            equivalenceString = equivalenceStringFromTerms(terms),
+            string = equivalenceString,  ///
+            equivalenceNode = instantiateEquivalence(string, context);
 
-        equivalence = equivalenceFromEquivalenceNode(equivalenceNode, context);
-      }, context);
+      equivalence = equivalenceFromEquivalenceNode(equivalenceNode, context);
     }, context);
 
     equivalence.setType(type);
@@ -240,15 +238,13 @@ export default define(class Equivalence extends Element {
 
     const type = equality.getType();
 
-    ablate((context) => {
-      instantiate((context) => {
-        const terms = equality.getTerms(),
-              equivalenceString = equivalenceStringFromTerms(terms),
-              string = equivalenceString,  ///
-              equivalenceNode = instantiateEquivalence(string, context);
+    instantiate((context) => {
+      const terms = equality.getTerms(),
+            equivalenceString = equivalenceStringFromTerms(terms),
+            string = equivalenceString,  ///
+            equivalenceNode = instantiateEquivalence(string, context);
 
-        equivalence = equivalenceFromEquivalenceNode(equivalenceNode, context);
-      }, context);
+      equivalence = equivalenceFromEquivalenceNode(equivalenceNode, context);
     }, context);
 
     equivalence.setType(type);

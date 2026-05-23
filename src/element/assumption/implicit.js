@@ -77,7 +77,7 @@ export default define(class ImplicitAssumption extends Element {
 
     const implicitAssumptionString = this.getString();  ///
 
-    context.trace(`Validating the '${implicitAssumptionString}' implicitAssumption...`);
+    context.trace(`Validating the '${implicitAssumptionString}' implicit qssumption...`);
 
     let validates = false;
 
@@ -88,7 +88,7 @@ export default define(class ImplicitAssumption extends Element {
 
       implicitAssumption = validAssumption; ///
 
-      context.debug(`...the '${implicitAssumptionString}' implicitAssumption is already valid.`);
+      context.debug(`...the '${implicitAssumptionString}' implicit qssumption is already valid.`);
     } else {
       const statementValidates = this.validateStatement(context);
 

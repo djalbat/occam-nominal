@@ -251,7 +251,7 @@ export function termsFromJSON(json, context) {
   let { terms } = json;
 
   const { Term } = elements,
-    termsJSON = terms; ///
+        termsJSON = terms; ///
 
   terms = termsJSON.map((termJSON) => {
     const json = termJSON,  ///
@@ -264,7 +264,7 @@ export function termsFromJSON(json, context) {
 }
 
 export function goalsFromJSON(json, context) {
-  let { goals = [] } = json;
+  let { goals } = json;
 
   const { Goal } = elements,
         goalsJSON = goals; ///
@@ -344,7 +344,7 @@ export function axiomsFromJSON(json, context) {
 }
 
 export function schemasFromJSON(json, context) {
-  let { schemas = [] } = json;
+  let { schemas } = json;
 
   const { Schema } = elements,
         schemasJSON = schemas; ///

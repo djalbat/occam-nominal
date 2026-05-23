@@ -73,18 +73,16 @@ export default define(class Signature extends Element {
 
     context.trace(`Verifying the '${signatureString}' signature...`);
 
-    ablate((context) => {
-      attempt((context) => {
-        const termsValidate = this.validateTerms(context);
+    attempt((context) => {
+      const termsValidate = this.validateTerms(context);
 
-        if (termsValidate !== null) {
-          verifies = true;
-        }
+      if (termsValidate !== null) {
+        verifies = true;
+      }
 
-        if (verifies) {
-          this.commit(context);
-        }
-      }, context);
+      if (verifies) {
+        this.commit(context);
+      }
     }, context);
 
     if (verifies) {

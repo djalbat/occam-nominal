@@ -65,7 +65,7 @@ export default define(class Constraint extends Element {
 
     const constraintString = this.getString();  ///
 
-    context.trace(`Validating the '${constraintString}' meta-lLevel assumption...`);
+    context.trace(`Validating the '${constraintString}' constraint...`);
 
     let validates = false;
 
