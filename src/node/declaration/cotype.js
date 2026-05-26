@@ -5,7 +5,7 @@ import DeclarationNode from "../../node/declaration";
 import { PROVISIONAL } from "../../constants";
 import { TYPE_RULE_NAME, TYPES_RULE_NAME, PROPERTY_DECLARATION_RULE_NAME } from "../../ruleNames";
 
-export default class ComplexTypeDeclarationNode extends DeclarationNode {
+export default class CotypeDeclarationNode extends DeclarationNode {
   isProvisional() {
     let provisional = false;
 
@@ -84,5 +84,5 @@ export default class ComplexTypeDeclarationNode extends DeclarationNode {
     return propertyDeclarationNodes;
   }
 
-  static fromRuleNameChildNodesOpacityAndPrecedence(ruleName, childNodes, opacity, precedence) { return DeclarationNode.fromRuleNameChildNodesOpacityAndPrecedence(ComplexTypeDeclarationNode, ruleName, childNodes, opacity, precedence); }
+  static fromRuleNameChildNodesOpacityAndPrecedence(ruleName, childNodes, opacity, precedence) { return DeclarationNode.fromRuleNameChildNodesOpacityAndPrecedence(CotypeDeclarationNode, ruleName, childNodes, opacity, precedence); }
 }

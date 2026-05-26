@@ -67,6 +67,7 @@ import ConjectureHeaderNode from "./node/header/conjecture";
 import PropertyAssertionNode from "./node/assertion/property";
 import SubproofAssertionNode from "./node/assertion/subproof";
 import FrameSubstitutionNode from "./node/substitution/frame";
+import CotypeDeclarationNode from "./node/declaration/cotype";
 import ParenthesisedLabelNode from "./node/parenthesisedLabel";
 import ProcedureReferenceNode from "./node/procedureReference";
 import ContainedAssertionNode from "./node/assertion/contained";
@@ -80,7 +81,6 @@ import CombinatorDeclarationNode from "./node/declaration/combinator";
 import ReferenceSubstitutionNode from "./node/substitution/reference";
 import StatementSubstitutionNode from "./node/substitution/statement";
 import TypePrefixDeclarationNode from "./node/declaration/typePrefix";
-import ComplexTypeDeclarationNode from "./node/declaration/complexType";
 import DonstructorDeclarationNode from "./node/declaration/constructor";
 import MetavariableDeclarationNode from "./node/declaration/metavariable";
 
@@ -149,6 +149,7 @@ import {
   PROPERTY_RELATION_RULE_NAME,
   DEFINED_ASSERTION_RULE_NAME,
   TERM_SUBSTITUTION_RULE_NAME,
+  COTYPE_DECLARATION_RULE_NAME,
   SUBPROOF_ASSERTION_RULE_NAME,
   PROPERTY_ASSERTION_RULE_NAME,
   FRAME_SUBSTITUTION_RULE_NAME,
@@ -166,7 +167,6 @@ import {
   SIMPLE_TYPE_DECLARATION_RULE_NAME,
   CONSTRUCTOR_DECLARATION_RULE_NAME,
   TYPE_PREFIX_DECLARATION_RULE_NAME,
-  COMPLEX_TYPE_DECLARATION_RULE_NAME,
   METAVARIABLE_DECLARATION_RULE_NAME } from "./ruleNames";
 
 const NonTerminalNodeMap = {
@@ -216,24 +216,25 @@ const NonTerminalNodeMap = {
   [SUPPOSITION_RULE_NAME]: SuppositionNode,
   [CONSTRUCTOR_RULE_NAME]: ConstructorNode,
   [EQUIVALENCE_RULE_NAME]: EquivalenceNode,
+  [SCHEMA_BODY_RULE_NAME]: SchemaBodyNode,
   [AXIOM_HEADER_RULE_NAME]: AxiomHeaderNode,
   [LEMMA_HEADER_RULE_NAME]: LemmaHeaderNode,
   [THEOREM_BODY_RULE_NAME]: TheoremBodyNode,
   [METAVARIABLE_RULE_NAME]: MetavariableNode,
   [EQUIVALENCES_RULE_NAME]: EquivalencesNode,
   [META_ARGUMENT_RULE_NAME]: MetaArgumentNode,
+  [SCHEMA_HEADER_RULE_NAME]: SchemaHeaderNode,
   [QUALIFICATION_RULE_NAME]: QualificationNode,
   [PROCEDURE_CALL_RULE_NAME]: ProcedureCallNode,
   [TYPE_ASSERTION_RULE_NAME]: TypeAssertionNode,
   [SUB_DERIVATION_RULE_NAME]: SubDerivationNode,
   [THEOREM_HEADER_RULE_NAME]: TheoremHeaderNode,
   [CONJECTURE_BODY_RULE_NAME]: ConjectureBodyNode,
-  [SCHEMA_BODY_RULE_NAME]: SchemaBodyNode,
   [CONJECTURE_HEADER_RULE_NAME]: ConjectureHeaderNode,
   [PROPERTY_RELATION_RULE_NAME]: PropertyRelationNode,
   [DEFINED_ASSERTION_RULE_NAME]: DefinedAssertionNode,
   [TERM_SUBSTITUTION_RULE_NAME]: TermSubstitutionNode,
-  [SCHEMA_HEADER_RULE_NAME]: SchemaHeaderNode,
+  [COTYPE_DECLARATION_RULE_NAME]: CotypeDeclarationNode,
   [SUBPROOF_ASSERTION_RULE_NAME]: SubproofAssertionNode,
   [PROPERTY_ASSERTION_RULE_NAME]: PropertyAssertionNode,
   [FRAME_SUBSTITUTION_RULE_NAME]: FrameSubstitutionNode,
@@ -251,7 +252,6 @@ const NonTerminalNodeMap = {
   [SIMPLE_TYPE_DECLARATION_RULE_NAME]: SimpleTypeDeclarationNode,
   [TYPE_PREFIX_DECLARATION_RULE_NAME]: TypePrefixDeclarationNode,
   [CONSTRUCTOR_DECLARATION_RULE_NAME]: DonstructorDeclarationNode,
-  [COMPLEX_TYPE_DECLARATION_RULE_NAME]: ComplexTypeDeclarationNode,
   [METAVARIABLE_DECLARATION_RULE_NAME]: MetavariableDeclarationNode
 };
 

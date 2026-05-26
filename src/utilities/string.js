@@ -239,6 +239,15 @@ export function procedureCallStringFromProcedureReferenceAndParameters(procedure
   return procedureCallString;
 }
 
+export function cotypeDeclarationStringFromTypeSuperTypesAndProvisional(type, superTypes, provisional) {
+  const typeString = type.getString(),
+        superTypesString = superTypesStringFromSuperTypes(superTypes),
+        provisionalString = provisinalStringFromProvisional(provisional),
+        cotypeDeclarationString = `${provisionalString}${typeString}${superTypesString}`;
+
+  return cotypeDeclarationString;
+}
+
 export function statementSubstitutionStringFromStatementAndMetavariable(statement, metavariable) {
   const statementString = statement.getString(),
         metavariableString = metavariable.getString(),
@@ -253,15 +262,6 @@ export function referenceSubstitutionStringFromReferenceAndMetavariable(referenc
         referenceSubstitutionString = `[${referenceString} for ${metavariableString}]`;
 
   return referenceSubstitutionString;
-}
-
-export function complexTypeDeclarationStringFromTypeSuperTypesAndProvisional(type, superTypes, provisional) {
-  const typeString = type.getString(),
-        superTypesString = superTypesStringFromSuperTypes(superTypes),
-        provisionalString = provisinalStringFromProvisional(provisional),
-        complexTypeDeclarationString = `${provisionalString}${typeString}${superTypesString}`;
-
-  return complexTypeDeclarationString;
 }
 
 export function topLevelAssertionStringFromLabelsSignatureSuppositionsAndDeduction(labels, signature, suppositions, deduction) {

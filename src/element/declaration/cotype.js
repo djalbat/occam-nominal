@@ -9,7 +9,7 @@ import { baseTypeFromNothing } from "../../utilities/type";
 
 const { asyncEvery } = asynchronousUtilities;
 
-export default define(class ComplexTypeDeclaration extends Declaration {
+export default define(class CotypeDeclaration extends Declaration {
   constructor(context, string, node, breakPoint, type, superTypes, provisional, propertyDeclarations) {
     super(context, string, node, breakPoint);
 
@@ -35,11 +35,11 @@ export default define(class ComplexTypeDeclaration extends Declaration {
     return this.propertyDeclarations;
   }
 
-  getComplexTypeDeclarationNode() {
+  getCotypeDeclarationNode() {
     const node = this.getNode(),
-          complexTypeDeclarationNode = node; ///
+          cotypeDeclarationNode = node; ///
 
-    return complexTypeDeclarationNode;
+    return cotypeDeclarationNode;
   }
 
   getProperties() {
@@ -61,9 +61,9 @@ export default define(class ComplexTypeDeclaration extends Declaration {
 
     await this.break(context);
 
-    const complexTypeDeclarationString = this.getString();  ///
+    const cotypeDeclarationString = this.getString();  ///
 
-    context.trace(`Verifying the '${complexTypeDeclarationString}' complex type declaration...`);
+    context.trace(`Verifying the '${cotypeDeclarationString}' cotype declaration...`);
 
     const typeVerifies = this.verifyType(context);
 
@@ -98,7 +98,7 @@ export default define(class ComplexTypeDeclaration extends Declaration {
     }
 
     if (verifies) {
-      context.debug(`...verified the '${complexTypeDeclarationString}' complex type declaration.`);
+      context.debug(`...verified the '${cotypeDeclarationString}' cotype declaration.`);
     }
 
     return verifies;
@@ -108,9 +108,9 @@ export default define(class ComplexTypeDeclaration extends Declaration {
     let typeVerifies = false;
 
     const typeString = this.type.getString(),
-          complexTypeDeclarationString = this.getString(); ///
+          cotypeDeclarationString = this.getString(); ///
 
-    context.trace(`Verifying the '${complexTypeDeclarationString}' complex type declaration's '${typeString}' type...`);
+    context.trace(`Verifying the '${cotypeDeclarationString}' cotype declaration's '${typeString}' type...`);
 
     const typeName = this.type.getName(),
           includeRelease = false,
@@ -132,7 +132,7 @@ export default define(class ComplexTypeDeclaration extends Declaration {
     }
 
     if (typeVerifies) {
-      context.debug(`...verified the '${complexTypeDeclarationString}' complex type declaration's '${typeString}' type`);
+      context.debug(`...verified the '${cotypeDeclarationString}' cotype declaration's '${typeString}' type`);
     }
 
     return typeVerifies;
@@ -142,9 +142,9 @@ export default define(class ComplexTypeDeclaration extends Declaration {
     let superTypeVerifies = false;
 
     const superTypeString = superType.getString(),
-          complexTypeDeclarationString = this.getString(); ///
+          cotypeDeclarationString = this.getString(); ///
 
-    context.trace(`Verifying the '${complexTypeDeclarationString}' complex type declaration's '${superTypeString}' super-type...`);
+    context.trace(`Verifying the '${cotypeDeclarationString}' cotype declaration's '${superTypeString}' super-type...`);
 
     const nominalTypeName = superType.getNominalTypeName(),
           typeName = nominalTypeName, ///
@@ -165,7 +165,7 @@ export default define(class ComplexTypeDeclaration extends Declaration {
     }
 
     if (superTypeVerifies) {
-      context.debug(`...verified the '${complexTypeDeclarationString}' complex type declaration's '${superTypeString}' super-type.`);
+      context.debug(`...verified the '${cotypeDeclarationString}' cotype declaration's '${superTypeString}' super-type.`);
     }
 
     return superTypeVerifies;
@@ -175,9 +175,9 @@ export default define(class ComplexTypeDeclaration extends Declaration {
     let superTypesVerify;
 
     const superTypes = [],
-          complexTypeDeclarationString = this.getString(); ///
+          cotypeDeclarationString = this.getString(); ///
 
-    context.trace(`Verifying the '${complexTypeDeclarationString}' complex type declaration's super-types...`);
+    context.trace(`Verifying the '${cotypeDeclarationString}' cotype declaration's super-types...`);
 
     superTypesVerify = this.superTypes.every((superType) => {
       const superTypeVerifies = this.verifySuperType(superType, superTypes, context);
@@ -199,7 +199,7 @@ export default define(class ComplexTypeDeclaration extends Declaration {
 
       this.type.setSuperTypes(superTypes);
 
-      context.debug(`...verified the '${complexTypeDeclarationString}' complex type declaration's super-types.`);
+      context.debug(`...verified the '${cotypeDeclarationString}' cotype declaration's super-types.`);
     }
 
     return superTypesVerify;
@@ -209,20 +209,20 @@ export default define(class ComplexTypeDeclaration extends Declaration {
     let typePrefixVerifies = false;
 
     const typeString = this.type.getString(),
-          complexTypeDeclarationString = this.getString(); ///
+          cotypeDeclarationString = this.getString(); ///
 
-    context.trace(`Verifying the '${complexTypeDeclarationString}' complex type declaration's '${typeString}' type's prefix...`);
+    context.trace(`Verifying the '${cotypeDeclarationString}' cotype declaration's '${typeString}' type's prefix...`);
 
     const typePrefixed = this.type.isPrefixed();
 
     if (!typePrefixed) {
       typePrefixVerifies = true;
     } else {
-      context.debug(`The '${complexTypeDeclarationString}' complex type declaration's '${typeString}' type is prefixed.`);
+      context.debug(`The '${cotypeDeclarationString}' cotype declaration's '${typeString}' type is prefixed.`);
     }
 
     if (typePrefixVerifies) {
-      context.debug(`...verified the '${complexTypeDeclarationString}' complex type declaration's '${typeString}' type's prefix.`);
+      context.debug(`...verified the '${cotypeDeclarationString}' cotype declaration's '${typeString}' type's prefix.`);
     }
 
     return typePrefixVerifies;
@@ -232,9 +232,9 @@ export default define(class ComplexTypeDeclaration extends Declaration {
     let propertyDeclarationsVerify;
 
     const typeString = this.type.getString(),
-          complexTypeDeclarationString = this.getString(); ///
+          cotypeDeclarationString = this.getString(); ///
 
-    context.trace(`Verifying the '${complexTypeDeclarationString}' complex type declaration's '${typeString}' type's property declarations...`);
+    context.trace(`Verifying the '${cotypeDeclarationString}' cotype declaration's '${typeString}' type's property declarations...`);
 
     const properties = this.getProperties();
 
@@ -247,11 +247,11 @@ export default define(class ComplexTypeDeclaration extends Declaration {
     });
 
     if (propertyDeclarationsVerify) {
-      context.debug(`...verified the '${complexTypeDeclarationString}' complex type declaration's '${typeString}' type's property declarations.`);
+      context.debug(`...verified the '${cotypeDeclarationString}' cotype declaration's '${typeString}' type's property declarations.`);
     }
 
     return propertyDeclarationsVerify;
   }
 
-  static name = "ComplexTypeDeclaration";
+  static name = "CotypeDeclaration";
 });

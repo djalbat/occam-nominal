@@ -11,12 +11,12 @@ import { ruleFromRuleNode,
          sectionFromSectionNode,
          theoremFromTheoremNode,
          conjectureFromConjectureNode,
+         cotypeDeclarationFromCotypeDeclarationNode,
          variableDeclarationFromVariableDeclarationNode,
          simpleTypeDeclarationFromSimpleTypeDeclarationNode,
          typePrefixDeclarationFromTypePrefixDeclarationNode,
          combinatorDeclarationFromCombinatorDeclarationNode,
          constructorDeclarationFromConstructorDeclarationNode,
-         complexTypeDeclarationFromComplexTypeDeclarationNode,
          metavariableDeclarationFromMetavariableDeclarationNode } from "../utilities/element";
 
 const { nodeQuery } = queryUtilities;
@@ -29,12 +29,12 @@ const ruleNodeQuery = nodeQuery("/rule"),
       sectionNodeQuery = nodeQuery("/section"),
       theoremNodeQuery = nodeQuery("/theorem"),
       conjectureNodeQuery = nodeQuery("/conjecture"),
+      cotypeDeclarationNodeQuery = nodeQuery("/cotypeDeclaration"),
       variableDeclarationNodeQuery = nodeQuery("/variableDeclaration"),
       combinatorDeclarationNodeQuery = nodeQuery("/combinatorDeclaration"),
       simpleTypeDeclarationNodeQuery = nodeQuery("/simpleTypeDeclaration"),
       typePrefixDeclarationNodeQuery = nodeQuery("/typePrefixDeclaration"),
       constructorDeclarationNodeQuery = nodeQuery("/constructorDeclaration"),
-      complexTypeDeclarationNodeQuery = nodeQuery("/complexTypeDeclaration"),
       metavariableDeclarationNodeQuery = nodeQuery("/metavariableDeclaration");
 
 class TopLevelPass extends AsyncPass {
@@ -160,6 +160,21 @@ class TopLevelPass extends AsyncPass {
       }
     },
     {
+      nodeQuery: cotypeDeclarationNodeQuery,
+      run: async (cotypeDeclarationNode, context) => {
+        let success = false;
+
+        const cotypeDeclaration = cotypeDeclarationFromCotypeDeclarationNode(cotypeDeclarationNode, context),
+              cotypeDeclarationVerifies = await cotypeDeclaration.verify(context);
+
+        if (cotypeDeclarationVerifies) {
+          success = true;
+        }
+
+        return success;
+      }
+    },
+    {
       nodeQuery: variableDeclarationNodeQuery,
       run: async (variableDeclarationNode, context) => {
         let success = false;
@@ -228,21 +243,6 @@ class TopLevelPass extends AsyncPass {
               constructorDeclarationVerifies = await constructorDeclaration.verify(context);
 
         if (constructorDeclarationVerifies) {
-          success = true;
-        }
-
-        return success;
-      }
-    },
-    {
-      nodeQuery: complexTypeDeclarationNodeQuery,
-      run: async (complexTypeDeclarationNode, context) => {
-        let success = false;
-
-        const complexTypeDeclaration = complexTypeDeclarationFromComplexTypeDeclarationNode(complexTypeDeclarationNode, context),
-              complexTypeDeclarationVerifies = await complexTypeDeclaration.verify(context);
-
-        if (complexTypeDeclarationVerifies) {
           success = true;
         }
 

@@ -10,7 +10,7 @@ import { equivalenceStringFromTerms,
          subproofStringFromSuppositionsAndSubDerivation,
          sectionStringFromHypothesesAndTopLevelAssertion,
          procedureCallStringFromProcedureReferenceAndParameters,
-         complexTypeDeclarationStringFromTypeSuperTypesAndProvisional,
+         cotypeDeclarationStringFromTypeSuperTypesAndProvisional,
          topLevelAssertionStringFromLabelsSignatureSuppositionsAndDeduction } from "../utilities/string";
 
 export function typeFromTypeNode(typeNode, context) {
@@ -735,6 +735,24 @@ export function subproofAssertionFromSubproofAssertionNode(subproofAssertionNode
   return subproofAssertion;
 }
 
+export function cotypeDeclarationFromCotypeDeclarationNode(cotypeDeclarationNode, context) {
+  const { CotypeDeclaration } = elements,
+        node = cotypeDeclarationNode,  ///
+        breakPoint = null,
+        type = typeFromCotypeDeclarationNode(cotypeDeclarationNode, context),
+        superTypes = superTypesFromCotypeDeclarationNode(cotypeDeclarationNode, context),
+        provisional = provisionalFromCotypeDeclarationNode(cotypeDeclarationNode, context),
+        propertyDeclarations = propertyDeclarationsFromCotypeDeclarationNode(cotypeDeclarationNode, context),
+        cotypeDeclarationString = cotypeDeclarationStringFromTypeSuperTypesAndProvisional(type, superTypes, provisional),
+        string = cotypeDeclarationString;  ///
+
+  context = null;
+
+  const cotypeDeclaration = new CotypeDeclaration(context, string, node, breakPoint, type, superTypes, provisional, propertyDeclarations);
+
+  return cotypeDeclaration;
+}
+
 export function containedAssertionFromContainedAssertionNode(containedAssertionNode, context) {
   const { ContainedAssertion } = elements,
         node = containedAssertionNode,  ///
@@ -940,24 +958,6 @@ export function constructorDeclarationFromConstructorDeclarationNode(constructor
   const constructorDeclaration = new ConstructorDeclaration(context, string, node, breakPoint, type, provisional, constructor);
 
   return constructorDeclaration;
-}
-
-export function complexTypeDeclarationFromComplexTypeDeclarationNode(complexTypeDeclarationNode, context) {
-  const { ComplexTypeDeclaration } = elements,
-        node = complexTypeDeclarationNode,  ///
-        breakPoint = null,
-        type = typeFromComplexTypeDeclarationNode(complexTypeDeclarationNode, context),
-        superTypes = superTypesFromComplexTypeDeclarationNode(complexTypeDeclarationNode, context),
-        provisional = provisionalFromComplexTypeDeclarationNode(complexTypeDeclarationNode, context),
-        propertyDeclarations = propertyDeclarationsFromComplexTypeDeclarationNode(complexTypeDeclarationNode, context),
-        complexTypeDeclarationString = complexTypeDeclarationStringFromTypeSuperTypesAndProvisional(type, superTypes, provisional),
-        string = complexTypeDeclarationString;  ///
-
-  context = null;
-
-  const complexTypeDeclaration = new ComplexTypeDeclaration(context, string, node, breakPoint, type, superTypes, provisional, propertyDeclarations);
-
-  return complexTypeDeclaration;
 }
 
 export function metavariableDeclarationFromMetavariableDeclarationNode(metavariableDeclarationNode, context) {
@@ -1646,6 +1646,13 @@ export function termFromPropertyAssertionNode(propertyAssertionNode, context) {
   return term;
 }
 
+export function typeFromCotypeDeclarationNode(cotypeDeclarationNode, context) {
+  const typeNode = cotypeDeclarationNode.getTypeNode(),
+        type = typeFromTypeNode(typeNode, context);
+
+  return type;
+}
+
 export function signatureAssertionFromStepNode(stepNode, context) {
   let signatureAssertion = null;
 
@@ -1893,13 +1900,6 @@ export function subproofAssertionFromStatementNode(statementNode, context) {
   return subproofAssertion;
 }
 
-export function typeFromComplexTypeDeclarationNode(complexTypeDeclarationNode, context) {
-  const typeNode = complexTypeDeclarationNode.getTypeNode(),
-        type = typeFromTypeNode(typeNode, context);
-
-  return type;
-}
-
 export function typeFromConstructorDeclarationNode(constructorDeclarationNode, context) {
   const typeNode = constructorDeclarationNode.getTypeNode(),
         type = typeFromTypeNode(typeNode, context);
@@ -1929,6 +1929,20 @@ export function signatureAssertionFromStatementNode(statementNode, context) {
   }
 
   return signatureAssertion;
+}
+
+export function superTypesFromCotypeDeclarationNode(cotypeDeclarationNode, context) {
+  let superTypes = [];
+
+  const typesNode = cotypeDeclarationNode.getTypesNode();
+
+  if (typesNode !== null) {
+    const types = typesFromTypesNode(typesNode, context);
+
+    superTypes = types; ///
+  }
+
+  return superTypes;
 }
 
 export function statementsFromSubproofAssertionNode(subproofAssertionNode, context) {
@@ -1988,18 +2002,24 @@ export function variableFromVariableDeclarationNode(variableDeclarationNode, con
   return variable;
 }
 
-export function statementFromBracketedCombinatorNode(bracketedCombinatorNode, context) {
-  const statementNode = bracketedCombinatorNode.getStatementNode(),
-        statement = statementFromStatementNode(statementNode, context);
-
-  return statement;
-}
-
 export function targetFrameFromFrameSubstitutionNode(frameSubstitutionNode, context) {
   const targetFrameNode = frameSubstitutionNode.getTargetFrameNode(),
         targetFrame = frameFromFrameNode(targetFrameNode, context);
 
   return targetFrame;
+}
+
+export function provisionalFromCotypeDeclarationNode(cotypeDeclarationNode, context) {
+  const provisional = cotypeDeclarationNode.isProvisional();
+
+  return provisional;
+}
+
+export function statementFromBracketedCombinatorNode(bracketedCombinatorNode, context) {
+  const statementNode = bracketedCombinatorNode.getStatementNode(),
+        statement = statementFromStatementNode(statementNode, context);
+
+  return statement;
 }
 
 export function suppositionsFromTopLevelAssertionNode(topLevelAsssertionNode, context) {
@@ -2076,20 +2096,6 @@ export function provisionalFromSimpleTypeDeclarationNode(simpleTypeDeclarationNo
   return provisional;
 }
 
-export function superTypesFromComplexTypeDeclarationNode(complexTypeDeclarationNode, context) {
-  let superTypes = [];
-
-  const typesNode = complexTypeDeclarationNode.getTypesNode();
-
-  if (typesNode !== null) {
-    const types = typesFromTypesNode(typesNode, context);
-
-    superTypes = types; ///
-  }
-
-  return superTypes;
-}
-
 export function replacementFrameFromFrameSubstitutionNode(frameSubstitutionNode, context) {
   const replacementFrameNode = frameSubstitutionNode.getReplacementFrameNode(),
         replacementFrame = frameFromFrameNode(replacementFrameNode, context);
@@ -2125,12 +2131,6 @@ export function provisionalFromConstructorDeclarationNode(constructorDeclaration
   return provisional;
 }
 
-export function provisionalFromComplexTypeDeclarationNode(complexTypeDeclarationNode, context) {
-  const provisional = complexTypeDeclarationNode.isProvisional();
-
-  return provisional;
-}
-
 export function metavariableFromMetavariableDeclarationNode(metavariableDeclarationNode, context) {
   const metavariableNode = metavariableDeclarationNode.getMetavariableNode(),
         metavariable = metavariableFromMetavariableNode(metavariableNode, context);
@@ -2152,6 +2152,13 @@ export function targetStatementFromStatementSubstitutionNode(statementSubstituti
         targetStatement = statementFromStatementNode(targetStatementNode, context);
 
   return targetStatement;
+}
+
+export function propertyDeclarationsFromCotypeDeclarationNode(cotypeDeclarationNode, context) {
+  const propertyDeclarationnNodes = cotypeDeclarationNode.getPropertyDeclarationNodes(),
+        propertyDeclarations = propertyDeclarationsFromPropertyDeclarationNodes(propertyDeclarationnNodes, context);
+
+  return propertyDeclarations;
 }
 
 export function termSubstitutionFromStatementSubstitutionNode(statementSubstitutionNode, generalContext, specificContext) {
@@ -2192,13 +2199,6 @@ export function replacementStatementFromStatementSubstitutionNode(statementSubst
         replacementStatement = statementFromStatementNode(replacementStatementNode, context);
 
   return replacementStatement;
-}
-
-export function propertyDeclarationsFromComplexTypeDeclarationNode(complexTypeDeclarationNode, context) {
-  const propertyDeclarationnNodes = complexTypeDeclarationNode.getPropertyDeclarationNodes(),
-        propertyDeclarations = propertyDeclarationsFromPropertyDeclarationNodes(propertyDeclarationnNodes, context);
-
-  return propertyDeclarations;
 }
 
 export function termsFromTermNodes(termNodes, context) {
