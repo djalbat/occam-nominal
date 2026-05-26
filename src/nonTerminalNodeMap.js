@@ -60,6 +60,7 @@ import TheoremHeaderNode from "./node/header/theorem";
 import TypeAssertionNode from "./node/assertion/type";
 import ProcedureCallNode from "./node/procedureCall";
 import ConjectureBodyNode from "./node/body/conjecture";
+import TypeDeclarationNode from "./node/declaration/type";
 import PropertyRelationNode from "./node/propertyRelation"
 import DefinedAssertionNode from "./node/assertion/defined";
 import TermSubstitutionNode from "./node/substitution/term";
@@ -76,7 +77,6 @@ import ImplicitAssumptionNode from "./node/assumption/implicit";
 import ParenthesisedLabelsNode from "./node/parenthesisedLabels"
 import PropertyDeclarationNode from "./node/declaration/property";
 import VariableDeclarationNode from "./node/declaration/variable";
-import SimpleTypeDeclarationNode from "./node/declaration/simpleType";
 import CombinatorDeclarationNode from "./node/declaration/combinator";
 import ReferenceSubstitutionNode from "./node/substitution/reference";
 import StatementSubstitutionNode from "./node/substitution/statement";
@@ -145,6 +145,7 @@ import {
   SUB_DERIVATION_RULE_NAME,
   TYPE_ASSERTION_RULE_NAME,
   CONJECTURE_BODY_RULE_NAME,
+  TYPE_DECLARATION_RULE_NAME,
   CONJECTURE_HEADER_RULE_NAME,
   PROPERTY_RELATION_RULE_NAME,
   DEFINED_ASSERTION_RULE_NAME,
@@ -164,7 +165,6 @@ import {
   COMBINATOR_DECLARATION_RULE_NAME,
   REFERENCE_SUBSTITUTION_RULE_NAME,
   STATEMENT_SUBSTITUTION_RULE_NAME,
-  SIMPLE_TYPE_DECLARATION_RULE_NAME,
   CONSTRUCTOR_DECLARATION_RULE_NAME,
   TYPE_PREFIX_DECLARATION_RULE_NAME,
   METAVARIABLE_DECLARATION_RULE_NAME } from "./ruleNames";
@@ -230,6 +230,7 @@ const NonTerminalNodeMap = {
   [SUB_DERIVATION_RULE_NAME]: SubDerivationNode,
   [THEOREM_HEADER_RULE_NAME]: TheoremHeaderNode,
   [CONJECTURE_BODY_RULE_NAME]: ConjectureBodyNode,
+  [TYPE_DECLARATION_RULE_NAME]: TypeDeclarationNode,
   [CONJECTURE_HEADER_RULE_NAME]: ConjectureHeaderNode,
   [PROPERTY_RELATION_RULE_NAME]: PropertyRelationNode,
   [DEFINED_ASSERTION_RULE_NAME]: DefinedAssertionNode,
@@ -249,7 +250,6 @@ const NonTerminalNodeMap = {
   [COMBINATOR_DECLARATION_RULE_NAME]: CombinatorDeclarationNode,
   [STATEMENT_SUBSTITUTION_RULE_NAME]: StatementSubstitutionNode,
   [REFERENCE_SUBSTITUTION_RULE_NAME]: ReferenceSubstitutionNode,
-  [SIMPLE_TYPE_DECLARATION_RULE_NAME]: SimpleTypeDeclarationNode,
   [TYPE_PREFIX_DECLARATION_RULE_NAME]: TypePrefixDeclarationNode,
   [CONSTRUCTOR_DECLARATION_RULE_NAME]: DonstructorDeclarationNode,
   [METAVARIABLE_DECLARATION_RULE_NAME]: MetavariableDeclarationNode

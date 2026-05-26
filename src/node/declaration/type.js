@@ -5,7 +5,7 @@ import DeclarationNode from "../../node/declaration";
 import { PROVISIONAL } from "../../constants";
 import { TYPE_RULE_NAME, TYPES_RULE_NAME } from "../../ruleNames";
 
-export default class SimpleTypeDeclarationNode extends DeclarationNode {
+export default class TypeDeclarationNode extends DeclarationNode {
   isProvisional() {
     let provisional = false;
 
@@ -82,6 +82,6 @@ export default class SimpleTypeDeclarationNode extends DeclarationNode {
     return typesNode;
   }
 
-  static fromRuleNameChildNodesOpacityAndPrecedence(ruleName, childNodes, opacity, precedence) { return DeclarationNode.fromRuleNameChildNodesOpacityAndPrecedence(SimpleTypeDeclarationNode, ruleName, childNodes, opacity, precedence); }
+  static fromRuleNameChildNodesOpacityAndPrecedence(ruleName, childNodes, opacity, precedence) { return DeclarationNode.fromRuleNameChildNodesOpacityAndPrecedence(TypeDeclarationNode, ruleName, childNodes, opacity, precedence); }
 }
 

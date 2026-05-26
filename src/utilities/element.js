@@ -630,15 +630,20 @@ export function stepOrSubproofFromStepOrSubproofNode(stepOrSubproofNode, context
   return stepOrSubproof;
 }
 
-export function implicitAssumptionFromAssumptionNode(implicitAssumptionNode, context) {
-  const { ImplicitAssumption } = elements,
-        node = implicitAssumptionNode,  ///
+export function typeDeclarationFromTypeDeclarationNode(typeDeclarationNode, context) {
+  const { TypeDeclaration } = elements,
+        node = typeDeclarationNode, ///
         string = context.nodeAsString(node),
         breakPoint = null,
-        statement = statementFromImplicitAssumptionNode(implicitAssumptionNode, context),
-        implicitAssumption = new ImplicitAssumption(context, string, node, breakPoint, statement);
+        type = typeFromTypeDeclarationNode(typeDeclarationNode, context),
+        superTypes = superTypesFromTypeDeclarationNode(typeDeclarationNode, context),
+        provisional = provisionalFromTypeDeclarationNode(typeDeclarationNode, context);
 
-  return implicitAssumption;
+  context = null;
+
+  const typeDeclaration = new TypeDeclaration(context, string, node, breakPoint, type, superTypes, provisional);
+
+  return typeDeclaration;
 }
 
 export function definedAssertionFromDefinedAssertionNode(definedAssertionNode, context) {
@@ -890,22 +895,6 @@ export function combinatorDeclarationFromCombinatorDeclarationNode(combinatorDec
   const combinatorDeclaration = new CombinatorDeclaration(context, string, node, breakPoint, combinator);
 
   return combinatorDeclaration;
-}
-
-export function simpleTypeDeclarationFromSimpleTypeDeclarationNode(simpleTypeDeclarationNode, context) {
-  const { SimpleTypeDeclaration } = elements,
-        node = simpleTypeDeclarationNode, ///
-        string = context.nodeAsString(node),
-        breakPoint = null,
-        type = typeFromSimpleTypeDeclarationNode(simpleTypeDeclarationNode, context),
-        superTypes = superTypesFromSimpleTypeDeclarationNode(simpleTypeDeclarationNode, context),
-        provisional = provisionalFromSimpleTypeDeclarationNode(simpleTypeDeclarationNode, context);
-
-  context = null;
-
-  const simpleTypeDeclaration = new SimpleTypeDeclaration(context, string, node, breakPoint, type, superTypes, provisional);
-
-  return simpleTypeDeclaration;
 }
 
 export function referenceSubstitutionFromReferenceSubstitutionNode(referenceSubstitutionNode, generalContext, specificContext) {
@@ -1530,6 +1519,13 @@ export function statementFromConstraintNode(constraintNode, context) {
   return statement;
 }
 
+export function typeFromTypeDeclarationNode(typeDeclarationNode, context) {
+  const typeNode = typeDeclarationNode.getTypeNode(),
+        type = typeFromTypeNode(typeNode, context);
+
+  return type;
+}
+
 export function procedureCallFromPremiseNode(premiseNode, context) {
   let procedureCall = null;
 
@@ -1834,17 +1830,24 @@ export function definedAssertionFromStatementNode(statementNode, context) {
   return definedAssertion;
 }
 
+export function superTypesFromTypeDeclarationNode(typeDeclarationNode, context) {
+  let superTypes = [];
+
+  const typesNode = typeDeclarationNode.getTypesNode();
+
+  if (typesNode !== null) {
+    const types = typesFromTypesNode(typesNode, context);
+
+    superTypes = types; ///
+  }
+
+  return superTypes;
+}
+
 export function negatedFromContainedAssertionNode(containedAssertionNode, context) {
   const negated = containedAssertionNode.isNegated();
 
   return negated;
-}
-
-export function typeFromSimpleTypeDeclarationNode(simpleTypeDeclarationNode, context) {
-  const typeNode = simpleTypeDeclarationNode.getTypeNode(),
-        type = typeFromTypeNode(typeNode, context);
-
-  return type;
 }
 
 export function targetTermFromTermSubstitutionNode(termSubstitutionNode, context) {
@@ -1898,6 +1901,12 @@ export function subproofAssertionFromStatementNode(statementNode, context) {
   }
 
   return subproofAssertion;
+}
+
+export function provisionalFromTypeDeclarationNode(typeDeclarationNode, context) {
+  const provisional = typeDeclarationNode.isProvisional();
+
+  return provisional;
 }
 
 export function typeFromConstructorDeclarationNode(constructorDeclarationNode, context) {
@@ -2055,20 +2064,6 @@ export function procedureReferenceFromProcedureCallNode(procedureCallNode, conte
   return procedureReference;
 }
 
-export function superTypesFromSimpleTypeDeclarationNode(simpleTypeDeclarationNode, context) {
-  let superTypes = [];
-
-  const typesNode = simpleTypeDeclarationNode.getTypesNode();
-
-  if (typesNode !== null) {
-    const types = typesFromTypesNode(typesNode, context);
-
-    superTypes = types; ///
-  }
-
-  return superTypes;
-}
-
 export function typePrefixFromTypePrefixDeclarationNode(typePrefixDeclarationNode, context) {
   const typePrefixNode = typePrefixDeclarationNode.getTypePrefixNode(),
         typePrefix = typePrefixFromTypePrefixNode(typePrefixNode, context);
@@ -2088,12 +2083,6 @@ export function metaTypeFromMetavariableDeclarationNode(metavariableDeclarationN
         metaType = context.findMetaTypeByMetaTypeName(metaTypeName);
 
   return metaType;
-}
-
-export function provisionalFromSimpleTypeDeclarationNode(simpleTypeDeclarationNode, context) {
-  const provisional = simpleTypeDeclarationNode.isProvisional();
-
-  return provisional;
 }
 
 export function replacementFrameFromFrameSubstitutionNode(frameSubstitutionNode, context) {
