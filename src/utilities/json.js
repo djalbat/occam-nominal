@@ -578,6 +578,22 @@ export function signaturesFromJSON(json, context) {
   return signatures;
 }
 
+export function generatorsFromJSON(json, context) {
+  let { generators = [] } = json;
+
+  const { Generator } = elements,
+        generatorsJSON = generators; ///
+
+  generators = generatorsJSON.map((generatorJSON) => {
+    const json = generatorJSON,  ///
+          generator = Generator.fromJSON(json, context);
+
+    return generator;
+  });
+
+  return generators;
+}
+
 export function conjecturesFromJSON(json, context) {
   let { conjectures } = json;
 
@@ -1160,6 +1176,16 @@ export function referencesToReferencesJSON(references) {
   });
 
   return referencesJSON;
+}
+
+export function generatorsToGeneratorsJSON(generators) {
+  const generatorsJSON = generators.map((generator) => {
+    const generatorJSON = generator.toJSON();
+
+    return generatorJSON;
+  });
+
+  return generatorsJSON;
 }
 
 export function constraintsToConstraintsJSON(constraints) {

@@ -17,6 +17,7 @@ import { typesFromJSON,
          theoremsFromJSON,
          rulesToRulesJSON,
          axiomsToAxiomsJSON,
+         generatorsFromJSON,
          conjecturesFromJSON,
          combinatorsFromJSON,
          typePrefixesFromJSON,
@@ -24,6 +25,7 @@ import { typesFromJSON,
          schemasToSchemasJSON,
          theoremsToTheoremsJSON,
          declaredVariablesFromJSON,
+         generatorsToGeneratorsJSON,
          conjecturesToConjecturesJSON,
          combinatorsToCombinatorsJSON,
          declaredMetavariablesFromJSON,
@@ -36,7 +38,7 @@ const { push } = arrayUtilities,
       { nominalLexerFromCombinedCustomGrammar, nominalParserFromCombinedCustomGrammar } = nominalUtilities;
 
 export default class NominalFileContext extends FileContext {
-  constructor(context, fileContent, filePath, tokens, node, json, lexer, parser, types, rules, axioms, lemmas, schemas, theorems, conjectures, combinators, typePrefixes, constructors, declaredVariables, declaredMetavariables) {
+  constructor(context, fileContent, filePath, tokens, node, json, lexer, parser, types, rules, axioms, lemmas, schemas, theorems, generators, conjectures, combinators, typePrefixes, constructors, declaredVariables, declaredMetavariables) {
     super(context, fileContent, filePath, tokens, node, json);
 
     this.lexer = lexer;
@@ -51,6 +53,7 @@ export default class NominalFileContext extends FileContext {
     this.lemmas = lemmas;
     this.schemas = schemas;
     this.theorems = theorems;
+    this.generators = generators;
     this.conjectures = conjectures;
     this.combinators = combinators;
     this.typePrefixes = typePrefixes;
@@ -173,6 +176,14 @@ export default class NominalFileContext extends FileContext {
                          this.theorems;
 
     return theorems;
+  }
+
+  getGenerators(includeRelease = true) {
+    const generators = includeRelease ?
+                         this.context.getGenerators() :
+                           this.generators;
+
+    return generators;
   }
 
   getConjectures(includeRelease = true) {
@@ -334,6 +345,15 @@ export default class NominalFileContext extends FileContext {
     this.trace(`Added the '${lemmaString}' lemma to the '${filePath}' file context.`)
   }
 
+  addSchema(schema) {
+    this.schemas.push(schema);
+
+    const filePath = this.getFilePath(),
+          schemaString = schema.getString();
+
+    this.trace(`Added the '${schemaString}' schema to the '${filePath}' file context.`)
+  }
+
   addTheorem(theorem) {
     this.theorems.push(theorem);
 
@@ -343,13 +363,13 @@ export default class NominalFileContext extends FileContext {
     this.trace(`Added the '${theoremString}' theorem to the '${filePath}' file context.`)
   }
 
-  addSchema(schema) {
-    this.schemas.push(schema);
+  addGenerator(generator) {
+    this.generators.push(generator);
 
     const filePath = this.getFilePath(),
-          schemaString = schema.getString();
+          generatorString = generator.getString();
 
-    this.trace(`Added the '${schemaString}' schema to the '${filePath}' file context.`)
+    this.trace(`Added the '${generatorString}' generator to the '${filePath}' file context.`)
   }
 
   addConjecture(conjecture) {
@@ -386,15 +406,6 @@ export default class NominalFileContext extends FileContext {
           constructorString = constructor.getString();
 
     this.trace(`Added the '${constructorString}' constructor to the '${filePath}' file context.`)
-  }
-
-  addSchema(schema) {
-    this.schemas.push(schema);
-
-    const filePath = this.getFilePath(),
-          schemaString = schema.getString();
-
-    this.trace(`Added the '${schemaString}' schema to the '${filePath}' file context.`)
   }
 
   addDeclaredVariable(declaredVariable) {
@@ -723,6 +734,7 @@ export default class NominalFileContext extends FileContext {
     this.lemmas = [];
     this.schemas = [];
     this.theorems = [];
+    this.generators = [];
     this.conjectures = [];
     this.combinators = [];
     this.typePrefixes = [];
@@ -764,6 +776,7 @@ export default class NominalFileContext extends FileContext {
     this.declaredMetavariables = declaredMetavariablesFromJSON(json, fileContext);
     this.declaredVariables = declaredVariablesFromJSON(json, fileContext);
     this.typePrefixes = typePrefixesFromJSON(json, fileContext);
+    this.generators = generatorsFromJSON(json, fileContext);
     this.combinators = combinatorsFromJSON(json, fileContext);
     this.constructors = constructorsFromJSON(json, fileContext);
 
@@ -780,6 +793,7 @@ export default class NominalFileContext extends FileContext {
           axiomsJSON = axiomsToAxiomsJSON(this.axioms),
           schemasJSON = schemasToSchemasJSON(this.schemas),
           theoremsJSON = theoremsToTheoremsJSON(this.theorems),
+          generatorsJSON = generatorsToGeneratorsJSON(this.generators),
           conjecturesJSON = conjecturesToConjecturesJSON(this.conjectures),
           combinatorsJSON = combinatorsToCombinatorsJSON(this.combinators),
           typePrefixesJSON = typePrefixesToTypePrefixesJSON(this.typePrefixes),
@@ -793,6 +807,7 @@ export default class NominalFileContext extends FileContext {
           axioms = axiomsJSON,  ///
           schemas = schemasJSON,  ///
           theorems = theoremsJSON,  ///
+          generators = generatorsJSON,  ///
           conjectures = conjecturesJSON,  ///
           combinators = combinatorsJSON,  ///
           typePrefixes = typePrefixesJSON,  ///
@@ -807,6 +822,7 @@ export default class NominalFileContext extends FileContext {
             axioms,
             schemas,
             theorems,
+            generators,
             conjectures,
             combinators,
             typePrefixes,
@@ -831,13 +847,14 @@ export default class NominalFileContext extends FileContext {
           lemmas = [],
           schemas = [],
           theorems = [],
+          generators = [],
           conjectures = [],
           combinators = [],
           typePrefixes = [],
           constructors = [],
           declaredVariables = [],
           declaredMetavariables = [],
-          nominalFileContext = FileContext.fromFile(NominalFileContext, file, lexer, parser, types, rules, axioms, lemmas, schemas, theorems, conjectures, combinators, typePrefixes, constructors, declaredVariables, declaredMetavariables, context);
+          nominalFileContext = FileContext.fromFile(NominalFileContext, file, lexer, parser, types, rules, axioms, lemmas, schemas, theorems, generators, conjectures, combinators, typePrefixes, constructors, declaredVariables, declaredMetavariables, context);
 
     return nominalFileContext;
   }
@@ -855,13 +872,14 @@ export default class NominalFileContext extends FileContext {
           lemmas = null,
           schemas = null,
           theorems = null,
+          generators = null,
           conjectures = null,
           combinators = null,
           typePrefixes = null,
           constructors = null,
           declaredVariables = null,
           declaredMetavariables = null,
-          nominalFileContext = FileContext.fromJSON(NominalFileContext, json, lexer, parser, types, rules, axioms, lemmas, schemas, theorems, conjectures, combinators, typePrefixes, constructors, declaredVariables, declaredMetavariables, context);
+          nominalFileContext = FileContext.fromJSON(NominalFileContext, json, lexer, parser, types, rules, axioms, lemmas, schemas, theorems, generators, conjectures, combinators, typePrefixes, constructors, declaredVariables, declaredMetavariables, context);
 
     return nominalFileContext;
   }
