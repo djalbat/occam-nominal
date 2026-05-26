@@ -111,6 +111,13 @@ export default define(class Type extends Element {
     return established;
   }
 
+  isCotype() {
+    const propertiesLength = this.properties.length,
+          cotype = (propertiesLength > 0);
+
+    return cotype;
+  }
+
   isPrefixed() {
     const prefixed = (this.prefixName !== null);
 
