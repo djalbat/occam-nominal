@@ -405,6 +405,21 @@ export function parameterFromParameterNode(parameterNode, context) {
   return parameter;
 }
 
+export function generatorFromGeneratorNode(generatorNode, context) {
+  const { Generator } = elements,
+        node = generatorNode, ///
+        string = context.nodeAsString(node),
+        breakPoint = null,
+        term = termFromGeneratorNode(generatorNode, context),
+        type = typeFromGeneratorNode(generatorNode, context);
+
+  context = null;
+
+  const generator = new Generator(context, string, node, breakPoint, term, type);
+
+  return generator;
+}
+
 export function hypothesisFromHypothesisNode(hypotheseNode, context) {
   const { Hypothesis } = elements,
         node = hypotheseNode, ///
@@ -519,11 +534,11 @@ export function assumptionFromAssumptionNode(assumptionNode, context) {
 
 export function constructorFromConstructorNode(constructorNode, context) {
   const { Constructor } = elements,
-        node = constructorNode, ///
-        string = context.nodeAsString(node),
-        breakPoint = null,
-        term = termFromConstructorNode(constructorNode, context),
-        type = typeFromConstructorNode(constructorNode, context);
+    node = constructorNode, ///
+    string = context.nodeAsString(node),
+    breakPoint = null,
+    term = termFromConstructorNode(constructorNode, context),
+    type = typeFromConstructorNode(constructorNode, context);
 
   context = null;
 
@@ -1137,6 +1152,19 @@ export function goalFromJudgementNode(judgementNode, context) {
         goal = goalFromGoalNode(goalNode, context);
 
   return goal;
+}
+
+export function termFromGeneratorNode(generatorNode, context) {
+  const termNode = generatorNode.getTermNode(),
+        term = termFromTermNode(termNode, context);
+
+  return term;
+}
+
+export function typeFromGeneratorNode(generatorNode, context) {
+  const type = null;
+
+  return type;
 }
 
 export function superTypesFromTypeNode(typeNode, context) {

@@ -112,7 +112,8 @@ export default define(class Type extends Element {
   }
 
   isCotype() {
-    const propertiesLength = this.properties.length,
+    const properties = this.getProperties(),
+          propertiesLength = properties.length,
           cotype = (propertiesLength > 0);
 
     return cotype;

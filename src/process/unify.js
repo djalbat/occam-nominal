@@ -177,6 +177,44 @@ class MetaLevelPass extends ZipPassBase {
   ];
 }
 
+class GeneratorrPass extends ZipPass {
+  static maps = [
+    {
+      generalNodeQuery: typeNodeQuery,
+      specificNodeQuery: termNodeQuery,
+      run: (generalTypeNode, specificTermNode, generalContext, specificContext) => {
+        let success = false;
+
+        const typeNode = generalTypeNode, ///
+              termNode = specificTermNode, ///
+              nominalTypeName = typeNode.getNominalTypeName();
+
+        let context;
+
+        context = generalContext; ///
+
+        const type = context.findTypeByNominalTypeName(nominalTypeName);
+
+        if (type !== null) {
+          context = specificContext;  ///
+
+          let term;
+
+          term = termFromTermNode(termNode, context);
+
+          term = term.validateGivenType(type, context);
+
+          if (term !== null) {
+            success = true;
+          }
+        }
+
+        return success;
+      }
+    }
+  ];
+}
+
 class CombinatorPass extends ZipPass {
   static maps = [
     {
@@ -406,6 +444,7 @@ class IntrinsicMetavariablePass extends ZipPass {
 }
 
 const metaLevelPass = new MetaLevelPass(),
+      generatorPass = new GeneratorrPass(),
       combinatorPass = new CombinatorPass(),
       constructorPass = new ConstructorPass(),
       metavariablePass = new MetavariablePass(),
@@ -440,6 +479,21 @@ export function unifyMetavariable(generalMetavariable, specificMetavariable, gen
   }
 
   return metavariableUnifies;
+}
+
+export function unifyTermWithGenerator(term, generator, generalContext, specificContext) {
+  let termUnifiesWithGenerator = false;
+
+  const termNode = term.getNode(),
+        generatorTerm = generator.getTerm(),
+        generatorTermNode = generatorTerm.getNode(),
+        success = generatorPass.run(generatorTermNode, termNode, generalContext, specificContext);
+
+  if (success) {
+    termUnifiesWithGenerator = true;
+  }
+
+  return termUnifiesWithGenerator;
 }
 
 export function unifyTermWithConstructor(term, constructor, generalContext, specificContext) {

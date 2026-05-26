@@ -33,6 +33,7 @@ import ParameterNode from "./node/parameter";
 import SignatureNode from "./node/signature";
 import AxiomBodyNode from "./node/body/axiom";
 import LemmaBodyNode from "./node/body/lemma";
+import GeneratorNode from "./node/generator";
 import ConstraintNode from "./node/constraint";
 import DerivationNode from "./node/derivation";
 import CombinatorNode from "./node/combinator";
@@ -77,6 +78,7 @@ import ImplicitAssumptionNode from "./node/assumption/implicit";
 import ParenthesisedLabelsNode from "./node/parenthesisedLabels"
 import PropertyDeclarationNode from "./node/declaration/property";
 import VariableDeclarationNode from "./node/declaration/variable";
+import GeneratorDeclarationNode from "./node/declaration/generator";
 import CombinatorDeclarationNode from "./node/declaration/combinator";
 import ReferenceSubstitutionNode from "./node/substitution/reference";
 import StatementSubstitutionNode from "./node/substitution/statement";
@@ -116,6 +118,7 @@ import {
   REFERENCE_RULE_NAME,
   STATEMENT_RULE_NAME,
   RULE_BODY_RULE_NAME,
+  GENERATOR_RULE_NAME,
   DERIVATION_RULE_NAME,
   COMBINATOR_RULE_NAME,
   CONCLUSION_RULE_NAME,
@@ -162,6 +165,7 @@ import {
   PARENTHESISED_LABELS_RULE_NAME,
   PROPERTY_DECLARATION_RULE_NAME,
   VARIABLE_DECLARATION_RULE_NAME,
+  GENERATOR_DECLARATION_RULE_NAME,
   COMBINATOR_DECLARATION_RULE_NAME,
   REFERENCE_SUBSTITUTION_RULE_NAME,
   STATEMENT_SUBSTITUTION_RULE_NAME,
@@ -201,6 +205,7 @@ const NonTerminalNodeMap = {
   [DEDUCTION_RULE_NAME]: DeductionNode,
   [PARAMETER_RULE_NAME]: ParameterNode,
   [STATEMENT_RULE_NAME]: StatementNode,
+  [GENERATOR_RULE_NAME]: GeneratorNode,
   [AXIOM_BODY_RULE_NAME]: AxiomBodyNode,
   [LEMMA_BODY_RULE_NAME]: LemmaBodyNode,
   [COMBINATOR_RULE_NAME]: CombinatorNode,
@@ -247,6 +252,7 @@ const NonTerminalNodeMap = {
   [PARENTHESISED_LABELS_RULE_NAME]: ParenthesisedLabelsNode,
   [VARIABLE_DECLARATION_RULE_NAME]: VariableDeclarationNode,
   [PROPERTY_DECLARATION_RULE_NAME]: PropertyDeclarationNode,
+  [GENERATOR_DECLARATION_RULE_NAME]: GeneratorDeclarationNode,
   [COMBINATOR_DECLARATION_RULE_NAME]: CombinatorDeclarationNode,
   [STATEMENT_SUBSTITUTION_RULE_NAME]: StatementSubstitutionNode,
   [REFERENCE_SUBSTITUTION_RULE_NAME]: ReferenceSubstitutionNode,
