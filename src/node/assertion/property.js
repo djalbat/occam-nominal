@@ -2,7 +2,7 @@
 
 import AssertionNode from "../../node/assertion";
 
-import { TERM_RULE_NAME, FRAME_RULE_NAME, PROPERTY_RELATION_RULE_NAME } from "../../ruleNames";
+import { TERM_RULE_NAME, PROPERTY_RULE_NAME } from "../../ruleNames";
 
 export default class PropertyAssertionNode extends AssertionNode {
   getTermNode() {
@@ -12,18 +12,11 @@ export default class PropertyAssertionNode extends AssertionNode {
     return termNode;
   }
 
-  getFrameNode() {
-    const ruleName = FRAME_RULE_NAME,
-          propertyRelationNode = this.getNodeByRuleName(ruleName);
+  getPropertyNode() {
+    const ruleName = PROPERTY_RULE_NAME,
+          propertyNode = this.getNodeByRuleName(ruleName);
 
-    return propertyRelationNode;
-  }
-
-  getPropertyRelationNode() {
-    const ruleName = PROPERTY_RELATION_RULE_NAME,
-          propertyRelationNode = this.getNodeByRuleName(ruleName);
-
-    return propertyRelationNode;
+    return propertyNode;
   }
 
   static fromRuleNameChildNodesOpacityAndPrecedence(ruleName, childNodes, opacity, precedence) { return AssertionNode.fromRuleNameChildNodesOpacityAndPrecedence(PropertyAssertionNode, ruleName, childNodes, opacity, precedence); }

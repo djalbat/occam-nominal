@@ -677,21 +677,6 @@ export function definedAssertionFromDefinedAssertionNode(definedAssertionNode, c
   return definedAssertion;
 }
 
-export function propertyRelationFromPropertyRelationNode(propertyRelationNode, context) {
-  const { PropertyRelation } = elements,
-        node = propertyRelationNode,  ///
-        string = context.nodeAsString(node),
-        breakPoint = null,
-        term = termFromPropertyRelationNode(propertyRelationNode, context),
-        property = propertyFromPropertyRelationNode(propertyRelationNode, context);
-
-  context = null;
-
-  const propertyRelation = new PropertyRelation(context, string, node, breakPoint, term, property);
-
-  return propertyRelation;
-}
-
 export function termSubstitutionFromTermSubstitutionNode(termSubstitutionNode, generalContext, specificContext) {
   const { TermSubstitution } = elements,
         node = termSubstitutionNode,  ///
@@ -732,11 +717,11 @@ export function propertyAssertionFromPropertyAssertionNode(propertyAssertionNode
         string = context.nodeAsString(node),
         breakPoint = null,
         term = termFromPropertyAssertionNode(propertyAssertionNode, context),
-        propertyRelation = propertyRelationFromPropertyAssertionNode(propertyAssertionNode, context);
+        property = propertyFromPropertyAssertionNode(propertyAssertionNode, context);
 
   context = null;
 
-  const propertyAssertion = new PropertyAssertion(context, string, node, breakPoint, term, propertyRelation);
+  const propertyAssertion = new PropertyAssertion(context, string, node, breakPoint, term, property);
 
   return propertyAssertion;
 }
@@ -1613,13 +1598,6 @@ export function termFromDefinedAssertionNode(definedAssertionNode, context) {
   return term;
 }
 
-export function termFromPropertyRelationNode(propertyRelationNode, context) {
-  const termNode = propertyRelationNode.getTermNode(),
-        term = termFromTermNode(termNode, context);
-
-  return term;
-}
-
 export function subDerivationFromSubproofNode(subproofNode, context) {
   const subDerivationNode = subproofNode.getSubDerivationNode(),
         subDerviation = subDerivationFromSubDerivationNode(subDerivationNode, context);
@@ -1841,13 +1819,6 @@ export function negatedFromJDefinedAssertionNode(definedAssertionNode, context) 
   return negated
 }
 
-export function propertyFromPropertyRelationNode(propertyRelationNode, context) {
-  const propertyNode = propertyRelationNode.getPropertyNode(),
-        property = propertyFromPropertyNode(propertyNode, context);
-
-  return property;
-}
-
 export function termFromBracketedConstructorNode(bracketedCcnstructorNode, context) {
   const termNode = bracketedCcnstructorNode.getTermNode(),
         term = termFromTermNode(termNode, context);
@@ -1893,6 +1864,13 @@ export function superTypesFromTypeDeclarationNode(typeDeclarationNode, context) 
   }
 
   return superTypes;
+}
+
+export function propertyFromPropertyAssertionNode(propertyAssertionNode, context) {
+  const propertyNode = propertyAssertionNode.getPropertyNode(),
+        property = propertyFromPropertyNode(propertyNode, context);
+
+  return property;
 }
 
 export function negatedFromContainedAssertionNode(containedAssertionNode, context) {
@@ -2159,13 +2137,6 @@ export function replacementFrameFromFrameSubstitutionNode(frameSubstitutionNode,
         replacementFrame = frameFromFrameNode(replacementFrameNode, context);
 
   return replacementFrame;
-}
-
-export function propertyRelationFromPropertyAssertionNode(propertyAssertionNode, context) {
-  const propertyRelationNode = propertyAssertionNode.getPropertyRelationNode(),
-        propertyRelation = propertyRelationFromPropertyRelationNode(propertyRelationNode, context);
-
-  return propertyRelation;
 }
 
 export function substitutionFromStatementSubstitutionNode(statementSubstitutionNode, generalContxt, specificContext) {

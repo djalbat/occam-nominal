@@ -43,7 +43,6 @@ import ProcedureCall from "./element/procedureCall";
 import SubDerivation from "./element/subDerivation";
 import TypeAssertion from "./element/assertion/type";
 import TypeDeclaration from "./element/declaration/type";
-import PropertyRelation from "./element/propertyRelation";
 import DefinedAssertion from "./element/assertion/defined";
 import TermSubstitution from "./element/substitution/term";
 import FrameSubstitution from "./element/substitution/frame";

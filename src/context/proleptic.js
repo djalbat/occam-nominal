@@ -15,12 +15,12 @@ export default class ProlepticContext extends Context {
     return this.type;
   }
 
-  getTypes() {
+  getTypes(includeRelease = true) {
     let types;
 
     const context = this.getContext();
 
-    types = context.getTypes();
+    types = context.getTypes(includeRelease);
 
     types = [ ///
       this.type,
@@ -30,8 +30,8 @@ export default class ProlepticContext extends Context {
     return types;
   }
 
-  findTypeByTypeName(typeName) {
-    const types = this.getTypes(),
+  findTypeByTypeName(typeName, includeRelease = true) {
+    const types = this.getTypes(includeRelease),
           type = findType(types, (type) => {
             const typeComparesToTypeName = type.compareTypeName(typeName);
 
@@ -43,8 +43,8 @@ export default class ProlepticContext extends Context {
     return type;
   }
 
-  findTypeByNominalTypeName(nominalTypeName) {
-    const types = this.getTypes(),
+  findTypeByNominalTypeName(nominalTypeName, includeRelease = true) {
+    const types = this.getTypes(includeRelease),
           type = findType(types, (type) => {
             const typeComparesToNominalTypeName = type.compareNominalTypeName(nominalTypeName);
 
@@ -56,8 +56,8 @@ export default class ProlepticContext extends Context {
     return type;
   }
 
-  findTypeByPrefixedTypeName(prefixedTypeName) {
-    const types = this.getTypes(),
+  findTypeByPrefixedTypeName(prefixedTypeName, includeRelease = true) {
+    const types = this.getTypes(includeRelease),
           type = findType(types, (type) => {
             const typeComparesToPrefixedTypeName = type.comparePrefixedTypeName(prefixedTypeName);
 
@@ -69,22 +69,22 @@ export default class ProlepticContext extends Context {
     return type;
   }
 
-  isTypePresentByTypeName(typeName) {
-    const type = this.findTypeByTypeName(typeName),
+  isTypePresentByTypeName(typeName, includeRelease = true) {
+    const type = this.findTypeByTypeName(typeName, includeRelease),
           typePresent = (type !== null);
 
     return typePresent;
   }
 
-  isTypePresentByNominalTypeName(nominalTypeName) {
-    const type = this.findTypeByNominalTypeName(nominalTypeName),
+  isTypePresentByNominalTypeName(nominalTypeName, includeRelease = true) {
+    const type = this.findTypeByNominalTypeName(nominalTypeName, includeRelease),
           typePresent = (type !== null);
 
     return typePresent;
   }
 
-  isTypePresentByPrefixedTypeName(prefixedTypeName) {
-    const type = this.findTypeByPrefixedTypeName(prefixedTypeName),
+  isTypePresentByPrefixedTypeName(prefixedTypeName, includeRelease = true) {
+    const type = this.findTypeByPrefixedTypeName(prefixedTypeName, includeRelease),
           typePresent = (type !== null);
 
     return typePresent;

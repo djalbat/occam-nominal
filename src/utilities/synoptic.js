@@ -133,13 +133,3 @@ export function compressSubstitutions(substitutions) {
     }
   });
 }
-
-export function compressPropertyRelations(propertyRelations) {
-  compress(propertyRelations, (propertyRelationA, propertyRelationB) => {
-    const propertyRelationAEqualToPropertyRelationB = propertyRelationA.isEqualTo(propertyRelationB);
-
-    if (!propertyRelationAEqualToPropertyRelationB) {
-      return true;
-    }
-  });
-}

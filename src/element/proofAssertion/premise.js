@@ -169,7 +169,7 @@ export default define(class Premise extends ProofAssertion {
             procedureCall = this.getrocedureCall();
 
       if (statement !== null) {
-        const premiseContext = this.getContext(),
+        const premiseContext = this.getContext(), ///
               generalContext = premiseContext,  ///
               specificContext = context,  ///
               statementUnifiesIndependently = statement.unifyIndependently(generalContext, specificContext);
@@ -206,7 +206,7 @@ export default define(class Premise extends ProofAssertion {
     const subproofAssertion = this.findSubproofAssertion();
 
     if (subproofAssertion !== null) {
-      const premiseContext = this.getContext(),
+      const premiseContext = this.getContext(), ///
             generalContext = premiseContext, ///
             specificContext = context; ///
 

@@ -95,20 +95,6 @@ export default define(class Step extends ProofAssertion {
     return comparesToJudgements;
   }
 
-  compareTermAndPropertyRelation(term, propertyRelation, context) {
-    let comparesToTermAndPropertyRelation = false;
-
-    const { PropertyAssertion } = elements,
-          statement = this.getStatement(),
-          propertyAssertion = PropertyAssertion.fromStatement(statement, context);
-
-    if (propertyAssertion !== null) {
-      comparesToTermAndPropertyRelation = propertyAssertion.compareTermAndPropertyRelation(term, propertyRelation, context);
-    }
-
-    return comparesToTermAndPropertyRelation;
-  }
-
   compareSubproofOrProofAssertions(subproofOrProofAssertions, context) {
     let comparesToSubproofOrProofAssertions;
 

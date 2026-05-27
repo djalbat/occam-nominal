@@ -27,7 +27,7 @@ export default define(class Property extends Element {
     return this.type;
   }
 
-  getConclusionNode() {
+  getPropertyNode() {
     const node = this.getNode(),
           propertyNode = node;  ///
 
@@ -53,31 +53,78 @@ export default define(class Property extends Element {
     this.type = type;
   }
 
+  findValidProperty(context) {
+    const propertyNode = this.getPropertyNode(),
+          property = context.findPropertyByPropertyNode(propertyNode),
+          validProperty = property; ///
+
+    return validProperty;
+  }
+
+  verify(context) {
+    let verifies = false;
+
+    const includeType = false,
+          propertyString = this.getString(includeType);
+
+    context.trace(`Verifying the '${propertyString}' property...`);
+
+    attempt((context) => {
+      const termValidates = this.validateTerm(context);
+
+      if (termValidates) {
+        verifies = true;
+      }
+
+      if (verifies) {
+        this.commit(context);
+      }
+    }, context);
+
+    if (verifies) {
+      context.debug(`...verified the '${propertyString}' property.`);
+    }
+
+    return verifies;
+  }
+
   validate(context) {
-    let validates = false;
+    let property = null;
 
     const includeType = false,
           propertyString = this.getString(includeType);
 
     context.trace(`Validating the '${propertyString}' property...`);
 
-    attempt((context) => {
+    let validates = false;
+
+    const validProperty = this.findValidProperty(context);
+
+    if (validProperty !== null) {
+      property = validProperty; ///
+
+      validates = true;
+
+      context.debug(`...the '${propertyString}' property is already valid.`);
+    } else {
       const termValidates = this.validateTerm(context);
 
       if (termValidates) {
         validates = true;
       }
+    }
 
-      if (validates) {
-        this.commit(context);
-      }
-    }, context);
+    if (validates) {
+      property = this; ///
+
+      context.addProperty(property);
+    }
 
     if (validates) {
       context.debug(`...validated the '${propertyString}' property.`);
     }
 
-    return validates;
+    return property;
   }
 
   validateTerm(context) {
@@ -111,7 +158,7 @@ export default define(class Property extends Element {
     context.trace(`Unifying the '${termString}' term with the '${propertyString}' property...`);
 
     const property = this, ///
-          propertyContext = property.getContext(),
+          propertyContext = this.getContext(),  ///
           generalContext = propertyContext,  ///
           specifiContext = context, ///
           termUnifiesWithProperty = unifyTermWithProperty(term, property, generalContext, specifiContext);

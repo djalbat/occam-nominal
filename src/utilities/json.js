@@ -3,32 +3,6 @@
 import elements from "../elements";
 import MnemicContext from "../context/mnemic";
 
-export function nameFromJSON(json, context) {
-  let { name } = json;
-
-  const nameJSON = name;  ///
-
-  name = nameJSON;  ///
-
-  return name;
-}
-
-export function termFromJSON(json, context) {
-  let { term } = json;
-
-  if (term !== null) {
-    const termJSON = term;  ///
-
-    json = termJSON;  ///
-
-    const { Term } = elements;
-
-    term = Term.fromJSON(json, context);
-  }
-
-  return term;
-}
-
 export function typeFromJSON(json, context) {
   let { type } = json;
 
@@ -57,28 +31,6 @@ export function labelFromJSON(json, context) {
   return label;
 }
 
-export function frameFromJSON(json, context) {
-  let { frame } = json;
-
-  if (frame !== null) {
-    const frameJSON = frame;  ///
-
-    json = frameJSON;  ///
-
-    const { Frame } = elements;
-
-    frame = Frame.fromJSON(json, context);
-  }
-
-  return frame;
-}
-
-export function negatedFromJSON(json, context) {
-  const { negated } = json;
-
-  return negated;
-}
-
 export function metaTypeFromJSON(json, context) {
   let { metaType } = json;
 
@@ -92,21 +44,6 @@ export function metaTypeFromJSON(json, context) {
   }
 
   return metaType;
-}
-
-export function statementFromJSON(json, context) {
-  let { statement = null } = json;
-
-  if (statement !== null) {
-    const { Statement } = elements,
-          statementJSON = statement;  ///
-
-    json = statementJSON; ///
-
-    statement = Statement.fromJSON(json, context);
-  }
-
-  return statement;
 }
 
 export function deductionFromJSON(json, context) {
@@ -137,29 +74,6 @@ export function signatureFromJSON(json, context) {
   return signature;
 }
 
-export function referenceFromJSON(json, context) {
-  let { reference } = json;
-
-  const { Reference } = elements,
-        referenceJSON = reference;  ///
-
-  json = referenceJSON; ///
-
-  reference = Reference.fromJSON(json, context);
-
-  return reference;
-}
-
-export function identifierFromJSON(json, context) {
-  let { identifier } = json;
-
-  const identifierJSON = identifier;  ///
-
-  identifier = identifierJSON;  ///
-
-  return identifier;
-}
-
 export function conclusionFromJSON(json, context) {
   let { conclusion } = json;
 
@@ -179,19 +93,6 @@ export function provisionalFromJSON(json, context) {
   return provisional;
 }
 
-export function metavariableFromJSON(json, context) {
-  let { metavariable } = json;
-
-  const { Metavariable } = elements,
-        metavariableJSON = metavariable;  ///
-
-  json = metavariableJSON; ///
-
-  metavariable = Metavariable.fromJSON(json, context);
-
-  return metavariable;
-}
-
 export function mnemicContextFromJSON(json, context) {
   const releaseContext = context; ///
 
@@ -204,34 +105,6 @@ export function mnemicContextFromJSON(json, context) {
   const mnemicContext = MnemicContext.fromJSON(json, context);
 
   return mnemicContext;
-}
-
-export function procedureCallFromJSON(json, context) {
-  let { procedureCall = null } = json;
-
-  if (procedureCall !== null) {
-    const { ProcedureCall } = elements,
-          procedureCallJSON = procedureCall;  ///
-
-    json = procedureCallJSON; ///
-
-    procedureCall = ProcedureCall.fromJSON(json, context);
-  }
-
-  return procedureCall;
-}
-
-export function procedureReferenceFromJSON(json, context) {
-  let { procedureReference } = json;
-
-  const { ProcedureReference } = elements,
-        procedureReferenceJSON = procedureReference;  ///
-
-  json = procedureReferenceJSON;  ///
-
-  procedureReference = ProcedureReference.fromJSON(json, context);
-
-  return procedureReference;
 }
 
 export function typesFromJSON(json, types, context) {
@@ -391,22 +264,6 @@ export function theoremsFromJSON(json, context) {
   return theorems;
 }
 
-export function variablesFromJSON(json, context) {
-  let { variables } = json;
-
-  const { Variable } = elements,
-        variablesJSON = variables; ///
-
-  variables = variablesJSON.map((variableJSON) => {
-    const json = variableJSON,  ///
-          variable = Variable.fromJSON(json, context);
-
-    return variable;
-  });
-
-  return variables;
-}
-
 export function propertiesFromJSON(json, context) {
   let { properties } = json;
 
@@ -475,22 +332,6 @@ export function hypothesesFromJSON(json, context) {
   });
 
   return hypotheses;
-}
-
-export function parametersFromJSON(json, context) {
-  let { parameters } = json;
-
-  const { Parameter } = elements,
-        parametersJSON = parameters; ///
-
-  parameters = parametersJSON.map((parameterJSON) => {
-    const json = parameterJSON,  ///
-          parameter = Parameter.fromJSON(json, context);
-
-    return parameter;
-  });
-
-  return parameters;
 }
 
 export function judgementsFromJSON(json, context) {
@@ -642,6 +483,22 @@ export function assumptionsFromJSON(json, context) {
   return assumptions;
 }
 
+export function constraintsFromJSON(json, context) {
+  let { constraints } = json;
+
+  const { Constraint } = elements,
+    constraintsJSON = constraints; ///
+
+  constraints = constraintsJSON.map((constraintJSON) => {
+    const json = constraintJSON,  ///
+      constraint = Constraint.fromJSON(json, context);
+
+    return constraint;
+  });
+
+  return constraints;
+}
+
 export function typePrefixesFromJSON(json, context) {
   let { typePrefixes } = json;
 
@@ -756,38 +613,6 @@ export function declaredVariablesFromJSON(json, context) {
   return declaredVariables;
 }
 
-export function propertyRelationsFromJSON(json, context) {
-  let { propertyRelations } = json;
-
-  const { PropertyRelation } = elements,
-        propertyRelationsJSON = propertyRelations; ///
-
-  propertyRelations = propertyRelationsJSON.map((propertyRelationJSON) => {
-    const json = propertyRelationJSON,  ///
-          propertyRelation = PropertyRelation.fromJSON(json, context);
-
-    return propertyRelation;
-  });
-
-  return propertyRelations;
-}
-
-export function constraintsFromJSON(json, context) {
-  let { constraints } = json;
-
-  const { Constraint } = elements,
-        constraintsJSON = constraints; ///
-
-  constraints = constraintsJSON.map((constraintJSON) => {
-    const json = constraintJSON,  ///
-          constraint = Constraint.fromJSON(json, context);
-
-    return constraint;
-  });
-
-  return constraints;
-}
-
 export function declaredMetavariablesFromJSON(json, context) {
   let { declaredMetavariables } = json;
 
@@ -805,28 +630,6 @@ export function declaredMetavariablesFromJSON(json, context) {
   return declaredMetavariables;
 }
 
-export function nameToNameJSON(name) {
-  const nameJSON = name;  ///
-
-  return nameJSON;
-}
-
-export function termToTermJSON(term) {
-  const termJSON = (term !== null) ?
-                     term.toJSON() :
-                       null;
-
-  return termJSON;
-}
-
-export function goalToGoalJSON(goal) {
-  const goalJSON = (goal !== null) ?
-                     goal.toJSON() :
-                       null;
-
-  return goalJSON;
-}
-
 export function typeToTypeJSON(type) {
   let typeJSON = null;
 
@@ -839,30 +642,10 @@ export function typeToTypeJSON(type) {
   return typeJSON;
 }
 
-export function frameToFrameJSON(frame) {
-  const frameJSON = (frame !== null) ?
-                      frame.toJSON() :
-                        null;
-
-  return frameJSON;
-}
-
 export function labelToLabelJSON(label) {
   const labelJSON = label.toJSON();
 
   return labelJSON;
-}
-
-export function negatedToNegatedJSON(negated) {
-  const negatedJSON = negated;  ///
-
-  return negatedJSON;
-}
-
-export function ariableToVariableJSON(ariable) {
-  const ariableJSON = ariable.toJSON();
-
-  return ariableJSON;
 }
 
 export function metaTypeToMetaTypeJSON(metaType) {
@@ -871,20 +654,6 @@ export function metaTypeToMetaTypeJSON(metaType) {
                            null;
 
   return metaTypeJSON;
-}
-
-export function referenceToReferenceJSON(reference) {
-  const referenceJSON = reference.toJSON();
-
-  return referenceJSON;
-}
-
-export function statementToStatementJSON(statement) {
-  const statementJSON = (statement !== null) ?
-                          statement.toJSON() :
-                            null;
-
-  return statementJSON;
 }
 
 export function deductionToDeductionJSON(deduction) {
@@ -901,12 +670,6 @@ export function signatureToSignatureJSON(signature) {
   return signatureJSON;
 }
 
-export function identifierToIdentifierJSON(identifier) {
-  const identifierJSON = identifier;  ///
-
-  return identifierJSON;
-}
-
 export function conclusionToConclusionJSON(conclusion) {
   const conclusionJSON = conclusion.toJSON();
 
@@ -919,24 +682,10 @@ export function provisionalToProvisionalJSON(provisional) {
   return provisionalJSON;
 }
 
-export function metavariableToMetavariableJSON(metavariable) {
-  const metavariableJSON = metavariable.toJSON();
-
-  return metavariableJSON;
-}
-
 export function mnemicContextToMnemicContextJSON(mnemicContext) {
   const mnemicContextJSON = mnemicContext.toJSON();
 
   return mnemicContextJSON;
-}
-
-export function procedureCallToProcedureCallJSON(procedureCall) {
-  const procedureCallJSON = (procedureCall !== null) ?
-                               procedureCall.toJSON() :
-                                 null;
-
-  return procedureCallJSON;
 }
 
 export function substitutionFromSubstitutionJSON(json, context) {
@@ -947,18 +696,6 @@ export function substitutionFromSubstitutionJSON(json, context) {
                         ReferenceSubstitution.fromJSON(json, context);
 
   return substitution;
-}
-
-export function procedureReferenceToProcedureReferenceJSON(procedureReference) {
-  const procedureReferenceJSON = procedureReference.toJSON();
-
-  return procedureReferenceJSON;
-}
-
-export function declaredMetavariableToDEclaredMetavariableJSON(declaredMetavariable) {
-  const declaredMetavariableJSON = declaredMetavariable.toJSON();
-
-  return declaredMetavariableJSON;
 }
 
 export function typesToTypesJSON(types) {
@@ -1061,16 +798,6 @@ export function theoremsToTheoremsJSON(theorems) {
   return theoremsJSON;
 }
 
-export function variablesToVariablesJSON(variables) {
-  const variablesJSON = variables.map((variable) => {
-    const variableJSON = variable.toJSON();
-
-    return variableJSON;
-  });
-
-  return variablesJSON;
-}
-
 export function hypothesesToHypothesesJSON(hypotheses) {
   const hypothesesJSON = hypotheses.map((hypothesis) => {
     const hypothesisJSON = hypothesis.toJSON();
@@ -1096,16 +823,6 @@ export function superTypesToSuperTypesJSON(superTypes) {
         });
 
   return superTypesJSON;
-}
-
-export function parametersToParametersJSON(parameters) {
-  const parametersJSON = parameters.map((parameter) => {
-    const parameterJSON = parameter.toJSON();
-
-    return parameterJSON;
-  });
-
-  return parametersJSON;
 }
 
 export function propertiesToPropertiesJSON(properties) {
@@ -1286,16 +1003,6 @@ export function mnemicContextsToMnemicContextsJSON(mnemicContexts) {
   });
 
   return mnemicContextsJSON;
-}
-
-export function propertyRelationsToPropertyRelationsJSON(propertyRelations) {
-  const propertyRelationsJSON = propertyRelations.map((propertyRelation) => {
-    const propertyRelationJSON = propertyRelation.toJSON();
-
-    return propertyRelationJSON;
-  });
-
-  return propertyRelationsJSON;
 }
 
 export function declaredVariablesToDeclaredVariablesJSON(declaredVariables) {

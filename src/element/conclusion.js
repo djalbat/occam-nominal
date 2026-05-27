@@ -110,7 +110,7 @@ export default define(class Conclusion extends Element {
     context.trace(`Unifying the '${stepString}' step with the '${conclusionString}' conclusion...`);
 
     const stepContext = step.getContext(),
-          conclusionContext = this.getContext(),
+          conclusionContext = this.getContext(),  ///
           generalContext = conclusionContext, ///
           specificContext = stepContext;  ///
 

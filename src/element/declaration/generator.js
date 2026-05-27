@@ -44,9 +44,9 @@ export default define(class GeneratorDeclaration extends Declaration {
     const typeVerified = this.verifyType(context);
 
     if (typeVerified) {
-      const generatorValidates = this.validateGenerator(context);
+      const generatorVerifies = this.verifyGenerator(context);
 
-      if (generatorValidates) {
+      if (generatorVerifies) {
         this.generator.setType(this.type);
 
         context.addGenerator(this.generator);
@@ -103,22 +103,22 @@ export default define(class GeneratorDeclaration extends Declaration {
     return typeVerifies;
   }
 
-  validateGenerator(context) {
-    let generatorValidates;
+  verifyGenerator(context) {
+    let generatorVerifies;
 
     const includeType = false,
           generatorString = this.generator.getString(includeType),
           generatorDeclarationString = this.getString();  ///
 
-    context.trace(`Validating the '${generatorDeclarationString}' generator declaration's '${generatorString}' generator...`);
+    context.trace(`Verifying the '${generatorDeclarationString}' generator declaration's '${generatorString}' generator...`);
 
-    generatorValidates = this.generator.validate(context);
+    generatorVerifies = this.generator.verify(context);
 
-    if (generatorValidates) {
-      context.debug(`...validated the '${generatorDeclarationString}' generator declaration's '${generatorString}' generator.`);
+    if (generatorVerifies) {
+      context.debug(`...verified the '${generatorDeclarationString}' generator declaration's '${generatorString}' generator.`);
     }
 
-    return generatorValidates;
+    return generatorVerifies;
   }
 
   static name = "GeneratorDeclaration";

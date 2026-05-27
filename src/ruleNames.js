@@ -63,7 +63,6 @@ export const PROCEDURE_CALL_RULE_NAME = "procedureCall";
 export const CONJECTURE_BODY_RULE_NAME = "conjectureBody";
 export const TYPE_DECLARATION_RULE_NAME = "typeDeclaration";
 export const CONJECTURE_HEADER_RULE_NAME = "conjectureHeader";
-export const PROPERTY_RELATION_RULE_NAME = "propertyRelation";
 export const DEFINED_ASSERTION_RULE_NAME = "definedAssertion";
 export const TERM_SUBSTITUTION_RULE_NAME = "termSubstitution";
 export const COTYPE_DECLARATION_RULE_NAME = "cotypeDeclaration";

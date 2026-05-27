@@ -27,7 +27,7 @@ export default define(class Generator extends Element {
     return this.type;
   }
 
-  getConclusionNode() {
+  getGeneratorNode() {
     const node = this.getNode(),
           generatorNode = node;  ///
 
@@ -53,31 +53,31 @@ export default define(class Generator extends Element {
     this.type = type;
   }
 
-  validate(context) {
-    let validates = false;
+  verify(context) {
+    let verifies = false;
 
     const includeType = false,
           generatorString = this.getString(includeType);
 
-    context.trace(`Validating the '${generatorString}' generator...`);
+    context.trace(`Verifying the '${generatorString}' generator...`);
 
     attempt((context) => {
       const termValidates = this.validateTerm(context);
 
       if (termValidates) {
-        validates = true;
+        verifies = true;
       }
 
-      if (validates) {
+      if (verifies) {
         this.commit(context);
       }
     }, context);
 
-    if (validates) {
-      context.debug(`...validated the '${generatorString}' generator.`);
+    if (verifies) {
+      context.debug(`...verified the '${generatorString}' generator.`);
     }
 
-    return validates;
+    return verifies;
   }
 
   validateTerm(context) {

@@ -169,7 +169,7 @@ export default define(class Supposition extends ProofAssertion {
             procedureCall = this.getProcedureCall();
 
       if (statement !== null) {
-        const suppositionContext = this.getContext(),
+        const suppositionContext = this.getContext(), ///
               generalContext = suppositionContext,  ///
               specificContext = context,  ///
               statementUnifiesIndependently = statement.unifyIndependently(generalContext, specificContext);
@@ -206,7 +206,7 @@ export default define(class Supposition extends ProofAssertion {
     const subproofAssertion = this.findSubproofAssertion();
 
     if (subproofAssertion !== null) {
-      const suppositionContext = this.getContext(),
+      const suppositionContext = this.getContext(), ///
             generalContext = suppositionContext, ///
             specificContext = context; ///
 

@@ -39,9 +39,9 @@ export default define(class PropertyDeclaration extends Declaration {
     const typeVerified = this.verifyType(context);
 
     if (typeVerified) {
-      const propertyValidates = this.validateProperty(context);
+      const propertyVerifies = this.verifyProperty(context);
 
-      if (propertyValidates) {
+      if (propertyVerifies) {
         this.property.setType(this.type);
 
         verifies = true;
@@ -81,22 +81,26 @@ export default define(class PropertyDeclaration extends Declaration {
     return typeVerifies;
   }
 
-  validateProperty(context) {
-    let propertyValidates;
+  verifyProperty(context) {
+    let propertyVerifies = false;
 
     const includeType = false,
           propertyString = this.property.getString(includeType),
           propertyDeclarationString = this.getString();  ///
 
-    context.trace(`Validating the '${propertyDeclarationString}' property declaration's '${propertyString}' property...`);
+    context.trace(`Verifying the '${propertyDeclarationString}' property declaration's '${propertyString}' property...`);
 
-    propertyValidates = this.property.validate(context);
+    const property = this.property.verify(context);
 
-    if (propertyValidates) {
-      context.debug(`...validated the '${propertyDeclarationString}' property declaration's '${propertyString}' property.`);
+    if (property !== null) {
+      propertyVerifies = true;
     }
 
-    return propertyValidates;
+    if (propertyVerifies) {
+      context.debug(`...verified the '${propertyDeclarationString}' property declaration's '${propertyString}' property.`);
+    }
+
+    return propertyVerifies;
   }
 
   static name = "PropertyDeclaration";

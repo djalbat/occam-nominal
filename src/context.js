@@ -141,14 +141,6 @@ export default class Context extends ContextBase {
     return substitutions;
   }
 
-  getPropertyRelations(propertyRelations = []) {
-    const context = this.getContext();
-
-    context.getPropertyRelations(propertyRelations);
-
-    return propertyRelations;
-  }
-
   getDerivedSubstitutions(derivedSubstitutions = []) {
     const context = this.getContext();
 
@@ -208,7 +200,7 @@ export default class Context extends ContextBase {
 
   getSteps() {
     const context = this.getContext(),
-      steps = context.getSteps();
+          steps = context.getSteps();
 
     return steps;
   }
@@ -395,13 +387,6 @@ export default class Context extends ContextBase {
     return substitution;
   }
 
-  findPropertyRelationByPropertyRelationNode(propertyRelationNode) {
-    const context = this.getContext(),
-          propertyRelation = context.findPropertyRelationByPropertyRelationNode(propertyRelationNode);
-
-    return propertyRelation;
-  }
-
   findDerivedSubstitutionByVariableNode(variableNode) {
     const context = this.getContext(),
           derivedSubstitution = context.findDerivedSubstitutionByVariableNode(variableNode);
@@ -516,7 +501,7 @@ export default class Context extends ContextBase {
 
   isStatementPresentByStatementNode(statementNode) {
     const context = this.getContext(),
-      statementPresent = context.isStatementPresentByStatementNode(statementNode);
+          statementPresent = context.isStatementPresentByStatementNode(statementNode);
 
     return statementPresent;
   }
@@ -558,7 +543,7 @@ export default class Context extends ContextBase {
 
   isReferencePresentByMetavariableNode(metvvariableNode) {
     const context = this.getContext(),
-      referencePresent = context.isReferencePresentByMetavariableNode(metvvariableNode);
+          referencePresent = context.isReferencePresentByMetavariableNode(metvvariableNode);
 
     return referencePresent;
   }
@@ -709,12 +694,6 @@ export default class Context extends ContextBase {
     const context = this.getContext();
 
     context.addSubstitution(substitution);
-  }
-
-  addPropertyRelation(propertyRelation) {
-    const context = this.getContext();
-
-    context.addPropertyRelation(propertyRelation);
   }
 
   addDeclaredVariable(declaredVariable) {

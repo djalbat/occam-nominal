@@ -212,20 +212,6 @@ class BoundedContext extends Context {
     context.debug(`...added the '${subproofOrProofAssertionString}' subproof or proof assertion to the bounded context.`);
   }
 
-  compareTermAndPropertyRelation(term, propertyRelation) {
-    const context = this, ///
-          proofAssertions = this.getProofAssertions(),
-          comparesToTermAndPropertyRelation = proofAssertions.some((proofAssertion) => {
-            const comparesToTermAndPropertyRelation = proofAssertion.compareTermAndPropertyRelation(term, propertyRelation, context);
-
-            if (comparesToTermAndPropertyRelation) {
-              return true;
-            }
-          });
-
-    return comparesToTermAndPropertyRelation;
-  }
-
   findDeclaredVariableByVariableIdentifier(variableIdentifier) {
     const declaredVariables = this.getDeclaredVariables(),
           declaredVariable = declaredVariables.find((declaredVariable) => {

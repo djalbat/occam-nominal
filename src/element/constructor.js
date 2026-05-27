@@ -27,7 +27,7 @@ export default define(class Constructor extends Element {
     return this.type;
   }
 
-  getConclusionNode() {
+  getConstructorNode() {
     const node = this.getNode(),
           constructorNode = node;  ///
 
@@ -53,31 +53,31 @@ export default define(class Constructor extends Element {
     this.type = type;
   }
 
-  validate(context) {
-    let validates = false;
+  verify(context) {
+    let verifies = false;
 
     const includeType = false,
           constructorString = this.getString(includeType);
 
-    context.trace(`Validating the '${constructorString}' constructor...`);
+    context.trace(`Verifying the '${constructorString}' constructor...`);
 
     attempt((context) => {
       const termValidates = this.validateTerm(context);
 
       if (termValidates) {
-        validates = true;
+        verifies = true;
       }
 
-      if (validates) {
+      if (verifies) {
         this.commit(context);
       }
     }, context);
 
-    if (validates) {
-      context.debug(`...validated the '${constructorString}' constructor.`);
+    if (verifies) {
+      context.debug(`...verified the '${constructorString}' constructor.`);
     }
 
-    return validates;
+    return verifies;
   }
 
   validateTerm(context) {

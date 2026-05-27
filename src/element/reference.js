@@ -85,8 +85,8 @@ export default define(class Reference extends Element {
     let schemaCompares = false;
 
     const context = this.getContext(),
-          referenceString = this.getString(), ///
-          schemaString = schema.getString();
+          schemaString = schema.getString(),
+          referenceString = this.getString(); ///
 
     context.trace(`Comparing the '${schemaString}' schema to the '${referenceString}' reference...`);
 

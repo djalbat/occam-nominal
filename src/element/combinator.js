@@ -28,30 +28,30 @@ export default define(class Combinator extends Element {
     return combinatorNode;
   }
 
-  validate(context) {
-    let validates = false;
+  verify(context) {
+    let verifies = false;
 
     const combinatorString = this.getString();  ///
 
-    context.trace(`Validating the '${combinatorString}' combinator...`);
+    context.trace(`Verifying the '${combinatorString}' combinator...`);
 
     attempt((context) => {
       const statementValidates = this.validateStatement(context);
 
       if (statementValidates) {
-        validates = true;
+        verifies = true;
       }
 
-      if (validates) {
+      if (verifies) {
         this.commit(context);
       }
     }, context)
 
-    if (validates) {
-      context.debug(`...validated the '${combinatorString}' combinator.`);
+    if (verifies) {
+      context.debug(`...verified the '${combinatorString}' combinator.`);
     }
 
-    return validates;
+    return verifies;
   }
 
   validateStatement(context) {
