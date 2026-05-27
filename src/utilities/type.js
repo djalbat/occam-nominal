@@ -17,3 +17,22 @@ export function baseTypeFromNothing() {
 
   return baseType;
 }
+
+export function findType(types, callback) {
+  const baseType = baseTypeFromNothing();
+
+  types = [
+    ...types,
+    baseType
+  ];
+
+  const type = types.find((type) => {
+    const found = callback(type)
+
+    if (found) {
+      return true;
+    }
+  }) || null;
+
+  return type;
+}

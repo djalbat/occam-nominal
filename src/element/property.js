@@ -3,256 +3,186 @@
 import { Element } from "occam-languages";
 
 import { define } from "../elements";
-import { instantiate } from "../utilities/context";
 import { instantiateProperty } from "../process/instantiate";
-import { nameFromPropertyNode } from "../utilities/element";
+import { termFromPropertyNode } from "../utilities/element";
+import { unifyTermWithProperty } from "../process/unify";
+import { validateTermAsProperty } from "../process/validate";
 import { typeFromJSON, typeToTypeJSON } from "../utilities/json";
+import { attempt, serialise, unserialise, instantiate } from "../utilities/context";
 import { breakPointFromJSON, breakPointToBreakPointJSON } from "../utilities/breakPoint";
 
 export default define(class Property extends Element {
-  constructor(context, string, node, breakPoint, name, type) {
+  constructor(context, string, node, breakPoint, term, type) {
     super(context, string, node, breakPoint);
 
-    this.name = name;
+    this.term = term;
     this.type = type;
   }
 
-  getName() {
-    return this.name;
+  getTerm() {
+    return this.term;
   }
 
   getType() {
     return this.type;
   }
 
-  getPropertyNode() {
+  getConclusionNode() {
     const node = this.getNode(),
-          properetyNode = node; ///
+          propertyNode = node;  ///
 
-    return properetyNode;
+    return propertyNode;
   }
 
-  setName(name) {
-    this.name = name;
+  getString(includeType = true) {
+    let string;
+
+    if (includeType) {
+      const termString = this.term.getString(),
+            typeString = this.type.getString();
+
+      string = `${termString}.${typeString}`;
+    } else {
+      string = super.getString();
+    }
+
+    return string;
   }
 
   setType(type) {
     this.type = type;
   }
 
-  isEqualTo(property) {
-    const propertyNode = property.getNode(),
-          propertyNodeMatches = this.matchPropertyNode(propertyNode),
-          equalTo = propertyNodeMatches;  ///
+  validate(context) {
+    let validates = false;
 
-    return equalTo;
-  }
-
-  matchPropertyNode(propertyNode) {
-    const node = propertyNode, ///
-          nodeMatches = this.matchNode(node),
-          propertyNodeMatches = nodeMatches; ///
-
-    return propertyNodeMatches;
-  }
-
-  comparePropertyName(propertyName) {
-    const comparesToPropertyName = (this.name === propertyName);
-
-    return comparesToPropertyName;
-  }
-
-  verify(properties, context) {
-    let verifies = false;
-
-    const propertyString = this.getString();  ///
-
-    context.trace(`Verifying the '${propertyString}' property...`);
-
-    const naemVerifies = this.verifyName(properties, context);
-
-    if (naemVerifies) {
-      verifies = true;
-    }
-
-    if (verifies) {
-      context.debug(`...verified the '${propertyString}' property.`);
-    }
-
-    return verifies;
-  }
-
-  verifyName(properties, context) {
-    let naemVerifies = false;
-
-    const propertyString = this.getString();
-
-    context.trace(`Verifying the '${propertyString}' property's name...`);
-
-    const propertyName = this.name, ///
-          count = properties.reduce((count, property) => {
-            if (property !== this) {
-              const propertyComparesToPropertyName = property.comparePropertyName(propertyName);
-
-              if (propertyComparesToPropertyName) {
-                count++;
-              }
-            }
-
-            return count;
-          }, 0);
-
-    if (count === 0) {
-      naemVerifies = true;
-    } else {
-      context.debug(`The '${propertyString}' property appears more than once.`);
-    }
-
-    if (naemVerifies) {
-      context.debug(`...verified the '${propertyString}' property's name.`);
-    }
-
-    return naemVerifies;
-  }
-
-  findValidProperty(context) {
-    const propertyNode = this.getPropertyNode(),
-          property = context.findPropertyByPropertyNode(propertyNode),
-          validProperty = property; ///
-
-    return validProperty;
-  }
-
-  validate(context, validateForwards) {
-    let property = null;
-
-    const propertyString = this.getString();  ///
+    const includeType = false,
+          propertyString = this.getString(includeType);
 
     context.trace(`Validating the '${propertyString}' property...`);
 
-    let validates = false;
+    attempt((context) => {
+      const termValidates = this.validateTerm(context);
 
-    const validProperty = this.findValidProperty(context);
-
-    if (validProperty !== null) {
-      property = validProperty; ///
-
-      const validatesForward = validateForwards(property, context);
-
-      if (validatesForward) {
+      if (termValidates) {
         validates = true;
-
-        context.debug(`...the '${propertyString}' property is already valid.`);
-      } else {
-        property = null;
-      }
-    } else {
-      {
-        const property = this,  ///
-              validatesForward = validateForwards(property, context);
-
-        if (validatesForward) {
-          validates = true;
-        }
       }
 
       if (validates) {
-        property = this;  ///
-
-        context.addProperty(property);
+        this.commit(context);
       }
-    }
+    }, context);
 
     if (validates) {
       context.debug(`...validated the '${propertyString}' property.`);
     }
 
-    return property;
+    return validates;
   }
 
-  validateGivenType(type, context) {
-    let property;
+  validateTerm(context) {
+    let termValidates = false;
 
-    const typeString = type.getString(),
-          propertyString = this.getString();  ///
+    const includeType = false,
+          propertyString = this.getString(includeType);
 
-    context.trace(`Validating the '${propertyString}' property given the '${typeString}' type...`);
+    context.trace(`Validating the '${propertyString}' property's term...`);
 
-    let validatesGivenType = false;
+    const termValidatesAsProperty = validateTermAsProperty(this.term, context);
 
-    property = this.validate(context, (property, context) => {
-      let validatesForwards = false;
+    if (termValidatesAsProperty) {
+      termValidates = true;
+    }
 
-      const propertyName = property.getName(),
-            typeProperties = type.getProperties(),
-            typeProperty = typeProperties.find((typeProperty) => {
-              const typePropertyComparesToPropertyName = typeProperty.comparePropertyName(propertyName);
+    if (termValidates) {
+      context.debug(`...validated the '${propertyString}' property's term.`);
+    }
 
-              if (typePropertyComparesToPropertyName) {
-                return true;
-              }
-            }) || null;
+    return termValidates;
+  }
 
-      if (typeProperty !== null) {
-        const type = typeProperty.getType();
+  unifyTerm(term, context, validateForwards) {
+    let termUnifies = false;
 
-        property.setType(type);
+    const termString = term.getString(),
+          includeType = false,
+          propertyString = this.getString(includeType);  ///
 
-        validatesForwards = true;
+    context.trace(`Unifying the '${termString}' term with the '${propertyString}' property...`);
+
+    const property = this, ///
+          propertyContext = property.getContext(),
+          generalContext = propertyContext,  ///
+          specifiContext = context, ///
+          termUnifiesWithProperty = unifyTermWithProperty(term, property, generalContext, specifiContext);
+
+    if (termUnifiesWithProperty) {
+      const provisional = this.type.isProvisional();
+
+      term.setType(this.type);
+
+      term.setProvisional(provisional);
+
+      const validatesForwards = validateForwards(term, context);
+
+      if (validatesForwards) {
+        termUnifies = true;
       }
-
-      return validatesForwards;
-    });
-
-    if (property !== null) {
-      validatesGivenType = true;
     }
 
-    if (validatesGivenType) {
-      context.debug(`...validated the '${propertyString}' property given the '${typeString}' type.`);
+    if (termUnifies) {
+      context.debug(`...unified the '${termString}' term with the '${propertyString}' property.`);
     }
 
-    return property;
+    return termUnifies;
   }
 
   toJSON() {
-    const typeJSON = typeToTypeJSON(this.type),
-          string = this.getString();
+    const context = this.getContext();
 
-    let breakPoint;
+    return serialise((context) => {
+      const includeType = false,
+            typeJSON = typeToTypeJSON(this.type),
+            string = this.getString(includeType);
 
-    breakPoint = this.getBreakPoint();
+      let breakPoint;
 
-    const breakPointJSON = breakPointToBreakPointJSON(breakPoint);
+      breakPoint = this.getBreakPoint();
 
-    breakPoint = breakPointJSON;  ///
+      const breakPointJSON = breakPointToBreakPointJSON(breakPoint);
 
-    const type = typeJSON,  ///
-          json = {
-            string,
-            breakPoint,
-            type
-          };
+      breakPoint = breakPointJSON;  ///
 
-    return json;
+      const type = typeJSON,  ///
+            json = {
+              context,
+              string,
+              breakPoint,
+              type
+            };
+
+      return json;
+    }, context);
   }
 
   static name = "Property";
 
   static fromJSON(json, context) {
-    return instantiate((context) => {
-      const { string } = json,
-            propertyNode = instantiateProperty(string, context),
-            node = propertyNode,  ///
-            breakPoint = breakPointFromJSON(json),
-            name = nameFromPropertyNode(propertyNode, context),
-            type = typeFromJSON(json, context);
+    let property;
 
-      context = null;
+    instantiate((context) => {
+      unserialise((json, context) => {
+        const { string } = json,
+              propertyNode = instantiateProperty(string, context),
+              node = propertyNode, ///
+              breakPoint = breakPointFromJSON(json),
+              term = termFromPropertyNode(propertyNode, context),
+              type = typeFromJSON(json, context);
 
-      const property = new Property(context, string, node, breakPoint, name, type);
-
-      return property;
+        property = new Property(context, string, node, breakPoint, term, type);
+      }, json, context);
     }, context);
+
+    return property;
   }
 });

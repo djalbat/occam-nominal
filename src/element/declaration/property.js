@@ -5,22 +5,29 @@ import Declaration from "../declaration";
 import { define } from "../../elements";
 
 export default define(class PropertyDeclaration extends Declaration {
-  constructor(context, string, node, breakPoint, property, type) {
+  constructor(context, string, node, breakPoint, type, property) {
     super(context, string, node, breakPoint);
 
-    this.property = property;
     this.type = type;
-  }
-
-  getProperty() {
-    return this.property;
+    this.property = property;
   }
 
   getType() {
     return this.type;
   }
 
-  async verify(properties, type, context) {
+  getProperty() {
+    return this.property;
+  }
+
+  getPropertyDeclarationNode() {
+    const node = this.getNode(),
+          propertyDeclarationNode = node; ///
+
+    return propertyDeclarationNode;
+  }
+
+  async verify(context) {
     let verifies = false;
 
     await this.break(context);
@@ -29,20 +36,16 @@ export default define(class PropertyDeclaration extends Declaration {
 
     context.trace(`Verifying the '${propertyDeclarationString}' property declaration...`);
 
-    if (this.property !== null) {
-      const typeVerifies = this.verifyType(type, context);
+    const typeVerified = this.verifyType(context);
 
-      if (typeVerifies) {
-        const propertyVerifies = this.verifyProperty(properties, context);
+    if (typeVerified) {
+      const propertyValidates = this.validateProperty(context);
 
-        if (propertyVerifies) {
-          this.property.setType(this.type);
+      if (propertyValidates) {
+        this.property.setType(this.type);
 
-          verifies = true;
-        }
+        verifies = true;
       }
-    } else {
-      context.debug(`Unable to verify the '${propertyDeclarationString}' property declaration because it is nonsense.`);
     }
 
     if (verifies) {
@@ -52,56 +55,48 @@ export default define(class PropertyDeclaration extends Declaration {
     return verifies;
   }
 
-  verifyType(type, context) {
+  verifyType(context) {
     let typeVerifies = false;
 
-    const propertyDeclarationString = this.getString(); ///
+    const propertyDeclarationString = this.getString();  ///
 
     context.trace(`Verifying the '${propertyDeclarationString}' property declaration's type...`);
 
     const nominalTypeName = this.type.getNominalTypeName(),
-          comparesToNominalTypeName = type.compareNominalTypeName(nominalTypeName);
+          typeString = this.type.getString(),
+          type = context.findTypeByNominalTypeName(nominalTypeName);
 
-    if (comparesToNominalTypeName) {
+    if (type !== null) {
       this.type = type;
 
       typeVerifies = true;
     } else {
-      const type = context.findTypeByTypeName(nominalTypeName);
-
-      if (type !== null) {
-        this.type = type;
-
-        typeVerifies = true;
-      } else {
-        const typeString = this.type.getString();
-
-        context.debug(`The '${typeString}' type is not present.`);
-      }
+      context.debug(`The '${typeString}' type is not present.`);
     }
 
     if (typeVerifies) {
-      context.debug(`...verified the '${propertyDeclarationString}' property declaration's type`);
+      context.debug(`...verified the '${propertyDeclarationString}' property declaration's type.`);
     }
 
     return typeVerifies;
   }
 
-  verifyProperty(properties, context) {
-    let propertyVerifies;
+  validateProperty(context) {
+    let propertyValidates;
 
-    const propertyString = this.property.getString(),
-          propertyDeclarationString = this.getString(); ///
+    const includeType = false,
+          propertyString = this.property.getString(includeType),
+          propertyDeclarationString = this.getString();  ///
 
-    context.trace(`Verifying the '${propertyDeclarationString}' property declaration's '${propertyString}' property...`);
+    context.trace(`Validating the '${propertyDeclarationString}' property declaration's '${propertyString}' property...`);
 
-    propertyVerifies = this.property.verify(properties, context);
+    propertyValidates = this.property.validate(context);
 
-    if (propertyVerifies) {
-      context.debug(`...verified the '${propertyDeclarationString}' property declaration's '${propertyString}' type`);
+    if (propertyValidates) {
+      context.debug(`...validated the '${propertyDeclarationString}' property declaration's '${propertyString}' property.`);
     }
 
-    return propertyVerifies;
+    return propertyValidates;
   }
 
   static name = "PropertyDeclaration";

@@ -12,7 +12,7 @@ const termNodeQuery = nodeQuery("/term"),
       typeNodeQuery = nodeQuery("/type"),
       statementNodeQuery = nodeQuery("/statement");
 
-class GeneratorPass extends SimplePass {
+class TermPass extends SimplePass {
   run(termNode, context) {
     let success = false;
 
@@ -68,7 +68,7 @@ class GeneratorPass extends SimplePass {
   ];
 }
 
-class CombinatorPass extends SimplePass {
+class StatementPass extends SimplePass {
   run(statementNode, context) {
     let success = false;
 
@@ -144,71 +144,27 @@ class CombinatorPass extends SimplePass {
   ];
 }
 
-class ConstructorPass extends SimplePass {
-  run(termNode, context) {
-    let success = false;
+const termPass = new TermPass(),
+      statementPass = new StatementPass();
 
-    const nonTerminalNode = termNode,  ///
-          childNodes = nonTerminalNode.getChildNodes(), ///
-          descended = this.descend(childNodes, context);
+export function validateTermAsProperty(term, context) {
+  let termValidatesAsProperty = false;
 
-    if (descended) {
-      success = true;
-    }
+  const termNode = term.getNode(),
+        success = termPass.run(termNode, context);
 
-    return success;
+  if (success) {
+    termValidatesAsProperty = true;
   }
 
-  static maps = [
-    {
-      nodeQuery: termNodeQuery,
-      run: (termNode, context) => {
-        let success = false;
-
-        let term;
-
-        term = termFromTermNode(termNode, context);
-
-        term = term.validate(context, (term, context) => { ///
-          const validatesForwards = true;
-
-          return validatesForwards;
-        });
-
-        if (term !== null) {
-          success = true;
-        }
-
-        return success;
-      }
-    },
-    {
-      nodeQuery: typeNodeQuery,
-      run: (typeNode, context) => {
-        let success = false;
-
-        const nominalTypeName = typeNode.getNominalTypeName(),
-              typePresent = context.isTypePresentByNominalTypeName(nominalTypeName);
-
-        if (typePresent) {
-          success = true;
-        }
-
-        return success;
-      }
-    }
-  ];
+  return termValidatesAsProperty;
 }
-
-const generatorPass = new GeneratorPass(),
-      combinatorPass = new CombinatorPass(),
-      constructorPass = new ConstructorPass();
 
 export function validateTermAsGenerator(term, context) {
   let termValidatesAsGenerator = false;
 
   const termNode = term.getNode(),
-        success = generatorPass.run(termNode, context);
+        success = termPass.run(termNode, context);
 
   if (success) {
     termValidatesAsGenerator = true;
@@ -221,7 +177,7 @@ export function validateTermAsConstructor(term, context) {
   let termValidatesAsConstructor = false;
 
   const termNode = term.getNode(),
-    success = constructorPass.run(termNode, context);
+        success = termPass.run(termNode, context);
 
   if (success) {
     termValidatesAsConstructor = true;
@@ -234,7 +190,7 @@ export function validateStatementAsCombinator(statement, context) {
   let statementValidatesAsCombinator = false;
 
   const statementNode = statement.getNode(),
-        success = combinatorPass.run(statementNode, context);
+        success = statementPass.run(statementNode, context);
 
   if (success) {
     statementValidatesAsCombinator = true;

@@ -271,12 +271,12 @@ export function propertyFromPropertyNode(propertyNode, context) {
           node = propertyNode, ///
           string = context.nodeAsString(node),
           breakPoint = null,
-          name = nameFromPropertyNode(propertyNode, context),
+          term = termFromPropertyNode(propertyNode, context),
           type = typeFromPropertyNode(propertyNode, context);
 
     context = null;
 
-    property = new Property(context, string, node, breakPoint, name, type);
+    property = new Property(context, string, node, breakPoint, term, type);
   }
 
   return property;
@@ -840,7 +840,7 @@ export function propertyDeclarationFromPropertyDeclarationNode(propertyDeclarati
 
   context = null;
 
-  const propertyDeclaration = new PropertyDeclaration(context, string, node, breakPoint, property, type);
+  const propertyDeclaration = new PropertyDeclaration(context, string, node, breakPoint, type, property);
 
   return propertyDeclaration;
 }
@@ -1086,15 +1086,15 @@ export function lemmaFromSectionNode(sectionNode, context) {
   return lemma;
 }
 
-export function nameFromPropertyNode(propertyNode, context) {
-  const propertyName = propertyNode.getPropertyName(),
-        name = propertyName;
+export function termFromPropertyNode(propertyNode, context) {
+  const termNode = propertyNode.getTermNode(),
+    term = termFromTermNode(termNode, context);
 
-  return name;
+  return term;
 }
 
 export function typeFromPropertyNode(propertyNode, context) {
-  const type = null;  ///
+  const type = null;
 
   return type;
 }
@@ -2049,8 +2049,13 @@ export function hypothesesFromTopLevelAssertionNode(topLevelAsssertionNode, cont
 }
 
 export function propertyFromPropertyDeclarationNode(propertyDeclarationNode, context) {
-  const propertyNode = propertyDeclarationNode.getPropertyNode(),
-        property = propertyFromPropertyNode(propertyNode, context);
+  let property = null;
+
+  const propertyNode = propertyDeclarationNode.getPropertyNode();
+
+  if (propertyNode !== null) {
+    property = propertyFromPropertyNode(propertyNode, context);
+  }
 
   return property;
 }

@@ -5,6 +5,7 @@ import Declaration from "../declaration";
 import { asynchronousUtilities } from "occam-languages";
 
 import { define } from "../../elements";
+import { anticipate } from "../../utilities/context";
 import { baseTypeFromNothing } from "../../utilities/type";
 
 const { asyncEvery } = asynchronousUtilities;
@@ -43,15 +44,11 @@ export default define(class CotypeDeclaration extends Declaration {
   }
 
   getProperties() {
-    const properties = this.propertyDeclarations.reduce((properties, propertyDeclaration) => {
+    const properties = this.propertyDeclarations.map((propertyDeclaration) => {
       const property = propertyDeclaration.getProperty();
 
-      if (property !== null) {
-        properties.push(property);
-      }
-
-      return properties;
-    }, []);
+      return property;
+    });
 
     return properties;
   }
@@ -236,15 +233,15 @@ export default define(class CotypeDeclaration extends Declaration {
 
     context.trace(`Verifying the '${cotypeDeclarationString}' cotype declaration's '${typeString}' type's property declarations...`);
 
-    const properties = this.getProperties();
+    await anticipate(async (context) => {
+      propertyDeclarationsVerify = await asyncEvery(this.propertyDeclarations, async (propertyDeclaration) => {
+        const propertyVerifes = await propertyDeclaration.verify(context);
 
-    propertyDeclarationsVerify = await asyncEvery(this.propertyDeclarations, async (propertyDeclaration) => {
-      const propertyVerifes = await propertyDeclaration.verify(properties, this.type, context);
-
-      if (propertyVerifes) {
-        return true;
-      }
-    });
+        if (propertyVerifes) {
+          return true;
+        }
+      });
+    }, this.type, context);
 
     if (propertyDeclarationsVerify) {
       context.debug(`...verified the '${cotypeDeclarationString}' cotype declaration's '${typeString}' type's property declarations.`);

@@ -7,7 +7,7 @@ import NominalLexer from "../../nominal/lexer";
 import NominalParser from "../../nominal/parser";
 
 import { verifyFile } from "../../process/verify";
-import { baseTypeFromNothing } from "../../utilities/type";
+import {baseTypeFromNothing, findType} from "../../utilities/type";
 import { findMetaTypeByMetaTypeName } from "../../metaTypes";
 import { typesFromJSON,
          rulesFromJSON,
@@ -524,65 +524,41 @@ export default class NominalFileContext extends FileContext {
     return topLevelAssertion;
   }
 
-  findTypeByTypeName(typeName, includeRelease = true) {
-    let types = this.getTypes(includeRelease);
+  findTypeByTypeName(typeName) {
+    const types = this.getTypes(),
+          type = findType(types, (type) => {
+            const typeComparesToTypeName = type.compareTypeName(typeName);
 
-    const baseType = baseTypeFromNothing();
-
-    types = [
-      ...types,
-      baseType
-    ];
-
-    const type = types.find((type) => {
-      const typeComparesToTypeName = type.compareTypeName(typeName);
-
-      if (typeComparesToTypeName) {
-        return true;
-      }
-    }) || null;
+            if (typeComparesToTypeName) {
+              return true;
+            }
+          });
 
     return type;
   }
 
   findTypeByNominalTypeName(nominalTypeName) {
-    let types = this.getTypes();
+    const types = this.getTypes(),
+          type = findType(types, (type) => {
+            const typeComparesToNominalTypeName = type.compareNominalTypeName(nominalTypeName);
 
-    const baseType = baseTypeFromNothing();
-
-    types = [
-      ...types,
-      baseType
-    ];
-
-    const type = types.find((type) => {
-      const typeComparesToNominalTypeName = type.compareNominalTypeName(nominalTypeName);
-
-      if (typeComparesToNominalTypeName) {
-        return true;
-      }
-    }) || null;
+            if (typeComparesToNominalTypeName) {
+              return true;
+            }
+          });
 
     return type;
   }
 
   findTypeByPrefixedTypeName(prefixedTypeName) {
-    let types = this.getTypes();
+    const types = this.getTypes(),
+          type = findType(types, (type) => {
+            const typeComparesToPrefixedTypeName = type.comparePrefixedTypeName(prefixedTypeName);
 
-    const baseType = baseTypeFromNothing();
-
-    types = [
-      ...types,
-      baseType
-    ];
-
-    const type = types.find((type) => {
-      const typeComparesToPrefixedTypeName = type.comparePrefixedTypeName(prefixedTypeName);
-
-      if (typeComparesToPrefixedTypeName) {
-        return true;
-      }
-    }) || null;
+            if (typeComparesToPrefixedTypeName) {
+              return true;
+            }
+          });
 
     return type;
   }
@@ -672,8 +648,8 @@ export default class NominalFileContext extends FileContext {
     return labelPresent;
   }
 
-  isTypePresentByTypeName(typeName, includeRelease = true) {
-    const type = this.findTypeByTypeName(typeName, includeRelease),
+  isTypePresentByTypeName(typeName) {
+    const type = this.findTypeByTypeName(typeName),
           typePresent = (type !== null);
 
     return typePresent;
