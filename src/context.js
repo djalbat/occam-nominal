@@ -157,6 +157,13 @@ export default class Context extends ContextBase {
     return derivedSubstitutions;
   }
 
+  getGenerators(includeRelease = true) {
+    const context = this.getContext(),
+          generators = context.getGenerators(includeRelease);
+
+    return generators;
+  }
+
   getProcedures(includeRelease = true) {
     const context = this.getContext(),
           procedures = context.getProcedures(includeRelease);

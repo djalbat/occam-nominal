@@ -49,6 +49,32 @@ function validateTermAsVariable(term, context, validateForwards) {
   return termValidatesAsVariable;
 }
 
+function unifyTermWithGenerators(term, context, validateForwards) {
+  let termUnifiesWithGenerators;
+
+  const generators = context.getGenerators();
+
+  termUnifiesWithGenerators = generators.some((generator) => {
+    let termUnifiesWithGenerator = false;
+
+    choose((context) => {
+      const termUnifies = generator.unifyTerm(term, context, validateForwards);
+
+      if (termUnifies) {
+        termUnifiesWithGenerator = true;
+
+        context.commit();
+      }
+    }, context);
+
+    if (termUnifiesWithGenerator) {
+      return true;
+    }
+  });
+
+  return termUnifiesWithGenerators;
+}
+
 function unifyTermWithConstructors(term, context, validateForwards) {
   let termUnifiesWithConstructors;
 
@@ -391,6 +417,7 @@ function validateStatementAsSignatureAssertion(statement, context) {
 
 export const validateTerms = [
   validateTermAsVariable,
+  unifyTermWithGenerators,
   unifyTermWithConstructors,
   unifyTermWithBracketedConstructor
 ];

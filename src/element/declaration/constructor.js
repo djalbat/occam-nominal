@@ -70,26 +70,29 @@ export default define(class ConstructorDeclaration extends Declaration {
     context.trace(`Verifying the '${constructorDeclarationString}' constructor declaration's type...`);
 
     const nominalTypeName = this.type.getNominalTypeName(),
+          typeString = this.type.getString(),
           type = context.findTypeByNominalTypeName(nominalTypeName);
 
     if (type !== null) {
-      const provisional = this.isProvisional(),
-            typeComparesToProvisional = type.compareProvisional(provisional);
+      const typeCotype = type.isCotype();
 
-      if (!typeComparesToProvisional) {
-        const typeString = this.type.getString();
+      if (!typeCotype) {
+        const provisional = this.isProvisional(),
+              typeComparesToProvisional = type.compareProvisional(provisional);
 
-        provisional ?
-          context.debug(`The '${typeString}' type is present but not provisional.`) :
-            context.debug(`The '${typeString}' type is present but provisional.`);
+        if (!typeComparesToProvisional) {
+          provisional ?
+            context.debug(`The '${typeString}' type is present but not provisional.`) :
+              context.debug(`The '${typeString}' type is present but provisional.`);
+        } else {
+          this.type = type;
+
+          typeVerifies = true;
+        }
       } else {
-        this.type = type;
-
-        typeVerifies = true;
+        context.debug(`The '${typeString}' type is a cotype.`);
       }
     } else {
-      const typeString = this.type.getString();
-
       context.debug(`The '${typeString}' type is not present.`);
     }
 

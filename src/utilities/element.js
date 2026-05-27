@@ -884,6 +884,22 @@ export function bracketedConstructorFromBracketedConstructorNode(bracketedConstr
   return bracketedConstructor;
 }
 
+export function generatorDeclarationFromGeneratorDeclarationNode(generatorDeclarationNode, context) {
+  const { GeneratorDeclaration } = elements,
+        node = generatorDeclarationNode, ///
+        string = context.nodeAsString(node),
+        breakPoint = null,
+        type = typeFromGeneratorDeclarationNode(generatorDeclarationNode, context),
+        generator = generatorFromGeneratorDeclarationNode(generatorDeclarationNode, context),
+        provisional = provisionalFromGeneratorDeclarationNode(generatorDeclarationNode, context);
+
+  context = null;
+
+  const generatorDeclaration = new GeneratorDeclaration(context, string, node, breakPoint, type, provisional, generator);
+
+  return generatorDeclaration;
+}
+
 export function typePrefixDeclarationFromTypePrefixDeclarationNode(typePrefixDeclarationNode, context) {
   const { TypePrefixDeclaration } = elements,
         node = typePrefixDeclarationNode, ///
@@ -1846,6 +1862,13 @@ export function typeFromBracketedConstructorNode(bracketedCcnstructorNode, conte
   return type;
 }
 
+export function typeFromGeneratorDeclarationNode(generatorDeclarationNode, context) {
+  const typeNode = generatorDeclarationNode.getTypeNode(),
+        type = typeFromTypeNode(typeNode, context);
+
+  return type;
+}
+
 export function definedAssertionFromStatementNode(statementNode, context) {
   let definedAssertion = null;
 
@@ -2066,6 +2089,13 @@ export function suppositionsFromTopLevelAssertionNode(topLevelAsssertionNode, co
   return suppositions;
 }
 
+export function generatorFromGeneratorDeclarationNode(generatorDeclarationNode, context) {
+  const generatorNode = generatorDeclarationNode.getGeneratorNode(),
+        generator = generatorFromGeneratorNode(generatorNode, context);
+
+  return generator;
+}
+
 export function resolvedFromStatementSubstitutionNode(statementSubstitutionNode, context) {
   const resolved = statementSubstitutionNode.isResolved();
 
@@ -2090,6 +2120,12 @@ export function procedureReferenceFromProcedureCallNode(procedureCallNode, conte
         procedureReference = procedureReferenceFromProcedureReferenceNode(procedureReferenceNode, context);
 
   return procedureReference;
+}
+
+export function provisionalFromGeneratorDeclarationNode(generatorDeclarationNode, context) {
+  const provisional = generatorDeclarationNode.isProvisional();
+
+  return provisional;
 }
 
 export function typePrefixFromTypePrefixDeclarationNode(typePrefixDeclarationNode, context) {

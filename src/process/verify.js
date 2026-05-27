@@ -14,6 +14,7 @@ import { ruleFromRuleNode,
          typeDeclarationFromTypeDeclarationNode,
          cotypeDeclarationFromCotypeDeclarationNode,
          variableDeclarationFromVariableDeclarationNode,
+         generatorDeclarationFromGeneratorDeclarationNode,
          typePrefixDeclarationFromTypePrefixDeclarationNode,
          combinatorDeclarationFromCombinatorDeclarationNode,
          constructorDeclarationFromConstructorDeclarationNode,
@@ -32,6 +33,7 @@ const ruleNodeQuery = nodeQuery("/rule"),
       typeDeclarationNodeQuery = nodeQuery("/typeDeclaration"),
       cotypeDeclarationNodeQuery = nodeQuery("/cotypeDeclaration"),
       variableDeclarationNodeQuery = nodeQuery("/variableDeclaration"),
+      generatorDeclarationNodeQuery = nodeQuery("/generatorDeclaration"),
       combinatorDeclarationNodeQuery = nodeQuery("/combinatorDeclaration"),
       typePrefixDeclarationNodeQuery = nodeQuery("/typePrefixDeclaration"),
       constructorDeclarationNodeQuery = nodeQuery("/constructorDeclaration"),
@@ -205,6 +207,21 @@ class TopLevelPass extends AsyncPass {
       }
     },
     {
+      nodeQuery: generatorDeclarationNodeQuery,
+      run: async (generatorDeclarationNode, context) => {
+        let success = false;
+
+        const generatorDeclaration = generatorDeclarationFromGeneratorDeclarationNode(generatorDeclarationNode, context),
+              generatorDeclarationVerifies = await generatorDeclaration.verify(context);
+
+        if (generatorDeclarationVerifies) {
+          success = true;
+        }
+
+        return success;
+      }
+    },
+    {
       nodeQuery: typePrefixDeclarationNodeQuery,
       run: async (typePrefixDeclarationNode, context) => {
         let success = false;
@@ -225,7 +242,7 @@ class TopLevelPass extends AsyncPass {
         let success = false;
 
         const combinatorDeclaration = combinatorDeclarationFromCombinatorDeclarationNode(combinatorDeclarationNode, context),
-              combinatorDeclarationVerifies = await combinatorDeclaration.verify(context);
+          combinatorDeclarationVerifies = await combinatorDeclaration.verify(context);
 
         if (combinatorDeclarationVerifies) {
           success = true;
