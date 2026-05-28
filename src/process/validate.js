@@ -12,7 +12,63 @@ const termNodeQuery = nodeQuery("/term"),
       typeNodeQuery = nodeQuery("/type"),
       statementNodeQuery = nodeQuery("/statement");
 
-class TermPass extends SimplePass {
+class PropertyPass extends SimplePass {
+  run(termNode, context) {
+    let success = false;
+
+    const nonTerminalNode = termNode,  ///
+          childNodes = nonTerminalNode.getChildNodes(), ///
+          descended = this.descend(childNodes, context);
+
+    if (descended) {
+      success = true;
+    }
+
+    return success;
+  }
+
+  static maps = [
+    {
+      nodeQuery: termNodeQuery,
+      run: (termNode, context) => {
+        let success = false;
+
+        let term;
+
+        term = termFromTermNode(termNode, context);
+
+        term = term.validate(context, (term, context) => { ///
+          const validatesForwards = true;
+
+          return validatesForwards;
+        });
+
+        if (term !== null) {
+          success = true;
+        }
+
+        return success;
+      }
+    },
+    {
+      nodeQuery: typeNodeQuery,
+      run: (typeNode, context) => {
+        let success = false;
+
+        const nominalTypeName = typeNode.getNominalTypeName(),
+              typePresent = context.isTypePresentByNominalTypeName(nominalTypeName);
+
+        if (typePresent) {
+          success = true;
+        }
+
+        return success;
+      }
+    }
+  ];
+}
+
+class GeneratorPass extends SimplePass {
   run(termNode, context) {
     let success = false;
 
@@ -144,11 +200,61 @@ class CombinatorPass extends SimplePass {
   ];
 }
 
-class PropertyPass extends TermPass {}
+class ConstructorPass extends SimplePass {
+  run(termNode, context) {
+    let success = false;
 
-class GeneratorPass extends TermPass {}
+    const nonTerminalNode = termNode,  ///
+          childNodes = nonTerminalNode.getChildNodes(), ///
+          descended = this.descend(childNodes, context);
 
-class ConstructorPass extends TermPass {}
+    if (descended) {
+      success = true;
+    }
+
+    return success;
+  }
+
+  static maps = [
+    {
+      nodeQuery: termNodeQuery,
+      run: (termNode, context) => {
+        let success = false;
+
+        let term;
+
+        term = termFromTermNode(termNode, context);
+
+        term = term.validate(context, (term, context) => { ///
+          const validatesForwards = true;
+
+          return validatesForwards;
+        });
+
+        if (term !== null) {
+          success = true;
+        }
+
+        return success;
+      }
+    },
+    {
+      nodeQuery: typeNodeQuery,
+      run: (typeNode, context) => {
+        let success = false;
+
+        const nominalTypeName = typeNode.getNominalTypeName(),
+              typePresent = context.isTypePresentByNominalTypeName(nominalTypeName);
+
+        if (typePresent) {
+          success = true;
+        }
+
+        return success;
+      }
+    }
+  ];
+}
 
 const propertyPass = new PropertyPass(),
       generatorPass = new GeneratorPass(),

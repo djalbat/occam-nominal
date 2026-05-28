@@ -420,7 +420,7 @@ export function signaturesFromJSON(json, context) {
 }
 
 export function generatorsFromJSON(json, context) {
-  let { generators = [] } = json;
+  let { generators } = json;
 
   const { Generator } = elements,
         generatorsJSON = generators; ///

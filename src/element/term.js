@@ -228,7 +228,13 @@ export default define(class Term extends Element {
     return term;
   }
 
-  validateGivenType(type, context) {
+  validateGivenType(type, strict, context) {
+    if (context === undefined) {
+      context = strict; ///
+
+      strict = true;
+    }
+
     let term;
 
     const typeString = type.getString(),
@@ -247,11 +253,13 @@ export default define(class Term extends Element {
       if (termTypeEqualToOrSubTypeOfType) {
         validatesForwards = true;
 
-        const typeEstablished = type.isEstablished(),
-              termProvisional = term.isProvisional();
+        if (strict) {
+          const typeEstablished = type.isEstablished(),
+                termProvisional = term.isProvisional();
 
-        if (typeEstablished && termProvisional) {
-          validatesForwards = false;
+          if (typeEstablished && termProvisional) {
+            validatesForwards = false;
+          }
         }
       }
 

@@ -36,16 +36,20 @@ export default define(class PropertyDeclaration extends Declaration {
 
     context.trace(`Verifying the '${propertyDeclarationString}' property declaration...`);
 
-    const typeVerified = this.verifyType(context);
+    if (this.property !== null) {
+      const typeVerified = this.verifyType(context);
 
-    if (typeVerified) {
-      const propertyVerifies = this.verifyProperty(context);
+      if (typeVerified) {
+        const propertyVerifies = this.verifyProperty(context);
 
-      if (propertyVerifies) {
-        this.property.setType(this.type);
+        if (propertyVerifies) {
+          this.property.setType(this.type);
 
-        verifies = true;
+          verifies = true;
+        }
       }
+    } else {
+      context.debug(`Cannot verify the the '${propertyDeclarationString}' property declaration because it is nonsense.`);
     }
 
     if (verifies) {

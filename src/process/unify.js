@@ -22,7 +22,85 @@ const typeNodeQuery = nodeQuery("/type"),
       statementMetavariableNodeQuery = nodeQuery("/statement/metavariable!"),
       assumptionMetavariableNodeQuery = nodeQuery("/assumption/metavariable!");
 
-class TermPass extends ZipPass {
+class PropertyPass extends ZipPass {
+  static maps = [
+    {
+      generalNodeQuery: typeNodeQuery,
+      specificNodeQuery: termNodeQuery,
+      run: (generalTypeNode, specificTermNode, generalContext, specificContext) => {
+        let success = false;
+
+        const typeNode = generalTypeNode, ///
+          termNode = specificTermNode, ///
+          nominalTypeName = typeNode.getNominalTypeName();
+
+        let context;
+
+        context = generalContext; ///
+
+        const type = context.findTypeByNominalTypeName(nominalTypeName);
+
+        if (type !== null) {
+          context = specificContext;  ///
+
+          let term;
+
+          term = termFromTermNode(termNode, context);
+
+          const strict = false;
+
+          term = term.validateGivenType(type, strict, context);
+
+          if (term !== null) {
+            success = true;
+          }
+        }
+
+        return success;
+      }
+    }
+  ];
+}
+
+class GeneratorPass extends ZipPass {
+  static maps = [
+    {
+      generalNodeQuery: typeNodeQuery,
+      specificNodeQuery: termNodeQuery,
+      run: (generalTypeNode, specificTermNode, generalContext, specificContext) => {
+        let success = false;
+
+        const typeNode = generalTypeNode, ///
+              termNode = specificTermNode, ///
+              nominalTypeName = typeNode.getNominalTypeName();
+
+        let context;
+
+        context = generalContext; ///
+
+        const type = context.findTypeByNominalTypeName(nominalTypeName);
+
+        if (type !== null) {
+          context = specificContext;  ///
+
+          let term;
+
+          term = termFromTermNode(termNode, context);
+
+          term = term.validateGivenType(type, context);
+
+          if (term !== null) {
+            success = true;
+          }
+        }
+
+        return success;
+      }
+    }
+  ];
+}
+
+class ConstructorPass extends ZipPass {
   static maps = [
     {
       generalNodeQuery: typeNodeQuery,
@@ -405,15 +483,9 @@ class IntrinsicMetavariablePass extends ZipPass {
   ];
 }
 
-class PropertyPass extends TermPass {}
-
-class GeneratorrPass extends TermPass {}
-
-class ConstructorPass extends TermPass {}
-
 const metaLevelPass = new MetaLevelPass(),
       propertyPass = new PropertyPass(),
-      generatorPass = new GeneratorrPass(),
+      generatorPass = new GeneratorPass(),
       combinatorPass = new CombinatorPass(),
       constructorPass = new ConstructorPass(),
       metavariablePass = new MetavariablePass(),
