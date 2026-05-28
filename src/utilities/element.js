@@ -716,12 +716,12 @@ export function propertyAssertionFromPropertyAssertionNode(propertyAssertionNode
         node = propertyAssertionNode,  ///
         string = context.nodeAsString(node),
         breakPoint = null,
-        term = termFromPropertyAssertionNode(propertyAssertionNode, context),
-        property = propertyFromPropertyAssertionNode(propertyAssertionNode, context);
+        subjectTerm = subjectTermFromPropertyAssertionNode(propertyAssertionNode, context),
+        propertyTerm = propertyTermFromPropertyAssertionNode(propertyAssertionNode, context);
 
   context = null;
 
-  const propertyAssertion = new PropertyAssertion(context, string, node, breakPoint, term, property);
+  const propertyAssertion = new PropertyAssertion(context, string, node, breakPoint, subjectTerm, propertyTerm);
 
   return propertyAssertion;
 }
@@ -1657,13 +1657,6 @@ export function frameFromDefinedAssertionNode(definedAssertionNode, context) {
   return frame;
 }
 
-export function termFromPropertyAssertionNode(propertyAssertionNode, context) {
-  const termNode = propertyAssertionNode.getTermNode(),
-        term = termFromTermNode(termNode, context);
-
-  return term;
-}
-
 export function typeFromCotypeDeclarationNode(cotypeDeclarationNode, context) {
   const typeNode = cotypeDeclarationNode.getTypeNode(),
         type = typeFromTypeNode(typeNode, context);
@@ -1866,13 +1859,6 @@ export function superTypesFromTypeDeclarationNode(typeDeclarationNode, context) 
   return superTypes;
 }
 
-export function propertyFromPropertyAssertionNode(propertyAssertionNode, context) {
-  const propertyNode = propertyAssertionNode.getPropertyNode(),
-        property = propertyFromPropertyNode(propertyNode, context);
-
-  return property;
-}
-
 export function negatedFromContainedAssertionNode(containedAssertionNode, context) {
   const negated = containedAssertionNode.isNegated();
 
@@ -2045,6 +2031,13 @@ export function variableFromVariableDeclarationNode(variableDeclarationNode, con
   return variable;
 }
 
+export function subjectTermFromPropertyAssertionNode(propertyAssertionNode, context) {
+  const subjectTermNode = propertyAssertionNode.getSubjectTermNode(),
+        subjectTerm = termFromTermNode(subjectTermNode, context);
+
+  return subjectTerm;
+}
+
 export function targetFrameFromFrameSubstitutionNode(frameSubstitutionNode, context) {
   const targetFrameNode = frameSubstitutionNode.getTargetFrameNode(),
         targetFrame = frameFromFrameNode(targetFrameNode, context);
@@ -2063,6 +2056,13 @@ export function statementFromBracketedCombinatorNode(bracketedCombinatorNode, co
         statement = statementFromStatementNode(statementNode, context);
 
   return statement;
+}
+
+export function propertyTermFromPropertyAssertionNode(propertyAssertionNode, context) {
+  const propertyTermNode = propertyAssertionNode.getPropertyTermNode(),
+        propertyTerm = termFromTermNode(propertyTermNode, context);
+
+  return propertyTerm;
 }
 
 export function suppositionsFromTopLevelAssertionNode(topLevelAsssertionNode, context) {

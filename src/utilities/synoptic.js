@@ -34,16 +34,6 @@ export function compressFrames(frames) {
   });
 }
 
-export function compressProperties(properties) {
-  compress(properties, (propertyA, propertyB) => {
-    const propertyAEqualToPropertyB = propertyA.isEqualTo(propertyB);
-
-    if (!propertyAEqualToPropertyB) {
-      return true;
-    }
-  });
-}
-
 export function compressEqualities(equalities) {
   compress(equalities, (equalityA, equalityB) => {
     const equalityAEqualToEqualityB = equalityA.isEqualTo(equalityB);

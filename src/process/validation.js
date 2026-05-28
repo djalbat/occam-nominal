@@ -415,6 +415,32 @@ function validateStatementAsSignatureAssertion(statement, context) {
   return validatesAStatementsSignatureAssertion;
 }
 
+export function unifyTermWithProperties(term, context, validateForwards) {
+  let termUnifiesWithProperties;
+
+  const properties = context.getProperties();
+
+  termUnifiesWithProperties = properties.some((property) => {
+    let termUnifiesWithProperty = false;
+
+    choose((context) => {
+      const termUnifies = property.unifyTerm(term, context, validateForwards);
+
+      if (termUnifies) {
+        termUnifiesWithProperty = true;
+
+        context.commit();
+      }
+    }, context);
+
+    if (termUnifiesWithProperty) {
+      return true;
+    }
+  });
+
+  return termUnifiesWithProperties;
+}
+
 export const validateTerms = [
   validateTermAsVariable,
   unifyTermWithGenerators,

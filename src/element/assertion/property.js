@@ -7,22 +7,22 @@ import { instantiate } from "../../utilities/context";
 import { breakPointFromJSON } from "../../utilities/breakPoint";
 import { instantiatePropertyAssertion } from "../../process/instantiate";
 import { variableAssignmentFromPrepertyAssertion } from "../../process/assign";
-import { termFromPropertyAssertionNode, propertyFromPropertyAssertionNode, propertyAssertionFromStatementNode } from "../../utilities/element";
+import { propertyAssertionFromStatementNode, subjectTermFromPropertyAssertionNode, propertyTermFromPropertyAssertionNode } from "../../utilities/element";
 
 export default define(class PropertyAssertion extends Assertion {
-  constructor(context, string, node, breakPoint, term, property) {
+  constructor(context, string, node, breakPoint, subjectTerm, propertyTerm) {
     super(context, string, node, breakPoint);
 
-    this.term = term;
-    this.property = property;
+    this.subjectTerm = subjectTerm;
+    this.propertyTerm = propertyTerm;
   }
 
-  getTerm() {
-    return this.term;
+  getSubjectTerm() {
+    return this.subjectTerm;
   }
 
-  getProperty() {
-    return this.property;
+  getPropertyTerm() {
+    return this.propertyTerm;
   }
 
   getPropertyAssertionNode() {
@@ -32,32 +32,11 @@ export default define(class PropertyAssertion extends Assertion {
     return propertyAssertionNode;
   }
 
-  getType() { return this.property.getType(); }
+  getPropertyType() {
+    const propertyTermType = this.propertyTerm.getType(),
+          propertyType = propertyTermType;  ///
 
-  compareTermAndProperty(term, property, context) {
-    let comparesToTermAndProperty = false;
-
-    const termString = term.getString(),
-          propertyString = property.getString(),
-          propertyAssertionString = this.getString(); ///
-
-    context.trace(`Comparing the '${propertyAssertionString}' property assertion to the '${termString}' term and '${propertyString}' property...`);
-
-    const termA = term,
-          termB = this.term, ///
-          termAEqualToTermB = termA.isEqualTo(termB);
-
-    if (termAEqualToTermB) {
-      const propertyEqualToProperty = this.property.isEqualTo(property);
-
-      comparesToTermAndProperty = propertyEqualToProperty;  ///
-    }
-
-    if (comparesToTermAndProperty) {
-      context.debug(`...compared the '${propertyAssertionString}' property assertion to the '${termString}' term and '${propertyString}' property.`);
-    }
-
-    return comparesToTermAndProperty;
+    return propertyType;
   }
 
   validate(context) {
@@ -78,26 +57,22 @@ export default define(class PropertyAssertion extends Assertion {
 
       context.debug(`...the '${propertyAssertionString}' property assertion is already valid.`);
     } else {
-      const propertyVerifies = this.validateProperty(context);
+      const termsValidate = this.validateTerms(context);
 
-      if (propertyVerifies) {
-        const termValidates = this.validateTerm(context);
+      if (termsValidate) {
+        const stated = context.isStated();
 
-        if (termValidates) {
-          const stated = context.isStated();
+        let validatesWhenStated = false,
+            validatesWhenDerived = false;
 
-          let validatesWhenStated = false,
-              validatesWhenDerived = false;
+        if (stated) {
+          validatesWhenStated = this.validateWhenStated(context);
+        } else {
+          validatesWhenDerived = this.validateWhenDerived(context);
+        }
 
-          if (stated) {
-            validatesWhenStated = this.validateWhenStated(context);
-          } else {
-            validatesWhenDerived = this.validateWhenDerived(context);
-          }
-
-          if (validatesWhenStated || validatesWhenDerived) {
-            validates = true;
-          }
+        if (validatesWhenStated || validatesWhenDerived) {
+          validates = true;
         }
       }
 
@@ -119,73 +94,66 @@ export default define(class PropertyAssertion extends Assertion {
     return propertyAssertion;
   }
 
-  validateTerm(context) {
-    let termValidates = false;
+  validateTerms(context) {
+    let termsValidate = false;
 
-    const propertyAssertionString = this.getString(); ///
+    const proofAssertionString = this.getString(); ///
 
-    context.trace(`Validating the '${propertyAssertionString}' property assertion's term...`);
+    context.trace(`Validating the '${proofAssertionString}' proof assertion's terms...`);
 
-    const type = this.getType(),
-          term = this.term.validate(context, (term, context) => {
-            let validatesForwards = false;
+    let subjectTerm,
+        propertyTerm;
 
-            const termType = term.getType(),
-                  termTypeEqualToSubTypeOrSuperTypeOfType = termType.isEqualToSubTypeOrSuperTypeOf(type);
+    propertyTerm = this.propertyTerm.validateAsProperty(context, (propertyTerm, context) => {
+      let validatesForwards = false;
 
-            if (termTypeEqualToSubTypeOrSuperTypeOfType) {
-              validatesForwards = true;
-            }
+      subjectTerm = this.subjectTerm.validate(context, (subjectTerm, context) => {
+        let validatesForwards = false;
 
-            return validatesForwards;
-          });
+        const subjectTermType = subjectTerm.getType(),
+              propertyTermType = propertyTerm.getType(),
+              subjectTermTypeEqualToSubTypeOrSuperTypeOfPropertyTermType = subjectTermType.isEqualToSubTypeOrSuperTypeOf(propertyTermType);
 
-    if (term !== null) {
-      this.term = term;
+        if (subjectTermTypeEqualToSubTypeOrSuperTypeOfPropertyTermType) {
+          validatesForwards = true;
+        }
 
-      termValidates = true;
+        return validatesForwards;
+      });
+
+      if (subjectTerm !== null) {
+        validatesForwards = true;
+      }
+
+      return validatesForwards;
+    });
+
+    if (propertyTerm !== null) {
+      this.subjectTerm = subjectTerm;
+
+      this.propertyTerm = propertyTerm;
+
+      termsValidate = true;
     }
 
-    if (termValidates) {
-      context.debug(`...validated the '${propertyAssertionString}' property assertion's term...`);
+    if (termsValidate) {
+      context.debug(`...validated the '${proofAssertionString}' proof assertion's terms.`);
     }
 
-    return termValidates;
-  }
-
-  validateProperty(context) {
-    let propertyValidates = false;
-
-    const propertyAssertionString = this.getString(); ///
-
-    context.trace(`Validating the '${propertyAssertionString}' property assertion's property...`);
-
-    const property = this.property.validate(context);
-
-    if (property !== null) {
-      this.property = property;
-
-      propertyValidates = true;
-    }
-
-    if (propertyValidates) {
-      context.trace(`...validated the '${propertyAssertionString}' property assertion's property.`);
-    }
-
-    return propertyValidates;
+    return termsValidate;
   }
 
   validateWhenStated(context) {
     let validatesWhenStated;
 
-    const propertyAssertionString = this.getString(); ///
+    const typeAssertionString = this.getString(); ///
 
-    context.trace(`Validating the '${propertyAssertionString}' stated property assertion...`);
+    context.trace(`Validating the '${typeAssertionString}' stated property assertion...`);
 
     validatesWhenStated = true;
 
     if (validatesWhenStated) {
-      context.debug(`...verified the '${propertyAssertionString}' stated property assertion.`);
+      context.debug(`...validated the '${typeAssertionString}' stated property assertion.`);
     }
 
     return validatesWhenStated;
@@ -194,14 +162,14 @@ export default define(class PropertyAssertion extends Assertion {
   validateWhenDerived(context) {
     let validatesWhenDerived;
 
-    const propertyAssertionString = this.getString(); ///
+    const typeAssertionString = this.getString(); ///
 
-    context.trace(`Validating the '${propertyAssertionString}' derived property assertion...`);
+    context.trace(`Validating the '${typeAssertionString}' derived property assertion...`);
 
     validatesWhenDerived = true;
 
     if (validatesWhenDerived) {
-      context.debug(`...validated the '${propertyAssertionString}' derived property assertion.`);
+      context.debug(`...validated the '${typeAssertionString}' derived property assertion.`);
     }
 
     return validatesWhenDerived;
@@ -233,12 +201,12 @@ export default define(class PropertyAssertion extends Assertion {
               propertyAssertionNode = instantiatePropertyAssertion(string, context),
               node = propertyAssertionNode,  ///
               breakPoint = breakPointFromJSON(json),
-              term = termFromPropertyAssertionNode(propertyAssertionNode, context),
-              property = propertyFromPropertyAssertionNode(propertyAssertionNode, context);
+              subjectTerm = subjectTermFromPropertyAssertionNode(propertyAssertionNode, context),
+              propertyTerm = propertyTermFromPropertyAssertionNode(propertyAssertionNode, context);
 
         context = null;
 
-        propertyAssertion = new PropertyAssertion(context, string, node, breakPoint, term, property);
+        propertyAssertion = new PropertyAssertion(context, string, node, breakPoint, subjectTerm, propertyTerm);
       }, context);
     }
 

@@ -261,10 +261,6 @@ export default class NominalFileContext extends FileContext {
     return frames;
   }
 
-  getProperties(properties = []) {
-    return properties;
-  }
-
   getEqualities(equalities = []) {
     return equalities;
   }
@@ -303,6 +299,17 @@ export default class NominalFileContext extends FileContext {
 
   getDerivedSubstitutions(derivedSubstitutions = []) {
     return derivedSubstitutions;
+  }
+
+  getProperties() {
+    const properties = [],
+          types = this.getTypes();
+
+    types.forEach((type) => {
+      type.getProperties(properties);
+    });
+
+    return properties;
   }
 
   addType(type) {

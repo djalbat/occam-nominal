@@ -61,14 +61,6 @@ export default class Context extends ContextBase {
     return frames;
   }
 
-  getProperties(properties = []) {
-    const context = this.getContext();
-
-    context.getProperties(properties);
-
-    return properties;
-  }
-
   getEqualities(equalities = []) {
     const context = this.getContext();
 
@@ -198,6 +190,13 @@ export default class Context extends ContextBase {
     return variables;
   }
 
+  getProperties() {
+    const context = this.getContext(),
+          properties = context.getProperties();
+
+    return properties;
+  }
+
   getSteps() {
     const context = this.getContext(),
           steps = context.getSteps();
@@ -308,13 +307,6 @@ export default class Context extends ContextBase {
           equality = context.findEqualityByEqualityNode(equalityNode);
 
     return equality;
-  }
-
-  findPropertyByPropertyNode(propertyNode) {
-    const context = this.getContext(),
-          property = context.findPropertyByPropertyNode(propertyNode);
-
-    return property;
   }
 
   findJudgementByJudgementNode(judgementNode) {
@@ -634,12 +626,6 @@ export default class Context extends ContextBase {
     const context = this.getContext();
 
     context.addEquality(equality);
-  }
-
-  addProperty(property) {
-    const context = this.getContext();
-
-    context.addProperty(property);
   }
 
   addJudgement(judgement) {

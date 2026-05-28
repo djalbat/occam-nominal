@@ -181,28 +181,28 @@ export default define(class Equality extends Element {
         rightTerm;
 
     leftTerm = this.leftTerm.validate(context, (leftTerm, context) => {
+      let validatesForwards = false;
+
+      rightTerm = this.rightTerm.validate(context, (rightTerm, context) => {
         let validatesForwards = false;
 
-        rightTerm = this.rightTerm.validate(context, (rightTerm, context) => {
-          let validatesForwards = false;
+        const leftTermType = leftTerm.getType(),
+              rightTermType = rightTerm.getType(),
+              leftTermTypeEqualToSubTypeOrSuperTypeOfRightTermType = leftTermType.isEqualToSubTypeOrSuperTypeOf(rightTermType);
 
-          const leftTermType = leftTerm.getType(),
-                rightTermType = rightTerm.getType(),
-                leftTermTypeEqualToSubTypeOrSuperTypeOfRightTermType = leftTermType.isEqualToSubTypeOrSuperTypeOf(rightTermType);
-
-          if (leftTermTypeEqualToSubTypeOrSuperTypeOfRightTermType) {
-            validatesForwards = true;
-          }
-
-          return validatesForwards;
-        });
-
-        if (rightTerm !== null) {
+        if (leftTermTypeEqualToSubTypeOrSuperTypeOfRightTermType) {
           validatesForwards = true;
         }
 
         return validatesForwards;
       });
+
+      if (rightTerm !== null) {
+        validatesForwards = true;
+      }
+
+      return validatesForwards;
+    });
 
     if (leftTerm !== null) {
       this.leftTerm = leftTerm;

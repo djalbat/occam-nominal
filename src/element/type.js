@@ -50,18 +50,14 @@ export default define(class Type extends Element {
     return typeNode;
   }
 
-  getProperties(includeSuperTypes = true) {
-    const properties = [];
-
+  getProperties(properties = []) {
     push(properties, this.properties);
 
-    if (includeSuperTypes) {
-      this.superTypes.forEach((superType) => {
-        const superTypeProperties = superType.getProperties();
+    this.superTypes.forEach((superType) => {
+      const superTypeProperties = superType.getProperties();
 
-        push(properties, superTypeProperties);
-      });
-    }
+      push(properties, superTypeProperties);
+    });
 
     return properties;
   }

@@ -5,10 +5,10 @@ import { arrayUtilities } from "necessary";
 
 import { define } from "../elements";
 import { instantiate } from "../utilities/context";
-import { validateTerms } from "../process/validation";
 import { instantiateTerm } from "../process/instantiate";
 import { variablesFromTerm } from "../utilities/equivalence";
 import { unifyTermIntrinsically } from "../process/unify";
+import { validateTerms, unifyTermWithProperties } from "../process/validation";
 import { breakPointFromJSON, breakPointToBreakPointJSON } from "../utilities/breakPoint";
 import { typeFromJSON, typeToTypeJSON, provisionalFromJSON, provisionalToProvisionalJSON } from "../utilities/json";
 
@@ -264,6 +264,52 @@ export default define(class Term extends Element {
 
     if (validatesGivenType) {
       context.debug(`...validated the '${termString}' term given the '${typeString}' type.`);
+    }
+
+    return term;
+  }
+
+  validateAsProperty(context, validateForwards) {
+    let term = null;
+
+    const termString = this.getString();  ///
+
+    context.trace(`Validating the '${termString}' term as a property...`);
+
+    let validatesAsProperty = false;
+
+    const validTerm = this.findValidTerm(context);
+
+    if (validTerm !== null) {
+      term = validTerm; ///
+
+      const validatesForward = validateForwards(term, context);
+
+      if (validatesForward) {
+        validatesAsProperty = true;
+
+        context.debug(`...the '${termString}' term is already valid.`);
+      } else {
+        term = null;
+      }
+    } else {
+      term = this;  ///
+
+      const termUnifiesWithProperties = unifyTermWithProperties(term, context, validateForwards);
+
+      if (termUnifiesWithProperties) {
+        validatesAsProperty = true;
+      } else {
+        term = null;
+      }
+
+      if (validatesAsProperty) {
+        context.addTerm(term);
+      }
+    }
+
+    if (validatesAsProperty) {
+      context.debug(`...validated the '${termString}' term as a property.`);
     }
 
     return term;

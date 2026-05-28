@@ -68,7 +68,7 @@ class TermPass extends SimplePass {
   ];
 }
 
-class StatementPass extends SimplePass {
+class CombinatorPass extends SimplePass {
   run(statementNode, context) {
     let success = false;
 
@@ -144,14 +144,22 @@ class StatementPass extends SimplePass {
   ];
 }
 
-const termPass = new TermPass(),
-      statementPass = new StatementPass();
+class PropertyPass extends TermPass {}
+
+class GeneratorPass extends TermPass {}
+
+class ConstructorPass extends TermPass {}
+
+const propertyPass = new PropertyPass(),
+      generatorPass = new GeneratorPass(),
+      combinatorPass = new CombinatorPass(),
+      constructorPass = new ConstructorPass();
 
 export function validateTermAsProperty(term, context) {
   let termValidatesAsProperty = false;
 
   const termNode = term.getNode(),
-        success = termPass.run(termNode, context);
+        success = propertyPass.run(termNode, context);
 
   if (success) {
     termValidatesAsProperty = true;
@@ -164,7 +172,7 @@ export function validateTermAsGenerator(term, context) {
   let termValidatesAsGenerator = false;
 
   const termNode = term.getNode(),
-        success = termPass.run(termNode, context);
+        success = generatorPass.run(termNode, context);
 
   if (success) {
     termValidatesAsGenerator = true;
@@ -177,7 +185,7 @@ export function validateTermAsConstructor(term, context) {
   let termValidatesAsConstructor = false;
 
   const termNode = term.getNode(),
-        success = termPass.run(termNode, context);
+        success = constructorPass.run(termNode, context);
 
   if (success) {
     termValidatesAsConstructor = true;
@@ -190,7 +198,7 @@ export function validateStatementAsCombinator(statement, context) {
   let statementValidatesAsCombinator = false;
 
   const statementNode = statement.getNode(),
-        success = statementPass.run(statementNode, context);
+        success = combinatorPass.run(statementNode, context);
 
   if (success) {
     statementValidatesAsCombinator = true;

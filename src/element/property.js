@@ -53,14 +53,6 @@ export default define(class Property extends Element {
     this.type = type;
   }
 
-  findValidProperty(context) {
-    const propertyNode = this.getPropertyNode(),
-          property = context.findPropertyByPropertyNode(propertyNode),
-          validProperty = property; ///
-
-    return validProperty;
-  }
-
   verify(context) {
     let verifies = false;
 
@@ -86,45 +78,6 @@ export default define(class Property extends Element {
     }
 
     return verifies;
-  }
-
-  validate(context) {
-    let property = null;
-
-    const includeType = false,
-          propertyString = this.getString(includeType);
-
-    context.trace(`Validating the '${propertyString}' property...`);
-
-    let validates = false;
-
-    const validProperty = this.findValidProperty(context);
-
-    if (validProperty !== null) {
-      property = validProperty; ///
-
-      validates = true;
-
-      context.debug(`...the '${propertyString}' property is already valid.`);
-    } else {
-      const termValidates = this.validateTerm(context);
-
-      if (termValidates) {
-        validates = true;
-      }
-    }
-
-    if (validates) {
-      property = this; ///
-
-      context.addProperty(property);
-    }
-
-    if (validates) {
-      context.debug(`...validated the '${propertyString}' property.`);
-    }
-
-    return property;
   }
 
   validateTerm(context) {

@@ -30,6 +30,17 @@ export default class ProlepticContext extends Context {
     return types;
   }
 
+  getProperties() {
+    const properties = [],
+          types = this.getTypes();
+
+    types.forEach((type) => {
+      type.getProperties(properties);
+    });
+
+    return properties;
+  }
+
   findTypeByTypeName(typeName, includeRelease = true) {
     const types = this.getTypes(includeRelease),
           type = findType(types, (type) => {

@@ -12,7 +12,7 @@ function dischargeStatementAsTypeAssertion(statement, context) {
   if (typeAssertion !== null) {
     const statementString = statement.getString();
 
-    context.trace(`Validating the '${statementString}' statement as a type assertion...`);
+    context.trace(`Discharging the '${statementString}' statement's type assertion...`);
 
     const discharges = typeAssertion.discharge(context);  ///
 
@@ -21,7 +21,7 @@ function dischargeStatementAsTypeAssertion(statement, context) {
     }
 
     if (dischargesStatementAsTypeAssertion) {
-      context.debug(`...discharged the '${statementString}' statement as a type assertion.`);
+      context.debug(`...discharged the '${statementString}' statement's type assertion.`);
     }
   }
 

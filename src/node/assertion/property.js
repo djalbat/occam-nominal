@@ -2,21 +2,35 @@
 
 import AssertionNode from "../../node/assertion";
 
-import { TERM_RULE_NAME, PROPERTY_RULE_NAME } from "../../ruleNames";
+import { TERM_RULE_NAME } from "../../ruleNames";
 
 export default class PropertyAssertionNode extends AssertionNode {
-  getTermNode() {
-    const ruleName = TERM_RULE_NAME,
-          termNode = this.getNodeByRuleName(ruleName);
+  getSubjectTermNode() {
+    const firstTermNode = this.getFirstTermNode(),
+          subjectTermNode = firstTermNode; ///
 
-    return termNode;
+    return subjectTermNode;
   }
 
-  getPropertyNode() {
-    const ruleName = PROPERTY_RULE_NAME,
-          propertyNode = this.getNodeByRuleName(ruleName);
+  getPropertyTermNode() {
+    const lastTermNode = this.getLastTermNode(),
+          propertyTermNode = lastTermNode; ///
 
-    return propertyNode;
+    return propertyTermNode;
+  }
+
+  getLastTermNode() {
+    const ruleName = TERM_RULE_NAME,
+          lastTermNode = this.getLastNodeByRuleName(ruleName);
+
+    return lastTermNode;
+  }
+
+  getFirstTermNode() {
+    const ruleName = TERM_RULE_NAME,
+          firstTermNode = this.getFirstNodeByRuleName(ruleName);
+
+    return firstTermNode;
   }
 
   static fromRuleNameChildNodesOpacityAndPrecedence(ruleName, childNodes, opacity, precedence) { return AssertionNode.fromRuleNameChildNodesOpacityAndPrecedence(PropertyAssertionNode, ruleName, childNodes, opacity, precedence); }

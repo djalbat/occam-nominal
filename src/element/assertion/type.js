@@ -58,7 +58,7 @@ export default define(class TypeAssertion extends Assertion {
         const stated = context.isStated();
 
         let validatesWhenStated = false,
-          validatesWhenDerived = false;
+            validatesWhenDerived = false;
 
         if (stated) {
           validatesWhenStated = this.validateWhenStated(context);

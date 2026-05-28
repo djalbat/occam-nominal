@@ -264,22 +264,6 @@ export function theoremsFromJSON(json, context) {
   return theorems;
 }
 
-export function propertiesFromJSON(json, context) {
-  let { properties } = json;
-
-  const { Property } = elements,
-        propertiesJSON = properties; ///
-
-  properties = propertiesJSON.map((propertyJSON) => {
-    const json = propertyJSON,  ///
-          property = Property.fromJSON(json, context);
-
-    return property;
-  });
-
-  return properties;
-}
-
 export function equalitiesFromJSON(json, context) {
   let { equalities } = json;
 
@@ -294,6 +278,22 @@ export function equalitiesFromJSON(json, context) {
   });
 
   return equalities;
+}
+
+export function propertiesFromJSON(json, context) {
+  let { properties } = json;
+
+  const { Property } = elements,
+        propertiesJSON = properties; ///
+
+  properties = propertiesJSON.map((propertyJSON) => {
+    const json = propertyJSON,  ///
+          property = Property.fromJSON(json, context);
+
+    return property;
+  });
+
+  return properties;
 }
 
 export function prefixNameFromJSON(json, context) {
@@ -816,11 +816,11 @@ export function prefixnameToPrevixNameJSON(prefixname) {
 
 export function superTypesToSuperTypesJSON(superTypes) {
   const superTypesJSON = superTypes.map((superType) => {
-          const abridged = true,
-                superTypeJSON = superType.toJSON(abridged);
+    const abridged = true,
+      superTypeJSON = superType.toJSON(abridged);
 
-          return superTypeJSON;
-        });
+    return superTypeJSON;
+  });
 
   return superTypesJSON;
 }

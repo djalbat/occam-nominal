@@ -22,6 +22,44 @@ const typeNodeQuery = nodeQuery("/type"),
       statementMetavariableNodeQuery = nodeQuery("/statement/metavariable!"),
       assumptionMetavariableNodeQuery = nodeQuery("/assumption/metavariable!");
 
+class TermPass extends ZipPass {
+  static maps = [
+    {
+      generalNodeQuery: typeNodeQuery,
+      specificNodeQuery: termNodeQuery,
+      run: (generalTypeNode, specificTermNode, generalContext, specificContext) => {
+        let success = false;
+
+        const typeNode = generalTypeNode, ///
+              termNode = specificTermNode, ///
+              nominalTypeName = typeNode.getNominalTypeName();
+
+        let context;
+
+        context = generalContext; ///
+
+        const type = context.findTypeByNominalTypeName(nominalTypeName);
+
+        if (type !== null) {
+          context = specificContext;  ///
+
+          let term;
+
+          term = termFromTermNode(termNode, context);
+
+          term = term.validateGivenType(type, context);
+
+          if (term !== null) {
+            success = true;
+          }
+        }
+
+        return success;
+      }
+    }
+  ];
+}
+
 class MetaLevelPass extends ZipPassBase {
   static maps = [
     {
@@ -177,44 +215,6 @@ class MetaLevelPass extends ZipPassBase {
   ];
 }
 
-class GeneratorrPass extends ZipPass {
-  static maps = [
-    {
-      generalNodeQuery: typeNodeQuery,
-      specificNodeQuery: termNodeQuery,
-      run: (generalTypeNode, specificTermNode, generalContext, specificContext) => {
-        let success = false;
-
-        const typeNode = generalTypeNode, ///
-              termNode = specificTermNode, ///
-              nominalTypeName = typeNode.getNominalTypeName();
-
-        let context;
-
-        context = generalContext; ///
-
-        const type = context.findTypeByNominalTypeName(nominalTypeName);
-
-        if (type !== null) {
-          context = specificContext;  ///
-
-          let term;
-
-          term = termFromTermNode(termNode, context);
-
-          term = term.validateGivenType(type, context);
-
-          if (term !== null) {
-            success = true;
-          }
-        }
-
-        return success;
-      }
-    }
-  ];
-}
-
 class CombinatorPass extends ZipPass {
   static maps = [
     {
@@ -299,44 +299,6 @@ class CombinatorPass extends ZipPass {
 
         if (term !== null) {
           success = true;
-        }
-
-        return success;
-      }
-    }
-  ];
-}
-
-class ConstructorPass extends ZipPass {
-  static maps = [
-    {
-      generalNodeQuery: typeNodeQuery,
-      specificNodeQuery: termNodeQuery,
-      run: (generalTypeNode, specificTermNode, generalContext, specificContext) => {
-        let success = false;
-
-        const typeNode = generalTypeNode, ///
-              termNode = specificTermNode, ///
-              nominalTypeName = typeNode.getNominalTypeName();
-
-        let context;
-
-        context = generalContext; ///
-
-        const type = context.findTypeByNominalTypeName(nominalTypeName);
-
-        if (type !== null) {
-          context = specificContext;  ///
-
-          let term;
-
-          term = termFromTermNode(termNode, context);
-
-          term = term.validateGivenType(type, context);
-
-          if (term !== null) {
-            success = true;
-          }
         }
 
         return success;
@@ -443,7 +405,14 @@ class IntrinsicMetavariablePass extends ZipPass {
   ];
 }
 
+class PropertyPass extends TermPass {}
+
+class GeneratorrPass extends TermPass {}
+
+class ConstructorPass extends TermPass {}
+
 const metaLevelPass = new MetaLevelPass(),
+      propertyPass = new PropertyPass(),
       generatorPass = new GeneratorrPass(),
       combinatorPass = new CombinatorPass(),
       constructorPass = new ConstructorPass(),
@@ -481,13 +450,28 @@ export function unifyMetavariable(generalMetavariable, specificMetavariable, gen
   return metavariableUnifies;
 }
 
+export function unifyTermWithProperty(term, property, generalContext, specificContext) {
+  let termUnifiesWithProperty = false;
+
+  const termNode = term.getNode(),
+        propertyTerm = property.getTerm(),
+        propertyTermNode = propertyTerm.getNode(),
+        success = propertyPass.run(propertyTermNode, termNode, generalContext, specificContext);
+
+  if (success) {
+    termUnifiesWithProperty = true;
+  }
+
+  return termUnifiesWithProperty;
+}
+
 export function unifyTermWithGenerator(term, generator, generalContext, specificContext) {
   let termUnifiesWithGenerator = false;
 
   const termNode = term.getNode(),
-        generatorTerm = generator.getTerm(),
-        generatorTermNode = generatorTerm.getNode(),
-        success = generatorPass.run(generatorTermNode, termNode, generalContext, specificContext);
+    generatorTerm = generator.getTerm(),
+    generatorTermNode = generatorTerm.getNode(),
+    success = generatorPass.run(generatorTermNode, termNode, generalContext, specificContext);
 
   if (success) {
     termUnifiesWithGenerator = true;

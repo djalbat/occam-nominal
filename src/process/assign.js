@@ -11,17 +11,19 @@ export function equalityAssignmentFromEquality(equality, context) {
 }
 
 export function leftVariableAssignmentFromEquality(equality, context) {
-  const type = equality.getType(),
-        leftTerm = equality.getLeftTerm(),
-        leftVariableAssignment = variableAssignmentFromTermAndType(leftTerm, type, context);
+  const leftTerm = equality.getLeftTerm(),
+        type = equality.getType(),
+        term = leftTerm,  ///
+        leftVariableAssignment = variableAssignmentFromTermAndType(term, type, context);
 
   return leftVariableAssignment;
 }
 
 export function rightVariableAssignmentFromEquality(equality, context) {
-  const type = equality.getType(),
-        rightTerm = equality.getRightTerm(),
-        rightVariableAssignment = variableAssignmentFromTermAndType(rightTerm, type, context);
+  const rightTerm = equality.getRightTerm(),
+        type = equality.getType(),
+        term = rightTerm, ///
+        rightVariableAssignment = variableAssignmentFromTermAndType(term, type, context);
 
   return rightVariableAssignment;
 }
@@ -35,8 +37,10 @@ export function variableAssignmentFromTypeAssertion(typeAssertion, context) {
 }
 
 export function variableAssignmentFromPrepertyAssertion(propertyAssertion, context) {
-  const term = propertyAssertion.getTerm(),
-        type = propertyAssertion.getType(),
+  const subjectTerm = propertyAssertion.getSubjectTerm(),
+        propertyType = propertyAssertion.getPropertyType(),
+        term = subjectTerm, ///
+        type = propertyType,  ///
         variableAssignment = variableAssignmentFromTermAndType(term, type, context);
 
   return variableAssignment;
