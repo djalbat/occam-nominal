@@ -12,16 +12,15 @@ const { first } = arrayUtilities,
 function createSuite(name, logLevel, projectsDirectoryPath) {
   let releaseContext = null;
 
-  const releaseContexts = [];
+  const log = Log.fromLogLevel(logLevel),
+        callback = async (context, breakPoint) => {
+          ///
+        },
+        releaseContexts = [];
 
   let context;
 
   before(() => {
-    const log = Log.fromLogLevel(logLevel),
-          callback = async (context, breakPoint) => {
-            ///
-          };
-
     context = {
       log,
       callback,

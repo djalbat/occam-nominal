@@ -6,7 +6,7 @@ const { createSuite } = require("../utilities/test");
 
 const { ERROR_LEVEL } = levels;
 
-const name = "algebraic-numbers",
+const name = "decimal-numbers",
       logLevel = ERROR_LEVEL,
       projectsDirectoryPath = "../../Mathematics";
 
