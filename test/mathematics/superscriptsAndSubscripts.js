@@ -10,6 +10,6 @@ const name = "superscripts-and-subscripts",
       logLevel = ERROR_LEVEL,
       projectsDirectoryPath = "../../Mathematics";
 
-describe.only(name, () => {
+describe(name, () => {
   createSuite(name, logLevel, projectsDirectoryPath);
 });
