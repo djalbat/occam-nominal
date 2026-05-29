@@ -10,17 +10,18 @@ const { first } = arrayUtilities,
       { createReleaseContexts, verifyReleaseContexts, initialiseReleaseContexts } = verificationUtilities;
 
 function createSuite(name, logLevel, projectsDirectoryPath) {
-  let releaseContext;
+  let releaseContext = null;
 
-  const log = Log.fromLogLevel(logLevel),
-        callback = async (context, breakPoint) => {
-          ///
-        },
-        releaseContexts = [];
+  const releaseContexts = [];
 
   let context;
 
   before(() => {
+    const log = Log.fromLogLevel(logLevel),
+          callback = async (context, breakPoint) => {
+            ///
+          };
+
     context = {
       log,
       callback,
@@ -31,15 +32,18 @@ function createSuite(name, logLevel, projectsDirectoryPath) {
     }
   });
 
-  before(async () => {
-    const dependencyName = name;  ///
+  it("create", async () => {
+    const dependencyName = name,  ///
+          releaseContextsCreated = await createReleaseContexts(dependencyName, context);
 
-    await createReleaseContexts(dependencyName, context);
+    assert.isTrue(releaseContextsCreated);
+  });
 
+  it("initialise", () => {
     initialiseReleaseContexts(context);
   });
 
-  it("verifies", async () => {
+  it("verify", async () => {
     const releaseContextsVerify = await verifyReleaseContexts(context);
 
     assert.isTrue(releaseContextsVerify);
@@ -55,7 +59,7 @@ function createSuite(name, logLevel, projectsDirectoryPath) {
       entries,
       customGrammar;
 
-  it("serialises", () => {
+  it("serialise", () => {
     json = releaseContext.toJSON();
 
     entries = releaseContext.getEntries();
@@ -63,7 +67,7 @@ function createSuite(name, logLevel, projectsDirectoryPath) {
     customGrammar = releaseContext.getCustomGrammar();
   });
 
-  it("unserialises", () => {
+  it("unserialise", () => {
     const releaseContxt = ReleaseContext.fromLogNameJSONEntriesCallbackAndCustomGrammar(log, name, json, entries, callback, customGrammar);
 
     releaseContxt.initialise(releaseContexts, FileContextFromFilePath);
