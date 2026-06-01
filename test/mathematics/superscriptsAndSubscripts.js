@@ -6,10 +6,10 @@ const { createSuite } = require("../utilities/test");
 
 const { ERROR_LEVEL } = levels;
 
-const name = "superscripts-and-subscripts",
-      logLevel = ERROR_LEVEL,
+const logLevel = ERROR_LEVEL,
+      projectName = "superscripts-and-subscripts",
       projectsDirectoryPath = "../../Mathematics";
 
-describe(name, () => {
-  createSuite(name, logLevel, projectsDirectoryPath);
+describe(projectName, () => {
+  createSuite(logLevel, projectName, projectsDirectoryPath);
 });

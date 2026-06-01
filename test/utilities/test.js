@@ -9,7 +9,7 @@ const { FileContextFromFilePath } = require("../utilities/fileContext"),
 const { first } = arrayUtilities,
       { createReleaseContexts, verifyReleaseContexts, initialiseReleaseContexts } = verificationUtilities;
 
-function createSuite(name, logLevel, projectsDirectoryPath) {
+function createSuite(logLevel, projectName, projectsDirectoryPath) {
   let releaseContext = null;
 
   const log = Log.fromLogLevel(logLevel),
@@ -32,7 +32,7 @@ function createSuite(name, logLevel, projectsDirectoryPath) {
   });
 
   it("create", async () => {
-    const dependencyName = name,  ///
+    const dependencyName = projectName,  ///
           releaseContextsCreated = await createReleaseContexts(dependencyName, context);
 
     assert.isTrue(releaseContextsCreated);
@@ -67,14 +67,11 @@ function createSuite(name, logLevel, projectsDirectoryPath) {
   });
 
   it("unserialise", () => {
-    const releaseContxt = ReleaseContext.fromLogNameJSONEntriesCallbackAndCustomGrammar(log, name, json, entries, callback, customGrammar);
+    const name = projectName, ///
+          releaseContxt = ReleaseContext.fromLogNameJSONEntriesCallbackAndCustomGrammar(log, name, json, entries, callback, customGrammar);
 
     releaseContxt.initialise(releaseContexts, FileContextFromFilePath);
   });
-
-  return () => {
-    return releaseContext;
-  };
 }
 
 module.exports = {

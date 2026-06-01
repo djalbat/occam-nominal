@@ -6,10 +6,10 @@ const { createSuite } = require("../utilities/test");
 
 const { ERROR_LEVEL } = levels;
 
-const name = "minimal-propositional-logic",
-      logLevel = ERROR_LEVEL,
+const logLevel = ERROR_LEVEL,
+      projectName = "minimal-propositional-logic",
       projectsDirectoryPath = "../../Logic";
 
-describe(name, () => {
-  createSuite(name, logLevel, projectsDirectoryPath);
+describe(projectName, () => {
+  createSuite(logLevel, projectName, projectsDirectoryPath);
 });
