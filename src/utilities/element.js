@@ -534,11 +534,11 @@ export function assumptionFromAssumptionNode(assumptionNode, context) {
 
 export function constructorFromConstructorNode(constructorNode, context) {
   const { Constructor } = elements,
-    node = constructorNode, ///
-    string = context.nodeAsString(node),
-    breakPoint = null,
-    term = termFromConstructorNode(constructorNode, context),
-    type = typeFromConstructorNode(constructorNode, context);
+        node = constructorNode, ///
+        string = context.nodeAsString(node),
+        breakPoint = null,
+        term = termFromConstructorNode(constructorNode, context),
+        type = typeFromConstructorNode(constructorNode, context);
 
   context = null;
 
@@ -1784,6 +1784,16 @@ export function typeFromVariableDeclarationNode(variableDeclarationNode, context
   return type;
 }
 
+export function topLevelAssertionFromSectionNode(sectionNode, context) {
+  const axiom = axiomFromSectionNode(sectionNode, context),
+        lemma = lemmaFromSectionNode(sectionNode, context),
+        theorem = theoremFromSectionNode(sectionNode, context),
+        conjecture = conjectureFromSectionNode(sectionNode, context),
+        topLevelAssertion = (axiom || lemma || theorem || conjecture);
+
+  return topLevelAssertion;
+}
+
 export function procedureCallFromSuppositionNode(suppositionNode, context) {
   let procedureCall = null;
 
@@ -1794,16 +1804,6 @@ export function procedureCallFromSuppositionNode(suppositionNode, context) {
   }
 
   return procedureCall;
-}
-
-export function topLevelAssertionFromSectionNode(sectionNode, context) {
-  const axiom = axiomFromSectionNode(sectionNode, context),
-        lemma = lemmaFromSectionNode(sectionNode, context),
-        theorem = theoremFromSectionNode(sectionNode, context),
-        conjecture = conjectureFromSectionNode(sectionNode, context),
-        topLevelAssertion = (axiom || lemma || theorem || conjecture);
-
-  return topLevelAssertion;
 }
 
 export function negatedFromJDefinedAssertionNode(definedAssertionNode, context) {
@@ -2091,18 +2091,18 @@ export function provisionalFromVariableDeclarationNode(variableDeclarationNode, 
   return provisional;
 }
 
-export function replacementTermFromTermSubstitutionNode(termSubstitutionNode, context) {
-  const replacementTermNode = termSubstitutionNode.getReplacementTermNode(),
-        replacementTerm = termFromTermNode(replacementTermNode, context);
-
-  return replacementTerm;
-}
-
 export function procedureReferenceFromProcedureCallNode(procedureCallNode, context) {
   const procedureReferenceNode = procedureCallNode.getProcedureReferenceNode(),
         procedureReference = procedureReferenceFromProcedureReferenceNode(procedureReferenceNode, context);
 
   return procedureReference;
+}
+
+export function replacementTermFromTermSubstitutionNode(termSubstitutionNode, context) {
+  const replacementTermNode = termSubstitutionNode.getReplacementTermNode(),
+        replacementTerm = termFromTermNode(replacementTermNode, context);
+
+  return replacementTerm;
 }
 
 export function provisionalFromGeneratorDeclarationNode(generatorDeclarationNode, context) {

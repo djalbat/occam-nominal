@@ -105,7 +105,7 @@ export default define(class Constructor extends Element {
     let termUnifies = false;
 
     const termString = term.getString(),
-          includeType = false,
+          includeType = true,
           constructorString = this.getString(includeType);  ///
 
     context.trace(`Unifying the '${termString}' term with the '${constructorString}' constructor...`);
