@@ -10,6 +10,6 @@ const logLevel = ERROR_LEVEL,
       projectName = "material-conditional",
       projectsDirectoryPath = "../../Logic";
 
-describe(projectName, () => {
+describe.only(projectName, () => {
   createSuite(logLevel, projectName, projectsDirectoryPath);
 });
