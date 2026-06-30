@@ -1,7 +1,7 @@
 {
   "name": "occam-nominal",
   "author": "James Smith",
-  "version": "1.0.253",
+  "version": "1.0.254",
   "license": "MIT, Anti-996",
   "homepage": "https://github.com/djalbat/occam-nominal",
   "description": "Occam's Nominal language.",
@@ -11,8 +11,8 @@
   },
   "dependencies": {
     "necessary": "^17.5.0",
-    "occam-furtle": "^3.0.334",
-    "occam-languages": "^1.0.1",
+    "occam-furtle": "^3.0.335",
+    "occam-languages": "^1.0.3",
     "occam-lexers": "^23.1.75",
     "occam-parsers": "^23.1.201",
     "occam-query": "^4.1.187"
