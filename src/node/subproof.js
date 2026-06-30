@@ -1,6 +1,6 @@
 "use strict";
 
-import { NonTerminalNode } from "occam-languages";
+import NonTerminalNode from "../nonTerminalNode";
 
 import { SUPPOSITION_RULE_NAME, SUB_DERIVATION_RULE_NAME } from "../ruleNames";
 

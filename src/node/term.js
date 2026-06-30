@@ -1,10 +1,11 @@
 "use strict";
 
+import { nodeMixins } from "occam-languages";
 import { NonTerminalNode } from "occam-grammar-utilities";
 
 import { ARGUMENT_RULE_NAME, VARIABLE_RULE_NAME } from "../ruleNames";
 
-export default class TermNode extends NonTerminalNode {
+class TermNode extends NonTerminalNode {
   getVariableIdentifier() {
     let variableIdentifier = null;
 
@@ -73,3 +74,7 @@ export default class TermNode extends NonTerminalNode {
 
   static fromRuleNameChildNodesOpacityAndPrecedence(ruleName, childNodes, opacity, precedence) { return NonTerminalNode.fromRuleNameChildNodesOpacityAndPrecedence(TermNode, ruleName, childNodes, opacity, precedence); }
 }
+
+Object.assign(TermNode.prototype, nodeMixins);
+
+export default TermNode;

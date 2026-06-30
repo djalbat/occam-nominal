@@ -1,6 +1,6 @@
 "use strict";
 
-import { NonTerminalNode } from "occam-languages";
+import NonTerminalNode from "../nonTerminalNode";
 
 import { REFERENCE_RULE_NAME, STATEMENT_RULE_NAME } from "../ruleNames";
 

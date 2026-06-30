@@ -1,6 +1,6 @@
 "use strict";
 
-import { NonTerminalNode } from "occam-languages";
+import NonTerminalNode from "../nonTerminalNode";
 
 import { NAME_TOKEN_TYPE, IDENTIFIER_TOKEN_TYPE } from "../tokenTypes";
 

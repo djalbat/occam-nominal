@@ -1,6 +1,6 @@
 "use strict";
 
-import { NonTerminalNode } from "occam-languages";
+import NonTerminalNode from "../nonTerminalNode";
 
 export default class VariableNode extends NonTerminalNode {
   getVariableIdentifier() {

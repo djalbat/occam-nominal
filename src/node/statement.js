@@ -1,6 +1,7 @@
 "use strict";
 
-import { NonTerminalNode } from "occam-languages";
+import { nodeMixins } from "occam-languages";
+import { NonTerminalNode } from "occam-grammar-utilities";
 
 import { TERM_RULE_NAME,
          FRAME_RULE_NAME,
@@ -18,7 +19,7 @@ import { TERM_RULE_NAME,
          CONTAINED_ASSERTION_RULE_NAME,
          STATEMENT_SUBSTITUTION_RULE_NAME } from "../ruleNames";
 
-export default class StatementNode extends NonTerminalNode {
+class StatementNode extends NonTerminalNode {
   isSingular() {
     let singular = false;
 
@@ -165,3 +166,7 @@ export default class StatementNode extends NonTerminalNode {
 
   static fromRuleNameChildNodesOpacityAndPrecedence(ruleName, childNodes, opacity, precedence) { return NonTerminalNode.fromRuleNameChildNodesOpacityAndPrecedence(StatementNode, ruleName, childNodes, opacity, precedence); }
 }
+
+Object.assign(StatementNode.prototype, nodeMixins);
+
+export default StatementNode;

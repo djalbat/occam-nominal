@@ -1,7 +1,8 @@
 "use strict";
 
 import { arrayUtilities } from "necessary";
-import { NonTerminalNode } from "occam-languages";
+
+import NonTerminalNode from "../nonTerminalNode";
 
 import { TERM_RULE_NAME } from "../ruleNames";
 

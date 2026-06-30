@@ -1,6 +1,6 @@
 "use strict";
 
-import { NonTerminalNode } from "occam-languages";
+import NonTerminalNode from "../nonTerminalNode";
 
 import { REFERENCE_RULE_NAME, SIGNATURE_ASSERTION_RULE_NAME } from "../ruleNames";
 

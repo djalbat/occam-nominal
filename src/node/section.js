@@ -1,6 +1,6 @@
 "use strict";
 
-import { NonTerminalNode } from "occam-languages";
+import NonTerminalNode from "../nonTerminalNode";
 
 import { AXIOM_RULE_NAME, LEMMA_RULE_NAME, THEOREM_RULE_NAME, CONJECTURE_RULE_NAME, HYPOTHESIS_RULE_NAME } from "../ruleNames";
 
