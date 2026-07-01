@@ -74,7 +74,7 @@ export default define(class ReferenceSubstitution extends Substitution {
   compareSubstitution(substitution) {
     let substitutionCompares = false;
 
-    const substitutionReferenceSubstitution = (substitution instanceof ReferenceSubstitution);
+    const substitutionReferenceSubstitution = ReferenceSubstitution.prototype.isPrototypeOf(substitution);
 
     if (substitutionReferenceSubstitution) {
       const substitutionNode = substitution.getNode(),

@@ -219,12 +219,12 @@ export function ablates(innerFunction, ...contexts) {
 }
 
 function pareContext(context) {
-  let contextLiminalContext = (context instanceof LiminalContext);
+  let contextLiminalContext = LiminalContext.prototype.isPrototypeOf(context);
 
   while (contextLiminalContext) {
     context = context.getContext();
 
-    contextLiminalContext = (context instanceof LiminalContext)
+    contextLiminalContext = LiminalContext.prototype.isPrototypeOf(context)
   }
 
   return context;
@@ -243,9 +243,9 @@ function ablateContext(context) {
 }
 
 function isContextGroundedContext(context) {
-  const contextTheticContext = (context instanceof TheticContext),
-        contextIllativeContext = (context instanceof IllativeContext),
-        contextNominalFileContext = (context instanceof NominalFileContext),
+  const contextTheticContext = TheticContext.prototype.isPrototypeOf(context),
+        contextIllativeContext = IllativeContext.prototype.isPrototypeOf(context),
+        contextNominalFileContext = NominalFileContext.prototype.isPrototypeOf(context),
         contextGroundedContext = (contextTheticContext || contextIllativeContext || contextNominalFileContext);
 
   return contextGroundedContext;
