@@ -1,6 +1,6 @@
 "use strict";
 
-import NonTerminalNode from "../nonTerminalNode";
+import { NonTerminalNode } from "occam-languages";
 
 export default class TopLevelAssertionNode extends NonTerminalNode {
   getBodyNode() {

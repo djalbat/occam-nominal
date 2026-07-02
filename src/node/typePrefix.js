@@ -1,6 +1,6 @@
 "use strict";
 
-import NonTerminalNode from "../nonTerminalNode";
+import { NonTerminalNode } from "occam-languages";
 
 export default class TypePrefixNode extends NonTerminalNode {
   getTypePrefixName() {
