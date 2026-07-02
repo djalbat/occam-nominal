@@ -6,7 +6,7 @@ import { define } from "../elements";
 import { instantiateLabel } from "../process/instantiate";
 import { labelFromLabelNode, metavariableFromLabelNode } from "../utilities/element";
 import { breakPointFromJSON, breakPointToBreakPointJSON } from "../utilities/breakPoint";
-import { attempt, serialise, unserialise, instantiate, join} from "../utilities/context";
+import { attempt, reconcile, serialise, unserialise, instantiate} from "../utilities/context";
 
 export default define(class Label extends Element {
   constructor(context, string, node, breakPoint, metavariable) {
@@ -138,14 +138,14 @@ export default define(class Label extends Element {
           generalContext = labelContext, ///
           specificContext = referenceContext;  ///
 
-    join((specificContext) => {
+    reconcile((specificContext) => {
       const metavariable = reference.getMetavariable(),
             metavariableUnifies = this.unifyMetavariable(metavariable, generalContext, specificContext);
 
       if (metavariableUnifies) {
         referenceUnifies = true;
       }
-    }, specificContext, context);
+    }, specificContext);
 
     if (referenceUnifies) {
       context.debug(`...unified the '${referenceString}' reference with the '${labelString}' label.`);

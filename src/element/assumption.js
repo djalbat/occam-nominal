@@ -7,7 +7,7 @@ import elements from "../elements";
 
 import { define } from "../elements";
 import { instantiateAssumption } from "../process/instantiate";
-import { join, reconcile, instantiate } from "../utilities/context";
+import { reconcile, instantiate } from "../utilities/context";
 import { breakPointFromJSON, breakPointToBreakPointJSON } from "../utilities/breakPoint";
 
 const { each, clone, filter } = arrayUtilities;
@@ -236,7 +236,7 @@ export default define(class Assumption extends Element {
     const labelString = label.getString(),
           assumptionString = this.getString();  ///
 
-    context.trace(`Unifying the '${labelString}' label with the '${assumptionString}' assumption...`);
+    context.trace(`Unifying the '${labelString}' label with the '${assumptionString}' assumption's reference...`);
 
     reconcile((context) => {
       labelUnifies = this.reference.unifyLabel(label, context);
@@ -257,16 +257,15 @@ export default define(class Assumption extends Element {
 
     context.trace(`Unifying the '${schemaString}' schema with the '${assumptionString}' assumption...`);
 
-    const generalContext = context, ///
-          specificContext = context;  ///
+    const generalContext = context;  ///
 
-    reconcile((specificContext) => {
+    reconcile((context) => {
       const label = schema.getLabel(),
-            context = specificContext,  ///
             labelUnifies = this.reference.unifyLabel(label, context);
 
       if (labelUnifies) {
-        const schemaConditional = schema.isConditional(),
+        const specificContext = context,  ///
+              schemaConditional = schema.isConditional(),
               subproofAssertion = subproofAssertionFromStatement(this.statement, context)
 
         if (schemaConditional) {
@@ -284,7 +283,7 @@ export default define(class Assumption extends Element {
           }
         }
       }
-    }, specificContext);
+    }, context);
 
     if (schemaUnifies) {
       context.debug(`...unified the '${schemaString}' schema with the '${assumptionString}' assumption.`);
@@ -300,20 +299,22 @@ export default define(class Assumption extends Element {
           deductionString = deduction.getString(),
           assumptionString = this.getString();
 
-    context.trace(`Unifying the '${deductionString}' deduction's statement  with the '${assumptionString}' assumption's '${assumptionString}' statement...`);
+    context.trace(`Unifying the '${deductionString}' deduction's statement with the '${assumptionString}' assumption's '${assumptionString}' statement...`);
 
     const statement = deduction.getStatement(),
           deductionContext = deduction.getContext(); ///
 
     specificContext = deductionContext; ///
 
-    join((specificContext) => {
+    reconcile((specificContext) => {
       const statementUnifies = this.statement.unifyStatement(statement, generalContext, specificContext);
 
       if (statementUnifies) {
         deductionUnifies = true;
+
+        specificContext.commit(context);
       }
-    }, specificContext, context);
+    }, specificContext);
 
     if (deductionUnifies) {
       context.debug(`...unified the '${deductionString}' deduction's statement with the '${assumptionString}' assumption's '${assumptionString}' statement.`);

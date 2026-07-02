@@ -6,7 +6,7 @@ import { define } from "../../elements";
 import { instantiateSupposition} from "../../process/instantiate";
 import { procedureCallFromSuppositionNode } from "../../utilities/element";
 import { breakPointFromJSON, breakPointToBreakPointJSON } from "../../utilities/breakPoint";
-import { join, declare, attempt, reconcile, serialise, unserialise, instantiate } from "../../utilities/context";
+import { declare, attempt, reconcile, serialise, unserialise, instantiate } from "../../utilities/context";
 
 export default define(class Supposition extends ProofAssertion {
   constructor(context, string, node, breakPoint, statement, procedureCall) {
@@ -233,14 +233,16 @@ export default define(class Supposition extends ProofAssertion {
           generalContext = suppositionContext, ///
           specificContext = proofAssertionContext;  ///
 
-    join((specificContext) => {
+    reconcile((specificContext) => {
       const statement = proofAssertion.getStatement(),
             statementUnifies = this.unifyStatement(statement, generalContext, specificContext);
 
       if (statementUnifies) {
         proofAssertionUnifies = true;
+
+        specificContext.commit(context);
       }
-    }, specificContext, context);
+    }, specificContext);
 
     if (proofAssertionUnifies) {
       context.debug(`...unified the '${proofAssertionString}' proof assertion with the '${suppositionString}' supposition.`);
@@ -262,8 +264,8 @@ export default define(class Supposition extends ProofAssertion {
                              subproofOrProofAssertion :
                                null,
           subproof = subproofOrProofAssertionProofAssertion ?
-                      null :
-                        subproofOrProofAssertion;
+                       null :
+                         subproofOrProofAssertion;
 
     reconcile((context) => {
       if (proofAssertion !== null) {

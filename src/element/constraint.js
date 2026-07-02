@@ -4,12 +4,12 @@ import { Element } from "occam-languages";
 
 import { define } from "../elements";
 import { unifyStatement } from "../process/unify";
-import { stripBracketsFromStatement } from "../utilities/brackets";
 import { instantiateConstraint } from "../process/instantiate";
-import { breakPointFromJSON, breakPointToBreakPointJSON } from "../utilities/breakPoint";
+import { stripBracketsFromStatement } from "../utilities/brackets";
 import { constraintFromConstraintNode } from "../utilities/element";
 import { constraintStringFromReferenceAndStatement } from "../utilities/string";
-import { join, ablate, attempt, descend, reconcile, serialise, unserialise, instantiate } from "../utilities/context";
+import { breakPointFromJSON, breakPointToBreakPointJSON } from "../utilities/breakPoint";
+import { ablate, attempt, descend, reconcile, serialise, unserialise, instantiate } from "../utilities/context";
 
 export default define(class Constraint extends Element {
   constructor(context, string, node, breakPoint, reference, statement) {
@@ -262,27 +262,24 @@ export default define(class Constraint extends Element {
     context.trace(`Unifying the '${assumptionString}' assumption with the '${constraintString}' constraint...`);
 
     const constraintContext = this.getContext(), ///
-          assumptionContext = assumption.getContext(), ///
-          generalContext = constraintContext,
-          specificContext = assumptionContext;  ///
+          generalContext = constraintContext; ///
 
-    join((specificContext) => {
-      reconcile((specificContext) => {
-        const reference = assumption.getReference(),
-              referneceUnifies = this.unifyReference(reference, generalContext, specificContext);
+    reconcile((context) => {
+      const reference = assumption.getReference(),
+            specificContext = context,  ///
+            referneceUnifies = this.unifyReference(reference, generalContext, specificContext);
 
-        if (referneceUnifies) {
-          const statement = assumption.getStatement(),
-                statementUnified = this.unifyStatement(statement, generalContext, specificContext);
+      if (referneceUnifies) {
+        const statement = assumption.getStatement(),
+              statementUnified = this.unifyStatement(statement, generalContext, specificContext);
 
-          if (statementUnified) {
-            specificContext.commit(context);
+        if (statementUnified) {
+          context.commit();
 
-            assumptionUnifies = true;
-          }
+          assumptionUnifies = true;
         }
-      }, specificContext);
-    }, specificContext, context);
+      }
+    }, context);
 
     if (assumptionUnifies) {
       context.debug(`...unified the '${assumptionString}' assumption with the '${constraintString}' constraint...`);

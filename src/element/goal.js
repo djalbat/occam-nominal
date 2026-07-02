@@ -7,7 +7,7 @@ import elements from "../elements";
 
 import { define } from "../elements";
 import { instantiateGoal } from "../process/instantiate";
-import { join, reconcile, instantiate } from "../utilities/context";
+import { reconcile, instantiate } from "../utilities/context";
 import { breakPointFromJSON, breakPointToBreakPointJSON } from "../utilities/breakPoint";
 
 const { each, clone, filter } = arrayUtilities;
@@ -257,16 +257,15 @@ export default define(class Goal extends Element {
 
     context.trace(`Unifying the '${schemaString}' schema with the '${goalString}' goal...`);
 
-    const generalContext = context, ///
-          specificContext = context;  ///
+    const generalContext = context;  ///
 
-    reconcile((specificContext) => {
+    reconcile((context) => {
       const label = schema.getLabel(),
-            context = specificContext,  ///
             labelUnifies = this.reference.unifyLabel(label, context);
 
       if (labelUnifies) {
-        const schemaConditional = schema.isConditional(),
+        const specificContext = context,  ///
+              schemaConditional = schema.isConditional(),
               subproofAssertion = subproofAssertionFromStatement(this.statement, context);
 
         if (schemaConditional) {
@@ -284,7 +283,7 @@ export default define(class Goal extends Element {
           }
         }
       }
-    }, specificContext);
+    }, context);
 
     if (schemaUnifies) {
       context.debug(`...unified the '${schemaString}' schema with the '${goalString}' goal.`);
@@ -307,13 +306,15 @@ export default define(class Goal extends Element {
 
     specificContext = deductionContext; ///
 
-    join((specificContext) => {
+    reconcile((specificContext) => {
       const statementUnifies = this.statement.unifyStatement(statement, generalContext, specificContext);
 
       if (statementUnifies) {
         deductionUnifies = true;
+
+        specificContext.commit(context);
       }
-    }, specificContext, context);
+    }, specificContext);
 
     if (deductionUnifies) {
       context.debug(`...unified the '${deductionString}' deduction's statement with the '${goalString}' goal's '${goalString}' statement.`);
