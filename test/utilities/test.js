@@ -68,9 +68,9 @@ function createSuite(logLevel, projectName, projectsDirectoryPath) {
 
   it("unserialise", () => {
     const name = projectName, ///
-          releaseContxt = ReleaseContext.fromLogNameJSONEntriesCallbackAndCustomGrammar(log, name, json, entries, callback, customGrammar);
+          releaseContext = ReleaseContext.fromLogNameJSONEntriesCallbackAndCustomGrammar(log, name, json, entries, callback, customGrammar);
 
-    releaseContxt.initialise(releaseContexts, FileContextFromFilePath);
+    releaseContext.initialise(releaseContexts, FileContextFromFilePath);
   });
 }
 
