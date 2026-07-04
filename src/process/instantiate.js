@@ -39,7 +39,7 @@ import { TERM_RULE_NAME,
          STATEMENT_SUBSTITUTION_RULE_NAME,
          REFERENCE_SUBSTITUTION_RULE_NAME } from "../ruleNames";
 
-const { ruleFromRuleName } = bnfUtilities;
+const { instantiate, ruleFromRuleName } = bnfUtilities;
 
 const termPlaceholderRule = ruleFromRuleName(TERM_RULE_NAME),
       typePlaceholderRule = ruleFromRuleName(TYPE_RULE_NAME),
@@ -169,29 +169,3 @@ export function instantiateImplicitAssumption(string, context) { return instanti
 export function instantiateStatementSubstitution(string, context) { return instantiate(statementSubstitutionPlaceholderRule, string, context); }
 
 export function instantiateReferenceSubstitution(string, context) { return instantiate(referenceSubstitutionPlaceholderRule, string, context); }
-
-function instantiate(placeholderRule, string, context) {
-  let node;
-
-  const lexer = context.getLexer(),
-        parser = context.getParser(),
-        content = `${string}
-`,
-        tokens = lexer.tokenise(content);
-
-  context.setTokens(tokens);
-
-  const startRule = placeholderRule;  ///
-
-  node = parser.parse(tokens, startRule);
-
-  const nonTerminalNode = node; ///
-
-  nonTerminalNode.someChildNode((childNode) => {
-    node = childNode; ///
-
-    return true;
-  });
-
-  return node;
-}
