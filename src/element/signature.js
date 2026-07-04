@@ -1,15 +1,15 @@
 "use strict";
 
-import { Element } from "occam-languages";
 import { arrayUtilities } from "necessary";
+import { Element, breakPointUtilities } from "occam-languages";
 
 import { define } from "../elements";
 import { instantiateSignature } from "../process/instantiate";
 import { signatureFromSignatureNode } from "../utilities/element";
-import { breakPointFromJSON, breakPointToBreakPointJSON } from "../utilities/breakPoint";
 import { ablate, attempt, reconcile, serialise, unserialise, instantiate } from "../utilities/context";
 
-const { match } = arrayUtilities;
+const { match } = arrayUtilities,
+      { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Signature extends Element {
   constructor(context, string, node, breakPoint, terms) {

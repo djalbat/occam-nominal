@@ -1,12 +1,13 @@
 "use strict";
 
-import { Element } from "occam-languages";
+import { Element, breakPointUtilities } from "occam-languages";
 
 import { define } from "../elements";
 import { instantiateLabel } from "../process/instantiate";
 import { labelFromLabelNode, metavariableFromLabelNode } from "../utilities/element";
-import { breakPointFromJSON, breakPointToBreakPointJSON } from "../utilities/breakPoint";
 import { attempt, reconcile, serialise, unserialise, instantiate} from "../utilities/context";
+
+const { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Label extends Element {
   constructor(context, string, node, breakPoint, metavariable) {

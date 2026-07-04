@@ -1,6 +1,6 @@
 "use strict";
 
-import { Element } from "occam-languages";
+import { Element, breakPointUtilities } from "occam-languages";
 
 import elements from "../elements";
 
@@ -8,9 +8,10 @@ import { define } from "../elements";
 import { instantiate } from "../utilities/context";
 import { instantiateVariable } from "../process/instantiate";
 import { provisionallyStringFromProvisional } from "../utilities/string";
-import { breakPointFromJSON, breakPointToBreakPointJSON } from "../utilities/breakPoint";
 import { variableFromTermNode, identifierFromVariableNode } from "../utilities/element";
 import { typeFromJSON, typeToTypeJSON, provisionalFromJSON, provisionalToProvisionalJSON } from "../utilities/json";
+
+const { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Variable extends Element {
   constructor(context, string, node, breakPoint, type, identifier, provisional) {

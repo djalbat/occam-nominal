@@ -1,12 +1,13 @@
 "use strict";
 
-import { Element } from "occam-languages";
+import { Element, breakPointUtilities } from "occam-languages";
 
 import { define } from "../elements";
 import { instantiate } from "../utilities/context";
 import { instantiateProcedureReference } from "../process/instantiate";
 import { nameFromProcedureReferenceNode } from "../utilities/element";
-import { breakPointFromJSON, breakPointToBreakPointJSON } from "../utilities/breakPoint";
+
+const { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class ProcedureReference extends Element {
   constructor(context, string, node, breakPoint, name) {

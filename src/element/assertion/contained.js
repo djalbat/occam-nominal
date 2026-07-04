@@ -1,10 +1,11 @@
 "use strict";
 
+import { breakPointUtilities } from "occam-languages";
+
 import Assertion from "../assertion";
 
 import { define } from "../../elements";
 import { instantiate } from "../../utilities/context";
-import { breakPointFromJSON } from "../../utilities/breakPoint";
 import { instantiateContainedAssertion } from "../../process/instantiate";
 import { termFromTermAndSubstitutions, frameFromFrameAndSubstitutions, statementFromStatementAndSubstitutions } from "../../utilities/substitutions";
 import { termFromContainedAssertionNode,
@@ -12,6 +13,8 @@ import { termFromContainedAssertionNode,
          negatedFromContainedAssertionNode,
          statementFromContainedAssertionNode,
          containedAssertionFromStatementNode } from "../../utilities/element";
+
+const { breakPointFromJSON } = breakPointUtilities;
 
 export default define(class ContainedAssertion extends Assertion {
   constructor(context, string, node, breakPoint, term, frame, negated, statement) {

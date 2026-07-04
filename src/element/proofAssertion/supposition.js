@@ -1,12 +1,15 @@
 "use strict";
 
+import { breakPointUtilities } from "occam-languages";
+
 import ProofAssertion from "../proofAssertion";
 
 import { define } from "../../elements";
 import { instantiateSupposition} from "../../process/instantiate";
 import { procedureCallFromSuppositionNode } from "../../utilities/element";
-import { breakPointFromJSON, breakPointToBreakPointJSON } from "../../utilities/breakPoint";
 import { declare, attempt, reconcile, serialise, unserialise, instantiate } from "../../utilities/context";
+
+const { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Supposition extends ProofAssertion {
   constructor(context, string, node, breakPoint, statement, procedureCall) {

@@ -1,14 +1,17 @@
 "use strict";
 
+import { breakPointUtilities } from "occam-languages";
+
 import Substitution from "../substitution";
 
 import { define } from "../../elements";
-import { breakPointFromJSON } from "../../utilities/breakPoint";
 import { stripBracketsFromTerm } from "../../utilities/brackets";
 import { instantiateTermSubstitution } from "../../process/instantiate";
 import { termSubstitutionFromTermSubstitutionNode } from "../../utilities/element";
 import { termSubstitutionStringFromTermAndVariable } from "../../utilities/string";
 import { elide, ablate, manifest, attempts, reconcile, ablates, instantiate, unserialises } from "../../utilities/context";
+
+const { breakPointFromJSON } = breakPointUtilities;
 
 export default define(class TermSubstitution extends Substitution {
   constructor(context, string, node, breakPoint, targetTerm, replacementTerm) {

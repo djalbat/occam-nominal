@@ -1,6 +1,6 @@
 "use strict";
 
-import { Element } from "occam-languages";
+import { Element, breakPointUtilities } from "occam-languages";
 
 import { define } from "../elements";
 import { unifyStatement } from "../process/unify";
@@ -8,8 +8,9 @@ import { instantiateConstraint } from "../process/instantiate";
 import { stripBracketsFromStatement } from "../utilities/brackets";
 import { constraintFromConstraintNode } from "../utilities/element";
 import { constraintStringFromReferenceAndStatement } from "../utilities/string";
-import { breakPointFromJSON, breakPointToBreakPointJSON } from "../utilities/breakPoint";
 import { ablate, attempt, descend, reconcile, serialise, unserialise, instantiate } from "../utilities/context";
+
+const { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Constraint extends Element {
   constructor(context, string, node, breakPoint, reference, statement) {

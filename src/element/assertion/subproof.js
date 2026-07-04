@@ -1,16 +1,17 @@
 "use strict";
 
 import { arrayUtilities } from "necessary";
+import { breakPointUtilities } from "occam-languages";
 
 import Assertion from "../assertion";
 
 import { define } from "../../elements";
-import { breakPointFromJSON } from "../../utilities/breakPoint";
 import { instantiateSubproofAssertion } from "../../process/instantiate";
 import { descend, reconcile, instantiate } from "../../utilities/context";
 import { subproofAssertionFromStatementNode } from "../../utilities/element";
 
-const { last, front, backwardsEvery } = arrayUtilities;
+const { breakPointFromJSON } = breakPointUtilities,
+      { last, front, backwardsEvery } = arrayUtilities;
 
 export default define(class SubproofAssertion extends Assertion {
   constructor(context, string, node, breakPoint, statements) {

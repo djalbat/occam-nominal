@@ -1,6 +1,6 @@
 "use strict";
 
-import { Element } from "occam-languages";
+import { Element, breakPointUtilities } from "occam-languages";
 
 import { define } from "../elements";
 import { instantiateCombinator } from "../process/instantiate";
@@ -8,7 +8,8 @@ import { statementFromCombinatorNode } from "../utilities/element";
 import { unifyStatementWithCombinator } from "../process/unify";
 import { validateStatementAsCombinator } from "../process/validate";
 import { attempt, serialise, unserialise, instantiate } from "../utilities/context";
-import { breakPointFromJSON, breakPointToBreakPointJSON } from "../utilities/breakPoint";
+
+const { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Combinator extends Element {
   constructor(context, string, node, breakPoint, statement) {

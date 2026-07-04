@@ -1,14 +1,13 @@
 "use strict";
 
-import { Element } from "occam-languages";
 import { arrayUtilities } from "necessary";
+import { Element, breakPointUtilities } from "occam-languages";
 
 import { define } from "../elements";
 import { instantiate } from "../utilities/context";
 import { instantiateType } from "../process/instantiate";
 import { nameFromTypeNode } from "../utilities/element";
 import { baseTypeFromNothing } from "../utilities/type";
-import { breakPointFromJSON, breakPointToBreakPointJSON } from "../utilities/breakPoint";
 import { propertiesFromJSON,
          prefixNameFromJSON,
          superTypesFromJSON,
@@ -18,7 +17,8 @@ import { propertiesFromJSON,
          propertiesToPropertiesJSON,
          provisionalToProvisionalJSON } from "../utilities/json";
 
-const { push, first } = arrayUtilities;
+const { push, first } = arrayUtilities,
+      { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Type extends Element {
   constructor(context, string, node, breakPoint, name, prefixName, superTypes, properties, provisional) {

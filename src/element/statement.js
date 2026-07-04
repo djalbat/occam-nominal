@@ -1,6 +1,6 @@
 "use strict";
 
-import { Element } from "occam-languages";
+import { Element, breakPointUtilities } from "occam-languages";
 
 import { define } from "../elements";
 import { instantiate } from "../utilities/context";
@@ -8,7 +8,8 @@ import { unifyStatement } from "../process/unify";
 import { validateStatements } from "../process/validation";
 import { dischargeStatements } from "../process/discharge";
 import { instantiateStatement } from "../process/instantiate";
-import { breakPointFromJSON, breakPointToBreakPointJSON } from "../utilities/breakPoint";
+
+const { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Statement extends Element {
   getStatementNode() {

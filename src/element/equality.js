@@ -1,14 +1,15 @@
 "use strict";
 
-import { Element } from "occam-languages";
+import { Element, breakPointUtilities } from "occam-languages";
 
 import { define } from "../elements";
 import { equateTerms } from "../process/equate";
 import { instantiate } from "../utilities/context";
 import { instantiateEquality } from "../process/instantiate";
 import { equalityFromStatementNode } from "../utilities/element";
-import { breakPointFromJSON, breakPointToBreakPointJSON } from "../utilities/breakPoint";
 import { equalityAssignmentFromEquality, leftVariableAssignmentFromEquality, rightVariableAssignmentFromEquality } from "../process/assign";
+
+const { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Equality extends Element {
   constructor(context, string, node, breakPoint, leftTerm, rightTerm) {

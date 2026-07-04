@@ -1,6 +1,6 @@
 "use strict";
 
-import { Element, asynchronousUtilities } from "occam-languages";
+import { Element, breakPointUtilities, asynchronousUtilities } from "occam-languages";
 
 import elements from "../elements";
 

@@ -1,14 +1,14 @@
 "use strict";
 
 import { arrayUtilities } from "necessary";
-import { Element, asynchronousUtilities } from "occam-languages";
+import { Element, breakPointUtilities, asynchronousUtilities } from "occam-languages";
 
 import { define } from "../elements";
 import { enclose } from "../utilities/context";
-import { breakPointFromJSON, breakPointToBreakPointJSON } from "../utilities/breakPoint";
 import { labelsFromJSON, premisesFromJSON, conclusionFromJSON, labelsToLabelsJSON, premisesToPremisesJSON, conclusionToConclusionJSON } from "../utilities/json";
 
 const { reverse } = arrayUtilities,
+      { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities,
       { asyncExtract, asyncForwardsEvery, asyncBackwardsEvery } = asynchronousUtilities;
 
 export default define(class Rule extends Element {

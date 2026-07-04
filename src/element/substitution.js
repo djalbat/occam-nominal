@@ -1,11 +1,12 @@
 "use strict";
 
 import { arrayUtilities } from "necessary";
+import { breakPointUtilities } from "occam-languages";
 
 import { serialises } from "../utilities/context";
-import { breakPointToBreakPointJSON } from "../utilities/breakPoint";
 
-const { first, second } = arrayUtilities;
+const { first, second } = arrayUtilities,
+      { breakPointToBreakPointJSON } = breakPointUtilities;
 
 class Element {
   constructor(contexts, string, node, breakPoint) {

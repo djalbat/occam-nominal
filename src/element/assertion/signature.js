@@ -1,12 +1,15 @@
 "use strict";
 
+import { breakPointUtilities } from "occam-languages";
+
 import Assertion from "../assertion";
 
 import { define } from "../../elements";
-import { breakPointFromJSON } from "../../utilities/breakPoint";
 import { reconcile, instantiate } from "../../utilities/context";
 import { instantiateSignatureAssertion } from "../../process/instantiate";
 import { signatureFromSignatureAssertionNode, referenceFromSignatureAssertionNode, signatureAssertionFromStatementNode } from "../../utilities/element";
+
+const { breakPointFromJSON } = breakPointUtilities;
 
 export default define(class SignatureAssertion extends Assertion {
   constructor(context, string, node, breakPoint, signature, reference) {

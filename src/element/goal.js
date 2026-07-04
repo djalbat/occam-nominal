@@ -1,16 +1,16 @@
 "use strict";
 
-import { Element } from "occam-languages";
 import { arrayUtilities } from "necessary";
+import { Element, breakPointUtilities } from "occam-languages";
 
 import elements from "../elements";
 
 import { define } from "../elements";
 import { instantiateGoal } from "../process/instantiate";
 import { reconcile, instantiate } from "../utilities/context";
-import { breakPointFromJSON, breakPointToBreakPointJSON } from "../utilities/breakPoint";
 
-const { each, clone, filter } = arrayUtilities;
+const { each, clone, filter } = arrayUtilities,
+      { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Goal extends Element {
   constructor(context, string, node, breakPoint, reference, statement) {
