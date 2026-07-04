@@ -1,6 +1,7 @@
 "use strict";
 
-import { ruleFromRuleName } from "../utilities/bnf";
+import { bnfUtilities } from "occam-languages";
+
 import { TERM_RULE_NAME,
          TYPE_RULE_NAME,
          FRAME_RULE_NAME,
@@ -37,6 +38,8 @@ import { TERM_RULE_NAME,
          IMPLICIT_ASSUMPTION_RULE_NAME,
          STATEMENT_SUBSTITUTION_RULE_NAME,
          REFERENCE_SUBSTITUTION_RULE_NAME } from "../ruleNames";
+
+const { ruleFromRuleName } = bnfUtilities;
 
 const termPlaceholderRule = ruleFromRuleName(TERM_RULE_NAME),
       typePlaceholderRule = ruleFromRuleName(TYPE_RULE_NAME),

@@ -22,7 +22,7 @@ export function labelFromJSON(json, context) {
   let { label } = json;
 
   const { Label } = elements,
-    labelJSON = label;  ///
+        labelJSON = label;  ///
 
   json = labelJSON; ///
 
