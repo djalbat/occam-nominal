@@ -6,7 +6,6 @@ import elements from "../elements";
 
 import { define } from "../elements";
 import { reconcile, encapsulate } from "../utilities/context";
-import { breakPointFromJSON, breakPointToBreakPointJSON } from "../utilities/breakPoint";
 import { schemaStringFromLabelSuppositionsAndDeduction } from "../utilities/string";
 import { labelFromJSON,
          labelToLabelJSON,
@@ -17,7 +16,8 @@ import { labelFromJSON,
          constraintsToConstraintsJSON,
          suppositionsToSuppositionsJSON } from "../utilities/json";
 
-const { asyncForwardsEvery } = asynchronousUtilities;
+const { asyncForwardsEvery } = asynchronousUtilities,
+      { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Schema extends Element {
   constructor(context, string, node, breakPoint, label, suppositions, deduction, proof, constraints) {
