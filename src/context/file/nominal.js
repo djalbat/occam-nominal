@@ -779,8 +779,8 @@ export default class NominalFileContext extends FileContext {
           constructorsJSON = constructorsToConstructorsJSON(this.constructors),
           declaredVariablesJSON = declaredVariablesToDeclaredVariablesJSON(this.declaredVariables),
           declaredMetavariablesJSON = declaredMetavariablesToDeclaredMetavariablesJSON(this.declaredMetavariables),
-          fileContent = this.fileContent,
-          filePath = this.filePath,
+          fileContent = this.getFileContent(),
+          filePath = this.getFilePath(),
           types = typesJSON,  ///
           rules = rulesJSON,  ///
           axioms = axiomsJSON,  ///
