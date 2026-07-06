@@ -237,9 +237,9 @@ export default define(class Statement extends Element {
 
     discharges = dischargeStatements.some((dischargeStatement) => {
       const statement = this, ///
-            statementDischarged = dischargeStatement(statement, context);
+            statementDischarges = dischargeStatement(statement, context);
 
-      if (statementDischarged) {
+      if (statementDischarges) {
         return true;
       }
     });

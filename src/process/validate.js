@@ -1,6 +1,6 @@
 "use strict";
 
-import { SimplePass } from "occam-languages";
+import { AsyncPass } from "occam-languages";
 import { queryUtilities } from "occam-query";
 
 import { descend } from "../utilities/context";
@@ -12,13 +12,13 @@ const termNodeQuery = nodeQuery("/term"),
       typeNodeQuery = nodeQuery("/type"),
       statementNodeQuery = nodeQuery("/statement");
 
-class PropertyPass extends SimplePass {
-  run(termNode, context) {
+class PropertyPass extends AsyncPass {
+  async run(termNode, context) {
     let success = false;
 
     const nonTerminalNode = termNode,  ///
           childNodes = nonTerminalNode.getChildNodes(), ///
-          descended = this.descend(childNodes, context);
+          descended = await this.descend(childNodes, context);
 
     if (descended) {
       success = true;
@@ -30,14 +30,14 @@ class PropertyPass extends SimplePass {
   static maps = [
     {
       nodeQuery: termNodeQuery,
-      run: (termNode, context) => {
+      run: async (termNode, context) => {
         let success = false;
 
         let term;
 
         term = termFromTermNode(termNode, context);
 
-        term = term.validate(context, (term, context) => { ///
+        term = await term.validate(context, async (term, context) => { ///
           const validatesForwards = true;
 
           return validatesForwards;
@@ -52,7 +52,7 @@ class PropertyPass extends SimplePass {
     },
     {
       nodeQuery: typeNodeQuery,
-      run: (typeNode, context) => {
+      run: async (typeNode, context) => {
         let success = false;
 
         const nominalTypeName = typeNode.getNominalTypeName(),
@@ -68,13 +68,13 @@ class PropertyPass extends SimplePass {
   ];
 }
 
-class GeneratorPass extends SimplePass {
-  run(termNode, context) {
+class GeneratorPass extends AsyncPass {
+  async run(termNode, context) {
     let success = false;
 
     const nonTerminalNode = termNode,  ///
           childNodes = nonTerminalNode.getChildNodes(), ///
-          descended = this.descend(childNodes, context);
+          descended = await this.descend(childNodes, context);
 
     if (descended) {
       success = true;
@@ -86,14 +86,14 @@ class GeneratorPass extends SimplePass {
   static maps = [
     {
       nodeQuery: termNodeQuery,
-      run: (termNode, context) => {
+      run: async (termNode, context) => {
         let success = false;
 
         let term;
 
         term = termFromTermNode(termNode, context);
 
-        term = term.validate(context, (term, context) => { ///
+        term = await term.validate(context, async (term, context) => { ///
           const validatesForwards = true;
 
           return validatesForwards;
@@ -108,7 +108,7 @@ class GeneratorPass extends SimplePass {
     },
     {
       nodeQuery: typeNodeQuery,
-      run: (typeNode, context) => {
+      run: async (typeNode, context) => {
         let success = false;
 
         const nominalTypeName = typeNode.getNominalTypeName(),
@@ -124,13 +124,13 @@ class GeneratorPass extends SimplePass {
   ];
 }
 
-class CombinatorPass extends SimplePass {
-  run(statementNode, context) {
+class CombinatorPass extends AsyncPass {
+  async run(statementNode, context) {
     let success = false;
 
     const nonTerminalNode = statementNode,  ///
           childNodes = nonTerminalNode.getChildNodes(), ///
-          descended = this.descend(childNodes, context);
+          descended = await this.descend(childNodes, context);
 
     if (descended) {
       success = true;
@@ -162,14 +162,14 @@ class CombinatorPass extends SimplePass {
     },
     {
       nodeQuery: termNodeQuery,
-      run: (termNode, context) => {
+      run: async (termNode, context) => {
         let success = false;
 
         let term;
 
         term = termFromTermNode(termNode, context);
 
-        term = term.validate(context, (term, context) => { ///
+        term = await term.validate(context, async (term, context) => { ///
           const validatesForwards = true;
 
           return validatesForwards;
@@ -184,7 +184,7 @@ class CombinatorPass extends SimplePass {
     },
     {
       nodeQuery: typeNodeQuery,
-      run: (typeNode, context) => {
+      run: async (typeNode, context) => {
         let success = false;
 
         const nominalTypeName = typeNode.getNominalTypeName(),
@@ -200,13 +200,13 @@ class CombinatorPass extends SimplePass {
   ];
 }
 
-class ConstructorPass extends SimplePass {
-  run(termNode, context) {
+class ConstructorPass extends AsyncPass {
+  async run(termNode, context) {
     let success = false;
 
     const nonTerminalNode = termNode,  ///
           childNodes = nonTerminalNode.getChildNodes(), ///
-          descended = this.descend(childNodes, context);
+          descended = await this.descend(childNodes, context);
 
     if (descended) {
       success = true;
@@ -218,14 +218,14 @@ class ConstructorPass extends SimplePass {
   static maps = [
     {
       nodeQuery: termNodeQuery,
-      run: (termNode, context) => {
+      run: async (termNode, context) => {
         let success = false;
 
         let term;
 
         term = termFromTermNode(termNode, context);
 
-        term = term.validate(context, (term, context) => { ///
+        term = await term.validate(context, async (term, context) => { ///
           const validatesForwards = true;
 
           return validatesForwards;
@@ -240,7 +240,7 @@ class ConstructorPass extends SimplePass {
     },
     {
       nodeQuery: typeNodeQuery,
-      run: (typeNode, context) => {
+      run: async (typeNode, context) => {
         let success = false;
 
         const nominalTypeName = typeNode.getNominalTypeName(),
@@ -261,11 +261,11 @@ const propertyPass = new PropertyPass(),
       combinatorPass = new CombinatorPass(),
       constructorPass = new ConstructorPass();
 
-export function validateTermAsProperty(term, context) {
+export async function validateTermAsProperty(term, context) {
   let termValidatesAsProperty = false;
 
   const termNode = term.getNode(),
-        success = propertyPass.run(termNode, context);
+        success = await propertyPass.run(termNode, context);
 
   if (success) {
     termValidatesAsProperty = true;
@@ -274,11 +274,11 @@ export function validateTermAsProperty(term, context) {
   return termValidatesAsProperty;
 }
 
-export function validateTermAsGenerator(term, context) {
+export async function validateTermAsGenerator(term, context) {
   let termValidatesAsGenerator = false;
 
   const termNode = term.getNode(),
-        success = generatorPass.run(termNode, context);
+        success = await generatorPass.run(termNode, context);
 
   if (success) {
     termValidatesAsGenerator = true;
@@ -287,11 +287,11 @@ export function validateTermAsGenerator(term, context) {
   return termValidatesAsGenerator;
 }
 
-export function validateTermAsConstructor(term, context) {
+export async function validateTermAsConstructor(term, context) {
   let termValidatesAsConstructor = false;
 
   const termNode = term.getNode(),
-        success = constructorPass.run(termNode, context);
+        success = await constructorPass.run(termNode, context);
 
   if (success) {
     termValidatesAsConstructor = true;
@@ -300,11 +300,11 @@ export function validateTermAsConstructor(term, context) {
   return termValidatesAsConstructor;
 }
 
-export function validateStatementAsCombinator(statement, context) {
+export async function validateStatementAsCombinator(statement, context) {
   let statementValidatesAsCombinator = false;
 
   const statementNode = statement.getNode(),
-        success = combinatorPass.run(statementNode, context);
+        success = await combinatorPass.run(statementNode, context);
 
   if (success) {
     statementValidatesAsCombinator = true;

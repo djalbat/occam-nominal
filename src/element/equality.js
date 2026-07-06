@@ -118,7 +118,7 @@ export default define(class Equality extends Element {
     return validEquality;
   }
 
-  validate(context) {
+  async validate(context) {
     let equality = null;
 
     const equalityString = this.getString(); ///
@@ -136,7 +136,7 @@ export default define(class Equality extends Element {
 
       context.debug(`...the '${equalityString}' equality is already valid.`);
     } else {
-      const termsValidate = this.validateTerms(context);
+      const termsValidate = await this.validateTerms(context);
 
       if (termsValidate) {
         const stated = context.isStated();
@@ -171,7 +171,7 @@ export default define(class Equality extends Element {
     return equality;
   }
 
-  validateTerms(context) {
+  async validateTerms(context) {
     let termsValidate = false;
 
     const equalityString = this.getString(); ///
@@ -181,10 +181,10 @@ export default define(class Equality extends Element {
     let leftTerm,
         rightTerm;
 
-    leftTerm = this.leftTerm.validate(context, (leftTerm, context) => {
+    leftTerm = await this.leftTerm.validate(context, async (leftTerm, context) => {
       let validatesForwards = false;
 
-      rightTerm = this.rightTerm.validate(context, (rightTerm, context) => {
+      rightTerm = await this.rightTerm.validate(context, async (rightTerm, context) => {
         let validatesForwards = false;
 
         const leftTermType = leftTerm.getType(),

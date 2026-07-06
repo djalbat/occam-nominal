@@ -41,7 +41,7 @@ export default define(class DefinedAssertion extends Assertion {
     return definedAssertionNode;
   }
 
-  validate(context) {
+  async validate(context) {
     let definedAssertion = null;
 
     const definedAssertionString = this.getString(); ///
@@ -59,7 +59,7 @@ export default define(class DefinedAssertion extends Assertion {
 
       context.debug(`...the '${definedAssertionString}' defined definedAssertion is already valid.`);
     } else {
-      const termValidates = this.validateTerm(context),
+      const termValidates = await this.validateTerm(context),
             frameValidates = this.validateFrame(context);
 
       if (termValidates || frameValidates) {
@@ -95,7 +95,7 @@ export default define(class DefinedAssertion extends Assertion {
     return definedAssertion;
   }
 
-  validateTerm(context) {
+  async validateTerm(context) {
     let termValidates = false;
 
     if (this.term !== null) {
@@ -107,7 +107,7 @@ export default define(class DefinedAssertion extends Assertion {
       const termSingular = this.term.isSingular();
 
       if (termSingular) {
-        const term = this.term.validate(context, (term, context) => {
+        const term = await this.term.validate(context, async (term, context) => {
           const validatesForwards = true;
 
           return validatesForwards;

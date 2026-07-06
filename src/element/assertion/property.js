@@ -42,7 +42,7 @@ export default define(class PropertyAssertion extends Assertion {
     return propertyType;
   }
 
-  validate(context) {
+  async validate(context) {
     let propertyAssertion = null;
 
     const propertyAssertionString = this.getString(); ///
@@ -60,7 +60,7 @@ export default define(class PropertyAssertion extends Assertion {
 
       context.debug(`...the '${propertyAssertionString}' property assertion is already valid.`);
     } else {
-      const termsValidate = this.validateTerms(context);
+      const termsValidate = await this.validateTerms(context);
 
       if (termsValidate) {
         const stated = context.isStated();
@@ -97,7 +97,7 @@ export default define(class PropertyAssertion extends Assertion {
     return propertyAssertion;
   }
 
-  validateTerms(context) {
+  async validateTerms(context) {
     let termsValidate = false;
 
     const proofAssertionString = this.getString(); ///
@@ -107,10 +107,10 @@ export default define(class PropertyAssertion extends Assertion {
     let subjectTerm,
         propertyTerm;
 
-    propertyTerm = this.propertyTerm.validateAsProperty(context, (propertyTerm, context) => {
+    propertyTerm = await this.propertyTerm.validateAsProperty(context, async (propertyTerm, context) => {
       let validatesForwards = false;
 
-      subjectTerm = this.subjectTerm.validate(context, (subjectTerm, context) => {
+      subjectTerm = await this.subjectTerm.validate(context, async (subjectTerm, context) => {
         let validatesForwards = false;
 
         const subjectTermType = subjectTerm.getType(),

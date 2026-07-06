@@ -219,9 +219,9 @@ export default define(class Axiom extends TopLevelAssertion {
           deductionUnifies = await this.unifyDeduction(deduction, context);
 
     if (deductionUnifies) {
-      const hypothesesDischarged = await topLevelAssertion.dischargeHypotheses(context);
+      const hypothesesDischarges = await topLevelAssertion.dischargeHypotheses(context);
 
-      if (hypothesesDischarged) {
+      if (hypothesesDischarges) {
         const suppositions = topLevelAssertion.getSuppositions(),
               suppositionsUnify = await this.unifySuppositions(suppositions, context);
 

@@ -1,7 +1,7 @@
 "use strict";
 
 import { arrayUtilities } from "necessary";
-import { Element, breakPointUtilities } from "occam-languages";
+import { Element, breakPointUtilities, asynchronousUtilities } from "occam-languages";
 
 import { define } from "../elements";
 import { instantiate } from "../utilities/context";
@@ -12,6 +12,7 @@ import { validateTerms, unifyTermWithProperties } from "../process/validation";
 import { typeFromJSON, typeToTypeJSON, provisionalFromJSON, provisionalToProvisionalJSON } from "../utilities/json";
 
 const { filter } = arrayUtilities,
+      { asyncSome } = asynchronousUtilities,
       { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Term extends Element {
@@ -181,7 +182,7 @@ export default define(class Term extends Element {
     return validTerm;
   }
 
-  validate(context, validateForwards) {
+  async validate(context, validateForwards) {
     let term = null;
 
     const termString = this.getString();  ///
@@ -195,7 +196,7 @@ export default define(class Term extends Element {
     if (validTerm !== null) {
       term = validTerm; ///
 
-      const validatesForward = validateForwards(term, context);
+      const validatesForward = await validateForwards(term, context);
 
       if (validatesForward) {
         validates = true;
@@ -205,9 +206,9 @@ export default define(class Term extends Element {
         term = null;
       }
     } else {
-      validates = validateTerms.some((validateTerm) => {  ///
+      validates = await asyncSome(validateTerms, async (validateTerm) => {  ///
         const term = this,  ///
-              termValidates = validateTerm(term, context, validateForwards);
+              termValidates = await validateTerm(term, context, validateForwards);
 
         if (termValidates) {
           return true;
@@ -228,7 +229,7 @@ export default define(class Term extends Element {
     return term;
   }
 
-  validateGivenType(type, strict, context) {
+  async validateGivenType(type, strict, context) {
     if (context === undefined) {
       context = strict; ///
 
@@ -244,7 +245,7 @@ export default define(class Term extends Element {
 
     let validatesGivenType = false;
 
-    term = this.validate(context, (term, context) => {
+    term = await this.validate(context, async (term, context) => {
       let validatesForwards = false;
 
       const termType = term.getType(),
@@ -277,7 +278,7 @@ export default define(class Term extends Element {
     return term;
   }
 
-  validateAsProperty(context, validateForwards) {
+  async validateAsProperty(context, validateForwards) {
     let term = null;
 
     const termString = this.getString();  ///
@@ -291,7 +292,7 @@ export default define(class Term extends Element {
     if (validTerm !== null) {
       term = validTerm; ///
 
-      const validatesForward = validateForwards(term, context);
+      const validatesForward = await validateForwards(term, context);
 
       if (validatesForward) {
         validatesAsProperty = true;

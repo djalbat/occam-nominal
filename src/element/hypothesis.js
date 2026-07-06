@@ -4,20 +4,25 @@ import { Element, breakPointUtilities } from "occam-languages";
 
 import { define } from "../elements";
 import { instantiateHypothesis } from "../process/instantiate";
-import { statementFromHypothesisNode } from "../utilities/element";
 import { declare, attempt, serialise, unserialise, instantiate } from "../utilities/context";
+import { statementFromHypothesisNode, procedureCallFromHypothesisNode } from "../utilities/element";
 
 const { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Hypothesis extends Element {
-  constructor(context, string, node, breakPoint, statement) {
+  constructor(context, string, node, breakPoint, statement, procedureCall) {
     super(context, string, node, breakPoint);
 
     this.statement = statement;
+    this.procedureCall = procedureCall;
   }
 
   getStatement() {
     return this.statement;
+  }
+
+  getProcedureCall() {
+    return this.procedureCall;
   }
 
   getHypothesisNode() {
@@ -36,7 +41,7 @@ export default define(class Hypothesis extends Element {
 
     context.trace(`Verifying the '${hypothesisString}' hypothesis...`);
 
-    if (this.statement !== null) {
+    if ((this.statement !== null) || (this.procedureCall !== null)) {
       declare((context) => {
         const validates = this.validate(context);
 
@@ -63,9 +68,10 @@ export default define(class Hypothesis extends Element {
     context.trace(`Validating the '${hypothesisString}' hypothesis...`);
 
     attempt((context) => {
-      const statementValidates = this.validateStatement(context);
+      const statementValidates = this.validateStatement(context),
+            procedureCallValidates =  this.validateProcedureCall(context);
 
-      if (statementValidates) {
+      if (statementValidates || procedureCallValidates) {
         validates = true;
       }
 
@@ -79,6 +85,50 @@ export default define(class Hypothesis extends Element {
     }
 
     return validates;
+  }
+
+  validateStatement(context) {
+    let statementValidates = false;
+
+    if (this.statement !== null) {
+      const hypothesisString = this.getString();
+
+      context.trace(`Validating the '${hypothesisString}' hypothesis's statement...`);
+
+      const statement = this.statement.validate(context);  ///
+
+      if (statement !== null) {
+        statementValidates = true;
+      }
+
+      if (statementValidates) {
+        context.debug(`...validated the '${hypothesisString}' hypothesis's statement.`);
+      }
+    }
+
+    return statementValidates;
+  }
+
+  validateProcedureCall(context) {
+    let procedureCallValidates = false;
+
+    if (this.procedureCall !== null) {
+      const hypothesisString = this.getString();
+
+      context.trace(`Validating the '${hypothesisString}' hypothesis's procedure call...`);
+
+      const procedureCall = this.procedureCall.validate(context);  ///
+
+      if (procedureCall !== null) {
+        procedureCallValidates = true;
+      }
+
+      if (procedureCallValidates) {
+        context.debug(`...validated the '${hypothesisString}' hypothesis's procedure call.`);
+      }
+    }
+
+    return procedureCallValidates;
   }
 
   discharge(context) {
@@ -101,44 +151,70 @@ export default define(class Hypothesis extends Element {
     return discharges;
   }
 
-  validateStatement(context) {
-    let statementValidates = false;
-
-    const hypothesisString = this.getString();
-
-    context.trace(`Validating the '${hypothesisString}' hypothesis's statement... `);
-
-    const statement = this.statement.validate(context);  ///
-
-    if (statement !== null) {
-      statementValidates = true;
-    }
-
-    if (statementValidates) {
-      context.debug(`...validated the '${hypothesisString}' hypothesis's statement. `);
-    }
-
-    return statementValidates;
-  }
-
   dischargeStatement(context) {
     let statementDischarges = false;
 
-    const hypothesisString = this.getString();
+    if (this.statement !== null) {
+      const hypothesisString = this.getString();
 
-    context.trace(`Discharging the '${hypothesisString}' hypothesis's statement... `);
+      context.trace(`Discharging the '${hypothesisString}' hypothesis's statement...`);
 
-    const discharges = this.statement.discharge(context);  ///
+      const discharges = this.statement.discharge(context);  ///
 
-    if (discharges) {
-      statementDischarges = true;
-    }
+      if (discharges) {
+        statementDischarges = true;
+      }
 
-    if (statementDischarges) {
-      context.debug(`...discharged the '${hypothesisString}' hypothesis' statement. `);
+      if (statementDischarges) {
+        context.debug(`...discharged the '${hypothesisString}' hypothesis' statement.`);
+      }
     }
 
     return statementDischarges;
+  }
+
+  async dischargeGivenTerm(term, context) {
+    let dischargesGivenTerm = false;
+
+    const termString = term.getString(),
+          hypothesisString = this.getString(); ///
+
+    context.trace(`Discharging the '${hypothesisString}' hypothesis given the '${termString}' term...`);
+
+    const procedureCallDischargesGivenTerm = await this.dischargeProcedureCallGivenTerm(term, context);
+
+    if (procedureCallDischargesGivenTerm) {
+      dischargesGivenTerm = true;
+    }
+
+    if (dischargesGivenTerm) {
+      context.debug(`...discharged the '${hypothesisString}' hypothesis given the '${termString}' term.`);
+    }
+
+    return dischargesGivenTerm;
+  }
+
+  async dischargeProcedureCallGivenTerm(term, context) {
+    let procedureCallDischarges = false;
+
+    if (this.procedureCall !== null) {
+      const termString = term.getString(),
+            hypothesisString = this.getString();
+
+      context.trace(`Discharging the '${hypothesisString}' hypothesis's procedure call given the '${termString}' term...`);
+
+      const discharges = await this.procedureCall.dischargeGivenTerm(term, context);  ///
+
+      if (discharges) {
+        procedureCallDischarges = true;
+      }
+
+      if (procedureCallDischarges) {
+        context.debug(`...discharged the '${hypothesisString}' hypothesis' procedure call given the '${termString}' term.`);
+      }
+    }
+
+    return procedureCallDischarges;
   }
 
   static name = "Hypothesis";
@@ -176,9 +252,10 @@ export default define(class Hypothesis extends Element {
               hypothesisNode = instantiateHypothesis(string, context),
               node = hypothesisNode,  ///
               breakPoint = breakPointFromJSON(json),
-              statement = statementFromHypothesisNode(hypothesisNode, context);
+              statement = statementFromHypothesisNode(hypothesisNode, context),
+              procedureCall = procedureCallFromHypothesisNode(hypothesisNode, context);
 
-        hypothesis = new Hypothesis(context, string, node, breakPoint, statement);
+        hypothesis = new Hypothesis(context, string, node, breakPoint, statement, procedureCall);
       }, json, context);
     }, context);
 

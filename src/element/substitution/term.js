@@ -77,7 +77,7 @@ export default define(class TermSubstitution extends Substitution {
     return comparesToParameter;
   }
 
-  validate(context) {
+  async validate(context) {
     let termSubstitution = null;
 
     const termSubstitutionString = this.getString();  ///
@@ -99,10 +99,10 @@ export default define(class TermSubstitution extends Substitution {
             specificContext = this.getSpecificContext();
 
       attempts((generalContext, specificContext) => {
-        const targetTermValidates = this.validateTargetTerm(generalContext, specificContext);
+        const targetTermValidates = await this.validateTargetTerm(generalContext, specificContext);
 
         if (targetTermValidates) {
-          const replacementTermValidates = this.validateReplacementTerm(generalContext, specificContext);
+          const replacementTermValidates = await this.validateReplacementTerm(generalContext, specificContext);
 
           if (replacementTermValidates) {
             validates = true;
@@ -130,7 +130,7 @@ export default define(class TermSubstitution extends Substitution {
     return termSubstitution;
   }
 
-  validateTargetTerm(generalContext, specificContext) {
+  async validateTargetTerm(generalContext, specificContext) {
     let targetTermValidates = false;
 
     const context = generalContext, ///
@@ -141,9 +141,9 @@ export default define(class TermSubstitution extends Substitution {
     const targetTermSingular = this.targetTerm.isSingular();
 
     if (targetTermSingular) {
-      manifest((context) => {
-        elide((context) => {
-          const targetTerm = this.targetTerm.validate(context, (targetTerm, context) => {
+      await tmanifest(async (context) => {
+        await elide(async (context) => {
+          const targetTerm = await this.targetTerm.validate(context, async (targetTerm, context) => {
             const validatesForwards = true;
 
             return validatesForwards;
@@ -169,7 +169,7 @@ export default define(class TermSubstitution extends Substitution {
     return targetTermValidates;
   }
 
-  validateReplacementTerm(generalContext, specificContext) {
+  async validateReplacementTerm(generalContext, specificContext) {
     let replacementTermValidates = false;
 
     const context = specificContext,  ///
@@ -177,8 +177,8 @@ export default define(class TermSubstitution extends Substitution {
 
     context.trace(`Validating the '${termSubstitutionString}' term substitution's replacement term...`);
 
-    elide((context) => {
-      const replacementTerm = this.replacementTerm.validate(context, (replacementTerm, context) => {
+    await elide(async (context) => {
+      const replacementTerm = await this.replacementTerm.validate(context, async (replacementTerm, context) => {
         const validatesForwards = true;
 
         return validatesForwards;

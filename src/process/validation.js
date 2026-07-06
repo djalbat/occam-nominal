@@ -1,12 +1,16 @@
 "use strict";
 
+import { asynchronousUtilities } from "occam-languages";
+
 import elements from "../elements";
 
 import { choose, descend } from "../utilities/context";
 import { provisionallyStringFromProvisional } from "../utilities/string";
 import { bracketedConstructorFromNothing, bracketedCombinatorFromNothing } from "../utilities/instance";
 
-function validateTermAsVariable(term, context, validateForwards) {
+const { asyncSome } = asynchronousUtilities;
+
+export async function validateTermAsVariable(term, context, validateForwards) {
   let termValidatesAsVariable = false;
 
   const { Variable } = elements;
@@ -20,7 +24,7 @@ function validateTermAsVariable(term, context, validateForwards) {
 
     context.trace(`Validating the '${termString}' term as a variable...`);
 
-    variable = variable.validate(context);
+    variable = await variable.validate(context);
 
     if (variable !== null) {
       const type = variable.getType(),
@@ -34,7 +38,7 @@ function validateTermAsVariable(term, context, validateForwards) {
 
       term.setProvisional(provisional);
 
-      const validatesForwards = validateForwards(term, context);
+      const validatesForwards = await validateForwards(term, context);
 
       if (validatesForwards) {
         termValidatesAsVariable = true;
@@ -49,16 +53,16 @@ function validateTermAsVariable(term, context, validateForwards) {
   return termValidatesAsVariable;
 }
 
-function unifyTermWithGenerators(term, context, validateForwards) {
+async function unifyTermWithGenerators(term, context, validateForwards) {
   let termUnifiesWithGenerators;
 
   const generators = context.getGenerators();
 
-  termUnifiesWithGenerators = generators.some((generator) => {
+  termUnifiesWithGenerators = await asyncSome(generators, (generator) => {
     let termUnifiesWithGenerator = false;
 
-    choose((context) => {
-      const termUnifies = generator.unifyTerm(term, context, validateForwards);
+    choose(async (context) => {
+      const termUnifies = await generator.unifyTerm(term, context, validateForwards);
 
       if (termUnifies) {
         termUnifiesWithGenerator = true;
@@ -75,16 +79,16 @@ function unifyTermWithGenerators(term, context, validateForwards) {
   return termUnifiesWithGenerators;
 }
 
-function unifyTermWithConstructors(term, context, validateForwards) {
+async function unifyTermWithConstructors(term, context, validateForwards) {
   let termUnifiesWithConstructors;
 
   const constructors = context.getConstructors();
 
-  termUnifiesWithConstructors = constructors.some((constructor) => {
+  termUnifiesWithConstructors = await asyncSome(constructors, async (constructor) => {
     let termUnifiesWithConstructor = false;
 
-    choose((context) => {
-      const termUnifies = constructor.unifyTerm(term, context, validateForwards);
+    choose(async (context) => {
+      const termUnifies = await constructor.unifyTerm(term, context, validateForwards);
 
       if (termUnifies) {
         termUnifiesWithConstructor = true;
@@ -101,7 +105,7 @@ function unifyTermWithConstructors(term, context, validateForwards) {
   return termUnifiesWithConstructors;
 }
 
-function unifyTermWithBracketedConstructor(term, context, validateForwards) {
+async function unifyTermWithBracketedConstructor(term, context, validateForwards) {
   let termUnifiesWithBracketedConstructor;
 
   const bracketedConstructor = bracketedConstructorFromNothing();

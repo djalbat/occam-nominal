@@ -81,7 +81,7 @@ export default define(class Property extends Element {
     return verifies;
   }
 
-  validateTerm(context) {
+  async validateTerm(context) {
     let termValidates = false;
 
     const includeType = false,
@@ -89,7 +89,7 @@ export default define(class Property extends Element {
 
     context.trace(`Validating the '${propertyString}' property's term...`);
 
-    const termValidatesAsProperty = validateTermAsProperty(this.term, context);
+    const termValidatesAsProperty = await validateTermAsProperty(this.term, context);
 
     if (termValidatesAsProperty) {
       termValidates = true;
@@ -102,7 +102,7 @@ export default define(class Property extends Element {
     return termValidates;
   }
 
-  unifyTerm(term, context, validateForwards) {
+  async unifyTerm(term, context, validateForwards) {
     let termUnifies = false;
 
     const termString = term.getString(),
@@ -124,7 +124,7 @@ export default define(class Property extends Element {
 
       term.setProvisional(provisional);
 
-      const validatesForwards = validateForwards(term, context);
+      const validatesForwards = await validateForwards(term, context);
 
       if (validatesForwards) {
         termUnifies = true;

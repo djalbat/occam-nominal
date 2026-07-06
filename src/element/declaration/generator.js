@@ -32,6 +32,8 @@ export default define(class GeneratorDeclaration extends Declaration {
     return generatorDeclarationNode;
   }
 
+  setHypotheses(hypotheses) { this.generator.setHypotheses(hypotheses); }
+
   async verify(context) {
     let verifies = false;
 

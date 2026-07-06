@@ -223,14 +223,6 @@ export function frameSubstitutionStringFromFrameAndMetavariable(frame, metavaria
   return string;
 }
 
-export function sectionStringFromHypothesesAndTopLevelAssertion(hypotheses, topLevelAssertion) {
-  const topLevelAssertionString = topLevelAssertion.getString(),
-        hypothesesString = hypothesesStringFromHypotheses(hypotheses),
-        sectionString = `[${hypothesesString}]::: ${topLevelAssertionString}`;
-
-  return sectionString;
-}
-
 export function procedureCallStringFromProcedureReferenceAndParameters(procedureReference, parameters) {
   const procedureReferenceName = procedureReference.getName(),
         parametersString = parametersStringFromParameters(parameters),
@@ -262,6 +254,28 @@ export function referenceSubstitutionStringFromReferenceAndMetavariable(referenc
         referenceSubstitutionString = `[${referenceString} for ${metavariableString}]`;
 
   return referenceSubstitutionString;
+}
+
+export function sectionStringFromHypothesesDeclarationAndTopLevelAssertion(hypotheses, declaration, topLevelAssertion) {
+  let sectionString;
+
+  const hypothesesString = hypothesesStringFromHypotheses(hypotheses);
+
+  sectionString = `[${hypothesesString}]::: `;
+
+  if (declaration !== null) {
+    const declarationString = declaration.getString();
+
+    sectionString = `${sectionString}${declarationString}`;
+  }
+
+  if (topLevelAssertion !== null) {
+    const topLevelAssertionString = topLevelAssertion.getString();
+
+    sectionString = `${sectionString}${topLevelAssertionString}`;
+  }
+
+  return sectionString;
 }
 
 export function topLevelAssertionStringFromLabelsSignatureSuppositionsAndDeduction(labels, signature, suppositions, deduction) {

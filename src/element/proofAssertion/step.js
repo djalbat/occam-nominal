@@ -189,7 +189,7 @@ export default define(class Step extends ProofAssertion {
 
     const stepString = this.getString();
 
-    context.trace(`Validating the '${stepString}' step's statement... `);
+    context.trace(`Validating the '${stepString}' step's statement...`);
 
     let statement;
 
@@ -202,7 +202,7 @@ export default define(class Step extends ProofAssertion {
     }
 
     if (statementValidates) {
-      context.debug(`...validated the '${stepString}' step's statement. `);
+      context.debug(`...validated the '${stepString}' step's statement.`);
     }
 
     return statementValidates;
@@ -215,7 +215,7 @@ export default define(class Step extends ProofAssertion {
       const stepString = this.getString(),  ///
             referenceString = this.reference.getString();
 
-      context.trace(`Validating the '${stepString}' step's '${referenceString}' reference... `);
+      context.trace(`Validating the '${stepString}' step's '${referenceString}' reference...`);
 
       const reference = this.reference.validate(context);
 
@@ -226,7 +226,7 @@ export default define(class Step extends ProofAssertion {
       }
 
       if (referenceValidates) {
-        context.debug(`...validated the '${stepString}' step's '${referenceString}' reference. `);
+        context.debug(`...validated the '${stepString}' step's '${referenceString}' reference.`);
       }
     } else {
       referenceValidates = true;
@@ -242,7 +242,7 @@ export default define(class Step extends ProofAssertion {
       const stepString = this.getString(),  ///
             signatureAssertionString = this.signatureAssertion.getString();
 
-      context.trace(`Validating the '${stepString}' step's '${signatureAssertionString}' signature assertion... `);
+      context.trace(`Validating the '${stepString}' step's '${signatureAssertionString}' signature assertion...`);
 
       const signatureAssertion = this.signatureAssertion.validate(context);
 
@@ -253,7 +253,7 @@ export default define(class Step extends ProofAssertion {
       }
 
       if (signatureAssertionValidates) {
-        context.debug(`...validated the '${stepString}' step's '${signatureAssertionString}' signature assertion. `);
+        context.debug(`...validated the '${stepString}' step's '${signatureAssertionString}' signature assertion.`);
       }
     } else {
       signatureAssertionValidates = true;

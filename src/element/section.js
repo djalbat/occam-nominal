@@ -8,15 +8,20 @@ import { enclose } from "../utilities/context";
 const { asyncEvery } = asynchronousUtilities;
 
 export default define(class Section extends Element {
-  constructor(context, string, node, breakPoint, hypotheses, topLevelAssertion) {
+  constructor(context, string, node, breakPoint, hypotheses, declaration, topLevelAssertion) {
     super(context, string, node, breakPoint);
 
     this.hypotheses = hypotheses;
+    this.declaration = declaration;
     this.topLevelAssertion = topLevelAssertion;
   }
 
   getHypotheses() {
     return this.hypotheses;
+  }
+
+  getDeclaration() {
+    return this.declaration;
   }
 
   getTopLevelAssertion() {
@@ -45,12 +50,24 @@ export default define(class Section extends Element {
       if (hypothesesVerify) {
         context.assignAssignments();
 
-        const topLevelAssertionVerifies = await this.topLevelAssertion.verify(context);
+        if (this.declaration !== null) {
+          this.declaration.setHypotheses(this.hypotheses);
 
-        if (topLevelAssertionVerifies) {
+          const declarationVerifies = await this.declaration.verify(context);
+
+          if (declarationVerifies) {
+            verifies = true;
+          }
+        }
+
+        if (this.topLevelAssertion !== null) {
           this.topLevelAssertion.setHypotheses(this.hypotheses);
 
-          verifies = true;
+          const topLevelAssertionVerifies = await this.topLevelAssertion.verify(context);
+
+          if (topLevelAssertionVerifies) {
+            verifies = true;
+          }
         }
       }
     }, context);

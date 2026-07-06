@@ -125,7 +125,7 @@ export default define(class Supposition extends ProofAssertion {
 
     const suppositionString = this.getString();
 
-    context.trace(`Validating the '${suppositionString}' supposition's statement... `);
+    context.trace(`Validating the '${suppositionString}' supposition's statement...`);
 
     let statement;
 
@@ -138,7 +138,7 @@ export default define(class Supposition extends ProofAssertion {
     }
 
     if (statementValidates) {
-      context.debug(`...validated the '${suppositionString}' supposition statement. `);
+      context.debug(`...validated the '${suppositionString}' supposition statement.`);
     }
 
     return statementValidates;

@@ -2,7 +2,13 @@
 
 import { NonTerminalNode } from "occam-languages";
 
-import { AXIOM_RULE_NAME, LEMMA_RULE_NAME, THEOREM_RULE_NAME, CONJECTURE_RULE_NAME, HYPOTHESIS_RULE_NAME } from "../ruleNames";
+import { AXIOM_RULE_NAME,
+         LEMMA_RULE_NAME,
+         THEOREM_RULE_NAME,
+         CONJECTURE_RULE_NAME,
+         HYPOTHESIS_RULE_NAME,
+         GENERATOR_DECLARATION_RULE_NAME,
+         CONSTRUCTOR_DECLARATION_RULE_NAME } from "../ruleNames";
 
 export default class SectionNode extends NonTerminalNode {
   getAxiomNode() {
@@ -38,6 +44,20 @@ export default class SectionNode extends NonTerminalNode {
           hypothesisNodes = this.getNodesByRuleName(ruleName);
 
     return hypothesisNodes;
+  }
+
+  getGeneratorDeclarationNode() {
+    const ruleName = GENERATOR_DECLARATION_RULE_NAME,
+          generatorDeclarationNode = this.getNodeByRuleName(ruleName);
+
+    return generatorDeclarationNode;
+  }
+
+  getConstructorDeclarationNode() {
+    const ruleName = CONSTRUCTOR_DECLARATION_RULE_NAME,
+          constructorDeclarationNode = this.getNodeByRuleName(ruleName);
+
+    return constructorDeclarationNode;
   }
 
   static fromRuleNameChildNodesOpacityAndPrecedence(ruleName, childNodes, opacity, precedence) { return NonTerminalNode.fromRuleNameChildNodesOpacityAndPrecedence(SectionNode, ruleName, childNodes, opacity, precedence); }

@@ -1,7 +1,7 @@
 "use strict";
 
 import { arrayUtilities } from "necessary";
-import { Element, breakPointUtilities } from "occam-languages";
+import { Element, breakPointUtilities, asynchronousUtilities } from "occam-languages";
 
 import { define } from "../elements";
 import { instantiateSignature } from "../process/instantiate";
@@ -9,6 +9,7 @@ import { signatureFromSignatureNode } from "../utilities/element";
 import { ablate, attempt, reconcile, serialise, unserialise, instantiate } from "../utilities/context";
 
 const { match } = arrayUtilities,
+      { asyncEvery } = asynchronousUtilities,
       { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Signature extends Element {
@@ -73,8 +74,8 @@ export default define(class Signature extends Element {
 
     context.trace(`Verifying the '${signatureString}' signature...`);
 
-    attempt((context) => {
-      const termsValidate = this.validateTerms(context);
+    attempt(async (context) => {
+      const termsValidate = await this.validateTerms(context);
 
       if (termsValidate !== null) {
         verifies = true;
@@ -92,7 +93,7 @@ export default define(class Signature extends Element {
     return verifies;
   }
 
-  validate(context) {
+  async validate(context) {
     let signature = null;
 
     const signatureString = this.getString();  ///
@@ -114,8 +115,8 @@ export default define(class Signature extends Element {
 
       context = this.getContext();
 
-      attempt((context) => {
-        const termsValidate = this.validateTerms(context);
+      attempt(async (context) => {
+        const termsValidate = await this.validateTerms(context);
 
         if (termsValidate !== null) {
           validates = true;
@@ -142,7 +143,7 @@ export default define(class Signature extends Element {
     return signature;
   }
 
-  validateTerms(context) {
+  async validateTerms(context) {
     let termsValidate;
 
     const signatureString = this.getString();  ///
@@ -151,8 +152,8 @@ export default define(class Signature extends Element {
 
     const terms = [];
 
-    termsValidate = this.terms.every((term) => {
-      term = term.validate(context, (term, context) => { ///
+    termsValidate = asyncEvery(this.terms, async (term) => {
+      term = term.validate(context, async (term, context) => { ///
         const validatesForwards = true;
 
         return validatesForwards;

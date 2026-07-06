@@ -125,7 +125,7 @@ export default define(class Premise extends ProofAssertion {
 
     const premiseString = this.getString();
 
-    context.trace(`Validating the '${premiseString}' premise's statsement... `);
+    context.trace(`Validating the '${premiseString}' premise's statsement...`);
 
     let statement;
 
@@ -138,7 +138,7 @@ export default define(class Premise extends ProofAssertion {
     }
 
     if (statementValidates) {
-      context.debug(`...validated the '${premiseString}' premise's statement. `);
+      context.debug(`...validated the '${premiseString}' premise's statement.`);
     }
 
     return statementValidates;

@@ -256,7 +256,7 @@ export default define(class Metavariable extends Element {
     return nameValidates;
   }
 
-  validateTerm(strict, context) {
+  async validateTerm(strict, context) {
     let termValidates = false;
 
     if (this.term === null) {
@@ -275,11 +275,11 @@ export default define(class Metavariable extends Element {
         const type = declaredMetavariable.getType();
 
         if (type !== null) {
-          term = this.term.validateGivenType(type, context);
+          term = await this.term.validateGivenType(type, context);
         }
       } else {
         if (!strict) {
-          term = this.term.validate(context, (term, context) => {
+          term = await this.term.validate(context, async (term, context) => {
             const validatesForwards = true;
 
             return validatesForwards;

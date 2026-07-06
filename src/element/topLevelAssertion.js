@@ -79,13 +79,6 @@ export default class TopLevelAssertion extends Element {
     return hypothetical;
   }
 
-  isUnconditional() {
-    const suppositionsLength = this.suppositions.length,
-          unconditional = (suppositionsLength === 0);
-
-    return unconditional;
-  }
-
   matchMetavariableNode(metavariableNode) {
     const metavariableNodeMatches = this.labels.some((label) => {
       const metavariableNodeMatches = label.matchMetavariableNode(metavariableNode);
@@ -258,35 +251,35 @@ export default class TopLevelAssertion extends Element {
   }
 
   async dischargeHypothesis(hypothesis, context) {
-    let hypothesisDischarged;
+    let hypothesisDischarges;
 
     await this.break(context);
 
     const hypothesisString = hypothesis.getString(),
           topLevelAssertionString = this.getString(); ///
 
-    context.trace(`Discharding the '${topLevelAssertionString}' top level assertion's '${hypothesisString}' hypothesis... `);
+    context.trace(`Discharding the '${topLevelAssertionString}' top level assertion's '${hypothesisString}' hypothesis...`);
 
-    hypothesisDischarged = hypothesis.discharge(context);
+    hypothesisDischarges = hypothesis.discharge(context);
 
-    if (hypothesisDischarged) {
-      context.trace(`...discharged the '${topLevelAssertionString}' top level assertion's '${hypothesisString}' hypothesis. `);
+    if (hypothesisDischarges) {
+      context.trace(`...discharges the '${topLevelAssertionString}' top level assertion's '${hypothesisString}' hypothesis.`);
     }
 
-    return hypothesisDischarged;
+    return hypothesisDischarges;
   }
 
   async dischargeHypotheses(context) {
     const hypotheses = this.getHypotheses(),
-          hypothesesDischarged = await asyncEvery(hypotheses, async (hypothesis) => {
-            const hypothesisDischarged = await this.dischargeHypothesis(hypothesis, context);
+          hypothesesDischarges = await asyncEvery(hypotheses, async (hypothesis) => {
+            const hypothesisDischarges = await this.dischargeHypothesis(hypothesis, context);
 
-            if (hypothesisDischarged) {
+            if (hypothesisDischarges) {
               return true;
             }
           });
 
-    return hypothesesDischarged;
+    return hypothesesDischarges;
   }
 
   async unifyStepWithDeduction(step, context) {
@@ -318,9 +311,9 @@ export default class TopLevelAssertion extends Element {
     const stepUnifiesWithDeduction = await this.unifyStepWithDeduction(step, context);
 
     if (stepUnifiesWithDeduction) {
-      const hypothesesDischarged = await this.dischargeHypotheses(context);
+      const hypothesesDischarges = await this.dischargeHypotheses(context);
 
-      if (hypothesesDischarged) {
+      if (hypothesesDischarges) {
         const subproofOrProofAssertionsUnifiesWithSuppositions = await this.unifySubproofOrProofAssertionsWithSuppositions(subproofOrProofAssertions, context);
 
         if (subproofOrProofAssertionsUnifiesWithSuppositions) {

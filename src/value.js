@@ -47,6 +47,14 @@ export default class Value {
     return value;
   }
 
+  static fromTerm(term, context) {
+    const node = term.getNode(),
+          string = context.nodeAsString(node),
+          value = new Value(context, string, node);
+
+    return value;
+  }
+
   static fromSubstitution(substitution) {
     const replacementNode = substitution.getReplacementNode(),
           specificContext = substitution.getSpecificContext(),

@@ -32,6 +32,8 @@ export default define(class ConstructorDeclaration extends Declaration {
     return constructorDeclarationNode;
   }
 
+  setHypotheses(hypotheses) { this.constructor.setHypotheses(hypotheses); }
+
   async verify(context) {
     let verifies = false;
 

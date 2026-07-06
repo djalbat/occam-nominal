@@ -37,7 +37,7 @@ export default define(class TypeAssertion extends Assertion {
     return typeAssertionNode;
   }
 
-  validate(context) {
+  async validate(context) {
     let typeAssertion = null;
 
     const typeAssertionString = this.getString();  ///
@@ -66,7 +66,7 @@ export default define(class TypeAssertion extends Assertion {
         if (stated) {
           validatesWhenStated = this.validateWhenStated(context);
         } else {
-          validatesWhenDerived = this.validateWhenDerived(context);
+          validatesWhenDerived = await this.validateWhenDerived(context);
         }
 
         if (validatesWhenStated || validatesWhenDerived) {
@@ -148,14 +148,14 @@ export default define(class TypeAssertion extends Assertion {
     return typeValidates;
   }
 
-  validateWhenStated(context) {
+  async validateWhenStated(context) {
     let validatesWhenStated = false;
 
     const typeAssertionString = this.getString(); ///
 
     context.trace(`Validating the '${typeAssertionString}' stated type assertion...`);
 
-    const term = this.term.validate(context, (term, context) => {
+    const term = await this.term.validate(context, async (term, context) => {
       let validatesForwards = false;
 
       const termType = term.getType(),
@@ -307,9 +307,9 @@ export default define(class TypeAssertion extends Assertion {
   }
 });
 
-function validateWhenDerived(term, type, context) {
+async function validateWhenDerived(term, type, context) {
   if (term !== null) {
-    term = term.validate(context, (term, context) => {
+    term = await term.validate(context, async (term, context) => {
       let validatesForwards = false;
 
       const termType = term.getType(),

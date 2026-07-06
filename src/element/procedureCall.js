@@ -2,6 +2,8 @@
 
 import { Element, breakPointUtilities } from "occam-languages";
 
+import Value from "../value";
+
 import { define } from "../elements";
 import { instantiate } from "../utilities/context";
 import { instantiateProcedureCall } from "../process/instantiate";
@@ -33,6 +35,13 @@ export default define(class ProcedureCall extends Element {
   }
 
   getProcedureName() { return this.procedureReference.getProcedureName(); }
+
+  isUnary() {
+    const parametersLength = this.parameters.length,
+          unary = (parametersLength === 1);
+
+    return unary;
+  }
 
   findValues(context) {
     const substitutions = context.getSubstitutions(),
@@ -114,6 +123,58 @@ export default define(class ProcedureCall extends Element {
     }
 
     return unifiesIndependently;
+  }
+
+  async dischargeGivenTerm(term, context) {
+    let dischargedGivenTerm = false;
+
+    const termString = term.getString(),
+          procedureCallString = this.getString(); ///
+
+    context.trace(`Discharging the '${procedureCallString}' procedure call given the '${termString}' term...`);
+
+    const unary = this.isUnary();
+
+    if (!unary) {
+      const procedureName = this.getProcedureName(),
+            procedure = context.findProcedureByProcedureName(procedureName),
+            value = Value.fromTerm(term, context),
+            values = [
+              value
+            ];
+
+      term = null;
+
+      try {
+        term = await procedure.callNominally(values);
+      } catch (exception) {
+        const message = exception.getMessage();
+
+        context.info(message);
+      }
+
+      if (term !== null) {
+        const boolean = term.isBoolean();
+
+        if (!boolean) {
+          context.info(`The '${procedureCallString}' procedure call did not return a boolean.`);
+        } else {
+          const primitiveValue = term.getPrimitiveValue();
+
+          if (primitiveValue) {
+            dischargedGivenTerm = true;
+          }
+        }
+      }
+    } else {
+      context.debug(`The '${procedureCallString}' procedure call is not unary.`);
+    }
+
+    if (dischargedGivenTerm) {
+      context.debug(`...discharged the '${procedureCallString}' procedure call given the '${termString}' term.`);
+    }
+
+    return dischargedGivenTerm;
   }
 
   static name = "ProcedureCall";

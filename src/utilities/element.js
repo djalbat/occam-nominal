@@ -8,9 +8,9 @@ import { equivalenceStringFromTerms,
          rulsStringFromLabelsPremisesAndConclusion,
          schemaStringFromLabelSuppositionsAndDeduction,
          subproofStringFromSuppositionsAndSubDerivation,
-         sectionStringFromHypothesesAndTopLevelAssertion,
          procedureCallStringFromProcedureReferenceAndParameters,
          cotypeDeclarationStringFromTypeSuperTypesAndProvisional,
+         sectionStringFromHypothesesDeclarationAndTopLevelAssertion,
          topLevelAssertionStringFromLabelsSignatureSuppositionsAndDeduction } from "../utilities/string";
 
 export function typeFromTypeNode(typeNode, context) {
@@ -217,15 +217,16 @@ export function sectionFromSectionNode(sectionNode, context) {
   const { Section } = elements,
         hypothesisNodes = sectionNode.getHypothesisNodes(),
         hypotheses = hypothesesFromHypothesisNodes(hypothesisNodes, context),
+        declaration = declarationFromSectionNode(sectionNode, context),
         topLevelAssertion = topLevelAssertionFromSectionNode(sectionNode, context),
-        sectionString = sectionStringFromHypothesesAndTopLevelAssertion(hypotheses, topLevelAssertion),
+        sectionString = sectionStringFromHypothesesDeclarationAndTopLevelAssertion(hypotheses, declaration, topLevelAssertion),
         node = sectionNode, ///
         string = sectionString, ///
         breakPoint = null;
 
   context = null;
 
-  const section = new Section(context, string, node, breakPoint, hypotheses, topLevelAssertion);
+  const section = new Section(context, string, node, breakPoint, hypotheses, declaration, topLevelAssertion);
 
   return section;
 }
@@ -411,11 +412,12 @@ export function generatorFromGeneratorNode(generatorNode, context) {
         string = context.nodeAsString(node),
         breakPoint = null,
         term = termFromGeneratorNode(generatorNode, context),
-        type = typeFromGeneratorNode(generatorNode, context);
+        type = typeFromGeneratorNode(generatorNode, context),
+        hypotheses = hypothesesFromGeneratorNode(generatorNode, context);
 
   context = null;
 
-  const generator = new Generator(context, string, node, breakPoint, term, type);
+  const generator = new Generator(context, string, node, breakPoint, term, type, hypotheses);
 
   return generator;
 }
@@ -425,11 +427,12 @@ export function hypothesisFromHypothesisNode(hypotheseNode, context) {
         node = hypotheseNode, ///
         string = context.nodeAsString(node),
         breakPoint = null,
-        statement = statementFromHypothesisNode(hypotheseNode, context);
+        statement = statementFromHypothesisNode(hypotheseNode, context),
+        procedureCall = procedureCallFromHypothesisNode(hypotheseNode, context);
 
   context = null;
 
-  const hypohtesis = new Hypothesis(context, string, node, breakPoint, statement);
+  const hypohtesis = new Hypothesis(context, string, node, breakPoint, statement, procedureCall);
 
   return hypohtesis;
 }
@@ -541,11 +544,12 @@ export function constructorFromConstructorNode(constructorNode, context) {
         string = context.nodeAsString(node),
         breakPoint = null,
         term = termFromConstructorNode(constructorNode, context),
-        type = typeFromConstructorNode(constructorNode, context);
+        type = typeFromConstructorNode(constructorNode, context),
+        hypotheses = hypothesesFromConstructorNode(constructorNode, context);
 
   context = null;
 
-  const constructor = new Constructor(context, string, node, breakPoint, term, type);
+  const constructor = new Constructor(context, string, node, breakPoint, term, type, hypotheses);
 
   return constructor;
 }
@@ -867,7 +871,8 @@ export function bracketedConstructorFromBracketedConstructorNode(bracketedConstr
         breakPoint = null,
         term = termFromBracketedConstructorNode(bracketedConstructorNode, context),
         type = typeFromBracketedConstructorNode(bracketedConstructorNode, context),
-        bracketedConstructor = new BracketedConstructor(context, string, node, breakPoint, term, type);
+        hypotheses = hypothesesFromBracketedConstructorNode(bracketedConstructorNode, context),
+        bracketedConstructor = new BracketedConstructor(context, string, node, breakPoint, term, type, hypotheses);
 
   return bracketedConstructor;
 }
@@ -878,8 +883,8 @@ export function generatorDeclarationFromGeneratorDeclarationNode(generatorDeclar
         string = context.nodeAsString(node),
         breakPoint = null,
         type = typeFromGeneratorDeclarationNode(generatorDeclarationNode, context),
-        generator = generatorFromGeneratorDeclarationNode(generatorDeclarationNode, context),
-        provisional = provisionalFromGeneratorDeclarationNode(generatorDeclarationNode, context);
+        provisional = provisionalFromGeneratorDeclarationNode(generatorDeclarationNode, context),
+        generator = generatorFromGeneratorDeclarationNode(generatorDeclarationNode, context);
 
   context = null;
 
@@ -1416,6 +1421,14 @@ export function suppositionsFromSchemaNode(schemaNode, context) {
   return suppositions;
 }
 
+export function declarationFromSectionNode(sectionNode, context) {
+  const constructorDeclaration = constructorDeclarationFromSectionNode(sectionNode, context),
+        generatorDeclaration = generatorDeclarationFromSectionNode(sectionNode, context),
+        declaration = (constructorDeclaration || generatorDeclaration);
+
+  return declaration;
+}
+
 export function identifierFromVariableNode(variableNode, context) {
   const variableIdentifier = variableNode.getVariableIdentifier(),
     identifier = variableIdentifier;  ///
@@ -1483,6 +1496,12 @@ export function identifierFromParameterNode(parameterNode, context) {
   const identifier = parameterNode.getIdentifier();
 
   return identifier;
+}
+
+export function hypothesesFromGeneratorNode(generatorNode, context) {
+  const hypotheses = [];
+
+  return hypotheses;
 }
 
 export function referenceFromAssumptionNode(assumptionNode, context) {
@@ -1627,6 +1646,12 @@ export function metavariableFromReferenceNode(referenceNode, context) {
   return metavariable;
 }
 
+export function hypothesesFromConstructorNode(constructorNode, context) {
+  const hypotheses = [];
+
+  return hypotheses;
+}
+
 export function referenceFromMetavariableNode(metavariableNode, context) {
   const { Reference } = elements,
         metavariableString = context.nodeAsString(metavariableNode),
@@ -1745,6 +1770,18 @@ export function nameFromProcedureReferenceNode(procedureReferenceNode, context) 
   const name = procedureReferenceNode.getName();
 
   return name;
+}
+
+export function procedureCallFromHypothesisNode(hypothesisNode, context) {
+  let procedureCall = null;
+
+  const procedureCallNode = hypothesisNode.getProcedureCallNode();
+
+  if (procedureCallNode !== null) {
+    procedureCall = procedureCallFromProcedureCallNode(procedureCallNode, context);
+  }
+
+  return procedureCall;
 }
 
 export function parametersFromProcedureCallNode(procedureCallNode, context) {
@@ -1958,6 +1995,18 @@ export function signatureAssertionFromStatementNode(statementNode, context) {
   return signatureAssertion;
 }
 
+export function generatorDeclarationFromSectionNode(sectionNode, context) {
+  let generatorDeclaration = null;
+
+  const generatorDeclarationNode = sectionNode.getGeneratorDeclarationNode();
+
+  if (generatorDeclarationNode !== null) {
+    generatorDeclaration = generatorDeclarationFromGeneratorDeclarationNode(generatorDeclarationNode, context);
+  }
+
+  return generatorDeclaration;
+}
+
 export function superTypesFromCotypeDeclarationNode(cotypeDeclarationNode, context) {
   let superTypes = [];
 
@@ -2010,9 +2059,9 @@ export function referenceFromSignatureAssertionNode(signatureAssertionNode, cont
 }
 
 export function hypothesesFromTopLevelAssertionNode(topLevelAsssertionNode, context) {
-  const ypotheses = [];
+  const hypotheses = [];
 
-  return ypotheses;
+  return hypotheses;
 }
 
 export function propertyFromPropertyDeclarationNode(propertyDeclarationNode, context) {
@@ -2061,6 +2110,18 @@ export function statementFromBracketedCombinatorNode(bracketedCombinatorNode, co
   return statement;
 }
 
+export function constructorDeclarationFromSectionNode(sectionNode, context) {
+  let constructorDeclaration = null;
+
+  const constructorDeclarationNode = sectionNode.getConstructorDeclarationNode();
+
+  if (constructorDeclarationNode !== null) {
+    constructorDeclaration = constructorDeclarationFromConstructorDeclarationNode(constructorDeclarationNode, context);
+  }
+
+  return constructorDeclaration;
+}
+
 export function propertyTermFromPropertyAssertionNode(propertyAssertionNode, context) {
   const propertyTermNode = propertyAssertionNode.getPropertyTermNode(),
         propertyTerm = termFromTermNode(propertyTermNode, context);
@@ -2092,6 +2153,12 @@ export function provisionalFromVariableDeclarationNode(variableDeclarationNode, 
   const provisional = variableDeclarationNode.isProvisional();
 
   return provisional;
+}
+
+export function hypothesesFromBracketedConstructorNode(bracketedConstructorNode, context) {
+  const hypotheses = [];
+
+  return hypotheses;
 }
 
 export function procedureReferenceFromProcedureCallNode(procedureCallNode, context) {

@@ -201,6 +201,18 @@ class BoundedContext extends Context {
     context.debug(`...added the '${constraintString}' constraint to the bounded context.`);
   }
 
+  addGenerator(generator) {
+    const context = this.getContext();
+
+    context.addGenerator(generator);
+  }
+
+  addConstructor(constructor) {
+    const context = this.getContext();
+
+    context.addConstructor(constructor);
+  }
+
   addSubproofOrProofAssertion(subproofOrProofAssertion) {
     const context = this, ///
           subproofOrProofAssertionString = subproofOrProofAssertion.getString();

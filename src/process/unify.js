@@ -49,7 +49,7 @@ class PropertyPass extends ZipPass {
 
           const strict = false;
 
-          term = term.validateGivenType(type, strict, context);
+          term = await term.validateGivenType(type, strict, context);
 
           if (term !== null) {
             success = true;
@@ -67,7 +67,7 @@ class GeneratorPass extends ZipPass {
     {
       generalNodeQuery: typeNodeQuery,
       specificNodeQuery: termNodeQuery,
-      run: (generalTypeNode, specificTermNode, generalContext, specificContext) => {
+      run: async (generalTypeNode, specificTermNode, generalContext, specificContext) => {
         let success = false;
 
         const typeNode = generalTypeNode, ///
@@ -87,7 +87,7 @@ class GeneratorPass extends ZipPass {
 
           term = termFromTermNode(termNode, context);
 
-          term = term.validateGivenType(type, context);
+          term = await term.validateGivenType(type, context);
 
           if (term !== null) {
             success = true;
@@ -105,7 +105,7 @@ class ConstructorPass extends ZipPass {
     {
       generalNodeQuery: typeNodeQuery,
       specificNodeQuery: termNodeQuery,
-      run: (generalTypeNode, specificTermNode, generalContext, specificContext) => {
+      run: async (generalTypeNode, specificTermNode, generalContext, specificContext) => {
         let success = false;
 
         const typeNode = generalTypeNode, ///
@@ -125,7 +125,7 @@ class ConstructorPass extends ZipPass {
 
           term = termFromTermNode(termNode, context);
 
-          term = term.validateGivenType(type, context);
+          term = await term.validateGivenType(type, context);
 
           if (term !== null) {
             success = true;
@@ -354,7 +354,7 @@ class CombinatorPass extends ZipPass {
     {
       generalNodeQuery: typeNodeQuery,
       specificNodeQuery: termNodeQuery,
-      run: (generalTypeNode, specificTermNode, generalContext, specificContext) => {
+      run: async (generalTypeNode, specificTermNode, generalContext, specificContext) => {
         let success = false;
 
         const typeNode = generalTypeNode, ///
@@ -373,7 +373,7 @@ class CombinatorPass extends ZipPass {
 
         term = termFromTermNode(termNode, context);
 
-        term = term.validateGivenType(type, context);
+        term = await term.validateGivenType(type, context);
 
         if (term !== null) {
           success = true;

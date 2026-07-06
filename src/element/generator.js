@@ -1,23 +1,27 @@
 "use strict";
 
-import { Element, breakPointUtilities } from "occam-languages";
+import { Element, breakPointUtilities, asynchronousUtilities } from "occam-languages";
 
 import { define } from "../elements";
+import { baseTypeFromNothing } from "../utilities/type";
 import { instantiateGenerator } from "../process/instantiate";
 import { termFromGeneratorNode } from "../utilities/element";
+import { validateTermAsVariable } from "../process/validation";
 import { unifyTermWithGenerator } from "../process/unify";
 import { validateTermAsGenerator } from "../process/validate";
 import { typeFromJSON, typeToTypeJSON } from "../utilities/json";
 import { attempt, serialise, unserialise, instantiate } from "../utilities/context";
 
-const { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
+const { asyncEvery } = asynchronousUtilities,
+      { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Generator extends Element {
-  constructor(context, string, node, breakPoint, term, type) {
+  constructor(context, string, node, breakPoint, term, type, hypotheses) {
     super(context, string, node, breakPoint);
 
     this.term = term;
     this.type = type;
+    this.hypotheses = hypotheses;
   }
 
   getTerm() {
@@ -28,11 +32,26 @@ export default define(class Generator extends Element {
     return this.type;
   }
 
+  getHypotheses() {
+    return this.hypotheses;
+  }
+
+  setHypotheses(hypotheses) {
+    this.hypotheses = hypotheses;
+  }
+
   getGeneratorNode() {
     const node = this.getNode(),
           generatorNode = node;  ///
 
     return generatorNode;
+  }
+
+  isHypothetical() {
+    const hypothesesLength = this.hypotheses.length,
+          hypothetical = (hypothesesLength > 0);
+
+    return hypothetical;
   }
 
   getString(includeType = true) {
@@ -81,7 +100,7 @@ export default define(class Generator extends Element {
     return verifies;
   }
 
-  validateTerm(context) {
+  async validateTerm(context) {
     let termValidates = false;
 
     const includeType = false,
@@ -89,10 +108,31 @@ export default define(class Generator extends Element {
 
     context.trace(`Validating the '${generatorString}' generator's term...`);
 
-    const termValidatesAsGenerator = validateTermAsGenerator(this.term, context);
+    const hypothtical = this.isHypothetical();
 
-    if (termValidatesAsGenerator) {
-      termValidates = true;
+    if (hypothtical) {
+      const termValidatesAsVariable = validateTermAsVariable(this.term, context, (term, context) => { ///
+        let validatesForwards = false;
+
+        const type = term.getType(),
+              baseType = baseTypeFromNothing();
+
+        if (type === baseType) {
+          validatesForwards = true;
+        }
+
+        return validatesForwards;
+      });
+
+      if (termValidatesAsVariable) {
+        termValidates = true;
+      }
+    } else {
+      const termValidatesAsGenerator = validateTermAsGenerator(this.term, context);
+
+      if (termValidatesAsGenerator) {
+        termValidates = true;
+      }
     }
 
     if (termValidates) {
@@ -102,7 +142,7 @@ export default define(class Generator extends Element {
     return termValidates;
   }
 
-  unifyTerm(term, context, validateForwards) {
+  async unifyTerm(term, context, validateForwards) {
     let termUnifies = false;
 
     const termString = term.getString(),
@@ -111,23 +151,27 @@ export default define(class Generator extends Element {
 
     context.trace(`Unifying the '${termString}' term with the '${generatorString}' generator...`);
 
-    const generator = this, ///
-          generatorContext = generator.getContext(),
-          generalContext = generatorContext,  ///
-          specifiContext = context, ///
-          termUnifiesWithGenerator = unifyTermWithGenerator(term, generator, generalContext, specifiContext);
+    const hypothesesDiscardedGivenTerm = await this.dischargeHypothesesGivenTerm(term, context);
 
-    if (termUnifiesWithGenerator) {
-      const provisional = this.type.isProvisional();
+    if (hypothesesDiscardedGivenTerm) {
+      const generator = this, ///
+            generatorContext = generator.getContext(),
+            generalContext = generatorContext,  ///
+            specifiContext = context, ///
+            termUnifiesWithGenerator = unifyTermWithGenerator(term, generator, generalContext, specifiContext);
 
-      term.setType(this.type);
+      if (termUnifiesWithGenerator) {
+        const provisional = this.type.isProvisional();
 
-      term.setProvisional(provisional);
+        term.setType(this.type);
 
-      const validatesForwards = validateForwards(term, context);
+        term.setProvisional(provisional);
 
-      if (validatesForwards) {
-        termUnifies = true;
+        const validatesForwards = await validateForwards(term, context);
+
+        if (validatesForwards) {
+          termUnifies = true;
+        }
       }
     }
 
@@ -136,6 +180,44 @@ export default define(class Generator extends Element {
     }
 
     return termUnifies;
+  }
+
+  async dischargeHypothesisGivenTerm(hypothesis, term, context) {
+    let hypothesisDischargesGivenTerm;
+
+    await this.break(context);
+
+    const termString = term.getString(),
+          hypothesisString = hypothesis.getString(),
+          generatorString = this.getString(); ///
+
+    context.trace(`Discharding the '${generatorString}' generator's '${hypothesisString}' hypothesis given the '${termString}' term...`);
+
+    hypothesisDischargesGivenTerm = await hypothesis.dischargeGivenTerm(term, context);
+
+    if (hypothesisDischargesGivenTerm) {
+      context.trace(`...discharges the '${generatorString}' generator's '${hypothesisString}' hypothesis given the '${termString}' term.`);
+    }
+
+    return hypothesisDischargesGivenTerm;
+  }
+
+  async dischargeHypothesesGivenTerm(term, context) {
+    let hypothesesDischargesGivenTerm = true;  ///
+
+    const hypothetical = this.isHypothetical();
+
+    if (hypothetical) {
+      hypothesesDischargesGivenTerm = await asyncEvery(this.hypotheses, async (hypothesis) => {
+        const hypothesisDischarges = await this.dischargeHypothesisGivenTerm(hypothesis, term, context);
+
+        if (hypothesisDischarges) {
+          return true;
+        }
+      });
+    }
+
+    return hypothesesDischargesGivenTerm;
   }
 
   toJSON() {

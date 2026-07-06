@@ -104,7 +104,7 @@ export default define(class ContainedAssertion extends Assertion {
     return containedAssertion;
   }
 
-  validateTerm(context) {
+  async validateTerm(context) {
     let termValidates = false;
 
     if (this.term !== null) {
@@ -116,7 +116,7 @@ export default define(class ContainedAssertion extends Assertion {
       const termSingular = this.term.isSingular();
 
       if (termSingular) {
-        const term = this.term.validate(context, (term, context) => {
+        const term = await this.term.validate(context, async (term, context) => {
           const validatesForwards = true;
 
           return validatesForwards;

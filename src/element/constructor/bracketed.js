@@ -13,14 +13,14 @@ export default define(class BracketedConstructor extends Constructor {
     return bracketedConstructorNode;
   }
 
-  unifyTerm(term, context, validateForwards) {
+  async unifyTerm(term, context, validateForwards) {
     let termUnifies;
 
     const termString = term.getString();
 
     context.trace(`Unifying the '${termString}' term with the bracketed constructor...`);
 
-    termUnifies = super.unifyTerm(term, context, (term, context) => {
+    termUnifies = await super.unifyTerm(term, context, async (term, context) => {
       let validatesForwards = false;
 
       const bracketedTerm = term, ///
@@ -34,7 +34,7 @@ export default define(class BracketedConstructor extends Constructor {
 
         bracketlessTerm = termFromTermNode(bracketlessTermNode, context);
 
-        bracketlessTerm = bracketlessTerm.validate(context, (bracketlessTerm, context) => {  ///
+        bracketlessTerm = await bracketlessTerm.validate(context, async (bracketlessTerm, context) => {  ///
           let validatesForwards;
 
           const type = bracketlessTerm.getType(),
@@ -44,7 +44,7 @@ export default define(class BracketedConstructor extends Constructor {
 
           bracketedTerm.setProvisional(provisional);
 
-          validatesForwards = validateForwards(bracketedTerm, context);
+          validatesForwards = await validateForwards(bracketedTerm, context);
 
           return validatesForwards;
         });
