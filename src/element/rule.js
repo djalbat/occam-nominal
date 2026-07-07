@@ -1,7 +1,7 @@
 "use strict";
 
 import { arrayUtilities } from "necessary";
-import { Element, breakPointUtilities, asynchronousUtilities } from "occam-languages";
+import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
 
 import { define } from "../elements";
 import { enclose } from "../utilities/context";
@@ -9,7 +9,7 @@ import { labelsFromJSON, premisesFromJSON, conclusionFromJSON, labelsToLabelsJSO
 
 const { reverse } = arrayUtilities,
       { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities,
-      { asyncExtract, asyncForwardsEvery, asyncBackwardsEvery } = asynchronousUtilities;
+      { extract, breakable, forwardsEvery, backwardsEvery } = continuationUtilities;
 
 export default define(class Rule extends Element {
   constructor(context, string, node, breakPoint, proof, labels, premises, conclusion) {
@@ -189,7 +189,7 @@ export default define(class Rule extends Element {
 
     context.trace(`Verifying the '${ruleString}' rule's premises...`);
 
-    premisesVerify = await asyncForwardsEvery(this.premises, async (premise) => {
+    premisesVerify = await forwardsEvery(this.premises, async (premise) => {
       const premiseVerifies = await this.verifyPremise(premise, context);
 
       if (premiseVerifies) {
@@ -271,7 +271,7 @@ export default define(class Rule extends Element {
     await this.break(context);
 
     if (!subproofOrProofAssertionsUnifiesWithPremise) {
-      const subproofOrProofAssertion = await asyncExtract(subproofOrProofAssertions, async (subproofOrProofAssertion) => {
+      const subproofOrProofAssertion = await extract(subproofOrProofAssertions, async (subproofOrProofAssertion) => {
         const subproofOrProofAssertionUnifies = await premise.unifySubproofOrProofAssertion(subproofOrProofAssertion, context);
 
         if (subproofOrProofAssertionUnifies) {
@@ -302,7 +302,7 @@ export default define(class Rule extends Element {
 
     subproofOrProofAssertions = reverse(subproofOrProofAssertions); ///
 
-    subproofOrProofAssertionsUnifiesWithPremises = await asyncBackwardsEvery(this.premises, async (premise) => {
+    subproofOrProofAssertionsUnifiesWithPremises = await backwardsEvery(this.premises, async (premise) => {
       const stepUnifiesWithPremise = await this.unifySubproofOrProofAssertionsWithPremise(subproofOrProofAssertions, premise, context);
 
       if (stepUnifiesWithPremise) {

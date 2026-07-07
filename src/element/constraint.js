@@ -1,6 +1,6 @@
 "use strict";
 
-import { Element, breakPointUtilities } from "occam-languages";
+import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
 
 import { define } from "../elements";
 import { unifyStatement } from "../process/unify";
@@ -10,7 +10,8 @@ import { constraintFromConstraintNode } from "../utilities/element";
 import { constraintStringFromReferenceAndStatement } from "../utilities/string";
 import { ablate, attempt, descend, reconcile, serialise, unserialise, instantiate } from "../utilities/context";
 
-const { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
+const { breakable } = continuationUtilities,
+      { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Constraint extends Element {
   constructor(context, string, node, breakPoint, reference, statement) {
@@ -84,10 +85,10 @@ export default define(class Constraint extends Element {
       context = this.getContext();
 
       attempt((context) => {
-        const statementValidates = await this.validateStatement(context);
+        const statementValidates = this.validateStatement(context);
 
         if (statementValidates) {
-          const referenceValidates = await this.validateReference(context);
+          const referenceValidates = this.validateReference(context);
 
           if (referenceValidates) {
             const stated = context.isStated();
@@ -162,8 +163,8 @@ export default define(class Constraint extends Element {
 
     context.trace(`Validating the '${constraintString}' constraint's statement...`);
 
-    await descend(async (context) => {
-      const statement = await this.statement.validate(context);
+    descend(async (context) => {
+      const statement = this.statement.validate(context);
 
       if (statement !== null) {
         statementValidates = true;
@@ -245,7 +246,7 @@ export default define(class Constraint extends Element {
     const generalStatement = this.statement,  ///
           specificStatement = stripBracketsFromStatement(statement, context);  ///
 
-    statementUnifies = await unifyStatement(generalStatement, specificStatement, generalContext, specificContext);
+    statementUnifies = unifyStatement(generalStatement, specificStatement, generalContext, specificContext);
 
     if (statementUnifies) {
       context.debug(`...unified the '${statementString}' statement with the '${constraintString}' constraint's statement.`);
@@ -265,14 +266,14 @@ export default define(class Constraint extends Element {
     const constraintContext = this.getContext(), ///
           generalContext = constraintContext; ///
 
-    await reconcile(async (context) => {
+    reconcile(async (context) => {
       const reference = assumption.getReference(),
             specificContext = context,  ///
             referneceUnifies = this.unifyReference(reference, generalContext, specificContext);
 
       if (referneceUnifies) {
         const statement = assumption.getStatement(),
-              statementUnified = await this.unifyStatement(statement, generalContext, specificContext);
+              statementUnified = this.unifyStatement(statement, generalContext, specificContext);
 
         if (statementUnified) {
           context.commit();

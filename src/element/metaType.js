@@ -1,10 +1,11 @@
 "use strict";
 
-import { Element, breakPointUtilities } from "occam-languages";
+import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
 
 import { define } from "../elements";
 
-const { breakPointToBreakPointJSON } = breakPointUtilities;
+const { breakable } = continuationUtilities,
+      { breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class MetaType extends Element {
   constructor(context, string, node, breakPoint, name) {

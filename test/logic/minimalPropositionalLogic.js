@@ -10,6 +10,6 @@ const logLevel = ERROR_LEVEL,
       projectName = "minimal-propositional-logic",
       projectsDirectoryPath = "../../Logic";
 
-describe(projectName, () => {
+describe.only(projectName, () => {
   createSuite(logLevel, projectName, projectsDirectoryPath);
 });

@@ -1,6 +1,6 @@
 "use strict";
 
-import { asynchronousUtilities } from "occam-languages";
+import { continuationUtilities } from "occam-languages";
 
 import elements from "../elements";
 
@@ -8,7 +8,7 @@ import { choose, descend } from "../utilities/context";
 import { provisionallyStringFromProvisional } from "../utilities/string";
 import { bracketedConstructorFromNothing, bracketedCombinatorFromNothing } from "../utilities/instance";
 
-const { asyncSome } = asynchronousUtilities;
+const { some } = continuationUtilities;
 
 export async function validateTermAsVariable(term, context, validateForwards) {
   let termValidatesAsVariable = false;
@@ -58,7 +58,7 @@ async function unifyTermWithGenerators(term, context, validateForwards) {
 
   const generators = context.getGenerators();
 
-  termUnifiesWithGenerators = await asyncSome(generators, async (generator) => {
+  termUnifiesWithGenerators = await some(generators, async (generator) => {
     let termUnifiesWithGenerator = false;
 
     await choose(async (context) => {
@@ -84,7 +84,7 @@ async function unifyTermWithConstructors(term, context, validateForwards) {
 
   const constructors = context.getConstructors();
 
-  termUnifiesWithConstructors = await asyncSome(constructors, async (constructor) => {
+  termUnifiesWithConstructors = await some(constructors, async (constructor) => {
     let termUnifiesWithConstructor = false;
 
     await choose(async (context) => {
@@ -168,7 +168,7 @@ async function unifyStatementWithCombinators(statement, context) {
 
   const combinators = context.getCombinators();
 
-  await asyncSome(combinators, async (combinator) => {
+  await some(combinators, async (combinator) => {
     let statementUnifies;
 
     await descend(async (context) => {
@@ -424,7 +424,7 @@ export async function unifyTermWithProperties(term, context, validateForwards) {
 
   const properties = context.getProperties();
 
-  termUnifiesWithProperties = await asyncSome(properties, async (property) => {
+  termUnifiesWithProperties = await some(properties, async (property) => {
     let termUnifiesWithProperty = false;
 
     await choose(async (context) => {

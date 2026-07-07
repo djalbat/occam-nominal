@@ -1,12 +1,13 @@
 "use strict";
 
-import { Element, breakPointUtilities } from "occam-languages";
+import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
 
 import { define } from "../elements";
 import { instantiateDeduction } from "../process/instantiate";
 import { elide, declare, attempt, serialise, unserialise, instantiate, reconcile } from "../utilities/context";
 
-const { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
+const { breakable } = continuationUtilities,
+      { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Deduction extends Element {
   constructor(context, string, node, breakPoint, statement) {

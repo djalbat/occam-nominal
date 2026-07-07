@@ -1,7 +1,7 @@
 "use strict";
 
 import { arrayUtilities } from "necessary";
-import { Element, breakPointUtilities, asynchronousUtilities } from "occam-languages";
+import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
 
 import { define } from "../elements";
 import { instantiate } from "../utilities/context";
@@ -12,7 +12,7 @@ import { validateTerms, unifyTermWithProperties } from "../process/validation";
 import { typeFromJSON, typeToTypeJSON, provisionalFromJSON, provisionalToProvisionalJSON } from "../utilities/json";
 
 const { filter } = arrayUtilities,
-      { asyncSome } = asynchronousUtilities,
+      { some, breakable } = continuationUtilities,
       { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Term extends Element {
@@ -206,7 +206,7 @@ export default define(class Term extends Element {
         term = null;
       }
     } else {
-      validates = await asyncSome(validateTerms, async (validateTerm) => {  ///
+      validates = await some(validateTerms, async (validateTerm) => {  ///
         const term = this,  ///
               termValidates = await validateTerm(term, context, validateForwards);
 

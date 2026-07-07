@@ -1,6 +1,6 @@
 "use strict";
 
-import { Element, breakPointUtilities, asynchronousUtilities } from "occam-languages";
+import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
 
 import elements from "../elements";
 
@@ -16,7 +16,7 @@ import { labelFromJSON,
          constraintsToConstraintsJSON,
          suppositionsToSuppositionsJSON } from "../utilities/json";
 
-const { asyncForwardsEvery } = asynchronousUtilities,
+const { breakable, forwardsEvery } = continuationUtilities,
       { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Schema extends Element {
@@ -195,7 +195,7 @@ export default define(class Schema extends Element {
 
     context.trace(`Verifying the '${schemaString}' schema's suppositions...`);
 
-    suppositionsVerify = await asyncForwardsEvery(this.suppositions, async (supposition) => {
+    suppositionsVerify = await forwardsEvery(this.suppositions, async (supposition) => {
       const suppositionVerifies = await this.verifySupposition(supposition, context);
 
       if (suppositionVerifies) {

@@ -1,6 +1,6 @@
 "use strict";
 
-import { breakPointUtilities } from "occam-languages";
+import { breakPointUtilities, continuationUtilities } from "occam-languages";
 
 import Assertion from "../assertion";
 
@@ -11,7 +11,8 @@ import { separateGroundedTermsAndDefinedVariables } from "../../utilities/equiva
 import { termFromTermAndSubstitutions, frameFromFrameAndSubstitutions } from "../../utilities/substitutions";
 import { termFromJDefinedAssertionNode, frameFromJDefinedAssertionNode, negatedFromJDefinedAssertionNode, definedAssertionFromStatementNode } from "../../utilities/element";
 
-const { breakPointFromJSON } = breakPointUtilities;
+const { breakable } = continuationUtilities,
+      { breakPointFromJSON } = breakPointUtilities;
 
 export default define(class DefinedAssertion extends Assertion {
   constructor(context, string, node, breakPoint, term, frame, negated) {

@@ -1,11 +1,11 @@
 "use strict";
 
-import { Element, asynchronousUtilities } from "occam-languages";
+import { Element, continuationUtilities } from "occam-languages";
 
 import { define } from "../elements";
 import { enclose } from "../utilities/context";
 
-const { asyncEvery } = asynchronousUtilities;
+const { every, breakable } = continuationUtilities;
 
 export default define(class Subproof extends Element {
   constructor(context, string, node, breakPoint, suppositions, subDerivation) {
@@ -123,7 +123,7 @@ export default define(class Subproof extends Element {
   async verifySuppositions(context) {
     let suppositionsVerify;
 
-    suppositionsVerify = await asyncEvery(this.suppositions, async (supposition) => {
+    suppositionsVerify = await every(this.suppositions, async (supposition) => {
       const suppositionVerifies = await this.verifySupposition(supposition, context);
 
       if (suppositionVerifies) {

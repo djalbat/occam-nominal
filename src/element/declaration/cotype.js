@@ -1,14 +1,14 @@
 "use strict";
 
-import Declaration from "../declaration";
+import { continuationUtilities } from "occam-languages";
 
-import { asynchronousUtilities } from "occam-languages";
+import Declaration from "../declaration";
 
 import { define } from "../../elements";
 import { anticipate } from "../../utilities/context";
 import { baseTypeFromNothing } from "../../utilities/type";
 
-const { asyncEvery } = asynchronousUtilities;
+const { every, breakable } = continuationUtilities;
 
 export default define(class CotypeDeclaration extends Declaration {
   constructor(context, string, node, breakPoint, type, superTypes, provisional, propertyDeclarations) {
@@ -234,7 +234,7 @@ export default define(class CotypeDeclaration extends Declaration {
     context.trace(`Verifying the '${cotypeDeclarationString}' cotype declaration's '${typeString}' type's property declarations...`);
 
     await anticipate(async (context) => {
-      propertyDeclarationsVerify = await asyncEvery(this.propertyDeclarations, async (propertyDeclaration) => {
+      propertyDeclarationsVerify = await every(this.propertyDeclarations, async (propertyDeclaration) => {
         const propertyVerifes = await propertyDeclaration.verify(context);
 
         if (propertyVerifes) {

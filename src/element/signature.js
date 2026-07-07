@@ -1,7 +1,7 @@
 "use strict";
 
 import { arrayUtilities } from "necessary";
-import { Element, breakPointUtilities, asynchronousUtilities } from "occam-languages";
+import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
 
 import { define } from "../elements";
 import { instantiateSignature } from "../process/instantiate";
@@ -9,7 +9,7 @@ import { signatureFromSignatureNode } from "../utilities/element";
 import { ablate, attempt, reconcile, serialise, unserialise, instantiate } from "../utilities/context";
 
 const { match } = arrayUtilities,
-      { asyncEvery } = asynchronousUtilities,
+      { every, breakable } = continuationUtilities,
       { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Signature extends Element {
@@ -152,7 +152,7 @@ export default define(class Signature extends Element {
 
     const terms = [];
 
-    termsValidate = await asyncEvery(this.terms, async (term) => {
+    termsValidate = await every(this.terms, async (term) => {
       term = await term.validate(context, async (term, context) => { ///
         const validatesForwards = true;
 

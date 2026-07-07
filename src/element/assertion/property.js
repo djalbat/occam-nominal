@@ -1,6 +1,6 @@
 "use strict";
 
-import { breakPointUtilities } from "occam-languages";
+import { breakPointUtilities, continuationUtilities } from "occam-languages";
 
 import Assertion from "../assertion";
 
@@ -10,7 +10,8 @@ import { instantiatePropertyAssertion } from "../../process/instantiate";
 import { variableAssignmentFromPrepertyAssertion } from "../../process/assign";
 import { propertyAssertionFromStatementNode, subjectTermFromPropertyAssertionNode, propertyTermFromPropertyAssertionNode } from "../../utilities/element";
 
-const { breakPointFromJSON } = breakPointUtilities;
+const { breakable } = continuationUtilities,
+      { breakPointFromJSON } = breakPointUtilities;
 
 export default define(class PropertyAssertion extends Assertion {
   constructor(context, string, node, breakPoint, subjectTerm, propertyTerm) {

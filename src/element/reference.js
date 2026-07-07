@@ -1,6 +1,6 @@
 "use strict";
 
-import { Element, breakPointUtilities } from "occam-languages";
+import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
 
 import { define } from "../elements";
 import { instantiateReference } from "../process/instantiate";
@@ -8,7 +8,8 @@ import { REFERENCE_META_TYPE_NAME } from "../metaTypeNames";
 import { referenceFromReferenceNode, metavariableFromReferenceNode } from "../utilities/element";
 import { ablate, attempt, reconcile, serialise, unserialise, instantiate } from "../utilities/context";
 
-const { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
+const { breakable } = continuationUtilities,
+      { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Reference extends Element {
   constructor(context, string, node, breakPoint, metavariable) {

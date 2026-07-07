@@ -1,7 +1,7 @@
 "use strict";
 
 import { arrayUtilities } from "necessary";
-import { breakPointUtilities, asynchronousUtilities } from "occam-languages";
+import { breakPointUtilities, continuationUtilities } from "occam-languages";
 
 import Assertion from "../assertion";
 
@@ -10,7 +10,7 @@ import { instantiateSubproofAssertion } from "../../process/instantiate";
 import { descend, reconcile, instantiate } from "../../utilities/context";
 import { subproofAssertionFromStatementNode } from "../../utilities/element";
 
-const { asyncEvery } = asynchronousUtilities,
+const { every, breakable } = continuationUtilities,
       { breakPointFromJSON } = breakPointUtilities,
       { last, front, backwardsEvery } = arrayUtilities;
 
@@ -94,7 +94,7 @@ export default define(class SubproofAssertion extends Assertion {
   }
 
   async validateStatements(context) {
-    const statementsValidate = await asyncEvery(this.statements, async (statement) => {
+    const statementsValidate = await every(this.statements, async (statement) => {
       let statementValidates = false;
 
       await descend(async (context) => {

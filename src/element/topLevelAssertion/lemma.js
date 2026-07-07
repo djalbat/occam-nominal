@@ -1,8 +1,12 @@
 "use strict";
 
+import { continuationUtilities } from "occam-languages";
+
 import TopLevelAssertion from "../topLevelAssertion";
 
 import { define } from "../../elements";
+
+const { breakable } = continuationUtilities;
 
 export default define(class Lemma extends TopLevelAssertion {
   getLemmaNode() {

@@ -1,7 +1,7 @@
 "use strict";
 
 import { Element } from "occam-languages";
-import { arrayUtilities } from "necessary";
+import { arrayUtilities, continuationUtilities } from "necessary";
 
 import { define } from "../elements";
 import { instantiate } from "../utilities/context";
@@ -10,7 +10,8 @@ import { stripBracketsFromTermNode } from "../utilities/brackets";
 import { equivalenceStringFromTerms } from "../utilities/string";
 import { equivalenceFromEquivalenceNode } from "../utilities/element";
 
-const { compress } = arrayUtilities;
+const { compress } = arrayUtilities,
+      { breakable } = continuationUtilities;
 
 export default define(class Equivalence extends Element {
   constructor(context, string, node, breakPoint, type, terms) {

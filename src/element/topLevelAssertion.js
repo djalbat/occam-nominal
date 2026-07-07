@@ -1,7 +1,7 @@
 "use strict";
 
 import { arrayUtilities } from "necessary";
-import { Element, breakPointUtilities, asynchronousUtilities } from "occam-languages";
+import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
 
 import { enclose } from "../utilities/context";
 import { topLevelAssertionStringFromLabelsSignatureSuppositionsAndDeduction } from "../utilities/string";
@@ -18,7 +18,7 @@ import { labelsFromJSON,
 
 const { reverse } = arrayUtilities,
       { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities,
-      { asyncEvery, asyncExtract, asyncForwardsEvery, asyncBackwardsEvery } = asynchronousUtilities;
+      { every, extract, breakable, forwardsEvery, backwardsEvery } = continuationUtilities;
 
 export default class TopLevelAssertion extends Element {
   constructor(context, string, node, breakPoint, labels, suppositions, deduction, proof, signature, hypotheses) {
@@ -235,7 +235,7 @@ export default class TopLevelAssertion extends Element {
 
     context.trace(`Verifying the '${topLevelAssertionString}' top level assertion's suppositions...`);
 
-    suppositionsVerify = await asyncForwardsEvery(this.suppositions, async (supposition) => {
+    suppositionsVerify = await forwardsEvery(this.suppositions, async (supposition) => {
       const suppositionVerifies = await this.verifySupposition(supposition, context);
 
       if (suppositionVerifies) {
@@ -271,7 +271,7 @@ export default class TopLevelAssertion extends Element {
 
   async dischargeHypotheses(context) {
     const hypotheses = this.getHypotheses(),
-          hypothesesDischarges = await asyncEvery(hypotheses, async (hypothesis) => {
+          hypothesesDischarges = await every(hypotheses, async (hypothesis) => {
             const hypothesisDischarges = await this.dischargeHypothesis(hypothesis, context);
 
             if (hypothesisDischarges) {
@@ -335,7 +335,7 @@ export default class TopLevelAssertion extends Element {
     await this.break(context);
 
     if (!subproofOrProofAssertionsUnifiesWithSupposition) {
-      const subproofOrProofAssertion = await asyncExtract(subproofOrProofAssertions, async (subproofOrProofAssertion) => {
+      const subproofOrProofAssertion = await extract(subproofOrProofAssertions, async (subproofOrProofAssertion) => {
         const subproofOrProofAssertionUnifies = await supposition.unifySubproofOrProofAssertion(subproofOrProofAssertion, context);
 
         if (subproofOrProofAssertionUnifies) {
@@ -366,7 +366,7 @@ export default class TopLevelAssertion extends Element {
 
     subproofOrProofAssertions = reverse(subproofOrProofAssertions); ///
 
-    subproofOrProofAssertionsUnifiesWithSuppositions = await asyncBackwardsEvery(this.suppositions, async (supposition) => {
+    subproofOrProofAssertionsUnifiesWithSuppositions = await backwardsEvery(this.suppositions, async (supposition) => {
       const stepUnifiesWithSupposition = await this.unifySubproofOrProofAssertionsWithSupposition(subproofOrProofAssertions, supposition, context);
 
       if (stepUnifiesWithSupposition) {

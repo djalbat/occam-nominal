@@ -1,8 +1,10 @@
 "use strict";
 
-import { Element } from "occam-languages";
+import { Element, continuationUtilities } from "occam-languages";
 
 import { define } from "../elements";
+
+const { breakable } = continuationUtilities;
 
 export default define(class Error extends Element {
   getErrorNode() {

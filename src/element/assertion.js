@@ -1,8 +1,9 @@
 "use strict";
 
-import { Element, breakPointUtilities } from "occam-languages";
+import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
 
-const { breakPointToBreakPointJSON } = breakPointUtilities;
+const { breakable } = continuationUtilities,
+      { breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default class Assertion extends Element {
   getName() {

@@ -10,6 +10,6 @@ const logLevel = TRACE_LEVEL,
       projectName = "decimal-numbers",
       projectsDirectoryPath = "../../Mathematics";
 
-describe.only(projectName, () => {
+describe(projectName, () => {
   createSuite(logLevel, projectName, projectsDirectoryPath);
 });

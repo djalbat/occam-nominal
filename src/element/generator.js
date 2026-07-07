@@ -1,6 +1,6 @@
 "use strict";
 
-import { Element, breakPointUtilities, asynchronousUtilities } from "occam-languages";
+import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
 
 import { define } from "../elements";
 import { baseTypeFromNothing } from "../utilities/type";
@@ -12,7 +12,7 @@ import { validateTermAsGenerator } from "../process/validate";
 import { typeFromJSON, typeToTypeJSON } from "../utilities/json";
 import { attempt, serialise, unserialise, instantiate } from "../utilities/context";
 
-const { asyncEvery } = asynchronousUtilities,
+const { every, breakable } = continuationUtilities,
       { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Generator extends Element {
@@ -208,7 +208,7 @@ export default define(class Generator extends Element {
     const hypothetical = this.isHypothetical();
 
     if (hypothetical) {
-      hypothesesDischargesGivenTerm = await asyncEvery(this.hypotheses, async (hypothesis) => {
+      hypothesesDischargesGivenTerm = await every(this.hypotheses, async (hypothesis) => {
         const hypothesisDischarges = await this.dischargeHypothesisGivenTerm(hypothesis, term, context);
 
         if (hypothesisDischarges) {

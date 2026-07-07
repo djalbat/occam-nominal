@@ -1,8 +1,12 @@
 "use strict";
 
+import { continuationUtilities } from "occam-languages";
+
 import Combinator from "../combinator";
 
 import { define } from "../../elements";
+
+const { breakable } = continuationUtilities;
 
 export default define(class BracketedCombinator extends Combinator {
   getBracketedCombinatorNode() {

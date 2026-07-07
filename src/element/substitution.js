@@ -1,11 +1,12 @@
 "use strict";
 
 import { arrayUtilities } from "necessary";
-import { breakPointUtilities } from "occam-languages";
+import { breakPointUtilities, continuationUtilities } from "occam-languages";
 
 import { serialises } from "../utilities/context";
 
-const { first, second } = arrayUtilities,
+const { breakable } = continuationUtilities,
+      { first, second } = arrayUtilities,
       { breakPointToBreakPointJSON } = breakPointUtilities;
 
 class Element {

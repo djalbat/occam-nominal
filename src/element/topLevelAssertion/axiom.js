@@ -1,13 +1,13 @@
 "use strict";
 
-import { asynchronousUtilities } from "occam-languages";
+import { continuationUtilities } from "occam-languages";
 
 import TopLevelAssertion from "../topLevelAssertion";
 
 import { define } from "../../elements";
 import { reconcile } from "../../utilities/context";
 
-const { asyncMatch } = asynchronousUtilities;
+const { match, breakable } = continuationUtilities;
 
 export default define(class Axiom extends TopLevelAssertion {
   getAxiomNode() {
@@ -195,7 +195,7 @@ export default define(class Axiom extends TopLevelAssertion {
 
     const generalSuppositions = suppositions; ///
 
-    suppositionsUnify = await asyncMatch(generalSuppositions, specificSuppositions, async (generalSupposition, specificSupposition, index) => {
+    suppositionsUnify = await match(generalSuppositions, specificSuppositions, async (generalSupposition, specificSupposition, index) => {
       const supposition = specificSupposition,  ///
             suppositionUnifies = await this.unifySupposition(supposition, index, context);
 

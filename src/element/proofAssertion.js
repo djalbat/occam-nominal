@@ -1,10 +1,12 @@
 "use strict";
 
-import { Element } from "occam-languages";
+import { Element, continuationUtilities } from "occam-languages";
 
 import { equateStatements } from "../process/equate";
 
-export default class ProofAssertion extends Element {
+const { breakable } = continuationUtilities;
+
+  export default class ProofAssertion extends Element {
   constructor(context, string, node, breakPoint, statement) {
     super(context, string, node, breakPoint);
 

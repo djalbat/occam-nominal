@@ -1,6 +1,6 @@
 "use strict";
 
-import { Element, breakPointUtilities } from "occam-languages";
+import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
 
 import Value from "../value";
 
@@ -9,7 +9,8 @@ import { instantiate } from "../utilities/context";
 import { instantiateParameter } from "../process/instantiate";
 import { nameFromParaneterNode, identifierFromParameterNode } from "../utilities/element";
 
-const { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
+const { breakable } = continuationUtilities,
+      { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Parameter extends Element {
   constructor(context, string, node, breakPoint, name, identifier) {

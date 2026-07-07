@@ -1,7 +1,7 @@
 "use strict";
 
 import { arrayUtilities } from "necessary";
-import { asynchronousUtilities } from "occam-languages";
+import { continuationUtilities } from "occam-languages";
 
 import elements from "../../elements";
 import ProofAssertion from "../proofAssertion";
@@ -10,8 +10,8 @@ import { define } from "../../elements";
 import { unifySteps } from "../../process/unification";
 import { derive, declare, attempt, reconcile } from "../../utilities/context";
 
-const { asyncSome } = asynchronousUtilities,
-      { backwardsSome } = arrayUtilities;
+const { backwardsSome } = arrayUtilities,
+      { some, breakable } = continuationUtilities;
 
 export default define(class Step extends ProofAssertion {
   constructor(context, string, node, breakPoint, statement, reference, signatureAssertion) {
@@ -271,7 +271,7 @@ export default define(class Step extends ProofAssertion {
 
     const step = this;  ///
 
-    await asyncSome(unifySteps, async (unifyStep) => {
+    await some(unifySteps, async (unifyStep) => {
       let stepUnifies;
 
       await reconcile(async (context) => {
