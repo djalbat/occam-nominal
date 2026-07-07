@@ -1,9 +1,9 @@
 "use strict";
 
 import { queryUtilities } from "occam-query";
-import { ZipPass as ZipPassBase } from "occam-languages";
+import { AsyncZipPass as AsyncZipPassBase } from "occam-languages";
 
-import ZipPass from "../pass/zip";
+import AsyncZipPass from "../pass/asyncZip";
 
 import { reconcile } from "../utilities/context";
 import { FRAME_META_TYPE_NAME, STATEMENT_META_TYPE_NAME } from "../metaTypeNames";
@@ -22,17 +22,17 @@ const typeNodeQuery = nodeQuery("/type"),
       statementMetavariableNodeQuery = nodeQuery("/statement/metavariable!"),
       assumptionMetavariableNodeQuery = nodeQuery("/assumption/metavariable!");
 
-class PropertyPass extends ZipPass {
+class PropertyPass extends AsyncZipPass {
   static maps = [
     {
       generalNodeQuery: typeNodeQuery,
       specificNodeQuery: termNodeQuery,
-      run: (generalTypeNode, specificTermNode, generalContext, specificContext) => {
+      run: async (generalTypeNode, specificTermNode, generalContext, specificContext) => {
         let success = false;
 
         const typeNode = generalTypeNode, ///
-          termNode = specificTermNode, ///
-          nominalTypeName = typeNode.getNominalTypeName();
+              termNode = specificTermNode, ///
+              nominalTypeName = typeNode.getNominalTypeName();
 
         let context;
 
@@ -62,7 +62,7 @@ class PropertyPass extends ZipPass {
   ];
 }
 
-class GeneratorPass extends ZipPass {
+class GeneratorPass extends AsyncZipPass {
   static maps = [
     {
       generalNodeQuery: typeNodeQuery,
@@ -100,7 +100,7 @@ class GeneratorPass extends ZipPass {
   ];
 }
 
-class ConstructorPass extends ZipPass {
+class ConstructorPass extends AsyncZipPass {
   static maps = [
     {
       generalNodeQuery: typeNodeQuery,
@@ -138,12 +138,12 @@ class ConstructorPass extends ZipPass {
   ];
 }
 
-class MetaLevelPass extends ZipPassBase {
+class MetaLevelPass extends AsyncZipPassBase {
   static maps = [
     {
       generalNodeQuery: assumptionMetavariableNodeQuery,
       specificNodeQuery: assumptionMetavariableNodeQuery,
-      run: (generalAssumptionMetavariableNode, specificAssumptionMetavariableNode, generalContext, specificContext) => {
+      run: async (generalAssumptionMetavariableNode, specificAssumptionMetavariableNode, generalContext, specificContext) => {
         let success = false;
 
         let context,
@@ -176,7 +176,7 @@ class MetaLevelPass extends ZipPassBase {
     {
       generalNodeQuery: statementMetavariableNodeQuery,
       specificNodeQuery: statementNodeQuery,
-      run: (generalStatementMetavariableNode, specificStatementNode, generalContext, specificContext) => {
+      run: async (generalStatementMetavariableNode, specificStatementNode, generalContext, specificContext) => {
         let success = false;
 
         let context,
@@ -200,7 +200,7 @@ class MetaLevelPass extends ZipPassBase {
         statementNode = specificStatementNode;  ///
 
         const statement = context.findStatementByStatementNode(statementNode),
-              statementUnifies = metavariable.unifyStatement(statement, substitution, generalContext, specificContext);
+              statementUnifies = await metavariable.unifyStatement(statement, substitution, generalContext, specificContext);
 
         if (statementUnifies) {
           success = true;
@@ -212,7 +212,7 @@ class MetaLevelPass extends ZipPassBase {
     {
       generalNodeQuery: frameMetavariableNodeQuery,
       specificNodeQuery: frameNodeQuery,
-      run: (generalFrameMetavariableNode, specificFrameNode, generalContext, specificContext) => {
+      run: async (generalFrameMetavariableNode, specificFrameNode, generalContext, specificContext) => {
         let success = false;
 
         const frameNode = specificFrameNode, ///
@@ -227,7 +227,7 @@ class MetaLevelPass extends ZipPassBase {
         context = specificContext;  ///
 
         const frame = context.findFrameByFrameNode(frameNode),
-              frameUnifies = metavariable.unifyFrame(frame, generalContext, specificContext);
+              frameUnifies = await metavariable.unifyFrame(frame, generalContext, specificContext);
 
         if (frameUnifies) {
           success = true;
@@ -239,7 +239,7 @@ class MetaLevelPass extends ZipPassBase {
     {
       generalNodeQuery: termVariableNodeQuery,
       specificNodeQuery: termNodeQuery,
-      run: (generalTermVariableNode, specificTermNode, generalContext, specificContext) => {
+      run: async (generalTermVariableNode, specificTermNode, generalContext, specificContext) => {
         let success = false;
 
         const termNode = specificTermNode, ///
@@ -254,7 +254,7 @@ class MetaLevelPass extends ZipPassBase {
         context = specificContext;  ///
 
         const term = context.findTermByTermNode(termNode),
-              termUnifies = variable.unifyTerm(term, generalContext, specificContext);
+              termUnifies = await variable.unifyTerm(term, generalContext, specificContext);
 
         if (termUnifies) {
           success = true;
@@ -266,7 +266,7 @@ class MetaLevelPass extends ZipPassBase {
     {
       generalNodeQuery: signatureNodeQuery,
       specificNodeQuery: signatureNodeQuery,
-      run: (generalSignatureNode, specificSignatureNode, generalContext, specificContext) => {
+      run: async (generalSignatureNode, specificSignatureNode, generalContext, specificContext) => {
         let success = false;
 
          let context;
@@ -279,8 +279,8 @@ class MetaLevelPass extends ZipPassBase {
 
         const specificSignature = context.findSignatureBySignatureNode(specificSignatureNode);
 
-        reconcile((context) => {
-          const signatureUnifies = generalSignature.unifySignature(specificSignature, context);
+        await reconcile(async (context) => {
+          const signatureUnifies = await generalSignature.unifySignature(specificSignature, context);
 
           if (signatureUnifies) {
             success = true;
@@ -293,12 +293,12 @@ class MetaLevelPass extends ZipPassBase {
   ];
 }
 
-class CombinatorPass extends ZipPass {
+class CombinatorPass extends AsyncZipPass {
   static maps = [
     {
       generalNodeQuery: metaTypeNodeQuery,
       specificNodeQuery: statementNodeQuery,
-      run: (generalMetaTypeNode, specificStatementNode, generalContext, specificContext) => {
+      run: async (generalMetaTypeNode, specificStatementNode, generalContext, specificContext) => {
         let success = false;
 
         const metaTypeNode = generalMetaTypeNode, ///
@@ -313,7 +313,7 @@ class CombinatorPass extends ZipPass {
 
           statement = statementFromStatementNode(statementNode, context);
 
-          statement = statement.validate(context);  ///
+          statement = await statement.validate(context);  ///
 
           if (statement !== null) {
             success = true;
@@ -326,7 +326,7 @@ class CombinatorPass extends ZipPass {
     {
       generalNodeQuery: metaTypeNodeQuery,
       specificNodeQuery: frameNodeQuery,
-      run: (generalMetaTypeNode, specificFrameNode, generalContext, specificContext) => {
+      run: async (generalMetaTypeNode, specificFrameNode, generalContext, specificContext) => {
         let success = false;
 
         const metaTypeNode = generalMetaTypeNode, ///
@@ -341,7 +341,7 @@ class CombinatorPass extends ZipPass {
 
           frame = frameFromFrameNode(frameNode, context);
 
-          frame = frame.validate(context);  ///
+          frame = await frame.validate(context);  ///
 
           if (frame !== null) {
             success = true;
@@ -385,12 +385,12 @@ class CombinatorPass extends ZipPass {
   ];
 }
 
-class MetavariablePass extends ZipPass {
+class MetavariablePass extends AsyncZipPass {
   static maps = [
     {
       generalNodeQuery: typeNodeQuery,
       specificNodeQuery: termNodeQuery,
-      run: (generalTypeNode, specificTermNode, generalContext, specificContext) => {
+      run: async (generalTypeNode, specificTermNode, generalContext, specificContext) => {
         let success = false;
 
         let context;
@@ -419,12 +419,12 @@ class MetavariablePass extends ZipPass {
   ];
 }
 
-class IntrinsicTermPass extends ZipPassBase {
+class IntrinsicTermPass extends AsyncZipPassBase {
   static maps = [
     {
       generalNodeQuery: termVariableNodeQuery,
       specificNodeQuery: termNodeQuery,
-      run: (generalTermVariableNode, specificTermNode, generalContext, specificContext) => {
+      run: async (generalTermVariableNode, specificTermNode, generalContext, specificContext) => {
         let success = false;
 
         const termNode = specificTermNode, ///
@@ -439,7 +439,7 @@ class IntrinsicTermPass extends ZipPassBase {
         context = specificContext;  ///
 
         const term = context.findTermByTermNode(termNode),
-              termUnifies = variable.unifyTerm(term, generalContext, specificContext);
+              termUnifies = await variable.unifyTerm(term, generalContext, specificContext);
 
         if (termUnifies) {
           success = true;
@@ -451,12 +451,12 @@ class IntrinsicTermPass extends ZipPassBase {
   ];
 }
 
-class IntrinsicMetavariablePass extends ZipPass {
+class IntrinsicMetavariablePass extends AsyncZipPass {
   static maps = [
     {
       generalNodeQuery: termVariableNodeQuery,
       specificNodeQuery: termNodeQuery,
-      run: (generalTermVariableNode, specificTermNode, generalContext, specificContext) => {
+      run: async (generalTermVariableNode, specificTermNode, generalContext, specificContext) => {
         let success = false;
 
         const termNode = specificTermNode, ///
@@ -471,7 +471,7 @@ class IntrinsicMetavariablePass extends ZipPass {
         context = specificContext;  ///
 
         const term = context.findTermByTermNode(termNode),
-              termUnifies = variable.unifyTerm(term, generalContext, specificContext);
+              termUnifies = await variable.unifyTerm(term, generalContext, specificContext);
 
         if (termUnifies) {
           success = true;
@@ -492,14 +492,14 @@ const metaLevelPass = new MetaLevelPass(),
       intrinsicTermPass = new IntrinsicTermPass(),
       intrinsicMetavariablePass = new IntrinsicMetavariablePass();
 
-export function unifyStatement(generalStatement, specificStatement, generalContext, specificContext) {
+export async function unifyStatement(generalStatement, specificStatement, generalContext, specificContext) {
   let statementUnifies = false;
 
   const generalStatementNode = generalStatement.getNode(),
         specificStatementNode = specificStatement.getNode(),
         generalNode = generalStatementNode, ///
         specificNode = specificStatementNode,  ///
-        success = metaLevelPass.run(generalNode, specificNode, generalContext, specificContext);
+        success = await metaLevelPass.run(generalNode, specificNode, generalContext, specificContext);
 
   if (success) {
     statementUnifies = true;
@@ -508,12 +508,12 @@ export function unifyStatement(generalStatement, specificStatement, generalConte
   return statementUnifies;
 }
 
-export function unifyMetavariable(generalMetavariable, specificMetavariable, generalContext, specificContext) {
+export async function unifyMetavariable(generalMetavariable, specificMetavariable, generalContext, specificContext) {
   let metavariableUnifies = false;
 
   const generalMetavariableNode = generalMetavariable.getNode(),
         specificMetavariableNode = specificMetavariable.getNode(),
-        success = metavariablePass.run(generalMetavariableNode, specificMetavariableNode, generalContext, specificContext);
+        success = await metavariablePass.run(generalMetavariableNode, specificMetavariableNode, generalContext, specificContext);
 
   if (success) {
     metavariableUnifies = true;
@@ -522,13 +522,13 @@ export function unifyMetavariable(generalMetavariable, specificMetavariable, gen
   return metavariableUnifies;
 }
 
-export function unifyTermWithProperty(term, property, generalContext, specificContext) {
+export async function unifyTermWithProperty(term, property, generalContext, specificContext) {
   let termUnifiesWithProperty = false;
 
   const termNode = term.getNode(),
         propertyTerm = property.getTerm(),
         propertyTermNode = propertyTerm.getNode(),
-        success = propertyPass.run(propertyTermNode, termNode, generalContext, specificContext);
+        success = await propertyPass.run(propertyTermNode, termNode, generalContext, specificContext);
 
   if (success) {
     termUnifiesWithProperty = true;
@@ -537,13 +537,13 @@ export function unifyTermWithProperty(term, property, generalContext, specificCo
   return termUnifiesWithProperty;
 }
 
-export function unifyTermWithGenerator(term, generator, generalContext, specificContext) {
+export async function unifyTermWithGenerator(term, generator, generalContext, specificContext) {
   let termUnifiesWithGenerator = false;
 
   const termNode = term.getNode(),
-    generatorTerm = generator.getTerm(),
-    generatorTermNode = generatorTerm.getNode(),
-    success = generatorPass.run(generatorTermNode, termNode, generalContext, specificContext);
+        generatorTerm = generator.getTerm(),
+        generatorTermNode = generatorTerm.getNode(),
+        success = await generatorPass.run(generatorTermNode, termNode, generalContext, specificContext);
 
   if (success) {
     termUnifiesWithGenerator = true;
@@ -552,13 +552,13 @@ export function unifyTermWithGenerator(term, generator, generalContext, specific
   return termUnifiesWithGenerator;
 }
 
-export function unifyTermWithConstructor(term, constructor, generalContext, specificContext) {
+export async function unifyTermWithConstructor(term, constructor, generalContext, specificContext) {
   let termUnifiesWithConstructor = false;
 
   const termNode = term.getNode(),
         constructorTerm = constructor.getTerm(),
         constructorTermNode = constructorTerm.getNode(),
-        success = constructorPass.run(constructorTermNode, termNode, generalContext, specificContext);
+        success = await constructorPass.run(constructorTermNode, termNode, generalContext, specificContext);
 
   if (success) {
     termUnifiesWithConstructor = true;
@@ -567,13 +567,13 @@ export function unifyTermWithConstructor(term, constructor, generalContext, spec
   return termUnifiesWithConstructor;
 }
 
-export function unifyStatementWithCombinator(statement, combinator, generalContext, specificContext) {
+export async function unifyStatementWithCombinator(statement, combinator, generalContext, specificContext) {
   let statementUnifiesWithCombinator = false;
 
   const statementNode = statement.getNode(),
         combinatorStatement = combinator.getStatement(),
         combinatorStatementNode = combinatorStatement.getNode(),
-        success = combinatorPass.run(combinatorStatementNode, statementNode, generalContext, specificContext);
+        success = await combinatorPass.run(combinatorStatementNode, statementNode, generalContext, specificContext);
 
   if (success) {
     statementUnifiesWithCombinator = true;
@@ -582,14 +582,14 @@ export function unifyStatementWithCombinator(statement, combinator, generalConte
   return statementUnifiesWithCombinator;
 }
 
-export function unifyTermIntrinsically(generalTerm, specificTerm, generalContext, specificContext) {
+export async function unifyTermIntrinsically(generalTerm, specificTerm, generalContext, specificContext) {
   let termUnifiesIntrinsically = false;
 
   const generalTermNode = generalTerm.getNode(),
         specificTermNode = specificTerm.getNode(),
         generalNode = generalTermNode, ///
         specificNode = specificTermNode, ///
-        success = intrinsicTermPass.run(generalNode, specificNode, generalContext, specificContext);
+        success = await intrinsicTermPass.run(generalNode, specificNode, generalContext, specificContext);
 
   if (success) {
     termUnifiesIntrinsically = true;
@@ -598,14 +598,14 @@ export function unifyTermIntrinsically(generalTerm, specificTerm, generalContext
   return termUnifiesIntrinsically;
 }
 
-export function unifyMetavariableIntrinsically(generalMetavariable, specificMetavariable, generalContext, specificContext) {
+export async function unifyMetavariableIntrinsically(generalMetavariable, specificMetavariable, generalContext, specificContext) {
   let metavariableUnifiesIntrinsically = false;
 
   const generalMetavariableNode = generalMetavariable.getNode(),
         specificMetavariableNode = specificMetavariable.getNode(),
         generalNode = generalMetavariableNode, ///
         specificNode = specificMetavariableNode, ///
-        success = intrinsicMetavariablePass.run(generalNode, specificNode, generalContext, specificContext);
+        success = await intrinsicMetavariablePass.run(generalNode, specificNode, generalContext, specificContext);
 
   if (success) {
     metavariableUnifiesIntrinsically = true;

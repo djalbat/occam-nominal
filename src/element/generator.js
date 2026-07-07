@@ -73,7 +73,7 @@ export default define(class Generator extends Element {
     this.type = type;
   }
 
-  verify(context) {
+  async verify(context) {
     let verifies = false;
 
     const includeType = false,
@@ -81,8 +81,8 @@ export default define(class Generator extends Element {
 
     context.trace(`Verifying the '${generatorString}' generator...`);
 
-    attempt((context) => {
-      const termValidates = this.validateTerm(context);
+    await attempt(async (context) => {
+      const termValidates = await this.validateTerm(context);
 
       if (termValidates) {
         verifies = true;
@@ -111,7 +111,7 @@ export default define(class Generator extends Element {
     const hypothtical = this.isHypothetical();
 
     if (hypothtical) {
-      const termValidatesAsVariable = validateTermAsVariable(this.term, context, (term, context) => { ///
+      const termValidatesAsVariable = await validateTermAsVariable(this.term, context, async (term, context) => { ///
         let validatesForwards = false;
 
         const type = term.getType(),
@@ -128,7 +128,7 @@ export default define(class Generator extends Element {
         termValidates = true;
       }
     } else {
-      const termValidatesAsGenerator = validateTermAsGenerator(this.term, context);
+      const termValidatesAsGenerator = await validateTermAsGenerator(this.term, context);
 
       if (termValidatesAsGenerator) {
         termValidates = true;

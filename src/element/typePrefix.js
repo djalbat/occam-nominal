@@ -39,7 +39,7 @@ export default define(class TypePrefix extends Element {
     return comparesToTypePrefixName;
   }
 
-  verify(context) {
+  async verify(context) {
     let verifies = false;
 
     const typePrefixString = this.getString();  ///

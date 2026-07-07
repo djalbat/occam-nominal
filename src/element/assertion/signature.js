@@ -34,7 +34,7 @@ export default define(class SignatureAssertion extends Assertion {
     return signatureAssertionNode;
   }
 
-  validate(context) {
+  async validate(context) {
     let signatureAssertion = null;
 
     const signatureAssertionString = this.getString(); ///

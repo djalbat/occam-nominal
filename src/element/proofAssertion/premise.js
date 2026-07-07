@@ -120,7 +120,7 @@ export default define(class Premise extends ProofAssertion {
     return validates;
   }
 
-  validateStatement(context) {
+  async validateStatement(context) {
     let statementValidates = false;
 
     const premiseString = this.getString();
@@ -131,7 +131,7 @@ export default define(class Premise extends ProofAssertion {
 
     statement = this.getStatement();
 
-    statement = statement.validate(context);  ///
+    statement = await statement.validate(context);  ///
 
     if (statement !== null) {
       statementValidates = true;
@@ -223,7 +223,7 @@ export default define(class Premise extends ProofAssertion {
     return subproofUnifies;
   }
 
-  unifyProofAssertion(proofAssertion, context) {
+  async unifyProofAssertion(proofAssertion, context) {
     let proofAssertionUnifies = false;
 
     const premiseString = this.getString(), ///
@@ -236,9 +236,9 @@ export default define(class Premise extends ProofAssertion {
           generalContext = premiseContext, ///
           specificContext = proofAssertionContext;  ///
 
-    reconcile((specificContext) => {
+    await reconcile(async (specificContext) => {
       const statement = proofAssertion.getStatement(),
-            statementUnifies = this.unifyStatement(statement, generalContext, specificContext);
+            statementUnifies = await this.unifyStatement(statement, generalContext, specificContext);
 
       if (statementUnifies) {
         proofAssertionUnifies = true;

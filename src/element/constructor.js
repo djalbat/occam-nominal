@@ -73,7 +73,7 @@ export default define(class Constructor extends Element {
     this.type = type;
   }
 
-  verify(context) {
+  async verify(context) {
     let verifies = false;
 
     const includeType = false,
@@ -81,8 +81,8 @@ export default define(class Constructor extends Element {
 
     context.trace(`Verifying the '${constructorString}' constructor...`);
 
-    attempt((context) => {
-      const termValidates = this.validateTerm(context);
+    await attempt(async (context) => {
+      const termValidates = await this.validateTerm(context);
 
       if (termValidates) {
         verifies = true;
@@ -128,7 +128,7 @@ export default define(class Constructor extends Element {
         termValidates = true;
       }
     } else {
-      const termValidatesAsConstructor = validateTermAsConstructor(this.term, context);
+      const termValidatesAsConstructor = await validateTermAsConstructor(this.term, context);
 
       if (termValidatesAsConstructor) {
         termValidates = true;

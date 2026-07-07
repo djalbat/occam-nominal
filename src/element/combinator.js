@@ -29,15 +29,15 @@ export default define(class Combinator extends Element {
     return combinatorNode;
   }
 
-  verify(context) {
+  async verify(context) {
     let verifies = false;
 
     const combinatorString = this.getString();  ///
 
     context.trace(`Verifying the '${combinatorString}' combinator...`);
 
-    attempt((context) => {
-      const statementValidates = this.validateStatement(context);
+    await attempt(async (context) => {
+      const statementValidates = await this.validateStatement(context);
 
       if (statementValidates) {
         verifies = true;
@@ -55,14 +55,14 @@ export default define(class Combinator extends Element {
     return verifies;
   }
 
-  validateStatement(context) {
+  async validateStatement(context) {
     let statementValidates = false;
 
     const combinatorString = this.getString();  ///
 
     context.trace(`Validating the '${combinatorString}' combinator's statement...`);
 
-    const statementValidatesAsCombinator = validateStatementAsCombinator(this.statement, context);
+    const statementValidatesAsCombinator = await validateStatementAsCombinator(this.statement, context);
 
     if (statementValidatesAsCombinator) {
       statementValidates = true;
@@ -75,7 +75,7 @@ export default define(class Combinator extends Element {
     return statementValidates;
   }
 
-  unifyStatement(statement, context) {
+  async unifyStatement(statement, context) {
     let statementUnifies = false;
 
     const statementString = statement.getString(),
@@ -87,7 +87,7 @@ export default define(class Combinator extends Element {
           combinatorContext = combinator.getContext(),
           generalContext = combinatorContext, ///
           specifiContext = context, ///
-          statementUnifiesWithCombinator = unifyStatementWithCombinator(statement, combinator, generalContext, specifiContext);
+          statementUnifiesWithCombinator = await unifyStatementWithCombinator(statement, combinator, generalContext, specifiContext);
 
     if (statementUnifiesWithCombinator) {
       statementUnifies = true;

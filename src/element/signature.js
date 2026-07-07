@@ -67,14 +67,14 @@ export default define(class Signature extends Element {
     return validSignature;
   }
 
-  verify(context) {
+  async verify(context) {
     let verifies = false;
 
     const signatureString = this.getString();  ///
 
     context.trace(`Verifying the '${signatureString}' signature...`);
 
-    attempt(async (context) => {
+    await attempt(async (context) => {
       const termsValidate = await this.validateTerms(context);
 
       if (termsValidate !== null) {
@@ -115,7 +115,7 @@ export default define(class Signature extends Element {
 
       context = this.getContext();
 
-      attempt(async (context) => {
+      await attempt(async (context) => {
         const termsValidate = await this.validateTerms(context);
 
         if (termsValidate !== null) {
@@ -152,8 +152,8 @@ export default define(class Signature extends Element {
 
     const terms = [];
 
-    termsValidate = asyncEvery(this.terms, async (term) => {
-      term = term.validate(context, async (term, context) => { ///
+    termsValidate = await asyncEvery(this.terms, async (term) => {
+      term = await term.validate(context, async (term, context) => { ///
         const validatesForwards = true;
 
         return validatesForwards;

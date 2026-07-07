@@ -105,14 +105,14 @@ export default define(class Metavariable extends Element {
     return comparesToMetavariableName;
   }
 
-  verify(context) {
+  async verify(context) {
     let verifies = false;
 
     const metavariableString = this.getString();  ///
 
     context.trace(`Verifying the '${metavariableString}' metavariable...`);
 
-    const termVerifies = this.verifyTerm(context);
+    const termVerifies = await this.verifyTerm(context);
 
     if (termVerifies) {
       const typeVerifies = this.verifyType(context);
@@ -169,7 +169,7 @@ export default define(class Metavariable extends Element {
     return typeVerifies;
   }
 
-  validate(strict, context) {
+  async validate(strict, context) {
     if (context === undefined) {
       context = strict; ///
 
@@ -196,7 +196,7 @@ export default define(class Metavariable extends Element {
       const nameValidates = this.validateName(strict, context);
 
       if (nameValidates) {
-        const termValidates = this.validateTerm(strict, context);
+        const termValidates = await this.validateTerm(strict, context);
 
         if (termValidates) {
           const typeValidates = this.validateType(strict, context);

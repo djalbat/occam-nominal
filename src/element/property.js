@@ -54,7 +54,7 @@ export default define(class Property extends Element {
     this.type = type;
   }
 
-  verify(context) {
+  async verify(context) {
     let verifies = false;
 
     const includeType = false,
@@ -62,8 +62,8 @@ export default define(class Property extends Element {
 
     context.trace(`Verifying the '${propertyString}' property...`);
 
-    attempt((context) => {
-      const termValidates = this.validateTerm(context);
+    await attempt(async (context) => {
+      const termValidates = await this.validateTerm(context);
 
       if (termValidates) {
         verifies = true;

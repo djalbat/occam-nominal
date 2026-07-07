@@ -295,7 +295,7 @@ export default define(class Schema extends Element {
     return assumptionsUnify;
   }
 
-  unifyDeducedStatement(deducedStatement, context) {
+  async unifyDeducedStatement(deducedStatement, context) {
     let deducedStatementUnifies = false;
 
     const deductionString = this.deduction.getString(),
@@ -307,7 +307,7 @@ export default define(class Schema extends Element {
           statement = deducedStatement, ///
           generalContext = deductionContext, ///
           specificContext = context,  ///
-          statementUnifies = this.deduction.unifyStatement(statement, generalContext, specificContext);
+          statementUnifies = await this.deduction.unifyStatement(statement, generalContext, specificContext);
 
     if (statementUnifies) {
       deducedStatementUnifies = true;
@@ -347,7 +347,7 @@ export default define(class Schema extends Element {
     return subproofAssertionUnifies;
   }
 
-  unifySupposedStatement(supposedStatement, index, context) {
+  async unifySupposedStatement(supposedStatement, index, context) {
     let supposedStatementUnifies = false;
 
     const supposition = this.getSupposition(index),
@@ -360,7 +360,7 @@ export default define(class Schema extends Element {
           statement = supposedStatement, ///
           generalContext = suppositionContext, ///
           specificContext = context,  ///
-          statementUnifies = supposition.unifyStatement(statement, generalContext, specificContext);
+          statementUnifies = await supposition.unifyStatement(statement, generalContext, specificContext);
 
     if (statementUnifies) {
       supposedStatementUnifies = true;

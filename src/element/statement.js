@@ -251,7 +251,7 @@ export default define(class Statement extends Element {
     return discharges;
   }
 
-  unifyStatement(statement, generalContext, specificContext) {
+  async unifyStatement(statement, generalContext, specificContext) {
     let statementUnifies;
 
     const context = specificContext,  ///
@@ -262,7 +262,7 @@ export default define(class Statement extends Element {
 
     context.trace(`Unifying the '${specificStatementString}' statement with the '${generalStatementString}' statement...`);
 
-    statementUnifies = unifyStatement(generalStatement, specificStatement, generalContext, specificContext);
+    statementUnifies = await unifyStatement(generalStatement, specificStatement, generalContext, specificContext);
 
     if (statementUnifies) {
       context.debug(`...unified the '${specificStatementString}' statement with the '${generalStatementString}' statement.`);

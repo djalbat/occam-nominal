@@ -60,7 +60,7 @@ export default define(class DefinedAssertion extends Assertion {
       context.debug(`...the '${definedAssertionString}' defined definedAssertion is already valid.`);
     } else {
       const termValidates = await this.validateTerm(context),
-            frameValidates = this.validateFrame(context);
+            frameValidates = await this.validateFrame(context);
 
       if (termValidates || frameValidates) {
         const stated = context.isStated();

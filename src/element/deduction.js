@@ -56,15 +56,15 @@ export default define(class Deduction extends Element {
     return verifies;
   }
 
-  validate(context) {
+  async validate(context) {
     let validates = false;
 
     const deductionString = this.getString();  ///
 
     context.trace(`Validating the '${deductionString}' deduction...`);
 
-    attempt((context) => {
-      const statementValidates = this.validateStatement(context);
+    await attempt(async (context) => {
+      const statementValidates = await this.validateStatement(context);
 
       if (statementValidates) {
         validates = true;
@@ -82,14 +82,14 @@ export default define(class Deduction extends Element {
     return validates;
   }
 
-  validateStatement(context) {
+  async validateStatement(context) {
     let statementValidates = false;
 
     const deductionnString = this.getString();  ///
 
     context.trace(`Validating the '${deductionnString}' deductionn's statement...`);
 
-    const statement = this.statement.validate(context);
+    const statement = await this.statement.validate(context);
 
     if (statement !== null) {
       statementValidates = true;
@@ -102,7 +102,7 @@ export default define(class Deduction extends Element {
     return statementValidates;
   }
 
-  unifyStep(step, context) {
+  async unifyStep(step, context) {
     let stepUnifies = false;
 
     const stepString = step.getString(),
@@ -115,9 +115,9 @@ export default define(class Deduction extends Element {
           generalContext = deductionnContext, ///
           specificContext = stepContext;  ///
 
-    reconcile((specificContext) => {
+    await reconcile(async (specificContext) => {
       const statement = step.getStatement(),
-            statementUnifies = this.unifyStatement(statement, generalContext, specificContext);
+            statementUnifies = await this.unifyStatement(statement, generalContext, specificContext);
 
       if (statementUnifies) {
         specificContext.commit(context);
@@ -133,7 +133,7 @@ export default define(class Deduction extends Element {
     return stepUnifies;
   }
 
-  unifyStatement(statement, generalContext, specificContext) {
+  async unifyStatement(statement, generalContext, specificContext) {
     let statementUnifies;
 
     const context = specificContext,  ///
@@ -142,7 +142,7 @@ export default define(class Deduction extends Element {
 
     context.trace(`Unifying the '${statementString}' statement with the '${deductionString}' deduction's statement...`);
 
-    statementUnifies = this.statement.unifyStatement(statement, generalContext, specificContext);
+    statementUnifies = await this.statement.unifyStatement(statement, generalContext, specificContext);
 
     if (statementUnifies) {
       context.debug(`...unified the '${statementString}' statement with the '${deductionString}' deduction's statement.`);

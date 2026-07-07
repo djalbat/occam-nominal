@@ -220,7 +220,7 @@ export default define(class StatementSubstitution extends Substitution {
     return replacementStatementValidates;
   }
 
-  unifyTargetStatement(substitution, context) {
+  async unifyTargetStatement(substitution, context) {
     let targetStatemnentUnifies = false;
 
     const generalSubstitution = this, ///
@@ -239,8 +239,8 @@ export default define(class StatementSubstitution extends Substitution {
           generalStatement = generalSubstitutionTargetStatement, ///
           specificStatement = specificSubstitutionTargetStatement; ///
 
-    reconcile((specificContext) => {
-      const statementUnifies = generalStatement.unifyStatement(specificStatement, generalContext, specificContext);
+    await reconcile(async (specificContext) => {
+      const statementUnifies = await generalStatement.unifyStatement(specificStatement, generalContext, specificContext);
 
       if (statementUnifies) {
         specificContext.commit(context);
@@ -256,7 +256,7 @@ export default define(class StatementSubstitution extends Substitution {
     return targetStatemnentUnifies;
   }
 
-  unifyReplacementStatement(substitution, context) {
+  async unifyReplacementStatement(substitution, context) {
     let replacementStatemnentUnifies = false;
 
     const generalSubstitution = this, ///
@@ -275,8 +275,8 @@ export default define(class StatementSubstitution extends Substitution {
           generalStatement = generalSubstitutionReplacementStatement, ///
           specificStatement = specificSubstitutionReplacementStatement; ///
 
-    reconcile((specificContext) => {
-      const statementUnifies = generalStatement.unifyStatement(specificStatement, generalContext, specificContext);
+    await reconcile(async (specificContext) => {
+      const statementUnifies = await generalStatement.unifyStatement(specificStatement, generalContext, specificContext);
 
       if (statementUnifies) {
         specificContext.commit(context);

@@ -137,7 +137,7 @@ export default define(class Frame extends Element {
     return validFrame;
   }
 
-  validate(context) {
+  async validate(context) {
     let frame = null;
 
     const frameString = this.getString();  ///

@@ -184,7 +184,7 @@ export default define(class Step extends ProofAssertion {
     return validates;
   }
 
-  validateStatement(context) {
+  async validateStatement(context) {
     let statementValidates = false;
 
     const stepString = this.getString();
@@ -195,7 +195,7 @@ export default define(class Step extends ProofAssertion {
 
     statement = this.getStatement();
 
-    statement = statement.validate(context);  ///
+    statement = await statement.validate(context);  ///
 
     if (statement !== null) {
       statementValidates = true;

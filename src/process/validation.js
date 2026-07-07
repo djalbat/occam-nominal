@@ -58,10 +58,10 @@ async function unifyTermWithGenerators(term, context, validateForwards) {
 
   const generators = context.getGenerators();
 
-  termUnifiesWithGenerators = await asyncSome(generators, (generator) => {
+  termUnifiesWithGenerators = await asyncSome(generators, async (generator) => {
     let termUnifiesWithGenerator = false;
 
-    choose(async (context) => {
+    await choose(async (context) => {
       const termUnifies = await generator.unifyTerm(term, context, validateForwards);
 
       if (termUnifies) {
@@ -87,7 +87,7 @@ async function unifyTermWithConstructors(term, context, validateForwards) {
   termUnifiesWithConstructors = await asyncSome(constructors, async (constructor) => {
     let termUnifiesWithConstructor = false;
 
-    choose(async (context) => {
+    await choose(async (context) => {
       const termUnifies = await constructor.unifyTerm(term, context, validateForwards);
 
       if (termUnifies) {
@@ -115,7 +115,7 @@ async function unifyTermWithBracketedConstructor(term, context, validateForwards
   return termUnifiesWithBracketedConstructor;
 }
 
-function validateStatementAsMetavariable(statement, context) {
+async function validateStatementAsMetavariable(statement, context) {
   let statementValidatesAsMetavariable = false;
 
   const { Metavariable } = elements;
@@ -163,16 +163,16 @@ function validateStatementAsMetavariable(statement, context) {
   return statementValidatesAsMetavariable;
 }
 
-function unifyStatementWithCombinators(statement, context) {
+async function unifyStatementWithCombinators(statement, context) {
   let statementUnifiesWithCombinators = false;
 
   const combinators = context.getCombinators();
 
-  combinators.some((combinator) => {
+  await asyncSome(combinators, async (combinator) => {
     let statementUnifies;
 
-    descend((context) => {
-      statementUnifies = combinator.unifyStatement(statement, context);
+    await descend(async (context) => {
+      statementUnifies = await combinator.unifyStatement(statement, context);
     }, context);
 
     if (statementUnifies) {
@@ -185,17 +185,17 @@ function unifyStatementWithCombinators(statement, context) {
   return statementUnifiesWithCombinators;
 }
 
-function unifyStatementWithBracketedCombinator(statement, context) {
+async function unifyStatementWithBracketedCombinator(statement, context) {
   let statementUnifiesWithBracketedCombinator;
 
   const bracketedCombinator = bracketedCombinatorFromNothing();
 
-  statementUnifiesWithBracketedCombinator = bracketedCombinator.unifyStatement(statement, context);
+  statementUnifiesWithBracketedCombinator = await bracketedCombinator.unifyStatement(statement, context);
 
   return statementUnifiesWithBracketedCombinator;
 }
 
-function validateStatementAsEquality(statement, context) {
+async function validateStatementAsEquality(statement, context) {
   let statementValidatesAsEquality = false;
 
   const { Equality } = elements;
@@ -223,7 +223,7 @@ function validateStatementAsEquality(statement, context) {
   return statementValidatesAsEquality;
 }
 
-function validateStatementAsJudgement(statement, context) {
+async function validateStatementAsJudgement(statement, context) {
   let validatesStatementAsJudgement = false;
 
   let judgement;
@@ -251,7 +251,7 @@ function validateStatementAsJudgement(statement, context) {
   return validatesStatementAsJudgement;
 }
 
-function validateStatementAsTypeAssertion(statement, context) {
+async function validateStatementAsTypeAssertion(statement, context) {
   let validatesStatementAsTypeAssertion = false;
 
   const { TypeAssertion } = elements;
@@ -279,7 +279,7 @@ function validateStatementAsTypeAssertion(statement, context) {
   return validatesStatementAsTypeAssertion;
 }
 
-function validateStatementAsDefinedAssertion(statement, context) {
+async function validateStatementAsDefinedAssertion(statement, context) {
   let validatesStatementAsDefinedAssertion = false;
 
   const { DefinedAssertion } = elements;
@@ -307,7 +307,7 @@ function validateStatementAsDefinedAssertion(statement, context) {
   return validatesStatementAsDefinedAssertion;
 }
 
-function validateStatementAsPropertyAssertion(statement, context) {
+async function validateStatementAsPropertyAssertion(statement, context) {
   let statementValidatesAsPropertyAssertion = false;
 
   const { PropertyAssertion } = elements;
@@ -335,7 +335,7 @@ function validateStatementAsPropertyAssertion(statement, context) {
   return statementValidatesAsPropertyAssertion;
 }
 
-function validateStatementAsSubproofAssertion(statement, context) {
+async function validateStatementAsSubproofAssertion(statement, context) {
   let statementValidatesAsSubproofAssertion = false;
 
   const { SubproofAssertion } = elements;
@@ -363,7 +363,7 @@ function validateStatementAsSubproofAssertion(statement, context) {
   return statementValidatesAsSubproofAssertion;
 }
 
-function validateStatementAsContainedAssertion(statement, context) {
+async function validateStatementAsContainedAssertion(statement, context) {
   let validatesStatementAsContainedAssertion = false;
 
   const { ContainedAssertion } = elements;
@@ -391,7 +391,7 @@ function validateStatementAsContainedAssertion(statement, context) {
   return validatesStatementAsContainedAssertion;
 }
 
-function validateStatementAsSignatureAssertion(statement, context) {
+async function validateStatementAsSignatureAssertion(statement, context) {
   let validatesAStatementsSignatureAssertion = false;
 
   const { SignatureAssertion } = elements;
@@ -419,16 +419,16 @@ function validateStatementAsSignatureAssertion(statement, context) {
   return validatesAStatementsSignatureAssertion;
 }
 
-export function unifyTermWithProperties(term, context, validateForwards) {
+export async function unifyTermWithProperties(term, context, validateForwards) {
   let termUnifiesWithProperties;
 
   const properties = context.getProperties();
 
-  termUnifiesWithProperties = properties.some((property) => {
+  termUnifiesWithProperties = await asyncSome(properties, async (property) => {
     let termUnifiesWithProperty = false;
 
-    choose((context) => {
-      const termUnifies = property.unifyTerm(term, context, validateForwards);
+    await choose(async (context) => {
+      const termUnifies = await property.unifyTerm(term, context, validateForwards);
 
       if (termUnifies) {
         termUnifiesWithProperty = true;

@@ -60,15 +60,15 @@ export default define(class Hypothesis extends Element {
     return verifies;
   }
 
-  validate(context) {
+  async validate(context) {
     let validates = false;
 
     const hypothesisString = this.getString(); ///
 
     context.trace(`Validating the '${hypothesisString}' hypothesis...`);
 
-    attempt((context) => {
-      const statementValidates = this.validateStatement(context),
+    await attempt(async (context) => {
+      const statementValidates = await this.validateStatement(context),
             procedureCallValidates =  this.validateProcedureCall(context);
 
       if (statementValidates || procedureCallValidates) {
@@ -87,7 +87,7 @@ export default define(class Hypothesis extends Element {
     return validates;
   }
 
-  validateStatement(context) {
+  async validateStatement(context) {
     let statementValidates = false;
 
     if (this.statement !== null) {
@@ -95,7 +95,7 @@ export default define(class Hypothesis extends Element {
 
       context.trace(`Validating the '${hypothesisString}' hypothesis's statement...`);
 
-      const statement = this.statement.validate(context);  ///
+      const statement = await this.statement.validate(context);  ///
 
       if (statement !== null) {
         statementValidates = true;

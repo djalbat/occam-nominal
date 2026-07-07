@@ -115,7 +115,7 @@ export default define(class Axiom extends TopLevelAssertion {
           generalContext = generalDeductionContext, ///
           specificContext = specificDeductionContext; ///
 
-    reconcile((specificContext) => {
+    await reconcile(async (specificContext) => {
       let statement;
 
       statement = specificDeduction.getStatement();
@@ -125,7 +125,7 @@ export default define(class Axiom extends TopLevelAssertion {
       statement = generalDeduction.getStatement();
 
       const generalStatement = statement, ///
-            statementUnifies = generalStatement.unifyStatement(specificStatement, generalContext, specificContext);
+            statementUnifies = await generalStatement.unifyStatement(specificStatement, generalContext, specificContext);
 
       if (statementUnifies) {
         specificContext.commit(context);
@@ -160,7 +160,7 @@ export default define(class Axiom extends TopLevelAssertion {
           generalContext = generalSuppositionContext, ///
           specificContext = specificSuppositionContext; ///
 
-    reconcile((specificContext) => {
+    await reconcile(async (specificContext) => {
       let statement;
 
       statement = specificSupposition.getStatement();
@@ -170,7 +170,7 @@ export default define(class Axiom extends TopLevelAssertion {
       statement = generalSupposition.getStatement();
 
       const generalStatement = statement, ///
-            statementUnifies = generalStatement.unifyStatement(specificStatement, generalContext, specificContext);
+            statementUnifies = await generalStatement.unifyStatement(specificStatement, generalContext, specificContext);
 
       if (statementUnifies) {
         specificContext.commit(context);

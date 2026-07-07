@@ -49,7 +49,7 @@ export default define(class ContainedAssertion extends Assertion {
     return containedAssertionNode;
   }
 
-  validate(context) {
+  async validate(context) {
     let containedAssertion = null;
 
     const containedAssertionString = this.getString(); ///
@@ -67,9 +67,9 @@ export default define(class ContainedAssertion extends Assertion {
 
       context.debug(`...the '${containedAssertionString}' contained assertion is already valid.`);
     } else {
-      const termValidates = this.validateTerm(context),
-            frameValidates = this.validateFrame(context),
-            statementValidates = this.validateStatement(context)
+      const termValidates = await this.validateTerm(context),
+            frameValidates = await this.validateFrame(context),
+            statementValidates = await this.validateStatement(context)
 
       if (termValidates || frameValidates || statementValidates) {
         const stated = context.isStated();
@@ -170,7 +170,7 @@ export default define(class ContainedAssertion extends Assertion {
     return frameValidates;
   }
 
-  validateStatement(context) {
+  async validateStatement(context) {
     let statementValidates = false;
 
     if (this.statement !== null) {
@@ -178,7 +178,7 @@ export default define(class ContainedAssertion extends Assertion {
 
       context.trace(`Validating the '${statementString}' statement...`);
 
-      const statement = this.statement.validate(context);
+      const statement = await this.statement.validate(context);
 
       if (statement !== null) {
         statementValidates = true;

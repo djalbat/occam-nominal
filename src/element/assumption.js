@@ -76,7 +76,7 @@ export default define(class Assumption extends Element {
     return validAssumption;
   }
 
-  validate(context) {
+  async validate(context) {
     let assumption = null;
 
     const assumptionString = this.getString();  ///
@@ -94,10 +94,10 @@ export default define(class Assumption extends Element {
 
       context.debug(`...the '${assumptionString}' assumption is already valid.`);
     } else {
-      const statementValidates = this.validateStatement(context);
+      const statementValidates = await this.validateStatement(context);
 
       if (statementValidates) {
-        const referenceValidates = this.validateReference(context);
+        const referenceValidates = await this.validateReference(context);
 
         if (referenceValidates) {
           const stated = context.isStated();
@@ -153,14 +153,14 @@ export default define(class Assumption extends Element {
     return referenceValidates;
   }
 
-  validateStatement(context) {
+  async validateStatement(context) {
     let statementValidates = false;
 
     const assumptionString = this.getString();  ///
 
     context.trace(`Validating the '${assumptionString}' assumption's statement...`);
 
-    const statement = this.statement.validate(context);
+    const statement = await this.statement.validate(context);
 
     if (statement !== null) {
       statementValidates = true;
@@ -292,7 +292,7 @@ export default define(class Assumption extends Element {
     return schemaUnifies;
   }
 
-  unifyDeduction(deduction, generalContext, specificContext) {
+  async unifyDeduction(deduction, generalContext, specificContext) {
     let deductionUnifies;
 
     const context = specificContext,  ///
@@ -306,8 +306,8 @@ export default define(class Assumption extends Element {
 
     specificContext = deductionContext; ///
 
-    reconcile((specificContext) => {
-      const statementUnifies = this.statement.unifyStatement(statement, generalContext, specificContext);
+    await reconcile(async (specificContext) => {
+      const statementUnifies = await this.statement.unifyStatement(statement, generalContext, specificContext);
 
       if (statementUnifies) {
         deductionUnifies = true;

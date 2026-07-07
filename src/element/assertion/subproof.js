@@ -1,7 +1,7 @@
 "use strict";
 
 import { arrayUtilities } from "necessary";
-import { breakPointUtilities } from "occam-languages";
+import { breakPointUtilities, asynchronousUtilities } from "occam-languages";
 
 import Assertion from "../assertion";
 
@@ -10,7 +10,8 @@ import { instantiateSubproofAssertion } from "../../process/instantiate";
 import { descend, reconcile, instantiate } from "../../utilities/context";
 import { subproofAssertionFromStatementNode } from "../../utilities/element";
 
-const { breakPointFromJSON } = breakPointUtilities,
+const { asyncEvery } = asynchronousUtilities,
+      { breakPointFromJSON } = breakPointUtilities,
       { last, front, backwardsEvery } = arrayUtilities;
 
 export default define(class SubproofAssertion extends Assertion {
@@ -52,7 +53,7 @@ export default define(class SubproofAssertion extends Assertion {
     return subproofAssertionNode;
   }
 
-  validate(context) {
+  async validate(context) {
     let subproofAssertion = null;
 
     const subproofAssertionString = this.getString();  ///
@@ -70,7 +71,7 @@ export default define(class SubproofAssertion extends Assertion {
 
       context.debug(`...the '${subproofAssertionString}' subproof assertion is already valid.`);
     } else {
-      const statementsValidate = this.validateStatements(context);
+      const statementsValidate = await this.validateStatements(context);
 
       if (statementsValidate) {
         validates = true;
@@ -92,12 +93,12 @@ export default define(class SubproofAssertion extends Assertion {
     return subproofAssertion;
   }
 
-  validateStatements(context) {
-    const statementsValidate = this.statements.every((statement) => {
+  async validateStatements(context) {
+    const statementsValidate = await asyncEvery(this.statements, async (statement) => {
       let statementValidates = false;
 
-      descend((context) => {
-        statement = statement.validate(context);  ///
+      await descend(async (context) => {
+        statement = await statement.validate(context);  ///
 
         if (statement !== null) {
           statementValidates = true;
@@ -168,7 +169,7 @@ export default define(class SubproofAssertion extends Assertion {
     return subproofUnifies;
   }
 
-  unifyLastStep(lastStep, generalContext, specificContext) {
+  async unifyLastStep(lastStep, generalContext, specificContext) {
     let lastStepUnifies = false;
 
     const context = specificContext,  ///
@@ -182,9 +183,9 @@ export default define(class SubproofAssertion extends Assertion {
 
     specificContext = lastStepContext;  ///
 
-    reconcile((specificContext) => {
+    await reconcile(async (specificContext) => {
       const lastStepStatement = lastStep.getStatement(),
-            lastStepStatementUnifies = deducedStatement.unifyStatement(lastStepStatement, generalContext, specificContext);
+            lastStepStatementUnifies = await deducedStatement.unifyStatement(lastStepStatement, generalContext, specificContext);
 
       if (lastStepStatementUnifies) {
         lastStepUnifies = true;
@@ -200,7 +201,7 @@ export default define(class SubproofAssertion extends Assertion {
     return lastStepUnifies;
   }
 
-  unifyDeduction(deduction, generalContext, specificContext) {
+  async unifyDeduction(deduction, generalContext, specificContext) {
     let deductionUnifies = false;
 
     const context = specificContext,  ///
@@ -214,9 +215,9 @@ export default define(class SubproofAssertion extends Assertion {
 
     specificContext = deductionContext;  ///
 
-    reconcile((specificContext) => {
+    await reconcile(async (specificContext) => {
       const deductionStatement = deduction.getStatement(),
-            deductionStatementUnifies = deducedStatement.unifyStatement(deductionStatement, generalContext, specificContext);
+            deductionStatementUnifies = await deducedStatement.unifyStatement(deductionStatement, generalContext, specificContext);
 
       if (deductionStatementUnifies) {
         deductionUnifies = true;
@@ -232,7 +233,7 @@ export default define(class SubproofAssertion extends Assertion {
     return deductionUnifies;
   }
 
-  unifySupposition(supposition, index, generalContext, specificContext) {
+  async unifySupposition(supposition, index, generalContext, specificContext) {
     let suppositionUnifies = false;
 
     const context = specificContext,  ///
@@ -246,9 +247,9 @@ export default define(class SubproofAssertion extends Assertion {
 
     specificContext = suppositionContext;  ///
 
-    reconcile((specificContext) => {
+    await reconcile(async (specificContext) => {
       const suppositionStatement = supposition.getStatement(),
-            suppositionStatementUnifies = supposedStatement.unifyStatement(suppositionStatement, generalContext, specificContext);
+            suppositionStatementUnifies = await supposedStatement.unifyStatement(suppositionStatement, generalContext, specificContext);
 
       if (suppositionStatementUnifies) {
         suppositionUnifies = true;

@@ -79,7 +79,7 @@ export default class ProofAssertion extends Element {
     return comparesToStatement;
   }
 
-  unifyStatement(statement, generalContext, specificContext) {
+  async unifyStatement(statement, generalContext, specificContext) {
     let statementUnifies = false;
 
     if (this.statement !== null) {
@@ -89,7 +89,7 @@ export default class ProofAssertion extends Element {
 
       context.trace(`Unifying the '${statementString}' statement with the '${proofAssertionString}' proof assertion's statement...`);
 
-      statementUnifies = this.statement.unifyStatement(statement, generalContext, specificContext);
+      statementUnifies = await this.statement.unifyStatement(statement, generalContext, specificContext);
 
       if (statementUnifies) {
         context.debug(`...unified the '${statementString}' statement with the '${proofAssertionString}' proof assertion's statement.`);

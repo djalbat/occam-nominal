@@ -98,7 +98,7 @@ export default define(class TermSubstitution extends Substitution {
       const generalContext = this.getGeneralContext(),
             specificContext = this.getSpecificContext();
 
-      attempts((generalContext, specificContext) => {
+      await attempts(async (generalContext, specificContext) => {
         const targetTermValidates = await this.validateTargetTerm(generalContext, specificContext);
 
         if (targetTermValidates) {

@@ -61,7 +61,7 @@ export default define(class Constraint extends Element {
     return validConstraint;
   }
 
-  validate(context) {
+  async validate(context) {
     let constraint = null;
 
     const constraintString = this.getString();  ///
@@ -84,10 +84,10 @@ export default define(class Constraint extends Element {
       context = this.getContext();
 
       attempt((context) => {
-        const statementValidates = this.validateStatement(context);
+        const statementValidates = await this.validateStatement(context);
 
         if (statementValidates) {
-          const referenceValidates = this.validateReference(context);
+          const referenceValidates = await this.validateReference(context);
 
           if (referenceValidates) {
             const stated = context.isStated();
@@ -155,15 +155,15 @@ export default define(class Constraint extends Element {
     return referenceValidates;
   }
 
-  validateStatement(context) {
+  async validateStatement(context) {
     let statementValidates = false;
 
     const constraintString = this.getString();  ///
 
     context.trace(`Validating the '${constraintString}' constraint's statement...`);
 
-    descend((context) => {
-      const statement = this.statement.validate(context);
+    await descend(async (context) => {
+      const statement = await this.statement.validate(context);
 
       if (statement !== null) {
         statementValidates = true;
@@ -233,7 +233,7 @@ export default define(class Constraint extends Element {
     return referenceUnifies;
   }
 
-  unifyStatement(statement, generalContext, specificContext) {
+  async unifyStatement(statement, generalContext, specificContext) {
     let statementUnifies;
 
     const context = specificContext,  ///
@@ -245,7 +245,7 @@ export default define(class Constraint extends Element {
     const generalStatement = this.statement,  ///
           specificStatement = stripBracketsFromStatement(statement, context);  ///
 
-    statementUnifies = unifyStatement(generalStatement, specificStatement, generalContext, specificContext);
+    statementUnifies = await unifyStatement(generalStatement, specificStatement, generalContext, specificContext);
 
     if (statementUnifies) {
       context.debug(`...unified the '${statementString}' statement with the '${constraintString}' constraint's statement.`);
@@ -254,7 +254,7 @@ export default define(class Constraint extends Element {
     return statementUnifies;
   }
 
-  unifyAssumption(assumption, context) {
+  async unifyAssumption(assumption, context) {
     let assumptionUnifies = false;
 
     const assumptionString = assumption.getString(),  ///
@@ -265,14 +265,14 @@ export default define(class Constraint extends Element {
     const constraintContext = this.getContext(), ///
           generalContext = constraintContext; ///
 
-    reconcile((context) => {
+    await reconcile(async (context) => {
       const reference = assumption.getReference(),
             specificContext = context,  ///
             referneceUnifies = this.unifyReference(reference, generalContext, specificContext);
 
       if (referneceUnifies) {
         const statement = assumption.getStatement(),
-              statementUnified = this.unifyStatement(statement, generalContext, specificContext);
+              statementUnified = await this.unifyStatement(statement, generalContext, specificContext);
 
         if (statementUnified) {
           context.commit();

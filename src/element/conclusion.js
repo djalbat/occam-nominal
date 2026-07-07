@@ -56,15 +56,15 @@ export default define(class Conclusion extends Element {
     return verifies;
   }
 
-  validate(context) {
+  async validate(context) {
     let validates = false;
 
     const conclusionString = this.getString();  ///
 
     context.trace(`Validating the '${conclusionString}' conclusion...`);
 
-    attempt((context) => {
-      const statementValidates = this.validateStatement(context);
+    await attempt(async (context) => {
+      const statementValidates = await this.validateStatement(context);
 
       if (statementValidates) {
         validates = true;
@@ -82,14 +82,14 @@ export default define(class Conclusion extends Element {
     return validates;
   }
 
-  validateStatement(context) {
+  async validateStatement(context) {
     let statementValidates = false;
 
     const conclusionString = this.getString();  ///
 
     context.trace(`Validating the '${conclusionString}' conclusion's statement...`);
 
-    const statement = this.statement.validate(context);
+    const statement = await this.statement.validate(context);
 
     if (statement !== null) {
       statementValidates = true;
@@ -102,7 +102,7 @@ export default define(class Conclusion extends Element {
     return statementValidates;
   }
 
-  unifyStep(step, context) {
+  async unifyStep(step, context) {
     let stepUnifies = false;
 
     const stepString = step.getString(),
@@ -115,9 +115,9 @@ export default define(class Conclusion extends Element {
           generalContext = conclusionContext, ///
           specificContext = stepContext;  ///
 
-    reconcile((specificContext) => {
+    await reconcile(async (specificContext) => {
       const statement = step.getStatement(),
-            statementUnifies = this.statement.unifyStatement(statement, generalContext, specificContext);
+            statementUnifies = await this.statement.unifyStatement(statement, generalContext, specificContext);
 
       if (statementUnifies) {
         specificContext.commit(context);

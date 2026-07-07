@@ -72,7 +72,7 @@ export default define(class ImplicitAssumption extends Element {
     return validAssumption;
   }
 
-  validate(context) {
+  async validate(context) {
     let implicitAssumption = null;
 
     const implicitAssumptionString = this.getString();  ///
@@ -90,7 +90,7 @@ export default define(class ImplicitAssumption extends Element {
 
       context.debug(`...the '${implicitAssumptionString}' implicit qssumption is already valid.`);
     } else {
-      const statementValidates = this.validateStatement(context);
+      const statementValidates = await this.validateStatement(context);
 
       if (statementValidates) {
         const stated = context.isStated();
@@ -125,14 +125,14 @@ export default define(class ImplicitAssumption extends Element {
     return implicitAssumption;
   }
 
-  validateStatement(context) {
+  async validateStatement(context) {
     let statementValidates = false;
 
     const implicitAssumptionString = this.getString();  ///
 
     context.trace(`Validating the '${implicitAssumptionString}' implicitAssumption's statement...`);
 
-    const statement = this.statement.validate(context);
+    const statement = await this.statement.validate(context);
 
     if (statement !== null) {
       statementValidates = true;
@@ -177,7 +177,7 @@ export default define(class ImplicitAssumption extends Element {
     return validatesWhenDerived;
   }
 
-  unifyStatement(statement, generalContext, specificContext) {
+  async unifyStatement(statement, generalContext, specificContext) {
     let statementUnifies;
 
     const context = specificContext, ///
@@ -186,7 +186,7 @@ export default define(class ImplicitAssumption extends Element {
 
     context.trace(`Unifying the '${statementString}' statement with the '${proofAssertionString}' implicitAssumption's statement...`);
 
-    statementUnifies = this.statement.unifyStatement(statement, generalContext, specificContext);
+    statementUnifies = await this.statement.unifyStatement(statement, generalContext, specificContext);
 
     if (statementUnifies) {
       context.debug(`...unified the '${statementString}' statement with the '${proofAssertionString}' implicitAssumption's statement.`);

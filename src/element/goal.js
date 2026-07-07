@@ -76,7 +76,7 @@ export default define(class Goal extends Element {
     return validGoal;
   }
 
-  validate(context) {
+  async validate(context) {
     let goal = null;
 
     const goalString = this.getString();  ///
@@ -153,14 +153,14 @@ export default define(class Goal extends Element {
     return referenceValidates;
   }
 
-  validateStatement(context) {
+  async validateStatement(context) {
     let statementValidates = false;
 
     const goalString = this.getString();  ///
 
     context.trace(`Validating the '${goalString}' goal's statement...`);
 
-    const statement = this.statement.validate(context);
+    const statement = await this.statement.validate(context);
 
     if (statement !== null) {
       statementValidates = true;
@@ -292,7 +292,7 @@ export default define(class Goal extends Element {
     return schemaUnifies;
   }
 
-  unifyDeduction(deduction, generalContext, specificContext) {
+  async unifyDeduction(deduction, generalContext, specificContext) {
     let deductionUnifies;
 
     const context = specificContext,  ///
@@ -306,8 +306,8 @@ export default define(class Goal extends Element {
 
     specificContext = deductionContext; ///
 
-    reconcile((specificContext) => {
-      const statementUnifies = this.statement.unifyStatement(statement, generalContext, specificContext);
+    await reconcile(async (specificContext) => {
+      const statementUnifies = await this.statement.unifyStatement(statement, generalContext, specificContext);
 
       if (statementUnifies) {
         deductionUnifies = true;
