@@ -49,9 +49,7 @@ export default define(class Label extends Element {
 
   compareMetavariable(metavariable) { return this.metavariable.compareMetavariable(metavariable); }
 
-  verify() {
-    let verifies = false;
-
+  verify(continuation) {
     const context = this.getContext(),
           labelString = this.getString(); ///
 
@@ -60,70 +58,76 @@ export default define(class Label extends Element {
     const labelNode = this.getLabelNode(),
           labelPresent = context.isLabelPresentByLabelNode(labelNode);
 
-    if (!labelPresent) {
-      const validates = this.validate();
+    if (labelPresent) {
+      const verifies = true;
+
+      context.debug(`The '${labelString}' label is already present.`);
+
+      continuation(verifies);
+
+      return;
+    }
+
+    this.validate((validates) => {
+      let verifies = false;
 
       if (validates !== null) {
         verifies = true;
       }
-    } else {
-      context.debug(`The '${labelString}' label is already present.`);
-    }
 
-    if (verifies) {
-      context.debug(`...verified the '${labelString}' label.`);
-    }
+      if (verifies) {
+        context.debug(`...verified the '${labelString}' label.`);
+      }
 
-    return verifies;
+      continuation(verifies);
+    });
   }
 
-  validate() {
-    let validates = false;
-
+  validate(continuation) {
     const context = this.getContext(),
           labelString = this.getString(); ///
 
     context.trace(`Validating the '${labelString}' label...`);
 
     attempt((context) => {
-      const metavariableValidates = this.validateMetavariable(context);
+      this.validateMetavariable(context, (metavariableValidates) => {
+        let validates = false;
 
-      if (metavariableValidates) {
-        validates = true;
-      }
+        if (metavariableValidates) {
+          validates = true;
+        }
 
-      if (validates) {
-        this.commit(context);
-      }
+        if (validates) {
+          this.commit(context);
+
+          context.debug(`...validated the '${labelString}' label.`);
+        }
+
+        continuation(validates);
+      });
     }, context);
-
-    if (validates) {
-      context.debug(`...validated the '${labelString}' label.`);
-    }
-
-    return validates;
   }
 
-  validateMetavariable(context) {
+  validateMetavariable(context, continuation) {
     let metavariableValidates = false;
 
     const labelString = this.getString(); ///
 
     context.trace(`Validating the '${labelString}' label's metavariable...`);
 
-    const metavariable = this.metavariable.validate(context);
+    this.metavariable.validate(context, (metavariable) => {
+      if (metavariable !== null) {
+        this.metavariable = metavariable;
 
-    if (metavariable !== null) {
-      this.metavariable = metavariable;
+        metavariableValidates = true;
+      }
 
-      metavariableValidates = true;
-    }
+      if (metavariableValidates) {
+        context.debug(`...validated the '${labelString}' label's metavariable.'`);
+      }
 
-    if (metavariableValidates) {
-      context.debug(`...validated the '${labelString}' label's metavariable.'`);
-    }
-
-    return metavariableValidates;
+      continuation(metavariableValidates);
+    });
   }
 
   unifyReference(reference, context) {

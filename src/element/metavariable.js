@@ -216,7 +216,7 @@ export default define(class Metavariable extends Element {
           context.addMetavariable(metavariable);
         }
 
-        context.debug(`...verified the '${metavariableString}' rule.`);
+        context.debug(`...validated the '${metavariableString}' metavariable.`);
       }
 
       continuation(metavariable);
@@ -300,28 +300,32 @@ export default define(class Metavariable extends Element {
     }
   }
 
-  validateType(strict, context) {
-    let typeValidates;
-
+  validateType(strict, context, continuation) {
     if (this.type === null) {
-      typeValidates = true;
-    } else {
-      const metavariableString = this.getString();  ///
+      const typeValidates = true;
 
-      context.trace(`Validating  the '${metavariableString}' metavariable's type...`);
+      continuation(typeValidates);
 
-      typeValidates = false;
-
-      const typeString = this.type.getString();
-
-      context.trace(`A '${typeString}' type is present in the '${metavariableString}' metavariable.`);
-
-      if (typeValidates) {
-        context.trace(`...validated  the '${metavariableString}' metavariable's type.`);
-      }
+      return;
     }
 
-    return typeValidates;
+    let typeValidates;
+
+    const metavariableString = this.getString();  ///
+
+    context.trace(`Validating  the '${metavariableString}' metavariable's type...`);
+
+    typeValidates = false;
+
+    const typeString = this.type.getString();
+
+    context.trace(`A '${typeString}' type is present in the '${metavariableString}' metavariable.`);
+
+    if (typeValidates) {
+      context.trace(`...validated  the '${metavariableString}' metavariable's type.`);
+    }
+
+    continuation(typeValidates);
   }
 
   unifyFrame(frame, generalContext, specificContext) {

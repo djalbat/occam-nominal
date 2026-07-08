@@ -8,7 +8,7 @@ import { enclose } from "../utilities/context";
 import { labelsFromJSON, premisesFromJSON, conclusionFromJSON, labelsToLabelsJSON, premisesToPremisesJSON, conclusionToConclusionJSON } from "../utilities/json";
 
 const { reverse } = arrayUtilities,
-      { all, extract, forwardsEvery, backwardsEvery } = continuationUtilities,
+      { all, every, extract, forwardsEvery, backwardsEvery } = continuationUtilities,
       { breakable, breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Rule extends Element {
@@ -86,21 +86,19 @@ export default define(class Rule extends Element {
     }, context);
   });
 
-  verifyLabel(label, context) {
-    let labelVerifies;
-
+  verifyLabel(label, context, continuation) {
     const ruleString = this.getString(),  ///
           labelString = label.getString();
 
     context.trace(`Verifying the '${ruleString}' rule's '${labelString}' label...`);
 
-    labelVerifies = label.verify();
+    label.verify((labelVerifies) => {
+      if (labelVerifies) {
+        context.debug(`...verified the '${ruleString}' rule's '${labelString}' label.`);
+      }
 
-    if (labelVerifies) {
-      context.debug(`...verified the '${ruleString}' rule's '${labelString}' label.`);
-    }
-
-    return labelVerifies;
+      continuation(labelVerifies);
+    });
   }
 
   verifyProof(context, continuation) {
@@ -128,25 +126,19 @@ export default define(class Rule extends Element {
   }
 
   verifyLabels(context, conntinuation) {
-    let labelsVerify;
-
     const ruleString = this.getString();  ///
 
     context.trace(`Verifying the '${ruleString}' rule's labels...`);
 
-    labelsVerify = this.labels.every((label) => {
-      const labelVerifies = this.verifyLabel(label, context);
-
-      if (labelVerifies) {
-        return true;
+    every(this.labels, (label, continuation) => {
+      this.verifyLabel(label, context, continuation);
+    }, (labelsVerify) => {
+      if (labelsVerify) {
+        context.debug(`...verified the '${ruleString}' rule's labels.`);
       }
+
+      conntinuation(labelsVerify);
     });
-
-    if (labelsVerify) {
-      context.debug(`...verified the '${ruleString}' rule's labels.`);
-    }
-
-    conntinuation(labelsVerify);
   }
 
   verifyPremise(premise, context, continuation) {
