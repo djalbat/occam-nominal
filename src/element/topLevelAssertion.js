@@ -17,8 +17,8 @@ import { labelsFromJSON,
          suppositionsToSuppositionsJSON } from "../utilities/json";
 
 const { reverse } = arrayUtilities,
-      { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities,
-      { every, extract, breakable, forwardsEvery, backwardsEvery } = continuationUtilities;
+      { every, extract, forwardsEvery, backwardsEvery } = continuationUtilities,
+      { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default class TopLevelAssertion extends Element {
   constructor(context, string, node, breakPoint, labels, suppositions, deduction, proof, signature, hypotheses) {

@@ -1,13 +1,9 @@
 "use strict";
 
-import { continuationUtilities } from "occam-languages";
-
 import Declaration from "../declaration";
 
 import { define } from "../../elements";
 import { baseTypeFromNothing } from "../../utilities/type";
-
-const { breakable } = continuationUtilities;
 
 export default define(class TypeDeclaration extends Declaration {
   constructor(context, string, node, breakPoint, type, superTypes, provisional) {

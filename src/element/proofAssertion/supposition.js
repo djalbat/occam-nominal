@@ -1,6 +1,6 @@
 "use strict";
 
-import { breakPointUtilities, continuationUtilities } from "occam-languages";
+import { breakPointUtilities } from "occam-languages";
 
 import ProofAssertion from "../proofAssertion";
 
@@ -9,8 +9,7 @@ import { instantiateSupposition} from "../../process/instantiate";
 import { procedureCallFromSuppositionNode } from "../../utilities/element";
 import { declare, attempt, reconcile, serialise, unserialise, instantiate } from "../../utilities/context";
 
-const { breakable } = continuationUtilities,
-      { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
+const { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Supposition extends ProofAssertion {
   constructor(context, string, node, breakPoint, statement, procedureCall) {
@@ -55,6 +54,14 @@ export default define(class Supposition extends ProofAssertion {
     return subproofAssertion;
   }
 
+  isNonsense() {
+    const statement = this.getStatement(),
+          procedureCall = this.getProcedureCall(),
+          nonsense = ((statement === null) && (procedureCall === null));
+
+    return nonsense;
+  }
+
   async verify(context) {
     let verifies = false;
 
@@ -76,7 +83,7 @@ export default define(class Supposition extends ProofAssertion {
         }
       }, context);
     } else {
-      context.debug(`Unable to validate the '${suppositionString}' supposition because it is nonsense.`);
+      context.debug(`Unable to verify the '${suppositionString}' supposition because it is nonsense.`);
     }
 
     return verifies;

@@ -1,6 +1,6 @@
 "use strict";
 
-import { breakPointUtilities, continuationUtilities } from "occam-languages";
+import { breakPointUtilities } from "occam-languages";
 
 import Substitution from "../substitution";
 
@@ -10,8 +10,7 @@ import { referenceSubstitutionFromReferenceSubstitutionNode } from "../../utilit
 import { referenceSubstitutionStringFromReferenceAndMetavariable } from "../../utilities/string";
 import { elide, ablates, manifest, attempts, instantiate, unserialises } from "../../utilities/context";
 
-const { breakable } = continuationUtilities,
-      { breakPointFromJSON } = breakPointUtilities;
+const { breakPointFromJSON } = breakPointUtilities;
 
 export default define(class ReferenceSubstitution extends Substitution {
   constructor(context, string, node, breakPoint, targetReference, replacementReference) {

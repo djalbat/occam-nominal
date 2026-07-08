@@ -8,7 +8,7 @@ import { define } from "../../elements";
 import { anticipate } from "../../utilities/context";
 import { baseTypeFromNothing } from "../../utilities/type";
 
-const { every, breakable } = continuationUtilities;
+const { every } = continuationUtilities;
 
 export default define(class CotypeDeclaration extends Declaration {
   constructor(context, string, node, breakPoint, type, superTypes, provisional, propertyDeclarations) {

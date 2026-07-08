@@ -7,7 +7,7 @@ import TopLevelAssertion from "../topLevelAssertion";
 import { define } from "../../elements";
 import { reconcile } from "../../utilities/context";
 
-const { match, breakable } = continuationUtilities;
+const { match } = continuationUtilities;
 
 export default define(class Axiom extends TopLevelAssertion {
   getAxiomNode() {

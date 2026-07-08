@@ -1,13 +1,9 @@
 "use strict";
 
-import { continuationUtilities } from "occam-languages";
-
 import Constructor from "../constructor";
 
 import { define } from "../../elements";
 import { termFromTermNode } from "../../utilities/element";
-
-const { breakable } = continuationUtilities;
 
 export default define(class BracketedConstructor extends Constructor {
   getBracketedConstructorNode() {

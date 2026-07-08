@@ -1,7 +1,7 @@
 "use strict";
 
-import { AsyncPass } from "occam-languages";
 import { queryUtilities } from "occam-query";
+import { ContinuationPass } from "occam-languages";
 
 import { descend } from "../utilities/context";
 import { termFromTermNode, statementFromStatementNode } from "../utilities/element";
@@ -12,47 +12,34 @@ const termNodeQuery = nodeQuery("/term"),
       typeNodeQuery = nodeQuery("/type"),
       statementNodeQuery = nodeQuery("/statement");
 
-class PropertyPass extends AsyncPass {
-  async run(termNode, context) {
-    let success = false;
-
+class PropertyPass extends ContinuationPass {
+  run(termNode, context, continuatino) {
     const nonTerminalNode = termNode,  ///
-          childNodes = nonTerminalNode.getChildNodes(), ///
-          descended = await this.descend(childNodes, context);
+          childNodes = nonTerminalNode.getChildNodes();
 
-    if (descended) {
-      success = true;
-    }
-
-    return success;
+    this.descend(childNodes, context, continuatino);
   }
 
   static maps = [
     {
       nodeQuery: termNodeQuery,
-      run: async (termNode, context) => {
-        let success = false;
+      run: (termNode, context, continuatino) => {
+        const term = termFromTermNode(termNode, context);
 
-        let term;
+        term.validate(context, (term, context) => {
+          let success = false;
 
-        term = termFromTermNode(termNode, context);
+          if (term !== null) {
+            success = true;
+          }
 
-        term = await term.validate(context, async (term, context) => { ///
-          const validatesForwards = true;
-
-          return validatesForwards;
+          continuatino(success);
         });
-
-        if (term !== null) {
-          success = true;
-        }
-
-        return success;
       }
     },
     {
       nodeQuery: typeNodeQuery,
-      run: async (typeNode, context) => {
+      run: (typeNode, context, continuatino) => {
         let success = false;
 
         const nominalTypeName = typeNode.getNominalTypeName(),
@@ -62,53 +49,40 @@ class PropertyPass extends AsyncPass {
           success = true;
         }
 
-        return success;
+        continuatino(success);
       }
     }
   ];
 }
 
-class GeneratorPass extends AsyncPass {
-  async run(termNode, context) {
-    let success = false;
-
+class GeneratorPass extends ContinuationPass {
+  run(termNode, context, continuatino) {
     const nonTerminalNode = termNode,  ///
-          childNodes = nonTerminalNode.getChildNodes(), ///
-          descended = await this.descend(childNodes, context);
+          childNodes = nonTerminalNode.getChildNodes();
 
-    if (descended) {
-      success = true;
-    }
-
-    return success;
+    this.descend(childNodes, context, continuatino);
   }
 
   static maps = [
     {
       nodeQuery: termNodeQuery,
-      run: async (termNode, context) => {
-        let success = false;
+      run: (termNode, context, continuatino) => {
+        const term = termFromTermNode(termNode, context);
 
-        let term;
+        term.validate(context, (term, context) => {
+          let success = false;
 
-        term = termFromTermNode(termNode, context);
+          if (term !== null) {
+            success = true;
+          }
 
-        term = await term.validate(context, async (term, context) => { ///
-          const validatesForwards = true;
-
-          return validatesForwards;
+          continuatino(success);
         });
-
-        if (term !== null) {
-          success = true;
-        }
-
-        return success;
       }
     },
     {
       nodeQuery: typeNodeQuery,
-      run: async (typeNode, context) => {
+      run: (typeNode, context, continuatino) => {
         let success = false;
 
         const nominalTypeName = typeNode.getNominalTypeName(),
@@ -118,73 +92,58 @@ class GeneratorPass extends AsyncPass {
           success = true;
         }
 
-        return success;
+        continuatino(success);
       }
     }
   ];
 }
 
-class CombinatorPass extends AsyncPass {
-  async run(statementNode, context) {
-    let success = false;
-
+class CombinatorPass extends ContinuationPass {
+  run(statementNode, context, continuatino) {
     const nonTerminalNode = statementNode,  ///
-          childNodes = nonTerminalNode.getChildNodes(), ///
-          descended = await this.descend(childNodes, context);
+          childNodes = nonTerminalNode.getChildNodes();
 
-    if (descended) {
-      success = true;
-    }
-
-    return success;
+    this.descend(childNodes, context, continuatino);
   }
 
   static maps = [
     {
       nodeQuery: statementNodeQuery,
-      run: (statementNode, context) => {
-        let success = false;
+      run: (statementNode, context, continuatino) => {
+        const statement = statementFromStatementNode(statementNode, context);
 
         descend((context) => {
-          let statement;
+          statement.validate(context, (statement) => {
+            let success = false;
 
-          statement = statementFromStatementNode(statementNode, context);
+            if (statement !== null) {
+              success = true;
+            }
 
-          statement = statement.validate(context);  ///
-
-          if (statement !== null) {
-            success = true;
-          }
+            continuatino(success);
+          });
         }, context);
-
-        return success;
       }
     },
     {
       nodeQuery: termNodeQuery,
-      run: async (termNode, context) => {
-        let success = false;
+      run: (termNode, context, continuatino) => {
+        const term = termFromTermNode(termNode, context);
 
-        let term;
+        term.validate(context, (term, context) => {
+          let success = false;
 
-        term = termFromTermNode(termNode, context);
+          if (term !== null) {
+            success = true;
+          }
 
-        term = await term.validate(context, async (term, context) => { ///
-          const validatesForwards = true;
-
-          return validatesForwards;
+          continuatino(success);
         });
-
-        if (term !== null) {
-          success = true;
-        }
-
-        return success;
       }
     },
     {
       nodeQuery: typeNodeQuery,
-      run: async (typeNode, context) => {
+      run: (typeNode, context, continuatino) => {
         let success = false;
 
         const nominalTypeName = typeNode.getNominalTypeName(),
@@ -194,53 +153,40 @@ class CombinatorPass extends AsyncPass {
           success = true;
         }
 
-        return success;
+        continuatino(success);
       }
     }
   ];
 }
 
-class ConstructorPass extends AsyncPass {
-  async run(termNode, context) {
-    let success = false;
-
+class ConstructorPass extends ContinuationPass {
+  run(termNode, context, continuatino) {
     const nonTerminalNode = termNode,  ///
-          childNodes = nonTerminalNode.getChildNodes(), ///
-          descended = await this.descend(childNodes, context);
+          childNodes = nonTerminalNode.getChildNodes();
 
-    if (descended) {
-      success = true;
-    }
-
-    return success;
+    this.descend(childNodes, context, continuatino);
   }
 
   static maps = [
     {
       nodeQuery: termNodeQuery,
-      run: async (termNode, context) => {
-        let success = false;
+      run: (termNode, context, continuatino) => {
+        const term = termFromTermNode(termNode, context);
 
-        let term;
+        term.validate(context, (term, context) => {
+          let success = false;
 
-        term = termFromTermNode(termNode, context);
+          if (term !== null) {
+            success = true;
+          }
 
-        term = await term.validate(context, async (term, context) => { ///
-          const validatesForwards = true;
-
-          return validatesForwards;
+          continuatino(success);
         });
-
-        if (term !== null) {
-          success = true;
-        }
-
-        return success;
       }
     },
     {
       nodeQuery: typeNodeQuery,
-      run: async (typeNode, context) => {
+      run: (typeNode, context, continuatino) => {
         let success = false;
 
         const nominalTypeName = typeNode.getNominalTypeName(),
@@ -250,7 +196,7 @@ class ConstructorPass extends AsyncPass {
           success = true;
         }
 
-        return success;
+        continuatino(success);
       }
     }
   ];
@@ -261,54 +207,26 @@ const propertyPass = new PropertyPass(),
       combinatorPass = new CombinatorPass(),
       constructorPass = new ConstructorPass();
 
-export async function validateTermAsProperty(term, context) {
-  let termValidatesAsProperty = false;
+export function validateTermAsProperty(term, context, continuation) {
+  const termNode = term.getNode();
 
-  const termNode = term.getNode(),
-        success = await propertyPass.run(termNode, context);
-
-  if (success) {
-    termValidatesAsProperty = true;
-  }
-
-  return termValidatesAsProperty;
+  propertyPass.run(termNode, context, continuation);
 }
 
-export async function validateTermAsGenerator(term, context) {
-  let termValidatesAsGenerator = false;
+export function validateTermAsGenerator(term, context, continuation) {
+  const termNode = term.getNode();
 
-  const termNode = term.getNode(),
-        success = await generatorPass.run(termNode, context);
-
-  if (success) {
-    termValidatesAsGenerator = true;
-  }
-
-  return termValidatesAsGenerator;
+  generatorPass.run(termNode, context, continuation);
 }
 
-export async function validateTermAsConstructor(term, context) {
-  let termValidatesAsConstructor = false;
+export function validateTermAsConstructor(term, context, continuation) {
+  const termNode = term.getNode();
 
-  const termNode = term.getNode(),
-        success = await constructorPass.run(termNode, context);
-
-  if (success) {
-    termValidatesAsConstructor = true;
-  }
-
-  return termValidatesAsConstructor;
+  constructorPass.run(termNode, context, continuation);
 }
 
-export async function validateStatementAsCombinator(statement, context) {
-  let statementValidatesAsCombinator = false;
+export function validateStatementAsCombinator(statement, context, continuatino) {
+  const statementNode = statement.getNode();
 
-  const statementNode = statement.getNode(),
-        success = await combinatorPass.run(statementNode, context);
-
-  if (success) {
-    statementValidatesAsCombinator = true;
-  }
-
-  return statementValidatesAsCombinator;
+  combinatorPass.run(statementNode, context, continuatino);
 }

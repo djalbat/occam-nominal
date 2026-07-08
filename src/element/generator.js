@@ -12,7 +12,7 @@ import { validateTermAsGenerator } from "../process/validate";
 import { typeFromJSON, typeToTypeJSON } from "../utilities/json";
 import { attempt, serialise, unserialise, instantiate } from "../utilities/context";
 
-const { every, breakable } = continuationUtilities,
+const { every } = continuationUtilities,
       { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Generator extends Element {

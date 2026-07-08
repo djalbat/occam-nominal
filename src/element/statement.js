@@ -9,7 +9,7 @@ import { validateStatements } from "../process/validation";
 import { dischargeStatements } from "../process/discharge";
 import { instantiateStatement } from "../process/instantiate";
 
-const { breakable } = continuationUtilities,
+const { exists } = continuationUtilities,
       { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Statement extends Element {
@@ -188,45 +188,36 @@ export default define(class Statement extends Element {
     return comparesToParamter;
   }
 
-  validate(context) {
-    let statement = null;
-
+  validate(context, continuation) {
     const statementString = this.getString();  ///
 
     context.trace(`Validating the '${statementString}' statement...`);
 
-    let validates;
-
     const validStatement = this.findValidStatement(context);
 
     if (validStatement !== null) {
-      validates = true;
-
-      statement = validStatement; ///
+      const statement = validStatement; ///
 
       context.debug(`...the '${statementString}' statement is already valid.`);
-    } else {
-      validates = validateStatements.some((validateStatement) => {
-        const statement = this, ///
-              statementValidates = validateStatement(statement, context);
 
-        if (statementValidates) {
-          return true;
-        }
-      });
+      continuation(statement);
 
-      if (validates) {
-        statement = this; ///
+      return;
+    }
 
+    let statement = this; ///
+
+    exists(validateStatements, statement, context, (statementValidates) => {
+      if (statementValidates) {
         context.addStatement(statement);
+
+        context.debug(`...validated the '${statementString}' statement.`);
+      } else {
+        statement = null;
       }
-    }
 
-    if (validates) {
-      context.debug(`...validated the '${statementString}' statement.`);
-    }
-
-    return statement;
+      continuation(statement);
+    });
   }
 
   discharge(context) {

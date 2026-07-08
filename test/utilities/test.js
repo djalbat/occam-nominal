@@ -13,8 +13,8 @@ function createSuite(logLevel, projectName, projectsDirectoryPath) {
   let releaseContext = null;
 
   const log = Log.fromLogLevel(logLevel),
-        callback = async (context, breakPoint) => {
-          ///
+        callback = (breakPoint, context, continuation) => {
+          continuation();
         },
         releaseContexts = [];
 
@@ -42,8 +42,8 @@ function createSuite(logLevel, projectName, projectsDirectoryPath) {
     initialiseReleaseContexts(context);
   });
 
-  it("verify", async () => {
-    const releaseContextsVerify = await verifyReleaseContexts(context);
+  it("verify", () => {
+    const releaseContextsVerify = verifyReleaseContexts(context);
 
     assert.isTrue(releaseContextsVerify);
 

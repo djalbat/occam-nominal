@@ -1,6 +1,6 @@
 "use strict";
 
-import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
+import { Element, breakPointUtilities } from "occam-languages";
 
 import { define } from "../elements";
 import { instantiateCombinator } from "../process/instantiate";
@@ -9,8 +9,7 @@ import { unifyStatementWithCombinator } from "../process/unify";
 import { validateStatementAsCombinator } from "../process/validate";
 import { attempt, serialise, unserialise, instantiate } from "../utilities/context";
 
-const { breakable } = continuationUtilities,
-      { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
+const { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Combinator extends Element {
   constructor(context, string, node, breakPoint, statement) {
@@ -76,9 +75,7 @@ export default define(class Combinator extends Element {
     return statementValidates;
   }
 
-  async unifyStatement(statement, context) {
-    let statementUnifies = false;
-
+  unifyStatement(statement, context, continuation) {
     const statementString = statement.getString(),
           combinatorString = this.getString();  ///
 
@@ -87,18 +84,21 @@ export default define(class Combinator extends Element {
     const combinator = this, ///
           combinatorContext = combinator.getContext(),
           generalContext = combinatorContext, ///
-          specifiContext = context, ///
-          statementUnifiesWithCombinator = await unifyStatementWithCombinator(statement, combinator, generalContext, specifiContext);
+          specifiContext = context; ///
 
-    if (statementUnifiesWithCombinator) {
-      statementUnifies = true;
-    }
+    unifyStatementWithCombinator(statement, combinator, generalContext, specifiContext, (statementUnifiesWithCombinator) => {
+      let statementUnifies = false;
 
-    if (statementUnifies) {
-      context.debug(`...unified the '${statementString}' statement with the '${combinatorString}' combinator.`);
-    }
+      if (statementUnifiesWithCombinator) {
+        statementUnifies = true;
+      }
 
-    return statementUnifies;
+      if (statementUnifies) {
+        context.debug(`...unified the '${statementString}' statement with the '${combinatorString}' combinator.`);
+      }
+
+      continuation(statementUnifies);
+    });
   }
 
   toJSON() {

@@ -1,7 +1,7 @@
 "use strict";
 
 import { arrayUtilities } from "necessary";
-import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
+import { Element, breakPointUtilities } from "occam-languages";
 
 import elements from "../elements";
 
@@ -9,8 +9,7 @@ import { define } from "../elements";
 import { instantiateGoal } from "../process/instantiate";
 import { reconcile, instantiate } from "../utilities/context";
 
-const { breakable } = continuationUtilities,
-      { each, clone, filter } = arrayUtilities,
+const { each, clone, filter } = arrayUtilities,
       { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Goal extends Element {

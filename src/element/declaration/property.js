@@ -1,12 +1,8 @@
 "use strict";
 
-import { continuationUtilities } from "occam-languages";
-
 import Declaration from "../declaration";
 
 import { define } from "../../elements";
-
-const { breakable } = continuationUtilities;
 
 export default define(class PropertyDeclaration extends Declaration {
   constructor(context, string, node, breakPoint, type, property) {

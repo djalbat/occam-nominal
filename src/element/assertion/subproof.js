@@ -10,7 +10,7 @@ import { instantiateSubproofAssertion } from "../../process/instantiate";
 import { descend, reconcile, instantiate } from "../../utilities/context";
 import { subproofAssertionFromStatementNode } from "../../utilities/element";
 
-const { every, breakable } = continuationUtilities,
+const { every } = continuationUtilities,
       { breakPointFromJSON } = breakPointUtilities,
       { last, front, backwardsEvery } = arrayUtilities;
 

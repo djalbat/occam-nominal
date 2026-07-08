@@ -1,7 +1,7 @@
 "use strict";
 
-import { AsyncPass } from "occam-languages"
 import { queryUtilities } from "occam-query"
+import { ContinuationPass } from "occam-languages";
 
 import { ruleFromRuleNode,
          errorFromErrorNode,
@@ -39,246 +39,134 @@ const ruleNodeQuery = nodeQuery("/rule"),
       constructorDeclarationNodeQuery = nodeQuery("/constructorDeclaration"),
       metavariableDeclarationNodeQuery = nodeQuery("/metavariableDeclaration");
 
-class TopLevelPass extends AsyncPass {
+class TopLevelPass extends ContinuationPass {
   static maps = [
     {
       nodeQuery: errorNodeQuery,
-      run: async (errorNode, context) => {
-        let success = false;
+      run: (errorNode, context, continuation) => {
+        const error = errorFromErrorNode(errorNode, context);
 
-        const error = errorFromErrorNode(errorNode, context),
-              errorVerifies = await error.verify(context);
-
-        if (errorVerifies) {
-          success = true;
-        }
-
-        return success;
+        error.verify(context, continuation);
       }
     },
     {
       nodeQuery: ruleNodeQuery,
-      run: async (ruleNode, context) => {
-        let success = false;
+      run: (ruleNode, context, continuation) => {
+        const rule = ruleFromRuleNode(ruleNode, context);
 
-        const rule = ruleFromRuleNode(ruleNode, context),
-              ruleVerifies = await rule.verify(context);
-
-        if (ruleVerifies) {
-          success = true;
-        }
-
-        return success;
+        rule.verify(context, continuation);
       }
     },
     {
       nodeQuery: axiomNodeQuery,
-      run: async (axiomNode, context) => {
-        let success = false;
+      run: (axiomNode, context, continuation) => {
+        const axiom = axiomFromAxiomNode(axiomNode, context);
 
-        const axiom = axiomFromAxiomNode(axiomNode, context),
-              axiomVerifies = await axiom.verify(context);
-
-        if (axiomVerifies) {
-          success = true;
-        }
-
-        return success;
+        axiom.verify(context, continuation);
       }
     },
     {
       nodeQuery: lemmaNodeQuery,
-      run: async (lemmaNode, context) => {
-        let success = false;
+      run: (lemmaNode, context, continuation) => {
+        const lemma = lemmaFromLemmaNode(lemmaNode, context);
 
-        const lemma = lemmaFromLemmaNode(lemmaNode, context),
-              lemmaVerifies = await lemma.verify(context);
-
-        if (lemmaVerifies) {
-          success = true;
-        }
-
-        return success;
+        lemma.verify(context, continuation);
       }
     },
     {
       nodeQuery: schemaNodeQuery,
-      run: async (schemaNode, context) => {
-        let success = false;
+      run: (schemaNode, context, continuation) => {
+        const schema = schemaFromSchemaNode(schemaNode, context);
 
-        const schema = schemaFromSchemaNode(schemaNode, context),
-              schemaVerifies = await schema.verify(context);
-
-        if (schemaVerifies) {
-          success = true;
-        }
-
-        return success;
+        schema.verify(context, continuation);
       }
     },
     {
       nodeQuery: sectionNodeQuery,
-      run: async (sectionNode, context) => {
-        let success = false;
+      run: (sectionNode, context, continuation) => {
+        const section = sectionFromSectionNode(sectionNode, context);
 
-        const section = sectionFromSectionNode(sectionNode, context),
-              sectionVerifies = await section.verify(context);
-
-        if (sectionVerifies) {
-          success = true;
-        }
-
-        return success;
+        section.verify(context, continuation);
       }
     },
     {
       nodeQuery: theoremNodeQuery,
-      run: async (theoremNode, context) => {
-        let success = false;
+      run: (theoremNode, context, continuation) => {
+        const theorem = theoremFromTheoremNode(theoremNode, context);
 
-        const theorem = theoremFromTheoremNode(theoremNode, context),
-              theoremVerifies = await theorem.verify(context);
-
-        if (theoremVerifies) {
-          success = true;
-        }
-
-        return success;
+        theorem.verify(context, continuation);
       }
     },
     {
       nodeQuery: conjectureNodeQuery,
-      run: async (conjectureNode, context) => {
-        let success = false;
+      run: (conjectureNode, context, continuation) => {
+        const conjecture = conjectureFromConjectureNode(conjectureNode, context);
 
-        const conjecture = conjectureFromConjectureNode(conjectureNode, context),
-              conjectureVerifies = await conjecture.verify(context);
-
-        if (conjectureVerifies) {
-          success = true;
-        }
-
-        return success;
+        conjecture.verify(context, continuation);
       }
     },
     {
       nodeQuery: typeDeclarationNodeQuery,
-      run: async (typeDeclarationNode, context) => {
-        let success = false;
+      run: (typeDeclarationNode, context, continuation) => {
+        const typeDeclaration = typeDeclarationFromTypeDeclarationNode(typeDeclarationNode, context);
 
-        const typeDeclaration = typeDeclarationFromTypeDeclarationNode(typeDeclarationNode, context),
-              typeDeclarationVerifies = await typeDeclaration.verify(context);
-
-        if (typeDeclarationVerifies) {
-          success = true;
-        }
-
-        return success;
+        typeDeclaration.verify(context, continuation);
       }
     },
     {
       nodeQuery: cotypeDeclarationNodeQuery,
-      run: async (cotypeDeclarationNode, context) => {
-        let success = false;
+      run: (cotypeDeclarationNode, context, continuation) => {
+        const cotypeDeclaration = cotypeDeclarationFromCotypeDeclarationNode(cotypeDeclarationNode, context);
 
-        const cotypeDeclaration = cotypeDeclarationFromCotypeDeclarationNode(cotypeDeclarationNode, context),
-              cotypeDeclarationVerifies = await cotypeDeclaration.verify(context);
-
-        if (cotypeDeclarationVerifies) {
-          success = true;
-        }
-
-        return success;
+        cotypeDeclaration.verify(context, continuation);
       }
     },
     {
       nodeQuery: variableDeclarationNodeQuery,
-      run: async (variableDeclarationNode, context) => {
-        let success = false;
+      run: (variableDeclarationNode, context, continuation) => {
+        const variableDeclaration = variableDeclarationFromVariableDeclarationNode(variableDeclarationNode, context);
 
-        const variableDeclaration = variableDeclarationFromVariableDeclarationNode(variableDeclarationNode, context),
-              variableDeclarationVerifies = await variableDeclaration.verify(context);
-
-        if (variableDeclarationVerifies) {
-          success = true;
-        }
-
-        return success;
+        variableDeclaration.verify(context, continuation);
       }
     },
     {
       nodeQuery: generatorDeclarationNodeQuery,
-      run: async (generatorDeclarationNode, context) => {
-        let success = false;
+      run: (generatorDeclarationNode, context, continuation) => {
+        const generatorDeclaration = generatorDeclarationFromGeneratorDeclarationNode(generatorDeclarationNode, context);
 
-        const generatorDeclaration = generatorDeclarationFromGeneratorDeclarationNode(generatorDeclarationNode, context),
-              generatorDeclarationVerifies = await generatorDeclaration.verify(context);
-
-        if (generatorDeclarationVerifies) {
-          success = true;
-        }
-
-        return success;
+        generatorDeclaration.verify(context, continuation);
       }
     },
     {
       nodeQuery: typePrefixDeclarationNodeQuery,
-      run: async (typePrefixDeclarationNode, context) => {
-        let success = false;
+      run: (typePrefixDeclarationNode, context, continuation) => {
+        const typePrefixDeclaration = typePrefixDeclarationFromTypePrefixDeclarationNode(typePrefixDeclarationNode, context);
 
-        const typePrefixDeclaration = typePrefixDeclarationFromTypePrefixDeclarationNode(typePrefixDeclarationNode, context),
-              typePrefixDeclarationVerifies = await typePrefixDeclaration.verify(context);
-
-        if (typePrefixDeclarationVerifies) {
-          success = true;
-        }
-
-        return success;
+        typePrefixDeclaration.verify(context, continuation);
       }
     },
     {
       nodeQuery: combinatorDeclarationNodeQuery,
-      run: async (combinatorDeclarationNode, context) => {
-        let success = false;
+      run: (combinatorDeclarationNode, context, continuation) => {
+        const combinatorDeclaration = combinatorDeclarationFromCombinatorDeclarationNode(combinatorDeclarationNode, context);
 
-        const combinatorDeclaration = combinatorDeclarationFromCombinatorDeclarationNode(combinatorDeclarationNode, context),
-          combinatorDeclarationVerifies = await combinatorDeclaration.verify(context);
-
-        if (combinatorDeclarationVerifies) {
-          success = true;
-        }
-
-        return success;
+        combinatorDeclaration.verify(context, continuation);
       }
     },
     {
       nodeQuery: constructorDeclarationNodeQuery,
-      run: async (constructorDeclarationNode, context) => {
-        let success = false;
+      run: (constructorDeclarationNode, context, continuation) => {
+        const constructorDeclaration = constructorDeclarationFromConstructorDeclarationNode(constructorDeclarationNode, context);
 
-        const constructorDeclaration = constructorDeclarationFromConstructorDeclarationNode(constructorDeclarationNode, context),
-              constructorDeclarationVerifies = await constructorDeclaration.verify(context);
-
-        if (constructorDeclarationVerifies) {
-          success = true;
-        }
-
-        return success;
+        constructorDeclaration.verify(context, continuation);
       }
     },
     {
       nodeQuery: metavariableDeclarationNodeQuery,
-      run: async (metavariableDeclarationNode, context) => {
-        let success = false;
+      run: (metavariableDeclarationNode, context, continuation) => {
+        const metavariableDeclaration = metavariableDeclarationFromMetavariableDeclarationNode(metavariableDeclarationNode, context);
 
-        const metavariableDeclaration = metavariableDeclarationFromMetavariableDeclarationNode(metavariableDeclarationNode, context),
-              metavariableDeclarationVerifies = await metavariableDeclaration.verify(context);
-
-        if (metavariableDeclarationVerifies) {
-          success = true;
-        }
-
-        return success;
+        metavariableDeclaration.verify(context, continuation);
       }
     }
   ];
@@ -286,15 +174,8 @@ class TopLevelPass extends AsyncPass {
 
 const topLevelPass = new TopLevelPass();
 
-export async function verifyFile(fileNode, context) {
-  let fileVerifies = false;
+export function verifyFile(fileNode, context, continuation) {
+  const node = fileNode; ///
 
-  const node = fileNode, ///
-        sucess = await topLevelPass.run(node, context);
-
-  if (sucess) {
-    fileVerifies = true;
-  }
-
-  return fileVerifies;
+  topLevelPass.run(node, context, continuation);
 }

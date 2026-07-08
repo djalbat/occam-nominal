@@ -10,8 +10,8 @@ import { define } from "../../elements";
 import { unifySteps } from "../../process/unification";
 import { derive, declare, attempt, reconcile } from "../../utilities/context";
 
-const { backwardsSome } = arrayUtilities,
-      { some, breakable } = continuationUtilities;
+const { some } = continuationUtilities,
+      { backwardsSome } = arrayUtilities;
 
 export default define(class Step extends ProofAssertion {
   constructor(context, string, node, breakPoint, statement, reference, signatureAssertion) {

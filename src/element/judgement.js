@@ -1,7 +1,7 @@
 "use strict";
 
 import { arrayUtilities } from "necessary";
-import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
+import { Element, breakPointUtilities } from "occam-languages";
 
 import elements from "../elements";
 
@@ -11,8 +11,7 @@ import { equateStatements } from "../process/equate";
 import { instantiateJudgement } from "../process/instantiate";
 import { judgementFromStatementNode } from "../utilities/element";
 
-const { breakable } = continuationUtilities,
-      { one, push } = arrayUtilities,
+const { one, push } = arrayUtilities,
       { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Judgement extends Element {

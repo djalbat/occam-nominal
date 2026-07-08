@@ -9,8 +9,8 @@ import { instantiatePremise } from "../../process/instantiate";
 import { procedureCallFromPremiseNode } from "../../utilities/element";
 import { declare, attempt, reconcile, serialise, unserialise, instantiate } from "../../utilities/context";
 
-const { breakable } = continuationUtilities,
-      { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
+const { exists } = continuationUtilities,
+      { breakable, breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Premise extends ProofAssertion {
   constructor(context, string, node, breakPoint, statement, procedureCall) {
@@ -19,7 +19,7 @@ export default define(class Premise extends ProofAssertion {
     this.procedureCall = procedureCall;
   }
 
-  getrocedureCall() {
+  getProcedureCall() {
     return this.procedureCall;
   }
 
@@ -55,110 +55,126 @@ export default define(class Premise extends ProofAssertion {
     return subproofAssertion;
   }
 
-  async verify(context) {
-    let verifies = false;
+  isNonsense() {
+    const statement = this.getStatement(),
+          procedureCall = this.getProcedureCall(),
+          nonsense = ((statement === null) && (procedureCall === null));
 
-    await this.break(context);
+    return nonsense;
+  }
 
+  verify = breakable(function (context, continuation) {
     const premiseString = this.getString();
 
     context.trace(`Verifying the '${premiseString}' premise...`);
 
-    const statement = this.getStatement(),
-          procedureCall = this.getrocedureCall();
+    const nonsense = this.isNonsense();
 
-    if ((statement !== null) || (procedureCall !== null)) {
-      declare((context) => {
-        const validates = this.validate(context);
+    if (nonsense) {
+      const verifies = false;
+
+      context.debug(`Unable to verify the '${premiseString}' premise because it is nonsense.`);
+
+      continuation(verifies);
+
+      return;
+    }
+
+    declare((context) => {
+      this.validate(context, (validates) => {
+        let verifies = false;
 
         if (validates) {
           verifies = true;
         }
-      }, context);
-    } else {
-      context.debug(`Unable to validate the '${premiseString}' premise because it is nonsense.`);
-    }
 
-    return verifies;
-  }
+        if (verifies) {
+          context.debug(`...verified the '${premiseString}' premise.`);
+        }
 
-  validate(context) {
-    let validates = false;
+        continuation(verifies);
+      });
+    }, context);
+  });
 
+  validate(context, continuation) {
     const premiseString = this.getString(); ///
 
     context.trace(`Validatting the '${premiseString}' premise...`);
 
     attempt((context) => {
-      const statement = this.getStatement(),
-            procedureCall = this.getrocedureCall();
+      const validateStatement = this.validateStatement.bind(this),
+            validateProcedureCall = this.validateProcedureCall.bind(this);
 
-      if (statement !== null) {
-        const statementValidates = this.validateStatement(context);
-
-        if (statementValidates) {
-          validates = true;
+      exists([
+        validateStatement,
+        validateProcedureCall
+      ], context, (validates) => {
+        if (validates) {
+          this.commit(context);
         }
-      }
 
-      if (procedureCall !== null) {
-        const procedureCallValidates = this.validaterocedureCall(context);
-
-        if (procedureCallValidates) {
-          validates = true;
+        if (validates) {
+          context.debug(`...validated the '${premiseString}' premise.`);
         }
-      }
 
-      if (validates) {
-        this.commit(context);
-      }
+        continuation(validates);
+      });
     }, context);
-
-    if (validates) {
-      context.debug(`...validated the '${premiseString}' premise.`);
-    }
-
-    return validates;
   }
 
-  async validateStatement(context) {
-    let statementValidates = false;
+  validateStatement(context, continuation) {
+    const statement = this.getStatement();
+
+    if (statement === null) {
+      const statementValidates = false;
+
+      continuation(statementValidates);
+
+      return;
+    }
 
     const premiseString = this.getString();
 
     context.trace(`Validating the '${premiseString}' premise's statsement...`);
 
-    let statement;
+    statement.validate(context, (statement) => {
+      let statementValidates = false;
 
-    statement = this.getStatement();
+      if (statement !== null) {
+        statementValidates = true;
+      }
 
-    statement = await statement.validate(context);  ///
+      if (statementValidates) {
+        context.debug(`...validated the '${premiseString}' premise's statement.`);
+      }
 
-    if (statement !== null) {
-      statementValidates = true;
-    }
-
-    if (statementValidates) {
-      context.debug(`...validated the '${premiseString}' premise's statement.`);
-    }
-
-    return statementValidates;
+      continuation(statementValidates);
+    });
   }
 
-  validaterocedureCall(context) {
-    let procedureCallValidates;
+  validateProcedureCall(context, continuation) {
+    const procedureCall = this.getProcedureCall();
+
+    if (procedureCall === null) {
+      const procedureCallValidates = false;
+
+      continuation(procedureCallValidates);
+
+      return;
+    }
 
     const premiseString = this.getString();
 
     context.trace(`Validatting the '${premiseString}' premise's procedure call...`);
 
-    procedureCallValidates = this.procedureCall.validate(context);
+    this.procedureCall.validate(context, (procedureCallValidates) => {
+      if (procedureCallValidates) {
+        context.debug(`...validated the '${premiseString}' premise's procedure call.`);
+      }
 
-    if (procedureCallValidates) {
-      context.debug(`...validated the '${premiseString}' premise's procedure call.`);
-    }
-
-    return procedureCallValidates;
+      continuation(procedureCallValidates);
+    });
   }
 
   async unifyIndependently(context) {
@@ -170,7 +186,7 @@ export default define(class Premise extends ProofAssertion {
 
     await reconcile(async (context) => {
       const statement = this.getStatement(),
-            procedureCall = this.getrocedureCall();
+            procedureCall = this.getProcedureCall();
 
       if (statement !== null) {
         const premiseContext = this.getContext(), ///

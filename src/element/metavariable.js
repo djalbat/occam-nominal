@@ -12,7 +12,7 @@ import { metaTypeFromJSON, metaTypeToMetaTypeJSON } from "../utilities/json";
 import { unifyMetavariable, unifyMetavariableIntrinsically } from "../process/unify";
 import { nameFromMetavariableNode, termFromMetavariableNode, typeFromMetavariableNode, metavariableFromStatementNode } from "../utilities/element";
 
-const { breakable } = continuationUtilities,
+const { all } = continuationUtilities,
       { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Metavariable extends Element {
@@ -170,45 +170,43 @@ export default define(class Metavariable extends Element {
     return typeVerifies;
   }
 
-  async validate(strict, context) {
-    if (context === undefined) {
+  validate(strict, context, continuation) {
+    if (continuation === undefined) {
+      continuation = context; ///
+
       context = strict; ///
 
       strict = false;
     }
 
-    let metavariable = null;
-
     const metavariableString = this.getString(); ///
 
     context.trace(`Validating the '${metavariableString}' metavariable...`);
 
-    let validates = false;
-
     const validMetavariable = this.findValidMetavariable(context);
 
     if (validMetavariable !== null) {
-      validates = true;
-
-      metavariable = validMetavariable; ///
+      const metavariable = validMetavariable; ///
 
       context.debug(`...the '${metavariableString}' metavariable is already valid.`);
-    } else {
-      const nameValidates = this.validateName(strict, context);
 
-      if (nameValidates) {
-        const termValidates = await this.validateTerm(strict, context);
+      continuation(metavariable);
 
-        if (termValidates) {
-          const typeValidates = this.validateType(strict, context);
+      return;
+    }
 
-          if (typeValidates) {
-            validates = true;
-          }
-        }
-      }
+    const validateName = this.validateName.bind(this),
+          validateTerm = this.validateTerm.bind(this),
+          validateType = this.validateType.bind(this);
 
-      if (validates) {
+    all([
+      validateName,
+      validateTerm,
+      validateType
+    ], strict, context, (validated) => {
+      let metavariable = null;
+
+      if (validated) {
         metavariable = this;  ///
 
         const metavariableName = this.getMetavariableName(),  ///
@@ -217,17 +215,15 @@ export default define(class Metavariable extends Element {
         if (declaredMetavariable !== null) {
           context.addMetavariable(metavariable);
         }
+
+        context.debug(`...verified the '${metavariableString}' rule.`);
       }
-    }
 
-    if (validates) {
-      context.debug(`...validated the '${metavariableString}' metavariable.`);
-    }
-
-    return metavariable;
+      continuation(metavariable);
+    });
   }
 
-  validateName(strict, context) {
+  validateName(strict, context, continuation) {
     let nameValidates = true; ///
 
     const metavariableString = this.getString();  ///
@@ -254,52 +250,54 @@ export default define(class Metavariable extends Element {
       context.debug(`...validated the '${metavariableString}' metavariable's name.`);
     }
 
-    return nameValidates;
+    continuation(nameValidates);
   }
 
-  async validateTerm(strict, context) {
+  validateTerm(strict, context, continuation) {
+    if (this.term === null) {
+      const termValidates = true;
+
+      continuation(termValidates);
+
+      return;
+    }
+
+    const metavariableString = this.getString();  ///
+
+    context.trace(`Validating the '${metavariableString}' metavariable's term...`);
+
     let termValidates = false;
 
-    if (this.term === null) {
-      termValidates = true;
+    const metavariableName = this.getMetavariableName(),
+          declaredMetavariable = context.findDeclaredMetavariableByMetavariableName(metavariableName);
+
+    let term = null;
+
+    if (declaredMetavariable !== null) {
+      const type = declaredMetavariable.getType();
+
+      if (type !== null) {
+        term = this.term.validateGivenType(type, context);
+      }
     } else {
-      const metavariableString = this.getString();  ///
+      if (!strict) {
+        term = this.term.validate(context, async (term, context) => {
+          const validatesForwards = true;
 
-      context.trace(`Validating the '${metavariableString}' metavariable's term...`);
-
-      const metavariableName = this.getMetavariableName(),
-            declaredMetavariable = context.findDeclaredMetavariableByMetavariableName(metavariableName);
-
-      let term = null;
-
-      if (declaredMetavariable !== null) {
-        const type = declaredMetavariable.getType();
-
-        if (type !== null) {
-          term = await this.term.validateGivenType(type, context);
-        }
-      } else {
-        if (!strict) {
-          term = await this.term.validate(context, async (term, context) => {
-            const validatesForwards = true;
-
-            return validatesForwards;
-          });
-        }
-      }
-
-      if (term !== null) {
-        this.term = term;
-
-        termValidates = true;
-      }
-
-      if (termValidates) {
-        context.debug(`...validated the '${metavariableString}' metavariable's term.`);
+          return validatesForwards;
+        });
       }
     }
 
-    return termValidates;
+    if (term !== null) {
+      this.term = term;
+
+      termValidates = true;
+    }
+
+    if (termValidates) {
+      context.debug(`...validated the '${metavariableString}' metavariable's term.`);
+    }
   }
 
   validateType(strict, context) {

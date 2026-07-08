@@ -1,12 +1,12 @@
 "use strict";
 
-import { continuationUtilities } from "occam-languages";
+import { breakPointUtilities } from "occam-languages";
 
 import Declaration from "../declaration";
 
 import { define } from "../../elements";
 
-const { breakable } = continuationUtilities;
+const { breakable } = breakPointUtilities;
 
 export default define(class MetavariableDeclaration extends Declaration {
   constructor(context, string, node, breakPoint, metaType, metavariable) {
@@ -24,10 +24,8 @@ export default define(class MetavariableDeclaration extends Declaration {
     return this.metavariable;
   }
 
-  async verify(context) {
+  verify = breakable(function (context, continuation) {
     let verifies;
-
-    await this.break(context);
 
     const metavariableDeclarationString = this.getString(); ///
 
@@ -51,8 +49,8 @@ export default define(class MetavariableDeclaration extends Declaration {
       context.debug(`...verified the '${metavariableDeclarationString}' metavariable declaration.`);
     }
 
-    return verifies;
-  }
+    continuation(verifies);
+  });
 
   verifyMetaType(context) {
     let metaTypeVerifies = true;

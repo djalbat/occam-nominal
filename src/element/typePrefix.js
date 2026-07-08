@@ -1,14 +1,13 @@
 "use strict";
 
-import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
+import { Element, breakPointUtilities } from "occam-languages";
 
 import { define } from "../elements";
 import { instantiate } from "../utilities/context";
 import { instantiateTypePrefix } from "../process/instantiate";
 import { nameFromTypePrefixNode } from "../utilities/element";
 
-const { breakable } = continuationUtilities,
-      { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
+const { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class TypePrefix extends Element {
   constructor(context, string, node, breakPoint, name) {

@@ -1,14 +1,13 @@
 "use strict";
 
-import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
+import { Element, breakPointUtilities } from "occam-languages";
 
 import { define } from "../elements";
 import { instantiateHypothesis } from "../process/instantiate";
 import { declare, attempt, serialise, unserialise, instantiate } from "../utilities/context";
 import { statementFromHypothesisNode, procedureCallFromHypothesisNode } from "../utilities/element";
 
-const { breakable } = continuationUtilities,
-      { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
+const { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Hypothesis extends Element {
   constructor(context, string, node, breakPoint, statement, procedureCall) {

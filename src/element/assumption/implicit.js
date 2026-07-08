@@ -1,14 +1,12 @@
 "use strict";
 
-import { Element, continuationUtilities } from "occam-languages";
+import { Element } from "occam-languages";
 
 import { define } from "../../elements";
 import { pare, instantiate } from "../../utilities/context";
 import { instantiateImplicitAssumption } from "../../process/instantiate";
 import { implicitAssumptionStringFromStatement } from "../../utilities/string";
 import { implicitAssumptionFromImplicitAssumptionNode } from "../../utilities/element";
-
-const { breakable } = continuationUtilities;
 
 export default define(class ImplicitAssumption extends Element {
   constructor(context, string, node, breakPoint, statement) {

@@ -9,7 +9,7 @@ import { signatureFromSignatureNode } from "../utilities/element";
 import { ablate, attempt, reconcile, serialise, unserialise, instantiate } from "../utilities/context";
 
 const { match } = arrayUtilities,
-      { every, breakable } = continuationUtilities,
+      { every } = continuationUtilities,
       { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Signature extends Element {

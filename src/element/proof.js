@@ -1,11 +1,9 @@
 "use strict";
 
-import { Element, continuationUtilities } from "occam-languages";
+import { Element } from "occam-languages";
 
 import { define } from "../elements";
 import { enclose } from "../utilities/context";
-
-const { breakable } = continuationUtilities;
 
 export default define(class Proof extends Element {
   constructor(context, string, node, breakPoint, derivation) {

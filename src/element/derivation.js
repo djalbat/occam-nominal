@@ -6,7 +6,7 @@ import { Element, continuationUtilities } from "occam-languages";
 import { define } from "../elements";
 
 const { last } = arrayUtilities,
-      { every, breakable } = continuationUtilities;
+      { every } = continuationUtilities;
 
 export default define(class Derivation extends Element {
   constructor(context, string, node, breakPoint, subproofOrProofAssertions) {

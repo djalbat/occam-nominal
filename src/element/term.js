@@ -11,8 +11,8 @@ import { unifyTermIntrinsically } from "../process/unify";
 import { validateTerms, unifyTermWithProperties } from "../process/validation";
 import { typeFromJSON, typeToTypeJSON, provisionalFromJSON, provisionalToProvisionalJSON } from "../utilities/json";
 
-const { filter } = arrayUtilities,
-      { some, breakable } = continuationUtilities,
+const { some } = continuationUtilities,
+      { filter } = arrayUtilities,
       { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Term extends Element {

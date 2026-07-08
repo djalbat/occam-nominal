@@ -1,12 +1,8 @@
 "use strict";
 
-import { continuationUtilities } from "occam-languages";
-
 import Combinator from "../combinator";
 
 import { define } from "../../elements";
-
-const { breakable } = continuationUtilities;
 
 export default define(class BracketedCombinator extends Combinator {
   getBracketedCombinatorNode() {
@@ -16,20 +12,18 @@ export default define(class BracketedCombinator extends Combinator {
     return bracketedCombinatorNode;
   }
 
-  async unifyStatement(statement, context) {
-    let statementUnifies;
-
+  unifyStatement(statement, context, continuation) {
     const statementString = statement.getString();
 
     context.trace(`Unifying the '${statementString}' statement with the bracketed combinator...`);
 
-    statementUnifies = await super.unifyStatement(statement, context);
+    super.unifyStatement(statement, context, (statementUnifies) => {
+      if (statementUnifies) {
+        context.debug(`...unified the '${statementString}' statement with the bracketed combinator.`);
+      }
 
-    if (statementUnifies) {
-      context.debug(`...unified the '${statementString}' statement with the bracketed combinator.`);
-    }
-
-    return statementUnifies;
+      continuation(statementUnifies);
+    });
   }
 
   static name = "BracketedCombinator";
