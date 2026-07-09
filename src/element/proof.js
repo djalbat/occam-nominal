@@ -33,28 +33,28 @@ export default define(class Proof extends Element {
     return statement;
   }
 
-  async verify(statement, context) {
-    let verifies = false;
+  verify(statement, context, continuation) {
+    enclose((context) => {
+      this.derivation.verify(context, (derivationVerifies) => {
+        let verifies = false;
 
-    await enclose(async (context) => {
-      const derivationVerifies = await this.derivation.verify(context);
+        if (derivationVerifies) {
+          const lastStep = context.getLastStep();
 
-      if (derivationVerifies) {
-        const lastStep = context.getLastStep();
+          if (lastStep !== null) {
+            const proof = this, ///
+                  proofStatement = proof.getStatement(),
+                  proofStatementEqualToStatement = proofStatement.isEqualTo(statement);
 
-        if (lastStep !== null) {
-          const proof = this, ///
-                proofStatement = proof.getStatement(),
-                proofStatementEqualToStatement = proofStatement.isEqualTo(statement);
-
-          if (proofStatementEqualToStatement) {
-            verifies = true;
+            if (proofStatementEqualToStatement) {
+              verifies = true;
+            }
           }
         }
-      }
-    }, context);
 
-    return verifies;
+        continuation(verifies);
+      });
+    }, context);
   }
 
   static name = "Proof";

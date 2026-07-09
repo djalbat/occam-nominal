@@ -44,129 +44,161 @@ class TopLevelPass extends ContinuationPass {
     {
       nodeQuery: errorNodeQuery,
       run: (errorNode, context, continuation) => {
-        const error = errorFromErrorNode(errorNode, context);
+        setImmediate(() => {
+          const error = errorFromErrorNode(errorNode, context);
 
-        error.verify(context, continuation);
+          error.verify(context, continuation);
+        });
       }
     },
     {
       nodeQuery: ruleNodeQuery,
       run: (ruleNode, context, continuation) => {
-        const rule = ruleFromRuleNode(ruleNode, context);
+        setImmediate(() => {
+          const rule = ruleFromRuleNode(ruleNode, context);
 
-        rule.verify(context, continuation);
+          rule.verify(context, continuation);
+        });
       }
     },
     {
       nodeQuery: axiomNodeQuery,
       run: (axiomNode, context, continuation) => {
-        const axiom = axiomFromAxiomNode(axiomNode, context);
+        setImmediate(() => {
+          const axiom = axiomFromAxiomNode(axiomNode, context);
 
-        axiom.verify(context, continuation);
+          axiom.verify(context, continuation);
+        });
       }
     },
     {
       nodeQuery: lemmaNodeQuery,
       run: (lemmaNode, context, continuation) => {
-        const lemma = lemmaFromLemmaNode(lemmaNode, context);
+        setImmediate(() => {
+          const lemma = lemmaFromLemmaNode(lemmaNode, context);
 
-        lemma.verify(context, continuation);
+          lemma.verify(context, continuation);
+        });
       }
     },
     {
       nodeQuery: schemaNodeQuery,
       run: (schemaNode, context, continuation) => {
-        const schema = schemaFromSchemaNode(schemaNode, context);
+        setImmediate(() => {
+          const schema = schemaFromSchemaNode(schemaNode, context);
 
-        schema.verify(context, continuation);
+          schema.verify(context, continuation);
+        });
       }
     },
     {
       nodeQuery: sectionNodeQuery,
       run: (sectionNode, context, continuation) => {
-        const section = sectionFromSectionNode(sectionNode, context);
+        setImmediate(() => {
+          const section = sectionFromSectionNode(sectionNode, context);
 
-        section.verify(context, continuation);
+          section.verify(context, continuation);
+        });
       }
     },
     {
       nodeQuery: theoremNodeQuery,
       run: (theoremNode, context, continuation) => {
-        const theorem = theoremFromTheoremNode(theoremNode, context);
+        setImmediate(() => {
+          const theorem = theoremFromTheoremNode(theoremNode, context);
 
-        theorem.verify(context, continuation);
+          theorem.verify(context, continuation);
+        });
       }
     },
     {
       nodeQuery: conjectureNodeQuery,
       run: (conjectureNode, context, continuation) => {
-        const conjecture = conjectureFromConjectureNode(conjectureNode, context);
+        setImmediate(() => {
+          const conjecture = conjectureFromConjectureNode(conjectureNode, context);
 
-        conjecture.verify(context, continuation);
+          conjecture.verify(context, continuation);
+        });
       }
     },
     {
       nodeQuery: typeDeclarationNodeQuery,
       run: (typeDeclarationNode, context, continuation) => {
-        const typeDeclaration = typeDeclarationFromTypeDeclarationNode(typeDeclarationNode, context);
+        setImmediate(() => {
+          const typeDeclaration = typeDeclarationFromTypeDeclarationNode(typeDeclarationNode, context);
 
-        typeDeclaration.verify(context, continuation);
+          typeDeclaration.verify(context, continuation);
+        });
       }
     },
     {
       nodeQuery: cotypeDeclarationNodeQuery,
       run: (cotypeDeclarationNode, context, continuation) => {
-        const cotypeDeclaration = cotypeDeclarationFromCotypeDeclarationNode(cotypeDeclarationNode, context);
+        setImmediate(() => {
+          const cotypeDeclaration = cotypeDeclarationFromCotypeDeclarationNode(cotypeDeclarationNode, context);
 
-        cotypeDeclaration.verify(context, continuation);
+          cotypeDeclaration.verify(context, continuation);
+        });
       }
     },
     {
       nodeQuery: variableDeclarationNodeQuery,
       run: (variableDeclarationNode, context, continuation) => {
-        const variableDeclaration = variableDeclarationFromVariableDeclarationNode(variableDeclarationNode, context);
+        setImmediate(() => {
+          const variableDeclaration = variableDeclarationFromVariableDeclarationNode(variableDeclarationNode, context);
 
-        variableDeclaration.verify(context, continuation);
+          variableDeclaration.verify(context, continuation);
+        });
       }
     },
     {
       nodeQuery: generatorDeclarationNodeQuery,
       run: (generatorDeclarationNode, context, continuation) => {
-        const generatorDeclaration = generatorDeclarationFromGeneratorDeclarationNode(generatorDeclarationNode, context);
+        setImmediate(() => {
+          const generatorDeclaration = generatorDeclarationFromGeneratorDeclarationNode(generatorDeclarationNode, context);
 
-        generatorDeclaration.verify(context, continuation);
+          generatorDeclaration.verify(context, continuation);
+        });
       }
     },
     {
       nodeQuery: typePrefixDeclarationNodeQuery,
       run: (typePrefixDeclarationNode, context, continuation) => {
-        const typePrefixDeclaration = typePrefixDeclarationFromTypePrefixDeclarationNode(typePrefixDeclarationNode, context);
+        setImmediate(() => {
+          const typePrefixDeclaration = typePrefixDeclarationFromTypePrefixDeclarationNode(typePrefixDeclarationNode, context);
 
-        typePrefixDeclaration.verify(context, continuation);
+          typePrefixDeclaration.verify(context, continuation);
+        });
       }
     },
     {
       nodeQuery: combinatorDeclarationNodeQuery,
       run: (combinatorDeclarationNode, context, continuation) => {
-        const combinatorDeclaration = combinatorDeclarationFromCombinatorDeclarationNode(combinatorDeclarationNode, context);
+        setImmediate(() => {
+          const combinatorDeclaration = combinatorDeclarationFromCombinatorDeclarationNode(combinatorDeclarationNode, context);
 
-        combinatorDeclaration.verify(context, continuation);
+          combinatorDeclaration.verify(context, continuation);
+        });
       }
     },
     {
       nodeQuery: constructorDeclarationNodeQuery,
       run: (constructorDeclarationNode, context, continuation) => {
-        const constructorDeclaration = constructorDeclarationFromConstructorDeclarationNode(constructorDeclarationNode, context);
+        setImmediate(() => {
+          const constructorDeclaration = constructorDeclarationFromConstructorDeclarationNode(constructorDeclarationNode, context);
 
-        constructorDeclaration.verify(context, continuation);
+          constructorDeclaration.verify(context, continuation);
+        });
       }
     },
     {
       nodeQuery: metavariableDeclarationNodeQuery,
       run: (metavariableDeclarationNode, context, continuation) => {
-        const metavariableDeclaration = metavariableDeclarationFromMetavariableDeclarationNode(metavariableDeclarationNode, context);
+        setImmediate(() => {
+          const metavariableDeclaration = metavariableDeclarationFromMetavariableDeclarationNode(metavariableDeclarationNode, context);
 
-        metavariableDeclaration.verify(context, continuation);
+          metavariableDeclaration.verify(context, continuation);
+        });
       }
     }
   ];

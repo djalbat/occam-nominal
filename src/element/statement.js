@@ -205,7 +205,7 @@ export default define(class Statement extends Element {
       return;
     }
 
-    let statement = this; ///
+    let statement = this;
 
     exists(validateStatements, statement, context, (statementValidates) => {
       if (statementValidates) {

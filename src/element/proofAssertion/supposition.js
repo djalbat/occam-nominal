@@ -54,12 +54,12 @@ export default define(class Supposition extends ProofAssertion {
     return subproofAssertion;
   }
 
-  isNonsense() {
+  isNonsensical() {
     const statement = this.getStatement(),
           procedureCall = this.getProcedureCall(),
-          nonsense = ((statement === null) && (procedureCall === null));
+          nonsensical = ((statement === null) && (procedureCall === null));
 
-    return nonsense;
+    return nonsensical;
   }
 
   async verify(context) {

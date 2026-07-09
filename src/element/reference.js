@@ -82,53 +82,32 @@ export default define(class Reference extends Element {
     return comparesToParamter;
   }
 
-  compareSchema(schema) {
-    let schemaCompares = false;
-
-    const context = this.getContext(),
-          schemaString = schema.getString(),
-          referenceString = this.getString(); ///
-
-    context.trace(`Comparing the '${schemaString}' schema to the '${referenceString}' reference...`);
-
-    const label = schema.getLabel(),
-          labelUnifies = this.unifyLabel(label, context);
-
-    if (labelUnifies) {
-      schemaCompares = true;
-    }
-
-    if (schemaCompares) {
-      context.trace(`...compared the '${schemaString}' schema to the '${referenceString}' reference.`);
-    }
-
-    return schemaCompares;
-  }
-
-  validate(context) {
-    let reference = null;
-
+  validate(context, continuation) {
     const referenceString = this.getString(); ///
 
     context.trace(`Validating the '${referenceString}' reference...`);
 
-    let validates = false;
-
     const validReference = this.findValidReference(context);
 
     if (validReference !== null) {
-      validates = true;
-
-      reference = validReference;  ///
+      const reference = validReference;  ///
 
       context.debug(`...the '${referenceString}' reference is already valid.`);
-    } else {
-      const temporaryContext = context; ///
 
-      context = this.getContext();
+      continuation(reference);
 
-      attempt((context) => {
-        const metavariableValidates = this.validateMetavariable(context);
+      return;
+    }
+
+    const temporaryContext = context; ///
+
+    context = this.getContext();
+
+    attempt((context) => {
+      this.validateMetavariable(context, (metavariableValidates) => {
+        let reference = null;
+
+        let validates = false;
 
         if (metavariableValidates) {
           const metaType = this.metavariable.getMetaType();
@@ -155,44 +134,44 @@ export default define(class Reference extends Element {
         if (validates) {
           this.commit(context);
         }
-      }, context);
 
-      context = temporaryContext; ///
+        context = temporaryContext; ///
 
-      if (validates) {
-        reference = this;  ///
+        if (validates) {
+          reference = this;  ///
 
-        context.addReference(reference);
-      }
-    }
+          context.addReference(reference);
+        }
 
-    if (validates) {
-      context.debug(`...validated the '${referenceString}' reference.`);
-    }
+        if (validates) {
+          context.debug(`...validated the '${referenceString}' reference.`);
+        }
 
-    return reference;
+        continuation(reference);
+      });
+    }, context);
   }
 
-  validateMetavariable(context) {
-    let metavariableValidates = false;
-
+  validateMetavariable(context, continuation) {
     const referenceString = this.getString(); ///
 
     context.trace(`Validating the '${referenceString}' reference's metavariable...'`);
 
-    const metavariable = this.metavariable.validate(context);
+    this.metavariable.validate(context, (metavariable) => {
+      let metavariableValidates = true;
 
-    if (metavariable !== null) {
-      this.metavariable = metavariable;
+      if (metavariable !== null) {
+        this.metavariable = metavariable;
 
-      metavariableValidates = true;
-    }
+        metavariableValidates = true;
+      }
 
-    if (metavariableValidates) {
-      context.debug(`...validated the '${referenceString}' reference's metavariable.'`);
-    }
+      if (metavariableValidates) {
+        context.debug(`...validated the '${referenceString}' reference's metavariable.'`);
+      }
 
-    return metavariableValidates;
+      continuation(metavariableValidates);
+    });
   }
 
   unifyLabel(label, context) {

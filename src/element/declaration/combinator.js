@@ -1,8 +1,12 @@
 "use strict";
 
+import { breakPointUtilities } from "occam-languages";
+
 import Declaration from "../declaration";
 
 import { define } from "../../elements";
+
+const { breakable } = breakPointUtilities;
 
 export default define(class CombinatorDeclaration extends Declaration {
   constructor(context, string, node, breakPoint, combinator) {
@@ -22,44 +26,40 @@ export default define(class CombinatorDeclaration extends Declaration {
     return combinatorDeclarationNode;
   }
 
-  async verify(context) {
-    let verifies = false;
-
-    await this.break(context);
-
+  verify = breakable(function (context, continuation) {
     const combinatorDeclarationString = this.getString();  ///
 
     context.trace(`Verifying the '${combinatorDeclarationString}' combinator declaration...`);
 
-    const combinatorVerifies = this.verifyCombinator(context);
+    this.verifyCombinator(context, (combinatorVerifies) => {
+      let verifies = false;
 
-    if (combinatorVerifies) {
-      context.addCombinator(this.combinator);
+      if (combinatorVerifies) {
+        context.addCombinator(this.combinator);
 
-      verifies = true;
-    }
+        verifies = true;
+      }
 
-    if (verifies) {
-      context.debug(`...verified the '${combinatorDeclarationString}' combinator declaration.`);
-    }
+      if (verifies) {
+        context.debug(`...verified the '${combinatorDeclarationString}' combinator declaration.`);
+      }
 
-    return verifies;
-  }
+      continuation(verifies);
+    });
+  });
 
-  verifyCombinator(context) {
-    let combinatorVerifies;
-
+  verifyCombinator(context, continuation) {
     const combinatorDeclarationString = this.getString();  ///
 
     context.trace(`Verifying the '${combinatorDeclarationString}' combinator declaration's combinator...`);
 
-    combinatorVerifies = this.combinator.verify(context);
+    this.combinator.verify(context, (combinatorVerifies) => {
+      if (combinatorVerifies) {
+        context.debug(`...verified the '${combinatorDeclarationString}' combinator declaration's combinator.`);
+      }
 
-    if (combinatorVerifies) {
-      context.debug(`...verified the '${combinatorDeclarationString}' combinator declaration's combinator.`);
-    }
-
-    return combinatorVerifies;
+      continuation(combinatorVerifies);
+    });
   }
 
   static name = "CombinatorDeclaration";

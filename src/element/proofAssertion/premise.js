@@ -55,12 +55,12 @@ export default define(class Premise extends ProofAssertion {
     return subproofAssertion;
   }
 
-  isNonsense() {
+  isNonsensical() {
     const statement = this.getStatement(),
           procedureCall = this.getProcedureCall(),
-          nonsense = ((statement === null) && (procedureCall === null));
+          nonsensical = ((statement === null) && (procedureCall === null));
 
-    return nonsense;
+    return nonsensical;
   }
 
   verify = breakable(function (context, continuation) {
@@ -68,9 +68,9 @@ export default define(class Premise extends ProofAssertion {
 
     context.trace(`Verifying the '${premiseString}' premise...`);
 
-    const nonsense = this.isNonsense();
+    const nonsensical = this.isNonsensical();
 
-    if (nonsense) {
+    if (nonsensical) {
       const verifies = false;
 
       context.debug(`Unable to verify the '${premiseString}' premise because it is nonsense.`);

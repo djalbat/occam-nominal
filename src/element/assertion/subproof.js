@@ -53,25 +53,27 @@ export default define(class SubproofAssertion extends Assertion {
     return subproofAssertionNode;
   }
 
-  async validate(context) {
-    let subproofAssertion = null;
-
+  validate(context, continuation) {
     const subproofAssertionString = this.getString();  ///
 
     context.trace(`Validating the '${subproofAssertionString}' subproof assertion...`);
 
-    let validates = false;
-
     const validAssertion = this.findValidAssertion(context);
 
     if (validAssertion !== null) {
-      validates = true;
-
-      subproofAssertion = validAssertion; ///
+      const subproofAssertion = validAssertion; ///
 
       context.debug(`...the '${subproofAssertionString}' subproof assertion is already valid.`);
-    } else {
-      const statementsValidate = await this.validateStatements(context);
+
+      continuation(subproofAssertion);
+
+      return;
+    }
+
+    let subproofAssertion = null;
+
+    this.validateStatements(context, (statementsValidate) => {
+      let validates = false;
 
       if (statementsValidate) {
         validates = true;
@@ -84,33 +86,29 @@ export default define(class SubproofAssertion extends Assertion {
 
         context.addAssertion(assertion);
       }
-    }
 
-    if (validates) {
-      context.debug(`...validated the '${subproofAssertionString}' subproof assertion.`);
-    }
+      if (validates) {
+        context.debug(`...validated the '${subproofAssertionString}' subproof assertion.`);
+      }
 
-    return subproofAssertion;
+      continuation(subproofAssertion);
+    });
   }
 
-  async validateStatements(context) {
-    const statementsValidate = await every(this.statements, async (statement) => {
-      let statementValidates = false;
+  validateStatements(context, continuation) {
+    every(this.statements, (statement, continuation) => {
+      descend((context) => {
+        statement.validate(context, (statement) => {
+          let statementValidates = false;
 
-      await descend(async (context) => {
-        statement = await statement.validate(context);  ///
+          if (statement !== null) {
+            statementValidates = true;
+          }
 
-        if (statement !== null) {
-          statementValidates = true;
-        }
+          continuation(statementValidates);
+        });
       }, context);
-
-      if (statementValidates) {
-        return true;
-      }
-    });
-
-    return statementsValidate;
+    }, continuation);
   }
 
   unifySchema(schema, generalContext, specificContext) {

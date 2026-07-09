@@ -29,50 +29,48 @@ export default define(class Combinator extends Element {
     return combinatorNode;
   }
 
-  async verify(context) {
-    let verifies = false;
-
+  verify(context, continuation) {
     const combinatorString = this.getString();  ///
 
     context.trace(`Verifying the '${combinatorString}' combinator...`);
 
-    await attempt(async (context) => {
-      const statementValidates = await this.validateStatement(context);
+    attempt((context) => {
+      this.validateStatement(context, (statementValidates) => {
+        let verifies = false;
 
-      if (statementValidates) {
-        verifies = true;
-      }
+        if (statementValidates) {
+          verifies = true;
+        }
 
-      if (verifies) {
-        this.commit(context);
-      }
+        if (verifies) {
+          this.commit(context);
+
+          context.debug(`...verified the '${combinatorString}' combinator.`);
+        }
+
+        continuation(verifies);
+      });
     }, context)
-
-    if (verifies) {
-      context.debug(`...verified the '${combinatorString}' combinator.`);
-    }
-
-    return verifies;
   }
 
-  async validateStatement(context) {
-    let statementValidates = false;
-
+  validateStatement(context, continuation) {
     const combinatorString = this.getString();  ///
 
     context.trace(`Validating the '${combinatorString}' combinator's statement...`);
 
-    const statementValidatesAsCombinator = await validateStatementAsCombinator(this.statement, context);
+    validateStatementAsCombinator(this.statement, context, (statementValidatesAsCombinator) => {
+      let statementValidates = false;
 
-    if (statementValidatesAsCombinator) {
-      statementValidates = true;
-    }
+      if (statementValidatesAsCombinator) {
+        statementValidates = true;
+      }
 
-    if (statementValidates) {
-      context.debug(`...validated the '${combinatorString}' combinator's statement.`);
-    }
+      if (statementValidates) {
+        context.debug(`...validated the '${combinatorString}' combinator's statement.`);
+      }
 
-    return statementValidates;
+      continuation(statementValidates);
+    });
   }
 
   unifyStatement(statement, context, continuation) {

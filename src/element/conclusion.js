@@ -6,7 +6,7 @@ import { define } from "../elements";
 import { instantiateConclusion } from "../process/instantiate";
 import { elide, declare, attempt, reconcile, serialise, unserialise, instantiate } from "../utilities/context";
 
-const { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
+const { breakable, breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Conclusion extends Element {
   constructor(context, string, node, breakPoint, statement) {
@@ -26,80 +26,92 @@ export default define(class Conclusion extends Element {
     return conclusionNode;
   }
 
-  async verify(context) {
-    let verifies = false;
+  isNonBreakable() {
+    const nonsensical = (this.statement === null);
 
-    await this.break(context);
+    return nonsensical;
+  }
 
+  verify = breakable(function (context, continuation) {
     const conclusionString = this.getString();  ///
 
     context.trace(`Verifying the '${conclusionString}' conclusion...`);
 
-    if (this.statement !== null) {
-      declare((context) => {
-        elide((context) => {
-          const validates = this.validate(context);
+    const nonsensical = this.isNonBreakable();
+
+    if (nonsensical) {
+      const verifies = false;
+
+      context.debug(`Unable to verify the '${conclusionString}' conclusion because it is nonsense.`);
+
+      continuation(verifies);
+
+      return;
+    }
+
+    declare((context) => {
+      elide((context) => {
+        this.validate(context, (validates) => {
+          let verifies = false;
 
           if (validates) {
             verifies = true;
           }
-        }, context);
+
+          if (verifies) {
+            context.debug(`...verified the '${conclusionString}' conclusion.`);
+          }
+
+          continuation(verifies);
+        });
       }, context);
-    } else {
-      context.debug(`Unable to verify the '${conclusionString}' conclusion because it is nonsense.`);
-    }
+    }, context);
+  });
 
-    if (verifies) {
-      context.debug(`...verified the '${conclusionString}' conclusion.`);
-    }
-
-    return verifies;
-  }
-
-  async validate(context) {
-    let validates = false;
-
+  validate(context, continuation) {
     const conclusionString = this.getString();  ///
 
     context.trace(`Validating the '${conclusionString}' conclusion...`);
 
-    await attempt(async (context) => {
-      const statementValidates = await this.validateStatement(context);
+    attempt(async (context) => {
+      this.validateStatement(context, (statementValidates) => {
+        let validates = false;
 
-      if (statementValidates) {
-        validates = true;
-      }
+        if (statementValidates) {
+          validates = true;
+        }
 
-      if (validates) {
-        this.commit(context);
-      }
+        if (validates) {
+          this.commit(context);
+        }
+
+        if (validates) {
+          context.debug(`...validated the '${conclusionString}' conclusion.`);
+        }
+
+        continuation(validates);
+      });
     }, context);
-
-    if (validates) {
-      context.debug(`...validated the '${conclusionString}' conclusion.`);
-    }
-
-    return validates;
   }
 
-  async validateStatement(context) {
-    let statementValidates = false;
-
+  validateStatement(context, continuation) {
     const conclusionString = this.getString();  ///
 
     context.trace(`Validating the '${conclusionString}' conclusion's statement...`);
 
-    const statement = await this.statement.validate(context);
+    this.statement.validate(context, (statement) => {
+      let statementValidates = false;
 
-    if (statement !== null) {
-      statementValidates = true;
-    }
+      if (statement !== null) {
+        statementValidates = true;
+      }
 
-    if (statementValidates) {
-      context.trace(`...validated the '${conclusionString}' conclusion's statement.`);
-    }
+      if (statementValidates) {
+        context.trace(`...validated the '${conclusionString}' conclusion's statement.`);
+      }
 
-    return statementValidates;
+      continuation(statementValidates);
+    });
   }
 
   async unifyStep(step, context) {

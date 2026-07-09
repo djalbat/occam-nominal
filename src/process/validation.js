@@ -148,7 +148,7 @@ function validateStatementAsMetavariable(statement, context, continuation) {
           substitution = (termSubstitution || frameSubstitution);
 
     if (substitution === null) {
-      const statementValidatesAsMetavariable = false;
+      const statementValidatesAsMetavariable = true;
 
       continuation(statementValidatesAsMetavariable);
 

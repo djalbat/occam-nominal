@@ -13,17 +13,17 @@ const termNodeQuery = nodeQuery("/term"),
       statementNodeQuery = nodeQuery("/statement");
 
 class PropertyPass extends ContinuationPass {
-  run(termNode, context, continuatino) {
+  run(termNode, context, continuation) {
     const nonTerminalNode = termNode,  ///
           childNodes = nonTerminalNode.getChildNodes();
 
-    this.descend(childNodes, context, continuatino);
+    this.descend(childNodes, context, continuation);
   }
 
   static maps = [
     {
       nodeQuery: termNodeQuery,
-      run: (termNode, context, continuatino) => {
+      run: (termNode, context, continuation) => {
         const term = termFromTermNode(termNode, context);
 
         term.validate(context, (term, context) => {
@@ -33,13 +33,13 @@ class PropertyPass extends ContinuationPass {
             success = true;
           }
 
-          continuatino(success);
+          continuation(success);
         });
       }
     },
     {
       nodeQuery: typeNodeQuery,
-      run: (typeNode, context, continuatino) => {
+      run: (typeNode, context, continuation) => {
         let success = false;
 
         const nominalTypeName = typeNode.getNominalTypeName(),
@@ -49,24 +49,24 @@ class PropertyPass extends ContinuationPass {
           success = true;
         }
 
-        continuatino(success);
+        continuation(success);
       }
     }
   ];
 }
 
 class GeneratorPass extends ContinuationPass {
-  run(termNode, context, continuatino) {
+  run(termNode, context, continuation) {
     const nonTerminalNode = termNode,  ///
           childNodes = nonTerminalNode.getChildNodes();
 
-    this.descend(childNodes, context, continuatino);
+    this.descend(childNodes, context, continuation);
   }
 
   static maps = [
     {
       nodeQuery: termNodeQuery,
-      run: (termNode, context, continuatino) => {
+      run: (termNode, context, continuation) => {
         const term = termFromTermNode(termNode, context);
 
         term.validate(context, (term, context) => {
@@ -76,13 +76,13 @@ class GeneratorPass extends ContinuationPass {
             success = true;
           }
 
-          continuatino(success);
+          continuation(success);
         });
       }
     },
     {
       nodeQuery: typeNodeQuery,
-      run: (typeNode, context, continuatino) => {
+      run: (typeNode, context, continuation) => {
         let success = false;
 
         const nominalTypeName = typeNode.getNominalTypeName(),
@@ -92,24 +92,24 @@ class GeneratorPass extends ContinuationPass {
           success = true;
         }
 
-        continuatino(success);
+        continuation(success);
       }
     }
   ];
 }
 
 class CombinatorPass extends ContinuationPass {
-  run(statementNode, context, continuatino) {
+  run(statementNode, context, continuation) {
     const nonTerminalNode = statementNode,  ///
           childNodes = nonTerminalNode.getChildNodes();
 
-    this.descend(childNodes, context, continuatino);
+    this.descend(childNodes, context, continuation);
   }
 
   static maps = [
     {
       nodeQuery: statementNodeQuery,
-      run: (statementNode, context, continuatino) => {
+      run: (statementNode, context, continuation) => {
         const statement = statementFromStatementNode(statementNode, context);
 
         descend((context) => {
@@ -120,14 +120,14 @@ class CombinatorPass extends ContinuationPass {
               success = true;
             }
 
-            continuatino(success);
+            continuation(success);
           });
         }, context);
       }
     },
     {
       nodeQuery: termNodeQuery,
-      run: (termNode, context, continuatino) => {
+      run: (termNode, context, continuation) => {
         const term = termFromTermNode(termNode, context);
 
         term.validate(context, (term, context) => {
@@ -137,13 +137,13 @@ class CombinatorPass extends ContinuationPass {
             success = true;
           }
 
-          continuatino(success);
+          continuation(success);
         });
       }
     },
     {
       nodeQuery: typeNodeQuery,
-      run: (typeNode, context, continuatino) => {
+      run: (typeNode, context, continuation) => {
         let success = false;
 
         const nominalTypeName = typeNode.getNominalTypeName(),
@@ -153,24 +153,24 @@ class CombinatorPass extends ContinuationPass {
           success = true;
         }
 
-        continuatino(success);
+        continuation(success);
       }
     }
   ];
 }
 
 class ConstructorPass extends ContinuationPass {
-  run(termNode, context, continuatino) {
+  run(termNode, context, continuation) {
     const nonTerminalNode = termNode,  ///
           childNodes = nonTerminalNode.getChildNodes();
 
-    this.descend(childNodes, context, continuatino);
+    this.descend(childNodes, context, continuation);
   }
 
   static maps = [
     {
       nodeQuery: termNodeQuery,
-      run: (termNode, context, continuatino) => {
+      run: (termNode, context, continuation) => {
         const term = termFromTermNode(termNode, context);
 
         term.validate(context, (term, context) => {
@@ -180,13 +180,13 @@ class ConstructorPass extends ContinuationPass {
             success = true;
           }
 
-          continuatino(success);
+          continuation(success);
         });
       }
     },
     {
       nodeQuery: typeNodeQuery,
-      run: (typeNode, context, continuatino) => {
+      run: (typeNode, context, continuation) => {
         let success = false;
 
         const nominalTypeName = typeNode.getNominalTypeName(),
@@ -196,7 +196,7 @@ class ConstructorPass extends ContinuationPass {
           success = true;
         }
 
-        continuatino(success);
+        continuation(success);
       }
     }
   ];
@@ -225,8 +225,8 @@ export function validateTermAsConstructor(term, context, continuation) {
   constructorPass.run(termNode, context, continuation);
 }
 
-export function validateStatementAsCombinator(statement, context, continuatino) {
+export function validateStatementAsCombinator(statement, context, continuation) {
   const statementNode = statement.getNode();
 
-  combinatorPass.run(statementNode, context, continuatino);
+  combinatorPass.run(statementNode, context, continuation);
 }

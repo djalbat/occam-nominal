@@ -1,7 +1,7 @@
 "use strict";
 
 import { arrayUtilities } from "necessary";
-import { continuationUtilities } from "occam-languages";
+import { breakPointUtilities, continuationUtilities } from "occam-languages";
 
 import elements from "../../elements";
 import ProofAssertion from "../proofAssertion";
@@ -10,7 +10,8 @@ import { define } from "../../elements";
 import { unifySteps } from "../../process/unification";
 import { derive, declare, attempt, reconcile } from "../../utilities/context";
 
-const { some } = continuationUtilities,
+const { breakable } = breakPointUtilities,
+      { all, some } = continuationUtilities,
       { backwardsSome } = arrayUtilities;
 
 export default define(class Step extends ProofAssertion {
@@ -62,6 +63,12 @@ export default define(class Step extends ProofAssertion {
     return unqualified;
   }
 
+  isNonsensical() {
+    const nonsensical = (this.statement === null);
+
+    return nonsensical;
+  }
+
   isMetavariableDefined(metavariable, context) {
     let metavariableDefined = false;
 
@@ -111,113 +118,109 @@ export default define(class Step extends ProofAssertion {
     return comparesToSubproofOrProofAssertions;
   }
 
-  async verify(context) {
-    let verifies = false;
-
-    await this.break(context);
-
+  verify = breakable(function (context, continuation) {
     const stepString = this.getString(); ///
 
     context.trace(`Verifying the '${stepString}' step...`);
 
-    const statement = this.getStatement();
+    const nonsensical = this.isNonsensical();
 
-    if (statement !== null) {
-      const qualified = this.isQualified(),
-            stated = qualified; ///
+    if (nonsensical) {
+      const verifies = false;
 
-      await (stated ? declare : derive)(async (context) => {
-        const validates = this.validate(context);
-
-        if (validates) {
-          context = this.getContext();
-
-          const unifiies = await this.unify(context);
-
-          if (unifiies) {
-            verifies = true;
-          }
-        }
-      }, context)
-    } else {
       context.debug(`Unable to verify the '${stepString}' step because it is nonsense.`);
+
+      continuation(verifies);
+
+      return;
     }
 
-    if (verifies) {
-      context.debug(`...verified the '${stepString}' step.`);
-    }
+    const qualified = this.isQualified(),
+          stated = qualified; ///
 
-    return verifies;
-  }
+    (stated ? declare : derive)((context) => {
+      const validate = this.validate.bind(this),
+            unify = this.unify.bind(this);
 
-  validate(context) {
-    let validates = false;
+      all([
+        validate,
+        unify
+      ], context, (verifies) => {
+        if (verifies) {
+          context.debug(`...verified the '${stepString}' step.`);
+        }
 
+        continuation(verifies);
+      });
+    }, context);
+  });
+
+  validate(context, continuation) {
     const stepString = this.getString(); ///
 
     context.trace(`Validating the '${stepString}' step...`);
 
     attempt((context) => {
-      const statementValidates = this.validateStatement(context);
+      const validateStatement = this.validateStatement.bind(this),
+            validateReference = this.validateReference.bind(this),
+            validateSignatureAssertion = this.validateSignatureAssertion.bind(this);
 
-      if (statementValidates) {
-        const referenceValidates = this.validateReference(context);
-
-        if (referenceValidates) {
-          const signatureAssertionValidates = this.validateSignatureAssertion(context);
-
-          if (signatureAssertionValidates) {
-            validates = true;
-          }
+      all([
+        validateStatement,
+        validateReference,
+        validateSignatureAssertion
+      ], context, (validates) => {
+        if (validates) {
+          this.commit(context);
         }
-      }
 
-      if (validates) {
-        this.commit(context);
-      }
+        if (validates) {
+          context.debug(`...validated the '${stepString}' step.`);
+        }
+
+        continuation(validates);
+      });
     }, context);
-
-    if (validates) {
-      context.debug(`...validated the '${stepString}' step.`);
-    }
-
-    return validates;
   }
 
-  async validateStatement(context) {
-    let statementValidates = false;
-
+  validateStatement(context, continuation) {
     const stepString = this.getString();
 
     context.trace(`Validating the '${stepString}' step's statement...`);
 
-    let statement;
+    const statement = this.getStatement();
 
-    statement = this.getStatement();
+    statement.validate(context, (statement) => {
+      let statementValidates = false;
 
-    statement = await statement.validate(context);  ///
+      if (statement !== null) {
+        statementValidates = true;
+      }
 
-    if (statement !== null) {
-      statementValidates = true;
-    }
+      if (statementValidates) {
+        context.debug(`...validated the '${stepString}' step's statement.`);
+      }
 
-    if (statementValidates) {
-      context.debug(`...validated the '${stepString}' step's statement.`);
-    }
-
-    return statementValidates;
+      continuation(statementValidates);
+    });
   }
 
-  validateReference(context) {
-    let referenceValidates = false;
+  validateReference(context, continuation) {
+    if (this.reference === null) {
+      const referenceValidates = true;  ///
 
-    if (this.reference !== null) {
-      const stepString = this.getString(),  ///
-            referenceString = this.reference.getString();
+      continuation(referenceValidates);
 
-      context.trace(`Validating the '${stepString}' step's '${referenceString}' reference...`);
+      return;
+    }
 
-      const reference = this.reference.validate(context);
+    const stepString = this.getString(),  ///
+          referenceString = this.reference.getString();
+
+    context.trace(`Validating the '${stepString}' step's '${referenceString}' reference...`);
+
+    this.reference.validate(context, (reference) => {
+      let referenceValidates = false;
 
       if (reference !== null) {
         this.reference = reference;
@@ -228,23 +231,27 @@ export default define(class Step extends ProofAssertion {
       if (referenceValidates) {
         context.debug(`...validated the '${stepString}' step's '${referenceString}' reference.`);
       }
-    } else {
-      referenceValidates = true;
-    }
 
-    return referenceValidates;
+      continuation(referenceValidates);
+    });
   }
 
-  validateSignatureAssertion(context) {
-    let signatureAssertionValidates = false;
+  validateSignatureAssertion(context, continuation) {
+    if (this.signatureAssertion === null) {
+      const signatureAssertionValidates = true; ///
 
-    if (this.signatureAssertion !== null) {
-      const stepString = this.getString(),  ///
-            signatureAssertionString = this.signatureAssertion.getString();
+      continuation(signatureAssertionValidates);
 
-      context.trace(`Validating the '${stepString}' step's '${signatureAssertionString}' signature assertion...`);
+      return;
+    }
 
-      const signatureAssertion = this.signatureAssertion.validate(context);
+    const stepString = this.getString(),  ///
+          signatureAssertionString = this.signatureAssertion.getString();
+
+    context.trace(`Validating the '${stepString}' step's '${signatureAssertionString}' signature assertion...`);
+
+    this.signatureAssertion.validate(context, (signatureAssertion) => {
+      let signatureAssertionValidates = false;
 
       if (signatureAssertion !== null) {
         this.signatureAssertion = signatureAssertion;
@@ -255,41 +262,29 @@ export default define(class Step extends ProofAssertion {
       if (signatureAssertionValidates) {
         context.debug(`...validated the '${stepString}' step's '${signatureAssertionString}' signature assertion.`);
       }
-    } else {
-      signatureAssertionValidates = true;
-    }
 
-    return signatureAssertionValidates;
+      continuation(signatureAssertionValidates);
+    });
   }
 
-  async unify(context) {
-    let unifies = false;
-
+  unify(context, continuation) {
     const stepString = this.getString(); ///
 
     context.trace(`Unifying the '${stepString}' step...`);
 
     const step = this;  ///
 
-    await some(unifySteps, async (unifyStep) => {
-      let stepUnifies;
-
-      await reconcile(async (context) => {
-        stepUnifies = await unifyStep(step, context);
+    some(unifySteps, (unifyStep, continuation) => {
+      reconcile((context) => {
+        unifyStep(step, context, continuation);
       }, context);
-
-      if (stepUnifies) {
-        unifies = true;
-
-        return true;
+    }, (unifies) => {
+      if (unifies) {
+        context.debug(`...unified the '${stepString}' step.`);
       }
+
+      continuation(unifies);
     });
-
-    if (unifies) {
-      context.debug(`...unified the '${stepString}' step.`);
-    }
-
-    return unifies;
   }
 
   static name = "Step";

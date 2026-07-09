@@ -42,16 +42,18 @@ function createSuite(logLevel, projectName, projectsDirectoryPath) {
     initialiseReleaseContexts(context);
   });
 
-  it("verify", () => {
-    const releaseContextsVerify = verifyReleaseContexts(context);
+  it("verifies", (done) => {
+    verifyReleaseContexts(context, (releaseContextsVerify) => {
+      assert.isTrue(releaseContextsVerify);
 
-    assert.isTrue(releaseContextsVerify);
+      releaseContexts.reverse();
 
-    releaseContexts.reverse();
+      const firstReleaseContext = first(releaseContexts);
 
-    const firstReleaseContext = first(releaseContexts);
+      releaseContext = firstReleaseContext; ///
 
-    releaseContext = firstReleaseContext; ///
+      done();
+    });
   });
 
   let json,
