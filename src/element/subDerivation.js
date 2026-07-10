@@ -34,22 +34,18 @@ export default define(class SubDerivation extends Element {
     return lastStep;
   }
 
-  async verify(context) {
-    let verifies;
+  verify(context, continuation) {
+    every(this.subproofOrProofAssertions, (subproofOrProofAssertion, continuation) => {
+      subproofOrProofAssertion.verify(context, (subproofOrProofAssertionVerifies) => {
+        if (subproofOrProofAssertionVerifies) {
+          context.assignAssignments();
 
-    verifies = await every(this.subproofOrProofAssertions, async (subproofOrProofAssertion) => { ///
-      const subproofOrProofAssertionVarifies = await subproofOrProofAssertion.verify(context);
+          context.addSubproofOrProofAssertion(subproofOrProofAssertion);
+        }
 
-      if (subproofOrProofAssertionVarifies) {
-        context.assignAssignments();
-
-        context.addSubproofOrProofAssertion(subproofOrProofAssertion);
-
-        return true;
-      }
-    });
-
-    return verifies;
+        continuation(subproofOrProofAssertionVerifies);
+      });
+    }, continuation);
   }
 
   static name = "SubDerivation";

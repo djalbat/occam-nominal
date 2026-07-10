@@ -1,6 +1,6 @@
 "use strict";
 
-import { breakPointUtilities } from "occam-languages";
+import { breakPointUtilities, continuationUtilities } from "occam-languages";
 
 import ProofAssertion from "../proofAssertion";
 
@@ -9,7 +9,8 @@ import { instantiateSupposition} from "../../process/instantiate";
 import { procedureCallFromSuppositionNode } from "../../utilities/element";
 import { declare, attempt, reconcile, serialise, unserialise, instantiate } from "../../utilities/context";
 
-const { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
+const { exists } = continuationUtilities,
+      { breakable, breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Supposition extends ProofAssertion {
   constructor(context, string, node, breakPoint, statement, procedureCall) {
@@ -62,120 +63,124 @@ export default define(class Supposition extends ProofAssertion {
     return nonsensical;
   }
 
-  async verify(context) {
-    let verifies = false;
-
-    await this.break(context);
-
+  verify = breakable(function (context, continuation) {
     const suppositionString = this.getString();
 
     context.trace(`Verifying the '${suppositionString}' supposition...`);
 
-    const statement = this.getStatement(),
-          procedureCall = this.getProcedureCall();
+    const nonsensical = this.isNonsensical();
 
-    if ((statement !== null) || (procedureCall !== null)) {
-      declare((context) => {
-        const validates = this.validate(context);
+    if (nonsensical) {
+      const verifies = false;
+
+      context.debug(`Unable to verify the '${suppositionString}' supposition because it is nonsense.`);
+
+      continuation(verifies);
+
+      return;
+    }
+
+    declare((context) => {
+      this.validate(context, (validates) => {
+        let verifies = false;
 
         if (validates) {
           verifies = true;
         }
-      }, context);
-    } else {
-      context.debug(`Unable to verify the '${suppositionString}' supposition because it is nonsense.`);
-    }
 
-    return verifies;
-  }
+        continuation(verifies);
+      });
+    }, context);
+  });
 
-  validate(context) {
-    let validates = false;
-
+  validate(context, continuation) {
     const suppositionString = this.getString(); ///
 
     context.trace(`Validatting the '${suppositionString}' supposition...`);
 
     attempt((context) => {
-      const statement = this.getStatement(),
-            procedureCall = this.getProcedureCall();
+      const validateStatement = this.validateStatement.bind(this),
+            validateProcedureCall = this.validateProcedureCall.bind(this);
 
-      if (statement !== null) {
-        const statementValidates = this.validateStatement(context);
-
-        if (statementValidates) {
-          validates = true;
+      exists([
+        validateStatement,
+        validateProcedureCall
+      ], context, (validates) => {
+        if (validates) {
+          this.commit(context);
         }
-      }
 
-      if (procedureCall !== null) {
-        const procedureCallValidates = this.validateProcedureCall(context);
-
-        if (procedureCallValidates) {
-          validates = true;
+        if (validates) {
+          context.debug(`...validated the '${suppositionString}' supposition.`);
         }
-      }
 
-      if (validates) {
-        this.commit(context);
-      }
+        continuation(validates);
+      });
     }, context);
-
-    if (validates) {
-      context.debug(`...validated the '${suppositionString}' supposition.`);
-    }
-
-    return validates;
   }
 
-  async validateStatement(context) {
-    let statementValidates = false;
+  validateStatement(context, continuation) {
+    const statement = this.getStatement();
+
+    if (statement === null) {
+      const statementValidates = false;
+
+      continuation(statementValidates);
+
+      return;
+    }
 
     const suppositionString = this.getString();
 
     context.trace(`Validating the '${suppositionString}' supposition's statement...`);
 
-    let statement;
+    statement.validate(context, (statement) => {
+      let statementValidates = false;
 
-    statement = this.getStatement();
+      if (statement !== null) {
+        statementValidates = true;
+      }
 
-    statement = await statement.validate(context);  ///
+      if (statementValidates) {
+        context.debug(`...validated the '${suppositionString}' supposition statement.`);
+      }
 
-    if (statement !== null) {
-      statementValidates = true;
-    }
-
-    if (statementValidates) {
-      context.debug(`...validated the '${suppositionString}' supposition statement.`);
-    }
-
-    return statementValidates;
+      continuation(statementValidates);
+    });
   }
 
-  validateProcedureCall(context) {
-    let procedureCallValidates;
+  validateProcedureCall(context, continuation) {
+    const procedureCall = this.getProcedureCall();
+
+    if (procedureCall === null) {
+      const procedureCallValidates = false;
+
+      continuation(procedureCallValidates);
+
+      return;
+    }
 
     const suppositionString = this.getString();
 
     context.trace(`Validatting the '${suppositionString}' supposition's procedure call...`);
 
-    procedureCallValidates = this.procedureCall.validate(context);
+    procedureCall.validate(context, (procedureCallValidates) => {
+      if (procedureCallValidates) {
+        context.debug(`...validated the '${suppositionString}' supposition's procedure call.`);
+      }
 
-    if (procedureCallValidates) {
-      context.debug(`...validated the '${suppositionString}' supposition's procedure call.`);
-    }
-
-    return procedureCallValidates;
+      continuation(procedureCallValidates);
+    });
   }
 
-  async unifyIndependently(context) {
+  unifyIndependently(context) {
     let unifiesIndependently = false;
 
     const suppositionString = this.getString(); ///
 
     context.trace(`Unifying the '${suppositionString}' supposition independently...`);
 
-    await reconcile(async (context) => {
+    reconcile((context) => {
       const statement = this.getStatement(),
             procedureCall = this.getProcedureCall();
 
@@ -191,7 +196,7 @@ export default define(class Supposition extends ProofAssertion {
       }
 
       if (procedureCall !== null) {
-        const procedureCallResolvedIndependently = await procedureCall.unifyIndependently(context);
+        const procedureCallResolvedIndependently = procedureCall.unifyIndependently(context);
 
         if (procedureCallResolvedIndependently) {
           unifiesIndependently = true;
@@ -231,7 +236,7 @@ export default define(class Supposition extends ProofAssertion {
     return subproofUnifies;
   }
 
-  async unifyProofAssertion(proofAssertion, context) {
+  unifyProofAssertion(proofAssertion, context) {
     let proofAssertionUnifies = false;
 
     const suppositionString = this.getString(), ///
@@ -244,9 +249,9 @@ export default define(class Supposition extends ProofAssertion {
           generalContext = suppositionContext, ///
           specificContext = proofAssertionContext;  ///
 
-    await reconcile(async (specificContext) => {
+    reconcile((specificContext) => {
       const statement = proofAssertion.getStatement(),
-            statementUnifies = await this.unifyStatement(statement, generalContext, specificContext);
+            statementUnifies = this.unifyStatement(statement, generalContext, specificContext);
 
       if (statementUnifies) {
         proofAssertionUnifies = true;
@@ -262,49 +267,18 @@ export default define(class Supposition extends ProofAssertion {
     return proofAssertionUnifies;
   }
 
-  unifySubproofOrProofAssertion(subproofOrProofAssertion, context) {
-    let subproofOrProofAssertionUnifies;
+  unifySubproofOrProofAssertion(subproofOrProofAssertion, context, continuation) {
+    const subproofOrProofAssertionProofAssertion = subproofOrProofAssertion.isProofAssertion();
 
-    const suppositionString = this.getString(), ///
-          subproofOrProofAssertionString = subproofOrProofAssertion.getString();
+    if (subproofOrProofAssertionProofAssertion) {
+      const proofAssertion = subproofOrProofAssertionProofAssertion;  ///
 
-    context.trace(`Unifying the '${subproofOrProofAssertionString}' subproof or proof assertion with the '${suppositionString}' supposition...`);
+      this.unifyProofAssertion(proofAssertion, context, continuation);
+    } else {
+      const subproof = subproofOrProofAssertionProofAssertion;  ///
 
-    const subproofOrProofAssertionProofAssertion = subproofOrProofAssertion.isProofAssertion(),
-          proofAssertion = subproofOrProofAssertionProofAssertion ?
-                             subproofOrProofAssertion :
-                               null,
-          subproof = subproofOrProofAssertionProofAssertion ?
-                       null :
-                         subproofOrProofAssertion;
-
-    reconcile((context) => {
-      if (proofAssertion !== null) {
-        const proofAssertionUnifies = this.unifyProofAssertion(proofAssertion, context);
-
-        if (proofAssertionUnifies) {
-          subproofOrProofAssertionUnifies = true;
-        }
-      }
-
-      if (subproof !== null) {
-        const subproofUnifies = this.unifySubproof(subproof, context);
-
-        if (subproofUnifies) {
-          subproofOrProofAssertionUnifies = true;
-        }
-      }
-
-      if (subproofOrProofAssertionUnifies) {
-        context.commit();
-      }
-    }, context);
-
-    if (subproofOrProofAssertionUnifies) {
-      context.debug(`...unified the '${subproofOrProofAssertionString}' subproof or proof assertion with the '${suppositionString}' supposition.`);
+      this.unifySubproof(subproof, context, continuation);
     }
-
-    return subproofOrProofAssertionUnifies;
   }
 
   toJSON() {

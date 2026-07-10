@@ -73,7 +73,7 @@ export default define(class Conclusion extends Element {
 
     context.trace(`Validating the '${conclusionString}' conclusion...`);
 
-    attempt(async (context) => {
+    attempt((context) => {
       this.validateStatement(context, (statementValidates) => {
         let validates = false;
 
@@ -114,9 +114,7 @@ export default define(class Conclusion extends Element {
     });
   }
 
-  async unifyStep(step, context) {
-    let stepUnifies = false;
-
+  unifyStep(step, context, continuation) {
     const stepString = step.getString(),
           conclusionString = this.getString();  ///
 
@@ -127,22 +125,25 @@ export default define(class Conclusion extends Element {
           generalContext = conclusionContext, ///
           specificContext = stepContext;  ///
 
-    await reconcile(async (specificContext) => {
-      const statement = step.getStatement(),
-            statementUnifies = await this.statement.unifyStatement(statement, generalContext, specificContext);
+    reconcile((specificContext) => {
+      const statement = step.getStatement();
 
-      if (statementUnifies) {
-        specificContext.commit(context);
+      this.statement.unifyStatement(statement, generalContext, specificContext, (statementUnifies) => {
+        let stepUnifies = false;
 
-        stepUnifies = true;
-      }
+        if (statementUnifies) {
+          specificContext.commit(context);
+
+          stepUnifies = true;
+        }
+
+        if (stepUnifies) {
+          context.debug(`...unified the '${stepString}' step with the '${conclusionString}' conclusion.`);
+        }
+
+        continuation(stepUnifies);
+      });
     }, specificContext);
-
-    if (stepUnifies) {
-      context.debug(`...unified the '${stepString}' step with the '${conclusionString}' conclusion.`);
-    }
-
-    return stepUnifies;
   }
 
   toJSON() {

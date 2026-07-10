@@ -195,96 +195,76 @@ export default define(class Rule extends Element {
     });
   }
 
-  async unifyStepWithConclusion(step, context) {
-    let stepUnifiesWithConclusion = false;
-
-    await this.break(context);
-
+  unifyStepWithConclusion = breakable(function (step, context, continuation) {
     const ruleString = this.getString(),
           stepString = step.getString(),
           conclusionString = this.conclusion.getString();
 
     context.trace(`Unifying the '${stepString}' step with the '${ruleString}' rule's '${conclusionString}' conclusion...`);
 
-    const stepUnifies = this.conclusion.unifyStep(step, context);
+    this.conclusion.unifyStep(step, context, (stepUnifies) => {
+      let stepUnifiesWithConclusion = false;
 
-    if (stepUnifies) {
-      stepUnifiesWithConclusion = true;
-    }
-
-    if (stepUnifiesWithConclusion) {
-      context.debug(`...unified the '${stepString}' step with the '${ruleString}' rule's '${conclusionString}' conclusion.`);
-    }
-
-    return stepUnifiesWithConclusion;
-  }
-
-  async unifyStepAndSubproofOrProofAssertions(step, subproofOrProofAssertions, context) {
-    let stepAndSubproofOrProofAssertionsUnify = false;
-
-    const statementUnifiesWithConclusion = await this.unifyStepWithConclusion(step, context);
-
-    if (statementUnifiesWithConclusion) {
-      const subproofOrProofAssertionsUnifiesWithPremises = await this.unifySubproofOrProofAssertionsWithPremises(subproofOrProofAssertions, context);
-
-      if (subproofOrProofAssertionsUnifiesWithPremises) {
-        const derivedSubstitutionsResolved = context.areDerivedSubstitutionsResolved();
-
-        if (derivedSubstitutionsResolved) {
-          stepAndSubproofOrProofAssertionsUnify = true;
-        }
+      if (stepUnifies) {
+        stepUnifiesWithConclusion = true;
       }
-    }
 
-    return stepAndSubproofOrProofAssertionsUnify;
+      if (stepUnifiesWithConclusion) {
+        context.debug(`...unified the '${stepString}' step with the '${ruleString}' rule's '${conclusionString}' conclusion.`);
+      }
+
+      continuation(stepUnifiesWithConclusion);
+    });
+  });
+
+  unifyStepAndSubproofOrProofAssertions(step, subproofOrProofAssertions, context, continuation) {
+    this.unifyStepWithConclusion(step, context, (statementUnifiesWithConclusion) => {
+      if (!statementUnifiesWithConclusion) {
+        const stepAndSubproofOrProofAssertionsUnify = false;
+
+        continuation(stepAndSubproofOrProofAssertionsUnify);
+
+        return;
+      }
+
+      this.unifySubproofOrProofAssertionsWithPremises(subproofOrProofAssertions, context, (subproofOrProofAssertionsUnifiesWithPremises) => {
+        let stepAndSubproofOrProofAssertionsUnify = false;
+
+        if (subproofOrProofAssertionsUnifiesWithPremises) {
+          const derivedSubstitutionsResolved = context.areDerivedSubstitutionsResolved();
+
+          if (derivedSubstitutionsResolved) {
+            stepAndSubproofOrProofAssertionsUnify = true;
+          }
+        }
+
+        continuation(stepAndSubproofOrProofAssertionsUnify);
+      });
+    });
   }
 
-  async unifySubproofOrProofAssertionsWithPremise(subproofOrProofAssertions, premise, context) {
-    let subproofOrProofAssertionsUnifiesWithPremise = false;
-
-    await this.break(context);
-
-    if (!subproofOrProofAssertionsUnifiesWithPremise) {
-      const subproofOrProofAssertion = await extract(subproofOrProofAssertions, async (subproofOrProofAssertion) => {
-        const subproofOrProofAssertionUnifies = await premise.unifySubproofOrProofAssertion(subproofOrProofAssertion, context);
-
-        if (subproofOrProofAssertionUnifies) {
-          context.resolveDerivedSubstitutions();
-
-          return true;
-        }
-      }) || null;
-
+  unifySubproofOrProofAssertionsWithPremise(subproofOrProofAssertions, premise, context, continuation) {
+    extract(subproofOrProofAssertions, (subproofOrProofAssertion, continuation) => {
+      premise.unifySubproofOrProofAssertion(subproofOrProofAssertion, context, continuation);
+    }, (subproofOrProofAssertion) => {
       if (subproofOrProofAssertion !== null) {
-        subproofOrProofAssertionsUnifiesWithPremise = true;
+        const subproofOrProofAssertionsUnifiesWithPremise = true;
+
+        continuation(subproofOrProofAssertionsUnifiesWithPremise);
+
+        return;
       }
-    }
 
-    if (!subproofOrProofAssertionsUnifiesWithPremise) {
-      const premiseUnifiesIndependently = await premise.unifyIndependently(context);
-
-      if (premiseUnifiesIndependently) {
-        subproofOrProofAssertionsUnifiesWithPremise = true;
-      }
-    }
-
-    return subproofOrProofAssertionsUnifiesWithPremise;
+      premise.unifyIndependently(context, continuation);
+    });
   }
 
-  async unifySubproofOrProofAssertionsWithPremises(subproofOrProofAssertions, context) {
-    let subproofOrProofAssertionsUnifiesWithPremises;
-
+  unifySubproofOrProofAssertionsWithPremises(subproofOrProofAssertions, context, continuation) {
     subproofOrProofAssertions = reverse(subproofOrProofAssertions); ///
 
-    subproofOrProofAssertionsUnifiesWithPremises = await backwardsEvery(this.premises, async (premise) => {
-      const stepUnifiesWithPremise = await this.unifySubproofOrProofAssertionsWithPremise(subproofOrProofAssertions, premise, context);
-
-      if (stepUnifiesWithPremise) {
-        return true;
-      }
-    });
-
-    return subproofOrProofAssertionsUnifiesWithPremises;
+    backwardsEvery(this.premises, (premise, continuation) => {
+      this.unifySubproofOrProofAssertionsWithPremise(subproofOrProofAssertions, premise, context, continuation);
+    }, continuation);
   }
 
   toJSON() {

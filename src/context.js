@@ -604,6 +604,12 @@ export default class Context extends ContextBase {
     context.addConjecture(conjecture);
   }
 
+  addRule(rule) {
+    const context = this.getContext();
+
+    context.addRule(rule);
+  }
+
   addTerm(term) {
     const context = this.getContext();
 

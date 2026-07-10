@@ -49,7 +49,7 @@ export default define(class PropertyDeclaration extends Declaration {
         }
       }
     } else {
-      context.debug(`Unable to verify the the '${propertyDeclarationString}' property declaration because it is nonsense.`);
+      context.debug(`Unable to verify the '${propertyDeclarationString}' property declaration because it is nonsense.`);
     }
 
     if (verifies) {

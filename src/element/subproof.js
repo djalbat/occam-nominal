@@ -5,7 +5,7 @@ import { Element, continuationUtilities } from "occam-languages";
 import { define } from "../elements";
 import { enclose } from "../utilities/context";
 
-const { every } = continuationUtilities;
+const { all, every } = continuationUtilities;
 
 export default define(class Subproof extends Element {
   constructor(context, string, node, breakPoint, suppositions, subDerivation) {
@@ -88,56 +88,40 @@ export default define(class Subproof extends Element {
     return comparesToStatement;
   }
 
-  async verify(context) {
-    let verifies = false;
+  verify(context, continuation) {
+    enclose((context) => {
+      const verifySuppositions = this.verifySuppositions.bind(this),
+            verifySubDerivation = this.verifySubDerivation.bind(this);
 
-    await enclose(async (context) => {
-      const suppositionsVerify = await this.verifySuppositions(context);
-
-      if (suppositionsVerify) {
-        const subDerivationVerifies = await this.verifySubDerivation(context);
-
-        if (subDerivationVerifies) {
-          verifies = true;
-        }
-      }
+      all([
+        verifySuppositions,
+        verifySubDerivation
+      ], context, continuation);
     }, context);
-
-    return verifies;
   }
 
-  async verifySupposition(supposition, context) {
-    const suppositionVerifies = await supposition.verify(context);
-
-    if (suppositionVerifies) {
-      const subproofOrProofAssertion = supposition;  ////
-
-      context.assignAssignments(context);
-
-      context.addSubproofOrProofAssertion(subproofOrProofAssertion);
-    }
-
-    return suppositionVerifies;
-  }
-
-  async verifySuppositions(context) {
-    let suppositionsVerify;
-
-    suppositionsVerify = await every(this.suppositions, async (supposition) => {
-      const suppositionVerifies = await this.verifySupposition(supposition, context);
-
+  verifySupposition(supposition, context, continuation) {
+    supposition.verify(context, (suppositionVerifies) => {
       if (suppositionVerifies) {
-        return true;
-      }
-    });
+        const subproofOrProofAssertion = supposition;  ////
 
-    return suppositionsVerify;
+        context.assignAssignments(context);
+
+        context.addSubproofOrProofAssertion(subproofOrProofAssertion);
+      }
+
+      continuation(suppositionVerifies);
+    });
   }
 
-  async verifySubDerivation(context) {
-    const subDerivationVerifies = await this.subDerivation.verify(context);
+  verifySuppositions(context, continuation) {
+    every(this.suppositions, (supposition, continuation) => {
+      this.verifySupposition(supposition, context, continuation);
+    }, continuation);
+  }
 
-    return subDerivationVerifies;
+  verifySubDerivation(context, continuation) {
+    this.subDerivation.verify(context, continuation);
   }
 
   static name = "Subproof";

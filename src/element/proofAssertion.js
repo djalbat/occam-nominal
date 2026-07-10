@@ -34,6 +34,12 @@ export default class ProofAssertion extends Element {
     return step;
   }
 
+  isNonsensical() {
+    const nonsensical = (this.statement === null);
+
+    return nonsensical;
+  }
+
   compareStep(step, context) {
     let comparesToStep = false;
 
@@ -79,23 +85,31 @@ export default class ProofAssertion extends Element {
     return comparesToStatement;
   }
 
-  async unifyStatement(statement, generalContext, specificContext) {
-    let statementUnifies = false;
+  unifyStatement(statement, generalContext, specificContext, continuation) {
+    const context = specificContext, ///
+          statementString = statement.getString(),
+          proofAssertionString = this.getString();  ///
 
-    if (this.statement !== null) {
-      const context = specificContext, ///
-            statementString = statement.getString(),
-            proofAssertionString = this.getString();  ///
+    context.trace(`Unifying the '${statementString}' statement with the '${proofAssertionString}' proof assertion's statement...`);
 
-      context.trace(`Unifying the '${statementString}' statement with the '${proofAssertionString}' proof assertion's statement...`);
+    const nonsensical = this.isNonsensical();
 
-      statementUnifies = await this.statement.unifyStatement(statement, generalContext, specificContext);
+    if (nonsensical) {
+      const statementUnifies = false;
 
+      context.debug(`Unable to unify the '${statementString}' statement with the '${proofAssertionString}' proof assertion because it is nonsense.`);
+
+      continuation(statementUnifies);
+
+      return;
+    }
+
+    this.statement.unifyStatement(statement, generalContext, specificContext, (statementUnifies) => {
       if (statementUnifies) {
         context.debug(`...unified the '${statementString}' statement with the '${proofAssertionString}' proof assertion's statement.`);
       }
-    }
 
-    return statementUnifies;
+      continuation(statementUnifies);
+    });
   }
 }

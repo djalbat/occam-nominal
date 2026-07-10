@@ -380,9 +380,7 @@ export default define(class Metavariable extends Element {
     return frameUnifies;
   }
 
-  unifyStatement(statement, substitution, generalContext, specificContext) {
-    let statementUnifies = false;
-
+  unifyStatement(statement, substitution, generalContext, specificContext, continuation) {
     const context = specificContext,  ///
           statementString = statement.getString(),
           metavariableString = this.getString(), ///
@@ -392,18 +390,24 @@ export default define(class Metavariable extends Element {
 
     context.trace(`Unifying the '${statementString}' statement with the '${metavariableString}${substitutionString}' metavariable...`);
 
-    const metavariable = this, ///
-          statementMetavariableUnifies = this.unifyStatementMetavariable(statement, generalContext, specificContext);
+    this.unifyStatementMetavariable(statement, generalContext, specificContext, (statementMetavariableUnifies) => {
+      if (statementMetavariableUnifies) {
+        const statementUnifies = true;
 
-    if (statementMetavariableUnifies) {
-      statementUnifies = true;
-    } else {
-      const metavariableNode = metavariable.getNode(),
+        continuation(statementUnifies);
+
+        return;
+      }
+
+      const metavariable = this,  ///
+            metavariableNode = metavariable.getNode(),
             derivedSubstitution = (substitution !== null) ?
                                     context.findDerivedSubstitutionByMetavariableNodeAndSubstitution(metavariableNode, substitution) :
                                       context.findDerivedSubstitutionByMetavariableNode(metavariableNode);
 
       if (derivedSubstitution !== null) {
+        let statementUnifies = false;
+
         const derivedSubstitutionComparesToStatement = derivedSubstitution.compareStatement(statement, context);
 
         if (derivedSubstitutionComparesToStatement) {
@@ -413,30 +417,31 @@ export default define(class Metavariable extends Element {
 
           statementUnifies = true;
         }
-      } else {
-        const { StatementSubstitution } = elements;
 
-        let statementSubstitution;
+        continuation(statementUnifies);
 
-        statementSubstitution = (substitution !== null) ?
-                                  StatementSubstitution.fromStatementMetavariableAndSubstitution(statement, metavariable, substitution, generalContext, specificContext) :
-                                    StatementSubstitution.fromStatementAndMetavariable(statement, metavariable, generalContext, specificContext);
+        return;
+      }
 
-        statementSubstitution = statementSubstitution.validate(substitution, context);  ///
+      const { StatementSubstitution } = elements,
+            statementSubstitution = (substitution !== null) ?
+                                      StatementSubstitution.fromStatementMetavariableAndSubstitution(statement, metavariable, substitution, generalContext, specificContext) :
+                                        StatementSubstitution.fromStatementAndMetavariable(statement, metavariable, generalContext, specificContext);
 
+      statementSubstitution.validate(substitution, context, (statementSubstitution) => {
         const derivedSubstitution = statementSubstitution;  ///
 
         context.addDerivedSubstitution(derivedSubstitution);
 
-        statementUnifies = true;
-      }
-    }
+        const statementUnifies = true;
 
-    if (statementUnifies) {
-      context.debug(`...unified the '${statementString}' statement with the '${metavariableString}${substitutionString}' metavariable.`);
-    }
+        if (statementUnifies) {
+          context.debug(`...unified the '${statementString}' statement with the '${metavariableString}${substitutionString}' metavariable.`);
+        }
 
-    return statementUnifies;
+        continuation(statementUnifies);
+      });
+    });
   }
 
   unifyReference(reference, generalContext, specificContext) {
@@ -568,7 +573,7 @@ export default define(class Metavariable extends Element {
     return referenceMetavariableUnifies;
   }
 
-  unifyStatementMetavariable(statement, generalContext, specificContext) {
+  unifyStatementMetavariable(statement, generalContext, specificContext, continuation) {
     let statementMetavariableUnifies = false;
 
     const context = specificContext,  ///
@@ -593,7 +598,7 @@ export default define(class Metavariable extends Element {
       context.debug(`...unified the '${statementString}' statement's metavariable with the '${metavariableString}' metavariable.`);
     }
 
-    return statementMetavariableUnifies;
+    continuation(statementMetavariableUnifies);
   }
 
   unifyMetavariableIntrinsically(metavariable, generalContext, specificContext) {

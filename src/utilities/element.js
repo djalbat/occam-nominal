@@ -2209,9 +2209,9 @@ export function replacementFrameFromFrameSubstitutionNode(frameSubstitutionNode,
   return replacementFrame;
 }
 
-export function substitutionFromStatementSubstitutionNode(statementSubstitutionNode, generalContxt, specificContext) {
-  const frameSubstitution = frameSubstitutionFromStatementSubstitutionNode(statementSubstitutionNode, generalContxt, specificContext),
-        termSubstitution = termSubstitutionFromStatementSubstitutionNode(statementSubstitutionNode, generalContxt, specificContext),
+export function substitutionFromStatementSubstitutionNode(statementSubstitutionNode, generalContext, specificContext) {
+  const frameSubstitution = frameSubstitutionFromStatementSubstitutionNode(statementSubstitutionNode, generalContext, specificContext),
+        termSubstitution = termSubstitutionFromStatementSubstitutionNode(statementSubstitutionNode, generalContext, specificContext),
         substitution = (frameSubstitution || termSubstitution);
 
   return substitution;
