@@ -111,7 +111,7 @@ export default define(class Subproof extends Element {
         context.addSubproofOrProofAssertion(subproofOrProofAssertion);
       }
 
-      continuation(suppositionVerifies);
+      return continuation(suppositionVerifies);
     });
   }
 

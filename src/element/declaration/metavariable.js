@@ -49,7 +49,7 @@ export default define(class MetavariableDeclaration extends Declaration {
       context.debug(`...verified the '${metavariableDeclarationString}' metavariable declaration.`);
     }
 
-    continuation(verifies);
+    return continuation(verifies);
   });
 
   verifyMetaType(context) {

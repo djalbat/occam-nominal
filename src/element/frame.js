@@ -235,8 +235,8 @@ export default define(class Frame extends Element {
   }
 
   validatMetavariable(context, continuation) {
-    if (this.metavariable !== null) {
-      const metavariableValidates = true;
+    if (this.metavariable === null) {
+      const metavariableValidates = true; ///
 
       return continuation(metavariableValidates);
     }

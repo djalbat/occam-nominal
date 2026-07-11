@@ -95,7 +95,7 @@ export default define(class Combinator extends Element {
         context.debug(`...unified the '${statementString}' statement with the '${combinatorString}' combinator.`);
       }
 
-      continuation(statementUnifies);
+      return continuation(statementUnifies);
     });
   }
 

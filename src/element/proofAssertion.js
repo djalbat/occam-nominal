@@ -99,9 +99,7 @@ export default class ProofAssertion extends Element {
 
       context.debug(`Unable to unify the '${statementString}' statement with the '${proofAssertionString}' proof assertion because it is nonsense.`);
 
-      continuation(statementUnifies);
-
-      return;
+      return continuation(statementUnifies);
     }
 
     this.statement.unifyStatement(statement, generalContext, specificContext, (statementUnifies) => {
@@ -109,7 +107,7 @@ export default class ProofAssertion extends Element {
         context.debug(`...unified the '${statementString}' statement with the '${proofAssertionString}' proof assertion's statement.`);
       }
 
-      continuation(statementUnifies);
+      return continuation(statementUnifies);
     });
   }
 }

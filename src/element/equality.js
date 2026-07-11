@@ -227,9 +227,7 @@ export default define(class Equality extends Element {
     if (!stated) {
       const validatesWhenStated = false;
 
-      continuation(validatesWhenStated);
-
-      return;
+      return continuation(validatesWhenStated);
     }
 
     let validatesWhenStated;
@@ -244,7 +242,7 @@ export default define(class Equality extends Element {
       context.debug(`...validated the '${equalityString}' stated equality.`);
     }
 
-    continuation(validatesWhenStated);
+    return continuation(validatesWhenStated);
   }
 
   validateWhenDerived(context, continuation) {

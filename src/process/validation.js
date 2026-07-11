@@ -221,7 +221,7 @@ function validateStatementAsJudgement(statement, context, continuation) {
 
   context.trace(`Validating the '${statementString}' statement as a judgement...`);
 
-  judgement.validate(context, (jusgement) => {
+  judgement.validate(context, (judgement) => {
     let validatesStatementAsJudgement = false;
 
     if (judgement !== null) {

@@ -205,15 +205,17 @@ export default define(class Statement extends Element {
       return;
     }
 
-    let statement = this;
+    const statement = this;
 
     exists(validateStatements, statement, context, (statementValidates) => {
+      let statement = null;
+
       if (statementValidates) {
+        statement = this;
+
         context.addStatement(statement);
 
         context.debug(`...validated the '${statementString}' statement.`);
-      } else {
-        statement = null;
       }
 
       continuation(statement);
@@ -257,7 +259,7 @@ export default define(class Statement extends Element {
         context.debug(`...unified the '${specificStatementString}' statement with the '${generalStatementString}' statement.`);
       }
 
-      continuation(statementUnifies);
+      return continuation(statementUnifies);
     });
   }
 

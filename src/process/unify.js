@@ -223,7 +223,6 @@ class MetaLevelPass extends ContinuationZipPassBase {
         metavariable.unifyFrame(frame, generalContext, specificContext, (frameUnifies) => {
           let success = false;
 
-
           if (frameUnifies) {
             success = true;
           }

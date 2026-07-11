@@ -44,7 +44,7 @@ export default define(class CombinatorDeclaration extends Declaration {
         context.debug(`...verified the '${combinatorDeclarationString}' combinator declaration.`);
       }
 
-      continuation(verifies);
+      return continuation(verifies);
     });
   });
 
@@ -58,7 +58,7 @@ export default define(class CombinatorDeclaration extends Declaration {
         context.debug(`...verified the '${combinatorDeclarationString}' combinator declaration's combinator.`);
       }
 
-      continuation(combinatorVerifies);
+      return continuation(combinatorVerifies);
     });
   }
 

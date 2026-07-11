@@ -89,9 +89,7 @@ export default define(class Goal extends Element {
 
       context.debug(`...the '${goalString}' goal is already valid.`);
 
-      continuation(goal);
-
-      return;
+      return continuation(goal);
     }
 
     const validateStatement = this.validateStatement.bind(this),
@@ -104,9 +102,7 @@ export default define(class Goal extends Element {
       if (!validates) {
         const goal = null;
 
-        continuation(goal);
-
-        return;
+        return continuation(goal);
       }
 
       const validatesWhenStated = this.validateWhenStated.bind(this),
@@ -181,9 +177,7 @@ export default define(class Goal extends Element {
     if (!stated) {
       const validatesWhenStated = false;
 
-      continuation(validatesWhenStated);
-
-      return;
+      return continuation(validatesWhenStated);
     }
 
     let validatesWhenStated;
@@ -198,7 +192,7 @@ export default define(class Goal extends Element {
       context.debug(`...validated the '${goalString}' stated goal.`);
     }
 
-    continuation(validatesWhenStated);
+    return continuation(validatesWhenStated);
   }
 
   validateWhenDerived(context, continuation) {

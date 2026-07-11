@@ -22,7 +22,7 @@ export default define(class BracketedCombinator extends Combinator {
         context.debug(`...unified the '${statementString}' statement with the bracketed combinator.`);
       }
 
-      continuation(statementUnifies);
+      return continuation(statementUnifies);
     });
   }
 

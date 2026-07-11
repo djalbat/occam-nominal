@@ -140,8 +140,8 @@ export default define(class Step extends ProofAssertion {
           stated = qualified; ///
 
     (stated ? declare : derive)((context) => {
-      const validate = this.validate.bind(this),
-            unify = this.unify.bind(this);
+      const unify = this.unify.bind(this),
+            validate = this.validate.bind(this);
 
       all([
         validate,

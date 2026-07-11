@@ -44,9 +44,7 @@ export default define(class Deduction extends Element {
 
       context.debug(`Unable to verify the '${deductionString}' deduction because it is nonsense.`);
 
-      continuation(verifies);
-
-      return;
+      return continuation(verifies);
     }
 
     declare((context) => {
@@ -62,7 +60,7 @@ export default define(class Deduction extends Element {
             context.debug(`...verified the '${deductionString}' deduction.`);
           }
 
-          continuation(verifies);
+          return continuation(verifies);
         });
       }, context);
     }, context);
@@ -89,7 +87,7 @@ export default define(class Deduction extends Element {
           context.debug(`...validated the '${deductionString}' deduction.`);
         }
 
-        continuation(validates);
+        return continuation(validates);
       });
     }, context);
   }
@@ -158,7 +156,7 @@ export default define(class Deduction extends Element {
         context.debug(`...unified the '${statementString}' statement with the '${deductionString}' deduction's statement.`);
       }
 
-      continuation(statementUnifies);
+      return continuation(statementUnifies);
     });
   }
 

@@ -65,9 +65,7 @@ export default define(class SubproofAssertion extends Assertion {
 
       context.debug(`...the '${subproofAssertionString}' subproof assertion is already valid.`);
 
-      continuation(subproofAssertion);
-
-      return;
+      return continuation(subproofAssertion);
     }
 
     let subproofAssertion = null;
@@ -91,7 +89,7 @@ export default define(class SubproofAssertion extends Assertion {
         context.debug(`...validated the '${subproofAssertionString}' subproof assertion.`);
       }
 
-      continuation(subproofAssertion);
+      return continuation(subproofAssertion);
     });
   }
 
@@ -105,7 +103,7 @@ export default define(class SubproofAssertion extends Assertion {
             statementValidates = true;
           }
 
-          continuation(statementValidates);
+          return continuation(statementValidates);
         });
       }, context);
     }, continuation);
@@ -152,9 +150,7 @@ export default define(class SubproofAssertion extends Assertion {
       let subproofUnifies = false;
 
       if (!lastStepUnifies) {
-        continuation(subproofUnifies);
-
-        return;
+        return continuation(subproofUnifies);
       }
 
       const suppositions = subproof.getSuppositions();
@@ -168,7 +164,7 @@ export default define(class SubproofAssertion extends Assertion {
           context.debug(`...unified the '${subproofString}' subproof with the '${subproofAssertionString}' subproof assertion.`);
         }
 
-        continuation(subproofUnifies);
+        return continuation(subproofUnifies);
       });
     });
   }
@@ -201,7 +197,7 @@ export default define(class SubproofAssertion extends Assertion {
           context.debug(`...unified the '${lastStepString}' last step with the '${deducedStatementString}' deduced statement.`)
         }
 
-        continuation(lastStepUnifies);
+        return continuation(lastStepUnifies);
       });
     }, specificContext);
   }
@@ -266,7 +262,7 @@ export default define(class SubproofAssertion extends Assertion {
           context.debug(`...unified the '${suppositionString}' supposition with the '${supposedStatementString}' supposed statement.`)
         }
 
-        continuation(suppositionUnifies);
+        return continuation(suppositionUnifies);
       });
     }, specificContext);
   }
@@ -279,9 +275,7 @@ export default define(class SubproofAssertion extends Assertion {
     if (suppositionsLength !== supposedStatementsLength) {
       const suppositionsUnify = false;
 
-      continuation(suppositionsUnify);
-
-      return;
+      return continuation(suppositionsUnify);
     }
 
     let index = -1;

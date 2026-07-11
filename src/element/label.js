@@ -63,9 +63,7 @@ export default define(class Label extends Element {
 
       context.debug(`The '${labelString}' label is already present.`);
 
-      continuation(verifies);
-
-      return;
+      return continuation(verifies);
     }
 
     this.validate((validates) => {
@@ -79,7 +77,7 @@ export default define(class Label extends Element {
         context.debug(`...verified the '${labelString}' label.`);
       }
 
-      continuation(verifies);
+      return continuation(verifies);
     });
   }
 
@@ -103,7 +101,7 @@ export default define(class Label extends Element {
           context.debug(`...validated the '${labelString}' label.`);
         }
 
-        continuation(validates);
+        return continuation(validates);
       });
     }, context);
   }
@@ -126,7 +124,7 @@ export default define(class Label extends Element {
         context.debug(`...validated the '${labelString}' label's metavariable.'`);
       }
 
-      continuation(metavariableValidates);
+      return continuation(metavariableValidates);
     });
   }
 

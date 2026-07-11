@@ -164,9 +164,7 @@ export default define(class ContainedAssertion extends Assertion {
 
       context.debug(`The '${frameString}' frame is not singular.`);
 
-      continuation(frameValidates);
-
-      return;
+      return continuation(frameValidates);
     }
 
     this.frame.validate(context, (frame) => {
@@ -212,9 +210,7 @@ export default define(class ContainedAssertion extends Assertion {
     if (!stated) {
       const validatesWhenStated = false;
 
-      continuation(validatesWhenStated);
-
-      return;
+      return continuation(validatesWhenStated);
     }
 
     let validatesWhenStated;
@@ -229,7 +225,7 @@ export default define(class ContainedAssertion extends Assertion {
       context.debug(`...validated the '${containedAssertionString}' stated contained assertion.`);
     }
 
-    continuation(validatesWhenStated);
+    return continuation(validatesWhenStated);
   }
 
   validateWhenDerived(context, continuation) {
@@ -238,9 +234,7 @@ export default define(class ContainedAssertion extends Assertion {
     if (stated) {
       const validatesWhenDerived = false;
 
-      continuation(validatesWhenDerived);
-
-      return;
+      return continuation(validatesWhenDerived);
     }
 
     const containedAssertionString = this.getString(); ///
