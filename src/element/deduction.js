@@ -6,7 +6,7 @@ import { define } from "../elements";
 import { instantiateDeduction } from "../process/instantiate";
 import { elide, declare, attempt, serialise, unserialise, instantiate, reconcile } from "../utilities/context";
 
-const { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
+const { breakable, breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Deduction extends Element {
   constructor(context, string, node, breakPoint, statement) {
@@ -26,129 +26,140 @@ export default define(class Deduction extends Element {
     return deductionNode;
   }
 
-  async verify(context) {
-    let verifies = false;
+  isNonBreakable() {
+    const nonsensical = (this.statement === null);
 
-    await this.break(context);
+    return nonsensical;
+  }
 
+  verify = breakable(function (context, continuation) {
     const deductionString = this.getString();  ///
 
     context.trace(`Verifying the '${deductionString}' deduction...`);
 
-    if (this.statement !== null) {
-      declare((context) => {
-        elide((context) => {
-          const validates = this.validate(context);
+    const nonsensical = this.isNonBreakable();
+
+    if (nonsensical) {
+      const verifies = false;
+
+      context.debug(`Unable to verify the '${deductionString}' deduction because it is nonsense.`);
+
+      continuation(verifies);
+
+      return;
+    }
+
+    declare((context) => {
+      elide((context) => {
+        this.validate(context, (validates) => {
+          let verifies = false;
 
           if (validates) {
             verifies = true;
           }
-        }, context);
+
+          if (verifies) {
+            context.debug(`...verified the '${deductionString}' deduction.`);
+          }
+
+          continuation(verifies);
+        });
       }, context);
-    } else {
-      context.debug(`Unable to verify the '${deductionString}' deduction because it is nonsense.`);
-    }
+    }, context);
+  });
 
-    if (verifies) {
-      context.debug(`...verified the '${deductionString}' deduction.`);
-    }
-
-    return verifies;
-  }
-
-  async validate(context) {
-    let validates = false;
-
+  validate(context, continuation) {
     const deductionString = this.getString();  ///
 
     context.trace(`Validating the '${deductionString}' deduction...`);
 
-    await attempt(async (context) => {
-      const statementValidates = await this.validateStatement(context);
+    attempt((context) => {
+      this.validateStatement(context, (statementValidates) => {
+        let validates = false;
+
+        if (statementValidates) {
+          validates = true;
+        }
+
+        if (validates) {
+          this.commit(context);
+        }
+
+        if (validates) {
+          context.debug(`...validated the '${deductionString}' deduction.`);
+        }
+
+        continuation(validates);
+      });
+    }, context);
+  }
+
+  validateStatement(context, continuation) {
+    const deductionString = this.getString();  ///
+
+    context.trace(`Validating the '${deductionString}' deduction's statement...`);
+
+    this.statement.validate(context, (statement) => {
+      let statementValidates = false;
+
+      if (statement !== null) {
+        statementValidates = true;
+      }
 
       if (statementValidates) {
-        validates = true;
+        context.trace(`...validated the '${deductionString}' deduction's statement.`);
       }
 
-      if (validates) {
-        this.commit(context);
-      }
-    }, context);
-
-    if (validates) {
-      context.debug(`...validated the '${deductionString}' deduction.`);
-    }
-
-    return validates;
+      continuation(statementValidates);
+    });
   }
 
-  async validateStatement(context) {
-    let statementValidates = false;
-
-    const deductionnString = this.getString();  ///
-
-    context.trace(`Validating the '${deductionnString}' deductionn's statement...`);
-
-    const statement = await this.statement.validate(context);
-
-    if (statement !== null) {
-      statementValidates = true;
-    }
-
-    if (statementValidates) {
-      context.trace(`...validated the '${deductionnString}' deductionn's statement.`);
-    }
-
-    return statementValidates;
-  }
-
-  async unifyStep(step, context) {
-    let stepUnifies = false;
-
+  unifyStep(step, context, continuation) {
     const stepString = step.getString(),
           deductionString = this.getString();  ///
 
     context.trace(`Unifying the '${stepString}' step with the '${deductionString}' deduction...`);
 
     const stepContext = step.getContext(),
-          deductionnContext = this.getContext(), ///
-          generalContext = deductionnContext, ///
+          deductionContext = this.getContext(),  ///
+          generalContext = deductionContext, ///
           specificContext = stepContext;  ///
 
-    await reconcile(async (specificContext) => {
-      const statement = step.getStatement(),
-            statementUnifies = await this.unifyStatement(statement, generalContext, specificContext);
+    reconcile((specificContext) => {
+      const statement = step.getStatement();
 
-      if (statementUnifies) {
-        specificContext.commit(context);
+      this.statement.unifyStatement(statement, generalContext, specificContext, (statementUnifies) => {
+        let stepUnifies = false;
 
-        stepUnifies = true;
-      }
+        if (statementUnifies) {
+          specificContext.commit(context);
+
+          stepUnifies = true;
+        }
+
+        if (stepUnifies) {
+          context.debug(`...unified the '${stepString}' step with the '${deductionString}' deduction.`);
+        }
+
+        continuation(stepUnifies);
+      });
     }, specificContext);
-
-    if (stepUnifies) {
-      context.debug(`...unified the '${stepString}' step with the '${deductionString}' deduction.`);
-    }
-
-    return stepUnifies;
   }
 
-  async unifyStatement(statement, generalContext, specificContext) {
-    let statementUnifies;
-
+  unifyStatement(statement, generalContext, specificContext, continuation) {
     const context = specificContext,  ///
           deductionString = this.getString(), ///
           statementString = statement.getString();
 
     context.trace(`Unifying the '${statementString}' statement with the '${deductionString}' deduction's statement...`);
 
-    statementUnifies = await this.statement.unifyStatement(statement, generalContext, specificContext);
+    this.statement.unifyStatement(statement, generalContext, specificContext, (statementUnifies) => {
+      if (statementUnifies) {
+        context.debug(`...unified the '${statementString}' statement with the '${deductionString}' deduction's statement.`);
+      }
 
-    if (statementUnifies) {
-      context.debug(`...unified the '${statementString}' statement with the '${deductionString}' deduction's statement.`);
-    }
-
-    return statementUnifies;
+      continuation(statementUnifies);
+    });
   }
 
   toJSON() {

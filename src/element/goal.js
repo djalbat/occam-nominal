@@ -6,6 +6,7 @@ import { Element, breakPointUtilities } from "occam-languages";
 import elements from "../elements";
 
 import { define } from "../elements";
+import { all, exists } from "../utilities/continuation";
 import { instantiateGoal } from "../process/instantiate";
 import { reconcile, instantiate } from "../utilities/context";
 
@@ -76,104 +77,115 @@ export default define(class Goal extends Element {
     return validGoal;
   }
 
-  async validate(context) {
-    let goal = null;
-
+  validate(context, continuation) {
     const goalString = this.getString();  ///
 
     context.trace(`Validating the '${goalString}' goal...`);
 
-    let validates = false;
-
     const validGoal = this.findValidGoal(context);
 
     if (validGoal !== null) {
-      validates = true;
-
-      goal = validGoal; ///
+      const goal = validGoal; ///
 
       context.debug(`...the '${goalString}' goal is already valid.`);
-    } else {
-      const statementValidates = this.validateStatement(context);
 
-      if (statementValidates) {
-        const referenceValidates = this.validateReference(context);
+      continuation(goal);
 
-        if (referenceValidates) {
-          const stated = context.isStated();
+      return;
+    }
 
-          let validatesWhenStated = false,
-              validatesWhenDerived = false;
+    const validateStatement = this.validateStatement.bind(this),
+          validateReference = this.validateReference.bind(this);
 
-          if (stated) {
-            validatesWhenStated = this.validateWhenStated(context);
-          } else {
-            validatesWhenDerived = this.validateWhenDerived(context);
-          }
+    all([
+      validateReference,
+      validateStatement
+    ], context, (validates) => {
+      if (!validates) {
+        const goal = null;
 
-          if (validatesWhenStated || validatesWhenDerived) {
-            validates = true;
-          }
+        continuation(goal);
+
+        return;
+      }
+
+      const validatesWhenStated = this.validateWhenStated.bind(this),
+            validatesWhenDerived = this.validateWhenDerived.bind(this);
+
+      exists([
+        validatesWhenStated,
+        validatesWhenDerived
+      ], context, (validates) => {
+        let goal = null;
+
+        if (validates) {
+          goal = this; ///
+
+          context.addGoal(goal);
         }
-      }
 
-      if (validates) {
-        goal = this;  ///
+        if (validates) {
+          context.debug(`...validated the '${goalString}' goal.`);
+        }
 
-        context.addGoal(goal);
-      }
-    }
-
-    if (validates) {
-      context.debug(`...validated the '${goalString}' goal.`);
-    }
-
-    return goal;
+        continuation(goal);
+      });
+    });
   }
 
-  validateReference(context) {
-    let referenceValidates = false;
-
+  validateReference(context, continuation) {
     const goalString = this.getString();  ///
 
     context.trace(`Validating the '${goalString}' goal's reference...`);
 
-    const reference = this.reference.validate(context);
+    this.reference.validate(context, (reference) => {
+      let referenceValidates = false;
 
-    if (reference !== null) {
-      this.reference = reference;
+      if (reference !== null) {
+        this.reference = reference;
 
-      referenceValidates = true;
-    }
+        referenceValidates = true;
+      }
 
-    if (referenceValidates) {
-      context.debug(`...validated the '${goalString}' goal's reference.`);
-    }
+      if (referenceValidates) {
+        context.debug(`...validated the '${goalString}' goal's reference.`);
+      }
 
-    return referenceValidates;
+      continuation(referenceValidates);
+    });
   }
 
-  async validateStatement(context) {
-    let statementValidates = false;
-
+  validateStatement(context, continuation) {
     const goalString = this.getString();  ///
 
     context.trace(`Validating the '${goalString}' goal's statement...`);
 
-    const statement = await this.statement.validate(context);
+    this.statement.validate(context, (statement) => {
+      let statementValidates = false;
 
-    if (statement !== null) {
-      statementValidates = true;
-    }
+      if (statement !== null) {
+        statementValidates = true;
+      }
 
-    if (statementValidates) {
-      context.debug(`...validated the '${goalString}' goal's statement.`);
-    }
+      if (statementValidates) {
+        context.debug(`...validated the '${goalString}' goal's statement.`);
+      }
 
-    return statementValidates;
+      continuation(statementValidates);
+    });
   }
 
-  validateWhenStated(context) {
+  validateWhenStated(context, continuation) {
+    const stated = context.isStated();
+
+    if (!stated) {
+      const validatesWhenStated = false;
+
+      continuation(validatesWhenStated);
+
+      return;
+    }
+
     let validatesWhenStated;
 
     const goalString = this.getString();  ///
@@ -186,10 +198,20 @@ export default define(class Goal extends Element {
       context.debug(`...validated the '${goalString}' stated goal.`);
     }
 
-    return validatesWhenStated;
+    continuation(validatesWhenStated);
   }
 
-  validateWhenDerived(context) {
+  validateWhenDerived(context, continuation) {
+    const stated = context.isStated();
+
+    if (stated) {
+      const validatesWhenDerived = false;
+
+      continuation(validatesWhenDerived);
+
+      return;
+    }
+
     let validatesWhenDerived = false;
 
     const goalString = this.getString();  ///
@@ -292,7 +314,7 @@ export default define(class Goal extends Element {
     return schemaUnifies;
   }
 
-  async unifyDeduction(deduction, generalContext, specificContext) {
+  unifyDeduction(deduction, generalContext, specificContext) {
     let deductionUnifies;
 
     const context = specificContext,  ///
@@ -306,8 +328,8 @@ export default define(class Goal extends Element {
 
     specificContext = deductionContext; ///
 
-    await reconcile(async (specificContext) => {
-      const statementUnifies = await this.statement.unifyStatement(statement, generalContext, specificContext);
+    reconcile((specificContext) => {
+      const statementUnifies = this.statement.unifyStatement(statement, generalContext, specificContext);
 
       if (statementUnifies) {
         deductionUnifies = true;

@@ -1,14 +1,16 @@
 "use strict";
 
-import { Element, breakPointUtilities } from "occam-languages";
+import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
 
 import { define } from "../elements";
 import { instantiate } from "../utilities/context";
+import { all, exists } from "../utilities/continuation";
 import { instantiateFrame } from "../process/instantiate";
 import { FRAME_META_TYPE_NAME } from "../metaTypeNames";
 import { metavariableFromFrameNode } from "../utilities/element";
 
-const { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
+const { every } = continuationUtilities,
+      { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Frame extends Element {
   constructor(context, string, node, breakPoint, assumptions, metavariable) {
@@ -137,121 +139,120 @@ export default define(class Frame extends Element {
     return validFrame;
   }
 
-  async validate(context) {
-    let frame = null;
-
+  validate(context, continuation) {
     const frameString = this.getString();  ///
 
     context.trace(`Validating the '${frameString}' frame...`);
 
-    let validates = false;
-
     const validFrame = this.findValidFrame(context);
 
     if (validFrame !== null) {
-      validates = true;
-
-      frame = validFrame; ///
+      const frame = validFrame; ///
 
       context.debug(`...the '${frameString}' frame is already valid.`);
-    } else {
-      const metavariableValidates = this.validatMetavariable(context);
 
-      if (metavariableValidates) {
-        const assumptionsValidate = this.validateAssumptions(context);
+      continuation(frame);
 
-        if (assumptionsValidate) {
-          const stated = context.isStated();
+      return;
+    }
 
-          let validatesWhenStated = false,
-              validatesWhenDerived = false;
+    const validatMetavariable = this.validatMetavariable.bind(this),
+          validateAssumptions = this.validateAssumptions.bind(this);
 
-          if (stated) {
-            validatesWhenStated = this.validateWhenStated(context);
-          } else {
-            validatesWhenDerived = this.validateWhenDerived(context);
-          }
+    all([
+      validatMetavariable,
+      validateAssumptions
+    ], context, (validates) => {
+      if (!validates) {
+        const frame = null;
 
-          if (validatesWhenStated || validatesWhenDerived) {
-            validates = true;
-          }
+        continuation(frame);
+
+        return;
+      }
+
+      const validatesWhenStated = this.validateWhenStated.bind(this),
+            validatesWhenDerived = this.validateWhenDerived.bind(this);
+
+      exists([
+        validatesWhenStated,
+        validatesWhenDerived
+      ], context, (validates) => {
+        let frame = null;
+
+        if (validates) {
+          frame = this; ///
+
+          context.addFrame(frame);
         }
-      }
 
-      if (validates) {
-        frame = this; ///
+        if (validates) {
+          context.debug(`...validated the '${frameString}' frame.`);
+        }
 
-        context.addFrame(frame);
-      }
-    }
-
-    if (validates) {
-      context.debug(`...validated the '${frameString}' frame.`);
-    }
-
-    return frame;
+        continuation(frame);
+      });
+    });
   }
 
-  validateAssumption(assumption, assumptions, context) {
-    let assumptionValidates = false;
-
+  validateAssumption(assumption, assumptions, context, continuation) {
     const frameString = this.getString(), ///
           assumptionString = assumption.getString();
 
     context.trace(`Validating the '${frameString}' frame's '${assumptionString}' assumption.`);
 
-    assumption = assumption.validate(context);  ///
+    assumption.validate(context, (assumption) => {
+      let assumptionValidates = false;
 
-    if (assumption !== null) {
-      assumptions.push(assumption);
+      if (assumption !== null) {
+        assumptions.push(assumption);
 
-      assumptionValidates = true;
-    }
+        assumptionValidates = true;
+      }
 
-    if (assumptionValidates) {
-      context.debug(`...validated the '${frameString}' frame's '${assumptionString}' assumption.`);
-    }
+      if (assumptionValidates) {
+        context.debug(`...validated the '${frameString}' frame's '${assumptionString}' assumption.`);
+      }
 
-    return assumptionValidates;
+      continuation(assumptionValidates);
+    });
   }
 
-  validateAssumptions(context) {
-    let assumptionsValidate;
-
+  validateAssumptions(context, continuation) {
     const frameString = this.getString();
 
     context.trace(`Validating the '${frameString}' frame's assumptions...`);
 
     const assumptions = [];
 
-    assumptionsValidate = this.assumptions.every((assumption) => {
-      const assumptionValidates = this.validateAssumption(assumption, assumptions, context);
+    every(this.assumptions, (assumption) => {
+      this.validateAssumption(assumption, assumptions, context, continuation);
+    }, (assumptionsValidate) => {
+      if (assumptionsValidate) {
+        this.assumptions = assumptions;
 
-      if (assumptionValidates) {
-        return true;
+        context.debug(`...validated the '${frameString}' frame's assumptions.`);
       }
+
+      continuation(assumptionsValidate);
     });
-
-    if (assumptionsValidate) {
-      this.assumptions = assumptions;
-
-      context.debug(`...validated the '${frameString}' frame's assumptions.`);
-    }
-
-    return assumptionsValidate;
   }
 
-  validatMetavariable(context) {
-    let metavariableValidates = true; ///
-
+  validatMetavariable(context, continuation) {
     if (this.metavariable !== null) {
-      metavariableValidates = false;
+      const metavariableValidates = true;
 
-      const frameString = this.getString(); ///
+      continuation(metavariableValidates);
 
-      context.trace(`Validating the '${frameString}' frame's metavariable...`);
+      return;
+    }
 
-      const metavariable = this.metavariable.validate(context);
+    const frameString = this.getString(); ///
+
+    context.trace(`Validating the '${frameString}' frame's metavariable...`);
+
+    this.metavariable.validate(context, (metavariable) => {
+      let metavariableValidates = false;
 
       if (metavariable !== null) {
         const metaTypeName = FRAME_META_TYPE_NAME,
@@ -268,13 +269,23 @@ export default define(class Frame extends Element {
       if (metavariableValidates) {
         context.debug(`...validated the '${frameString}' frame's metavariable.`);
       }
-    }
 
-    return metavariableValidates;
+      continuation(metavariableValidates);
+    });
   }
 
-  validateWhenStated(context) {
-    let validatesWhenStated = false;
+  validateWhenStated(context, continuation) {
+    const stated = context.isStated();
+
+    if (!stated) {
+      const validatesWhenStated = false;
+
+      continuation(validatesWhenStated);
+
+      return;
+    }
+
+    let validatesWhenStated;
 
     const frameString = this.getString();  ///
 
@@ -282,20 +293,36 @@ export default define(class Frame extends Element {
 
     const singular = this.isSingular();
 
-    if (singular) {
-      validatesWhenStated = true;
-    } else {
+    if (!singular) {
+      const validatesWhenStated = false;
+
       context.debug(`The '${frameString}' stated frame must be singular.`);
+
+      continuation(validatesWhenStated);
+
+      return;
     }
+
+    validatesWhenStated = true;
 
     if (validatesWhenStated) {
       context.debug(`...validated the '${frameString}' stated frame.`);
     }
 
-    return validatesWhenStated;
+    continuation(validatesWhenStated);
   }
 
-  validateWhenDerived(context) {
+  validateWhenDerived(context, continuation) {
+    const stated = context.isStated();
+
+    if (stated) {
+      const validatesWhenDerived = false;
+
+      continuation(validatesWhenDerived);
+
+      return;
+    }
+
     let validatesWhenDerived;
 
     const frameString = this.getString();  ///
@@ -308,7 +335,7 @@ export default define(class Frame extends Element {
       context.debug(`...verified the '${frameString}' derived frame.`);
     }
 
-    return validatesWhenDerived;
+    continuation(validatesWhenDerived);
   }
 
   toJSON() {

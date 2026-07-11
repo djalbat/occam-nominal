@@ -288,7 +288,8 @@ export function topLevelAssertionStringFromLabelsSignatureSuppositionsAndDeducti
 
   topLevelAssertionString = (labelsString !== null) ?
                              `${topLevelAssertionString}${labelsString}` :
-                               `${topLevelAssertionString}`;
+                               `..`;
+
   topLevelAssertionString = (signatureString !== null) ?
                              `${topLevelAssertionString}${signatureString}` :
                                `${topLevelAssertionString}`;

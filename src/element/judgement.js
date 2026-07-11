@@ -273,7 +273,7 @@ export default define(class Judgement extends Element {
       context.debug(`...validated the '${judgementString}' stated judgement.`);
     }
 
-    return validatesWhenStated;
+    continuation(validatesWhenStated);
   }
 
   validateWhenDerived(context, continuation) {
