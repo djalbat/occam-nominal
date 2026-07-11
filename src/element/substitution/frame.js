@@ -4,6 +4,7 @@ import { breakPointUtilities } from "occam-languages";
 
 import Substitution from "../substitution";
 
+import { all } from "../../utilities/continuation";
 import { define } from "../../elements";
 import { instantiateFrameSubstitution } from "../../process/instantiate";
 import { frameSubstitutionFromFrameSubstitutionNode } from "../../utilities/element";
@@ -74,62 +75,58 @@ export default define(class FrameSubstitution extends Substitution {
     return comparedToFrame;
   }
 
-  validate(context) {
-    let frameSubstitution = null;
-
+  validate(context, continuatino) {
     const frameSubstitutionString = this.getString();  ///
 
     context.trace(`Validating the '${frameSubstitutionString}' frame substitution...`);
 
-    let validates = false;
-
     const validSubstitution = this.findValidSubstitution(context);
 
     if (validSubstitution !== null) {
-      validates = true;
-
-      frameSubstitution = validSubstitution;  ///
+      const frameSubstitution = validSubstitution;  ///
 
       context.debug(`...the '${frameSubstitutionString}' frame substitution is already valid.`);
-    } else {
-      const generalContext = this.getGeneralContext(),
-            specificContext = this.getSpecificContext();
 
-      attempts((generalContext, specificContext) => {
-        const targetFrameValidates = this.validateTargetFrame(generalContext, specificContext);
+      continuatino(frameSubstitution);
 
-        if (targetFrameValidates) {
-          const replacementFrameValidates = this.validateReplacementFrame(generalContext, specificContext);
+      return;
+    }
 
-          if (replacementFrameValidates) {
-            validates = true;
-          }
+    const generalContext = this.getGeneralContext(),
+          specificContext = this.getSpecificContext();
+
+    attempts((generalContext, specificContext) => {
+      const validateTargetFrame = this.validateTargetFrame.bind(this),
+            validateReplacementFrame = this.validateReplacementFrame.bind(this);
+
+      all([
+        validateTargetFrame,
+        validateReplacementFrame
+      ], generalContext, specificContext, (validates) => {
+        let frameSubstitution = null;
+
+        if (validates) {
+          const substitution = this;  ///
+
+          frameSubstitution = substitution; ///
+
+          context.addSubstitution(substitution);
         }
 
         if (validates) {
           this.commit(generalContext, specificContext);
         }
-      }, generalContext, specificContext);
 
-      if (validates) {
-        const substitution = this;  ///
+        if (validates) {
+          context.debug(`...validated the '${frameSubstitutionString}' frame substitution.`);
+        }
 
-        frameSubstitution = substitution; ///
-
-        context.addSubstitution(substitution);
-      }
-    }
-
-    if (validates) {
-      context.debug(`...validated the '${frameSubstitutionString}' frame substitution.`);
-    }
-
-    return frameSubstitution;
+        continuatino(frameSubstitution);
+      });
+    }, generalContext, specificContext);
   }
 
-  validateTargetFrame(generalContext, specificContext) {
-    let targetFrameValidates = false;
-
+  validateTargetFrame(generalContext, specificContext, continuatino) {
     const context = generalContext,  ///
           frameSubstitutionString = this.getString();  ///
 
@@ -137,54 +134,57 @@ export default define(class FrameSubstitution extends Substitution {
 
     const targetFrameSingular = this.targetFrame.isSingular();
 
-    if (targetFrameSingular) {
-      manifest((context) => {
-        elide((context) => {
-          const tragetFrame = this.targetFrame.validate(context);
-
-          if (tragetFrame !== null) {
-            this.targetFrame = tragetFrame;
-
-            targetFrameValidates = true;
-          }
-        }, context);
-      }, specificContext, context);
-    } else {
-      const targetFrameString = this.targetFrame.getString();
+    if (!targetFrameSingular) {
+      const targetFrameString = this.targetFrame.getString(),
+            targetFrameValidates = false;
 
       context.debug(`The '${targetFrameString}' target frame is not singular.`);
+
+      continuatino(targetFrameValidates);
+
+      return;
     }
 
-    if (targetFrameValidates) {
-      context.debug(`...validated the frame substitution's target frame...`);
-    }
+    manifest((context) => {
+      elide((context) => {
+        this.targetFrame.validate(context, (targetFrame) => {
+          let targetFrameValidates = false;
 
-    return targetFrameValidates;
+          if (targetFrame !== null) {
+            targetFrameValidates = true;
+          }
+
+          if (targetFrameValidates) {
+            context.debug(`...validated the '${frameSubstitutionString}' frame substitution's target frame...`);
+          }
+
+          continuatino(targetFrameValidates);
+        });
+      }, context);
+    }, specificContext, context);
   }
 
-  validateReplacementFrame(generalContext, specificContext) {
-    let replacementFrameValidates = false;
-
+  validateReplacementFrame(generalContext, specificContext, continuatino) {
     const context = specificContext,  ///
           frameSubstitutionString = this.getString();  ///
 
     context.trace(`Validating the '${frameSubstitutionString}' frame substitution's replacement frame...`);
 
     elide((context) => {
-      const replacementFrame = this.replacementFrame.validate(context);
+      this.replacementFrame.validate(context, (replacementFrame) => {
+        let replacementFrameValidates = false;
 
-      if (replacementFrame !== null) {
-        this.replacementFrame = replacementFrame;
+        if (replacementFrame !== null) {
+          replacementFrameValidates = true;
+        }
 
-        replacementFrameValidates = true;
-      }
+        if (replacementFrameValidates) {
+          context.debug(`...validated the '${frameSubstitutionString}' frame substitution's replacement frame.`);
+        }
+
+        continuatino(replacementFrameValidates);
+      });
     }, context);
-
-    if (replacementFrameValidates) {
-      context.debug(`...validated the '${frameSubstitutionString}' frame substitution's replacement frame.`);
-    }
-
-    return replacementFrameValidates;
   }
 
   unifySubstitution(substitution, context) {

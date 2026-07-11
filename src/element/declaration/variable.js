@@ -1,8 +1,13 @@
 "use strict";
 
+import { breakPointUtilities } from "occam-languages";
+
 import Declaration from "../declaration";
 
+import { all } from "../../utilities/continuation";
 import { define } from "../../elements";
+
+const { breakable } = breakPointUtilities;
 
 export default define(class VariableDeclaration extends Declaration {
   constructor(context, string, node, breakPoint, type, variable, provisional) {
@@ -32,37 +37,33 @@ export default define(class VariableDeclaration extends Declaration {
     return variableDeclarationNode;
   }
 
-  async verify(context) {
-    let verifies = false;
-
-    await this.break(context);
-
+  verify = breakable(function (context, continuation) {
     const variableDeclarationString = this.getString(); ///
 
     context.trace(`Verifying the '${variableDeclarationString}' variable declaration...`);
 
-    const typeVerifies = this.verifyType(context);
+    const typeVerifies = this.verifyType.bind(this),
+          variableVerifies = this.verifyVariable.bind(this);
 
-    if (typeVerifies) {
-      const variableVerifies = this.verifyVariable(context);
-
-      if (variableVerifies) {
+    all([
+      typeVerifies,
+      variableVerifies
+    ],  context, (verifies) => {
+      if (verifies) {
         const declaredVariable = this.variable;
 
         context.addDeclaredVariable(declaredVariable);
-
-        verifies = true;
       }
-    }
 
-    if (verifies) {
-      context.debug(`...verified the '${variableDeclarationString}' variable declaration.`);
-    }
+      if (verifies) {
+        context.debug(`...verified the '${variableDeclarationString}' variable declaration.`);
+      }
 
-    return verifies;
-  }
+      continuation(verifies);
+    });
+  });
 
-  verifyType(context) {
+  verifyType(context, continuation) {
     let typeVerifies = false;
 
     const variableDeclarationString = this.getString(); ///
@@ -99,10 +100,10 @@ export default define(class VariableDeclaration extends Declaration {
       context.debug(`...verified the '${variableDeclarationString}' variable declaration's type.`);
     }
 
-    return typeVerifies;
+    continuation(typeVerifies);
   }
 
-  verifyVariable(context) {
+  verifyVariable(context, continuation) {
     let  variableVerifies = false;
 
     const variableString = this.variable.getString(),
@@ -123,7 +124,7 @@ export default define(class VariableDeclaration extends Declaration {
       context.debug(`...verified the '${variableDeclarationString}' variable declaration's '${variableString}' variable.`);
     }
 
-    return variableVerifies;
+    continuation(variableVerifies);
   }
 
   static name = "VariableDeclaration";

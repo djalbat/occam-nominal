@@ -7,9 +7,9 @@ const { createSuite } = require("../utilities/test");
 const { TRACE_LEVEL } = levels;
 
 const logLevel = TRACE_LEVEL,
-      projectName = "minimal-propositional-logic",
+      projectName = "first-order-logic",
       projectsDirectoryPath = "../../Logic";
 
-describe(projectName, () => {
+describe.only(projectName, () => {
   createSuite(logLevel, projectName, projectsDirectoryPath);
 });

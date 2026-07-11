@@ -4,12 +4,13 @@ import { breakPointUtilities } from "occam-languages";
 
 import Substitution from "../substitution";
 
+import { all } from "../../utilities/continuation";
 import { define } from "../../elements";
 import { stripBracketsFromTerm } from "../../utilities/brackets";
 import { instantiateTermSubstitution } from "../../process/instantiate";
 import { termSubstitutionFromTermSubstitutionNode } from "../../utilities/element";
 import { termSubstitutionStringFromTermAndVariable } from "../../utilities/string";
-import { elide, ablate, attempts, reconcile, ablates, instantiate, unserialises } from "../../utilities/context";
+import { elide, ablate, ablates, manifest, attempts, reconcile, instantiate, unserialises } from "../../utilities/context";
 
 const { breakPointFromJSON } = breakPointUtilities;
 
@@ -77,125 +78,116 @@ export default define(class TermSubstitution extends Substitution {
     return comparesToParameter;
   }
 
-  async validate(context) {
-    let termSubstitution = null;
-
+  validate(context, continuatino) {
     const termSubstitutionString = this.getString();  ///
 
     context.trace(`Validating the '${termSubstitutionString}' term substitution...`);
 
-    let validates = false;
-
     const validSubstitution = this.findValidSubstitution(context);
 
     if (validSubstitution !== null) {
-      validates = true;
-
-      termSubstitution = validSubstitution; ///
+      const termSubstitution = validSubstitution;  ///
 
       context.debug(`...the '${termSubstitutionString}' term substitution is already valid.`);
-    } else {
-      const generalContext = this.getGeneralContext(),
-            specificContext = this.getSpecificContext();
 
-      await attempts(async (generalContext, specificContext) => {
-        const targetTermValidates = await this.validateTargetTerm(generalContext, specificContext);
+      continuatino(termSubstitution);
 
-        if (targetTermValidates) {
-          const replacementTermValidates = await this.validateReplacementTerm(generalContext, specificContext);
+      return;
+    }
 
-          if (replacementTermValidates) {
-            validates = true;
-          }
+    const generalContext = this.getGeneralContext(),
+          specificContext = this.getSpecificContext();
+
+    attempts((generalContext, specificContext) => {
+      const validateTargetTerm = this.validateTargetTerm.bind(this),
+            validateReplacementTerm = this.validateReplacementTerm.bind(this);
+
+      all([
+        validateTargetTerm,
+        validateReplacementTerm
+      ], generalContext, specificContext, (validates) => {
+        let termSubstitution = null;
+
+        if (validates) {
+          const substitution = this;  ///
+
+          termSubstitution = substitution; ///
+
+          context.addSubstitution(substitution);
         }
 
         if (validates) {
           this.commit(generalContext, specificContext);
         }
-      }, generalContext, specificContext);
 
-      if (validates) {
-        const substitution = this;  ///
+        if (validates) {
+          context.debug(`...validated the '${termSubstitutionString}' term substitution.`);
+        }
 
-        termSubstitution = substitution;  ///
-
-        context.addSubstitution(substitution);
-      }
-    }
-
-    if (validates) {
-      context.debug(`...validated the '${termSubstitutionString}' term substitution.`);
-    }
-
-    return termSubstitution;
+        continuatino(termSubstitution);
+      });
+    }, generalContext, specificContext);
   }
 
-  async validateTargetTerm(generalContext, specificContext) {
-    let targetTermValidates = false;
-
-    const context = generalContext, ///
+  validateTargetTerm(generalContext, specificContext, continuatino) {
+    const context = generalContext,  ///
           termSubstitutionString = this.getString();  ///
 
     context.trace(`Validating the '${termSubstitutionString}' term substitution's target term...`);
 
     const targetTermSingular = this.targetTerm.isSingular();
 
-    if (targetTermSingular) {
-      await tmanifest(async (context) => {
-        await elide(async (context) => {
-          const targetTerm = await this.targetTerm.validate(context, async (targetTerm, context) => {
-            const validatesForwards = true;
-
-            return validatesForwards;
-          });
-
-          if (targetTerm !== null) {
-            this.targetTerm = targetTerm;
-
-            targetTermValidates = true;
-          }
-        }, context);
-      }, specificContext, context);
-    } else {
-      const targetTermString = this.targetTerm.getString();
+    if (!targetTermSingular) {
+      const targetTermString = this.targetTerm.getString(),
+            targetTermValidates = false;
 
       context.debug(`The '${targetTermString}' target term is not singular.`);
+
+      continuatino(targetTermValidates);
+
+      return;
     }
 
-    if (targetTermValidates) {
-      context.debug(`...validated the '${termSubstitutionString}' term substitution's target term...`);
-    }
+    manifest((context) => {
+      elide((context) => {
+        this.targetTerm.validate(context, (targetTerm) => {
+          let targetTermValidates = false;
 
-    return targetTermValidates;
+          if (targetTerm !== null) {
+            targetTermValidates = true;
+          }
+
+          if (targetTermValidates) {
+            context.debug(`...validated the '${termSubstitutionString}' term substitution's target term...`);
+          }
+
+          continuatino(targetTermValidates);
+        });
+      }, context);
+    }, specificContext, context);
   }
 
-  async validateReplacementTerm(generalContext, specificContext) {
-    let replacementTermValidates = false;
-
+  validateReplacementTerm(generalContext, specificContext, continuatino) {
     const context = specificContext,  ///
           termSubstitutionString = this.getString();  ///
 
     context.trace(`Validating the '${termSubstitutionString}' term substitution's replacement term...`);
 
-    await elide(async (context) => {
-      const replacementTerm = await this.replacementTerm.validate(context, async (replacementTerm, context) => {
-        const validatesForwards = true;
+    elide((context) => {
+      this.replacementTerm.validate(context, (replacementTerm) => {
+        let replacementTermValidates = false;
 
-        return validatesForwards;
+        if (replacementTerm !== null) {
+          replacementTermValidates = true;
+        }
+
+        if (replacementTermValidates) {
+          context.debug(`...validated the '${termSubstitutionString}' term substitution's replacement term.`);
+        }
+
+        continuatino(replacementTermValidates);
       });
-
-      if (replacementTerm !== null) {
-        this.replacementTerm = replacementTerm;
-
-        replacementTermValidates = true;
-      }
     }, context);
-
-    if (replacementTermValidates) {
-      context.debug(`...validated the '${termSubstitutionString}' term substitution's replacement term...`);
-    }
-
-    return replacementTermValidates;
   }
 
   unifySubstitution(substitution, context) {

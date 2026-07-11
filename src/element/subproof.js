@@ -2,10 +2,11 @@
 
 import { Element, continuationUtilities } from "occam-languages";
 
+import { all } from "../utilities/continuation";
 import { define } from "../elements";
 import { enclose } from "../utilities/context";
 
-const { all, every } = continuationUtilities;
+const { every } = continuationUtilities;
 
 export default define(class Subproof extends Element {
   constructor(context, string, node, breakPoint, suppositions, subDerivation) {

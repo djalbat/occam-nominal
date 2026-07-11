@@ -6,6 +6,7 @@ import Assertion from "../assertion";
 
 import { define } from "../../elements";
 import { instantiate } from "../../utilities/context";
+import { all, exists } from "../../utilities/continuation";
 import { instantiateContainedAssertion } from "../../process/instantiate";
 import { termFromTermAndSubstitutions, frameFromFrameAndSubstitutions, statementFromStatementAndSubstitutions } from "../../utilities/substitutions";
 import { termFromContainedAssertionNode,
@@ -49,136 +50,159 @@ export default define(class ContainedAssertion extends Assertion {
     return containedAssertionNode;
   }
 
-  async validate(context) {
-    let containedAssertion = null;
-
+  validate(context, continuation) {
     const containedAssertionString = this.getString(); ///
 
     context.trace(`Validating the '${containedAssertionString}' contained assertion...`);
 
-    let validates = false;
-
     const validAssertion = this.findValidAssertion(context);
 
     if (validAssertion !== null) {
-      validates = true;
-
-      containedAssertion = validAssertion;  ///
+      const containedAssertion = validAssertion;  ///
 
       context.debug(`...the '${containedAssertionString}' contained assertion is already valid.`);
-    } else {
-      const termValidates = await this.validateTerm(context),
-            frameValidates = await this.validateFrame(context),
-            statementValidates = await this.validateStatement(context)
 
-      if (termValidates || frameValidates || statementValidates) {
-        const stated = context.isStated();
+      continuation(containedAssertion);
 
-        let validatesWhenStated = false,
-            validatesWhenDerived = false;
-
-        if (stated) {
-          validatesWhenStated = this.validateWhenStated(context);
-        } else {
-          validatesWhenDerived = this.validateWhenDerived(context);
-        }
-
-        if (validatesWhenStated || validatesWhenDerived) {
-          validates = true;
-        }
-      }
-
-      if (validates) {
-        const assertion = this; ///
-
-        containedAssertion = assertion;  ///
-
-        context.addAssertion(assertion);
-      }
+      return;
     }
 
-    if (validates) {
-      context.debug(`...validated the '${containedAssertionString}' contained assertion.`);
-    }
+    const validateTerm = this.validateTerm.bind(this),
+          validateFrame = this.validateFrame.bind(this),
+          validateStatement = this.validateStatement.bind(this);
 
-    return containedAssertion;
+    all([
+      validateTerm,
+      validateFrame,
+      validateStatement
+    ], context, (validaets) => {
+      if (!validaets) {
+        const containedAssertion = null;
+
+        continuation(containedAssertion);
+
+        return;
+      }
+
+      const validatesWhenStated = this.validateWhenStated.bind(this),
+            validatesWhenDerived = this.validateWhenDerived.bind(this);
+
+      exists([
+        validatesWhenStated,
+        validatesWhenDerived
+      ], context, (validates) => {
+        let containedAssertion = null;
+
+        if (validates) {
+          const assertion = this; ///
+
+          containedAssertion = assertion; ///
+
+          context.addAssertion(assertion);
+        }
+
+        if (validates) {
+          context.debug(`...validated the '${containedAssertionString}' contained assertion.`);
+        }
+
+        continuation(containedAssertion);
+      });
+    });
   }
 
-  async validateTerm(context) {
-    let termValidates = false;
+  validateTerm(context, continuation) {
+    if (this.term === null) {
+      const termValidates = true; ///
 
-    if (this.term !== null) {
-      const termString = this.term.getString(),
-            containedAssertionString = this.getString(); ///
+      continuation(termValidates);
 
-      context.trace(`Validating the '${containedAssertionString}' contained assertion's term...`);
-
-      const termSingular = this.term.isSingular();
-
-      if (termSingular) {
-        const term = await this.term.validate(context, async (term, context) => {
-          const validatesForwards = true;
-
-          return validatesForwards;
-        });
-
-        if (term !== null) {
-          this.term = term;
-
-          termValidates = true;
-        }
-
-        if (termValidates) {
-          context.debug(`...validated the '${containedAssertionString}' contained assertion's term.`);
-        }
-      } else {
-        context.debug(`The '${termString}' term is not singular.`);
-      }
+      return;
     }
 
-    return termValidates;
+    const termString = this.term.getString(), ///
+          continaedAssertionString = this.getString();  ///
+
+    context.trace(`Validating the '${continaedAssertionString}' continaed assertion's term...`);
+
+    const termSingular = this.term.isSingular();
+
+    if (!termSingular) {
+      const termValidates = false;
+
+      context.debug(`The '${termString}' term is not singular.`);
+
+      continuation(termValidates);
+
+      return;
+    }
+
+    this.term.validate(context, (term, context) => {
+      let termValidates = false;
+
+      if (term !== null) {
+        this.term = term; ///
+
+        termValidates = true;
+      }
+
+      if (termValidates) {
+        context.debug(`...validates the'${continaedAssertionString}' continaed assertion's term.`);
+      }
+
+      continuation(termValidates);
+    });
   }
 
-  validateFrame(context) {
-    let frameValidates = false;
+  validateFrame(context, continuation) {
+    if (this.frame === null) {
+      const frameValidates = true;  ///
 
-    if (this.frame !== null) {
-      const frameString = this.frame.getString(),
-            containedAssertionString = this.getString(); ///
+      continuation(frameValidates);
 
-      context.trace(`Validating the '${containedAssertionString}' contained assertion's frame...`);
+      return;
+    }
 
-      const frameSingular = this.frame.isSingular();
+    const frameString = this.frame.getString(), ///
+          continaedAssertionString = this.getString();  ///
 
-      if (frameSingular) {
-        const frame = this.frame.validate(context);
+    context.trace(`Validating the'${continaedAssertionString}' continaed assertion's '${frameString}' frame...`);
 
-        if (frame !== null) {
-          this.frame = frame;
+    const frameSingular = this.frame.isSingular();
 
-          frameValidates = true;
-        }
-      } else {
-        context.debug(`The '${frameString}' frame is not singular.`);
+    if (!frameSingular) {
+      const frameValidates = false;
+
+      context.debug(`The '${frameString}' frame is not singular.`);
+
+      continuation(frameValidates);
+
+      return;
+    }
+
+    this.frame.validate(context, (frame) => {
+      let frameValidates = false;
+
+      if (frame !== null) {
+        this.frame = frame;
+
+        frameValidates = true;
       }
 
       if (frameValidates) {
-        context.debug(`...validated the '${containedAssertionString}' contained assertion's frame.`);
+        context.debug(`...validates the'${continaedAssertionString}' continaed assertion's '${frameString}' frame.`);
       }
-    }
 
-    return frameValidates;
+      continuation(frameValidates);
+    });
   }
 
-  async validateStatement(context) {
-    let statementValidates = false;
+  validateStatement(context, continuation) {
+    const statementString = this.statement.getString();
 
-    if (this.statement !== null) {
-      const statementString = this.statement.getString();
+    context.trace(`Validating the '${statementString}' statement...`);
 
-      context.trace(`Validating the '${statementString}' statement...`);
-
-      const statement = await this.statement.validate(context);
+    this.statement.validate(context, (statement) => {
+      let statementValidates = false;
 
       if (statement !== null) {
         statementValidates = true;
@@ -187,12 +211,22 @@ export default define(class ContainedAssertion extends Assertion {
       if (statementValidates) {
         context.debug(`...validated the '${statementString}' statement.`);
       }
-    }
 
-    return statementValidates;
+      continuation(statementValidates);
+    });
   }
 
-  validateWhenStated(context) {
+  validateWhenStated(context, continuation) {
+    const stated = context.isStated();
+
+    if (!stated) {
+      const validatesWhenStated = false;
+
+      continuation(validatesWhenStated);
+
+      return;
+    }
+
     let validatesWhenStated;
 
     const containedAssertionString = this.getString(); ///
@@ -205,26 +239,34 @@ export default define(class ContainedAssertion extends Assertion {
       context.debug(`...validated the '${containedAssertionString}' stated contained assertion.`);
     }
 
-    return validatesWhenStated;
+    continuation(validatesWhenStated);
   }
 
-  validateWhenDerived(context) {
-    let validatesWhenDerived;
+  validateWhenDerived(context, continuation) {
+    const stated = context.isStated();
+
+    if (stated) {
+      const validatesWhenDerived = false;
+
+      continuation(validatesWhenDerived);
+
+      return;
+    }
 
     const containedAssertionString = this.getString(); ///
 
     context.trace(`Validating the '${containedAssertionString}' derived contained assertion...`);
 
-    validatesWhenDerived = validateWhenDerived(this.term, this.frame, this.statement, this.negated, context);
+    validateWhenDerived(this.term, this.frame, this.statement, this.negated, context, (validatesWhenDerived) => {
+      if (validatesWhenDerived) {
+        context.debug(`...validated the '${containedAssertionString}' derived contained assertion.`);
+      }
 
-    if (validatesWhenDerived) {
-      context.debug(`...validated the '${containedAssertionString}' derived contained assertion.`);
-    }
-
-    return validatesWhenDerived;
+      continuation(validatesWhenDerived);
+    });
   }
 
-  unifyIndependently(generalContext, specificContext) {
+  unifyIndependently(generalContext, specificContext, continuation) {
     let unifiesIndependently = false;
 
     const context = specificContext,  ///
@@ -283,7 +325,7 @@ export default define(class ContainedAssertion extends Assertion {
   }
 });
 
-function validateWhenDerived(term, frame, statement, negated, context) {
+function validateWhenDerived(term, frame, statement, negated, context, continuation) {
   let validatesWhenDerived = false;
 
   if (statement !== null) {
@@ -312,5 +354,5 @@ function validateWhenDerived(term, frame, statement, negated, context) {
     }
   }
 
-  return validatesWhenDerived;
+  continuation(validatesWhenDerived);
 }

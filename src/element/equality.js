@@ -3,6 +3,7 @@
 import { Element, breakPointUtilities } from "occam-languages";
 
 import { define } from "../elements";
+import { exists } from "../utilities/continuation";
 import { equateTerms } from "../process/equate";
 import { instantiate } from "../utilities/context";
 import { instantiateEquality } from "../process/instantiate";
@@ -118,109 +119,119 @@ export default define(class Equality extends Element {
     return validEquality;
   }
 
-  async validate(context) {
+  validate(context, continuation) {
     let equality = null;
 
     const equalityString = this.getString(); ///
 
     context.trace(`Validating the '${equalityString}' equality...`);
 
-    let validates = false;
-
     const validEquality = this.findValidEquality(context);
 
     if (validEquality !== null) {
-      validates = true;
-
-      equality = validEquality; ///
+      const equality = validEquality; ///
 
       context.debug(`...the '${equalityString}' equality is already valid.`);
-    } else {
-      const termsValidate = await this.validateTerms(context);
 
-      if (termsValidate) {
-        const stated = context.isStated();
+      continuation(equality);
 
-        let validatesWhenStated = false,
-            validatesWhenDerived = false;
-
-        if (stated) {
-          validatesWhenStated = this.validateWhenStated(context);
-        } else {
-          validatesWhenDerived = this.validateWhenDerived(context);
-        }
-
-        if (validatesWhenStated || validatesWhenDerived) {
-          validates = true;
-        }
-      }
-
-      if (validates) {
-        equality = this;  ///
-
-        this.assign(context);
-
-        context.addEquality(equality);
-      }
+      return;
     }
 
-    if (validates) {
-      context.debug(`...validated the '${equalityString}' equality.`);
-    }
+    this.validateTerms(context, (termsValidate) => {
+      if (!termsValidate) {
+        const equality = null;
 
-    return equality;
+        continuation(equality);
+
+        return;
+      }
+
+      const validatesWhenStated = this.validateWhenStated.bind(this),
+            validatesWhenDerived = this.validateWhenDerived.bind(this);
+
+      exists([
+        validatesWhenStated,
+        validatesWhenDerived
+      ], context, (validates) => {
+        let equqlity = null;
+
+        if (validates) {
+          equality = this;  ///
+
+          this.assign(context);
+
+          context.addEquality(equality);
+        }
+
+        if (validates) {
+          context.debug(`...validated the '${equalityString}' equality.`);
+        }
+
+        continuation(equqlity);
+      });
+    });
   }
 
-  async validateTerms(context) {
-    let termsValidate = false;
-
+  validateTerms(context, continuation) {
     const equalityString = this.getString(); ///
 
     context.trace(`Validating the '${equalityString}' equality's terms...`);
 
-    let leftTerm,
-        rightTerm;
+    this.leftTerm.validate(context, (leftTerm, context) => {
+      if (leftTerm === null) {
+        const termsValidate = false;
 
-    leftTerm = await this.leftTerm.validate(context, async (leftTerm, context) => {
-      let validatesForwards = false;
+        continuation(termsValidate);
 
-      rightTerm = await this.rightTerm.validate(context, async (rightTerm, context) => {
-        let validatesForwards = false;
+        return;
+      }
+
+      this.rightTerm.validate(context, (rightTerm, context) => {
+        if (rightTerm === null) {
+          const termsValidate = false;
+
+          continuation(termsValidate);
+
+          return;
+        }
+
+        let termsValidate = false;
 
         const leftTermType = leftTerm.getType(),
               rightTermType = rightTerm.getType(),
               leftTermTypeEqualToSubTypeOrSuperTypeOfRightTermType = leftTermType.isEqualToSubTypeOrSuperTypeOf(rightTermType);
 
         if (leftTermTypeEqualToSubTypeOrSuperTypeOfRightTermType) {
-          validatesForwards = true;
+          termsValidate = true;
         }
 
-        return validatesForwards;
+        if (termsValidate) {
+          this.leftTerm = leftTerm;
+
+          this.rightTerm = rightTerm;
+        }
+
+        if (termsValidate) {
+          context.debug(`...validated the '${equalityString}' equality's terms.`);
+        }
+
+        continuation(termsValidate);
       });
-
-      if (rightTerm !== null) {
-        validatesForwards = true;
-      }
-
-      return validatesForwards;
     });
-
-    if (leftTerm !== null) {
-      this.leftTerm = leftTerm;
-
-      this.rightTerm = rightTerm;
-
-      termsValidate = true;
-    }
-
-    if (termsValidate) {
-      context.debug(`...validated the '${equalityString}' equality's terms.`);
-    }
-
-    return termsValidate;
   }
 
-  validateWhenStated(context) {
+  validateWhenStated(context, continuation) {
+    const stated = context.isStated();
+
+    if (!stated) {
+      const validatesWhenStated = false;
+
+      continuation(validatesWhenStated);
+
+      return;
+    }
+
     let validatesWhenStated;
 
     const equalityString = this.getString(); ///
@@ -233,10 +244,20 @@ export default define(class Equality extends Element {
       context.debug(`...validated the '${equalityString}' stated equality.`);
     }
 
-    return validatesWhenStated;
+    continuation(validatesWhenStated);
   }
 
-  validateWhenDerived(context) {
+  validateWhenDerived(context, continuation) {
+    const stated = context.isStated();
+
+    if (stated) {
+      const validatesWhenDerived = false;
+
+      continuation(validatesWhenDerived);
+
+      return;
+    }
+
     let validatesWhenDerived;
 
     const equalityString = this.getString(); ///
@@ -249,7 +270,7 @@ export default define(class Equality extends Element {
       context.debug(`...validated the '${equalityString}' derived equality.`);
     }
 
-    return validatesWhenDerived;
+    continuation(validatesWhenDerived);
   }
 
   assign(context) {

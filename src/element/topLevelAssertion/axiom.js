@@ -1,13 +1,14 @@
 "use strict";
 
-import { continuationUtilities } from "occam-languages";
+import { breakPointUtilities, continuationUtilities } from "occam-languages";
 
 import TopLevelAssertion from "../topLevelAssertion";
 
 import { define } from "../../elements";
 import { reconcile } from "../../utilities/context";
 
-const { match } = continuationUtilities;
+const { match } = continuationUtilities,
+      { breakable } = breakPointUtilities;
 
 export default define(class Axiom extends TopLevelAssertion {
   getAxiomNode() {
@@ -24,11 +25,7 @@ export default define(class Axiom extends TopLevelAssertion {
     return satisfiable;
   }
 
-  async verify(context) {
-    let verifies;
-
-    await this.break(context);
-
+  verify = breakable(function (context, continuation) {
     const axiomString = this.getString(); ///
 
     context.trace(`Verifying the '${axiomString}' axiom...`);
@@ -36,19 +33,25 @@ export default define(class Axiom extends TopLevelAssertion {
     const signatureVerifies = this.verifySignature(context);
 
     if (signatureVerifies) {
-      verifies = await super.verify(context);
+      const verifies = false;
+
+      continuation(verifies);
+
+      return;
     }
 
-    if (verifies) {
-      const axiom = this; ///
+    this.verifyEx(context, (verifies) => {
+      if (verifies) {
+        const axiom = this; ///
 
-      context.addAxiom(axiom);
+        context.addAxiom(axiom);
 
-      context.debug(`...verified the '${axiomString}' axiom.`);
-    }
+        context.debug(`...verified the '${axiomString}' axiom.`);
+      }
 
-    return verifies;
-  }
+      continuation(verifies);
+    });
+  });
 
   verifySignature(context) {
     let signatureVerifies;
@@ -97,10 +100,10 @@ export default define(class Axiom extends TopLevelAssertion {
     return signatureUnifies;
   }
 
-  async unifyDeduction(deduction, context) {
+  unifyDeduction(deduction, context) {
     let deductionUnifies;
 
-    await this.break(context);
+    this.break(context);
 
     const axiomString = this.getString(), ///
           generalDeduction = this.deduction,  ///
@@ -115,7 +118,7 @@ export default define(class Axiom extends TopLevelAssertion {
           generalContext = generalDeductionContext, ///
           specificContext = specificDeductionContext; ///
 
-    await reconcile(async (specificContext) => {
+    reconcile((specificContext) => {
       let statement;
 
       statement = specificDeduction.getStatement();
@@ -125,7 +128,7 @@ export default define(class Axiom extends TopLevelAssertion {
       statement = generalDeduction.getStatement();
 
       const generalStatement = statement, ///
-            statementUnifies = await generalStatement.unifyStatement(specificStatement, generalContext, specificContext);
+            statementUnifies = generalStatement.unifyStatement(specificStatement, generalContext, specificContext);
 
       if (statementUnifies) {
         specificContext.commit(context);
@@ -141,7 +144,7 @@ export default define(class Axiom extends TopLevelAssertion {
     return deductionUnifies;
   }
 
-  async unifySupposition(supposition, index, context) {
+  unifySupposition(supposition, index, context) {
     let suppositionUnifies = false;
 
     const specificSupposition = supposition;  ///
@@ -160,7 +163,7 @@ export default define(class Axiom extends TopLevelAssertion {
           generalContext = generalSuppositionContext, ///
           specificContext = specificSuppositionContext; ///
 
-    await reconcile(async (specificContext) => {
+    reconcile((specificContext) => {
       let statement;
 
       statement = specificSupposition.getStatement();
@@ -170,7 +173,7 @@ export default define(class Axiom extends TopLevelAssertion {
       statement = generalSupposition.getStatement();
 
       const generalStatement = statement, ///
-            statementUnifies = await generalStatement.unifyStatement(specificStatement, generalContext, specificContext);
+            statementUnifies = generalStatement.unifyStatement(specificStatement, generalContext, specificContext);
 
       if (statementUnifies) {
         specificContext.commit(context);
@@ -186,7 +189,7 @@ export default define(class Axiom extends TopLevelAssertion {
     return suppositionUnifies;
   }
 
-  async unifySuppositions(suppositions, context) {
+  unifySuppositions(suppositions, context) {
     let suppositionsUnify;
 
     const specificSuppositions = suppositions;  ///
@@ -195,9 +198,9 @@ export default define(class Axiom extends TopLevelAssertion {
 
     const generalSuppositions = suppositions; ///
 
-    suppositionsUnify = await match(generalSuppositions, specificSuppositions, async (generalSupposition, specificSupposition, index) => {
+    suppositionsUnify = match(generalSuppositions, specificSuppositions, (generalSupposition, specificSupposition, index) => {
       const supposition = specificSupposition,  ///
-            suppositionUnifies = await this.unifySupposition(supposition, index, context);
+            suppositionUnifies = this.unifySupposition(supposition, index, context);
 
       if (suppositionUnifies) {
         return true;
@@ -207,7 +210,7 @@ export default define(class Axiom extends TopLevelAssertion {
     return suppositionsUnify;
   }
 
-  async unifyTopLevelAssertion(topLevelAssertion, context) {
+  unifyTopLevelAssertion(topLevelAssertion, context) {
     let topLevelAssertionUnifies = false;
 
     const axiomString = this.getString(), ///
@@ -216,14 +219,14 @@ export default define(class Axiom extends TopLevelAssertion {
     context.trace(`Unifying the '${topLevelAssertionString}' top level assertion with the '${axiomString}' axiom...`);
 
     const deduction = topLevelAssertion.getDeduction(),
-          deductionUnifies = await this.unifyDeduction(deduction, context);
+          deductionUnifies = this.unifyDeduction(deduction, context);
 
     if (deductionUnifies) {
-      const hypothesesDischarges = await topLevelAssertion.dischargeHypotheses(context);
+      const hypothesesDischarges = topLevelAssertion.dischargeHypotheses(context);
 
       if (hypothesesDischarges) {
         const suppositions = topLevelAssertion.getSuppositions(),
-              suppositionsUnify = await this.unifySuppositions(suppositions, context);
+              suppositionsUnify = this.unifySuppositions(suppositions, context);
 
         if (suppositionsUnify) {
           topLevelAssertionUnifies = true;

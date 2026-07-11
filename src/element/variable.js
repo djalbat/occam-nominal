@@ -87,43 +87,40 @@ export default define(class Variable extends Element {
     return comparesToVariableIdentifier;
   }
 
-  validate(context) {
-    let variable = null;
-
+  validate(context, continuation) {
     const variableString = this.getString(); ///
 
     context.trace(`Validating the '${variableString}' variable...`);
 
-    let validates = false;
-
     const variableIdentifier = this.identifier, ///
           declaredVariable = context.findDeclaredVariableByVariableIdentifier(variableIdentifier);
 
-    if (declaredVariable !== null) {
-      const type = declaredVariable.getType(),
-            typeString = type.getString(),
-            provisional = declaredVariable.isProvisional(),
-            variableString = this.getString(),  ///
-            provisinallyString = provisionallyStringFromProvisional(provisional);
+    if (declaredVariable === null) {
+      const variable = null;
 
-      context.trace(`Setting the '${variableString}' variable's type to the '${typeString}' type${provisinallyString}.`);
-
-      this.type = type;
-
-      this.provisional = provisional;
-
-      variable = this;
-
-      validates = true;
-    } else {
       context.debug(`The '${variableString}' variable is not present.`);
+
+      continuation(variable);
+
+      return;
     }
 
-    if (validates) {
-      context.debug(`...validated the '${variableString}' variable.`);
-    }
+    const type = declaredVariable.getType(),
+          typeString = type.getString(),
+          provisional = declaredVariable.isProvisional(),
+          provisinallyString = provisionallyStringFromProvisional(provisional);
 
-    return variable;
+    context.trace(`Setting the '${variableString}' variable's type to the '${typeString}' type${provisinallyString}.`);
+
+    this.type = type;
+
+    this.provisional = provisional;
+
+    const variable = this;
+
+    context.debug(`...validated the '${variableString}' variable.`);
+
+    continuation(variable);
   }
 
   unifyTerm(term, generalContext, specificContext) {

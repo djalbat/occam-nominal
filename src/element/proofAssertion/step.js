@@ -6,12 +6,13 @@ import { breakPointUtilities, continuationUtilities } from "occam-languages";
 import elements from "../../elements";
 import ProofAssertion from "../proofAssertion";
 
+import { all } from "../../utilities/continuation";
 import { define } from "../../elements";
 import { unifySteps } from "../../process/unification";
 import { derive, declare, attempt, reconcile } from "../../utilities/context";
 
-const { breakable } = breakPointUtilities,
-      { all, some } = continuationUtilities,
+const { some } = continuationUtilities,
+      { breakable } = breakPointUtilities,
       { backwardsSome } = arrayUtilities;
 
 export default define(class Step extends ProofAssertion {

@@ -1,8 +1,12 @@
 "use strict";
 
+import { breakPointUtilities } from "occam-languages";
+
 import TopLevelAssertion from "../topLevelAssertion";
 
 import { define } from "../../elements";
+
+const { breakable } = breakPointUtilities;
 
 export default define(class Lemma extends TopLevelAssertion {
   getLemmaNode() {
@@ -12,31 +16,27 @@ export default define(class Lemma extends TopLevelAssertion {
     return lemmaNode;
   }
 
-  async verify(context) {
-    let verifies;
-
-    await this.break(context);
-
+  verify = breakable(function (context, continuation) {
     const lemmaString = this.getString(); ///
 
     (lemmaString === null) ?
       context.trace(`Verifying a lemma...`) :
         context.trace(`Verifying the '${lemmaString}' lemma...`);
 
-    verifies = await super.verify(context);
+    this.verifyEx(context, (verifies) => {
+      if (verifies) {
+        const lemma = this; ///
 
-    if (verifies) {
-      const lemma = this; ///
+        context.addLemma(lemma);
 
-      context.addLemma(lemma);
+        (lemmaString === null) ?
+          context.debug(`...verified a lemma.`) :
+            context.debug(`...verified the '${lemmaString}' lemma.`);
+      }
 
-      (lemmaString === null) ?
-        context.debug(`...verified a lemma.`) :
-          context.debug(`...verified the '${lemmaString}' lemma.`);
-    }
-
-    return verifies;
-  }
+      continuation(verifies);
+    });
+  });
 
   static name = "Lemma";
 });

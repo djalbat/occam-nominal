@@ -1,8 +1,12 @@
 "use strict";
 
+import { breakPointUtilities } from "occam-languages";
+
 import TopLevelAssertion from "../topLevelAssertion";
 
 import { define } from "../../elements";
+
+const { breakable } = breakPointUtilities;
 
 export default define(class Conjecture extends TopLevelAssertion {
   getConjectureNode() {
@@ -12,27 +16,23 @@ export default define(class Conjecture extends TopLevelAssertion {
     return conjectureNode;
   }
 
-  async verify(context) {
-    let verifies;
-
-    await this.break(context);
-
+  verify = breakable(function (context, continuation) {
     const conjectureString = this.getString();  ///
 
     context.trace(`Verifying the '${conjectureString}' conjecture...`);
 
-    verifies = await super.verify(context);
+    this.verifyEx(context, (verifies) => {
+      if (verifies) {
+        const conjecture = this;  ///
 
-    if (verifies) {
-      const conjecture = this;  ///
+        context.addConjecture(conjecture);
 
-      context.addConjecture(conjecture);
+        context.debug(`...verified the '${conjectureString}' conjecture.`);
+      }
 
-      context.debug(`...verified the '${conjectureString}' conjecture.`);
-    }
-
-    return verifies;
-  }
+      continuation(verifies);
+    });
+  });
 
   static name = "Conjecture";
 

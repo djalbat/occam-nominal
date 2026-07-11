@@ -54,7 +54,7 @@ export default define(class ProcedureCall extends Element {
     return values;
   }
 
-  validate(context) {
+  validate(context, continuation) {
     let validates = false;
 
     const procedureCallString = this.getString(); ///
@@ -80,7 +80,7 @@ export default define(class ProcedureCall extends Element {
       context.debug(`...validated the '${procedureCallString}' procedure call.`);
     }
 
-    return validates;
+    continuation(validates);
   }
 
   async unifyIndependently(context) {

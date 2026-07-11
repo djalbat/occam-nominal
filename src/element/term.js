@@ -1,9 +1,10 @@
 "use strict";
 
 import { arrayUtilities } from "necessary";
-import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
+import { Element, breakPointUtilities } from "occam-languages";
 
 import { define } from "../elements";
+import { exists } from "../utilities/continuation";
 import { instantiate } from "../utilities/context";
 import { instantiateTerm } from "../process/instantiate";
 import { variablesFromTerm } from "../utilities/equivalence";
@@ -11,8 +12,7 @@ import { unifyTermIntrinsically } from "../process/unify";
 import { validateTerms, unifyTermWithProperties } from "../process/validation";
 import { typeFromJSON, typeToTypeJSON, provisionalFromJSON, provisionalToProvisionalJSON } from "../utilities/json";
 
-const { some } = continuationUtilities,
-      { filter } = arrayUtilities,
+const { filter } = arrayUtilities,
       { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Term extends Element {
@@ -182,54 +182,39 @@ export default define(class Term extends Element {
     return validTerm;
   }
 
-  async validate(context, validateForwards) {
-    let term = null;
-
+  validate(context, continuation) {
     const termString = this.getString();  ///
 
     context.trace(`Validating the '${termString}' term...`);
 
-    let validates = false;
-
     const validTerm = this.findValidTerm(context);
 
     if (validTerm !== null) {
-      term = validTerm; ///
+      const term = validTerm; ///
 
-      const validatesForward = await validateForwards(term, context);
+      context.debug(`...the '${termString}' term is already valid.`);
 
-      if (validatesForward) {
-        validates = true;
+      continuation(term, context);
 
-        context.debug(`...the '${termString}' term is already valid.`);
+      return;
+    }
+
+    let term = this;
+
+    exists(validateTerms, term, context, (termValidates) => {
+      if (termValidates) {
+        context.addTerm(term);
+
+        context.debug(`...validated the '${termString}' term.`);
       } else {
         term = null;
       }
-    } else {
-      validates = await some(validateTerms, async (validateTerm) => {  ///
-        const term = this,  ///
-              termValidates = await validateTerm(term, context, validateForwards);
 
-        if (termValidates) {
-          return true;
-        }
-      });
-
-      if (validates) {
-        term = this;  ///
-
-        context.addTerm(term);
-      }
-    }
-
-    if (validates) {
-      context.debug(`...validated the '${termString}' term.`);
-    }
-
-    return term;
+      continuation(term, context);
+    });
   }
 
-  async validateGivenType(type, strict, context) {
+  validateGivenType(type, strict, context) {
     if (context === undefined) {
       context = strict; ///
 
@@ -245,7 +230,7 @@ export default define(class Term extends Element {
 
     let validatesGivenType = false;
 
-    term = await this.validate(context, async (term, context) => {
+    term = this.validate(context, (term, context) => {
       let validatesForwards = false;
 
       const termType = term.getType(),
@@ -278,7 +263,7 @@ export default define(class Term extends Element {
     return term;
   }
 
-  async validateAsProperty(context, validateForwards) {
+  validateAsProperty(context, validateForwards) {
     let term = null;
 
     const termString = this.getString();  ///
@@ -292,7 +277,7 @@ export default define(class Term extends Element {
     if (validTerm !== null) {
       term = validTerm; ///
 
-      const validatesForward = await validateForwards(term, context);
+      const validatesForward = validateForwards(term, context);
 
       if (validatesForward) {
         validatesAsProperty = true;

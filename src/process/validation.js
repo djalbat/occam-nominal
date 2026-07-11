@@ -10,50 +10,51 @@ import { bracketedConstructorFromNothing, bracketedCombinatorFromNothing } from 
 
 const { some } = continuationUtilities;
 
-export function validateTermAsVariable(term, context, validateForwards) {
-  let termValidatesAsVariable = false;
+export function validateTermAsVariable(term, context, continuation) {
+  const { Variable } = elements,
+        variable = Variable.fromTerm(term, context);
 
-  const { Variable } = elements;
+  if (variable === null) {
+    const termValidatesAsVariable = false;
 
-  let variable;
+    continuation(termValidatesAsVariable);
 
-  variable = Variable.fromTerm(term, context);
-
-  if (variable !== null) {
-    const termString = term.getString();
-
-    context.trace(`Validating the '${termString}' term as a variable...`);
-
-    variable = variable.validate(context);
-
-    if (variable !== null) {
-      const type = variable.getType(),
-            typeString = type.getString(),
-            provisional = variable.isProvisional(),
-            provisionallyString = provisionallyStringFromProvisional(provisional);
-
-      context.trace(`Setting the '${termString}' term's type to the '${typeString}' type${provisionallyString}.`);
-
-      term.setType(type);
-
-      term.setProvisional(provisional);
-
-      const validatesForwards = validateForwards(term, context);
-
-      if (validatesForwards) {
-        termValidatesAsVariable = true;
-      }
-    }
-
-    if (termValidatesAsVariable) {
-      context.debug(`...validated the '${termString}' term as a variable.`);
-    }
+    return;
   }
 
-  return termValidatesAsVariable;
+  const termString = term.getString();
+
+  context.trace(`Validating the '${termString}' term as a variable...`);
+
+  variable.validate(context, (variable) => {
+    if (variable === null) {
+      const termValidatesAsVariable = false;
+
+      continuation(termValidatesAsVariable);
+
+      return;
+    }
+
+    const type = variable.getType(),
+          typeString = type.getString(),
+          provisional = variable.isProvisional(),
+          provisionallyString = provisionallyStringFromProvisional(provisional);
+
+    context.trace(`Setting the '${termString}' term's type to the '${typeString}' type${provisionallyString}.`);
+
+    term.setType(type);
+
+    term.setProvisional(provisional);
+
+    context.debug(`...validated the '${termString}' term as a variable.`);
+
+    const termValidatesAsVariable = true;
+
+    continuation(termValidatesAsVariable);
+  });
 }
 
-function unifyTermWithGenerators(term, context, validateForwards) {
+function unifyTermWithGenerators(term, context, continuation) {
   let termUnifiesWithGenerators;
 
   const generators = context.getGenerators();
@@ -62,7 +63,7 @@ function unifyTermWithGenerators(term, context, validateForwards) {
     let termUnifiesWithGenerator = false;
 
     choose((context) => {
-      const termUnifies = generator.unifyTerm(term, context, validateForwards);
+      const termUnifies = generator.unifyTerm(term, context, continuation);
 
       if (termUnifies) {
         termUnifiesWithGenerator = true;
@@ -79,7 +80,7 @@ function unifyTermWithGenerators(term, context, validateForwards) {
   return termUnifiesWithGenerators;
 }
 
-function unifyTermWithConstructors(term, context, validateForwards) {
+function unifyTermWithConstructors(term, context, continuation) {
   let termUnifiesWithConstructors;
 
   const constructors = context.getConstructors();
@@ -88,7 +89,7 @@ function unifyTermWithConstructors(term, context, validateForwards) {
     let termUnifiesWithConstructor = false;
 
     choose((context) => {
-      const termUnifies = constructor.unifyTerm(term, context, validateForwards);
+      const termUnifies = constructor.unifyTerm(term, context, continuation);
 
       if (termUnifies) {
         termUnifiesWithConstructor = true;
@@ -105,12 +106,12 @@ function unifyTermWithConstructors(term, context, validateForwards) {
   return termUnifiesWithConstructors;
 }
 
-function unifyTermWithBracketedConstructor(term, context, validateForwards) {
+function unifyTermWithBracketedConstructor(term, context, continuation) {
   let termUnifiesWithBracketedConstructor;
 
   const bracketedConstructor = bracketedConstructorFromNothing();
 
-  termUnifiesWithBracketedConstructor = bracketedConstructor.unifyTerm(term, context, validateForwards);
+  termUnifiesWithBracketedConstructor = bracketedConstructor.unifyTerm(term, context, continuation);
 
   return termUnifiesWithBracketedConstructor;
 }
@@ -308,7 +309,6 @@ function validateStatementAsDefinedAssertion(statement, context, continuation) {
     }
 
     continuation(validatesStatementAsDefinedAssertion);
-
   });
 }
 
@@ -436,7 +436,7 @@ function validateStatementAsSignatureAssertion(statement, context, continuation)
   });
 }
 
-export function unifyTermWithProperties(term, context, validateForwards) {
+export function unifyTermWithProperties(term, context, continuation) {
   let termUnifiesWithProperties;
 
   const properties = context.getProperties();
@@ -445,7 +445,7 @@ export function unifyTermWithProperties(term, context, validateForwards) {
     let termUnifiesWithProperty = false;
 
     choose((context) => {
-      const termUnifies = property.unifyTerm(term, context, validateForwards);
+      const termUnifies = property.unifyTerm(term, context, continuation);
 
       if (termUnifies) {
         termUnifiesWithProperty = true;

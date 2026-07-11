@@ -3,6 +3,7 @@
 import { arrayUtilities } from "necessary";
 import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
 
+import { all } from "../utilities/continuation";
 import { enclose } from "../utilities/context";
 import { topLevelAssertionStringFromLabelsSignatureSuppositionsAndDeduction } from "../utilities/string";
 import { labelsFromJSON,
@@ -91,169 +92,145 @@ export default class TopLevelAssertion extends Element {
     return metavariableNodeMatches;
   }
 
-  async verify(context) {
-    let verifies = false;
-
+  verifyEx(context, continuation) {
     const topLevelAssertionString = this.getString(); ///
 
     context.trace(`Verifying the '${topLevelAssertionString}' top level assertion...`);
 
-    await enclose(async (context) => {
-      const labelsVerify = this.verifyLabels(context);
+    enclose((context) => {
+      const verifyProof = this.verifyProof.bind(this),
+            verifyLabels = this.verifyLabels.bind(this),
+            verifyDeduction = this.verifyDeduction.bind(this),
+            verifySuppositions = this.verifySuppositions.bind(this);
 
-      if (labelsVerify) {
-        const suppositionsVerify = await this.verifySuppositions(context);
-
-        if (suppositionsVerify) {
-          const deductionVerifies = await this.verifyDeduction(context);
-
-          if (deductionVerifies) {
-            const proofVerifies = await this.verifyProof(context);
-
-            if (proofVerifies) {
-              verifies = true;
-            }
-          }
+      all([
+        verifyLabels,
+        verifySuppositions,
+        verifyDeduction,
+        verifyProof
+      ], context, (verifies) => {
+        if (verifies) {
+          context.debug(`...verified the '${topLevelAssertionString}' top level assertion.`);
         }
-      }
+
+        continuation(verifies);
+      });
     }, context);
-
-    if (verifies) {
-      context.debug(`...verified the '${topLevelAssertionString}' top level assertion.`);
-    }
-
-    return verifies;
   }
 
-  verifyLabels(context) {
-    let labelsVerify;
-
+  verifyLabels(context, continuation) {
     const topLevelAssertionString = this.getString();  ///
 
     context.trace(`Verifying the '${topLevelAssertionString}' top level assertion's labels...`);
 
-    labelsVerify = this.labels.every((label) => {
-      const labelVerifies = this.verifyLabel(label, context);
-
-      if (labelVerifies) {
-        return true;
+    every(this.labels, (label, continuation) => {
+      this.verifyLabel(label, context, continuation);
+    }, (labelsVerify) => {
+      if (labelsVerify) {
+        context.debug(`...verified the '${topLevelAssertionString}' top level assertion's labels.`);
       }
+
+      continuation(labelsVerify);
     });
-
-    if (labelsVerify) {
-      context.debug(`...verified the '${topLevelAssertionString}' top level assertion's labels.`);
-    }
-
-    return labelsVerify;
   }
 
-  verifyLabel(label, context) {
-    let labelVerifies;
-
+  verifyLabel(label, context, continuation) {
     const labelString = label.getString(),
           topLevelAssertionString = this.getString(); ///
 
     context.trace(`Verifying the '${topLevelAssertionString}' top level assertion's '${labelString}' label...`);
 
-    labelVerifies = label.verify();
+    label.verify((labelVerifies) => {
+      if (labelVerifies) {
+        context.debug(`...verified the '${topLevelAssertionString}' top level assertion's '${labelString}' label.`);
+      }
 
-    if (labelVerifies) {
-      context.debug(`...verified the '${topLevelAssertionString}' top level assertion's '${labelString}' label.`);
-    }
-
-    return labelVerifies;
+      continuation(labelVerifies);
+    });
   }
 
-  async verifyProof(context) {
-    let proofVerifies;
-
+  verifyProof(context, continuation) {
     if (this.proof === null) {
-      proofVerifies = true;
-    } else {
-      const topLevelAssertionString = this.getString();  ///
+      const proofVerifies = true; ///
 
-      context.trace(`Verifying the '${topLevelAssertionString}' top level assertion's proof...`);
+      continuation(proofVerifies);
 
-      const statement = this.deduction.getStatement();
+      return;
+    }
 
-      proofVerifies = await this.proof.verify(statement, context);
+    const topLevelAssertionString = this.getString();  ///
 
+    context.trace(`Verifying the '${topLevelAssertionString}' top level assertion's proof...`);
+
+    const statement = this.deduction.getStatement();
+
+    this.proof.verify(statement, context, (proofVerifies) => {
       if (proofVerifies) {
         context.debug(`...verified the '${topLevelAssertionString}' top level assertion's proof.`);
       }
-    }
 
-    return proofVerifies;
+      continuation(proofVerifies);
+    });
   }
 
-  async verifyDeduction(context) {
-    let deductionVerifies;
-
+  verifyDeduction(context, continuation) {
     const deductionString = this.deduction.getString(),
           topLevelAssertionString = this.getString(); ///
 
     context.trace(`Verifying the '${topLevelAssertionString}' top level assertion's '${deductionString}' deduction...`);
 
-    deductionVerifies = await this.deduction.verify(context);
+    this.deduction.verify(context, (deductionVerifies) => {
+      if (deductionVerifies) {
+        context.debug(`...verified the '${topLevelAssertionString}' top level assertion's '${deductionString}' deduction.`);
+      }
 
-    if (deductionVerifies) {
-      context.debug(`...verified the '${topLevelAssertionString}' top level assertion's '${deductionString}' deduction.`);
-    }
-
-    return deductionVerifies;
+      continuation(deductionVerifies);
+    });
   }
 
-  async verifySupposition(supposition, context) {
-    let suppositionVerifies;
-
+  verifySupposition(supposition, context, continuation) {
     const suppositionString = supposition.getString(),
           topLevelAssertionString = this.getString();  ///
 
     context.trace(`Verifying the '${topLevelAssertionString}' top level assertion's '${suppositionString}' supposition...`);
 
-    suppositionVerifies = await supposition.verify(context)
+    supposition.verify(context, (suppositionVerifies) => {
+      if (suppositionVerifies) {
+        const subproofOrProofAssertion = supposition;  ////
 
-    if (suppositionVerifies) {
-      const subproofOrProofAssertion = supposition;  ////
+        context.assignAssignments();
 
-      context.assignAssignments();
+        context.addSubproofOrProofAssertion(subproofOrProofAssertion);
+      }
 
-      context.addSubproofOrProofAssertion(subproofOrProofAssertion);
-    }
+      if (suppositionVerifies) {
+        context.debug(`...verified the '${topLevelAssertionString}' top level assertion's '${suppositionString}' supposition.`);
+      }
 
-    if (suppositionVerifies) {
-      context.debug(`...verified the '${topLevelAssertionString}' top level assertion's '${suppositionString}' supposition.`);
-    }
-
-    return suppositionVerifies;
+      continuation(suppositionVerifies);
+    });
   }
 
-  async verifySuppositions(context) {
-    let suppositionsVerify;
-
+  verifySuppositions(context, continuation) {
     const topLevelAssertionString = this.getString();  ///
 
     context.trace(`Verifying the '${topLevelAssertionString}' top level assertion's suppositions...`);
 
-    suppositionsVerify = await forwardsEvery(this.suppositions, async (supposition) => {
-      const suppositionVerifies = await this.verifySupposition(supposition, context);
-
-      if (suppositionVerifies) {
-        return true;
+    forwardsEvery(this.suppositions, (supposition, continuation) => {
+      this.verifySupposition(supposition, context, continuation);
+    }, (suppositionsVerify) => {
+      if (suppositionsVerify) {
+        context.debug(`...verified the '${topLevelAssertionString}' top level assertion's suppositions.`);
       }
+
+      continuation(suppositionsVerify);
     });
-
-    if (suppositionsVerify) {
-      context.debug(`...verified the '${topLevelAssertionString}' top level assertion's suppositions.`);
-    }
-
-    return suppositionsVerify;
   }
 
-  async dischargeHypothesis(hypothesis, context) {
+  dischargeHypothesis(hypothesis, context) {
     let hypothesisDischarges;
 
-    await this.break(context);
+    this.break(context);
 
     const hypothesisString = hypothesis.getString(),
           topLevelAssertionString = this.getString(); ///
@@ -269,10 +246,10 @@ export default class TopLevelAssertion extends Element {
     return hypothesisDischarges;
   }
 
-  async dischargeHypotheses(context) {
+  dischargeHypotheses(context) {
     const hypotheses = this.getHypotheses(),
-          hypothesesDischarges = await every(hypotheses, async (hypothesis) => {
-            const hypothesisDischarges = await this.dischargeHypothesis(hypothesis, context);
+          hypothesesDischarges = every(hypotheses, (hypothesis) => {
+            const hypothesisDischarges = this.dischargeHypothesis(hypothesis, context);
 
             if (hypothesisDischarges) {
               return true;
@@ -282,10 +259,10 @@ export default class TopLevelAssertion extends Element {
     return hypothesesDischarges;
   }
 
-  async unifyStepWithDeduction(step, context) {
+  unifyStepWithDeduction(step, context) {
     let stepUnifiesWithDeduction = false;
 
-    await this.break(context);
+    this.break(context);
 
     const stepString = step.getString(),
           topLevelAssertionString = this.getString(); ///
@@ -305,16 +282,16 @@ export default class TopLevelAssertion extends Element {
     return stepUnifiesWithDeduction;
   }
 
-  async unifyStepAndSubproofOrProofAssertions(step, subproofOrProofAssertions, context) {
+  unifyStepAndSubproofOrProofAssertions(step, subproofOrProofAssertions, context) {
     let stepAndSubproofOrProofAssertionsUnify = false;
 
-    const stepUnifiesWithDeduction = await this.unifyStepWithDeduction(step, context);
+    const stepUnifiesWithDeduction = this.unifyStepWithDeduction(step, context);
 
     if (stepUnifiesWithDeduction) {
-      const hypothesesDischarges = await this.dischargeHypotheses(context);
+      const hypothesesDischarges = this.dischargeHypotheses(context);
 
       if (hypothesesDischarges) {
-        const subproofOrProofAssertionsUnifiesWithSuppositions = await this.unifySubproofOrProofAssertionsWithSuppositions(subproofOrProofAssertions, context);
+        const subproofOrProofAssertionsUnifiesWithSuppositions = this.unifySubproofOrProofAssertionsWithSuppositions(subproofOrProofAssertions, context);
 
         if (subproofOrProofAssertionsUnifiesWithSuppositions) {
           const derivedSubstitutionsResolved = context.areDerivedSubstitutionsResolved();
@@ -329,14 +306,14 @@ export default class TopLevelAssertion extends Element {
     return stepAndSubproofOrProofAssertionsUnify;
   }
 
-  async unifySubproofOrProofAssertionsWithSupposition(subproofOrProofAssertions, supposition, context) {
+  unifySubproofOrProofAssertionsWithSupposition(subproofOrProofAssertions, supposition, context) {
     let subproofOrProofAssertionsUnifiesWithSupposition = false;
 
-    await this.break(context);
+    this.break(context);
 
     if (!subproofOrProofAssertionsUnifiesWithSupposition) {
-      const subproofOrProofAssertion = await extract(subproofOrProofAssertions, async (subproofOrProofAssertion) => {
-        const subproofOrProofAssertionUnifies = await supposition.unifySubproofOrProofAssertion(subproofOrProofAssertion, context);
+      const subproofOrProofAssertion = extract(subproofOrProofAssertions, (subproofOrProofAssertion) => {
+        const subproofOrProofAssertionUnifies = supposition.unifySubproofOrProofAssertion(subproofOrProofAssertion, context);
 
         if (subproofOrProofAssertionUnifies) {
           context.resolveDerivedSubstitutions();
@@ -351,7 +328,7 @@ export default class TopLevelAssertion extends Element {
     }
 
     if (!subproofOrProofAssertionsUnifiesWithSupposition) {
-      const suppositionUnifiesIndependently = await supposition.unifyIndependently(context);
+      const suppositionUnifiesIndependently = supposition.unifyIndependently(context);
 
       if (suppositionUnifiesIndependently) {
         subproofOrProofAssertionsUnifiesWithSupposition = true;
@@ -361,13 +338,13 @@ export default class TopLevelAssertion extends Element {
     return subproofOrProofAssertionsUnifiesWithSupposition;
   }
 
-  async unifySubproofOrProofAssertionsWithSuppositions(subproofOrProofAssertions, context) {
+  unifySubproofOrProofAssertionsWithSuppositions(subproofOrProofAssertions, context) {
     let subproofOrProofAssertionsUnifiesWithSuppositions;
 
     subproofOrProofAssertions = reverse(subproofOrProofAssertions); ///
 
-    subproofOrProofAssertionsUnifiesWithSuppositions = await backwardsEvery(this.suppositions, async (supposition) => {
-      const stepUnifiesWithSupposition = await this.unifySubproofOrProofAssertionsWithSupposition(subproofOrProofAssertions, supposition, context);
+    subproofOrProofAssertionsUnifiesWithSuppositions = backwardsEvery(this.suppositions, (supposition) => {
+      const stepUnifiesWithSupposition = this.unifySubproofOrProofAssertionsWithSupposition(subproofOrProofAssertions, supposition, context);
 
       if (stepUnifiesWithSupposition) {
         return true;

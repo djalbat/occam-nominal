@@ -5,12 +5,12 @@ import { breakPointUtilities, continuationUtilities } from "occam-languages";
 import ProofAssertion from "../proofAssertion";
 
 import { define } from "../../elements";
+import { exists } from "../../utilities/continuation";
 import { instantiatePremise } from "../../process/instantiate";
 import { procedureCallFromPremiseNode } from "../../utilities/element";
 import { declare, attempt, reconcile, serialise, unserialise, instantiate } from "../../utilities/context";
 
-const { exists } = continuationUtilities,
-      { breakable, breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
+const { breakable, breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Premise extends ProofAssertion {
   constructor(context, string, node, breakPoint, statement, procedureCall) {

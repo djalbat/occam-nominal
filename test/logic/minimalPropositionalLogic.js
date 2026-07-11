@@ -7,7 +7,7 @@ const { createSuite } = require("../utilities/test");
 const { ERROR_LEVEL } = levels;
 
 const logLevel = ERROR_LEVEL,
-      projectName = "first-order-logic",
+      projectName = "minimal-propositional-logic",
       projectsDirectoryPath = "../../Logic";
 
 describe(projectName, () => {
