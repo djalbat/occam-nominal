@@ -52,7 +52,7 @@ export default define(class Proof extends Element {
           }
         }
 
-        continuation(verifies);
+        return continuation(verifies);
       });
     }, context);
   }

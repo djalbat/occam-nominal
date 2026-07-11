@@ -17,9 +17,7 @@ export function validateTermAsVariable(term, context, continuation) {
   if (variable === null) {
     const termValidatesAsVariable = false;
 
-    continuation(termValidatesAsVariable);
-
-    return;
+    return continuation(termValidatesAsVariable);
   }
 
   const termString = term.getString();
@@ -30,9 +28,7 @@ export function validateTermAsVariable(term, context, continuation) {
     if (variable === null) {
       const termValidatesAsVariable = false;
 
-      continuation(termValidatesAsVariable);
-
-      return;
+      return continuation(termValidatesAsVariable);
     }
 
     const type = variable.getType(),
@@ -50,7 +46,7 @@ export function validateTermAsVariable(term, context, continuation) {
 
     const termValidatesAsVariable = true;
 
-    continuation(termValidatesAsVariable);
+    return continuation(termValidatesAsVariable);
   });
 }
 
@@ -123,9 +119,7 @@ function validateStatementAsMetavariable(statement, context, continuation) {
   if (metavariable === null) {
     const statementValidatesAsMetavariable = false;
 
-    continuation(statementValidatesAsMetavariable);
-
-    return;
+    return continuation(statementValidatesAsMetavariable);
   }
 
   const statementString = statement.getString();
@@ -138,9 +132,7 @@ function validateStatementAsMetavariable(statement, context, continuation) {
     if (metavariable === null) {
       const statementValidatesAsMetavariable = false;
 
-      continuation(statementValidatesAsMetavariable);
-
-      return;
+      return continuation(statementValidatesAsMetavariable);
     }
 
     const { TermSubstitution, FrameSubstitution } = elements,
@@ -151,9 +143,7 @@ function validateStatementAsMetavariable(statement, context, continuation) {
     if (substitution === null) {
       const statementValidatesAsMetavariable = true;
 
-      continuation(statementValidatesAsMetavariable);
-
-      return;
+      return continuation(statementValidatesAsMetavariable);
     }
 
     substitution.validate(context, (substitution) => {
@@ -167,7 +157,7 @@ function validateStatementAsMetavariable(statement, context, continuation) {
         context.debug(`...validated the '${statementString}' statement as a metavariable.`);
       }
 
-      continuation(statementValidatesAsMetavariable);
+      return continuation(statementValidatesAsMetavariable);
     });
   });
 }
@@ -195,9 +185,7 @@ function validateStatementAsEquality(statement, context, continuation) {
   if (equality === null) {
     const statementValidatesAsEquality = false;
 
-    continuation(statementValidatesAsEquality);
-
-    return;
+    return continuation(statementValidatesAsEquality);
   }
 
   const statementString = statement.getString();
@@ -215,7 +203,7 @@ function validateStatementAsEquality(statement, context, continuation) {
       context.debug(`...validated the '${statementString}' statement as an equality.`);
     }
 
-    continuation(statementValidatesAsEquality);
+    return continuation(statementValidatesAsEquality);
   });
 }
 
@@ -226,9 +214,7 @@ function validateStatementAsJudgement(statement, context, continuation) {
   if (judgement === null) {
     const validatesStatementAsJudgement = false;
 
-    continuation(validatesStatementAsJudgement);
-
-    return;
+    return continuation(validatesStatementAsJudgement);
   }
 
   const statementString = statement.getString();
@@ -246,7 +232,7 @@ function validateStatementAsJudgement(statement, context, continuation) {
       context.debug(`...validated the '${statementString}' statement as a judgement.`);
     }
 
-    continuation(validatesStatementAsJudgement);
+    return continuation(validatesStatementAsJudgement);
   });
 }
 
@@ -257,9 +243,7 @@ function validateStatementAsTypeAssertion(statement, context, continuation) {
   if (typeAssertion === null) {
     const validatesStatementAsTypeAssertion = false;
 
-    continuation(validatesStatementAsTypeAssertion);
-
-    return;
+    return continuation(validatesStatementAsTypeAssertion);
   }
 
   const statementString = statement.getString();
@@ -277,7 +261,7 @@ function validateStatementAsTypeAssertion(statement, context, continuation) {
       context.debug(`...validated the '${statementString}' statement as a type assertion.`);
     }
 
-    continuation(validatesStatementAsTypeAssertion);
+    return continuation(validatesStatementAsTypeAssertion);
   });
 }
 
@@ -288,9 +272,7 @@ function validateStatementAsDefinedAssertion(statement, context, continuation) {
   if (definedAssertion === null) {
     const validatesStatementAsDefinedAssertion = false;
 
-    continuation(validatesStatementAsDefinedAssertion);
-
-    return;
+    return continuation(validatesStatementAsDefinedAssertion);
   }
 
   const statementString = statement.getString();
@@ -308,7 +290,7 @@ function validateStatementAsDefinedAssertion(statement, context, continuation) {
       context.debug(`...validated the '${statementString}' statement as a defined assertion.`);
     }
 
-    continuation(validatesStatementAsDefinedAssertion);
+    return continuation(validatesStatementAsDefinedAssertion);
   });
 }
 
@@ -319,9 +301,7 @@ function validateStatementAsPropertyAssertion(statement, context, continuation) 
   if (propertyAssertion === null) {
     const statementValidatesAsPropertyAssertion = false;
 
-    continuation(statementValidatesAsPropertyAssertion);
-
-    return;
+    return continuation(statementValidatesAsPropertyAssertion);
   }
 
   const statementString = statement.getString();
@@ -339,7 +319,7 @@ function validateStatementAsPropertyAssertion(statement, context, continuation) 
       context.debug(`...validated the '${statementString}' statement as a property assertion.`);
     }
 
-    continuation(statementValidatesAsPropertyAssertion);
+    return continuation(statementValidatesAsPropertyAssertion);
   });
 }
 
@@ -350,9 +330,7 @@ function validateStatementAsSubproofAssertion(statement, context, continuation) 
   if (subproofAssertion === null) {
     let statementValidatesAsSubproofAssertion = false;
 
-    continuation(statementValidatesAsSubproofAssertion);
-
-    return;
+    return continuation(statementValidatesAsSubproofAssertion);
   }
 
   const statementString = statement.getString();

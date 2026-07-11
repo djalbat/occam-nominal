@@ -62,9 +62,7 @@ export default define(class ContainedAssertion extends Assertion {
 
       context.debug(`...the '${containedAssertionString}' contained assertion is already valid.`);
 
-      continuation(containedAssertion);
-
-      return;
+      return continuation(containedAssertion);
     }
 
     const validateTerm = this.validateTerm.bind(this),
@@ -79,9 +77,7 @@ export default define(class ContainedAssertion extends Assertion {
       if (!validaets) {
         const containedAssertion = null;
 
-        continuation(containedAssertion);
-
-        return;
+        return continuation(containedAssertion);
       }
 
       const validatesWhenStated = this.validateWhenStated.bind(this),
@@ -105,7 +101,7 @@ export default define(class ContainedAssertion extends Assertion {
           context.debug(`...validated the '${containedAssertionString}' contained assertion.`);
         }
 
-        continuation(containedAssertion);
+        return continuation(containedAssertion);
       });
     });
   }
@@ -114,9 +110,7 @@ export default define(class ContainedAssertion extends Assertion {
     if (this.term === null) {
       const termValidates = true; ///
 
-      continuation(termValidates);
-
-      return;
+      return continuation(termValidates);
     }
 
     const termString = this.term.getString(), ///
@@ -131,9 +125,7 @@ export default define(class ContainedAssertion extends Assertion {
 
       context.debug(`The '${termString}' term is not singular.`);
 
-      continuation(termValidates);
-
-      return;
+      return continuation(termValidates);
     }
 
     this.term.validate(context, (term, context) => {
@@ -149,7 +141,7 @@ export default define(class ContainedAssertion extends Assertion {
         context.debug(`...validates the'${continaedAssertionString}' continaed assertion's term.`);
       }
 
-      continuation(termValidates);
+      return continuation(termValidates);
     });
   }
 
@@ -157,9 +149,7 @@ export default define(class ContainedAssertion extends Assertion {
     if (this.frame === null) {
       const frameValidates = true;  ///
 
-      continuation(frameValidates);
-
-      return;
+      return continuation(frameValidates);
     }
 
     const frameString = this.frame.getString(), ///

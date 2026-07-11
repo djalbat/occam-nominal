@@ -8,9 +8,7 @@ function unifyStepWithRule(step, context, continuation) {
   if (reference === null) {
     const stepUnifiesWithRule = false;
 
-    continuation(stepUnifiesWithRule);
-
-    return;
+    return continuation(stepUnifiesWithRule);
   }
 
   const rule = context.findRuleByReference(reference);
@@ -18,9 +16,7 @@ function unifyStepWithRule(step, context, continuation) {
   if (rule === null) {
     const stepUnifiesWithRule = false;
 
-    continuation(stepUnifiesWithRule);
-
-    return;
+    return continuation(stepUnifiesWithRule);
   }
 
   const stepString = step.getString(),
@@ -41,7 +37,7 @@ function unifyStepWithRule(step, context, continuation) {
       context.debug(`...unified the '${stepString}' step with the '${ruleString}' rule.`);
     }
 
-    continuation(stepUnifiesWithRule);
+    return continuation(stepUnifiesWithRule);
   });
 }
 
@@ -51,9 +47,7 @@ function unifyStepWithTopLevelAssertion(step, context, continuation) {
   if (reference === null) {
     const stepUnifiesWithTopLevelAssertion = false;
 
-    continuation(stepUnifiesWithTopLevelAssertion);
-
-    return;
+    return continuation(stepUnifiesWithTopLevelAssertion);
   }
 
   const topLevelAssertion = context.findTopLevelAssertionByReference(reference);
@@ -61,9 +55,7 @@ function unifyStepWithTopLevelAssertion(step, context, continuation) {
   if (topLevelAssertion === null) {
     const stepUnifiesWithTopLevelAssertion = false;
 
-    continuation(stepUnifiesWithTopLevelAssertion);
-
-    return;
+    return continuation(stepUnifiesWithTopLevelAssertion);
   }
 
   const satisfiable = topLevelAssertion.isSatisfiable();
@@ -71,9 +63,7 @@ function unifyStepWithTopLevelAssertion(step, context, continuation) {
   if (satisfiable) {
     const stepUnifiesWithTopLevelAssertion = false;
 
-    continuation(stepUnifiesWithTopLevelAssertion);
-
-    return;
+    return continuation(stepUnifiesWithTopLevelAssertion);
   }
 
   const stepString = step.getString(),
@@ -94,7 +84,7 @@ function unifyStepWithTopLevelAssertion(step, context, continuation) {
       context.debug(`...unified the '${stepString}' step with the '${topLevelAssertionString}' top level assertion.`);
     }
 
-    continuation(stepUnifiesWithTopLevelAssertion);
+    return continuation(stepUnifiesWithTopLevelAssertion);
   });
 }
 
@@ -104,9 +94,7 @@ function unifyStepWithSignatureAssertion(step, context, continuation) {
   if (signatureAssertion === null) {
     const stepUnifiesWithSignatureAssertion = false;
 
-    continuation(stepUnifiesWithSignatureAssertion);
-
-    return;
+    return continuation(stepUnifiesWithSignatureAssertion);
   }
 
   const stepString = step.getString(),
@@ -127,7 +115,7 @@ function unifyStepWithSignatureAssertion(step, context, continuation) {
       context.debug(`...unified the '${stepString}' step with the '${signatureAssertionString}' signature assertion.`);
     }
 
-    continuation(stepUnifiesWithSignatureAssertion);
+    return continuation(stepUnifiesWithSignatureAssertion);
   });
 }
 
@@ -137,9 +125,7 @@ function unifyStepAsQualifiedConstraint(step, context, continuation) {
   if (!metaLevel) {
     const stepUnifiesAsQualifiedConstraint = false;
 
-    continuation(stepUnifiesAsQualifiedConstraint);
-
-    return;
+    return continuation(stepUnifiesAsQualifiedConstraint);
   }
 
   const reference = step.getReference();
@@ -147,9 +133,7 @@ function unifyStepAsQualifiedConstraint(step, context, continuation) {
   if (reference === null) {
     const stepUnifiesAsQualifiedConstraint = false;
 
-    continuation(stepUnifiesAsQualifiedConstraint);
-
-    return;
+    return continuation(stepUnifiesAsQualifiedConstraint);
   }
 
   const stepString = step.getString(),
@@ -171,7 +155,7 @@ function unifyStepAsQualifiedConstraint(step, context, continuation) {
       context.debug(`...unified the '${stepString}' step as a constraint with the '${referenceString}' reference.`);
     }
 
-    continuation(stepUnifiesAsQualifiedConstraint);
+    return continuation(stepUnifiesAsQualifiedConstraint);
   });
 }
 
@@ -181,9 +165,7 @@ function unifyStepAsUnqualifiedEquality(step, context, continuation) {
   if (qualified) {
     const stepUnifiesAUnqualifiedEquality = false;
 
-    continuation(stepUnifiesAUnqualifiedEquality);
-
-    return;
+    return continuation(stepUnifiesAUnqualifiedEquality);
   }
 
   const { Equality } = elements,
@@ -193,9 +175,7 @@ function unifyStepAsUnqualifiedEquality(step, context, continuation) {
   if (equality === null) {
     const stepUnifiesAUnqualifiedEquality = false;
 
-    continuation(stepUnifiesAUnqualifiedEquality);
-
-    return;
+    return continuation(stepUnifiesAUnqualifiedEquality);
   }
 
   let stepUnifiesAUnqualifiedEquality;
@@ -210,7 +190,7 @@ function unifyStepAsUnqualifiedEquality(step, context, continuation) {
     context.debug(`...unified the '${stepString}' step as an unqualified equality.`);
   }
 
-  continuation(stepUnifiesAUnqualifiedEquality);
+  return continuation(stepUnifiesAUnqualifiedEquality);
 }
 
 function unifyStepAsUNqualifiedJudgement(step, context, continuation) {
@@ -219,9 +199,7 @@ function unifyStepAsUNqualifiedJudgement(step, context, continuation) {
   if (qualified) {
     const stepUnifiesAsUnqualifiedJudgement = false;
 
-    continuation(stepUnifiesAsUnqualifiedJudgement);
-
-    return;
+    return continuation(stepUnifiesAsUnqualifiedJudgement);
   }
 
   const { Judgement } = elements,
@@ -231,9 +209,7 @@ function unifyStepAsUNqualifiedJudgement(step, context, continuation) {
   if (judgement === null) {
     const stepUnifiesAsUnqualifiedJudgement = false;
 
-    continuation(stepUnifiesAsUnqualifiedJudgement);
-
-    return;
+    return continuation(stepUnifiesAsUnqualifiedJudgement);
   }
 
   let stepUnifiesAsUnqualifiedJudgement;
@@ -248,7 +224,7 @@ function unifyStepAsUNqualifiedJudgement(step, context, continuation) {
     context.debug(`...unified the '${stepString}' step as an unqualified judgement.`);
   }
 
-  continuation(stepUnifiesAsUnqualifiedJudgement);
+  return continuation(stepUnifiesAsUnqualifiedJudgement);
 }
 
 function unifyStepAsUnqualifiedTypeAssertion(step, context, continuation) {
@@ -257,9 +233,7 @@ function unifyStepAsUnqualifiedTypeAssertion(step, context, continuation) {
   if (qualified) {
     const stepUnifiesAsUnqualifiedTypeAssertion = false;
 
-    continuation(stepUnifiesAsUnqualifiedTypeAssertion);
-
-    return;
+    return continuation(stepUnifiesAsUnqualifiedTypeAssertion);
   }
 
   const { TypeAssertion } = elements,

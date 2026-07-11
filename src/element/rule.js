@@ -82,7 +82,7 @@ export default define(class Rule extends Element {
           context.debug(`...verified the '${ruleString}' rule.`);
         }
 
-        continuation(verifies);
+        return continuation(verifies);
       });
     }, context);
   });
@@ -98,7 +98,7 @@ export default define(class Rule extends Element {
         context.debug(`...verified the '${ruleString}' rule's '${labelString}' label.`);
       }
 
-      continuation(labelVerifies);
+      return continuation(labelVerifies);
     });
   }
 
@@ -106,9 +106,7 @@ export default define(class Rule extends Element {
     if (this.proof === null) {
       const proofVerifies = true;
 
-      continuation(proofVerifies);
-
-      return;
+      return continuation(proofVerifies);
     }
 
     const ruleString = this.getString();  ///
@@ -122,7 +120,7 @@ export default define(class Rule extends Element {
         context.debug(`...verified the '${ruleString}' rule's proof.`);
       }
 
-      continuation(proofVerifies);
+      return continuation(proofVerifies);
     });
   }
 
@@ -161,7 +159,7 @@ export default define(class Rule extends Element {
         context.debug(`...verified the '${ruleString}' rule's '${premiseString}' premise.`);
       }
 
-      continuation(premiseVerifies);
+      return continuation(premiseVerifies);
     });
   }
 
@@ -177,7 +175,7 @@ export default define(class Rule extends Element {
         context.debug(`...verified the '${ruleString}' rule's premises.`);
       }
 
-      continuation(premisesVerify);
+      return continuation(premisesVerify);
     });
   }
 
@@ -192,7 +190,7 @@ export default define(class Rule extends Element {
         context.debug(`...verified the '${ruleString}' rule's '${conclusionString}' conclusion.`);
       }
 
-      continuation(conclusionVerifies);
+      return continuation(conclusionVerifies);
     });
   }
 
@@ -214,7 +212,7 @@ export default define(class Rule extends Element {
         context.debug(`...unified the '${stepString}' step with the '${ruleString}' rule's '${conclusionString}' conclusion.`);
       }
 
-      continuation(stepUnifiesWithConclusion);
+      return continuation(stepUnifiesWithConclusion);
     });
   });
 
@@ -223,9 +221,7 @@ export default define(class Rule extends Element {
       if (!statementUnifiesWithConclusion) {
         const stepAndSubproofOrProofAssertionsUnify = false;
 
-        continuation(stepAndSubproofOrProofAssertionsUnify);
-
-        return;
+        return continuation(stepAndSubproofOrProofAssertionsUnify);
       }
 
       this.unifySubproofOrProofAssertionsWithPremises(subproofOrProofAssertions, context, (subproofOrProofAssertionsUnifiesWithPremises) => {
@@ -239,7 +235,7 @@ export default define(class Rule extends Element {
           }
         }
 
-        continuation(stepAndSubproofOrProofAssertionsUnify);
+        return continuation(stepAndSubproofOrProofAssertionsUnify);
       });
     });
   }
@@ -251,9 +247,7 @@ export default define(class Rule extends Element {
       if (subproofOrProofAssertion !== null) {
         const subproofOrProofAssertionsUnifiesWithPremise = true;
 
-        continuation(subproofOrProofAssertionsUnifiesWithPremise);
-
-        return;
+        return continuation(subproofOrProofAssertionsUnifiesWithPremise);
       }
 
       premise.unifyIndependently(context, continuation);

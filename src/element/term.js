@@ -194,9 +194,7 @@ export default define(class Term extends Element {
 
       context.debug(`...the '${termString}' term is already valid.`);
 
-      continuation(term, context);
-
-      return;
+      return continuation(term, context);
     }
 
     let term = this;
@@ -210,7 +208,7 @@ export default define(class Term extends Element {
         term = null;
       }
 
-      continuation(term, context);
+      return continuation(term, context);
     });
   }
 

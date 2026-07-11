@@ -54,9 +54,7 @@ export default define(class DefinedAssertion extends Assertion {
 
       context.debug(`...the '${definedAssertionString}' defined assertion is already valid.`);
 
-      continuation(definedAssertion);
-
-      return;
+      return continuation(definedAssertion);
     }
 
     const validateTerm = this.validateTerm.bind(this),
@@ -69,9 +67,7 @@ export default define(class DefinedAssertion extends Assertion {
       if (!validaets) {
         const definedAssertion = null;
 
-        continuation(definedAssertion);
-
-        return;
+        return continuation(definedAssertion);
       }
 
       const validatesWhenStated = this.validateWhenStated.bind(this),
@@ -95,7 +91,7 @@ export default define(class DefinedAssertion extends Assertion {
           context.debug(`...validated the '${definedAssertionString}' defined assertion.`);
         }
 
-        continuation(definedAssertion);
+        return continuation(definedAssertion);
       });
     });
   }
@@ -104,9 +100,7 @@ export default define(class DefinedAssertion extends Assertion {
     if (this.term === null) {
       const termValidates = true; ///
 
-      continuation(termValidates);
-
-      return;
+      return continuation(termValidates);
     }
 
     const termString = this.term.getString(), ///
@@ -121,9 +115,7 @@ export default define(class DefinedAssertion extends Assertion {
 
       context.debug(`The '${termString}' term is not singular.`);
 
-      continuation(termValidates);
-
-      return;
+      return continuation(termValidates);
     }
 
     this.term.validate(context, (term, context) => {
@@ -139,7 +131,7 @@ export default define(class DefinedAssertion extends Assertion {
         context.debug(`...validates the'${definedAssertionString}' defined assertion's term.`);
       }
 
-      continuation(termValidates);
+      return continuation(termValidates);
     });
   }
 
@@ -147,9 +139,7 @@ export default define(class DefinedAssertion extends Assertion {
     if (this.frame === null) {
       const frameValidates = true;  ///
 
-      continuation(frameValidates);
-
-      return;
+      return continuation(frameValidates);
     }
 
     const frameString = this.frame.getString(), ///
@@ -164,9 +154,7 @@ export default define(class DefinedAssertion extends Assertion {
 
       context.debug(`The '${frameString}' frame is not singular.`);
 
-      continuation(frameValidates);
-
-      return;
+      return continuation(frameValidates);
     }
 
     this.frame.validate(context, (frame) => {
@@ -182,7 +170,7 @@ export default define(class DefinedAssertion extends Assertion {
         context.debug(`...validates the'${definedAssertionString}' defined assertion's '${frameString}' frame.`);
       }
 
-      continuation(frameValidates);
+      return continuation(frameValidates);
     });
   }
 
@@ -192,9 +180,7 @@ export default define(class DefinedAssertion extends Assertion {
     if (!stated) {
       const validatesWhenStated = false;
 
-      continuation(validatesWhenStated);
-
-      return;
+      return continuation(validatesWhenStated);
     }
 
     let validatesWhenStated;
@@ -209,7 +195,7 @@ export default define(class DefinedAssertion extends Assertion {
       context.debug(`...validates the '${definedAssertionString}' stated defined assertion.`);
     }
 
-    continuation(validatesWhenStated);
+    return continuation(validatesWhenStated);
   }
 
   validateWhenDerived(context, continuation) {
@@ -218,9 +204,7 @@ export default define(class DefinedAssertion extends Assertion {
     if (stated) {
       const validatesWhenDerived = false;
 
-      continuation(validatesWhenDerived);
-
-      return;
+      return continuation(validatesWhenDerived);
     }
 
     const definedAssertionString = this.getString(); ///

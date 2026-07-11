@@ -151,9 +151,7 @@ export default define(class Frame extends Element {
 
       context.debug(`...the '${frameString}' frame is already valid.`);
 
-      continuation(frame);
-
-      return;
+      return continuation(frame);
     }
 
     const validatMetavariable = this.validatMetavariable.bind(this),
@@ -166,9 +164,7 @@ export default define(class Frame extends Element {
       if (!validates) {
         const frame = null;
 
-        continuation(frame);
-
-        return;
+        return continuation(frame);
       }
 
       const validatesWhenStated = this.validateWhenStated.bind(this),
@@ -190,7 +186,7 @@ export default define(class Frame extends Element {
           context.debug(`...validated the '${frameString}' frame.`);
         }
 
-        continuation(frame);
+        return continuation(frame);
       });
     });
   }
@@ -214,7 +210,7 @@ export default define(class Frame extends Element {
         context.debug(`...validated the '${frameString}' frame's '${assumptionString}' assumption.`);
       }
 
-      continuation(assumptionValidates);
+      return continuation(assumptionValidates);
     });
   }
 
@@ -234,7 +230,7 @@ export default define(class Frame extends Element {
         context.debug(`...validated the '${frameString}' frame's assumptions.`);
       }
 
-      continuation(assumptionsValidate);
+      return continuation(assumptionsValidate);
     });
   }
 
@@ -242,9 +238,7 @@ export default define(class Frame extends Element {
     if (this.metavariable !== null) {
       const metavariableValidates = true;
 
-      continuation(metavariableValidates);
-
-      return;
+      return continuation(metavariableValidates);
     }
 
     const frameString = this.getString(); ///
@@ -270,7 +264,7 @@ export default define(class Frame extends Element {
         context.debug(`...validated the '${frameString}' frame's metavariable.`);
       }
 
-      continuation(metavariableValidates);
+      return continuation(metavariableValidates);
     });
   }
 
@@ -280,9 +274,7 @@ export default define(class Frame extends Element {
     if (!stated) {
       const validatesWhenStated = false;
 
-      continuation(validatesWhenStated);
-
-      return;
+      return continuation(validatesWhenStated);
     }
 
     let validatesWhenStated;
@@ -298,9 +290,7 @@ export default define(class Frame extends Element {
 
       context.debug(`The '${frameString}' stated frame must be singular.`);
 
-      continuation(validatesWhenStated);
-
-      return;
+      return continuation(validatesWhenStated);
     }
 
     validatesWhenStated = true;
@@ -309,7 +299,7 @@ export default define(class Frame extends Element {
       context.debug(`...validated the '${frameString}' stated frame.`);
     }
 
-    continuation(validatesWhenStated);
+    return continuation(validatesWhenStated);
   }
 
   validateWhenDerived(context, continuation) {
@@ -318,9 +308,7 @@ export default define(class Frame extends Element {
     if (stated) {
       const validatesWhenDerived = false;
 
-      continuation(validatesWhenDerived);
-
-      return;
+      return continuation(validatesWhenDerived);
     }
 
     let validatesWhenDerived;
@@ -335,7 +323,7 @@ export default define(class Frame extends Element {
       context.debug(`...verified the '${frameString}' derived frame.`);
     }
 
-    continuation(validatesWhenDerived);
+    return continuation(validatesWhenDerived);
   }
 
   toJSON() {

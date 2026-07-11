@@ -51,7 +51,7 @@ class PropertyPass extends ContinuationZipPass {
               success = true;
             }
 
-            continuation(success);
+            return continuation(success);
           });
         }
       }
@@ -87,7 +87,7 @@ class GeneratorPass extends ContinuationZipPass {
               success = true;
             }
 
-            continuation(success);
+            return continuation(success);
           });
         }
       }
@@ -123,7 +123,7 @@ class ConstructorPass extends ContinuationZipPass {
               success = true;
             }
 
-            continuation(success);
+            return continuation(success);
           });
         }
       }
@@ -162,7 +162,7 @@ class MetaLevelPass extends ContinuationZipPassBase {
             success = true;
           }
 
-          continuation(success);
+          return continuation(success);
         });
       }
     },
@@ -199,7 +199,7 @@ class MetaLevelPass extends ContinuationZipPassBase {
             success = true;
           }
 
-          continuation(success);
+          return continuation(success);
         });
       }
     },
@@ -228,7 +228,7 @@ class MetaLevelPass extends ContinuationZipPassBase {
             success = true;
           }
 
-          continuation(success);
+          return continuation(success);
         });
       }
     },
@@ -256,7 +256,7 @@ class MetaLevelPass extends ContinuationZipPassBase {
             success = true;
           }
 
-          continuation(success);
+          return continuation(success);
         });
       }
     },
@@ -282,7 +282,7 @@ class MetaLevelPass extends ContinuationZipPassBase {
               success = true;
             }
 
-            continuation(success);
+            return continuation(success);
           });
         }, context)
       }
@@ -312,7 +312,7 @@ class CombinatorPass extends ContinuationZipPass {
               success = true;
             }
 
-            continuation(success);
+            return continuation(success);
           });
         }
       }
@@ -337,7 +337,7 @@ class CombinatorPass extends ContinuationZipPass {
               success = true;
             }
 
-            continuation(success);
+            return continuation(success);
           });
         }
       }
@@ -367,7 +367,7 @@ class CombinatorPass extends ContinuationZipPass {
             success = true;
           }
 
-          continuation(success);
+          return continuation(success);
         });
       }
     }
@@ -402,7 +402,7 @@ class MetavariablePass extends ContinuationZipPass {
           success = true;
         }
 
-        continuation(success);
+        return continuation(success);
       }
     }
   ];
@@ -434,7 +434,7 @@ class IntrinsicTermPass extends ContinuationZipPassBase {
             success = true;
           }
 
-          continuation(success);
+          return continuation(success);
         });
       }
     }
@@ -467,7 +467,7 @@ class IntrinsicMetavariablePass extends ContinuationZipPass {
             success = true;
           }
 
-          continuation(success);
+          return continuation(success);
         });
       }
     }

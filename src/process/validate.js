@@ -33,7 +33,7 @@ class PropertyPass extends ContinuationPass {
             success = true;
           }
 
-          continuation(success);
+          return continuation(success);
         });
       }
     },
@@ -49,7 +49,7 @@ class PropertyPass extends ContinuationPass {
           success = true;
         }
 
-        continuation(success);
+        return continuation(success);
       }
     }
   ];
@@ -76,7 +76,7 @@ class GeneratorPass extends ContinuationPass {
             success = true;
           }
 
-          continuation(success);
+          return continuation(success);
         });
       }
     },
@@ -92,7 +92,7 @@ class GeneratorPass extends ContinuationPass {
           success = true;
         }
 
-        continuation(success);
+        return continuation(success);
       }
     }
   ];
@@ -120,7 +120,7 @@ class CombinatorPass extends ContinuationPass {
               success = true;
             }
 
-            continuation(success);
+            return continuation(success);
           });
         }, context);
       }
@@ -137,7 +137,7 @@ class CombinatorPass extends ContinuationPass {
             success = true;
           }
 
-          continuation(success);
+          return continuation(success);
         });
       }
     },
@@ -153,7 +153,7 @@ class CombinatorPass extends ContinuationPass {
           success = true;
         }
 
-        continuation(success);
+        return continuation(success);
       }
     }
   ];
@@ -180,7 +180,7 @@ class ConstructorPass extends ContinuationPass {
             success = true;
           }
 
-          continuation(success);
+          return continuation(success);
         });
       }
     },
@@ -196,7 +196,7 @@ class ConstructorPass extends ContinuationPass {
           success = true;
         }
 
-        continuation(success);
+        return continuation(success);
       }
     }
   ];
