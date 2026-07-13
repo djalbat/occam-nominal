@@ -106,14 +106,14 @@ export default define(class Metavariable extends Element {
     return comparesToMetavariableName;
   }
 
-  async verify(context) {
+  verify(context) {
     let verifies = false;
 
     const metavariableString = this.getString();  ///
 
     context.trace(`Verifying the '${metavariableString}' metavariable...`);
 
-    const termVerifies = await this.verifyTerm(context);
+    const termVerifies = this.verifyTerm(context);
 
     if (termVerifies) {
       const typeVerifies = this.verifyType(context);
@@ -329,43 +329,47 @@ export default define(class Metavariable extends Element {
   }
 
   unifyFrame(frame, generalContext, specificContext, continuation) {
-    let frameUnifies = false;
-
     const context = specificContext,  ///
           frameString = frame.getString(),
           metavariableString = this.getString(); ///
 
     context.trace(`Unifying the '${frameString}' frame with the '${metavariableString}' metavariable...`);
 
-    this.unifyFrameMetavariable(frame, generalContext, specificContext, (frameMetavariableUnifies) => {
-      if (frameMetavariableUnifies) {
-        const frameUnifies = true;
+    const frameMetavariablCompares = this.compareFraemMetavaraible(frame, generalContext, specificContext);
 
-        return continuation(frameUnifies);
+    if (frameMetavariablCompares) {
+      const frameUnifies = true;
+
+      return continuation(frameUnifies);
+    }
+
+    const metavariable = this,  ///
+          metavariableNode = metavariable.getNode(),
+          derivedSubstitution = context.findDerivedSubstitutionByMetavariableNode(metavariableNode);
+
+    if (derivedSubstitution !== null) {
+      let frameUnifies = false;
+
+      const derivedSubstitutionFrameComparesToFrame = derivedSubstitution.compareFrame(frame, context);
+
+      if (derivedSubstitutionFrameComparesToFrame) {
+        const derivedSubstitutionString = derivedSubstitution.getString();
+
+        context.trace(`The '${derivedSubstitutionString}' derived substitution is already present.`);
+
+        frameUnifies = true;
       }
 
-      const metavariableNode = metavariable.getNode(),
-            derivedSubstitution = context.findDerivedSubstitutionByMetavariableNode(metavariableNode);
+      return continuation(frameUnifies);
+    }
 
-      if (derivedSubstitution !== null) {
-        const derivedSubstitutionFrameComparesToFrame = derivedSubstitution.compareFrame(frame, context);
+    const { FrameSubstitution } = elements,
+          frameSubstitution = FrameSubstitution.fromFrameAndMetavariable(frame, metavariable, generalContext, specificContext);
 
-        if (derivedSubstitutionFrameComparesToFrame) {
-          const derivedSubstitutionString = derivedSubstitution.getString();
+    frameSubstitution.validate(context, (frameSubstitution) => {
+      let frameUnifies = false;
 
-          context.trace(`The '${derivedSubstitutionString}' derived substitution is already present.`);
-
-          frameUnifies = true;
-        }
-      } else {
-        const { FrameSubstitution } = elements;
-
-        let frameSubstitution;
-
-        frameSubstitution = FrameSubstitution.fromFrameAndMetavariable(frame, metavariable, generalContext, specificContext);
-
-        frameSubstitution = frameSubstitution.validate(context);  ///
-
+      if (frameSubstitution !== null) {
         const derivedSubstitution = frameSubstitution;  ///
 
         context.addDerivedSubstitution(derivedSubstitution);
@@ -391,8 +395,8 @@ export default define(class Metavariable extends Element {
 
     context.trace(`Unifying the '${statementString}' statement with the '${metavariableString}${substitutionString}' metavariable...`);
 
-    this.unifyStatementMetavariable(statement, generalContext, specificContext, (statementMetavariableUnifies) => {
-      if (statementMetavariableUnifies) {
+    this.compareStatementMetavariable(statement, generalContext, specificContext, (statementMetavariableCompares) => {
+      if (statementMetavariableCompares) {
         const statementUnifies = true;
 
         return continuation(statementUnifies);
@@ -451,9 +455,9 @@ export default define(class Metavariable extends Element {
     context.trace(`Unifying the '${referenceString}' reference with the '${metavariableString}' metavariable...`);
 
     const metavariable = this,  ///
-          referenceMetavariableUnifies = this.unifyReferenceMetavariable(reference, generalContext, specificContext);
+          referenceMetavariableCompares = this.compareReferenceMetavariable(reference, generalContext, specificContext);
 
-    if (referenceMetavariableUnifies) {
+    if (referenceMetavariableCompares) {
       referenceUnifies = true;
     } else {
       const metavariableNode = metavariable.getNode(),
@@ -514,14 +518,32 @@ export default define(class Metavariable extends Element {
     return metavariableUnifies;
   }
 
-  unifyFrameMetavariable(frame, generalContext, specificContext, continuation) {
-    let frameMetavariableUnifies = false;
+  unifyMetavariableIntrinsically(metavariable, generalContext, specificContext, continuation) {
+    const context = specificContext,  ///
+          generalMetavariable = this, ///
+          specificMetavariable = metavariable,
+          generalMetavariableString = generalMetavariable.getString(),  ///
+          specificMetavariableString = specificMetavariable.getString();
+
+    context.trace(`Unifying the '${specificMetavariableString}' metavariable with the '${generalMetavariableString}' metavariable intrinsically...`);
+
+    unifyMetavariableIntrinsically(generalMetavariable, specificMetavariable, generalContext, specificContext, (metavariableUnifiesIntrinsically) => {
+      if (metavariableUnifiesIntrinsically) {
+        context.debug(`...unified the '${specificMetavariableString}' metavariable with the '${generalMetavariableString}' metavariable intrinsically.`);
+      }
+
+      return continuation(metavariableUnifiesIntrinsically);
+    });
+  }
+
+  compareFraemMetavaraible(frame, generalContext, specificContext) {
+    let frameMetavariablCompares = false;
 
     const context = specificContext,  ///
           frameString = frame.getString(),
           metavariableString = this.getString();  ///
 
-    context.trace(`Unifying the '${frameString}' frame's metavariable with the '${metavariableString}' metavariable...`);
+    context.trace(`Comparing the '${frameString}' frame's metavariable to the '${metavariableString}' metavariable...`);
 
     const generalContextFilePath = generalContext.getFilePath(),
           specificContextFilePath = specificContext.getFilePath();
@@ -531,25 +553,25 @@ export default define(class Metavariable extends Element {
             metavariableNodeMatches = frame.matchMetavariableNode(metavariableNode);
 
       if (metavariableNodeMatches) {
-        frameMetavariableUnifies = true;
+        frameMetavariablCompares = true;
       }
     }
 
-    if (frameMetavariableUnifies) {
-      context.debug(`...unified the '${frameString}' frame's metavariable with the '${metavariableString}' metavariable.`);
+    if (frameMetavariablCompares) {
+      context.debug(`...compared the '${frameString}' frame's metavariable to the '${metavariableString}' metavariable.`);
     }
 
-    return frameMetavariableUnifies;
+    return frameMetavariablCompares;
   }
 
-  unifyReferenceMetavariable(reference, generalContext, specificContext) {
-    let referenceMetavariableUnifies = false;
+  compareReferenceMetavariable(reference, generalContext, specificContext) {
+    let referenceMetavariableCompares = false;
 
     const context = specificContext,  ///
           referenceString = reference.getString(),
           metavariableString = this.getString();
 
-    context.trace(`Unifying the '${referenceString}' reference's metavariable with the '${metavariableString}' metavariable...`);
+    context.trace(`Comparing the '${referenceString}' reference's metavariable to the '${metavariableString}' metavariable...`);
 
     const generalContextFilePath = generalContext.getFilePath(),
           specificContextFilePath = specificContext.getFilePath();
@@ -559,25 +581,25 @@ export default define(class Metavariable extends Element {
             metavariableNodeMatches = reference.matchMetavariableNode(metavariableNode);
 
       if (metavariableNodeMatches) {
-        referenceMetavariableUnifies = true;
+        referenceMetavariableCompares = true;
       }
     }
 
-    if (referenceMetavariableUnifies) {
-      context.trace(`...unified the '${referenceString}' reference's metavariable with the '${metavariableString}' metavariable.`);
+    if (referenceMetavariableCompares) {
+      context.trace(`...compared the '${referenceString}' reference's metavariable to the '${metavariableString}' metavariable.`);
     }
 
-    return referenceMetavariableUnifies;
+    return referenceMetavariableCompares;
   }
 
-  unifyStatementMetavariable(statement, generalContext, specificContext, continuation) {
-    let statementMetavariableUnifies = false;
+  compareStatementMetavariable(statement, generalContext, specificContext, continuation) {
+    let statementMetavariableCompares = false;
 
     const context = specificContext,  ///
           statementString = statement.getString(),
           metavariableString = this.getString();  ///
 
-    context.trace(`Unifying the '${statementString}' statement's metavariable with the '${metavariableString}' metavariable...`);
+    context.trace(`Compares the '${statementString}' statement's metavariable to the '${metavariableString}' metavariable...`);
 
     const generalContextFilePath = generalContext.getFilePath(),
           specificContextFilePath = specificContext.getFilePath();
@@ -587,35 +609,15 @@ export default define(class Metavariable extends Element {
             metavariableNodeMatches = statement.matchMetavariableNode(metavariableNode);
 
       if (metavariableNodeMatches) {
-        statementMetavariableUnifies = true;
+        statementMetavariableCompares = true;
       }
     }
 
-    if (statementMetavariableUnifies) {
-      context.debug(`...unified the '${statementString}' statement's metavariable with the '${metavariableString}' metavariable.`);
+    if (statementMetavariableCompares) {
+      context.debug(`...compared the '${statementString}' statement's metavariable to the '${metavariableString}' metavariable.`);
     }
 
-    continuation(statementMetavariableUnifies);
-  }
-
-  unifyMetavariableIntrinsically(metavariable, generalContext, specificContext) {
-    let metavariableUnifiesIntrinsically;
-
-    const context = specificContext,  ///
-          generalMetavariable = this, ///
-          specificMetavariable = metavariable,
-          generalMetavariableString = generalMetavariable.getString(),  ///
-          specificMetavariableString = specificMetavariable.getString();
-
-    context.trace(`Unifying the '${specificMetavariableString}' metavariable with the '${generalMetavariableString}' metavariable intrinsically...`);
-
-    metavariableUnifiesIntrinsically = unifyMetavariableIntrinsically(generalMetavariable, specificMetavariable, generalContext, specificContext);
-
-    if (metavariableUnifiesIntrinsically) {
-      context.debug(`...unified the '${specificMetavariableString}' metavariable with the '${generalMetavariableString}' metavariable intrinsically.`);
-    }
-
-    return metavariableUnifiesIntrinsically;
+    continuation(statementMetavariableCompares);
   }
 
   toJSON() {

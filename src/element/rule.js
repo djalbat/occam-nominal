@@ -243,7 +243,7 @@ export default define(class Rule extends Element {
   unifySubproofOrProofAssertionsWithPremise(subproofOrProofAssertions, premise, context, continuation) {
     extract(subproofOrProofAssertions, (subproofOrProofAssertion, continuation) => {
       premise.unifySubproofOrProofAssertion(subproofOrProofAssertion, context, continuation);
-    }, (subproofOrProofAssertion) => {
+    }, (subproofOrProofAssertion = null) => {
       if (subproofOrProofAssertion !== null) {
         const subproofOrProofAssertionsUnifiesWithPremise = true;
 

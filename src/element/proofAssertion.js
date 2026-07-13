@@ -34,12 +34,6 @@ export default class ProofAssertion extends Element {
     return step;
   }
 
-  isNonsensical() {
-    const nonsensical = (this.statement === null);
-
-    return nonsensical;
-  }
-
   compareStep(step, context) {
     let comparesToStep = false;
 
@@ -86,21 +80,17 @@ export default class ProofAssertion extends Element {
   }
 
   unifyStatement(statement, generalContext, specificContext, continuation) {
+    if (this.statement === null) {
+      const statementUnifies = false;
+
+      return continuation(statementUnifies);
+    }
+
     const context = specificContext, ///
           statementString = statement.getString(),
           proofAssertionString = this.getString();  ///
 
     context.trace(`Unifying the '${statementString}' statement with the '${proofAssertionString}' proof assertion's statement...`);
-
-    const nonsensical = this.isNonsensical();
-
-    if (nonsensical) {
-      const statementUnifies = false;
-
-      context.debug(`Unable to unify the '${statementString}' statement with the '${proofAssertionString}' proof assertion because it is nonsense.`);
-
-      return continuation(statementUnifies);
-    }
 
     this.statement.unifyStatement(statement, generalContext, specificContext, (statementUnifies) => {
       if (statementUnifies) {
