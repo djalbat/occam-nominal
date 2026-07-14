@@ -199,7 +199,7 @@ export default define(class Term extends Element {
 
     let term = this;
 
-    exists(validateTerms, term, context, (termValidates) => {
+    return exists(validateTerms, term, context, (termValidates) => {
       if (termValidates) {
         context.addTerm(term);
 

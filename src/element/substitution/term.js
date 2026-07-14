@@ -10,7 +10,7 @@ import { stripBracketsFromTerm } from "../../utilities/brackets";
 import { instantiateTermSubstitution } from "../../process/instantiate";
 import { termSubstitutionFromTermSubstitutionNode } from "../../utilities/element";
 import { termSubstitutionStringFromTermAndVariable } from "../../utilities/string";
-import { elide, ablates, manifest, attempts, reconcile, instantiate, unserialises } from "../../utilities/context";
+import { elide, ablates, descend, manifest, attempts, reconcile, instantiate, unserialises } from "../../utilities/context";
 
 const { breakPointFromJSON } = breakPointUtilities;
 
@@ -323,8 +323,8 @@ export default define(class TermSubstitution extends Substitution {
                 termSubstitutionNode = instantiateTermSubstitution(string, context),
                 node = termSubstitutionNode,  ///
                 breakPoint = breakPointFromJSON(json),
-                targetTerm = targetTermFromTermSubstitutionNode(termSubstitutionNode, generalContext),
-                replacementTerm = replacementTermFromTermSubstitutionNode(termSubstitutionNode, specificContext),
+                targetTerm = targetTermFromTermSubstitutionNode(termSubstitutionNode, generalContext, specificContext),
+                replacementTerm = replacementTermFromTermSubstitutionNode(termSubstitutionNode, generalContext, specificContext),
                 contexts = [
                   generalContext,
                   specificContext
@@ -338,16 +338,18 @@ export default define(class TermSubstitution extends Substitution {
     return termSubstitutionn;
   }
 
-  static fromStatement(statement, context) {
+  static fromStatementNode(statementNode, context) {
     let termSubstitution = null;
 
-    const termSubstitutionNode = statement.getTermSubstitutionNode();
+    const termSubstitutionNode = statementNode.getTermSubstitutionNode();
 
     if (termSubstitutionNode !== null) {
-      const generalContext = context, ///
-            specificContext = context;  ///
+      descend((context) => {
+        const generalContext = context, ///
+              specificContext = context;  ///
 
-      termSubstitution = termSubstitutionFromTermSubstitutionNode(termSubstitutionNode, generalContext, specificContext);
+        termSubstitution = termSubstitutionFromTermSubstitutionNode(termSubstitutionNode, generalContext, specificContext);
+      }, context);
     }
 
     return termSubstitution;
@@ -389,14 +391,14 @@ function variableFromTermNode(termNode, generalContext) {
   return variable;
 }
 
-function targetTermFromTermSubstitutionNode(termSubstitutionNode, generalContext) {
+function targetTermFromTermSubstitutionNode(termSubstitutionNode, generalContext, specificContext) {
   const targetTermNode = termSubstitutionNode.getTargetTermNode(),
         targetTerm = generalContext.findTermByTermNode(targetTermNode);
 
   return targetTerm;
 }
 
-function replacementTermFromTermSubstitutionNode(termSubstitutionNode, specificContext) {
+function replacementTermFromTermSubstitutionNode(termSubstitutionNode, generalContext, specificContext) {
   const replacementTermNode = termSubstitutionNode.getReplacementTermNode(),
         replacementTerm = specificContext.findTermByTermNode(replacementTermNode);
 

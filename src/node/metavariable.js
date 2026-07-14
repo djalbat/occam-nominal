@@ -2,9 +2,36 @@
 
 import { NonTerminalNode } from "occam-languages";
 
-import { TERM_RULE_NAME, TYPE_RULE_NAME } from "../ruleNames";
+import { TERM_RULE_NAME, TYPE_RULE_NAME, STATEMENT_RULE_NAME } from "../ruleNames";
 
 export default class MetavariableNode extends NonTerminalNode {
+  getSiblingSubstitutionNode() {
+    let siblingSubstitutionNode = null;
+
+    const parentStatementNode = this.getParentStatementNode();
+
+    if (parentStatementNode !== null) {
+      const substitutionNode = parentStatementNode.getSubstitutionNode();
+
+      siblingSubstitutionNode = substitutionNode; ///
+    }
+
+    return siblingSubstitutionNode;
+  }
+
+  getParentStatementNode() {
+    let parentStatementNode = null;
+
+    const parentNode = this.getParentNode(),
+          parentNodeRuleName = parentNode.getRuleName();
+
+    if (parentNodeRuleName === STATEMENT_RULE_NAME) {
+      parentStatementNode = parentNode; ///
+    }
+
+    return parentStatementNode;
+  }
+
   getMetavariableName() {
     let metavariableName;
 

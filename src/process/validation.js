@@ -135,13 +135,14 @@ function validateStatementAsMetavariable(statement, context, continuation) {
       return continuation(statementValidatesAsMetavariable);
     }
 
-    const { TermSubstitution, FrameSubstitution } = elements,
-          frameSubstitution = FrameSubstitution.fromStatement(statement, context),
-          termSubstitution = TermSubstitution.fromStatement(statement, context),
-          substitution = (termSubstitution || frameSubstitution);
+    const substitution = statement.getSubstitution();
 
     if (substitution === null) {
       const statementValidatesAsMetavariable = true;
+
+      if (statementValidatesAsMetavariable) {
+        context.debug(`...validated the '${statementString}' statement as a metavariable.`);
+      }
 
       return continuation(statementValidatesAsMetavariable);
     }

@@ -170,29 +170,20 @@ class MetaLevelPass extends ContinuationZipPassBase {
       generalNodeQuery: statementMetavariableNodeQuery,
       specificNodeQuery: statementNodeQuery,
       run: (generalStatementMetavariableNode, specificStatementNode, generalContext, specificContext, continuation) => {
-        let context,
-            statementNode;
+        const statementNode = specificStatementNode, ///
+              metavariableNode = generalStatementMetavariableNode;
+
+        let context;
 
         context = generalContext; ///
 
-        const metavariableNode = generalStatementMetavariableNode,  ///
-              metavariable = context.findMetavariableByMetavariableNode(metavariableNode),
-              metavariableNodeParentNode = metavariableNode.getParentNode();
+        const metavariable = context.findMetavariableByMetavariableNode(metavariableNode);
 
-        statementNode = metavariableNodeParentNode; ///
-
-        const substitutionNode = statementNode.getSubstitutionNode(),
-              substitution = (substitutionNode !== null) ?
-                               context.findSubstitutionBySubstitutionNode(substitutionNode) :
-                                 null;
-
-        context = specificContext; ///
-
-        statementNode = specificStatementNode;  ///
+        context = specificContext;  ///
 
         const statement = context.findStatementByStatementNode(statementNode);
 
-        metavariable.unifyStatement(statement, substitution, generalContext, specificContext, (statementUnifies) => {
+        metavariable.unifyStatement(statement, generalContext, specificContext, (statementUnifies) => {
           let success = false;
 
           if (statementUnifies) {

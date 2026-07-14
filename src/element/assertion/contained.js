@@ -339,5 +339,5 @@ function validateWhenDerived(term, frame, statement, negated, context, continuat
     }
   }
 
-  continuation(validatesWhenDerived);
+  return continuation(validatesWhenDerived);
 }

@@ -221,7 +221,7 @@ export default define(class ReferenceSubstitution extends Substitution {
     return referenceSubstitutionn;
   }
 
-  static fromReferenceAndMetavariable(reference, metavariable, generalContext, specificContext) {
+  static fromAssumptionAndConstraint(assumption, constraint, generalContext, specificContext) {
     let referenceSubstitution;
 
     ablates((generalContext, specificContext) => {
@@ -229,6 +229,8 @@ export default define(class ReferenceSubstitution extends Substitution {
 
       instantiate((context) => {
         const specificContext = context,  ///
+              metavariable = assumption.getMetavariable(),
+              reference = constraint.getReference(),
               referenceSubstitutionString = referenceSubstitutionStringFromReferenceAndMetavariable(reference, metavariable),
               string = referenceSubstitutionString,  ///
               referenceSubstitutionNode = instantiateReferenceSubstitution(string, context);
@@ -240,7 +242,7 @@ export default define(class ReferenceSubstitution extends Substitution {
     return referenceSubstitution;
   }
 
-  static fromAssumptionAndConstraint(assumption, constraint, generalContext, specificContext) {
+  static fromReferenceAndMetavariable(reference, metavariable, generalContext, specificContext) {
     let referenceSubstitution;
 
     ablates((generalContext, specificContext) => {
@@ -248,8 +250,6 @@ export default define(class ReferenceSubstitution extends Substitution {
 
       instantiate((context) => {
         const specificContext = context,  ///
-              metavariable = assumption.getMetavariable(),
-              reference = constraint.getReference(),
               referenceSubstitutionString = referenceSubstitutionStringFromReferenceAndMetavariable(reference, metavariable),
               string = referenceSubstitutionString,  ///
               referenceSubstitutionNode = instantiateReferenceSubstitution(string, context);

@@ -9,29 +9,26 @@ import { unifyStatement } from "../process/unify";
 import { validateStatements } from "../process/validation";
 import { dischargeStatements } from "../process/discharge";
 import { instantiateStatement } from "../process/instantiate";
+import { substitutionFromStatementNode } from "../utilities/element";
 
 const { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Statement extends Element {
+  constructor(context, string, node, breakPoint, substitution) {
+    super(context, string, node, breakPoint);
+
+    this.substitution = substitution;
+  }
+
+  getSubstitution() {
+    return this.substitution;
+  }
+
   getStatementNode() {
     const node = this.getNode(),
           statementNode = node; ///
 
     return statementNode;
-  }
-
-  getTermSubstitutionNode() {
-    const statementNode = this.getNode(),
-          termSubstitutionNode = statementNode.getTermSubstitutionNode();
-
-    return termSubstitutionNode;
-  }
-
-  getFrameSubstitutionNode() {
-    const statementNode = this.getNode(),
-          frameSubstitutionNode = statementNode.getFrameSubstitutionNode();
-
-    return frameSubstitutionNode;
   }
 
   getMetavariableNode() {
@@ -69,6 +66,19 @@ export default define(class Statement extends Element {
           equalTo = statementNodeMatches;  ///
 
     return equalTo;
+  }
+
+  isSimple() {
+    const simple = true;
+
+    return simple;
+  }
+
+  isComplex() {
+    const simple = this.isSimple(),
+          complex = !simple;
+
+    return complex;
   }
 
   isSingular() {
@@ -207,7 +217,7 @@ export default define(class Statement extends Element {
 
     const statement = this;
 
-    exists(validateStatements, statement, context, (statementValidates) => {
+    return exists(validateStatements, statement, context, (statementValidates) => {
       let statement = null;
 
       if (statementValidates) {
@@ -218,7 +228,7 @@ export default define(class Statement extends Element {
         context.debug(`...validated the '${statementString}' statement.`);
       }
 
-      continuation(statement);
+      return continuation(statement);
     });
   }
 
@@ -358,11 +368,12 @@ export default define(class Statement extends Element {
       const { string } = json,
             statementNode = instantiateStatement(string, context),
             node = statementNode, ///
-            breakPoint = breakPointFromJSON(json);
+            breakPoint = breakPointFromJSON(json),
+            substitution = substitutionFromStatementNode(statementNode, context);
 
       context = null;
 
-      const statement = new Statement(context, string, node, breakPoint);
+      const statement = new Statement(context, string, node, breakPoint, substitution);
 
       return statement;
     }, context);

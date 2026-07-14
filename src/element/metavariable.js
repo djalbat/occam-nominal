@@ -7,7 +7,6 @@ import elements from "../elements";
 import { all } from "../utilities/continuation";
 import { define } from "../elements";
 import { instantiate } from "../utilities/context";
-import { EMPTY_STRING } from "../constants";
 import { instantiateMetavariable } from "../process/instantiate";
 import { metaTypeFromJSON, metaTypeToMetaTypeJSON } from "../utilities/json";
 import { unifyMetavariable, unifyMetavariableIntrinsically } from "../process/unify";
@@ -385,63 +384,70 @@ export default define(class Metavariable extends Element {
     });
   }
 
-  unifyStatement(statement, substitution, generalContext, specificContext, continuation) {
+  unifyStatement(statement, generalContext, specificContext, continuation) {
     const context = specificContext,  ///
           statementString = statement.getString(),
-          metavariableString = this.getString(), ///
-          substitutionString = (substitution !== null) ?
-                                  substitution.getString() :
-                                    EMPTY_STRING;
+          metavariableString = this.getString();
 
-    context.trace(`Unifying the '${statementString}' statement with the '${metavariableString}${substitutionString}' metavariable...`);
+    context.trace(`Unifying the '${statementString}' statement with the '${metavariableString}}' metavariable...`);
 
-    this.compareStatementMetavariable(statement, generalContext, specificContext, (statementMetavariableCompares) => {
-      if (statementMetavariableCompares) {
-        const statementUnifies = true;
+    const statementMetavariableCompares = this.compareStatementMetavariable(statement, generalContext, specificContext);
 
-        return continuation(statementUnifies);
+    if (statementMetavariableCompares) {
+      const statementUnifies = true;
+
+      return continuation(statementUnifies);
+    }
+
+    const metavariable = this,  ///
+          metavariableNode = metavariable.getNode(),
+          sublingSubstitutionNode = metavariableNode.getSiblingSubstitutionNode(),
+          substitutionNode = sublingSubstitutionNode, ///
+          derivedSubstitution = (substitutionNode !== null) ?
+                                  context.findDerivedSubstitutionByMetavariableNodeAndSubstitutionNode(metavariableNode, substitutionNode) :
+                                    context.findDerivedSubstitutionByMetavariableNode(metavariableNode);
+
+    if (derivedSubstitution !== null) {
+      let statementUnifies = false;
+
+      const derivedSubstitutionComparesToStatement = derivedSubstitution.compareStatement(statement, context);
+
+      if (derivedSubstitutionComparesToStatement) {
+        const derivedSubstitutionString = derivedSubstitution.getString();
+
+        context.trace(`The '${derivedSubstitutionString}' derived substitution is already present.`);
+
+        statementUnifies = true;
       }
 
-      const metavariable = this,  ///
-            metavariableNode = metavariable.getNode(),
-            derivedSubstitution = (substitution !== null) ?
-                                    context.findDerivedSubstitutionByMetavariableNodeAndSubstitution(metavariableNode, substitution) :
-                                      context.findDerivedSubstitutionByMetavariableNode(metavariableNode);
+      return continuation(statementUnifies);
+    }
 
-      if (derivedSubstitution !== null) {
-        let statementUnifies = false;
+    const { StatementSubstitution } = elements;
 
-        const derivedSubstitutionComparesToStatement = derivedSubstitution.compareStatement(statement, context);
+    let statementSubstitution;
 
-        if (derivedSubstitutionComparesToStatement) {
-          const derivedSubstitutionString = derivedSubstitution.getString();
+    if (substitutionNode !== null) {
+      const context = generalContext, ///
+            substitution = context.findSubstitutionBySubstitutionNode(substitutionNode);
 
-          context.trace(`The '${derivedSubstitutionString}' derived substitution is already present.`);
+      statementSubstitution = StatementSubstitution.fromStatementMetavariableAndSubstitution(statement, metavariable, substitution, generalContext, specificContext);
+    } else {
+      statementSubstitution = StatementSubstitution.fromStatementAndMetavariable(statement, metavariable, generalContext, specificContext);
+    }
 
-          statementUnifies = true;
-        }
+    statementSubstitution.validate(context, (statementSubstitution) => {
+      const derivedSubstitution = statementSubstitution;  ///
 
-        return continuation(statementUnifies);
+      context.addDerivedSubstitution(derivedSubstitution);
+
+      const statementUnifies = true;
+
+      if (statementUnifies) {
+        context.debug(`...unified the '${statementString}' statement with the '${metavariableString}' metavariable.`);
       }
 
-      const { StatementSubstitution } = elements,
-            statementSubstitution = (substitution !== null) ?
-                                      StatementSubstitution.fromStatementMetavariableAndSubstitution(statement, metavariable, substitution, generalContext, specificContext) :
-                                        StatementSubstitution.fromStatementAndMetavariable(statement, metavariable, generalContext, specificContext);
-
-      statementSubstitution.validate(substitution, context, (statementSubstitution) => {
-        const derivedSubstitution = statementSubstitution;  ///
-
-        context.addDerivedSubstitution(derivedSubstitution);
-
-        const statementUnifies = true;
-
-        if (statementUnifies) {
-          context.debug(`...unified the '${statementString}' statement with the '${metavariableString}${substitutionString}' metavariable.`);
-        }
-
-        return continuation(statementUnifies);
-      });
+      return continuation(statementUnifies);
     });
   }
 
@@ -592,7 +598,7 @@ export default define(class Metavariable extends Element {
     return referenceMetavariableCompares;
   }
 
-  compareStatementMetavariable(statement, generalContext, specificContext, continuation) {
+  compareStatementMetavariable(statement, generalContext, specificContext) {
     let statementMetavariableCompares = false;
 
     const context = specificContext,  ///
@@ -617,7 +623,7 @@ export default define(class Metavariable extends Element {
       context.debug(`...compared the '${statementString}' statement's metavariable to the '${metavariableString}' metavariable.`);
     }
 
-    continuation(statementMetavariableCompares);
+    return statementMetavariableCompares;
   }
 
   toJSON() {

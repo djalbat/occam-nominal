@@ -547,9 +547,9 @@ export default class Context extends ContextBase {
     return derivedSubstitutionPresent;
   }
 
-  isDerivedSubstitutionPresentByMetavariableNodeAndSubstitution(metavariableNode, substitution) {
+  isDerivedSubstitutionPresentByMetavariableNodeAndSubstitutionNode(metavariableNode, substitutionNode) {
     const context = this.getContext(),
-          derivedSubstitutionPresent = context.isDerivedSubstitutionPresentByMetavariableNodeAndSubstitution(metavariableNode, substitution);
+          derivedSubstitutionPresent = context.isDerivedSubstitutionPresentByMetavariableNodeAndSubstitutionNode(metavariableNode, substitutionNode);
 
     return derivedSubstitutionPresent;
   }

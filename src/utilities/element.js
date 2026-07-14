@@ -345,11 +345,12 @@ export function statementFromStatementNode(statementNode, context) {
   const { Statement } = elements,
         node = statementNode, ///
         string = context.nodeAsString(node),
-        breakPoint = null;
+        breakPoint = null,
+        substitution = substitutionFromStatementNode(statementNode, context);
 
   context = null;
 
-  const statement = new Statement(context, string, node, breakPoint);
+  const statement = new Statement(context, string, node, breakPoint, substitution);
 
   return statement;
 }
@@ -949,10 +950,9 @@ export function statementSubstitutionFromStatementSubstitutionNode(statementSubs
         string = context.nodeAsString(node),
         breakPoint = null,
         resolved = resolvedFromStatementSubstitutionNode(statementSubstitutionNode, context),
-        substitution = substitutionFromStatementSubstitutionNode(statementSubstitutionNode, generalContext, specificContext),
         targetStatement = targetStatementFromStatementSubstitutionNode(statementSubstitutionNode, context),
         replacementStatement = replacementStatementFromStatementSubstitutionNode(statementSubstitutionNode, context),
-        statementSubstitution = new StatementSubstitution(contexts, string, node, breakPoint, resolved, substitution, targetStatement, replacementStatement);
+        statementSubstitution = new StatementSubstitution(contexts, string, node, breakPoint, resolved, targetStatement, replacementStatement);
 
   return statementSubstitution;
 }
@@ -1646,6 +1646,15 @@ export function metavariableFromReferenceNode(referenceNode, context) {
   return metavariable;
 }
 
+export function substitutionFromStatementNode(statementNode, context) {
+  const { FrameSubstitution, TermSubstitution } = elements,
+        frameSubstitution = FrameSubstitution.fromStatementNode(statementNode, context),
+        termSubstitution = TermSubstitution.fromStatementNode(statementNode, context),
+        substitution = (frameSubstitution || termSubstitution);
+
+  return substitution;
+}
+
 export function hypothesesFromConstructorNode(constructorNode, context) {
   const hypotheses = [];
 
@@ -2209,14 +2218,6 @@ export function replacementFrameFromFrameSubstitutionNode(frameSubstitutionNode,
   return replacementFrame;
 }
 
-export function substitutionFromStatementSubstitutionNode(statementSubstitutionNode, generalContext, specificContext) {
-  const frameSubstitution = frameSubstitutionFromStatementSubstitutionNode(statementSubstitutionNode, generalContext, specificContext),
-        termSubstitution = termSubstitutionFromStatementSubstitutionNode(statementSubstitutionNode, generalContext, specificContext),
-        substitution = (frameSubstitution || termSubstitution);
-
-  return substitution;
-}
-
 export function constructorFromConstructorDeclarationNode(constructorDeclarationNode, context) {
   const constructorNode = constructorDeclarationNode.getConstructorNode(),
         constructor = constructorFromConstructorNode(constructorNode, context);
@@ -2258,30 +2259,6 @@ export function propertyDeclarationsFromCotypeDeclarationNode(cotypeDeclarationN
         propertyDeclarations = propertyDeclarationsFromPropertyDeclarationNodes(propertyDeclarationnNodes, context);
 
   return propertyDeclarations;
-}
-
-export function termSubstitutionFromStatementSubstitutionNode(statementSubstitutionNode, generalContext, specificContext) {
-  let termSubstitution = null;
-
-  const termSubstitutionNode = statementSubstitutionNode.getTermSubstitutionNode();
-
-  if (termSubstitutionNode !== null) {
-    termSubstitution = termSubstitutionFromTermSubstitutionNode(termSubstitutionNode, generalContext, specificContext);
-  }
-
-  return termSubstitution;
-}
-
-export function frameSubstitutionFromStatementSubstitutionNode(statementSubstitutionNode, generalContext, specificContext) {
-  let frameSubstitution = null;
-
-  const frameSubstitutionNode = statementSubstitutionNode.getFrameSubstitutionNode();
-
-  if (frameSubstitutionNode !== null) {
-    frameSubstitution = frameSubstitutionFromFrameSubstitutionNode(frameSubstitutionNode, generalContext, specificContext);
-  }
-
-  return frameSubstitution;
 }
 
 export function replacementReferenceFromReferenceSubstitutionNode(referenceSubstitutionNode, context) {

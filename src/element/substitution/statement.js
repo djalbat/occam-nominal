@@ -15,21 +15,16 @@ import { statementSubstitutionStringFromStatementAndMetavariable, statementSubst
 const { breakPointFromJSON } = breakPointUtilities;
 
 export default define(class StatementSubstitution extends Substitution {
-  constructor(contexts, string, node, breakPoint, resolved, substitution, targetStatement, replacementStatement) {
+  constructor(contexts, string, node, breakPoint, resolved, targetStatement, replacementStatement) {
     super(contexts, string, node, breakPoint);
 
     this.resolved = resolved;
-    this.substitution = substitution;
     this.targetStatement = targetStatement;
     this.replacementStatement = replacementStatement;
   }
 
   isResolved() {
     return this.resolved;
-  }
-
-  getSubstitution() {
-    return this.substitution;
   }
 
   getTargetStatement() {
@@ -61,13 +56,9 @@ export default define(class StatementSubstitution extends Substitution {
     return replacementNode;
   }
 
+  isSimple() { return this.targetStatement.isSimple(); }
+
   getMetavariableNode() { return this.targetStatement.getMetavariableNode(); }
-
-  isSimple() {
-    const simple = (this.substitution === null);
-
-    return simple;
-  }
 
   matchMetavariableNode(metavariableNode) { return this.targetStatement.matchMetavariableNode(metavariableNode); }
 
@@ -87,7 +78,7 @@ export default define(class StatementSubstitution extends Substitution {
     return comparesToParameter;
   }
 
-  validate(substitution, context, continuatino) {
+  validate(context, continuatino) {
     const statementSubstitutionString = this.getString();  ///
 
     context.trace(`Validating the '${statementSubstitutionString}' statement substitution...`);
@@ -113,10 +104,7 @@ export default define(class StatementSubstitution extends Substitution {
 
       return all([
         validateTargetStatement,
-        validateReplacementStatement,
-        (generalContext, specificContext, continuatino) => {
-          this.validateSubstitution(substitution, generalContext, specificContext, continuatino);
-        }
+        validateReplacementStatement
       ], generalContext, specificContext, (validates) => {
         let statementSubstitution = null;
 
@@ -141,32 +129,32 @@ export default define(class StatementSubstitution extends Substitution {
     }, generalContext, specificContext);
   }
 
-  validateSubstitution(substitution, generalContext, specificContext, continuatino) {
-    if (substitution === null) {
-      const substitutionValidates = true;
-
-      continuatino(substitutionValidates);
-
-      return;
-    }
-
-    let substitutionValidates;
-
-    const context = generalContext,  ///
-          statementSubstitutionString = this.getString(); ///
-
-    context.trace(`Validating the '${statementSubstitutionString}' statement substitution's substitution...`);
-
-    this.substitution = substitution;
-
-    substitutionValidates = true;
-
-    if (substitutionValidates) {
-      context.debug(`...validatewd the '${statementSubstitutionString}' statement substitution's substitution.`);
-    }
-
-    continuatino(substitutionValidates);
-  }
+  // validateSubstitution(substitution, generalContext, specificContext, continuatino) {
+  //   if (substitution === null) {
+  //     const substitutionValidates = true;
+  //
+  //     continuatino(substitutionValidates);
+  //
+  //     return;
+  //   }
+  //
+  //   let substitutionValidates;
+  //
+  //   const context = generalContext,  ///
+  //         statementSubstitutionString = this.getString(); ///
+  //
+  //   context.trace(`Validating the '${statementSubstitutionString}' statement substitution's substitution...`);
+  //
+  //   this.substitution = substitution;
+  //
+  //   substitutionValidates = true;
+  //
+  //   if (substitutionValidates) {
+  //     context.debug(`...validatewd the '${statementSubstitutionString}' statement substitution's substitution.`);
+  //   }
+  //
+  //   continuatino(substitutionValidates);
+  // }
 
   validateTargetStatement(generalContext, specificContext, continuatino) {
     const context = generalContext,  ///
@@ -381,7 +369,6 @@ export default define(class StatementSubstitution extends Substitution {
                 node = statementSubstitutionNode, ///
                 breakPoint = breakPointFromJSON(json),
                 resolved = resolvedFromStatementSubstitutionNode(statementSubstitutionNode, context),
-                substitution = substitutionFromStatementSubstitutionNode(statementSubstitutionNode, generalContext, specificContext),
                 targetStatement = targetStatementFromStatementSubstitutionNode(statementSubstitutionNode, generalContext),
                 replacementStatement = replacementStatementFromStatementSubstitutionNode(statementSubstitutionNode, specificContext),
                 contexts = [
@@ -389,7 +376,7 @@ export default define(class StatementSubstitution extends Substitution {
                   specificContext
                 ];
 
-          statementSubstitutionn = new StatementSubstitution(contexts, string, node, breakPoint, resolved, substitution, targetStatement, replacementStatement);
+          statementSubstitutionn = new StatementSubstitution(contexts, string, node, breakPoint, resolved, targetStatement, replacementStatement);
         }, json, context);
       }, context);
     }
@@ -431,10 +418,10 @@ export default define(class StatementSubstitution extends Substitution {
       const context = specificContext;  ///
 
       instantiate((context) => {
-        const specificContext = context,  ///
-              statementSubstitutionString = statementSubstitutionStringFromStatementMetavariableAndSubstitution(statement, metavariable, substitution),
+        const statementSubstitutionString = statementSubstitutionStringFromStatementMetavariableAndSubstitution(statement, metavariable, substitution),
               string = statementSubstitutionString, ///
-              statementSubstitutionNode = instantiateStatementSubstitution(string, context);
+              statementSubstitutionNode = instantiateStatementSubstitution(string, context),
+              specificContext = context;  ///
 
         statementSubstitution = statementSubstitutionFromStatementSubstitutionNode(statementSubstitutionNode, generalContext, specificContext);
       }, context);
@@ -448,13 +435,6 @@ function resolvedFromStatementSubstitutionNode(statementSubstitutionNode, contex
   const resolved = true;
 
   return resolved;
-}
-
-function substitutionFromStatementSubstitutionNode(statementSubstitutionNode, context) {
-  const substitutionNode = statementSubstitutionNode.getSubstitutionNode(),
-        substitution = context.findSubstitutionBySubstitutionNode(substitutionNode);
-
-  return substitution;
 }
 
 function targetStatementFromStatementSubstitutionNode(statementSubstitutionNode, generalContext) {

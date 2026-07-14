@@ -113,6 +113,12 @@ export default class Substitution extends Element {
     return equalTo;
   }
 
+  isSimple() {
+    const simple = true;
+
+    return simple;
+  }
+
   isComplex() {
     const simple = this.isSimple(),
           complex = !simple;
@@ -179,12 +185,6 @@ export default class Substitution extends Element {
     const replacementReference = null;
 
     return replacementReference;
-  }
-
-  isSimple() {
-    const simple = true;
-
-    return simple;
   }
 
   matchVariableNode(variableNode) {

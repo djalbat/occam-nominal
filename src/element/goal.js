@@ -147,7 +147,7 @@ export default define(class Goal extends Element {
         context.debug(`...validated the '${goalString}' goal's reference.`);
       }
 
-      continuation(referenceValidates);
+      return continuation(referenceValidates);
     });
   }
 
@@ -167,7 +167,7 @@ export default define(class Goal extends Element {
         context.debug(`...validated the '${goalString}' goal's statement.`);
       }
 
-      continuation(statementValidates);
+      return continuation(statementValidates);
     });
   }
 
@@ -201,9 +201,7 @@ export default define(class Goal extends Element {
     if (stated) {
       const validatesWhenDerived = false;
 
-      continuation(validatesWhenDerived);
-
-      return;
+      return continuation(validatesWhenDerived);
     }
 
     let validatesWhenDerived = false;

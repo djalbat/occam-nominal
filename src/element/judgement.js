@@ -162,9 +162,7 @@ export default define(class Judgement extends Element {
 
       context.debug(`...the '${judgementString}' judgement is already valid.`);
 
-      continuation(judgement);
-
-      return;
+      return continuation(judgement);
     }
 
     const validateGoal = this.validateGoal.bind(this),
@@ -177,9 +175,7 @@ export default define(class Judgement extends Element {
       if (!validates) {
         const judgement = null;
 
-        continuation(judgement);
-
-        return;
+        return continuation(judgement);
       }
 
       const validateWhenStated = this.validateWhenStated.bind(this),
@@ -224,7 +220,7 @@ export default define(class Judgement extends Element {
         context.debug(`...validated the '${judgementString}' judgement's goal.`);
       }
 
-      continuation(goalValidates);
+      return continuation(goalValidates);
     });
   }
 
@@ -246,7 +242,7 @@ export default define(class Judgement extends Element {
         context.trace(`...validated the '${judgementString}' judgement's frame.`);
       }
 
-      continuation(frameValidates);
+      return continuation(frameValidates);
     });
   }
 
