@@ -103,7 +103,7 @@ export default class TopLevelAssertion extends Element {
             verifyDeduction = this.verifyDeduction.bind(this),
             verifySuppositions = this.verifySuppositions.bind(this);
 
-      all([
+      return all([
         verifyLabels,
         verifySuppositions,
         verifyDeduction,
@@ -113,7 +113,7 @@ export default class TopLevelAssertion extends Element {
           context.debug(`...verified the '${topLevelAssertionString}' top level assertion.`);
         }
 
-        continuation(verifies);
+        return continuation(verifies);
       });
     }, context);
   }
@@ -130,7 +130,7 @@ export default class TopLevelAssertion extends Element {
         context.debug(`...verified the '${topLevelAssertionString}' top level assertion's labels.`);
       }
 
-      continuation(labelsVerify);
+      return continuation(labelsVerify);
     });
   }
 
@@ -140,12 +140,12 @@ export default class TopLevelAssertion extends Element {
 
     context.trace(`Verifying the '${topLevelAssertionString}' top level assertion's '${labelString}' label...`);
 
-    label.verify((labelVerifies) => {
+    return label.verify((labelVerifies) => {
       if (labelVerifies) {
         context.debug(`...verified the '${topLevelAssertionString}' top level assertion's '${labelString}' label.`);
       }
 
-      continuation(labelVerifies);
+      return continuation(labelVerifies);
     });
   }
 
@@ -153,9 +153,7 @@ export default class TopLevelAssertion extends Element {
     if (this.proof === null) {
       const proofVerifies = true; ///
 
-      continuation(proofVerifies);
-
-      return;
+      return continuation(proofVerifies);
     }
 
     const topLevelAssertionString = this.getString();  ///
@@ -164,12 +162,12 @@ export default class TopLevelAssertion extends Element {
 
     const statement = this.deduction.getStatement();
 
-    this.proof.verify(statement, context, (proofVerifies) => {
+    return this.proof.verify(statement, context, (proofVerifies) => {
       if (proofVerifies) {
         context.debug(`...verified the '${topLevelAssertionString}' top level assertion's proof.`);
       }
 
-      continuation(proofVerifies);
+      return continuation(proofVerifies);
     });
   }
 
@@ -179,12 +177,12 @@ export default class TopLevelAssertion extends Element {
 
     context.trace(`Verifying the '${topLevelAssertionString}' top level assertion's '${deductionString}' deduction...`);
 
-    this.deduction.verify(context, (deductionVerifies) => {
+    return this.deduction.verify(context, (deductionVerifies) => {
       if (deductionVerifies) {
         context.debug(`...verified the '${topLevelAssertionString}' top level assertion's '${deductionString}' deduction.`);
       }
 
-      continuation(deductionVerifies);
+      return continuation(deductionVerifies);
     });
   }
 
@@ -194,7 +192,7 @@ export default class TopLevelAssertion extends Element {
 
     context.trace(`Verifying the '${topLevelAssertionString}' top level assertion's '${suppositionString}' supposition...`);
 
-    supposition.verify(context, (suppositionVerifies) => {
+    return supposition.verify(context, (suppositionVerifies) => {
       if (suppositionVerifies) {
         const subproofOrProofAssertion = supposition;  ////
 
@@ -207,7 +205,7 @@ export default class TopLevelAssertion extends Element {
         context.debug(`...verified the '${topLevelAssertionString}' top level assertion's '${suppositionString}' supposition.`);
       }
 
-      continuation(suppositionVerifies);
+      return continuation(suppositionVerifies);
     });
   }
 
@@ -223,7 +221,7 @@ export default class TopLevelAssertion extends Element {
         context.debug(`...verified the '${topLevelAssertionString}' top level assertion's suppositions.`);
       }
 
-      continuation(suppositionsVerify);
+      return continuation(suppositionsVerify);
     });
   }
 

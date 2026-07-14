@@ -21,7 +21,7 @@ export default define(class Theorem extends TopLevelAssertion {
 
     context.trace(`Verifying the '${theoremString}' theorem...`);
 
-    this.verifyEx(context, (verifies) => {
+    return this.verifyEx(context, (verifies) => {
       if (verifies) {
         const theorem = this; ///
 
@@ -30,7 +30,7 @@ export default define(class Theorem extends TopLevelAssertion {
         context.debug(`...verified the '${theoremString}' theorem.`);
       }
 
-      continuation(verifies);
+      return continuation(verifies);
     });
   });
 

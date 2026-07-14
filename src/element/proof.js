@@ -35,7 +35,7 @@ export default define(class Proof extends Element {
 
   verify(statement, context, continuation) {
     enclose((context) => {
-      this.derivation.verify(context, (derivationVerifies) => {
+      return this.derivation.verify(context, (derivationVerifies) => {
         let verifies = false;
 
         if (derivationVerifies) {

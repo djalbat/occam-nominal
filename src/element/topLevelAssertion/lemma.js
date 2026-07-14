@@ -23,7 +23,7 @@ export default define(class Lemma extends TopLevelAssertion {
       context.trace(`Verifying a lemma...`) :
         context.trace(`Verifying the '${lemmaString}' lemma...`);
 
-    this.verifyEx(context, (verifies) => {
+    return this.verifyEx(context, (verifies) => {
       if (verifies) {
         const lemma = this; ///
 
@@ -34,7 +34,7 @@ export default define(class Lemma extends TopLevelAssertion {
             context.debug(`...verified the '${lemmaString}' lemma.`);
       }
 
-      continuation(verifies);
+      return continuation(verifies);
     });
   });
 

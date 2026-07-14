@@ -21,7 +21,7 @@ export default define(class Conjecture extends TopLevelAssertion {
 
     context.trace(`Verifying the '${conjectureString}' conjecture...`);
 
-    this.verifyEx(context, (verifies) => {
+    return this.verifyEx(context, (verifies) => {
       if (verifies) {
         const conjecture = this;  ///
 
@@ -30,7 +30,7 @@ export default define(class Conjecture extends TopLevelAssertion {
         context.debug(`...verified the '${conjectureString}' conjecture.`);
       }
 
-      continuation(verifies);
+      return continuation(verifies);
     });
   });
 

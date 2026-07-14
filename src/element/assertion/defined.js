@@ -211,36 +211,37 @@ export default define(class DefinedAssertion extends Assertion {
 
     context.trace(`Validating the '${definedAssertionString}' derived defined assertion...`);
 
-    validateWhenDerived(this.term, this.frame, this.negated, context, (validatesWhenDerived) => {
+    return validateWhenDerived(this.term, this.frame, this.negated, context, (validatesWhenDerived) => {
       if (validatesWhenDerived) {
         context.debug(`...validates the '${definedAssertionString}' derived defined assertion.`);
       }
 
-      continuation(validatesWhenDerived);
+      return continuation(validatesWhenDerived);
     });
   }
 
   unifyIndependently(generalContext, specificContext, continuation) {
-    let unifiesIndependently = false;
-
     const context = specificContext, ///
           definedAssertionString = this.getString(); ///
 
     context.trace(`Unifying the '${definedAssertionString}' defined assertion independently...`);
 
     const term = termFromTermAndSubstitutions(this.term, context),
-          frame = frameFromFrameAndSubstitutions(this.frame, context),
-          validatesWhenDerived = validateWhenDerived(term, frame, this.negated, context);
+          frame = frameFromFrameAndSubstitutions(this.frame, context);
 
-    if (validatesWhenDerived) {
-      unifiesIndependently = true;
-    }
+    return validateWhenDerived(term, frame, this.negated, context, (validatesWhenDerived) => {
+      let unifiesIndependently = false;
 
-    if (unifiesIndependently) {
-      context.debug(`...unified the '${definedAssertionString}' defined assertion independently.`);
-    }
+      if (validatesWhenDerived) {
+        unifiesIndependently = true;
+      }
 
-    return unifiesIndependently;
+      if (unifiesIndependently) {
+        context.debug(`...unified the '${definedAssertionString}' defined assertion independently.`);
+      }
+
+      return continuation(unifiesIndependently);
+    });
   }
 
   static name = "DefinedAssertion";
@@ -342,4 +343,3 @@ function validateWhenDerived(term, frame, negated, context, continuation) {
 
   continuation(validatesWhenDerived);
 }
-

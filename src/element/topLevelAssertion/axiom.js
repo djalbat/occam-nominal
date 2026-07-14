@@ -35,12 +35,10 @@ export default define(class Axiom extends TopLevelAssertion {
     if (signatureVerifies) {
       const verifies = false;
 
-      continuation(verifies);
-
-      return;
+      return continuation(verifies);
     }
 
-    this.verifyEx(context, (verifies) => {
+    return this.verifyEx(context, (verifies) => {
       if (verifies) {
         const axiom = this; ///
 
@@ -49,7 +47,7 @@ export default define(class Axiom extends TopLevelAssertion {
         context.debug(`...verified the '${axiomString}' axiom.`);
       }
 
-      continuation(verifies);
+      return continuation(verifies);
     });
   });
 
