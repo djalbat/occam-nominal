@@ -180,7 +180,7 @@ export default define(class ContainedAssertion extends Assertion {
         context.debug(`...validates the'${continaedAssertionString}' continaed assertion's '${frameString}' frame.`);
       }
 
-      continuation(frameValidates);
+      return continuation(frameValidates);
     });
   }
 
@@ -200,7 +200,7 @@ export default define(class ContainedAssertion extends Assertion {
         context.debug(`...validated the '${statementString}' statement.`);
       }
 
-      continuation(statementValidates);
+      return continuation(statementValidates);
     });
   }
 
@@ -246,13 +246,11 @@ export default define(class ContainedAssertion extends Assertion {
         context.debug(`...validated the '${containedAssertionString}' derived contained assertion.`);
       }
 
-      continuation(validatesWhenDerived);
+      return continuation(validatesWhenDerived);
     });
   }
 
   unifyIndependently(generalContext, specificContext, continuation) {
-    let unifiesIndependently = false;
-
     const context = specificContext,  ///
           containedAssertionString = this.getString(); ///
 
@@ -260,18 +258,21 @@ export default define(class ContainedAssertion extends Assertion {
 
     const term = termFromTermAndSubstitutions(this.term, context),
           frame = frameFromFrameAndSubstitutions(this.frame, context),
-          statement = statementFromStatementAndSubstitutions(this.statement, context),
-          validatesWhenDerived = validateWhenDerived(term, frame, statement, this.negated, context);
+          statement = statementFromStatementAndSubstitutions(this.statement, context);
 
-    if (validatesWhenDerived) {
-      unifiesIndependently = true;
-    }
+    validateWhenDerived(term, frame, statement, this.negated, context, (validatesWhenDerived) => {
+      let unifiesIndependently = false;
 
-    if (unifiesIndependently) {
-      context.debug(`...unified the '${containedAssertionString}' contained assertion independently.`);
-    }
+      if (validatesWhenDerived) {
+        unifiesIndependently = true;
+      }
 
-    return unifiesIndependently;
+      if (unifiesIndependently) {
+        context.debug(`...unified the '${containedAssertionString}' contained assertion independently.`);
+      }
+
+      return continuation(unifiesIndependently);
+    });
   }
 
   static name = "ContainedAssertion";

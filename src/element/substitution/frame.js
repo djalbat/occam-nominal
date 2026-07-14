@@ -70,7 +70,7 @@ export default define(class FrameSubstitution extends Substitution {
 
   compareFrame(frame, context) {
     const frameEqualToReplacementFrame = this.replacementFrame.isEqualTo(frame),
-        comparedToFrame = frameEqualToReplacementFrame; ///
+          comparedToFrame = frameEqualToReplacementFrame; ///
 
     return comparedToFrame;
   }
@@ -87,9 +87,7 @@ export default define(class FrameSubstitution extends Substitution {
 
       context.debug(`...the '${frameSubstitutionString}' frame substitution is already valid.`);
 
-      continuatino(frameSubstitution);
-
-      return;
+      return continuatino(frameSubstitution);
     }
 
     const generalContext = this.getGeneralContext(),
@@ -99,7 +97,7 @@ export default define(class FrameSubstitution extends Substitution {
       const validateTargetFrame = this.validateTargetFrame.bind(this),
             validateReplacementFrame = this.validateReplacementFrame.bind(this);
 
-      all([
+      return all([
         validateTargetFrame,
         validateReplacementFrame
       ], generalContext, specificContext, (validates) => {
@@ -121,7 +119,7 @@ export default define(class FrameSubstitution extends Substitution {
           context.debug(`...validated the '${frameSubstitutionString}' frame substitution.`);
         }
 
-        continuatino(frameSubstitution);
+        return continuatino(frameSubstitution);
       });
     }, generalContext, specificContext);
   }
@@ -140,14 +138,12 @@ export default define(class FrameSubstitution extends Substitution {
 
       context.debug(`The '${targetFrameString}' target frame is not singular.`);
 
-      continuatino(targetFrameValidates);
-
-      return;
+      return continuatino(targetFrameValidates);
     }
 
     manifest((context) => {
       elide((context) => {
-        this.targetFrame.validate(context, (targetFrame) => {
+        return this.targetFrame.validate(context, (targetFrame) => {
           let targetFrameValidates = false;
 
           if (targetFrame !== null) {
@@ -158,7 +154,7 @@ export default define(class FrameSubstitution extends Substitution {
             context.debug(`...validated the '${frameSubstitutionString}' frame substitution's target frame...`);
           }
 
-          continuatino(targetFrameValidates);
+          return continuatino(targetFrameValidates);
         });
       }, context);
     }, specificContext, context);
@@ -171,7 +167,7 @@ export default define(class FrameSubstitution extends Substitution {
     context.trace(`Validating the '${frameSubstitutionString}' frame substitution's replacement frame...`);
 
     elide((context) => {
-      this.replacementFrame.validate(context, (replacementFrame) => {
+      return this.replacementFrame.validate(context, (replacementFrame) => {
         let replacementFrameValidates = false;
 
         if (replacementFrame !== null) {
@@ -182,14 +178,12 @@ export default define(class FrameSubstitution extends Substitution {
           context.debug(`...validated the '${frameSubstitutionString}' frame substitution's replacement frame.`);
         }
 
-        continuatino(replacementFrameValidates);
+        return continuatino(replacementFrameValidates);
       });
     }, context);
   }
 
-  unifySubstitution(substitution, context) {
-    let substitutionUnifies = false;
-
+  unifySubstitution(substitution, context, continuation) {
     const generalSubstitution = this, ///
           specificSubstitution = substitution,
           generalSubstitutionString = generalSubstitution.getString(),
@@ -198,29 +192,27 @@ export default define(class FrameSubstitution extends Substitution {
     context.trace(`Unifying the '${specificSubstitutionString}' substitution with the '${generalSubstitutionString}' substitution...`);
 
     reconcile((context) => {
-      const replacementFrameUnifies = this.unifyReplacementFrame(substitution, context);
+      const unifyTargetFrame = this.unifyTargetFrame.bind(this),
+            unifyReplacementFrame = this.unifyReplacementFrame.bind(this);
 
-      if (replacementFrameUnifies) {
-        const targetFrameUnifies = this.unifyTargetFrame(substitution, context);
-
-        if (targetFrameUnifies) {
+      return all([
+        unifyReplacementFrame,
+        unifyTargetFrame
+      ], substitution, context, (substitutionUnifies) => {
+        if (substitutionUnifies) {
           context.commit();
-
-          substitutionUnifies = true;
         }
-      }
+
+        if (substitutionUnifies) {
+          context.debug(`...unified the '${specificSubstitutionString}' substitution with the '${generalSubstitutionString}' substitution.`);
+        }
+
+        return continuation(substitutionUnifies);
+      });
     }, context);
-
-    if (substitutionUnifies) {
-      context.debug(`...unified the '${specificSubstitutionString}' substitution with the '${generalSubstitutionString}' substitution.`);
-    }
-
-    return substitutionUnifies;
   }
 
-  unifyTargetFrame(substitution, context) {
-    let targetFrameUnifies = false;
-
+  unifyTargetFrame(substitution, context, continuation) {
     const generalSubstitution = this, ///
           specificSubstitution = substitution,
           generalSubstitutionString = generalSubstitution.getString(),
@@ -241,28 +233,33 @@ export default define(class FrameSubstitution extends Substitution {
       const frameNode = generalFrame.getFrameNode(),
             metavariable = metavariableFromFrameNode(frameNode, generalContext);
 
-      if (metavariable !== null) {
-        const frame = specificFrame,  ///
-              frameUnifies = metavariable.unifyFrame(frame, generalContext, specificContext);
+      if (metavariable === null) {
+        const targetFrameUnifies = false;
+
+        return continuation(targetFrameUnifies);
+      }
+
+      const frame = specificFrame;  ///
+
+      return metavariable.unifyFrame(frame, generalContext, specificContext, (frameUnifies) => {
+        let targetFrameUnifies = false;
 
         if (frameUnifies) {
           specificContext.commit(context);
 
           targetFrameUnifies = true;
         }
-      }
+
+        if (targetFrameUnifies) {
+          context.trace(`...unified the '${specificSubstitutionString}' substitution's target frame with the '${generalSubstitutionString}' substitution's target frame.`);
+        }
+
+        return continuation(targetFrameUnifies);
+      });
     }, specificContext);
-
-    if (targetFrameUnifies) {
-      context.trace(`...unified the '${specificSubstitutionString}' substitution's target frame with the '${generalSubstitutionString}' substitution's target frame.`);
-    }
-
-    return targetFrameUnifies;
   }
 
-  unifyReplacementFrame(substitution, context) {
-    let replacementFrameUnifies = false;
-
+  unifyReplacementFrame(substitution, context, continuation) {
     const generalSubstitution = this, ///
           specificSubstitution = substitution,
           generalSubstitutionString = generalSubstitution.getString(),
@@ -283,23 +280,30 @@ export default define(class FrameSubstitution extends Substitution {
       const frameNode = generalFrame.getNode(),
             metavariable = metavariableFromFrameNode(frameNode, generalContext);
 
-      if (metavariable !== null) {
-        const frame = specificFrame,  ///
-              frameUnifies = metavariable.unifyFrame(frame, generalContext, specificContext);
+      if (metavariable === null) {
+        const replacementFrameUnifies = false;
+
+        return continuation(replacementFrameUnifies);
+      }
+
+      const frame = specificFrame;  ///
+
+      return metavariable.unifyFrame(frame, generalContext, specificContext, (frameUnifies) => {
+        let replacementFrameUnifies = false;
 
         if (frameUnifies) {
           specificContext.commit(context);
 
           replacementFrameUnifies = true;
         }
-      }
+
+        if (replacementFrameUnifies) {
+          context.trace(`...unified the '${specificSubstitutionString}' substitution's replacement frame with the '${generalSubstitutionString}' substitution's replacement frame.`);
+        }
+
+        return continuation(replacementFrameUnifies);
+      });
     }, specificContext);
-
-    if (replacementFrameUnifies) {
-      context.trace(`...unified the '${specificSubstitutionString}' substitution's replacement frame with the '${generalSubstitutionString}' substitution's replacement frame.`);
-    }
-
-    return replacementFrameUnifies;
   }
 
   static name = "FrameSubstitution";

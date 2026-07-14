@@ -1,12 +1,14 @@
 "use strict";
 
 import { arrayUtilities } from "necessary";
+import { continuationUtilities } from "occam-languages";
 import { metavariableNodesFromDerivedSubstitutions } from "../utilities/substitutions";
 
 import Context from "../context";
 import elements from "../elements";
 
-const { push, find, first } = arrayUtilities;
+const { forEach } = continuationUtilities,
+      { push, find, first } = arrayUtilities;
 
 export default class LiminalContext extends Context {
   constructor(context, derivedSubstitutions) {
@@ -86,23 +88,25 @@ export default class LiminalContext extends Context {
     });
   }
 
-  resolveDerivedSubstitutions() {
+  resolveDerivedSubstitutions(continuation) {
     const context = this, ///
           derivedSubstitutions = this.getDerivedSubstitutions(),
           metavariableNodes = metavariableNodesFromDerivedSubstitutions(derivedSubstitutions);
 
-    metavariableNodes.forEach((metavariableNode) => {
+    return forEach(metavariableNodes, (metavariableNode, continuation) => {
       const complexDerivedSubstitutions = this.findComplexDerivedSubstitutionsByMetavariableNode(metavariableNode);
 
-      complexDerivedSubstitutions.forEach((complexDerivedSubstitution) => {
+      return forEach(complexDerivedSubstitutions, (complexDerivedSubstitution, continuation) => {
         const derivedSubstitution = complexDerivedSubstitution, ///
               resolved = derivedSubstitution.isResolved();
 
-        if (!resolved) {
-          derivedSubstitution.resolve(context);
+        if (resolved) {
+          return continuation();
         }
-      });
-    });
+
+        return derivedSubstitution.resolve(context, continuation);
+      }, continuation);
+    }, continuation);
   }
 
   areDerivedSubstitutionsResolved() {

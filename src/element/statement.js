@@ -254,7 +254,7 @@ export default define(class Statement extends Element {
 
     context.trace(`Unifying the '${specificStatementString}' statement with the '${generalStatementString}' statement...`);
 
-    unifyStatement(generalStatement, specificStatement, generalContext, specificContext, (statementUnifies) => {
+    return unifyStatement(generalStatement, specificStatement, generalContext, specificContext, (statementUnifies) => {
       if (statementUnifies) {
         context.debug(`...unified the '${specificStatementString}' statement with the '${generalStatementString}' statement.`);
       }
@@ -263,9 +263,7 @@ export default define(class Statement extends Element {
     });
   }
 
-  unifyIndependently(generalContext, specificContext) {
-    let unifiesIndependently = false;
-
+  unifyIndependently(generalContext, specificContext, continuation) {
     const context = specificContext,  ///
           statementString = this.getString();  ///
 
@@ -278,39 +276,60 @@ export default define(class Statement extends Element {
 
     if (typeAssertionNode !== null) {
       const context = generalContext, ///
-            typeAssertion = context.findAssertionByAssertionNode(typeAssertionNode),
-            typeAssertionUnifiesIndependently = typeAssertion.unifyIndependently(generalContext, specificContext);
+            typeAssertion = context.findAssertionByAssertionNode(typeAssertionNode);
 
-      if (typeAssertionUnifiesIndependently) {
-        unifiesIndependently = true;
-      }
+      typeAssertion.unifyIndependently(generalContext, specificContext, (typeAssertionUnifiesIndependently) => {
+        let unifiesIndependently = false;
+
+        if (typeAssertionUnifiesIndependently) {
+          unifiesIndependently = true;
+        }
+
+        if (unifiesIndependently) {
+          context.debug(`...unified the '${statementString}' statement independently.`);
+        }
+
+        return continuation(unifiesIndependently);
+      });
     }
 
     if (definedAssertionNode !== null) {
       const context = generalContext, ///
-            definedAssertion = context.findAssertionByAssertionNode(definedAssertionNode),
-            definedAssertionUnifiesIndependently = definedAssertion.unifyIndependently(generalContext, specificContext);
+            definedAssertion = context.findAssertionByAssertionNode(definedAssertionNode);
 
-      if (definedAssertionUnifiesIndependently) {
-        unifiesIndependently = true;
-      }
+      definedAssertion.unifyIndependently(generalContext, specificContext, (definedAssertionUnifiesIndependently) => {
+        let unifiesIndependently = false;
+
+        if (definedAssertionUnifiesIndependently) {
+          unifiesIndependently = true;
+        }
+
+        if (unifiesIndependently) {
+          context.debug(`...unified the '${statementString}' statement independently.`);
+        }
+
+        return continuation(unifiesIndependently);
+      });
     }
 
     if (containedAssertionNode !== null) {
       const context = generalContext, ///
-            containedAssertion = context.findAssertionByAssertionNode(containedAssertionNode),
-            containedAssertionUnifiesIndependently = containedAssertion.unifyIndependently(generalContext, specificContext);
+            containedAssertion = context.findAssertionByAssertionNode(containedAssertionNode);
 
-      if (containedAssertionUnifiesIndependently) {
-        unifiesIndependently = true;
-      }
+      containedAssertion.unifyIndependently(generalContext, specificContext, (containedAssertionUnifiesIndependently) => {
+        let unifiesIndependently = false;
+
+        if (containedAssertionUnifiesIndependently) {
+          unifiesIndependently = true;
+        }
+
+        if (unifiesIndependently) {
+          context.debug(`...unified the '${statementString}' statement independently.`);
+        }
+
+        return continuation(unifiesIndependently);
+      });
     }
-
-    if (unifiesIndependently) {
-      context.debug(`...unified the '${statementString}' statement independently.`);
-    }
-
-    return unifiesIndependently;
   }
 
   static name = "Statement";
