@@ -123,8 +123,8 @@ export default class TopLevelAssertion extends Element {
 
     context.trace(`Verifying the '${topLevelAssertionString}' top level assertion's labels...`);
 
-    every(this.labels, (label, continuation) => {
-      this.verifyLabel(label, context, continuation);
+    return every(this.labels, (label, continuation) => {
+      return this.verifyLabel(label, context, continuation);
     }, (labelsVerify) => {
       if (labelsVerify) {
         context.debug(`...verified the '${topLevelAssertionString}' top level assertion's labels.`);
@@ -216,8 +216,8 @@ export default class TopLevelAssertion extends Element {
 
     context.trace(`Verifying the '${topLevelAssertionString}' top level assertion's suppositions...`);
 
-    forwardsEvery(this.suppositions, (supposition, continuation) => {
-      this.verifySupposition(supposition, context, continuation);
+    return forwardsEvery(this.suppositions, (supposition, continuation) => {
+      return this.verifySupposition(supposition, context, continuation);
     }, (suppositionsVerify) => {
       if (suppositionsVerify) {
         context.debug(`...verified the '${topLevelAssertionString}' top level assertion's suppositions.`);

@@ -35,7 +35,7 @@ export default define(class Derivation extends Element {
   }
 
   verify(context, continuation) {
-    every(this.subproofOrProofAssertions, (subproofOrProofAssertion, continuation) => {
+    return every(this.subproofOrProofAssertions, (subproofOrProofAssertion, continuation) => {
       subproofOrProofAssertion.verify(context, (subproofOrProofAssertionVerifies) => {
         if (subproofOrProofAssertionVerifies) {
           context.assignAssignments();
@@ -43,7 +43,7 @@ export default define(class Derivation extends Element {
           context.addSubproofOrProofAssertion(subproofOrProofAssertion);
         }
 
-        continuation(subproofOrProofAssertionVerifies);
+        return continuation(subproofOrProofAssertionVerifies);
       });
     }, continuation);
   }

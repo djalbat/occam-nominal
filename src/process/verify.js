@@ -46,7 +46,7 @@ class TopLevelPass extends ContinuationPass {
       run: (errorNode, context, continuation) => {
         const error = errorFromErrorNode(errorNode, context);
 
-        error.verify(context, continuation);
+        return error.verify(context, continuation);
       }
     },
     {
@@ -54,7 +54,7 @@ class TopLevelPass extends ContinuationPass {
       run: (ruleNode, context, continuation) => {
         const rule = ruleFromRuleNode(ruleNode, context);
 
-        rule.verify(context, continuation);
+        return rule.verify(context, continuation);
       }
     },
     {
@@ -62,7 +62,7 @@ class TopLevelPass extends ContinuationPass {
       run: (axiomNode, context, continuation) => {
         const axiom = axiomFromAxiomNode(axiomNode, context);
 
-        axiom.verify(context, continuation);
+        return axiom.verify(context, continuation);
       }
     },
     {
@@ -70,7 +70,7 @@ class TopLevelPass extends ContinuationPass {
       run: (lemmaNode, context, continuation) => {
         const lemma = lemmaFromLemmaNode(lemmaNode, context);
 
-        lemma.verify(context, continuation);
+        return lemma.verify(context, continuation);
       }
     },
     {
@@ -78,7 +78,7 @@ class TopLevelPass extends ContinuationPass {
       run: (schemaNode, context, continuation) => {
         const schema = schemaFromSchemaNode(schemaNode, context);
 
-        schema.verify(context, continuation);
+        return schema.verify(context, continuation);
       }
     },
     {
@@ -86,7 +86,7 @@ class TopLevelPass extends ContinuationPass {
       run: (sectionNode, context, continuation) => {
         const section = sectionFromSectionNode(sectionNode, context);
 
-        section.verify(context, continuation);
+        return section.verify(context, continuation);
       }
     },
     {
@@ -94,7 +94,7 @@ class TopLevelPass extends ContinuationPass {
       run: (theoremNode, context, continuation) => {
         const theorem = theoremFromTheoremNode(theoremNode, context);
 
-        theorem.verify(context, continuation);
+        return theorem.verify(context, continuation);
       }
     },
     {
@@ -102,7 +102,7 @@ class TopLevelPass extends ContinuationPass {
       run: (conjectureNode, context, continuation) => {
         const conjecture = conjectureFromConjectureNode(conjectureNode, context);
 
-        conjecture.verify(context, continuation);
+        return conjecture.verify(context, continuation);
       }
     },
     {
@@ -110,7 +110,7 @@ class TopLevelPass extends ContinuationPass {
       run: (typeDeclarationNode, context, continuation) => {
         const typeDeclaration = typeDeclarationFromTypeDeclarationNode(typeDeclarationNode, context);
 
-        typeDeclaration.verify(context, continuation);
+        return typeDeclaration.verify(context, continuation);
       }
     },
     {
@@ -118,7 +118,7 @@ class TopLevelPass extends ContinuationPass {
       run: (cotypeDeclarationNode, context, continuation) => {
         const cotypeDeclaration = cotypeDeclarationFromCotypeDeclarationNode(cotypeDeclarationNode, context);
 
-        cotypeDeclaration.verify(context, continuation);
+        return cotypeDeclaration.verify(context, continuation);
       }
     },
     {
@@ -126,7 +126,7 @@ class TopLevelPass extends ContinuationPass {
       run: (variableDeclarationNode, context, continuation) => {
         const variableDeclaration = variableDeclarationFromVariableDeclarationNode(variableDeclarationNode, context);
 
-        variableDeclaration.verify(context, continuation);
+        return variableDeclaration.verify(context, continuation);
       }
     },
     {
@@ -134,7 +134,7 @@ class TopLevelPass extends ContinuationPass {
       run: (generatorDeclarationNode, context, continuation) => {
         const generatorDeclaration = generatorDeclarationFromGeneratorDeclarationNode(generatorDeclarationNode, context);
 
-        generatorDeclaration.verify(context, continuation);
+        return generatorDeclaration.verify(context, continuation);
       }
     },
     {
@@ -142,7 +142,7 @@ class TopLevelPass extends ContinuationPass {
       run: (typePrefixDeclarationNode, context, continuation) => {
         const typePrefixDeclaration = typePrefixDeclarationFromTypePrefixDeclarationNode(typePrefixDeclarationNode, context);
 
-        typePrefixDeclaration.verify(context, continuation);
+        return typePrefixDeclaration.verify(context, continuation);
       }
     },
     {
@@ -150,7 +150,7 @@ class TopLevelPass extends ContinuationPass {
       run: (combinatorDeclarationNode, context, continuation) => {
         const combinatorDeclaration = combinatorDeclarationFromCombinatorDeclarationNode(combinatorDeclarationNode, context);
 
-        combinatorDeclaration.verify(context, continuation);
+        return combinatorDeclaration.verify(context, continuation);
       }
     },
     {
@@ -158,7 +158,7 @@ class TopLevelPass extends ContinuationPass {
       run: (constructorDeclarationNode, context, continuation) => {
         const constructorDeclaration = constructorDeclarationFromConstructorDeclarationNode(constructorDeclarationNode, context);
 
-        constructorDeclaration.verify(context, continuation);
+        return constructorDeclaration.verify(context, continuation);
       }
     },
     {
@@ -166,7 +166,7 @@ class TopLevelPass extends ContinuationPass {
       run: (metavariableDeclarationNode, context, continuation) => {
         const metavariableDeclaration = metavariableDeclarationFromMetavariableDeclarationNode(metavariableDeclarationNode, context);
 
-        metavariableDeclaration.verify(context, continuation);
+        return metavariableDeclaration.verify(context, continuation);
       }
     }
   ];
@@ -177,5 +177,5 @@ const topLevelPass = new TopLevelPass();
 export function verifyFile(fileNode, context, continuation) {
   const node = fileNode; ///
 
-  topLevelPass.run(node, context, continuation);
+  return topLevelPass.run(node, context, continuation);
 }

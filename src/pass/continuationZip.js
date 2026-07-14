@@ -8,6 +8,6 @@ export default class ContinuationZipPass extends ContinuationZipPassBase {
           generalChildNodes = generalNonTerminalNode.getChildNodes(), ///
           specificChildNodes = specificNonTerminalNode.getChildNodes(); ///
 
-    this.descend(generalChildNodes, specificChildNodes, ...remainingArguments, continuation);
+    return this.descend(generalChildNodes, specificChildNodes, ...remainingArguments, continuation);
   }
 }

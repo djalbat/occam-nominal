@@ -221,8 +221,8 @@ export default define(class Frame extends Element {
 
     const assumptions = [];
 
-    every(this.assumptions, (assumption) => {
-      this.validateAssumption(assumption, assumptions, context, continuation);
+    return every(this.assumptions, (assumption) => {
+      return this.validateAssumption(assumption, assumptions, context, continuation);
     }, (assumptionsValidate) => {
       if (assumptionsValidate) {
         this.assumptions = assumptions;

@@ -17,7 +17,7 @@ class PropertyPass extends ContinuationPass {
     const nonTerminalNode = termNode,  ///
           childNodes = nonTerminalNode.getChildNodes();
 
-    this.descend(childNodes, context, continuation);
+    return this.descend(childNodes, context, continuation);
   }
 
   static maps = [
@@ -60,7 +60,7 @@ class GeneratorPass extends ContinuationPass {
     const nonTerminalNode = termNode,  ///
           childNodes = nonTerminalNode.getChildNodes();
 
-    this.descend(childNodes, context, continuation);
+    return this.descend(childNodes, context, continuation);
   }
 
   static maps = [
@@ -103,7 +103,7 @@ class CombinatorPass extends ContinuationPass {
     const nonTerminalNode = statementNode,  ///
           childNodes = nonTerminalNode.getChildNodes();
 
-    this.descend(childNodes, context, continuation);
+    return this.descend(childNodes, context, continuation);
   }
 
   static maps = [
@@ -164,7 +164,7 @@ class ConstructorPass extends ContinuationPass {
     const nonTerminalNode = termNode,  ///
           childNodes = nonTerminalNode.getChildNodes();
 
-    this.descend(childNodes, context, continuation);
+    return this.descend(childNodes, context, continuation);
   }
 
   static maps = [
@@ -210,23 +210,23 @@ const propertyPass = new PropertyPass(),
 export function validateTermAsProperty(term, context, continuation) {
   const termNode = term.getNode();
 
-  propertyPass.run(termNode, context, continuation);
+  return propertyPass.run(termNode, context, continuation);
 }
 
 export function validateTermAsGenerator(term, context, continuation) {
   const termNode = term.getNode();
 
-  generatorPass.run(termNode, context, continuation);
+  return generatorPass.run(termNode, context, continuation);
 }
 
 export function validateTermAsConstructor(term, context, continuation) {
   const termNode = term.getNode();
 
-  constructorPass.run(termNode, context, continuation);
+  return constructorPass.run(termNode, context, continuation);
 }
 
 export function validateStatementAsCombinator(statement, context, continuation) {
   const statementNode = statement.getNode();
 
-  combinatorPass.run(statementNode, context, continuation);
+  return combinatorPass.run(statementNode, context, continuation);
 }

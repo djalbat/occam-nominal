@@ -94,7 +94,7 @@ export default define(class SubproofAssertion extends Assertion {
   }
 
   validateStatements(context, continuation) {
-    every(this.statements, (statement, continuation) => {
+    return every(this.statements, (statement, continuation) => {
       descend((context) => {
         statement.validate(context, (statement) => {
           let statementValidates = false;
@@ -280,10 +280,10 @@ export default define(class SubproofAssertion extends Assertion {
 
     let index = -1;
 
-    backwardsEvery(suppositions, (supposition, continuation) => {
+    return backwardsEvery(suppositions, (supposition, continuation) => {
       index++;
 
-      this.unifySupposition(supposition, index, generalContext, specificContext, continuation);
+      return this.unifySupposition(supposition, index, generalContext, specificContext, continuation);
     }, continuation);
   }
 

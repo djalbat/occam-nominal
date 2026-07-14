@@ -129,14 +129,14 @@ export default define(class Rule extends Element {
 
     context.trace(`Verifying the '${ruleString}' rule's labels...`);
 
-    every(this.labels, (label, continuation) => {
-      this.verifyLabel(label, context, continuation);
+    return every(this.labels, (label, continuation) => {
+      return this.verifyLabel(label, context, continuation);
     }, (labelsVerify) => {
       if (labelsVerify) {
         context.debug(`...verified the '${ruleString}' rule's labels.`);
       }
 
-      conntinuation(labelsVerify);
+      return conntinuation(labelsVerify);
     });
   }
 
@@ -168,8 +168,8 @@ export default define(class Rule extends Element {
 
     context.trace(`Verifying the '${ruleString}' rule's premises...`);
 
-    forwardsEvery(this.premises, (premise, continuation) => {
-      this.verifyPremise(premise, context, continuation);
+    return forwardsEvery(this.premises, (premise, continuation) => {
+      return this.verifyPremise(premise, context, continuation);
     }, (premisesVerify) => {
       if (premisesVerify) {
         context.debug(`...verified the '${ruleString}' rule's premises.`);
@@ -194,7 +194,7 @@ export default define(class Rule extends Element {
     });
   }
 
-  unifyStepWithConclusion = breakable(function (step, context, continuation) {
+  unifyStepWithConclusion(step, context, continuation) {
     const ruleString = this.getString(),
           stepString = step.getString(),
           conclusionString = this.conclusion.getString();
@@ -214,7 +214,7 @@ export default define(class Rule extends Element {
 
       return continuation(stepUnifiesWithConclusion);
     });
-  });
+  }
 
   unifyStepAndSubproofOrProofAssertions(step, subproofOrProofAssertions, context, continuation) {
     this.unifyStepWithConclusion(step, context, (statementUnifiesWithConclusion) => {
@@ -241,7 +241,7 @@ export default define(class Rule extends Element {
   }
 
   unifySubproofOrProofAssertionsWithPremise(subproofOrProofAssertions, premise, context, continuation) {
-    extract(subproofOrProofAssertions, (subproofOrProofAssertion, continuation) => {
+    return extract(subproofOrProofAssertions, (subproofOrProofAssertion, continuation) => {
       premise.unifySubproofOrProofAssertion(subproofOrProofAssertion, context, continuation);
     }, (subproofOrProofAssertion = null) => {
       if (subproofOrProofAssertion !== null) {
@@ -250,15 +250,15 @@ export default define(class Rule extends Element {
         return continuation(subproofOrProofAssertionsUnifiesWithPremise);
       }
 
-      premise.unifyIndependently(context, continuation);
+      return premise.unifyIndependently(context, continuation);
     });
   }
 
   unifySubproofOrProofAssertionsWithPremises(subproofOrProofAssertions, context, continuation) {
     subproofOrProofAssertions = reverse(subproofOrProofAssertions); ///
 
-    backwardsEvery(this.premises, (premise, continuation) => {
-      this.unifySubproofOrProofAssertionsWithPremise(subproofOrProofAssertions, premise, context, continuation);
+    return backwardsEvery(this.premises, (premise, continuation) => {
+      return this.unifySubproofOrProofAssertionsWithPremise(subproofOrProofAssertions, premise, context, continuation);
     }, continuation);
   }
 

@@ -731,7 +731,7 @@ export default class NominalFileContext extends FileContext {
           context = this, ///
           fileNode = node;  ///
 
-    verifyFile(fileNode, context, continuation);
+    return verifyFile(fileNode, context, continuation);
   }
 
   initialise() {

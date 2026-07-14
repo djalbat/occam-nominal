@@ -165,9 +165,9 @@ function validateStatementAsMetavariable(statement, context, continuation) {
 function unifyStatementWithCombinators(statement, context, continuation) {
   const combinators = context.getCombinators();
 
-  some(combinators, (combinator, continuation) => {
+  return some(combinators, (combinator, continuation) => {
     descend((context) => {
-      combinator.unifyStatement(statement, context, continuation);
+      return combinator.unifyStatement(statement, context, continuation);
     }, context);
   }, continuation);
 }
@@ -175,7 +175,7 @@ function unifyStatementWithCombinators(statement, context, continuation) {
 function unifyStatementWithBracketedCombinator(statement, context, continuation) {
   const bracketedCombinator = bracketedCombinatorFromNothing();
 
-  bracketedCombinator.unifyStatement(statement, context, continuation);
+  return bracketedCombinator.unifyStatement(statement, context, continuation);
 }
 
 function validateStatementAsEquality(statement, context, continuation) {

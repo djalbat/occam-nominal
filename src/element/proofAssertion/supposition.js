@@ -288,12 +288,12 @@ export default define(class Supposition extends ProofAssertion {
     if (subproofOrProofAssertionProofAssertion) {
       const proofAssertion = subproofOrProofAssertion;  ///
 
-      this.unifyProofAssertion(proofAssertion, context, continuation);
-    } else {
-      const subproof = subproofOrProofAssertion;  ///
-
-      this.unifySubproof(subproof, context, continuation);
+      return this.unifyProofAssertion(proofAssertion, context, continuation);
     }
+
+    const subproof = subproofOrProofAssertion;  ///
+
+    return this.unifySubproof(subproof, context, continuation);
   }
 
   toJSON() {

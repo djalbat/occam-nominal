@@ -488,14 +488,14 @@ export function unifyStatement(generalStatement, specificStatement, generalConte
         generalNode = generalStatementNode, ///
         specificNode = specificStatementNode;  ///
 
-  metaLevelPass.run(generalNode, specificNode, generalContext, specificContext, continuation);
+  return metaLevelPass.run(generalNode, specificNode, generalContext, specificContext, continuation);
 }
 
 export function unifyMetavariable(generalMetavariable, specificMetavariable, generalContext, specificContext, continuation) {
   const generalMetavariableNode = generalMetavariable.getNode(),
         specificMetavariableNode = specificMetavariable.getNode();
 
-  metavariablePass.run(generalMetavariableNode, specificMetavariableNode, generalContext, specificContext, continuation);
+  return metavariablePass.run(generalMetavariableNode, specificMetavariableNode, generalContext, specificContext, continuation);
 }
 
 export function unifyTermWithProperty(term, property, generalContext, specificContext, continuation) {
@@ -503,7 +503,7 @@ export function unifyTermWithProperty(term, property, generalContext, specificCo
         propertyTerm = property.getTerm(),
         propertyTermNode = propertyTerm.getNode();
 
-  propertyPass.run(propertyTermNode, termNode, generalContext, specificContext, continuation);
+  return propertyPass.run(propertyTermNode, termNode, generalContext, specificContext, continuation);
 }
 
 export function unifyTermWithGenerator(term, generator, generalContext, specificContext, continuation) {
@@ -511,7 +511,7 @@ export function unifyTermWithGenerator(term, generator, generalContext, specific
         generatorTerm = generator.getTerm(),
         generatorTermNode = generatorTerm.getNode();
 
-  generatorPass.run(generatorTermNode, termNode, generalContext, specificContext, continuation);
+  return generatorPass.run(generatorTermNode, termNode, generalContext, specificContext, continuation);
 }
 
 export function unifyTermWithConstructor(term, constructor, generalContext, specificContext, continuation) {
@@ -519,7 +519,7 @@ export function unifyTermWithConstructor(term, constructor, generalContext, spec
         constructorTerm = constructor.getTerm(),
         constructorTermNode = constructorTerm.getNode();
 
-  constructorPass.run(constructorTermNode, termNode, generalContext, specificContext, continuation);
+  return constructorPass.run(constructorTermNode, termNode, generalContext, specificContext, continuation);
 }
 
 export function unifyStatementWithCombinator(statement, combinator, generalContext, specificContext, continuation) {
@@ -527,7 +527,7 @@ export function unifyStatementWithCombinator(statement, combinator, generalConte
         combinatorStatement = combinator.getStatement(),
         combinatorStatementNode = combinatorStatement.getNode();
 
-  combinatorPass.run(combinatorStatementNode, statementNode, generalContext, specificContext, continuation);
+  return combinatorPass.run(combinatorStatementNode, statementNode, generalContext, specificContext, continuation);
 }
 
 export function unifyTermIntrinsically(generalTerm, specificTerm, generalContext, specificContext, continuation) {
@@ -536,7 +536,7 @@ export function unifyTermIntrinsically(generalTerm, specificTerm, generalContext
         generalNode = generalTermNode, ///
         specificNode = specificTermNode; ///
 
-  intrinsicTermPass.run(generalNode, specificNode, generalContext, specificContext, continuation);
+  return intrinsicTermPass.run(generalNode, specificNode, generalContext, specificContext, continuation);
 }
 
 export function unifyMetavariableIntrinsically(generalMetavariable, specificMetavariable, generalContext, specificContext, continuation) {
@@ -545,5 +545,5 @@ export function unifyMetavariableIntrinsically(generalMetavariable, specificMeta
         generalNode = generalMetavariableNode, ///
         specificNode = specificMetavariableNode;
 
-  intrinsicMetavariablePass.run(generalNode, specificNode, generalContext, specificContext, continuation);
+  return intrinsicMetavariablePass.run(generalNode, specificNode, generalContext, specificContext, continuation);
 }

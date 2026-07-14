@@ -275,16 +275,16 @@ export default define(class Step extends ProofAssertion {
 
     const step = this;  ///
 
-    some(unifySteps, (unifyStep, continuation) => {
+    return some(unifySteps, (unifyStep, continuation) => {
       reconcile((context) => {
-        unifyStep(step, context, continuation);
+        return unifyStep(step, context, continuation);
       }, context);
     }, (unifies) => {
       if (unifies) {
         context.debug(`...unified the '${stepString}' step.`);
       }
 
-      continuation(unifies);
+      return continuation(unifies);
     });
   }
 

@@ -177,9 +177,7 @@ export default define(class Premise extends ProofAssertion {
     });
   }
 
-  unifyIndependently(context) {
-    let unifiesIndependently = false;
-
+  unifyIndependently(context, continuation) {
     const premiseString = this.getString(); ///
 
     context.trace(`Unifying the '${premiseString}' premise independently...`);
@@ -191,28 +189,39 @@ export default define(class Premise extends ProofAssertion {
       if (statement !== null) {
         const premiseContext = this.getContext(), ///
               generalContext = premiseContext,  ///
-              specificContext = context,  ///
-              statementUnifiesIndependently = statement.unifyIndependently(generalContext, specificContext);
+              specificContext = context;  ///
 
-        if (statementUnifiesIndependently) {
-          unifiesIndependently = true;
-        }
+        return statement.unifyIndependently(generalContext, specificContext, (statementUnifiesIndependently) => {
+          let unifiesIndependently = false;
+
+          if (statementUnifiesIndependently) {
+            unifiesIndependently = true;
+          }
+
+          if (unifiesIndependently) {
+            context.debug(`...unified the '${premiseString}' premise independently.`);
+          }
+
+          return continuation(unifiesIndependently);
+        });
       }
 
       if (procedureCall !== null) {
-        const procedureCallResolvedIndependently = procedureCall.unifyIndependently(context);
+        return procedureCall.unifyIndependently(context, (procedureCallResolvedIndependently) => {
+          let unifiesIndependently = false;
 
-        if (procedureCallResolvedIndependently) {
-          unifiesIndependently = true;
-        }
+          if (procedureCallResolvedIndependently) {
+            unifiesIndependently = true;
+          }
+
+          if (unifiesIndependently) {
+            context.debug(`...unified the '${premiseString}' premise independently.`);
+          }
+
+          return continuation(unifiesIndependently);
+        });
       }
     }, context);
-
-    if (unifiesIndependently) {
-      context.debug(`...unified the '${premiseString}' premise independently.`);
-    }
-
-    return unifiesIndependently;
   }
 
   unifySubproof(subproof, context, continuation) {
@@ -288,12 +297,12 @@ export default define(class Premise extends ProofAssertion {
     if (subproofOrProofAssertionProofAssertion) {
       const proofAssertion = subproofOrProofAssertion;  ///
 
-      this.unifyProofAssertion(proofAssertion, context, continuation);
-    } else {
-      const subproof = subproofOrProofAssertion;  ///
-
-      this.unifySubproof(subproof, context, continuation);
+      return this.unifyProofAssertion(proofAssertion, context, continuation);
     }
+
+    const subproof = subproofOrProofAssertion;  ///
+
+    return this.unifySubproof(subproof, context, continuation);
   }
 
   toJSON() {

@@ -94,7 +94,7 @@ export default define(class Subproof extends Element {
       const verifySuppositions = this.verifySuppositions.bind(this),
             verifySubDerivation = this.verifySubDerivation.bind(this);
 
-      all([
+      return all([
         verifySuppositions,
         verifySubDerivation
       ], context, continuation);
@@ -116,13 +116,13 @@ export default define(class Subproof extends Element {
   }
 
   verifySuppositions(context, continuation) {
-    every(this.suppositions, (supposition, continuation) => {
-      this.verifySupposition(supposition, context, continuation);
+    return every(this.suppositions, (supposition, continuation) => {
+      return this.verifySupposition(supposition, context, continuation);
     }, continuation);
   }
 
   verifySubDerivation(context, continuation) {
-    this.subDerivation.verify(context, continuation);
+    return this.subDerivation.verify(context, continuation);
   }
 
   static name = "Subproof";
