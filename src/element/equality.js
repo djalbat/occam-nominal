@@ -150,7 +150,7 @@ export default define(class Equality extends Element {
       const validatesWhenStated = this.validateWhenStated.bind(this),
             validatesWhenDerived = this.validateWhenDerived.bind(this);
 
-      exists([
+      return exists([
         validatesWhenStated,
         validatesWhenDerived
       ], context, (validates) => {
@@ -168,7 +168,7 @@ export default define(class Equality extends Element {
           context.debug(`...validated the '${equalityString}' equality.`);
         }
 
-        continuation(equqlity);
+        return continuation(equqlity);
       });
     });
   }

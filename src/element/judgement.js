@@ -170,7 +170,7 @@ export default define(class Judgement extends Element {
     const validateGoal = this.validateGoal.bind(this),
           validateFrame = this.validateFrame.bind(this);
 
-    all([
+    return all([
       validateFrame,
       validateGoal
     ], context, (validates) => {
@@ -185,7 +185,7 @@ export default define(class Judgement extends Element {
       const validateWhenStated = this.validateWhenStated.bind(this),
             validateWhenDerived = this.validateWhenDerived.bind(this);
 
-      exists([
+      return exists([
         validateWhenStated,
         validateWhenDerived
       ], context, (validates) => {
@@ -201,7 +201,7 @@ export default define(class Judgement extends Element {
           context.debug(`...validated the '${judgementString}' judgement.`);
         }
 
-        continuation(judgement);
+        return continuation(judgement);
       });
     });
   }

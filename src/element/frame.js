@@ -157,7 +157,7 @@ export default define(class Frame extends Element {
     const validatMetavariable = this.validatMetavariable.bind(this),
           validateAssumptions = this.validateAssumptions.bind(this);
 
-    all([
+    return all([
       validatMetavariable,
       validateAssumptions
     ], context, (validates) => {
@@ -170,7 +170,7 @@ export default define(class Frame extends Element {
       const validatesWhenStated = this.validateWhenStated.bind(this),
             validatesWhenDerived = this.validateWhenDerived.bind(this);
 
-      exists([
+      return exists([
         validatesWhenStated,
         validatesWhenDerived
       ], context, (validates) => {

@@ -199,7 +199,7 @@ export default define(class Metavariable extends Element {
           validateTerm = this.validateTerm.bind(this),
           validateType = this.validateType.bind(this);
 
-    all([
+    return all([
       validateName,
       validateTerm,
       validateType
@@ -219,7 +219,7 @@ export default define(class Metavariable extends Element {
         context.debug(`...validated the '${metavariableString}' metavariable.`);
       }
 
-      continuation(metavariable);
+      return continuation(metavariable);
     });
   }
 

@@ -45,7 +45,7 @@ export default define(class VariableDeclaration extends Declaration {
     const typeVerifies = this.verifyType.bind(this),
           variableVerifies = this.verifyVariable.bind(this);
 
-    all([
+    return all([
       typeVerifies,
       variableVerifies
     ],  context, (verifies) => {

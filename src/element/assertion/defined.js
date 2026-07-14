@@ -60,7 +60,7 @@ export default define(class DefinedAssertion extends Assertion {
     const validateTerm = this.validateTerm.bind(this),
           validateFrame = this.validateFrame.bind(this);
 
-    all([
+    return all([
       validateTerm,
       validateFrame
     ], context, (validaets) => {
@@ -73,7 +73,7 @@ export default define(class DefinedAssertion extends Assertion {
       const validatesWhenStated = this.validateWhenStated.bind(this),
             validatesWhenDerived = this.validateWhenDerived.bind(this);
 
-      exists([
+      return exists([
         validatesWhenStated,
         validatesWhenDerived
       ], context, (validates) => {

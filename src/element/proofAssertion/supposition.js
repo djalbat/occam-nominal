@@ -1,6 +1,6 @@
 "use strict";
 
-import { breakPointUtilities, continuationUtilities } from "occam-languages";
+import { breakPointUtilities } from "occam-languages";
 
 import ProofAssertion from "../proofAssertion";
 
@@ -75,13 +75,11 @@ export default define(class Supposition extends ProofAssertion {
 
       context.debug(`Unable to verify the '${suppositionString}' supposition because it is nonsense.`);
 
-      continuation(verifies);
-
-      return;
+      return continuation(verifies);
     }
 
     declare((context) => {
-      this.validate(context, (validates) => {
+      return this.validate(context, (validates) => {
         let verifies = false;
 
         if (validates) {
@@ -92,7 +90,7 @@ export default define(class Supposition extends ProofAssertion {
           context.debug(`...verified the '${suppositionString}' supposition.`);
         }
 
-        continuation(verifies);
+        return continuation(verifies);
       });
     }, context);
   });
@@ -106,7 +104,7 @@ export default define(class Supposition extends ProofAssertion {
       const validateStatement = this.validateStatement.bind(this),
             validateProcedureCall = this.validateProcedureCall.bind(this);
 
-      exists([
+      return exists([
         validateStatement,
         validateProcedureCall
       ], context, (validates) => {
@@ -118,7 +116,7 @@ export default define(class Supposition extends ProofAssertion {
           context.debug(`...validated the '${suppositionString}' supposition.`);
         }
 
-        continuation(validates);
+        return continuation(validates);
       });
     }, context);
   }
@@ -129,16 +127,14 @@ export default define(class Supposition extends ProofAssertion {
     if (statement === null) {
       const statementValidates = false;
 
-      continuation(statementValidates);
-
-      return;
+      return continuation(statementValidates);
     }
 
     const suppositionString = this.getString();
 
     context.trace(`Validating the '${suppositionString}' supposition's statsement...`);
 
-    statement.validate(context, (statement) => {
+    return statement.validate(context, (statement) => {
       let statementValidates = false;
 
       if (statement !== null) {
@@ -149,7 +145,7 @@ export default define(class Supposition extends ProofAssertion {
         context.debug(`...validated the '${suppositionString}' supposition's statement.`);
       }
 
-      continuation(statementValidates);
+      return continuation(statementValidates);
     });
   }
 
@@ -159,27 +155,23 @@ export default define(class Supposition extends ProofAssertion {
     if (procedureCall === null) {
       const procedureCallValidates = false;
 
-      continuation(procedureCallValidates);
-
-      return;
+      return continuation(procedureCallValidates);
     }
 
     const suppositionString = this.getString();
 
     context.trace(`Validatting the '${suppositionString}' supposition's procedure call...`);
 
-    this.procedureCall.validate(context, (procedureCallValidates) => {
+    procedureCall.validate(context, (procedureCallValidates) => {
       if (procedureCallValidates) {
         context.debug(`...validated the '${suppositionString}' supposition's procedure call.`);
       }
 
-      continuation(procedureCallValidates);
+      return continuation(procedureCallValidates);
     });
   }
 
-  unifyIndependently(context) {
-    let unifiesIndependently = false;
-
+  unifyIndependently(context, continuation) {
     const suppositionString = this.getString(); ///
 
     context.trace(`Unifying the '${suppositionString}' supposition independently...`);
@@ -191,28 +183,39 @@ export default define(class Supposition extends ProofAssertion {
       if (statement !== null) {
         const suppositionContext = this.getContext(), ///
               generalContext = suppositionContext,  ///
-              specificContext = context,  ///
-              statementUnifiesIndependently = statement.unifyIndependently(generalContext, specificContext);
+              specificContext = context;  ///
 
-        if (statementUnifiesIndependently) {
-          unifiesIndependently = true;
-        }
+        return statement.unifyIndependently(generalContext, specificContext, (statementUnifiesIndependently) => {
+          let unifiesIndependently = false;
+
+          if (statementUnifiesIndependently) {
+            unifiesIndependently = true;
+          }
+
+          if (unifiesIndependently) {
+            context.debug(`...unified the '${suppositionString}' supposition independently.`);
+          }
+
+          return continuation(unifiesIndependently);
+        });
       }
 
       if (procedureCall !== null) {
-        const procedureCallResolvedIndependently = procedureCall.unifyIndependently(context);
+        return procedureCall.unifyIndependently(context, (procedureCallResolvedIndependently) => {
+          let unifiesIndependently = false;
 
-        if (procedureCallResolvedIndependently) {
-          unifiesIndependently = true;
-        }
+          if (procedureCallResolvedIndependently) {
+            unifiesIndependently = true;
+          }
+
+          if (unifiesIndependently) {
+            context.debug(`...unified the '${suppositionString}' supposition independently.`);
+          }
+
+          return continuation(unifiesIndependently);
+        });
       }
     }, context);
-
-    if (unifiesIndependently) {
-      context.debug(`...unified the '${suppositionString}' supposition independently.`);
-    }
-
-    return unifiesIndependently;
   }
 
   unifySubproof(subproof, context, continuation) {
@@ -226,9 +229,7 @@ export default define(class Supposition extends ProofAssertion {
     if (subproofAssertion === null) {
       const subproofUnifies = false;
 
-      continuation(subproofUnifies);
-
-      return;
+      return continuation(subproofUnifies);
     }
 
     const suppositionContext = this.getContext(), ///
@@ -236,7 +237,7 @@ export default define(class Supposition extends ProofAssertion {
           specificContext = context; ///
 
     reconcile((context) => {
-      subproofAssertion.unifySubproof(subproof, generalContext, specificContext, (subproofUnifies) => {
+      return subproofAssertion.unifySubproof(subproof, generalContext, specificContext, (subproofUnifies) => {
         if (subproofUnifies) {
           context.commit();
         }
@@ -245,7 +246,7 @@ export default define(class Supposition extends ProofAssertion {
           context.debug(`...unified the '${subproofString}' subproof with the '${suppositionString}' supposition.`);
         }
 
-        continuation(subproofUnifies);
+        return continuation(subproofUnifies);
       });
     }, context);
   }
@@ -264,7 +265,7 @@ export default define(class Supposition extends ProofAssertion {
     reconcile((specificContext) => {
       const statement = proofAssertion.getStatement();
 
-      this.unifyStatement(statement, generalContext, specificContext, (statementUnifies) => {
+      return this.unifyStatement(statement, generalContext, specificContext, (statementUnifies) => {
         let proofAssertionUnifies = false;
 
         if (statementUnifies) {
@@ -277,7 +278,7 @@ export default define(class Supposition extends ProofAssertion {
           context.debug(`...unified the '${proofAssertionString}' proof assertion with the '${suppositionString}' supposition.`);
         }
 
-        continuation(proofAssertionUnifies);
+        return continuation(proofAssertionUnifies);
       });
     }, specificContext);
   }

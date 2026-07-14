@@ -111,7 +111,7 @@ export default define(class StatementSubstitution extends Substitution {
       const validateTargetStatement = this.validateTargetStatement.bind(this),
             validateReplacementStatement = this.validateReplacementStatement.bind(this);
 
-      all([
+      return all([
         validateTargetStatement,
         validateReplacementStatement,
         (generalContext, specificContext, continuatino) => {
@@ -136,7 +136,7 @@ export default define(class StatementSubstitution extends Substitution {
           context.debug(`...validated the '${statementSubstitutionString}' statement substitution.`);
         }
 
-        continuatino(statementSubstitution);
+        return continuatino(statementSubstitution);
       });
     }, generalContext, specificContext);
   }

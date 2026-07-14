@@ -143,7 +143,7 @@ export default define(class Step extends ProofAssertion {
       const unify = this.unify.bind(this),
             validate = this.validate.bind(this);
 
-      all([
+      return all([
         validate,
         unify
       ], context, (verifies) => {
@@ -151,7 +151,7 @@ export default define(class Step extends ProofAssertion {
           context.debug(`...verified the '${stepString}' step.`);
         }
 
-        continuation(verifies);
+        return continuation(verifies);
       });
     }, context);
   });
@@ -166,7 +166,7 @@ export default define(class Step extends ProofAssertion {
             validateReference = this.validateReference.bind(this),
             validateSignatureAssertion = this.validateSignatureAssertion.bind(this);
 
-      all([
+      return all([
         validateStatement,
         validateReference,
         validateSignatureAssertion
@@ -179,7 +179,7 @@ export default define(class Step extends ProofAssertion {
           context.debug(`...validated the '${stepString}' step.`);
         }
 
-        continuation(validates);
+        return continuation(validates);
       });
     }, context);
   }

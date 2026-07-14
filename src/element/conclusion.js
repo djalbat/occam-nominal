@@ -44,14 +44,12 @@ export default define(class Conclusion extends Element {
 
       context.debug(`Unable to verify the '${conclusionString}' conclusion because it is nonsense.`);
 
-      continuation(verifies);
-
-      return;
+      return continuation(verifies);
     }
 
     declare((context) => {
       elide((context) => {
-        this.validate(context, (validates) => {
+        return this.validate(context, (validates) => {
           let verifies = false;
 
           if (validates) {
@@ -62,7 +60,7 @@ export default define(class Conclusion extends Element {
             context.debug(`...verified the '${conclusionString}' conclusion.`);
           }
 
-          continuation(verifies);
+          return continuation(verifies);
         });
       }, context);
     }, context);
@@ -74,7 +72,7 @@ export default define(class Conclusion extends Element {
     context.trace(`Validating the '${conclusionString}' conclusion...`);
 
     attempt((context) => {
-      this.validateStatement(context, (statementValidates) => {
+      return this.validateStatement(context, (statementValidates) => {
         let validates = false;
 
         if (statementValidates) {
@@ -89,7 +87,7 @@ export default define(class Conclusion extends Element {
           context.debug(`...validated the '${conclusionString}' conclusion.`);
         }
 
-        continuation(validates);
+        return continuation(validates);
       });
     }, context);
   }
@@ -99,7 +97,7 @@ export default define(class Conclusion extends Element {
 
     context.trace(`Validating the '${conclusionString}' conclusion's statement...`);
 
-    this.statement.validate(context, (statement) => {
+    return this.statement.validate(context, (statement) => {
       let statementValidates = false;
 
       if (statement !== null) {
@@ -110,7 +108,7 @@ export default define(class Conclusion extends Element {
         context.trace(`...validated the '${conclusionString}' conclusion's statement.`);
       }
 
-      continuation(statementValidates);
+      return continuation(statementValidates);
     });
   }
 
@@ -128,7 +126,7 @@ export default define(class Conclusion extends Element {
     reconcile((specificContext) => {
       const statement = step.getStatement();
 
-      this.statement.unifyStatement(statement, generalContext, specificContext, (statementUnifies) => {
+      return this.statement.unifyStatement(statement, generalContext, specificContext, (statementUnifies) => {
         let stepUnifies = false;
 
         if (statementUnifies) {
@@ -141,7 +139,7 @@ export default define(class Conclusion extends Element {
           context.debug(`...unified the '${stepString}' step with the '${conclusionString}' conclusion.`);
         }
 
-        continuation(stepUnifies);
+        return continuation(stepUnifies);
       });
     }, specificContext);
   }

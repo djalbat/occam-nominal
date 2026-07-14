@@ -1,6 +1,6 @@
 "use strict";
 
-import { breakPointUtilities, continuationUtilities } from "occam-languages";
+import { breakPointUtilities } from "occam-languages";
 
 import ProofAssertion from "../proofAssertion";
 
@@ -75,13 +75,11 @@ export default define(class Premise extends ProofAssertion {
 
       context.debug(`Unable to verify the '${premiseString}' premise because it is nonsense.`);
 
-      continuation(verifies);
-
-      return;
+      return continuation(verifies);
     }
 
     declare((context) => {
-      this.validate(context, (validates) => {
+      return this.validate(context, (validates) => {
         let verifies = false;
 
         if (validates) {
@@ -92,7 +90,7 @@ export default define(class Premise extends ProofAssertion {
           context.debug(`...verified the '${premiseString}' premise.`);
         }
 
-        continuation(verifies);
+        return continuation(verifies);
       });
     }, context);
   });
@@ -106,7 +104,7 @@ export default define(class Premise extends ProofAssertion {
       const validateStatement = this.validateStatement.bind(this),
             validateProcedureCall = this.validateProcedureCall.bind(this);
 
-      exists([
+      return exists([
         validateStatement,
         validateProcedureCall
       ], context, (validates) => {
@@ -118,7 +116,7 @@ export default define(class Premise extends ProofAssertion {
           context.debug(`...validated the '${premiseString}' premise.`);
         }
 
-        continuation(validates);
+        return continuation(validates);
       });
     }, context);
   }
@@ -129,16 +127,14 @@ export default define(class Premise extends ProofAssertion {
     if (statement === null) {
       const statementValidates = false;
 
-      continuation(statementValidates);
-
-      return;
+      return continuation(statementValidates);
     }
 
     const premiseString = this.getString();
 
     context.trace(`Validating the '${premiseString}' premise's statsement...`);
 
-    statement.validate(context, (statement) => {
+    return statement.validate(context, (statement) => {
       let statementValidates = false;
 
       if (statement !== null) {
@@ -149,7 +145,7 @@ export default define(class Premise extends ProofAssertion {
         context.debug(`...validated the '${premiseString}' premise's statement.`);
       }
 
-      continuation(statementValidates);
+      return continuation(statementValidates);
     });
   }
 
@@ -159,21 +155,19 @@ export default define(class Premise extends ProofAssertion {
     if (procedureCall === null) {
       const procedureCallValidates = false;
 
-      continuation(procedureCallValidates);
-
-      return;
+      return continuation(procedureCallValidates);
     }
 
     const premiseString = this.getString();
 
     context.trace(`Validatting the '${premiseString}' premise's procedure call...`);
 
-    this.procedureCall.validate(context, (procedureCallValidates) => {
+    return procedureCall.validate(context, (procedureCallValidates) => {
       if (procedureCallValidates) {
         context.debug(`...validated the '${premiseString}' premise's procedure call.`);
       }
 
-      continuation(procedureCallValidates);
+      return continuation(procedureCallValidates);
     });
   }
 
@@ -235,9 +229,7 @@ export default define(class Premise extends ProofAssertion {
     if (subproofAssertion === null) {
       const subproofUnifies = false;
 
-      continuation(subproofUnifies);
-
-      return;
+      return continuation(subproofUnifies);
     }
 
     const premiseContext = this.getContext(), ///
@@ -245,7 +237,7 @@ export default define(class Premise extends ProofAssertion {
           specificContext = context; ///
 
     reconcile((context) => {
-      subproofAssertion.unifySubproof(subproof, generalContext, specificContext, (subproofUnifies) => {
+      return subproofAssertion.unifySubproof(subproof, generalContext, specificContext, (subproofUnifies) => {
         if (subproofUnifies) {
           context.commit();
         }
@@ -254,7 +246,7 @@ export default define(class Premise extends ProofAssertion {
           context.debug(`...unified the '${subproofString}' subproof with the '${premiseString}' premise.`);
         }
 
-        continuation(subproofUnifies);
+        return continuation(subproofUnifies);
       });
     }, context);
   }
@@ -273,7 +265,7 @@ export default define(class Premise extends ProofAssertion {
     reconcile((specificContext) => {
       const statement = proofAssertion.getStatement();
 
-      this.unifyStatement(statement, generalContext, specificContext, (statementUnifies) => {
+      return this.unifyStatement(statement, generalContext, specificContext, (statementUnifies) => {
         let proofAssertionUnifies = false;
 
         if (statementUnifies) {
@@ -286,7 +278,7 @@ export default define(class Premise extends ProofAssertion {
           context.debug(`...unified the '${proofAssertionString}' proof assertion with the '${premiseString}' premise.`);
         }
 
-        continuation(proofAssertionUnifies);
+        return continuation(proofAssertionUnifies);
       });
     }, specificContext);
   }

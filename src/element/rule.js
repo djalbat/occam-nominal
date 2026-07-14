@@ -68,7 +68,7 @@ export default define(class Rule extends Element {
             verifyPremises = this.verifyPremises.bind(this),
             verifyConclusion = this.verifyConclusion.bind(this);
 
-      all([
+      return all([
         verifyLabels,
         verifyPremises,
         verifyConclusion,
@@ -87,13 +87,29 @@ export default define(class Rule extends Element {
     }, context);
   });
 
+  verifyLabels(context, conntinuation) {
+    const ruleString = this.getString();  ///
+
+    context.trace(`Verifying the '${ruleString}' rule's labels...`);
+
+    return every(this.labels, (label, continuation) => {
+      return this.verifyLabel(label, context, continuation);
+    }, (labelsVerify) => {
+      if (labelsVerify) {
+        context.debug(`...verified the '${ruleString}' rule's labels.`);
+      }
+
+      return conntinuation(labelsVerify);
+    });
+  }
+
   verifyLabel(label, context, continuation) {
     const ruleString = this.getString(),  ///
           labelString = label.getString();
 
     context.trace(`Verifying the '${ruleString}' rule's '${labelString}' label...`);
 
-    label.verify((labelVerifies) => {
+    return label.verify((labelVerifies) => {
       if (labelVerifies) {
         context.debug(`...verified the '${ruleString}' rule's '${labelString}' label.`);
       }
@@ -115,28 +131,12 @@ export default define(class Rule extends Element {
 
     const statement = this.conclusion.getStatement();
 
-    this.proof.verify(statement, context, (proofVerifies) => {
+    return this.proof.verify(statement, context, (proofVerifies) => {
       if (proofVerifies) {
         context.debug(`...verified the '${ruleString}' rule's proof.`);
       }
 
       return continuation(proofVerifies);
-    });
-  }
-
-  verifyLabels(context, conntinuation) {
-    const ruleString = this.getString();  ///
-
-    context.trace(`Verifying the '${ruleString}' rule's labels...`);
-
-    return every(this.labels, (label, continuation) => {
-      return this.verifyLabel(label, context, continuation);
-    }, (labelsVerify) => {
-      if (labelsVerify) {
-        context.debug(`...verified the '${ruleString}' rule's labels.`);
-      }
-
-      return conntinuation(labelsVerify);
     });
   }
 
@@ -146,7 +146,7 @@ export default define(class Rule extends Element {
 
     context.trace(`Verifying the '${ruleString}' rule's '${premiseString}' premise...`);
 
-    premise.verify(context, (premiseVerifies) => {
+    return premise.verify(context, (premiseVerifies) => {
       if (premiseVerifies) {
         const subproofOrProofAssertion = premise;  ////
 
@@ -185,7 +185,7 @@ export default define(class Rule extends Element {
 
     context.trace(`Verifying the '${ruleString}' rule's '${conclusionString}' conclusion...`);
 
-    this.conclusion.verify(context, (conclusionVerifies) => {
+    return this.conclusion.verify(context, (conclusionVerifies) => {
       if (conclusionVerifies) {
         context.debug(`...verified the '${ruleString}' rule's '${conclusionString}' conclusion.`);
       }
@@ -201,7 +201,7 @@ export default define(class Rule extends Element {
 
     context.trace(`Unifying the '${stepString}' step with the '${ruleString}' rule's '${conclusionString}' conclusion...`);
 
-    this.conclusion.unifyStep(step, context, (stepUnifies) => {
+    return this.conclusion.unifyStep(step, context, (stepUnifies) => {
       let stepUnifiesWithConclusion = false;
 
       if (stepUnifies) {
@@ -217,7 +217,7 @@ export default define(class Rule extends Element {
   }
 
   unifyStepAndSubproofOrProofAssertions(step, subproofOrProofAssertions, context, continuation) {
-    this.unifyStepWithConclusion(step, context, (statementUnifiesWithConclusion) => {
+    return this.unifyStepWithConclusion(step, context, (statementUnifiesWithConclusion) => {
       if (!statementUnifiesWithConclusion) {
         const stepAndSubproofOrProofAssertionsUnify = false;
 

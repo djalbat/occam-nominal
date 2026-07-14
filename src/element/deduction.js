@@ -72,7 +72,7 @@ export default define(class Deduction extends Element {
     context.trace(`Validating the '${deductionString}' deduction...`);
 
     attempt((context) => {
-      this.validateStatement(context, (statementValidates) => {
+      return this.validateStatement(context, (statementValidates) => {
         let validates = false;
 
         if (statementValidates) {
@@ -97,7 +97,7 @@ export default define(class Deduction extends Element {
 
     context.trace(`Validating the '${deductionString}' deduction's statement...`);
 
-    this.statement.validate(context, (statement) => {
+    return this.statement.validate(context, (statement) => {
       let statementValidates = false;
 
       if (statement !== null) {
@@ -108,7 +108,7 @@ export default define(class Deduction extends Element {
         context.trace(`...validated the '${deductionString}' deduction's statement.`);
       }
 
-      continuation(statementValidates);
+      return continuation(statementValidates);
     });
   }
 
@@ -126,7 +126,7 @@ export default define(class Deduction extends Element {
     reconcile((specificContext) => {
       const statement = step.getStatement();
 
-      this.statement.unifyStatement(statement, generalContext, specificContext, (statementUnifies) => {
+      return this.statement.unifyStatement(statement, generalContext, specificContext, (statementUnifies) => {
         let stepUnifies = false;
 
         if (statementUnifies) {
@@ -139,7 +139,7 @@ export default define(class Deduction extends Element {
           context.debug(`...unified the '${stepString}' step with the '${deductionString}' deduction.`);
         }
 
-        continuation(stepUnifies);
+        return continuation(stepUnifies);
       });
     }, specificContext);
   }
@@ -151,7 +151,7 @@ export default define(class Deduction extends Element {
 
     context.trace(`Unifying the '${statementString}' statement with the '${deductionString}' deduction's statement...`);
 
-    this.statement.unifyStatement(statement, generalContext, specificContext, (statementUnifies) => {
+    return this.statement.unifyStatement(statement, generalContext, specificContext, (statementUnifies) => {
       if (statementUnifies) {
         context.debug(`...unified the '${statementString}' statement with the '${deductionString}' deduction's statement.`);
       }

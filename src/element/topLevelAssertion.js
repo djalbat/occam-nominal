@@ -246,7 +246,7 @@ export default class TopLevelAssertion extends Element {
 
   dischargeHypotheses(context) {
     const hypotheses = this.getHypotheses(),
-          hypothesesDischarges = every(hypotheses, (hypothesis) => {
+          hypothesesDischarge = every(hypotheses, (hypothesis) => {
             const hypothesisDischarges = this.dischargeHypothesis(hypothesis, context);
 
             if (hypothesisDischarges) {
@@ -254,42 +254,49 @@ export default class TopLevelAssertion extends Element {
             }
           });
 
-    return hypothesesDischarges;
+    return hypothesesDischarge;
   }
 
-  unifyStepWithDeduction(step, context) {
-    let stepUnifiesWithDeduction = false;
+  unifyStepWithDeduction(step, context, continuation) {
+    const ruleString = this.getString(),
+          stepString = step.getString(),
+          conclusionString = this.conclusion.getString();
 
-    this.break(context);
+    context.trace(`Unifying the '${stepString}' step with the '${ruleString}' rule's '${conclusionString}' conclusion...`);
 
-    const stepString = step.getString(),
-          topLevelAssertionString = this.getString(); ///
+    return this.conclusion.unifyStep(step, context, (stepUnifies) => {
+      let stepUnifiesWithDeduction = false;
 
-    context.trace(`Unifying the '${stepString}' step with the '${topLevelAssertionString}' top level assertion's deduction...`);
+      if (stepUnifies) {
+        stepUnifiesWithDeduction = true;
+      }
 
-    const stepUnifies = this.deduction.unifyStep(step, context);
+      if (stepUnifiesWithDeduction) {
+        context.debug(`...unified the '${stepString}' step with the '${ruleString}' rule's '${conclusionString}' conclusion.`);
+      }
 
-    if (stepUnifies) {
-      stepUnifiesWithDeduction = true;
-    }
-
-    if (stepUnifiesWithDeduction) {
-      context.debug(`...unified the '${stepString}' step with the '${topLevelAssertionString}' top level assertion's deduction.`);
-    }
-
-    return stepUnifiesWithDeduction;
+      return continuation(stepUnifiesWithDeduction);
+    });
   }
 
-  unifyStepAndSubproofOrProofAssertions(step, subproofOrProofAssertions, context) {
-    let stepAndSubproofOrProofAssertionsUnify = false;
+  unifyStepAndSubproofOrProofAssertions(step, subproofOrProofAssertions, context, continuation) {
+    return this.unifyStepWithDeduction(step, context, (statementUnifiesWithDeduction) => {
+      if (!statementUnifiesWithDeduction) {
+        const stepAndSubproofOrProofAssertionsUnify = false;
 
-    const stepUnifiesWithDeduction = this.unifyStepWithDeduction(step, context);
+        return continuation(stepAndSubproofOrProofAssertionsUnify);
+      }
 
-    if (stepUnifiesWithDeduction) {
-      const hypothesesDischarges = this.dischargeHypotheses(context);
+      const hypothesesDischarge = this.dischargeHypotheses(context);
 
-      if (hypothesesDischarges) {
-        const subproofOrProofAssertionsUnifiesWithSuppositions = this.unifySubproofOrProofAssertionsWithSuppositions(subproofOrProofAssertions, context);
+      if (hypothesesDischarge) {
+        const stepAndSubproofOrProofAssertionsUnify = false;
+
+        return continuation(stepAndSubproofOrProofAssertionsUnify);
+      }
+
+      this.unifySubproofOrProofAssertionsWithSuppositions(subproofOrProofAssertions, context, (subproofOrProofAssertionsUnifiesWithSuppositions) => {
+        let stepAndSubproofOrProofAssertionsUnify = false;
 
         if (subproofOrProofAssertionsUnifiesWithSuppositions) {
           const derivedSubstitutionsResolved = context.areDerivedSubstitutionsResolved();
@@ -298,58 +305,34 @@ export default class TopLevelAssertion extends Element {
             stepAndSubproofOrProofAssertionsUnify = true;
           }
         }
-      }
-    }
 
-    return stepAndSubproofOrProofAssertionsUnify;
+        return continuation(stepAndSubproofOrProofAssertionsUnify);
+      });
+    });
   }
 
-  unifySubproofOrProofAssertionsWithSupposition(subproofOrProofAssertions, supposition, context) {
-    let subproofOrProofAssertionsUnifiesWithSupposition = false;
-
-    this.break(context);
-
-    if (!subproofOrProofAssertionsUnifiesWithSupposition) {
-      const subproofOrProofAssertion = extract(subproofOrProofAssertions, (subproofOrProofAssertion) => {
-        const subproofOrProofAssertionUnifies = supposition.unifySubproofOrProofAssertion(subproofOrProofAssertion, context);
-
-        if (subproofOrProofAssertionUnifies) {
-          context.resolveDerivedSubstitutions();
-
-          return true;
-        }
-      }) || null;
-
+  unifySubproofOrProofAssertionsWithSupposition(subproofOrProofAssertions, supposition, context, continuation) {
+    return extract(subproofOrProofAssertions, (subproofOrProofAssertion, continuation) => {
+      return supposition.unifySubproofOrProofAssertion(subproofOrProofAssertion, context, continuation);
+    }, (subproofOrProofAssertion = null) => {
       if (subproofOrProofAssertion !== null) {
-        subproofOrProofAssertionsUnifiesWithSupposition = true;
+        const subproofOrProofAssertionsUnifiesWithSupposition = true;
+
+        return context.resolveDerivedSubstitutions(() => {
+          return continuation(subproofOrProofAssertionsUnifiesWithSupposition);
+        });
       }
-    }
 
-    if (!subproofOrProofAssertionsUnifiesWithSupposition) {
-      const suppositionUnifiesIndependently = supposition.unifyIndependently(context);
-
-      if (suppositionUnifiesIndependently) {
-        subproofOrProofAssertionsUnifiesWithSupposition = true;
-      }
-    }
-
-    return subproofOrProofAssertionsUnifiesWithSupposition;
+      return supposition.unifyIndependently(context, continuation);
+    });
   }
 
-  unifySubproofOrProofAssertionsWithSuppositions(subproofOrProofAssertions, context) {
-    let subproofOrProofAssertionsUnifiesWithSuppositions;
-
+  unifySubproofOrProofAssertionsWithSuppositions(subproofOrProofAssertions, context, continuation) {
     subproofOrProofAssertions = reverse(subproofOrProofAssertions); ///
 
-    subproofOrProofAssertionsUnifiesWithSuppositions = backwardsEvery(this.suppositions, (supposition) => {
-      const stepUnifiesWithSupposition = this.unifySubproofOrProofAssertionsWithSupposition(subproofOrProofAssertions, supposition, context);
-
-      if (stepUnifiesWithSupposition) {
-        return true;
-      }
-    });
-
-    return subproofOrProofAssertionsUnifiesWithSuppositions;
+    return backwardsEvery(this.suppositions, (supposition, continuation) => {
+      return this.unifySubproofOrProofAssertionsWithSupposition(subproofOrProofAssertions, supposition, context, continuation);
+    }, continuation);
   }
 
   toJSON() {
