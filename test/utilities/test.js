@@ -14,7 +14,7 @@ function createSuite(logLevel, projectName, projectsDirectoryPath) {
 
   const log = Log.fromLogLevel(logLevel),
         callback = (breakPoint, context, continuation) => {
-          continuation();
+          continuation(breakPoint);
         },
         releaseContexts = [];
 
