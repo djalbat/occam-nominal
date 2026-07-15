@@ -8,7 +8,9 @@ export function variablesFromTerm(term, context) {
   const termNode = term.getNode(),
         variableNodes = termNode.getVariableNodes(),
         variables = variableNodes.map((variableNode) => {
-          const variable = context.findVariableByVariableNode(variableNode);
+          const variableIdentifier = variableNode.getVariableIdentifier(),
+                declaredVariable = context.findDeclaredVariableByVariableIdentifier(variableIdentifier),
+                variable = declaredVariable;  ///
 
           return variable;
         });

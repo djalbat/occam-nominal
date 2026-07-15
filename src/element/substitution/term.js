@@ -78,7 +78,7 @@ export default define(class TermSubstitution extends Substitution {
     return comparedToTerm;
   }
 
-  validate(context, continuatino) {
+  validate(context, continuation) {
     const termSubstitutionString = this.getString();  ///
 
     context.trace(`Validating the '${termSubstitutionString}' term substitution...`);
@@ -90,7 +90,7 @@ export default define(class TermSubstitution extends Substitution {
 
       context.debug(`...the '${termSubstitutionString}' term substitution is already valid.`);
 
-      return continuatino(termSubstitution);
+      return continuation(termSubstitution);
     }
 
     const generalContext = this.getGeneralContext(),
@@ -122,12 +122,12 @@ export default define(class TermSubstitution extends Substitution {
           context.debug(`...validated the '${termSubstitutionString}' term substitution.`);
         }
 
-        return continuatino(termSubstitution);
+        return continuation(termSubstitution);
       });
     }, generalContext, specificContext);
   }
 
-  validateTargetTerm(generalContext, specificContext, continuatino) {
+  validateTargetTerm(generalContext, specificContext, continuation) {
     const context = generalContext,  ///
           termSubstitutionString = this.getString();  ///
 
@@ -141,7 +141,7 @@ export default define(class TermSubstitution extends Substitution {
 
       context.debug(`The '${targetTermString}' target term is not singular.`);
 
-      return continuatino(targetTermValidates);
+      return continuation(targetTermValidates);
     }
 
     elide((context) => {
@@ -156,12 +156,12 @@ export default define(class TermSubstitution extends Substitution {
           context.debug(`...validated the '${termSubstitutionString}' term substitution's target term...`);
         }
 
-        return continuatino(targetTermValidates);
+        return continuation(targetTermValidates);
       });
     }, context);
   }
 
-  validateReplacementTerm(generalContext, specificContext, continuatino) {
+  validateReplacementTerm(generalContext, specificContext, continuation) {
     const context = specificContext,  ///
           termSubstitutionString = this.getString();  ///
 
@@ -179,7 +179,7 @@ export default define(class TermSubstitution extends Substitution {
           context.debug(`...validated the '${termSubstitutionString}' term substitution's replacement term.`);
         }
 
-        return continuatino(replacementTermValidates);
+        return continuation(replacementTermValidates);
       });
     }, context);
   }
@@ -385,7 +385,10 @@ function variableFromTermNode(termNode, generalContext) {
   const variableNode = termNode.getVariableNode();
 
   if (variableNode !== null) {
-    variable = generalContext.findVariableByVariableNode(variableNode);
+    const variableIdentifier = variableNode.getVariableIdentifier(),
+          declaredVariable = generalContext.findDeclaredVariableByVariableIdentifier(variableIdentifier);
+
+    variable = declaredVariable;  ///
   }
 
   return variable;

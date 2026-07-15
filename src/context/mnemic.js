@@ -512,14 +512,6 @@ export default class MnemicContext extends Context {
     return substitution;
   }
 
-  findVariableByVariableNode(variableNode) {
-    const variableIdentifier = variableNode.getVariableIdentifier(),
-          declaredVariable = this.findDeclaredVariableByVariableIdentifier(variableIdentifier),
-          variable = declaredVariable;  ///
-
-    return variable;
-  }
-
   isTermPresentByTermNode(termNode) {
     const term = this.findTermByTermNode(termNode),
       termPresent = (term !== null);

@@ -9,14 +9,18 @@ import { mergeEquivalences, equivalencesFromEquality, separateGroundedTermsAndDe
 const { last, clear } = arrayUtilities;
 
 class BoundedContext extends Context {
-  constructor(context, assignments, equivalences, declaredVariables, constraints, subproofOrProofAssertions) {
+  constructor(context, constraints, assignments, equivalences, declaredVariables, subproofOrProofAssertions) {
     super(context);
 
+    this.constraints = constraints;
     this.assignments = assignments;
     this.equivalences = equivalences;
     this.declaredVariables = declaredVariables;
-    this.constraints = constraints;
     this.subproofOrProofAssertions = subproofOrProofAssertions;
+  }
+
+  getConstraints() {
+    return this.constraints;
   }
 
   getAssignments() {
@@ -52,10 +56,6 @@ class BoundedContext extends Context {
     ];
 
     return declaredVariables;
-  }
-
-  getConstraints() {
-    return this.constraints;
   }
 
   getSubproofOrProofAssertions() {
@@ -289,7 +289,7 @@ class BoundedContext extends Context {
           declaredVariables = [],
           constraints = null,
           subproofOrProofAssertions = [],
-          boundedContext = new BoundedContext(context, assignments, equivalences, declaredVariables, constraints, subproofOrProofAssertions);
+          boundedContext = new BoundedContext(context, constraints, assignments, equivalences, declaredVariables, subproofOrProofAssertions);
 
     return boundedContext;
   }
@@ -299,7 +299,7 @@ class BoundedContext extends Context {
           equivalences = [],
           declaredVariables = [],
           subproofOrProofAssertions = [],
-          boundedContext = new BoundedContext(context, assignments, equivalences, declaredVariables, constraints, subproofOrProofAssertions);
+          boundedContext = new BoundedContext(context, constraints, assignments, equivalences, declaredVariables, subproofOrProofAssertions);
 
     return boundedContext;
   }

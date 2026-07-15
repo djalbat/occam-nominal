@@ -95,11 +95,7 @@ export function descend(innerFunction, context) {
 }
 
 export function ablate(innerFunction, context) {
-  const unreleased = context.isUnreleased();
-
-  if (unreleased) {
-    context = ablateContext(context); ///
-  }
+  context = ablateContext(context); ///
 
   return innerFunction(context);
 }
@@ -198,11 +194,7 @@ export function serialises(innerFunction, ...contexts) {
 
 export function ablates(innerFunction, ...contexts) {
   contexts = contexts.map((context) => {  ///
-    const unreleased = context.isUnreleased();
-
-    if (unreleased) {
-      context = ablateContext(context); ///
-    }
+    context = ablateContext(context); ///
 
     return context;
   });
@@ -223,28 +215,32 @@ function pareContext(context) {
 }
 
 function ablateContext(context) {
-  let phanericContext = null;
+  const unreleased = context.isUnreleased();
 
-  const contextPhanericContext = PhanericContext.prototype.isPrototypeOf(context);
+  if (unreleased) {
+    let phanericContext = null;
 
-  if (contextPhanericContext) {
-    phanericContext = context;  ///
+    const contextPhanericContext = PhanericContext.prototype.isPrototypeOf(context);
 
-    context = phanericContext.detach();
-  }
+    if (contextPhanericContext) {
+      phanericContext = context;  ///
 
-  let contextGroundedContext = isContextGroundedContext(context);
+      context = phanericContext.detach();
+    }
 
-  while (!contextGroundedContext) {
-    context = context.getContext();
+    let contextGroundedContext = isContextGroundedContext(context);
 
-    contextGroundedContext = isContextGroundedContext(context);
-  }
+    while (!contextGroundedContext) {
+      context = context.getContext();
 
-  if (phanericContext !== null) {
-    phanericContext.attach(context);
+      contextGroundedContext = isContextGroundedContext(context);
+    }
 
-    context = phanericContext;  ///
+    if (phanericContext !== null) {
+      phanericContext.attach(context);
+
+      context = phanericContext;  ///
+    }
   }
 
   return context;

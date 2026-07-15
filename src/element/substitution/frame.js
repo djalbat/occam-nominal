@@ -75,7 +75,7 @@ export default define(class FrameSubstitution extends Substitution {
     return comparedToFrame;
   }
 
-  validate(context, continuatino) {
+  validate(context, continuation) {
     const frameSubstitutionString = this.getString();  ///
 
     context.trace(`Validating the '${frameSubstitutionString}' frame substitution...`);
@@ -87,7 +87,7 @@ export default define(class FrameSubstitution extends Substitution {
 
       context.debug(`...the '${frameSubstitutionString}' frame substitution is already valid.`);
 
-      return continuatino(frameSubstitution);
+      return continuation(frameSubstitution);
     }
 
     const generalContext = this.getGeneralContext(),
@@ -119,12 +119,12 @@ export default define(class FrameSubstitution extends Substitution {
           context.debug(`...validated the '${frameSubstitutionString}' frame substitution.`);
         }
 
-        return continuatino(frameSubstitution);
+        return continuation(frameSubstitution);
       });
     }, generalContext, specificContext);
   }
 
-  validateTargetFrame(generalContext, specificContext, continuatino) {
+  validateTargetFrame(generalContext, specificContext, continuation) {
     const context = generalContext,  ///
           frameSubstitutionString = this.getString();  ///
 
@@ -138,7 +138,7 @@ export default define(class FrameSubstitution extends Substitution {
 
       context.debug(`The '${targetFrameString}' target frame is not singular.`);
 
-      return continuatino(targetFrameValidates);
+      return continuation(targetFrameValidates);
     }
 
     elide((context) => {
@@ -153,12 +153,12 @@ export default define(class FrameSubstitution extends Substitution {
           context.debug(`...validated the '${frameSubstitutionString}' frame substitution's target frame...`);
         }
 
-        return continuatino(targetFrameValidates);
+        return continuation(targetFrameValidates);
       });
     }, context);
   }
 
-  validateReplacementFrame(generalContext, specificContext, continuatino) {
+  validateReplacementFrame(generalContext, specificContext, continuation) {
     const context = specificContext,  ///
           frameSubstitutionString = this.getString();  ///
 
@@ -176,7 +176,7 @@ export default define(class FrameSubstitution extends Substitution {
           context.debug(`...validated the '${frameSubstitutionString}' frame substitution's replacement frame.`);
         }
 
-        return continuatino(replacementFrameValidates);
+        return continuation(replacementFrameValidates);
       });
     }, context);
   }

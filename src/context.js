@@ -295,13 +295,6 @@ export default class Context extends ContextBase {
     return frame;
   }
 
-  findVariableByVariableNode(variableNode) {
-    const context = this.getContext(),
-          variable = context.findVariableByVariableNode(variableNode);
-
-    return variable;
-  }
-
   findEqualityByEqualityNode(equalityNode) {
     const context = this.getContext(),
           equality = context.findEqualityByEqualityNode(equalityNode);

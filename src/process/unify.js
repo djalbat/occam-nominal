@@ -233,7 +233,9 @@ class MetaLevelPass extends ContinuationZipPassBase {
 
         context = generalContext; ///
 
-        const variable = context.findVariableByVariableNode(variableNode);
+        const variableIdentifier = variableNode.getVariableIdentifier(),
+              declaredVariable = context.findDeclaredVariableByVariableIdentifier(variableIdentifier),
+              variable = declaredVariable;  ///
 
         context = specificContext;  ///
 
@@ -411,7 +413,9 @@ class IntrinsicTermPass extends ContinuationZipPassBase {
 
         context = generalContext; ///
 
-        const variable = context.findVariableByVariableNode(variableNode);
+        const variableIdentifier = variableNode.getVariableIdentifier(),
+              declaredVariable = context.findDeclaredVariableByVariableIdentifier(variableIdentifier),
+              variable = declaredVariable;  ///
 
         context = specificContext;  ///
 
@@ -444,7 +448,9 @@ class IntrinsicMetavariablePass extends ContinuationZipPass {
 
         context = generalContext; ///
 
-        const variable = context.findVariableByVariableNode(variableNode);
+        const variableIdentifier = variableNode.getVariableIdentifier(),
+              declaredVariable = context.findDeclaredVariableByVariableIdentifier(variableIdentifier),
+              variable = declaredVariable;  ///
 
         context = specificContext;  ///
 

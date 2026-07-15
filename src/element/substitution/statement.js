@@ -78,7 +78,7 @@ export default define(class StatementSubstitution extends Substitution {
     return comparesToParameter;
   }
 
-  validate(context, continuatino) {
+  validate(context, continuation) {
     const statementSubstitutionString = this.getString();  ///
 
     context.trace(`Validating the '${statementSubstitutionString}' statement substitution...`);
@@ -90,7 +90,7 @@ export default define(class StatementSubstitution extends Substitution {
 
       context.debug(`...the '${statementSubstitutionString}' statement substitution is already valid.`);
 
-      continuatino(statementSubstitution);
+      continuation(statementSubstitution);
 
       return;
     }
@@ -124,12 +124,12 @@ export default define(class StatementSubstitution extends Substitution {
           context.debug(`...validated the '${statementSubstitutionString}' statement substitution.`);
         }
 
-        return continuatino(statementSubstitution);
+        return continuation(statementSubstitution);
       });
     }, generalContext, specificContext);
   }
 
-  validateTargetStatement(generalContext, specificContext, continuatino) {
+  validateTargetStatement(generalContext, specificContext, continuation) {
     const context = generalContext,  ///
           statementSubstitutionString = this.getString();  ///
 
@@ -143,7 +143,7 @@ export default define(class StatementSubstitution extends Substitution {
 
       context.debug(`The '${targetStatementString}' target statement is not singular.`);
 
-      continuatino(targetStatementValidates);
+      continuation(targetStatementValidates);
 
       return;
     }
@@ -160,12 +160,12 @@ export default define(class StatementSubstitution extends Substitution {
           context.debug(`...validated the '${statementSubstitutionString}' statement substitution's target statement...`);
         }
 
-        continuatino(targetStatementValidates);
+        continuation(targetStatementValidates);
       });
     }, context);
   }
 
-  validateReplacementStatement(generalContext, specificContext, continuatino) {
+  validateReplacementStatement(generalContext, specificContext, continuation) {
     const context = specificContext,  ///
           statementSubstitutionString = this.getString();  ///
 
@@ -183,7 +183,7 @@ export default define(class StatementSubstitution extends Substitution {
           context.debug(`...validated the '${statementSubstitutionString}' statement substitution's replacement statement.`);
         }
 
-        continuatino(replacementStatementValidates);
+        continuation(replacementStatementValidates);
       });
     }, context);
   }

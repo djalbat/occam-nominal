@@ -100,9 +100,7 @@ export default define(class Variable extends Element {
 
       context.debug(`The '${variableString}' variable is not present.`);
 
-      continuation(variable);
-
-      return;
+      return continuation(variable);
     }
 
     const type = declaredVariable.getType(),
@@ -120,69 +118,74 @@ export default define(class Variable extends Element {
 
     context.debug(`...validated the '${variableString}' variable.`);
 
-    continuation(variable);
+    return continuation(variable);
   }
 
-  unifyTerm(term, generalContext, specificContext) {
-    let termUnifies = false;
-
+  unifyTerm(term, generalContext, specificContext, continuation) {
     const context = specificContext,  ///
           termString = term.getString(),
           variableString = this.getString(); ///
 
     context.trace(`Unifying the '${termString}' term with the '${variableString}' variable...`);
 
+    const termVariableCompares = this.compareTermVariable(term, generalContext, specificContext);
+
+    if (termVariableCompares) {
+      const termUnifies = true;
+
+      return continuation(termUnifies);
+    }
+
     const variable = this,  ///
-          termVariableUnifies = this.unifyTermVariable(term, generalContext, specificContext);
+          variableNode = variable.getNode(),
+          derivedSubstitution = context.findDerivedSubstitutionByVariableNode(variableNode);
 
-    if (termVariableUnifies) {
-      termUnifies = true;
-    } else {
-      const variableNode = variable.getNode(),
-            derivedSubstitution = context.findDerivedSubstitutionByVariableNode(variableNode);
+    if (derivedSubstitution !== null) {
+      let termUnifies = false;
 
-      if (derivedSubstitution !== null) {
-        const derivedSubstitutionTermComparesToTerm = derivedSubstitution.compareTerm(term, context);
+      const derivedSubstitutionTermComparesToTerm = derivedSubstitution.compareTerm(term, context);
 
-        if (derivedSubstitutionTermComparesToTerm) {
-          const derivedSubstitutionString = derivedSubstitution.getString();
+      if (derivedSubstitutionTermComparesToTerm) {
+        const derivedSubstitutionString = derivedSubstitution.getString();
 
-          context.trace(`The '${derivedSubstitutionString}' derived substitution is already present.`);
+        context.trace(`The '${derivedSubstitutionString}' derived substitution is already present.`);
 
-          termUnifies = true;
-        }
-      } else {
-        const { TermSubstitution } = elements;
+        termUnifies = true;
+      }
+      
+      return continuation(termUnifies);
+    }
 
-        let termSubstitution;
+    const { TermSubstitution } = elements,
+          termSubstitution = TermSubstitution.fromTermAndVariable(term, variable, generalContext, specificContext);
 
-        termSubstitution = TermSubstitution.fromTermAndVariable(term, variable, generalContext, specificContext);
+    termSubstitution.validate(context, (termSubstitution) => {
+      let termUnifies = false;
 
-        termSubstitution = termSubstitution.validate(context);  ///
-
+      if (termSubstitution !== null) {
         const derivedSubstitution = termSubstitution;  ///
 
         context.addDerivedSubstitution(derivedSubstitution);
 
         termUnifies = true;
       }
-    }
 
-    if (termUnifies) {
-      context.debug(`...unified the '${termString}' term with the '${variableString}' variable.`);
-    }
+      if (termUnifies) {
+        context.debug(`...unified the '${termString}' term with the '${variableString}' variable.`);
+      }
 
-    return termUnifies;
+      return continuation(termUnifies);
+    });
   }
 
-  unifyTermVariable(term, generalContext, specificContext) {
-    let termVariableUnifies = false;
+  compareTermVariable(term, generalContext, specificContext) {
+    let termVariableCompares = false;
 
     const context = specificContext,  ///
           termString = term.getString(),
           variableString = this.getString();  ///
 
-    context.trace(`Unifying the '${termString}' term's variable with the '${variableString}' variable...`);
+    context.trace(`Comparing the '${termString}' term's variable with the '${variableString}' variable...`);
 
     const generalContextFilePath = generalContext.getFilePath(),
           specificContextFilePath = specificContext.getFilePath();
@@ -192,15 +195,15 @@ export default define(class Variable extends Element {
             variableNodeMatches = term.matchVariableNode(variableNode);
 
       if (variableNodeMatches) {
-        termVariableUnifies = true;
+        termVariableCompares = true;
       }
     }
 
-    if (termVariableUnifies) {
-      context.debug(`...unified the '${termString}' term's variable with the '${variableString}' variable.`);
+    if (termVariableCompares) {
+      context.debug(`...compared the '${termString}' term's variable with the '${variableString}' variable.`);
     }
 
-    return termVariableUnifies;
+    return termVariableCompares;
   }
 
   toJSON() {
