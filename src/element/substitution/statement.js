@@ -129,33 +129,6 @@ export default define(class StatementSubstitution extends Substitution {
     }, generalContext, specificContext);
   }
 
-  // validateSubstitution(substitution, generalContext, specificContext, continuatino) {
-  //   if (substitution === null) {
-  //     const substitutionValidates = true;
-  //
-  //     continuatino(substitutionValidates);
-  //
-  //     return;
-  //   }
-  //
-  //   let substitutionValidates;
-  //
-  //   const context = generalContext,  ///
-  //         statementSubstitutionString = this.getString(); ///
-  //
-  //   context.trace(`Validating the '${statementSubstitutionString}' statement substitution's substitution...`);
-  //
-  //   this.substitution = substitution;
-  //
-  //   substitutionValidates = true;
-  //
-  //   if (substitutionValidates) {
-  //     context.debug(`...validatewd the '${statementSubstitutionString}' statement substitution's substitution.`);
-  //   }
-  //
-  //   continuatino(substitutionValidates);
-  // }
-
   validateTargetStatement(generalContext, specificContext, continuatino) {
     const context = generalContext,  ///
           statementSubstitutionString = this.getString();  ///
@@ -175,23 +148,21 @@ export default define(class StatementSubstitution extends Substitution {
       return;
     }
 
-    manifest((context) => {
-      elide((context) => {
-        this.targetStatement.validate(context, (targetStatement) => {
-          let targetStatementValidates = false;
+    elide((context) => {
+      this.targetStatement.validate(context, (targetStatement) => {
+        let targetStatementValidates = false;
 
-          if (targetStatement !== null) {
-            targetStatementValidates = true;
-          }
+        if (targetStatement !== null) {
+          targetStatementValidates = true;
+        }
 
-          if (targetStatementValidates) {
-            context.debug(`...validated the '${statementSubstitutionString}' statement substitution's target statement...`);
-          }
+        if (targetStatementValidates) {
+          context.debug(`...validated the '${statementSubstitutionString}' statement substitution's target statement...`);
+        }
 
-          continuatino(targetStatementValidates);
-        });
-      }, context);
-    }, specificContext, context);
+        continuatino(targetStatementValidates);
+      });
+    }, context);
   }
 
   validateReplacementStatement(generalContext, specificContext, continuatino) {
@@ -342,8 +313,14 @@ export default define(class StatementSubstitution extends Substitution {
         return continuation();
       }
 
-      return this.substitution.unifySubstitution(substitution, context, (simpleSubstitutionUnifies) => {
-        if (simpleSubstitutionUnifies) {
+      const replacementSubstitution = substitution; ///
+
+      substitution = this.targetStatement.getSubstitution();
+
+      const targetSubstitution = substitution; ///
+
+      return targetSubstitution.unifySubstitution(replacementSubstitution, context, (substitutionUnifies) => {
+        if (substitutionUnifies) {
           this.resolved = true;
 
           context.debug(`...resolved the '${complexSubstitutionString}' complex substitution.`);
@@ -368,7 +345,7 @@ export default define(class StatementSubstitution extends Substitution {
                 statementSubstitutionNode = instantiateStatementSubstitution(string, context),
                 node = statementSubstitutionNode, ///
                 breakPoint = breakPointFromJSON(json),
-                resolved = resolvedFromStatementSubstitutionNode(statementSubstitutionNode, context),
+                resolved = resolvedFromStatementSubstitutionNode(statementSubstitutionNode, generalContext, specificContext),
                 targetStatement = targetStatementFromStatementSubstitutionNode(statementSubstitutionNode, generalContext),
                 replacementStatement = replacementStatementFromStatementSubstitutionNode(statementSubstitutionNode, specificContext),
                 contexts = [
@@ -392,16 +369,16 @@ export default define(class StatementSubstitution extends Substitution {
     let statementSubstitution;
 
     ablates((generalContext, specificContext) => {
-      const context = specificContext;  ///
+      instantiate((specificContext) => {
+        manifest((generalContext) => {
+          const statementSubstitutionString = statementSubstitutionStringFromStatementAndMetavariable(statement, metavariable),
+                string = statementSubstitutionString, ///
+                context = specificContext,  ///
+                statementSubstitutionNode = instantiateStatementSubstitution(string, context);
 
-      instantiate((context) => {
-        const specificContext = context,  ///
-              statementSubstitutionString = statementSubstitutionStringFromStatementAndMetavariable(statement, metavariable),
-              string = statementSubstitutionString, ///
-              statementSubstitutionNode = instantiateStatementSubstitution(string, context);
-
-        statementSubstitution = statementSubstitutionFromStatementSubstitutionNode(statementSubstitutionNode, generalContext, specificContext);
-      }, context);
+          statementSubstitution = statementSubstitutionFromStatementSubstitutionNode(statementSubstitutionNode, generalContext, specificContext);
+        }, generalContext, specificContext);
+      }, specificContext);
     }, generalContext, specificContext);
 
     return statementSubstitution;
@@ -415,23 +392,23 @@ export default define(class StatementSubstitution extends Substitution {
     let statementSubstitution;
 
     ablates((generalContext, specificContext) => {
-      const context = specificContext;  ///
+      instantiate((specificContext) => {
+        manifest((generalContext) => {
+          const statementSubstitutionString = statementSubstitutionStringFromStatementMetavariableAndSubstitution(statement, metavariable, substitution),
+                string = statementSubstitutionString, ///
+                context = specificContext,  ///
+                statementSubstitutionNode = instantiateStatementSubstitution(string, context);
 
-      instantiate((context) => {
-        const statementSubstitutionString = statementSubstitutionStringFromStatementMetavariableAndSubstitution(statement, metavariable, substitution),
-              string = statementSubstitutionString, ///
-              statementSubstitutionNode = instantiateStatementSubstitution(string, context),
-              specificContext = context;  ///
-
-        statementSubstitution = statementSubstitutionFromStatementSubstitutionNode(statementSubstitutionNode, generalContext, specificContext);
-      }, context);
+          statementSubstitution = statementSubstitutionFromStatementSubstitutionNode(statementSubstitutionNode, generalContext, specificContext);
+        }, generalContext, specificContext);
+      }, specificContext);
     }, generalContext, specificContext);
 
     return statementSubstitution;
   }
 });
 
-function resolvedFromStatementSubstitutionNode(statementSubstitutionNode, context) {
+function resolvedFromStatementSubstitutionNode(statementSubstitutionNode, generalContext, specificContext) {
   const resolved = true;
 
   return resolved;

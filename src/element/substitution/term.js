@@ -144,23 +144,21 @@ export default define(class TermSubstitution extends Substitution {
       return continuatino(targetTermValidates);
     }
 
-    manifest((context) => {
-      elide((context) => {
-        return this.targetTerm.validate(context, (targetTerm) => {
-          let targetTermValidates = false;
+    elide((context) => {
+      return this.targetTerm.validate(context, (targetTerm) => {
+        let targetTermValidates = false;
 
-          if (targetTerm !== null) {
-            targetTermValidates = true;
-          }
+        if (targetTerm !== null) {
+          targetTermValidates = true;
+        }
 
-          if (targetTermValidates) {
-            context.debug(`...validated the '${termSubstitutionString}' term substitution's target term...`);
-          }
+        if (targetTermValidates) {
+          context.debug(`...validated the '${termSubstitutionString}' term substitution's target term...`);
+        }
 
-          return continuatino(targetTermValidates);
-        });
-      }, context);
-    }, specificContext, context);
+        return continuatino(targetTermValidates);
+      });
+    }, context);
   }
 
   validateReplacementTerm(generalContext, specificContext, continuatino) {
@@ -323,8 +321,8 @@ export default define(class TermSubstitution extends Substitution {
                 termSubstitutionNode = instantiateTermSubstitution(string, context),
                 node = termSubstitutionNode,  ///
                 breakPoint = breakPointFromJSON(json),
-                targetTerm = targetTermFromTermSubstitutionNode(termSubstitutionNode, generalContext, specificContext),
-                replacementTerm = replacementTermFromTermSubstitutionNode(termSubstitutionNode, generalContext, specificContext),
+                targetTerm = targetTermFromTermSubstitutionNode(termSubstitutionNode, generalContext),
+                replacementTerm = replacementTermFromTermSubstitutionNode(termSubstitutionNode, specificContext),
                 contexts = [
                   generalContext,
                   specificContext
@@ -363,16 +361,16 @@ export default define(class TermSubstitution extends Substitution {
     let termSubstitution;
 
     ablates((generalContext, specificContext) => {
-      const context = specificContext;  ///
+      instantiate((specificContext) => {
+        manifest((generalContext) => {
+          const termSubstitutionString = termSubstitutionStringFromTermAndVariable(term, variable),
+                string = termSubstitutionString,  ///
+                context = specificContext,  ///
+                termSubstitutionNode = instantiateTermSubstitution(string, context);
 
-      instantiate((context) => {
-        const specificContext = context, ///
-              termSubstitutionString = termSubstitutionStringFromTermAndVariable(term, variable),
-              string = termSubstitutionString,  ///
-              termSubstitutionNode = instantiateTermSubstitution(string, context);
-
-        termSubstitution = termSubstitutionFromTermSubstitutionNode(termSubstitutionNode, generalContext, specificContext);
-      }, context);
+          termSubstitution = termSubstitutionFromTermSubstitutionNode(termSubstitutionNode, generalContext, specificContext);
+        }, generalContext, specificContext);
+      }, specificContext);
     }, generalContext, specificContext);
 
     return termSubstitution;
@@ -391,14 +389,14 @@ function variableFromTermNode(termNode, generalContext) {
   return variable;
 }
 
-function targetTermFromTermSubstitutionNode(termSubstitutionNode, generalContext, specificContext) {
+function targetTermFromTermSubstitutionNode(termSubstitutionNode, generalContext) {
   const targetTermNode = termSubstitutionNode.getTargetTermNode(),
         targetTerm = generalContext.findTermByTermNode(targetTermNode);
 
   return targetTerm;
 }
 
-function replacementTermFromTermSubstitutionNode(termSubstitutionNode, generalContext, specificContext) {
+function replacementTermFromTermSubstitutionNode(termSubstitutionNode, specificContext) {
   const replacementTermNode = termSubstitutionNode.getReplacementTermNode(),
         replacementTerm = specificContext.findTermByTermNode(replacementTermNode);
 

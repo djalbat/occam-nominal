@@ -69,7 +69,7 @@ export default define(class Statement extends Element {
   }
 
   isSimple() {
-    const simple = true;
+    const simple = (this.substitution === null);
 
     return simple;
   }

@@ -141,23 +141,21 @@ export default define(class FrameSubstitution extends Substitution {
       return continuatino(targetFrameValidates);
     }
 
-    manifest((context) => {
-      elide((context) => {
-        return this.targetFrame.validate(context, (targetFrame) => {
-          let targetFrameValidates = false;
+    elide((context) => {
+      return this.targetFrame.validate(context, (targetFrame) => {
+        let targetFrameValidates = false;
 
-          if (targetFrame !== null) {
-            targetFrameValidates = true;
-          }
+        if (targetFrame !== null) {
+          targetFrameValidates = true;
+        }
 
-          if (targetFrameValidates) {
-            context.debug(`...validated the '${frameSubstitutionString}' frame substitution's target frame...`);
-          }
+        if (targetFrameValidates) {
+          context.debug(`...validated the '${frameSubstitutionString}' frame substitution's target frame...`);
+        }
 
-          return continuatino(targetFrameValidates);
-        });
-      }, context);
-    }, specificContext, context);
+        return continuatino(targetFrameValidates);
+      });
+    }, context);
   }
 
   validateReplacementFrame(generalContext, specificContext, continuatino) {
@@ -356,16 +354,16 @@ export default define(class FrameSubstitution extends Substitution {
     let frameSubstitution
 
     ablates((generalContext, specificContext) => {
-      const context = specificContext;  ///
+      instantiate((specificContext) => {
+        manifest((generalContext) => {
+          const frameSubstitutionString = frameSubstitutionStringFromFrameAndMetavariable(frame, metavariable),
+                string = frameSubstitutionString,  ///
+                context = specificContext,  ///
+                frameSubstitutionNode = instantiateFrameSubstitution(string, context);
 
-      instantiate((context) => {
-        const specificContext = context,  ///
-              frameSubstitutionString = frameSubstitutionStringFromFrameAndMetavariable(frame, metavariable),
-              string = frameSubstitutionString,  ///
-              frameSubstitutionNode = instantiateFrameSubstitution(string, context);
-
-        frameSubstitution = frameSubstitutionFromFrameSubstitutionNode(frameSubstitutionNode, generalContext, specificContext);
-      }, context);
+          frameSubstitution = frameSubstitutionFromFrameSubstitutionNode(frameSubstitutionNode, generalContext, specificContext);
+        }, generalContext, specificContext);
+      }, specificContext);
     }, generalContext, specificContext);
 
     return frameSubstitution;

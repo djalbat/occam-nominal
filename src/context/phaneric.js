@@ -6,7 +6,7 @@ import Context from "../context";
 
 import { EMPTY_STRING } from "../constants";
 
-const { last } = arrayUtilities;
+const { first } = arrayUtilities;
 
 export default class PhanericContext extends Context {
   constructor(context, contexts) {
@@ -34,8 +34,8 @@ export default class PhanericContext extends Context {
   }
 
   static fromContexts(contexts) {
-    const lastContext = last(contexts),
-          context = lastContext,  ///
+    const firstContext = first(contexts),
+          context = firstContext,  ///
           phanericContext = new PhanericContext(context, contexts);
 
     return phanericContext;

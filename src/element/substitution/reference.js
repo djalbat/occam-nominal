@@ -152,15 +152,13 @@ export default define(class ReferenceSubstitution extends Substitution {
 
     context.trace(`Validating the '${referenceSubstitutionString}' reference substitution's target reference...`);
 
-    manifest((context) => {
-      elide((context) => {
-        const targetReference = this.targetReference.validate(context);
+    elide((context) => {
+      const targetReference = this.targetReference.validate(context);
 
-        if (targetReference !== null) {
-          targetReferenceValidates = true;
-        }
-      }, context);
-    }, specificContext, context);
+      if (targetReference !== null) {
+        targetReferenceValidates = true;
+      }
+    }, context);
 
     if (targetReferenceValidates) {
       context.debug(`...validated the '${referenceSubstitutionString}' reference substitution's target reference...`);
@@ -225,18 +223,18 @@ export default define(class ReferenceSubstitution extends Substitution {
     let referenceSubstitution;
 
     ablates((generalContext, specificContext) => {
-      const context = specificContext;  ///
+      instantiate((specificContext) => {
+        manifest((generalContext) => {
+          const metavariable = assumption.getMetavariable(),
+                reference = constraint.getReference(),
+                referenceSubstitutionString = referenceSubstitutionStringFromReferenceAndMetavariable(reference, metavariable),
+                string = referenceSubstitutionString,  ///
+                context = specificContext,  ///
+                referenceSubstitutionNode = instantiateReferenceSubstitution(string, context);
 
-      instantiate((context) => {
-        const specificContext = context,  ///
-              metavariable = assumption.getMetavariable(),
-              reference = constraint.getReference(),
-              referenceSubstitutionString = referenceSubstitutionStringFromReferenceAndMetavariable(reference, metavariable),
-              string = referenceSubstitutionString,  ///
-              referenceSubstitutionNode = instantiateReferenceSubstitution(string, context);
-
-        referenceSubstitution = referenceSubstitutionFromReferenceSubstitutionNode(referenceSubstitutionNode, generalContext, specificContext);
-      }, context);
+          referenceSubstitution = referenceSubstitutionFromReferenceSubstitutionNode(referenceSubstitutionNode, generalContext, specificContext);
+        }, generalContext, specificContext);
+      }, specificContext);
     }, generalContext, specificContext);
 
     return referenceSubstitution;
@@ -246,16 +244,16 @@ export default define(class ReferenceSubstitution extends Substitution {
     let referenceSubstitution;
 
     ablates((generalContext, specificContext) => {
-      const context = specificContext;  ///
+      instantiate((specificContext) => {
+        manifest((generalContext) => {
+          const referenceSubstitutionString = referenceSubstitutionStringFromReferenceAndMetavariable(reference, metavariable),
+                string = referenceSubstitutionString,  ///
+                context = specificContext,  ///
+                referenceSubstitutionNode = instantiateReferenceSubstitution(string, context);
 
-      instantiate((context) => {
-        const specificContext = context,  ///
-              referenceSubstitutionString = referenceSubstitutionStringFromReferenceAndMetavariable(reference, metavariable),
-              string = referenceSubstitutionString,  ///
-              referenceSubstitutionNode = instantiateReferenceSubstitution(string, context);
-
-        referenceSubstitution = referenceSubstitutionFromReferenceSubstitutionNode(referenceSubstitutionNode, generalContext, specificContext);
-      }, context);
+          referenceSubstitution = referenceSubstitutionFromReferenceSubstitutionNode(referenceSubstitutionNode, generalContext, specificContext);
+        }, generalContext, specificContext);
+      }, specificContext);
     }, generalContext, specificContext);
 
     return referenceSubstitution;

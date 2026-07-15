@@ -215,6 +215,14 @@ export default define(class Frame extends Element {
   }
 
   validateAssumptions(context, continuation) {
+    const assumptionsLength = this.assumptions.length;
+
+    if (assumptionsLength === 0) {
+      const assumptionsValidate = true;
+
+      return continuation(assumptionsValidate);
+    }
+
     const frameString = this.getString();
 
     context.trace(`Validating the '${frameString}' frame's assumptions...`);

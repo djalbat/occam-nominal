@@ -688,15 +688,15 @@ export function definedAssertionFromDefinedAssertionNode(definedAssertionNode, c
 export function termSubstitutionFromTermSubstitutionNode(termSubstitutionNode, generalContext, specificContext) {
   const { TermSubstitution } = elements,
         node = termSubstitutionNode,  ///
-        context = specificContext,  ///
         contexts = [
           generalContext,
           specificContext
         ],
+        context = specificContext,  ///
         string = context.nodeAsString(node),
         breakPoint = null,
-        targetTerm = targetTermFromTermSubstitutionNode(termSubstitutionNode, context),
-        replacementTerm = replacementTermFromTermSubstitutionNode(termSubstitutionNode, context),
+        targetTerm = targetTermFromTermSubstitutionNode(termSubstitutionNode, generalContext),
+        replacementTerm = replacementTermFromTermSubstitutionNode(termSubstitutionNode, specificContext),
         termSubstitution = new TermSubstitution(contexts, string, node, breakPoint, targetTerm, replacementTerm);
 
   return termSubstitution;
@@ -705,15 +705,15 @@ export function termSubstitutionFromTermSubstitutionNode(termSubstitutionNode, g
 export function frameSubstitutionFromFrameSubstitutionNode(frameSubstitutionNode, generalContext, specificContext) {
   const { FrameSubstitution } = elements,
         node = frameSubstitutionNode,  ///
-        context = specificContext,  ///
         contexts = [
           generalContext,
           specificContext
         ],
+        context = specificContext,  ///
         string = context.nodeAsString(node),
         breakPoint = null,
-        targetFrame = targetFrameFromFrameSubstitutionNode(frameSubstitutionNode, context),
-        replacementFrame = replacementFrameFromFrameSubstitutionNode(frameSubstitutionNode, context),
+        targetFrame = targetFrameFromFrameSubstitutionNode(frameSubstitutionNode, generalContext),
+        replacementFrame = replacementFrameFromFrameSubstitutionNode(frameSubstitutionNode, specificContext),
         frameSubstitution = new FrameSubstitution(contexts, string, node, breakPoint, targetFrame, replacementFrame);
 
   return frameSubstitution;
@@ -925,15 +925,15 @@ export function combinatorDeclarationFromCombinatorDeclarationNode(combinatorDec
 export function referenceSubstitutionFromReferenceSubstitutionNode(referenceSubstitutionNode, generalContext, specificContext) {
   const { ReferenceSubstitution } = elements,
         node = referenceSubstitutionNode,  ///
-        context = specificContext,  ///
         contexts = [
           generalContext,
           specificContext
         ],
+        context = specificContext,  ///
         string = context.nodeAsString(node),
         breakPoint = null,
-        targetReference = targetReferenceFromReferenceSubstitutionNode(referenceSubstitutionNode, context),
-        replacementReference = replacementReferenceFromReferenceSubstitutionNode(referenceSubstitutionNode, context),
+        targetReference = targetReferenceFromReferenceSubstitutionNode(referenceSubstitutionNode, generalContext),
+        replacementReference = replacementReferenceFromReferenceSubstitutionNode(referenceSubstitutionNode, specificContext),
         referenceSubstitution = new ReferenceSubstitution(contexts, string, node, breakPoint, targetReference, replacementReference);
 
   return referenceSubstitution;
@@ -942,16 +942,16 @@ export function referenceSubstitutionFromReferenceSubstitutionNode(referenceSubs
 export function statementSubstitutionFromStatementSubstitutionNode(statementSubstitutionNode, generalContext, specificContext) {
   const { StatementSubstitution } = elements,
         node = statementSubstitutionNode,  ///
-        context = specificContext,  ///
         contexts = [
           generalContext,
           specificContext
         ],
+        context = specificContext,  ///
         string = context.nodeAsString(node),
         breakPoint = null,
-        resolved = resolvedFromStatementSubstitutionNode(statementSubstitutionNode, context),
-        targetStatement = targetStatementFromStatementSubstitutionNode(statementSubstitutionNode, context),
-        replacementStatement = replacementStatementFromStatementSubstitutionNode(statementSubstitutionNode, context),
+        resolved = resolvedFromStatementSubstitutionNode(statementSubstitutionNode, generalContext, specificContext),
+        targetStatement = targetStatementFromStatementSubstitutionNode(statementSubstitutionNode, generalContext),
+        replacementStatement = replacementStatementFromStatementSubstitutionNode(statementSubstitutionNode, specificContext),
         statementSubstitution = new StatementSubstitution(contexts, string, node, breakPoint, resolved, targetStatement, replacementStatement);
 
   return statementSubstitution;
@@ -1914,8 +1914,9 @@ export function negatedFromContainedAssertionNode(containedAssertionNode, contex
   return negated;
 }
 
-export function targetTermFromTermSubstitutionNode(termSubstitutionNode, context) {
-  const targetTermNode = termSubstitutionNode.getTargetTermNode(),
+export function targetTermFromTermSubstitutionNode(termSubstitutionNode, generalContext) {
+  const context = generalContext, ///
+        targetTermNode = termSubstitutionNode.getTargetTermNode(),
         targetTerm = termFromTermNode(targetTermNode, context);
 
   return targetTerm;
@@ -2099,8 +2100,9 @@ export function subjectTermFromPropertyAssertionNode(propertyAssertionNode, cont
   return subjectTerm;
 }
 
-export function targetFrameFromFrameSubstitutionNode(frameSubstitutionNode, context) {
-  const targetFrameNode = frameSubstitutionNode.getTargetFrameNode(),
+export function targetFrameFromFrameSubstitutionNode(frameSubstitutionNode, generalContext) {
+  const context = generalContext, ///
+        targetFrameNode = frameSubstitutionNode.getTargetFrameNode(),
         targetFrame = frameFromFrameNode(targetFrameNode, context);
 
   return targetFrame;
@@ -2152,7 +2154,7 @@ export function generatorFromGeneratorDeclarationNode(generatorDeclarationNode, 
   return generator;
 }
 
-export function resolvedFromStatementSubstitutionNode(statementSubstitutionNode, context) {
+export function resolvedFromStatementSubstitutionNode(statementSubstitutionNode, generalContext, specificContext) {
   const resolved = statementSubstitutionNode.isResolved();
 
   return resolved;
@@ -2177,8 +2179,9 @@ export function procedureReferenceFromProcedureCallNode(procedureCallNode, conte
   return procedureReference;
 }
 
-export function replacementTermFromTermSubstitutionNode(termSubstitutionNode, context) {
-  const replacementTermNode = termSubstitutionNode.getReplacementTermNode(),
+export function replacementTermFromTermSubstitutionNode(termSubstitutionNode, specificContext) {
+  const context = specificContext, //////
+        replacementTermNode = termSubstitutionNode.getReplacementTermNode(),
         replacementTerm = termFromTermNode(replacementTermNode, context);
 
   return replacementTerm;
@@ -2211,8 +2214,9 @@ export function metaTypeFromMetavariableDeclarationNode(metavariableDeclarationN
   return metaType;
 }
 
-export function replacementFrameFromFrameSubstitutionNode(frameSubstitutionNode, context) {
-  const replacementFrameNode = frameSubstitutionNode.getReplacementFrameNode(),
+export function replacementFrameFromFrameSubstitutionNode(frameSubstitutionNode, specificContext) {
+  const context = specificContext, ///
+        replacementFrameNode = frameSubstitutionNode.getReplacementFrameNode(),
         replacementFrame = frameFromFrameNode(replacementFrameNode, context);
 
   return replacementFrame;
@@ -2238,8 +2242,9 @@ export function metavariableFromMetavariableDeclarationNode(metavariableDeclarat
   return metavariable;
 }
 
-export function targetReferenceFromReferenceSubstitutionNode(referenceSubstitutionNode, context) {
+export function targetReferenceFromReferenceSubstitutionNode(referenceSubstitutionNode, generalContext) {
   const { Reference } = elements,
+        context = generalContext, ///
         targetReferenceNode = referenceSubstitutionNode.getTargetReferenceNode(),
         targetReferenceString = context.nodeAsString(targetReferenceNode),
         targetReference = Reference.fromReferenceString(targetReferenceString, context);
@@ -2247,8 +2252,9 @@ export function targetReferenceFromReferenceSubstitutionNode(referenceSubstituti
   return targetReference;
 }
 
-export function targetStatementFromStatementSubstitutionNode(statementSubstitutionNode, context) {
-  const targetStatementNode = statementSubstitutionNode.getTargetStatementNode(),
+export function targetStatementFromStatementSubstitutionNode(statementSubstitutionNode, generalContext) {
+  const context = generalContext, ///
+        targetStatementNode = statementSubstitutionNode.getTargetStatementNode(),
         targetStatement = statementFromStatementNode(targetStatementNode, context);
 
   return targetStatement;
@@ -2261,8 +2267,9 @@ export function propertyDeclarationsFromCotypeDeclarationNode(cotypeDeclarationN
   return propertyDeclarations;
 }
 
-export function replacementReferenceFromReferenceSubstitutionNode(referenceSubstitutionNode, context) {
+export function replacementReferenceFromReferenceSubstitutionNode(referenceSubstitutionNode, specificContext) {
   const { Reference } = elements,
+        context = specificContext, ///
         replacementReferenceNode = referenceSubstitutionNode.getReplacementReferenceNode(),
         replacementReferenceString = context.nodeAsString(replacementReferenceNode),
         replacementReference = Reference.fromReferenceString(replacementReferenceString, context);
@@ -2270,8 +2277,9 @@ export function replacementReferenceFromReferenceSubstitutionNode(referenceSubst
   return replacementReference;
 }
 
-export function replacementStatementFromStatementSubstitutionNode(statementSubstitutionNode, context) {
-  const replacementStatementNode = statementSubstitutionNode.getReplacementStatementNode(),
+export function replacementStatementFromStatementSubstitutionNode(statementSubstitutionNode, specificContext) {
+  const context = specificContext, ///
+        replacementStatementNode = statementSubstitutionNode.getReplacementStatementNode(),
         replacementStatement = statementFromStatementNode(replacementStatementNode, context);
 
   return replacementStatement;

@@ -249,21 +249,21 @@ export default define(class Metavariable extends Element {
       context.debug(`...validated the '${metavariableString}' metavariable's name.`);
     }
 
-    continuation(nameValidates);
+    return continuation(nameValidates);
   }
 
   validateTerm(strict, context, continuation) {
     if (this.term === null) {
       const termValidates = true;
 
-      continuation(termValidates);
-
-      return;
+      return continuation(termValidates);
     }
 
     const metavariableString = this.getString();  ///
 
     context.trace(`Validating the '${metavariableString}' metavariable's term...`);
+
+    debugger
 
     let termValidates = false;
 
@@ -303,9 +303,7 @@ export default define(class Metavariable extends Element {
     if (this.type === null) {
       const typeValidates = true;
 
-      continuation(typeValidates);
-
-      return;
+      return continuation(typeValidates);
     }
 
     let typeValidates;
@@ -324,7 +322,7 @@ export default define(class Metavariable extends Element {
       context.trace(`...validated  the '${metavariableString}' metavariable's type.`);
     }
 
-    continuation(typeValidates);
+    return continuation(typeValidates);
   }
 
   unifyFrame(frame, generalContext, specificContext, continuation) {
@@ -365,7 +363,7 @@ export default define(class Metavariable extends Element {
     const { FrameSubstitution } = elements,
           frameSubstitution = FrameSubstitution.fromFrameAndMetavariable(frame, metavariable, generalContext, specificContext);
 
-    frameSubstitution.validate(context, (frameSubstitution) => {
+    return frameSubstitution.validate(context, (frameSubstitution) => {
       let frameUnifies = false;
 
       if (frameSubstitution !== null) {
