@@ -10,7 +10,7 @@ import { stripBracketsFromTerm } from "../../utilities/brackets";
 import { instantiateTermSubstitution } from "../../process/instantiate";
 import { termSubstitutionFromTermSubstitutionNode } from "../../utilities/element";
 import { termSubstitutionStringFromTermAndVariable } from "../../utilities/string";
-import { elide, ablates, descend, manifest, attempts, reconcile, instantiate, unserialises } from "../../utilities/context";
+import { elide, ablate, ablates, descend, manifest, attempts, reconcile, instantiate, unserialises } from "../../utilities/context";
 
 const { breakPointFromJSON } = breakPointUtilities;
 
@@ -342,11 +342,13 @@ export default define(class TermSubstitution extends Substitution {
     const termSubstitutionNode = statementNode.getTermSubstitutionNode();
 
     if (termSubstitutionNode !== null) {
-      descend((context) => {
-        const generalContext = context, ///
-              specificContext = context;  ///
+      ablate((context) => {
+        descend((context) => {
+          const generalContext = context, ///
+                specificContext = context;  ///
 
-        termSubstitution = termSubstitutionFromTermSubstitutionNode(termSubstitutionNode, generalContext, specificContext);
+          termSubstitution = termSubstitutionFromTermSubstitutionNode(termSubstitutionNode, generalContext, specificContext);
+        }, context);
       }, context);
     }
 

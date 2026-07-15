@@ -9,7 +9,7 @@ import { define } from "../../elements";
 import { instantiateFrameSubstitution } from "../../process/instantiate";
 import { frameSubstitutionFromFrameSubstitutionNode } from "../../utilities/element";
 import { frameSubstitutionStringFromFrameAndMetavariable } from "../../utilities/string";
-import { elide, ablates, descend, manifest, attempts, reconcile, instantiate, unserialises } from "../../utilities/context";
+import { elide, ablate, ablates, descend, manifest, attempts, reconcile, instantiate, unserialises } from "../../utilities/context";
 
 const { breakPointFromJSON } = breakPointUtilities;
 
@@ -339,11 +339,13 @@ export default define(class FrameSubstitution extends Substitution {
     const frameSubstitutionNode = statementNode.getFrameSubstitutionNode();
 
     if (frameSubstitutionNode !== null) {
-      descend((context) => {
-        const generalContext = context, ///
-              specificContext = context;  ///
+      ablate((context) => {
+        descend((context) => {
+          const generalContext = context, ///
+                specificContext = context;  ///
 
-        frameSubstitution = frameSubstitutionFromFrameSubstitutionNode(frameSubstitutionNode, generalContext, specificContext);
+          frameSubstitution = frameSubstitutionFromFrameSubstitutionNode(frameSubstitutionNode, generalContext, specificContext);
+        }, context);
       }, context);
     }
 
