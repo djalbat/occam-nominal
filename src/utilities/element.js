@@ -688,12 +688,12 @@ export function definedAssertionFromDefinedAssertionNode(definedAssertionNode, c
 export function termSubstitutionFromTermSubstitutionNode(termSubstitutionNode, generalContext, specificContext) {
   const { TermSubstitution } = elements,
         node = termSubstitutionNode,  ///
+        context = specificContext,  ///
+        string = context.nodeAsString(node),
         contexts = [
           generalContext,
           specificContext
         ],
-        context = specificContext,  ///
-        string = context.nodeAsString(node),
         breakPoint = null,
         targetTerm = targetTermFromTermSubstitutionNode(termSubstitutionNode, generalContext),
         replacementTerm = replacementTermFromTermSubstitutionNode(termSubstitutionNode, specificContext),
@@ -705,12 +705,12 @@ export function termSubstitutionFromTermSubstitutionNode(termSubstitutionNode, g
 export function frameSubstitutionFromFrameSubstitutionNode(frameSubstitutionNode, generalContext, specificContext) {
   const { FrameSubstitution } = elements,
         node = frameSubstitutionNode,  ///
+        context = specificContext,  ///
+        string = context.nodeAsString(node),
         contexts = [
           generalContext,
           specificContext
         ],
-        context = specificContext,  ///
-        string = context.nodeAsString(node),
         breakPoint = null,
         targetFrame = targetFrameFromFrameSubstitutionNode(frameSubstitutionNode, generalContext),
         replacementFrame = replacementFrameFromFrameSubstitutionNode(frameSubstitutionNode, specificContext),
@@ -925,12 +925,12 @@ export function combinatorDeclarationFromCombinatorDeclarationNode(combinatorDec
 export function referenceSubstitutionFromReferenceSubstitutionNode(referenceSubstitutionNode, generalContext, specificContext) {
   const { ReferenceSubstitution } = elements,
         node = referenceSubstitutionNode,  ///
+        context = specificContext,  ///
+        string = context.nodeAsString(node),
         contexts = [
           generalContext,
           specificContext
         ],
-        context = specificContext,  ///
-        string = context.nodeAsString(node),
         breakPoint = null,
         targetReference = targetReferenceFromReferenceSubstitutionNode(referenceSubstitutionNode, generalContext),
         replacementReference = replacementReferenceFromReferenceSubstitutionNode(referenceSubstitutionNode, specificContext),
@@ -942,12 +942,12 @@ export function referenceSubstitutionFromReferenceSubstitutionNode(referenceSubs
 export function statementSubstitutionFromStatementSubstitutionNode(statementSubstitutionNode, generalContext, specificContext) {
   const { StatementSubstitution } = elements,
         node = statementSubstitutionNode,  ///
+        context = specificContext,  ///
+        string = context.nodeAsString(node),
         contexts = [
           generalContext,
           specificContext
         ],
-        context = specificContext,  ///
-        string = context.nodeAsString(node),
         breakPoint = null,
         resolved = resolvedFromStatementSubstitutionNode(statementSubstitutionNode, generalContext, specificContext),
         targetStatement = targetStatementFromStatementSubstitutionNode(statementSubstitutionNode, generalContext),

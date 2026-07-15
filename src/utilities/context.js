@@ -223,13 +223,29 @@ function pareContext(context) {
 }
 
 function ablateContext(context) {
-    let contextGroundedContext = isContextGroundedContext(context);
+  let phanericContext = null;
 
-    while (!contextGroundedContext) {
-      context = context.getContext();
+  const contextPhanericContext = PhanericContext.prototype.isPrototypeOf(context);
 
-      contextGroundedContext = isContextGroundedContext(context);
-    }
+  if (contextPhanericContext) {
+    phanericContext = context;  ///
+
+    context = phanericContext.detach();
+  }
+
+  let contextGroundedContext = isContextGroundedContext(context);
+
+  while (!contextGroundedContext) {
+    context = context.getContext();
+
+    contextGroundedContext = isContextGroundedContext(context);
+  }
+
+  if (phanericContext !== null) {
+    phanericContext.attach(context);
+
+    context = phanericContext;  ///
+  }
 
   return context;
 }

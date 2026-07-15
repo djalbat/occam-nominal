@@ -15,7 +15,7 @@ import { compressTerms,
          compressReferences,
          compressAssumptions,
          compressMetavariables,
-         compressSubstitutions } from "../utilities/synoptic";
+         compressSubstitutions } from "../utilities/compression";
 import { termsFromJSON,
          goalsFromJSON,
          framesFromJSON,

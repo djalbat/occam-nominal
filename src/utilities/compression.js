@@ -104,6 +104,16 @@ export function compressAssumptions(assumptions) {
   });
 }
 
+export function compressMetavariables(metavariables) {
+  compress(metavariables, (metavariableA, metavariableB) => {
+    const metavariableAEqualToMetavariableB = metavariableA.isEqualTo(metavariableB);
+
+    if (!metavariableAEqualToMetavariableB) {
+      return true;
+    }
+  });
+}
+
 export function compressSubstitutions(substitutions) {
   compress(substitutions, (substitutionA, substitutionB) => {
     const substitutionAEqualToSubstitutionB = substitutionA.isEqualTo(substitutionB);

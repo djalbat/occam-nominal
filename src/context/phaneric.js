@@ -1,12 +1,8 @@
 "use strict";
 
-import { arrayUtilities } from "necessary";
-
 import Context from "../context";
 
 import { EMPTY_STRING } from "../constants";
-
-const { first } = arrayUtilities;
 
 export default class PhanericContext extends Context {
   constructor(context, contexts) {
@@ -19,10 +15,34 @@ export default class PhanericContext extends Context {
     return this.contexts;
   }
 
+  nullifyContext() {
+    const context = null;
+
+    this.setContext(context);
+  }
+
+  attach(context) {
+    this.setContext(context);
+  }
+
+  detach() {
+    const context = this.getContext();
+
+    this.nullifyContext();
+
+    return context;
+  }
+
   nodeAsString(node) {
     let string = EMPTY_STRING;
 
-    this.contexts.some((context) => {
+    const context = this.getContext(),
+          contexts = [
+            context,
+            ...this.contexts
+          ];
+
+    contexts.some((context) => {
       string = context.nodeAsString(node);
 
       if (string !== EMPTY_STRING) {
@@ -34,8 +54,11 @@ export default class PhanericContext extends Context {
   }
 
   static fromContexts(contexts) {
-    const firstContext = first(contexts),
-          context = firstContext,  ///
+    contexts = [  ///
+      ...contexts
+    ];
+
+    const context = contexts.shift(),
           phanericContext = new PhanericContext(context, contexts);
 
     return phanericContext;

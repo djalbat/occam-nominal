@@ -203,13 +203,13 @@ export default define(class ReferenceSubstitution extends Substitution {
           const { string } = json,
                 referenceSubstitutionNode = instantiateReferenceSubstitution(string, context),
                 node = referenceSubstitutionNode, ///
-                breakPoint = breakPointFromJSON(json),
-                targetReference = targetReferenceFromReferenceSubstitutionNode(referenceSubstitutionNode, generalContext),
-                replacementReference = replacementReferenceFromReferenceSubstitutionNode(referenceSubstitutionNode, specificContext),
                 contexts = [
                   generalContext,
                   specificContext
-                ];
+                ],
+                breakPoint = breakPointFromJSON(json),
+                targetReference = targetReferenceFromReferenceSubstitutionNode(referenceSubstitutionNode, generalContext),
+                replacementReference = replacementReferenceFromReferenceSubstitutionNode(referenceSubstitutionNode, specificContext);
 
           referenceSubstitutionn = new ReferenceSubstitution(contexts, string, node, breakPoint, targetReference, replacementReference);
         }, json, context);

@@ -317,13 +317,13 @@ export default define(class FrameSubstitution extends Substitution {
           const { string } = json,
                 frameSubstitutionNode = instantiateFrameSubstitution(string, context),
                 node = frameSubstitutionNode, ///
-                breakPoint = breakPointFromJSON(json),
-                targetFrame = targetFrameFromFrameSubstitutionNode(frameSubstitutionNode, generalContext),
-                replacementFrame = replacementFrameFromFrameSubstitutionNode(frameSubstitutionNode, specificContext),
                 contexts = [
                   generalContext,
                   specificContext
-                ];
+                ],
+                breakPoint = breakPointFromJSON(json),
+                targetFrame = targetFrameFromFrameSubstitutionNode(frameSubstitutionNode, generalContext),
+                replacementFrame = replacementFrameFromFrameSubstitutionNode(frameSubstitutionNode, specificContext);
 
           frameSubstitutionn = new FrameSubstitution(contexts, string, node, breakPoint, targetFrame, replacementFrame);
         }, json, context);

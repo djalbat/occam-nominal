@@ -344,14 +344,14 @@ export default define(class StatementSubstitution extends Substitution {
           const { string } = json,
                 statementSubstitutionNode = instantiateStatementSubstitution(string, context),
                 node = statementSubstitutionNode, ///
-                breakPoint = breakPointFromJSON(json),
-                resolved = resolvedFromStatementSubstitutionNode(statementSubstitutionNode, generalContext, specificContext),
-                targetStatement = targetStatementFromStatementSubstitutionNode(statementSubstitutionNode, generalContext),
-                replacementStatement = replacementStatementFromStatementSubstitutionNode(statementSubstitutionNode, specificContext),
                 contexts = [
                   generalContext,
                   specificContext
-                ];
+                ],
+                breakPoint = breakPointFromJSON(json),
+                resolved = resolvedFromStatementSubstitutionNode(statementSubstitutionNode, generalContext, specificContext),
+                targetStatement = targetStatementFromStatementSubstitutionNode(statementSubstitutionNode, generalContext),
+                replacementStatement = replacementStatementFromStatementSubstitutionNode(statementSubstitutionNode, specificContext);
 
           statementSubstitutionn = new StatementSubstitution(contexts, string, node, breakPoint, resolved, targetStatement, replacementStatement);
         }, json, context);

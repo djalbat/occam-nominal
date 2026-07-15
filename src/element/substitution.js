@@ -85,26 +85,6 @@ export default class Substitution extends Element {
     return specificContext;
   }
 
-  setGeneralContext(generalContext) {
-    const specificContext = this.getSpecificContext(),
-          contexts = [
-            generalContext,
-            specificContext
-          ];
-
-    this.setContexts(contexts);
-  }
-
-  setSpecificContext(specificContext) {
-    const generalContext = this.getGeneralContext(),
-          contexts = [
-            generalContext,
-            specificContext
-          ];
-
-    this.setContexts(contexts);
-  }
-
   isEqualTo(substitution) {
     const substitutionNode = substitution.getNode(),
           substitutionNodeMatches = this.matchSubstitutionNode(substitutionNode),

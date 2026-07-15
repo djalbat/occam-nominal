@@ -4,7 +4,7 @@ import { arrayUtilities } from "necessary";
 
 import Context from "../context";
 
-import { compressTerms } from "../utilities/synoptic";
+import { compressTerms } from "../utilities/compression";
 
 const { push } = arrayUtilities;
 

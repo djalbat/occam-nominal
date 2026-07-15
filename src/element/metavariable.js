@@ -603,7 +603,7 @@ export default define(class Metavariable extends Element {
           statementString = statement.getString(),
           metavariableString = this.getString();  ///
 
-    context.trace(`Compares the '${statementString}' statement's metavariable to the '${metavariableString}' metavariable...`);
+    context.trace(`Comparing the '${statementString}' statement's metavariable to the '${metavariableString}' metavariable...`);
 
     const generalContextFilePath = generalContext.getFilePath(),
           specificContextFilePath = specificContext.getFilePath();

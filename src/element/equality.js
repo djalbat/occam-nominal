@@ -133,18 +133,14 @@ export default define(class Equality extends Element {
 
       context.debug(`...the '${equalityString}' equality is already valid.`);
 
-      continuation(equality);
-
-      return;
+      return continuation(equality);
     }
 
     this.validateTerms(context, (termsValidate) => {
       if (!termsValidate) {
         const equality = null;
 
-        continuation(equality);
-
-        return;
+        return continuation(equality);
       }
 
       const validatesWhenStated = this.validateWhenStated.bind(this),
@@ -154,7 +150,7 @@ export default define(class Equality extends Element {
         validatesWhenStated,
         validatesWhenDerived
       ], context, (validates) => {
-        let equqlity = null;
+        let equality = null;
 
         if (validates) {
           equality = this;  ///
@@ -168,7 +164,7 @@ export default define(class Equality extends Element {
           context.debug(`...validated the '${equalityString}' equality.`);
         }
 
-        return continuation(equqlity);
+        return continuation(equality);
       });
     });
   }

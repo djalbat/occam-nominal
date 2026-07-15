@@ -320,13 +320,13 @@ export default define(class TermSubstitution extends Substitution {
           const { string } = json,
                 termSubstitutionNode = instantiateTermSubstitution(string, context),
                 node = termSubstitutionNode,  ///
-                breakPoint = breakPointFromJSON(json),
-                targetTerm = targetTermFromTermSubstitutionNode(termSubstitutionNode, generalContext),
-                replacementTerm = replacementTermFromTermSubstitutionNode(termSubstitutionNode, specificContext),
                 contexts = [
                   generalContext,
                   specificContext
-                ];
+                ],
+                breakPoint = breakPointFromJSON(json),
+                targetTerm = targetTermFromTermSubstitutionNode(termSubstitutionNode, generalContext),
+                replacementTerm = replacementTermFromTermSubstitutionNode(termSubstitutionNode, specificContext);
 
           termSubstitutionn = new TermSubstitution(contexts, string, node, breakPoint, targetTerm, replacementTerm);
         }, json, context);
