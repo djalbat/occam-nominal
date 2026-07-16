@@ -24,7 +24,7 @@ export function validateTermAsVariable(term, context, continuation) {
 
   context.trace(`Validating the '${termString}' term as a variable...`);
 
-  variable.validate(context, (variable) => {
+  return variable.validate(context, (variable) => {
     if (variable === null) {
       const termValidatesAsVariable = false;
 
@@ -55,7 +55,7 @@ function unifyTermWithGenerators(term, context, continuation) {
 
   return some(generators, (generator, continuation) => {
     choose((context) => {
-      generator.unifyTerm(term, context, (termUnifies) => {
+      return generator.unifyTerm(term, context, (termUnifies) => {
         let termUnifiesWithGenerator = false;
 
         if (termUnifies) {
@@ -75,7 +75,7 @@ function unifyTermWithConstructors(term, context, continuation) {
 
   return some(constructors, (constructor, continuation) => {
     choose((context) => {
-      constructor.unifyTerm(term, context, (termUnifies) => {
+      return constructor.unifyTerm(term, context, (termUnifies) => {
         let termUnifiesWithConstructor = false;
 
         if (termUnifies) {
@@ -179,7 +179,7 @@ function validateStatementAsEquality(statement, context, continuation) {
 
   context.trace(`Validating the '${statementString}' statement as an equality...`);
 
-  equality.validate(context, (equality) => {
+  return equality.validate(context, (equality) => {
     let statementValidatesAsEquality = false;
 
     if (equality !== null) {
@@ -208,7 +208,7 @@ function validateStatementAsJudgement(statement, context, continuation) {
 
   context.trace(`Validating the '${statementString}' statement as a judgement...`);
 
-  judgement.validate(context, (judgement) => {
+  return judgement.validate(context, (judgement) => {
     let validatesStatementAsJudgement = false;
 
     if (judgement !== null) {
@@ -237,7 +237,7 @@ function validateStatementAsTypeAssertion(statement, context, continuation) {
 
   context.trace(`Validating the '${statementString}' statement as a type assertion...`);
 
-  typeAssertion.validate(context, (typeAssertion) => {
+  return typeAssertion.validate(context, (typeAssertion) => {
     let validatesStatementAsTypeAssertion = false;
 
     if (typeAssertion !== null) {
@@ -266,7 +266,7 @@ function validateStatementAsDefinedAssertion(statement, context, continuation) {
 
   context.trace(`Validating the '${statementString}' statement as a defined assertion...`);
 
-  definedAssertion.validate(context, (definedAssertion) => {
+  return definedAssertion.validate(context, (definedAssertion) => {
     let validatesStatementAsDefinedAssertion = false;
 
     if (definedAssertion !== null) {
@@ -295,7 +295,7 @@ function validateStatementAsPropertyAssertion(statement, context, continuation) 
 
   context.trace(`Validating the '${statementString}' statement as a property assertion...`);
 
-  propertyAssertion.validate(context, (propertyAssertion) => {
+  return propertyAssertion.validate(context, (propertyAssertion) => {
     let statementValidatesAsPropertyAssertion = false;
 
     if (propertyAssertion !== null) {
@@ -324,7 +324,7 @@ function validateStatementAsSubproofAssertion(statement, context, continuation) 
 
   context.trace(`Validating the '${statementString}' statement as a subproof assertion...`);
 
-  subproofAssertion.validate(context, (subproofAssertion) => {
+  return subproofAssertion.validate(context, (subproofAssertion) => {
     let statementValidatesAsSubproofAssertion = false;
 
     if (subproofAssertion !== null) {
@@ -335,7 +335,7 @@ function validateStatementAsSubproofAssertion(statement, context, continuation) 
       context.debug(`...validated the '${statementString}' statement as a subproof assertion.`);
     }
 
-    continuation(statementValidatesAsSubproofAssertion);
+    return continuation(statementValidatesAsSubproofAssertion);
   });
 }
 
@@ -355,7 +355,7 @@ function validateStatementAsContainedAssertion(statement, context, continuation)
 
   context.trace(`Validating the '${statementString}' statement as a contained assertion...`);
 
-  containedAssertion.validate(context, (containedAssertion) => {
+  return containedAssertion.validate(context, (containedAssertion) => {
     let validatesStatementAsContainedAssertion = false;
 
     if (containedAssertion !== null) {
@@ -366,7 +366,7 @@ function validateStatementAsContainedAssertion(statement, context, continuation)
       context.debug(`...validated the '${statementString}' statement as a contained assertion.`);
     }
 
-    continuation(validatesStatementAsContainedAssertion);
+    return continuation(validatesStatementAsContainedAssertion);
   });
 }
 

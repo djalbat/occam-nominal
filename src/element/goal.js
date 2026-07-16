@@ -134,7 +134,7 @@ export default define(class Goal extends Element {
 
     context.trace(`Validating the '${goalString}' goal's reference...`);
 
-    this.reference.validate(context, (reference) => {
+    return this.reference.validate(context, (reference) => {
       let referenceValidates = false;
 
       if (reference !== null) {
@@ -156,7 +156,7 @@ export default define(class Goal extends Element {
 
     context.trace(`Validating the '${goalString}' goal's statement...`);
 
-    this.statement.validate(context, (statement) => {
+    return this.statement.validate(context, (statement) => {
       let statementValidates = false;
 
       if (statement !== null) {

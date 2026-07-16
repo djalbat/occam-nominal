@@ -197,7 +197,7 @@ export default define(class Frame extends Element {
 
     context.trace(`Validating the '${frameString}' frame's '${assumptionString}' assumption.`);
 
-    assumption.validate(context, (assumption) => {
+    return assumption.validate(context, (assumption) => {
       let assumptionValidates = false;
 
       if (assumption !== null) {
@@ -253,7 +253,7 @@ export default define(class Frame extends Element {
 
     context.trace(`Validating the '${frameString}' frame's metavariable...`);
 
-    this.metavariable.validate(context, (metavariable) => {
+    return this.metavariable.validate(context, (metavariable) => {
       let metavariableValidates = false;
 
       if (metavariable !== null) {

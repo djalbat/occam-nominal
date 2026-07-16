@@ -128,7 +128,7 @@ export default define(class ContainedAssertion extends Assertion {
       return continuation(termValidates);
     }
 
-    this.term.validate(context, (term, context) => {
+    return this.term.validate(context, (term, context) => {
       let termValidates = false;
 
       if (term !== null) {
@@ -167,7 +167,7 @@ export default define(class ContainedAssertion extends Assertion {
       return continuation(frameValidates);
     }
 
-    this.frame.validate(context, (frame) => {
+    return this.frame.validate(context, (frame) => {
       let frameValidates = false;
 
       if (frame !== null) {
@@ -189,7 +189,7 @@ export default define(class ContainedAssertion extends Assertion {
 
     context.trace(`Validating the '${statementString}' statement...`);
 
-    this.statement.validate(context, (statement) => {
+    return this.statement.validate(context, (statement) => {
       let statementValidates = false;
 
       if (statement !== null) {

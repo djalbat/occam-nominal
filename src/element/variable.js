@@ -159,7 +159,7 @@ export default define(class Variable extends Element {
     const { TermSubstitution } = elements,
           termSubstitution = TermSubstitution.fromTermAndVariable(term, variable, generalContext, specificContext);
 
-    termSubstitution.validate(context, (termSubstitution) => {
+    return termSubstitution.validate(context, (termSubstitution) => {
       let termUnifies = false;
 
       if (termSubstitution !== null) {

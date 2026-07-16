@@ -26,7 +26,7 @@ function unifyStepWithRule(step, context, continuation) {
 
   const subproofOrProofAssertions = context.getSubproofOrProofAssertions();
 
-  rule.unifyStepAndSubproofOrProofAssertions(step, subproofOrProofAssertions, context, (stepAndSubproofOrProofAssertionsUnify) => {
+  return rule.unifyStepAndSubproofOrProofAssertions(step, subproofOrProofAssertions, context, (stepAndSubproofOrProofAssertionsUnify) => {
     let stepUnifiesWithRule = false;
 
     if (stepAndSubproofOrProofAssertionsUnify) {
@@ -73,7 +73,7 @@ function unifyStepWithTopLevelAssertion(step, context, continuation) {
 
   const subproofOrProofAssertions = context.getSubproofOrProofAssertions();
 
-  topLevelAssertion.unifyStepAndSubproofOrProofAssertions(step, subproofOrProofAssertions, context, (stepAndSubproofOrProofAssertionsUnify) => {
+  return topLevelAssertion.unifyStepAndSubproofOrProofAssertions(step, subproofOrProofAssertions, context, (stepAndSubproofOrProofAssertionsUnify) => {
     let stepUnifiesWithTopLevelAssertion = false;
 
     if (stepAndSubproofOrProofAssertionsUnify) {
@@ -104,7 +104,7 @@ function unifyStepWithSignatureAssertion(step, context, continuation) {
 
   const subproofOrProofAssertions = context.getSubproofOrProofAssertions();
 
-  signatureAssertion.unifyStepAndSubproofOrProofAssertions(step, subproofOrProofAssertions, context, (stepAndSubproofOrProofAssertionsUnify) => {
+  return signatureAssertion.unifyStepAndSubproofOrProofAssertions(step, subproofOrProofAssertions, context, (stepAndSubproofOrProofAssertionsUnify) => {
     let stepUnifiesWithSignatureAssertion = false;
 
     if (stepAndSubproofOrProofAssertionsUnify) {
@@ -144,7 +144,7 @@ function unifyStepAsQualifiedConstraint(step, context, continuation) {
   const { Constraint } = elements,
         constraint = Constraint.fromStep(step, context);
 
-  constraint.validate(context, (constraint) => {
+  return constraint.validate(context, (constraint) => {
     let stepUnifiesAsQualifiedConstraint = false;
 
     if (constraint !== null) {
@@ -377,7 +377,7 @@ function unifyStepAsQualifiedSignatureAssertion(step, context, continuation) {
 
   context.trace(`Unifying the '${stepString}' step as a signature assertion with the '${referenceString}' reference...`);
 
-  signatureAssertion.unifyTopLevelAssertion(topLevelAssertion, context, (topLevelAssertionUnifies) => {
+  return signatureAssertion.unifyTopLevelAssertion(topLevelAssertion, context, (topLevelAssertionUnifies) => {
     let stepUnifiesAsQualifiedSignatureAssertion = false;
 
     if (topLevelAssertionUnifies) {

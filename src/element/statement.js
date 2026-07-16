@@ -288,7 +288,7 @@ export default define(class Statement extends Element {
       const context = generalContext, ///
             typeAssertion = context.findAssertionByAssertionNode(typeAssertionNode);
 
-      typeAssertion.unifyIndependently(generalContext, specificContext, (typeAssertionUnifiesIndependently) => {
+      return typeAssertion.unifyIndependently(generalContext, specificContext, (typeAssertionUnifiesIndependently) => {
         let unifiesIndependently = false;
 
         if (typeAssertionUnifiesIndependently) {
@@ -307,7 +307,7 @@ export default define(class Statement extends Element {
       const context = generalContext, ///
             definedAssertion = context.findAssertionByAssertionNode(definedAssertionNode);
 
-      definedAssertion.unifyIndependently(generalContext, specificContext, (definedAssertionUnifiesIndependently) => {
+      return definedAssertion.unifyIndependently(generalContext, specificContext, (definedAssertionUnifiesIndependently) => {
         let unifiesIndependently = false;
 
         if (definedAssertionUnifiesIndependently) {
@@ -326,7 +326,7 @@ export default define(class Statement extends Element {
       const context = generalContext, ///
             containedAssertion = context.findAssertionByAssertionNode(containedAssertionNode);
 
-      containedAssertion.unifyIndependently(generalContext, specificContext, (containedAssertionUnifiesIndependently) => {
+      return containedAssertion.unifyIndependently(generalContext, specificContext, (containedAssertionUnifiesIndependently) => {
         let unifiesIndependently = false;
 
         if (containedAssertionUnifiesIndependently) {

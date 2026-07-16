@@ -26,7 +26,7 @@ class PropertyPass extends ContinuationPass {
       run: (termNode, context, continuation) => {
         const term = termFromTermNode(termNode, context);
 
-        term.validate(context, (term, context) => {
+        return term.validate(context, (term, context) => {
           let success = false;
 
           if (term !== null) {
@@ -69,7 +69,7 @@ class GeneratorPass extends ContinuationPass {
       run: (termNode, context, continuation) => {
         const term = termFromTermNode(termNode, context);
 
-        term.validate(context, (term, context) => {
+        return term.validate(context, (term, context) => {
           let success = false;
 
           if (term !== null) {
@@ -113,7 +113,7 @@ class CombinatorPass extends ContinuationPass {
         const statement = statementFromStatementNode(statementNode, context);
 
         descend((context) => {
-          statement.validate(context, (statement) => {
+          return statement.validate(context, (statement) => {
             let success = false;
 
             if (statement !== null) {
@@ -130,7 +130,7 @@ class CombinatorPass extends ContinuationPass {
       run: (termNode, context, continuation) => {
         const term = termFromTermNode(termNode, context);
 
-        term.validate(context, (term, context) => {
+        return term.validate(context, (term, context) => {
           let success = false;
 
           if (term !== null) {
@@ -173,7 +173,7 @@ class ConstructorPass extends ContinuationPass {
       run: (termNode, context, continuation) => {
         const term = termFromTermNode(termNode, context);
 
-        term.validate(context, (term, context) => {
+        return term.validate(context, (term, context) => {
           let success = false;
 
           if (term !== null) {

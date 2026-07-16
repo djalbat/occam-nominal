@@ -228,7 +228,7 @@ export default define(class Term extends Element {
 
     context.trace(`Validating the '${termString}' term given the '${typeString}' type...`);
 
-    this.validate(context, (term, context) => {
+    return this.validate(context, (term, context) => {
       let validatesGivenType = false;
 
       if (term !== null) {

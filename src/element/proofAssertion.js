@@ -92,7 +92,7 @@ export default class ProofAssertion extends Element {
 
     context.trace(`Unifying the '${statementString}' statement with the '${proofAssertionString}' proof assertion's statement...`);
 
-    this.statement.unifyStatement(statement, generalContext, specificContext, (statementUnifies) => {
+    return this.statement.unifyStatement(statement, generalContext, specificContext, (statementUnifies) => {
       if (statementUnifies) {
         context.debug(`...unified the '${statementString}' statement with the '${proofAssertionString}' proof assertion's statement.`);
       }

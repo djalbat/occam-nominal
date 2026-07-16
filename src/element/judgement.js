@@ -207,7 +207,7 @@ export default define(class Judgement extends Element {
 
     context.trace(`Validating the '${judgementString}' judgement's goal...`);
 
-    this.goal.validate(context, (goal) => {
+    return this.goal.validate(context, (goal) => {
       let goalValidates = false;
 
       if (goal !== null) {
@@ -229,7 +229,7 @@ export default define(class Judgement extends Element {
 
     context.trace(`Validating the '${judgementString}' judgement's frame...`);
 
-    this.frame.validate(context, (frame) => {
+    return this.frame.validate(context, (frame) => {
       let frameValidates = false;
 
       if (frame !== null) {

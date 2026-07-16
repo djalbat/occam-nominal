@@ -17,7 +17,7 @@ export default define(class BracketedCombinator extends Combinator {
 
     context.trace(`Unifying the '${statementString}' statement with the bracketed combinator...`);
 
-    super.unifyStatement(statement, context, (statementUnifies) => {
+    return super.unifyStatement(statement, context, (statementUnifies) => {
       if (statementUnifies) {
         context.debug(`...unified the '${statementString}' statement with the bracketed combinator.`);
       }

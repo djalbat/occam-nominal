@@ -49,7 +49,7 @@ export default define(class Deduction extends Element {
 
     declare((context) => {
       elide((context) => {
-        this.validate(context, (validates) => {
+        return this.validate(context, (validates) => {
           let verifies = false;
 
           if (validates) {

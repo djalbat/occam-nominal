@@ -155,7 +155,7 @@ class MetaLevelPass extends ContinuationZipPassBase {
 
         reference = context.findReferenceByMetavariableNode(metavariableNode);
 
-        metavariable.unifyReference(reference, generalContext, specificContext, (referenceUnifies) => {
+        return metavariable.unifyReference(reference, generalContext, specificContext, (referenceUnifies) => {
           let success = false;
 
           if (referenceUnifies) {
@@ -183,7 +183,7 @@ class MetaLevelPass extends ContinuationZipPassBase {
 
         const statement = context.findStatementByStatementNode(statementNode);
 
-        metavariable.unifyStatement(statement, generalContext, specificContext, (statementUnifies) => {
+        return metavariable.unifyStatement(statement, generalContext, specificContext, (statementUnifies) => {
           let success = false;
 
           if (statementUnifies) {
@@ -211,7 +211,7 @@ class MetaLevelPass extends ContinuationZipPassBase {
 
         const frame = context.findFrameByFrameNode(frameNode);
 
-        metavariable.unifyFrame(frame, generalContext, specificContext, (frameUnifies) => {
+        return metavariable.unifyFrame(frame, generalContext, specificContext, (frameUnifies) => {
           let success = false;
 
           if (frameUnifies) {
@@ -241,7 +241,7 @@ class MetaLevelPass extends ContinuationZipPassBase {
 
         const term = context.findTermByTermNode(termNode);
 
-        variable.unifyTerm(term, generalContext, specificContext, (termUnifies) => {
+        return variable.unifyTerm(term, generalContext, specificContext, (termUnifies) => {
           let success = false;
 
           if (termUnifies) {
@@ -267,7 +267,7 @@ class MetaLevelPass extends ContinuationZipPassBase {
         const specificSignature = context.findSignatureBySignatureNode(specificSignatureNode);
 
         reconcile((context) => {
-          generalSignature.unifySignature(specificSignature, context, (signatureUnifies) => {
+          return generalSignature.unifySignature(specificSignature, context, (signatureUnifies) => {
             let success = false;
 
             if (signatureUnifies) {
@@ -297,7 +297,7 @@ class CombinatorPass extends ContinuationZipPass {
                 statementNode = specificStatementNode,  ///
                 statement = statementFromStatementNode(statementNode, context);
 
-          statement.validate(context, (statement) => {
+          return statement.validate(context, (statement) => {
             let success = false;
 
             if (statement !== null) {
@@ -322,7 +322,7 @@ class CombinatorPass extends ContinuationZipPass {
                 frameNode = specificFrameNode,  ///
                 frame = frameFromFrameNode(frameNode, context);
 
-          frame.validate(context, (frame) => {
+          return frame.validate(context, (frame) => {
             let success = false;
 
             if (frame !== null) {
@@ -421,7 +421,7 @@ class IntrinsicTermPass extends ContinuationZipPassBase {
 
         const term = context.findTermByTermNode(termNode);
 
-        variable.unifyTerm(term, generalContext, specificContext, (termUnifies) => {
+        return variable.unifyTerm(term, generalContext, specificContext, (termUnifies) => {
           let success = false;
 
           if (termUnifies) {
@@ -456,7 +456,7 @@ class IntrinsicMetavariablePass extends ContinuationZipPass {
 
         const term = context.findTermByTermNode(termNode);
 
-        variable.unifyTerm(term, generalContext, specificContext, (termUnifies) => {
+        return variable.unifyTerm(term, generalContext, specificContext, (termUnifies) => {
           let success = false;
 
           if (termUnifies) {

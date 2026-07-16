@@ -96,7 +96,7 @@ export default define(class SubproofAssertion extends Assertion {
   validateStatements(context, continuation) {
     return every(this.statements, (statement, continuation) => {
       descend((context) => {
-        statement.validate(context, (statement) => {
+        return statement.validate(context, (statement) => {
           let statementValidates = false;
 
           if (statement !== null) {
@@ -146,7 +146,7 @@ export default define(class SubproofAssertion extends Assertion {
 
     const lastStep = subproof.getLastStep();
 
-    this.unifyLastStep(lastStep, generalContext, specificContext, (lastStepUnifies) => {
+    return this.unifyLastStep(lastStep, generalContext, specificContext, (lastStepUnifies) => {
       let subproofUnifies = false;
 
       if (!lastStepUnifies) {
@@ -155,7 +155,7 @@ export default define(class SubproofAssertion extends Assertion {
 
       const suppositions = subproof.getSuppositions();
 
-      this.unifySuppositions(suppositions, generalContext, specificContext, (suppositionsUnify) => {
+      return this.unifySuppositions(suppositions, generalContext, specificContext, (suppositionsUnify) => {
         if (suppositionsUnify) {
           subproofUnifies = true;
         }
@@ -184,7 +184,7 @@ export default define(class SubproofAssertion extends Assertion {
     reconcile((specificContext) => {
       const lastStepStatement = lastStep.getStatement();
 
-      deducedStatement.unifyStatement(lastStepStatement, generalContext, specificContext, (lastStepStatementUnifies) => {
+      return deducedStatement.unifyStatement(lastStepStatement, generalContext, specificContext, (lastStepStatementUnifies) => {
         let lastStepUnifies = false;
 
         if (lastStepStatementUnifies) {
@@ -249,7 +249,7 @@ export default define(class SubproofAssertion extends Assertion {
     reconcile((specificContext) => {
       const suppositionStatement = supposition.getStatement();
 
-      supposedStatement.unifyStatement(suppositionStatement, generalContext, specificContext, (suppositionStatementUnifies) => {
+      return supposedStatement.unifyStatement(suppositionStatement, generalContext, specificContext, (suppositionStatementUnifies) => {
         let suppositionUnifies = false;
 
         if (suppositionStatementUnifies) {

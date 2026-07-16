@@ -157,7 +157,7 @@ export default define(class TypeAssertion extends Assertion {
 
     context.trace(`Validating the '${typeAssertionString}' stated type assertion...`);
 
-    this.term.validate(context, (term, context) => {
+    return this.term.validate(context, (term, context) => {
       if (term === null) {
         const validatesWhenStated = false;
 
@@ -327,7 +327,7 @@ function validateWhenDerived(term, type, context, continuation) {
     return continuation(term);
   }
 
-  term.validate(context, (term, context) => {
+  return term.validate(context, (term, context) => {
     if (term === null) {
       return continuation(term);
     }

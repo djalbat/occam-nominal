@@ -162,7 +162,7 @@ export default define(class Supposition extends ProofAssertion {
 
     context.trace(`Validatting the '${suppositionString}' supposition's procedure call...`);
 
-    procedureCall.validate(context, (procedureCallValidates) => {
+    return procedureCall.validate(context, (procedureCallValidates) => {
       if (procedureCallValidates) {
         context.debug(`...validated the '${suppositionString}' supposition's procedure call.`);
       }

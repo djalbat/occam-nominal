@@ -191,7 +191,7 @@ export default define(class Step extends ProofAssertion {
 
     const statement = this.getStatement();
 
-    statement.validate(context, (statement) => {
+    return statement.validate(context, (statement) => {
       let statementValidates = false;
 
       if (statement !== null) {
@@ -202,7 +202,7 @@ export default define(class Step extends ProofAssertion {
         context.debug(`...validated the '${stepString}' step's statement.`);
       }
 
-      continuation(statementValidates);
+      return continuation(statementValidates);
     });
   }
 
@@ -220,7 +220,7 @@ export default define(class Step extends ProofAssertion {
 
     context.trace(`Validating the '${stepString}' step's '${referenceString}' reference...`);
 
-    this.reference.validate(context, (reference) => {
+    return this.reference.validate(context, (reference) => {
       let referenceValidates = false;
 
       if (reference !== null) {
@@ -233,7 +233,7 @@ export default define(class Step extends ProofAssertion {
         context.debug(`...validated the '${stepString}' step's '${referenceString}' reference.`);
       }
 
-      continuation(referenceValidates);
+      return continuation(referenceValidates);
     });
   }
 
@@ -251,7 +251,7 @@ export default define(class Step extends ProofAssertion {
 
     context.trace(`Validating the '${stepString}' step's '${signatureAssertionString}' signature assertion...`);
 
-    this.signatureAssertion.validate(context, (signatureAssertion) => {
+    return this.signatureAssertion.validate(context, (signatureAssertion) => {
       let signatureAssertionValidates = false;
 
       if (signatureAssertion !== null) {
@@ -264,7 +264,7 @@ export default define(class Step extends ProofAssertion {
         context.debug(`...validated the '${stepString}' step's '${signatureAssertionString}' signature assertion.`);
       }
 
-      continuation(signatureAssertionValidates);
+      return continuation(signatureAssertionValidates);
     });
   }
 

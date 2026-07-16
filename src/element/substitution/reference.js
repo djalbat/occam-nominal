@@ -173,7 +173,7 @@ export default define(class ReferenceSubstitution extends Substitution {
     }
 
     elide((context) => {
-      this.targetStatement.validate(context, (targetStatement) => {
+      return this.targetStatement.validate(context, (targetStatement) => {
         let targetStatementValidates = false;
 
         if (targetStatement !== null) {
@@ -184,7 +184,7 @@ export default define(class ReferenceSubstitution extends Substitution {
           context.debug(`...validated the '${referenceSubstitutionString}' reference substitution's target statement...`);
         }
 
-        continuation(targetStatementValidates);
+        return continuation(targetStatementValidates);
       });
     }, context);
   }
@@ -196,7 +196,7 @@ export default define(class ReferenceSubstitution extends Substitution {
     context.trace(`Validating the '${referenceSubstitutionString}' reference substitution's replacement statement...`);
 
     elide((context) => {
-      this.replacementStatement.validate(context, (replacementStatement) => {
+      return this.replacementStatement.validate(context, (replacementStatement) => {
         let replacementStatementValidates = false;
 
         if (replacementStatement !== null) {
@@ -207,7 +207,7 @@ export default define(class ReferenceSubstitution extends Substitution {
           context.debug(`...validated the '${referenceSubstitutionString}' reference substitution's replacement statement.`);
         }
 
-        continuation(replacementStatementValidates);
+        return continuation(replacementStatementValidates);
       });
     }, context);
   }

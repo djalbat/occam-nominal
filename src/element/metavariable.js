@@ -263,40 +263,56 @@ export default define(class Metavariable extends Element {
 
     context.trace(`Validating the '${metavariableString}' metavariable's term...`);
 
-    debugger
-
-    let termValidates = false;
-
     const metavariableName = this.getMetavariableName(),
           declaredMetavariable = context.findDeclaredMetavariableByMetavariableName(metavariableName);
-
-    let term = null;
 
     if (declaredMetavariable !== null) {
       const type = declaredMetavariable.getType();
 
-      if (type !== null) {
-        term = this.term.validateGivenType(type, context);
+      if (type === null) {
+        const termValidates = false;
+
+        return continuation(termValidates);
       }
-    } else {
-      if (!strict) {
-        term = this.term.validate(context, async (term, context) => {
-          const validatesForwards = true;
 
-          return validatesForwards;
-        });
+      return this.term.validateGivenType(type, context, (term) => {
+        let termValidates = false;
+
+        if (term !== null) {
+          this.term = term;
+
+          termValidates = true;
+        }
+
+        if (termValidates) {
+          context.debug(`...validated the '${metavariableString}' metavariable's term.`);
+        }
+
+        return continuation(termValidates);
+      });
+    }
+
+    if (strict) {
+      const termValidates = false;
+
+      return continuation(termValidates);
+    }
+
+    return this.term.validate(context, (term, context) => {
+      let termValidates = false;
+
+      if (term !== null) {
+        this.term = term;
+
+        termValidates = true;
       }
-    }
 
-    if (term !== null) {
-      this.term = term;
+      if (termValidates) {
+        context.debug(`...validated the '${metavariableString}' metavariable's term.`);
+      }
 
-      termValidates = true;
-    }
-
-    if (termValidates) {
-      context.debug(`...validated the '${metavariableString}' metavariable's term.`);
-    }
+      return continuation(termValidates);
+    });
   }
 
   validateType(strict, context, continuation) {
@@ -434,7 +450,7 @@ export default define(class Metavariable extends Element {
       statementSubstitution = StatementSubstitution.fromStatementAndMetavariable(statement, metavariable, generalContext, specificContext);
     }
 
-    statementSubstitution.validate(context, (statementSubstitution) => {
+    return statementSubstitution.validate(context, (statementSubstitution) => {
       const derivedSubstitution = statementSubstitution;  ///
 
       context.addDerivedSubstitution(derivedSubstitution);

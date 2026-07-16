@@ -157,7 +157,7 @@ export default define(class Reference extends Element {
 
     context.trace(`Validating the '${referenceString}' reference's metavariable...'`);
 
-    this.metavariable.validate(context, (metavariable) => {
+    return this.metavariable.validate(context, (metavariable) => {
       let metavariableValidates = true;
 
       if (metavariable !== null) {
@@ -170,7 +170,7 @@ export default define(class Reference extends Element {
         context.debug(`...validated the '${referenceString}' reference's metavariable.'`);
       }
 
-      continuation(metavariableValidates);
+      return continuation(metavariableValidates);
     });
   }
 
