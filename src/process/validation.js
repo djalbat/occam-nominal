@@ -51,65 +51,49 @@ export function validateTermAsVariable(term, context, continuation) {
 }
 
 function unifyTermWithGenerators(term, context, continuation) {
-  let termUnifiesWithGenerators;
-
   const generators = context.getGenerators();
 
-  termUnifiesWithGenerators = some(generators, (generator) => {
-    let termUnifiesWithGenerator = false;
-
+  return some(generators, (generator, continuation) => {
     choose((context) => {
-      const termUnifies = generator.unifyTerm(term, context, continuation);
+      generator.unifyTerm(term, context, (termUnifies) => {
+        let termUnifiesWithGenerator = false;
 
-      if (termUnifies) {
-        termUnifiesWithGenerator = true;
+        if (termUnifies) {
+          termUnifiesWithGenerator = true;
 
-        context.commit();
-      }
+          context.commit();
+        }
+
+        return continuation(termUnifiesWithGenerator);
+      });
     }, context);
-
-    if (termUnifiesWithGenerator) {
-      return true;
-    }
-  });
-
-  return termUnifiesWithGenerators;
+  }, continuation);
 }
 
 function unifyTermWithConstructors(term, context, continuation) {
-  let termUnifiesWithConstructors;
-
   const constructors = context.getConstructors();
 
-  termUnifiesWithConstructors = some(constructors, (constructor) => {
-    let termUnifiesWithConstructor = false;
-
+  return some(constructors, (constructor, continuation) => {
     choose((context) => {
-      const termUnifies = constructor.unifyTerm(term, context, continuation);
+      constructor.unifyTerm(term, context, (termUnifies) => {
+        let termUnifiesWithConstructor = false;
 
-      if (termUnifies) {
-        termUnifiesWithConstructor = true;
+        if (termUnifies) {
+          termUnifiesWithConstructor = true;
 
-        context.commit();
-      }
+          context.commit();
+        }
+
+        return continuation(termUnifiesWithConstructor);
+      });
     }, context);
-
-    if (termUnifiesWithConstructor) {
-      return true;
-    }
-  });
-
-  return termUnifiesWithConstructors;
+  }, continuation);
 }
 
 function unifyTermWithBracketedConstructor(term, context, continuation) {
-  let termUnifiesWithBracketedConstructor;
-
   const bracketedConstructor = bracketedConstructorFromNothing();
 
-  termUnifiesWithBracketedConstructor = bracketedConstructor.unifyTerm(term, context, continuation);
-
-  return termUnifiesWithBracketedConstructor;
+  return bracketedConstructor.unifyTerm(term, context, continuation);
 }
 
 function validateStatementAsMetavariable(statement, context, continuation) {

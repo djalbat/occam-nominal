@@ -178,49 +178,54 @@ export default define(class Constructor extends Element {
   }
 
   unifyTerm(term, context, continuation) {
-    let termUnifies = false;
-
     const termString = term.getString(),
           includeType = true,
           constructorString = this.getString(includeType);  ///
 
     context.trace(`Unifying the '${termString}' term with the '${constructorString}' constructor...`);
 
-    const hypothesesDiscardedGivenTerm = this.dischargeHypothesesGivenTerm(term, context);
+    this.dischargeHypothesesGivenTerm(term, context, (hypothesesDiscardedGivenTerm) => {
+      if (!hypothesesDiscardedGivenTerm) {
+        const termUnifies = false;
 
-    if (hypothesesDiscardedGivenTerm) {
+        return continuation(termUnifies);
+      }
+
       const constructor = this, ///
             constructorContext = constructor.getContext(),
             generalContext = constructorContext,  ///
-            specifiContext = context, ///
-            termUnifiesWithConstructor = unifyTermWithConstructor(term, constructor, generalContext, specifiContext);
+            specifiContext = context; ///
 
-      if (termUnifiesWithConstructor) {
+      unifyTermWithConstructor(term, constructor, generalContext, specifiContext, (termUnifiesWithConstructor) => {
+        if (!termUnifiesWithConstructor) {
+          const termUnifies = false;
+
+          return continuation(termUnifies);
+        }
+
+        let termUnifies;
+
         const provisional = this.type.isProvisional();
 
         term.setType(this.type);
 
         term.setProvisional(provisional);
 
-        const validatesForwards = validateForwards(term, context);
+        termUnifies = true;
 
-        if (validatesForwards) {
-          termUnifies = true;
+        if (termUnifies) {
+          context.debug(`...unified the '${termString}' term with the '${constructorString}' constructor.`);
         }
-      }
-    }
 
-    if (termUnifies) {
-      context.debug(`...unified the '${termString}' term with the '${constructorString}' constructor.`);
-    }
-
-    return termUnifies;
+        return continuation(termUnifies);
+      });
+    });
   }
 
-  dischargeHypothesisGivenTerm(hypothesis, term, context) {
+  dischargeHypothesisGivenTerm(hypothesis, term, context, continuation) {
     let hypothesisDischargesGivenTerm;
 
-    this.break(context);
+    debugger
 
     const termString = term.getString(),
           hypothesisString = hypothesis.getString(),
@@ -237,22 +242,18 @@ export default define(class Constructor extends Element {
     return hypothesisDischargesGivenTerm;
   }
 
-  dischargeHypothesesGivenTerm(term, context) {
-    let hypothesesDischargesGivenTerm = true;  ///
-
+  dischargeHypothesesGivenTerm(term, context, continuation) {
     const hypothetical = this.isHypothetical();
 
-    if (hypothetical) {
-      hypothesesDischargesGivenTerm = every(this.hypotheses, (hypothesis) => {
-        const hypothesisDischarges = this.dischargeHypothesisGivenTerm(hypothesis, term, context);
+    if (!hypothetical) {
+      const hypothesesDischargesGivenTerm = true;  ///
 
-        if (hypothesisDischarges) {
-          return true;
-        }
-      });
+      return continuation(hypothesesDischargesGivenTerm);
     }
 
-    return hypothesesDischargesGivenTerm;
+    return every(this.hypotheses, (hypothesis, continuation) => {
+      this.dischargeHypothesisGivenTerm(hypothesis, term, context, continuation);
+    }, continuation);
   }
 
   toJSON() {

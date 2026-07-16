@@ -120,8 +120,6 @@ export default define(class Equality extends Element {
   }
 
   validate(context, continuation) {
-    let equality = null;
-
     const equalityString = this.getString(); ///
 
     context.trace(`Validating the '${equalityString}' equality...`);
@@ -178,18 +176,14 @@ export default define(class Equality extends Element {
       if (leftTerm === null) {
         const termsValidate = false;
 
-        continuation(termsValidate);
-
-        return;
+        return continuation(termsValidate);
       }
 
       this.rightTerm.validate(context, (rightTerm, context) => {
         if (rightTerm === null) {
           const termsValidate = false;
 
-          continuation(termsValidate);
-
-          return;
+          return continuation(termsValidate);
         }
 
         let termsValidate = false;
@@ -212,7 +206,7 @@ export default define(class Equality extends Element {
           context.debug(`...validated the '${equalityString}' equality's terms.`);
         }
 
-        continuation(termsValidate);
+        return continuation(termsValidate);
       });
     });
   }
