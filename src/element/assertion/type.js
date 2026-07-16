@@ -5,6 +5,7 @@ import { breakPointUtilities } from "occam-languages";
 import Assertion from "../assertion";
 
 import { define } from "../../elements";
+import { exists } from "../../utilities/continuation";
 import { instantiate } from "../../utilities/context";
 import { instantiateTypeAssertion } from "../../process/instantiate";
 import { typeFromJSON, typeToTypeJSON } from "../../utilities/json";
@@ -37,59 +38,54 @@ export default define(class TypeAssertion extends Assertion {
     return typeAssertionNode;
   }
 
-  async validate(context) {
-    let typeAssertion = null;
-
+  validate(context, continuation) {
     const typeAssertionString = this.getString();  ///
 
     context.trace(`Validating the '${typeAssertionString}' type assertion...`);
 
-    let validates = false;
-
     const validAssertion = this.findValidAssertion(context);
 
     if (validAssertion !== null) {
-      validates = true;
-
-      typeAssertion = validAssertion; ///
+      const typeAssertion = validAssertion; ///
 
       context.debug(`...the '${typeAssertionString}' type assertion is already valid.`);
-    } else {
-      const typeValidates = this.validateType(context);
 
-      if (typeValidates) {
-        const stated = context.isStated();
-
-        let validatesWhenStated = false,
-            validatesWhenDerived = false;
-
-        if (stated) {
-          validatesWhenStated = this.validateWhenStated(context);
-        } else {
-          validatesWhenDerived = await this.validateWhenDerived(context);
-        }
-
-        if (validatesWhenStated || validatesWhenDerived) {
-          validates = true;
-        }
-      }
-
-      if (validates) {
-        const assertion = this; ///
-
-        typeAssertion = assertion;  ///
-
-        this.assign(context);
-
-        context.addAssertion(assertion);
-      }
+      return continuation(typeAssertion);
     }
 
-    if (validates) {
-      context.debug(`...verified the '${typeAssertionString}' type assertion.`);
-    }
+    this.validateType(context, (typeValidates) => {
+      if (!typeValidates) {
+        const typeAssertion = null;
 
-    return typeAssertion;
+        return continuation(typeAssertion);
+      }
+
+      const validateWhenStated = this.validateWhenStated.bind(this),
+            validateWhenDerived = this.validateWhenDerived.bind(this);
+
+      return exists([
+        validateWhenStated,
+        validateWhenDerived
+      ], context, (validates) => {
+        let typeAssertion = null;
+
+        if (validates) {
+          const assertion = this; ///
+
+          typeAssertion = assertion;  ///
+
+          this.assign(context);
+
+          context.addAssertion(assertion);
+        }
+
+        if (validates) {
+          context.debug(`...verified the '${typeAssertionString}' type assertion.`);
+        }
+
+        return continuation(typeAssertion);
+      });
+    });
   }
 
   discharge(context) {
@@ -121,8 +117,8 @@ export default define(class TypeAssertion extends Assertion {
     return discharges;
   }
 
-  validateType(context) {
-    let typeValidates;
+  validateType(context, continuation) {
+    let typeValidates = false;
 
     const typeAssertionString = this.getString();  ///
 
@@ -145,74 +141,93 @@ export default define(class TypeAssertion extends Assertion {
       context.debug(`...validated the '${typeAssertionString}' type assertion's type.`);
     }
 
-    return typeValidates;
+    return continuation(typeValidates);
   }
 
-  async validateWhenStated(context) {
-    let validatesWhenStated = false;
+  validateWhenStated(context, continuation) {
+    const stated = context.isStated();
+
+    if (!stated) {
+      const validatesWhenStated = false;
+
+      return continuation(validatesWhenStated);
+    }
 
     const typeAssertionString = this.getString(); ///
 
     context.trace(`Validating the '${typeAssertionString}' stated type assertion...`);
 
-    const term = await this.term.validate(context, async (term, context) => {
-      let validatesForwards = false;
+    this.term.validate(context, (term, context) => {
+      if (term === null) {
+        const validatesWhenStated = false;
+
+        return continuation(validatesWhenStated);
+      }
 
       const termType = term.getType(),
             termTypeEqualToType = termType.isEqualTo(this.type),
             termTypeSuperTypeOfType = termType.isSuperTypeOf(this.type);
 
+      let validatesWhenStated = false;
+
       if (false) {
         ///
       } else if (termTypeEqualToType) {
-        validatesForwards = true;
+        validatesWhenStated = true;
       } else if (termTypeSuperTypeOfType) {
         const termEstablished = term.isEstablished();
 
         if (termEstablished) {
-          validatesForwards = true;
+          validatesWhenStated = true;
         }
       }
 
-      return validatesForwards;
+      if (validatesWhenStated) {
+        this.term = term;
+      }
+
+      if (validatesWhenStated) {
+        context.debug(`...validated the '${typeAssertionString}' stated type assertion.`);
+      }
+
+      return continuation(validatesWhenStated);
     });
-
-    if (term !== null) {
-      this.term = term;
-
-      validatesWhenStated = true;
-    }
-
-    if (validatesWhenStated) {
-      context.debug(`...validated the '${typeAssertionString}' stated type assertion.`);
-    }
-
-    return validatesWhenStated;
   }
 
-  validateWhenDerived(context) {
-    let validatesWhenDerived = false;
+  validateWhenDerived(context, continuation) {
+    const stated = context.isStated();
+
+    if (stated) {
+      const validatesWhenDerived = false;
+
+      return continuation(validatesWhenDerived);
+    }
 
     const typeAssertionString = this.getString(); ///
 
     context.trace(`Validating the '${typeAssertionString}' derived type assertion...`);
 
-    const term = validateWhenDerived(this.term, this.type, context);
+    validateWhenDerived(this.term, this.type, context, (term) => {
+      let validatesWhenDerived = false;
 
-    if (term !== null) {
-      this.term = term;
+      if (term !== null) {
+        this.term = term;
 
-      validatesWhenDerived = true;
-    }
+        validatesWhenDerived = true;
+      }
 
-    if (validatesWhenDerived) {
-      context.debug(`...validated the '${typeAssertionString}' derived type assertion.`);
-    }
+      if (validatesWhenDerived) {
+        context.debug(`...validated the '${typeAssertionString}' derived type assertion.`);
+      }
 
-    return validatesWhenDerived;
+      return continuation(validatesWhenDerived);
+    });
   }
 
   unifyIndependently(generalContext, specificContext) {
+
+    debugger
+
     let unifiesIndependently = false;
 
     const context = specificContext, ///
@@ -307,25 +322,33 @@ export default define(class TypeAssertion extends Assertion {
   }
 });
 
-async function validateWhenDerived(term, type, context) {
-  if (term !== null) {
-    term = await term.validate(context, async (term, context) => {
-      let validatesForwards = false;
-
-      const termType = term.getType(),
-            termTypeEqualToOrSubTypeOfType = termType.isEqualToOrSubTypeOf(type);
-
-      if (termTypeEqualToOrSubTypeOfType) {
-        const termEstablished = term.isEstablished();
-
-        if (termEstablished) {
-          validatesForwards = true;
-        }
-      }
-
-      return validatesForwards;
-    });
+function validateWhenDerived(term, type, context, continuation) {
+  if (term === null) {
+    return continuation(term);
   }
 
-  return term;
+  term.validate(context, (term, context) => {
+    if (term === null) {
+      return continuation(term);
+    }
+
+    const termType = term.getType(),
+          termTypeEqualToOrSubTypeOfType = termType.isEqualToOrSubTypeOf(type);
+
+    if (!termTypeEqualToOrSubTypeOfType) {
+      term = null;
+
+      return continuation(term);
+    }
+
+    const termEstablished = term.isEstablished();
+
+    if (!termEstablished) {
+      term = null;
+
+      return continuation(term);
+    }
+
+    return continuation(term);
+  });
 }
