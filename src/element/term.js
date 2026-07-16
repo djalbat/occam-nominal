@@ -212,11 +212,11 @@ export default define(class Term extends Element {
     });
   }
 
-  validateGivenType(type, strict, context, continuation) {
+  validateGivenType(strict, type, context, continuation) {
     if (continuation === undefined) {
       continuation = context; ///
 
-      context = strict; ///
+      context = type; ///
 
       strict = true;
     }

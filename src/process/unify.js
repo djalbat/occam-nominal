@@ -44,7 +44,7 @@ class PropertyPass extends ContinuationZipPass {
           const term = termFromTermNode(termNode, context),
                 strict = false;
 
-          term.validateGivenType(type, strict, context, (term) => {
+          term.validateGivenType(strict, type, context, (term) => {
             let success = false;
 
             if (term !== null) {
