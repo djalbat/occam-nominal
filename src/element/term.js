@@ -218,6 +218,8 @@ export default define(class Term extends Element {
 
       context = type; ///
 
+      type = strict;  ///
+
       strict = true;
     }
 

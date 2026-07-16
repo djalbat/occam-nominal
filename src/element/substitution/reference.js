@@ -4,11 +4,12 @@ import { breakPointUtilities } from "occam-languages";
 
 import Substitution from "../substitution";
 
+import { all } from "../../utilities/continuation";
 import { define } from "../../elements";
 import { instantiateReferenceSubstitution } from "../../process/instantiate";
 import { referenceSubstitutionFromReferenceSubstitutionNode } from "../../utilities/element";
 import { referenceSubstitutionStringFromReferenceAndMetavariable } from "../../utilities/string";
-import { elide, ablates, manifest, attempts, instantiate, unserialises } from "../../utilities/context";
+import { pass, waive, elide, ablates, manifest, attempts, instantiate, unserialises } from "../../utilities/context";
 
 const { breakPointFromJSON } = breakPointUtilities;
 
@@ -91,103 +92,124 @@ export default define(class ReferenceSubstitution extends Substitution {
     return substitutionCompares;
   }
 
-  validate(context) {
-    let referenceSubstitution = null;
+  validate(strict, context, continuation) {
+    if (continuation === undefined) {
+      continuation = context; ///
+
+      context = strict; ///
+
+      strict = false;
+    }
 
     const referenceSubstitutionString = this.getString();  ///
 
     context.trace(`Validating the '${referenceSubstitutionString}' reference substitution...`);
 
-    let validates = false;
-
     const validSubstitution = this.findValidSubstitution(context);
 
     if (validSubstitution !== null) {
-      validates = true;
-
-      referenceSubstitution = validSubstitution;  ///
+      const referenceSubstitution = validSubstitution;  ///
 
       context.debug(`...the '${referenceSubstitutionString}' reference substitution is already valid.`);
-    } else {
-      const generalContext = this.getGeneralContext(),
-            specificContext = this.getSpecificContext();
 
+      continuation(referenceSubstitution);
+
+      return;
+    }
+
+    const generalContext = this.getGeneralContext(),
+          specificContext = this.getSpecificContext();
+
+    (strict ? pass : waive)((context) => {
       attempts((generalContext, specificContext) => {
-        const targetReferenceValidates = this.validateTargetReference(generalContext, specificContext);
+        const validateTargetStatement = this.validateTargetStatement.bind(this),
+              validateReplacementStatement = this.validateReplacementStatement.bind(this);
 
-        if (targetReferenceValidates) {
-          const replacementReferenceValidates = this.validateReplacementReference(generalContext, specificContext);
+        return all([
+          validateTargetStatement,
+          validateReplacementStatement
+        ], generalContext, specificContext, (validates) => {
+          let referenceSubstitution = null;
 
-          if (replacementReferenceValidates) {
-            validates = true;
+          if (validates) {
+            const substitution = this;  ///
+
+            referenceSubstitution = substitution; ///
+
+            context.addSubstitution(substitution);
           }
-        }
 
-        if (validates) {
-          this.commit(generalContext, specificContext);
-        }
+          if (validates) {
+            this.commit(generalContext, specificContext);
+          }
+
+          if (validates) {
+            context.debug(`...validated the '${referenceSubstitutionString}' reference substitution.`);
+          }
+
+          return continuation(referenceSubstitution);
+        });
       }, generalContext, specificContext);
-
-      if (validates) {
-        const substitution = this;  ///
-
-        referenceSubstitution = substitution;  ///
-
-        context.addSubstitution(substitution);
-      }
-    }
-
-    if (validates) {
-      context.debug(`...validated the '${referenceSubstitutionString}' reference substitution.`);
-    }
-
-    return referenceSubstitution;
+    }, context);
   }
 
-  validateTargetReference(generalContext, specificContext) {
-    let targetReferenceValidates = false;
-
-    const context = generalContext, ///
+  validateTargetStatement(generalContext, specificContext, continuation) {
+    const context = generalContext,  ///
           referenceSubstitutionString = this.getString();  ///
 
-    context.trace(`Validating the '${referenceSubstitutionString}' reference substitution's target reference...`);
+    context.trace(`Validating the '${referenceSubstitutionString}' reference substitution's target statement...`);
 
-    elide((context) => {
-      const targetReference = this.targetReference.validate(context);
+    const targetStatementSingular = this.targetStatement.isSingular();
 
-      if (targetReference !== null) {
-        targetReferenceValidates = true;
-      }
-    }, context);
+    if (!targetStatementSingular) {
+      const targetStatementString = this.targetStatement.getString(),
+            targetStatementValidates = false;
 
-    if (targetReferenceValidates) {
-      context.debug(`...validated the '${referenceSubstitutionString}' reference substitution's target reference...`);
+      context.debug(`The '${targetStatementString}' target statement is not singular.`);
+
+      continuation(targetStatementValidates);
+
+      return;
     }
 
-    return targetReferenceValidates;
+    elide((context) => {
+      this.targetStatement.validate(context, (targetStatement) => {
+        let targetStatementValidates = false;
+
+        if (targetStatement !== null) {
+          targetStatementValidates = true;
+        }
+
+        if (targetStatementValidates) {
+          context.debug(`...validated the '${referenceSubstitutionString}' reference substitution's target statement...`);
+        }
+
+        continuation(targetStatementValidates);
+      });
+    }, context);
   }
 
-  validateReplacementReference(generalContext, specificContext) {
-    let replacementReferenceValidates = false;
-
+  validateReplacementStatement(generalContext, specificContext, continuation) {
     const context = specificContext,  ///
           referenceSubstitutionString = this.getString();  ///
 
-    context.trace(`Validating the '${referenceSubstitutionString}' reference substitution's replacement reference...`);
+    context.trace(`Validating the '${referenceSubstitutionString}' reference substitution's replacement statement...`);
 
     elide((context) => {
-      const replacementReference = this.replacementReference.validate(context);
+      this.replacementStatement.validate(context, (replacementStatement) => {
+        let replacementStatementValidates = false;
 
-      if (replacementReference !== null) {
-        replacementReferenceValidates = true;
-      }
+        if (replacementStatement !== null) {
+          replacementStatementValidates = true;
+        }
+
+        if (replacementStatementValidates) {
+          context.debug(`...validated the '${referenceSubstitutionString}' reference substitution's replacement statement.`);
+        }
+
+        continuation(replacementStatementValidates);
+      });
     }, context);
-
-    if (replacementReferenceValidates) {
-      context.debug(`...validated the '${referenceSubstitutionString}' reference substitution's replacement reference.`);
-    }
-
-    return replacementReferenceValidates;
   }
 
   static name = "ReferenceSubstitution";

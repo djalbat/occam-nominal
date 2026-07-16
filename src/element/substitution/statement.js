@@ -9,7 +9,7 @@ import { define } from "../../elements";
 import { stripBracketsFromStatement } from "../../utilities/brackets";
 import { instantiateStatementSubstitution } from "../../process/instantiate";
 import { statementSubstitutionFromStatementSubstitutionNode } from "../../utilities/element";
-import { elide, ablates, manifest, attempts, reconcile, instantiate, unserialises } from "../../utilities/context";
+import { pass, waive, elide, ablates, manifest, attempts, reconcile, instantiate, unserialises } from "../../utilities/context";
 import { statementSubstitutionStringFromStatementAndMetavariable, statementSubstitutionStringFromStatementMetavariableAndSubstitution } from "../../utilities/string";
 
 const { breakPointFromJSON } = breakPointUtilities;
@@ -78,7 +78,15 @@ export default define(class StatementSubstitution extends Substitution {
     return comparesToParameter;
   }
 
-  validate(context, continuation) {
+  validate(strict, context, continuation) {
+    if (continuation === undefined) {
+      continuation = context; ///
+
+      context = strict; ///
+
+      strict = false;
+    }
+
     const statementSubstitutionString = this.getString();  ///
 
     context.trace(`Validating the '${statementSubstitutionString}' statement substitution...`);
@@ -98,35 +106,37 @@ export default define(class StatementSubstitution extends Substitution {
     const generalContext = this.getGeneralContext(),
           specificContext = this.getSpecificContext();
 
-    attempts((generalContext, specificContext) => {
-      const validateTargetStatement = this.validateTargetStatement.bind(this),
-            validateReplacementStatement = this.validateReplacementStatement.bind(this);
+    (strict ? pass : waive)((context) => {
+      attempts((generalContext, specificContext) => {
+        const validateTargetStatement = this.validateTargetStatement.bind(this),
+              validateReplacementStatement = this.validateReplacementStatement.bind(this);
 
-      return all([
-        validateTargetStatement,
-        validateReplacementStatement
-      ], generalContext, specificContext, (validates) => {
-        let statementSubstitution = null;
+        return all([
+          validateTargetStatement,
+          validateReplacementStatement
+        ], generalContext, specificContext, (validates) => {
+          let statementSubstitution = null;
 
-        if (validates) {
-          const substitution = this;  ///
+          if (validates) {
+            const substitution = this;  ///
 
-          statementSubstitution = substitution; ///
+            statementSubstitution = substitution; ///
 
-          context.addSubstitution(substitution);
-        }
+            context.addSubstitution(substitution);
+          }
 
-        if (validates) {
-          this.commit(generalContext, specificContext);
-        }
+          if (validates) {
+            this.commit(generalContext, specificContext);
+          }
 
-        if (validates) {
-          context.debug(`...validated the '${statementSubstitutionString}' statement substitution.`);
-        }
+          if (validates) {
+            context.debug(`...validated the '${statementSubstitutionString}' statement substitution.`);
+          }
 
-        return continuation(statementSubstitution);
-      });
-    }, generalContext, specificContext);
+          return continuation(statementSubstitution);
+        });
+      }, generalContext, specificContext);
+    }, context);
   }
 
   validateTargetStatement(generalContext, specificContext, continuation) {
@@ -188,9 +198,7 @@ export default define(class StatementSubstitution extends Substitution {
     }, context);
   }
 
-  unifyTargetStatement(substitution, context) {
-    let targetStatemnentUnifies = false;
-
+  unifyTargetStatement(substitution, context, continuation) {
     const generalSubstitution = this, ///
           specificSubstitution = substitution,
           generalSubstitutionString = generalSubstitution.getString(),
@@ -208,20 +216,22 @@ export default define(class StatementSubstitution extends Substitution {
           specificStatement = specificSubstitutionTargetStatement; ///
 
     reconcile((specificContext) => {
-      const statementUnifies = generalStatement.unifyStatement(specificStatement, generalContext, specificContext);
+      return generalStatement.unifyStatement(specificStatement, generalContext, specificContext, (statementUnifies) => {
+        let targetStatemnentUnifies = false;
 
-      if (statementUnifies) {
-        specificContext.commit(context);
+        if (statementUnifies) {
+          specificContext.commit(context);
 
-        targetStatemnentUnifies = true;
-      }
+          targetStatemnentUnifies = true;
+        }
+
+        if (targetStatemnentUnifies) {
+          context.trace(`...unified the '${specificSubstitutionString}' substitution's target statement with the '${generalSubstitutionString}' substitution's target statement.`);
+        }
+
+        return continuation(targetStatemnentUnifies);
+      });
     }, specificContext);
-
-    if (targetStatemnentUnifies) {
-      context.trace(`...unified the '${specificSubstitutionString}' substitution's target statement with the '${generalSubstitutionString}' substitution's target statement.`);
-    }
-
-    return targetStatemnentUnifies;
   }
 
   unifyReplacementStatement(substitution, context, continuation) {

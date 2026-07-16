@@ -10,7 +10,7 @@ import { stripBracketsFromTerm } from "../../utilities/brackets";
 import { instantiateTermSubstitution } from "../../process/instantiate";
 import { termSubstitutionFromTermSubstitutionNode } from "../../utilities/element";
 import { termSubstitutionStringFromTermAndVariable } from "../../utilities/string";
-import { elide, ablate, ablates, descend, manifest, attempts, reconcile, instantiate, unserialises } from "../../utilities/context";
+import { pass, waive, elide, ablate, ablates, descend, manifest, attempts, reconcile, instantiate, unserialises } from "../../utilities/context";
 
 const { breakPointFromJSON } = breakPointUtilities;
 
@@ -78,7 +78,15 @@ export default define(class TermSubstitution extends Substitution {
     return comparedToTerm;
   }
 
-  validate(context, continuation) {
+  validate(strict, context, continuation) {
+    if (continuation === undefined) {
+      continuation = context; ///
+
+      context = strict; ///
+
+      strict = false;
+    }
+
     const termSubstitutionString = this.getString();  ///
 
     context.trace(`Validating the '${termSubstitutionString}' term substitution...`);
@@ -96,35 +104,37 @@ export default define(class TermSubstitution extends Substitution {
     const generalContext = this.getGeneralContext(),
           specificContext = this.getSpecificContext();
 
-    attempts((generalContext, specificContext) => {
-      const validateTargetTerm = this.validateTargetTerm.bind(this),
-            validateReplacementTerm = this.validateReplacementTerm.bind(this);
+    (strict ? pass : waive)((context) => {
+      attempts((generalContext, specificContext) => {
+        const validateTargetTerm = this.validateTargetTerm.bind(this),
+              validateReplacementTerm = this.validateReplacementTerm.bind(this);
 
-      return all([
-        validateTargetTerm,
-        validateReplacementTerm
-      ], generalContext, specificContext, (validates) => {
-        let termSubstitution = null;
+        return all([
+          validateTargetTerm,
+          validateReplacementTerm
+        ], generalContext, specificContext, (validates) => {
+          let termSubstitution = null;
 
-        if (validates) {
-          const substitution = this;  ///
+          if (validates) {
+            const substitution = this;  ///
 
-          termSubstitution = substitution; ///
+            termSubstitution = substitution; ///
 
-          context.addSubstitution(substitution);
-        }
+            context.addSubstitution(substitution);
+          }
 
-        if (validates) {
-          this.commit(generalContext, specificContext);
-        }
+          if (validates) {
+            this.commit(generalContext, specificContext);
+          }
 
-        if (validates) {
-          context.debug(`...validated the '${termSubstitutionString}' term substitution.`);
-        }
+          if (validates) {
+            context.debug(`...validated the '${termSubstitutionString}' term substitution.`);
+          }
 
-        return continuation(termSubstitution);
-      });
-    }, generalContext, specificContext);
+          return continuation(termSubstitution);
+        });
+      }, generalContext, specificContext);
+    }, context);
   }
 
   validateTargetTerm(generalContext, specificContext, continuation) {

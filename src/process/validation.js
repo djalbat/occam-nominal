@@ -147,7 +147,9 @@ function validateStatementAsMetavariable(statement, context, continuation) {
       return continuation(statementValidatesAsMetavariable);
     }
 
-    substitution.validate(context, (substitution) => {
+    const strict = true;
+
+    substitution.validate(strict, context, (substitution) => {
       let statementValidatesAsMetavariable = false;
 
       if (substitution !== null) {

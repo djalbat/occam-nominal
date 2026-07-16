@@ -10,6 +10,6 @@ const logLevel = ERROR_LEVEL,
       projectName = "intuitionistic-propositional-logic",
       projectsDirectoryPath = "../../Logic";
 
-describe.only(projectName, () => {
+describe(projectName, () => {
   createSuite(logLevel, projectName, projectsDirectoryPath);
 });
