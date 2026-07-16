@@ -1,15 +1,17 @@
 "use strict";
 
 import { arrayUtilities } from "necessary";
-import { Element, breakPointUtilities } from "occam-languages";
+import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
 
 import elements from "../elements";
 
 import { define } from "../elements";
+import { all, exists } from "../utilities/continuation";
 import { instantiateAssumption } from "../process/instantiate";
 import { reconcile, instantiate } from "../utilities/context";
 
-const { each, clone, filter } = arrayUtilities,
+const { clone } = arrayUtilities,
+      { each, filter } = continuationUtilities,
       { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Assumption extends Element {
@@ -76,104 +78,109 @@ export default define(class Assumption extends Element {
     return validAssumption;
   }
 
-  async validate(context) {
-    let assumption = null;
-
+  validate(context, continuation) {
     const assumptionString = this.getString();  ///
 
     context.trace(`Validating the '${assumptionString}' assumption...`);
 
-    let validates = false;
-
     const validAssumption = this.findValidAssumption(context);
 
     if (validAssumption !== null) {
-      validates = true;
-
-      assumption = validAssumption; ///
+      const assumption = validAssumption; ///
 
       context.debug(`...the '${assumptionString}' assumption is already valid.`);
-    } else {
-      const statementValidates = await this.validateStatement(context);
 
-      if (statementValidates) {
-        const referenceValidates = await this.validateReference(context);
+      return continuation(assumption);
+    }
 
-        if (referenceValidates) {
-          const stated = context.isStated();
+    const validateStatement = this.validateStatement.bind(this),
+          validateReference = this.validateReference.bind(this);
 
-          let validatesWhenStated = false,
-              validatesWhenDerived = false;
+    return all([
+      validateStatement,
+      validateReference
+    ], context, (validates) => {
+      if (!validates) {
+        const assumption = null;
 
-          if (stated) {
-            validatesWhenStated = this.validateWhenStated(context);
-          } else {
-            validatesWhenDerived = this.validateWhenDerived(context);
-          }
+        return continuation(assumption);
+      }
 
-          if (validatesWhenStated || validatesWhenDerived) {
-            validates = true;
-          }
+      const validateWhenStated = this.validateWhenStated.bind(this),
+            validateWhenDerived = this.validateWhenDerived.bind(this);
+
+      return exists([
+        validateWhenStated,
+        validateWhenDerived
+      ], context, (validates) => {
+        let assumption = null;
+
+        if (validates) {
+          assumption = this;  ///
+
+          context.addAssumption(assumption);
         }
-      }
 
-      if (validates) {
-        assumption = this;  ///
+        if (validates) {
+          context.debug(`...validated the '${assumptionString}' assumption.`);
+        }
 
-        context.addAssumption(assumption);
-      }
-    }
-
-    if (validates) {
-      context.debug(`...validated the '${assumptionString}' assumption.`);
-    }
-
-    return assumption;
+        return continuation(assumption);
+      });
+    });
   }
 
-  validateReference(context) {
-    let referenceValidates = false;
-
+  validateReference(context, continuation) {
     const assumptionString = this.getString();  ///
 
     context.trace(`Validating the '${assumptionString}' assumption's reference...`);
 
-    const reference = this.reference.validate(context);
+    this.reference.validate(context, (reference) => {
+      let referenceValidates = false;
 
-    if (reference !== null) {
-      this.reference = reference;
+      if (reference !== null) {
+        this.reference = reference;
 
-      referenceValidates = true;
-    }
+        referenceValidates = true;
+      }
 
-    if (referenceValidates) {
-      context.debug(`...validated the '${assumptionString}' assumption's reference.`);
-    }
+      if (referenceValidates) {
+        context.debug(`...validated the '${assumptionString}' assumption's reference.`);
+      }
 
-    return referenceValidates;
+      return continuation(referenceValidates);
+    });
   }
 
-  async validateStatement(context) {
-    let statementValidates = false;
-
+  validateStatement(context, continuation) {
     const assumptionString = this.getString();  ///
 
     context.trace(`Validating the '${assumptionString}' assumption's statement...`);
 
-    const statement = await this.statement.validate(context);
+    this.statement.validate(context, (statement) => {
+      let statementValidates = false;
 
-    if (statement !== null) {
-      statementValidates = true;
-    }
+      if (statement !== null) {
+        statementValidates = true;
+      }
 
-    if (statementValidates) {
-      context.debug(`...validated the '${assumptionString}' assumption's statement.`);
-    }
+      if (statementValidates) {
+        context.debug(`...validated the '${assumptionString}' assumption's statement.`);
+      }
 
-    return statementValidates;
+      return continuation(statementValidates);
+    });
   }
 
-  validateWhenStated(context) {
+  validateWhenStated(context, continuation) {
+    const stated = context.isStated();
+
+    if (!stated) {
+      const validatesWhenStated = false;
+
+      return continuation(validatesWhenStated);
+    }
+
     let validatesWhenStated;
 
     const assumptionString = this.getString();  ///
@@ -186,10 +193,18 @@ export default define(class Assumption extends Element {
       context.debug(`...validated the '${assumptionString}' stated assumption.`);
     }
 
-    return validatesWhenStated;
+    return continuation(validatesWhenStated);
   }
 
-  validateWhenDerived(context) {
+  validateWhenDerived(context, continuation) {
+    const stated = context.isStated();
+
+    if (stated) {
+      const validatesWhenDerived = false;
+
+      return continuation(validatesWhenDerived);
+    }
+
     let validatesWhenDerived = false;
 
     const assumptionString = this.getString();  ///
@@ -202,35 +217,28 @@ export default define(class Assumption extends Element {
 
     schemas = clone(schemas); ///
 
-    filter(schemas, (schema) => {
-      const label = schema.getLabel(),
-            labelUnifies = this.unifyLabel(label, context);
+    return filter(schemas, (schema, continuation) => {
+      const label = schema.getLabel();
 
-      if (labelUnifies) {
-        return true;
-      }
+      return this.unifyLabel(label, context, continuation);
+    }, () => {
+      return each(schemas, (schema, continuation) => {
+        return this.unifySchema(schema, context, continuation);
+      }, (schemasUnifiy) => {
+        if (schemasUnifiy) {
+          validatesWhenDerived = true;
+        }
+
+        if (validatesWhenDerived) {
+          context.debug(`...validated the '${assumptionString}' derived assumption.`);
+        }
+
+        return continuation(validatesWhenDerived);
+      });
     });
-
-    const schemasUnifiy = each(schemas, (schema) => {
-      const schemaUnifies = this.unifySchema(schema, context);
-
-      if (schemaUnifies) {
-        return true;
-      }
-    });
-
-    if (schemasUnifiy) {
-      validatesWhenDerived = true;
-    }
-
-    if (validatesWhenDerived) {
-      context.debug(`...validated the '${assumptionString}' derived assumption.`);
-    }
-
-    return validatesWhenDerived;
   }
 
-  unifyLabel(label, context) {
+  unifyLabel(label, context, continuation) {
     let labelUnifies;
 
     const labelString = label.getString(),
@@ -249,7 +257,7 @@ export default define(class Assumption extends Element {
     return labelUnifies;
   }
 
-  unifySchema(schema, context) {
+  unifySchema(schema, context, continuation) {
     let schemaUnifies = false;
 
     const schemaString = schema.getString(),
@@ -292,7 +300,7 @@ export default define(class Assumption extends Element {
     return schemaUnifies;
   }
 
-  async unifyDeduction(deduction, generalContext, specificContext) {
+  unifyDeduction(deduction, generalContext, specificContext, continuation) {
     let deductionUnifies;
 
     const context = specificContext,  ///
@@ -306,8 +314,8 @@ export default define(class Assumption extends Element {
 
     specificContext = deductionContext; ///
 
-    await reconcile(async (specificContext) => {
-      const statementUnifies = await this.statement.unifyStatement(statement, generalContext, specificContext);
+    reconcile((specificContext) => {
+      const statementUnifies = this.statement.unifyStatement(statement, generalContext, specificContext);
 
       if (statementUnifies) {
         deductionUnifies = true;

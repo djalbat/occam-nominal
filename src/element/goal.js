@@ -10,8 +10,8 @@ import { all, exists } from "../utilities/continuation";
 import { instantiateGoal } from "../process/instantiate";
 import { reconcile, instantiate } from "../utilities/context";
 
-const { filter } = continuationUtilities,
-      { each, clone } = arrayUtilities,
+const { clone } = arrayUtilities,
+      { each, filter } = continuationUtilities,
       { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Goal extends Element {
@@ -217,39 +217,34 @@ export default define(class Goal extends Element {
 
     schemas = clone(schemas); ///
 
-    filter(schemas, (schema) => {
-      const label = schema.getLabel(),
-            labelUnifies = this.unifyLabel(label, context);
+    return filter(schemas, (schema, continuation) => {
+      const label = schema.getLabel();
 
-      if (labelUnifies) {
-        return true;
-      }
+      return this.unifyLabel(label, context, continuation);
+    }, () => {
+      return each(schemas, (schema, continuation) => {
+        return this.unifySchema(schema, context, continuation);
+      }, (schemasUnifiy) => {
+        if (schemasUnifiy) {
+          validatesWhenDerived = true;
+        }
+
+        if (validatesWhenDerived) {
+          context.debug(`...validated the '${goalString}' derived goal.`);
+        }
+
+        return continuation(validatesWhenDerived);
+      });
     });
-
-    const schemasUnifiy = each(schemas, (schema) => {
-      const schemaUnifies = this.unifySchema(schema, context);
-
-      if (schemaUnifies) {
-        return true;
-      }
-    });
-
-    if (schemasUnifiy) {
-      validatesWhenDerived = true;
-    }
-
-    if (validatesWhenDerived) {
-      context.debug(`...validated the '${goalString}' derived goal.`);
-    }
-
-    return validatesWhenDerived;
   }
 
-  unifyLabel(label, context) {
+  unifyLabel(label, context, continuation) {
     let labelUnifies;
 
     const goalString = this.getString(),  ///
           labelString = label.getString();
+
+    debugger
 
     context.trace(`Unifying the '${labelString}' label with the '${goalString}' goal...`);
 
@@ -264,11 +259,13 @@ export default define(class Goal extends Element {
     return labelUnifies;
   }
 
-  unifySchema(schema, context) {
+  unifySchema(schema, context, continuation) {
     let schemaUnifies = false;
 
     const goalString = this.getString(),
           schemaString = schema.getString();
+
+    debugger
 
     context.trace(`Unifying the '${schemaString}' schema with the '${goalString}' goal...`);
 

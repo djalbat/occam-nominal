@@ -17,7 +17,7 @@ import { labelFromJSON,
          suppositionsToSuppositionsJSON } from "../utilities/json";
 
 const { forwardsEvery } = continuationUtilities,
-      { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
+      { breakable, breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Schema extends Element {
   constructor(context, string, node, breakPoint, label, suppositions, deduction, proof, constraints) {
@@ -71,26 +71,24 @@ export default define(class Schema extends Element {
     return comparesToReference;
   }
 
-  async verify(context) {
+  verify = breakable(function (context, continuation) {
     let verifies;
-
-    await this.break(context);
 
     const schemaString = this.getString(); ///
 
     context.trace(`Verifying the '${schemaString}' schema...`);
 
-    await encapsulate(async (context) => {
+    encapsulate((context) => {
       const labelVerifies = this.verifyLabel(context);
 
       if (labelVerifies) {
-        const suppositionsVerify = await this.verifySuppositions(context);
+        const suppositionsVerify = this.verifySuppositions(context);
 
         if (suppositionsVerify) {
-          const deductionVerifies = await this.verifyDeduction(context);
+          const deductionVerifies = this.verifyDeduction(context);
 
           if (deductionVerifies) {
-            const proofVerifies = await this.verifyProof(context);
+            const proofVerifies = this.verifyProof(context);
 
             if (proofVerifies) {
               verifies = true;
@@ -109,7 +107,7 @@ export default define(class Schema extends Element {
     }
 
     return verifies;
-  }
+  });
 
   verifyLabel(context) {
     let labelVerifies;
@@ -128,7 +126,7 @@ export default define(class Schema extends Element {
     return labelVerifies;
   }
 
-  async verifyProof(context) {
+  verifyProof(context) {
     let proofVerifies;
 
     const schemaString = this.getString();  ///
@@ -137,7 +135,7 @@ export default define(class Schema extends Element {
 
     const statement = this.deduction.getStatement();
 
-    proofVerifies = await this.proof.verify(statement, context);
+    proofVerifies = this.proof.verify(statement, context);
 
     if (proofVerifies) {
       context.debug(`...verified the '${schemaString}' schema's proof.`);
@@ -146,7 +144,7 @@ export default define(class Schema extends Element {
     return proofVerifies;
   }
 
-  async verifyDeduction(context) {
+  verifyDeduction(context) {
     let deductionVerifies;
 
     const schemaString = this.getString(),  //
@@ -154,7 +152,7 @@ export default define(class Schema extends Element {
 
     context.trace(`Verifying the '${schemaString}' top level meta assertion's '${deductionString}' deduction...`);
 
-    deductionVerifies = await this.deduction.verify(context);
+    deductionVerifies = this.deduction.verify(context);
 
     if (deductionVerifies) {
       context.debug(`...verified the '${schemaString}' top level meta assertion's '${deductionString}' deduction.`);
@@ -163,7 +161,7 @@ export default define(class Schema extends Element {
     return deductionVerifies;
   }
 
-  async verifySupposition(supposition, context) {
+  verifySupposition(supposition, context) {
     let suppositionVerifies;
 
     const schemaString = this.getString(),  ///
@@ -171,7 +169,7 @@ export default define(class Schema extends Element {
 
     context.trace(`Verifying the '${schemaString}' schema's '${suppositionString}' supposition...`);
 
-    suppositionVerifies = await supposition.verify(context)
+    suppositionVerifies = supposition.verify(context)
 
     if (suppositionVerifies) {
       const subproofOrProofAssertion = supposition;  ////
@@ -188,15 +186,15 @@ export default define(class Schema extends Element {
     return suppositionVerifies;
   }
 
-  async verifySuppositions(context) {
+  verifySuppositions(context) {
     let suppositionsVerify;
 
     const schemaString = this.getString();  ///
 
     context.trace(`Verifying the '${schemaString}' schema's suppositions...`);
 
-    suppositionsVerify = await forwardsEvery(this.suppositions, async (supposition) => {
-      const suppositionVerifies = await this.verifySupposition(supposition, context);
+    suppositionsVerify = forwardsEvery(this.suppositions, (supposition) => {
+      const suppositionVerifies = this.verifySupposition(supposition, context);
 
       if (suppositionVerifies) {
         return true;
@@ -295,7 +293,7 @@ export default define(class Schema extends Element {
     return assumptionsUnify;
   }
 
-  async unifyDeducedStatement(deducedStatement, context) {
+  unifyDeducedStatement(deducedStatement, context) {
     let deducedStatementUnifies = false;
 
     const deductionString = this.deduction.getString(),
@@ -307,7 +305,7 @@ export default define(class Schema extends Element {
           statement = deducedStatement, ///
           generalContext = deductionContext, ///
           specificContext = context,  ///
-          statementUnifies = await this.deduction.unifyStatement(statement, generalContext, specificContext);
+          statementUnifies = this.deduction.unifyStatement(statement, generalContext, specificContext);
 
     if (statementUnifies) {
       deducedStatementUnifies = true;
@@ -347,7 +345,7 @@ export default define(class Schema extends Element {
     return subproofAssertionUnifies;
   }
 
-  async unifySupposedStatement(supposedStatement, index, context) {
+  unifySupposedStatement(supposedStatement, index, context) {
     let supposedStatementUnifies = false;
 
     const supposition = this.getSupposition(index),
@@ -360,7 +358,7 @@ export default define(class Schema extends Element {
           statement = supposedStatement, ///
           generalContext = suppositionContext, ///
           specificContext = context,  ///
-          statementUnifies = await supposition.unifyStatement(statement, generalContext, specificContext);
+          statementUnifies = supposition.unifyStatement(statement, generalContext, specificContext);
 
     if (statementUnifies) {
       supposedStatementUnifies = true;
