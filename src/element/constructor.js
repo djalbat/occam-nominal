@@ -10,8 +10,8 @@ import { validateTermAsVariable } from "../process/validation";
 import { termFromConstructorNode } from "../utilities/element";
 import { unifyTermWithConstructor } from "../process/unify";
 import { validateTermAsConstructor } from "../process/validate";
-import { typeFromJSON, typeToTypeJSON } from "../utilities/json";
 import { attempt, serialise, unserialise, instantiate } from "../utilities/context";
+import { typeFromJSON, typeToTypeJSON, hypothesesFromJSON, hypothesesToHypothesesJSON } from "../utilities/json";
 
 const { every } = continuationUtilities,
       { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
@@ -262,6 +262,7 @@ export default define(class Constructor extends Element {
     return serialise((context) => {
       const includeType = false,
             typeJSON = typeToTypeJSON(this.type),
+            hypothesesJSON = hypothesesToHypothesesJSON(this.hypotheses),
             string = this.getString(includeType);
 
       let breakPoint;
@@ -273,11 +274,13 @@ export default define(class Constructor extends Element {
       breakPoint = breakPointJSON;  ///
 
       const type = typeJSON,  ///
+            hypotheses = hypothesesJSON,  ///
             json = {
               context,
               string,
               breakPoint,
-              type
+              type,
+              hypotheses
             };
 
       return json;
@@ -296,9 +299,10 @@ export default define(class Constructor extends Element {
               node = constructorNode, ///
               breakPoint = breakPointFromJSON(json),
               term = termFromConstructorNode(constructorNode, context),
-              type = typeFromJSON(json, context);
+              type = typeFromJSON(json, context),
+              hypotheses = hypothesesFromJSON(json, context);
 
-        constructor = new Constructor(context, string, node, breakPoint, term, type);
+        constructor = new Constructor(context, string, node, breakPoint, term, type, hypotheses);
       }, json, context);
     }, context);
 
