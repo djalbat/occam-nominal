@@ -3,6 +3,7 @@
 import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
 
 import { define } from "../elements";
+import { exists } from "../utilities/continuation";
 import { baseTypeFromNothing } from "../utilities/type";
 import { instantiateConstructor } from "../process/instantiate";
 import { validateTermAsVariable } from "../process/validation";
@@ -73,7 +74,7 @@ export default define(class Constructor extends Element {
     this.type = type;
   }
 
-  async verify(context) {
+  verify(context, continuation) {
     let verifies = false;
 
     const includeType = false,
@@ -81,68 +82,102 @@ export default define(class Constructor extends Element {
 
     context.trace(`Verifying the '${constructorString}' constructor...`);
 
-    await attempt(async (context) => {
-      const termValidates = await this.validateTerm(context);
+    attempt((context) => {
+      this.validateTerm(context, (termValidates) => {
+        if (termValidates) {
+          verifies = true;
+        }
 
-      if (termValidates) {
-        verifies = true;
-      }
+        if (verifies) {
+          this.commit(context);
+        }
 
-      if (verifies) {
-        this.commit(context);
-      }
+        if (verifies) {
+          context.debug(`...verified the '${constructorString}' constructor.`);
+        }
+
+        return continuation(verifies);
+      });
     }, context);
-
-    if (verifies) {
-      context.debug(`...verified the '${constructorString}' constructor.`);
-    }
-
-    return verifies;
   }
 
-  async validateTerm(context) {
-    let termValidates = false;
+  validateTerm(context, continuation) {
+    const includeType = false,
+          constructorString = this.getString(includeType);
+
+    context.trace(`Validating the '${constructorString}' constructor's term...`);
+
+    const validateTermAsVariable = this.validateTermAsVariable.bind(this),
+          validateTermAsConstructor = this.validateTermAsConstructor.bind(this);
+
+    return exists([
+      validateTermAsVariable,
+      validateTermAsConstructor
+    ], context, (termValidates) => {
+      if (termValidates) {
+        context.debug(`...validated the '${constructorString}' constructor's term.`);
+      }
+
+      return continuation(termValidates);
+    });
+  }
+
+  validateTermAsVariable(context, continuation) {
+    const hypothtical = this.isHypothetical();
+
+    if (!hypothtical) {
+      const termValidatesAsVariable = false;
+
+      return continuation(termValidatesAsVariable);
+    }
 
     const includeType = false,
           constructorString = this.getString(includeType);
 
     context.trace(`Validating the '${constructorString}' constructor's term...`);
 
+    validateTermAsVariable(this.term, context, (term, context) => {
+      let termValidatesAsVariable = false;
+
+      const type = term.getType(),
+            baseType = baseTypeFromNothing();
+
+      if (type === baseType) {
+        termValidatesAsVariable = true;
+      }
+
+      if (termValidatesAsVariable) {
+        context.debug(`...validated the '${constructorString}' constructor's term.`);
+      }
+
+      return continuation(termValidatesAsVariable);
+    });
+  }
+
+  validateTermAsConstructor(context, continuation) {
     const hypothtical = this.isHypothetical();
 
     if (hypothtical) {
-      const termValidatesAsVariable = await validateTermAsVariable(this.term, context, async (term, context) => { ///
-        let validatesForwards = false;
+      const termValidatesAsConstructor = false;
 
-        const type = term.getType(),
-              baseType = baseTypeFromNothing();
+      return continuation(termValidatesAsConstructor);
+    }
 
-        if (type === baseType) {
-          validatesForwards = true;
-        }
+    const includeType = false,
+          constructorString = this.getString(includeType);
 
-        return validatesForwards;
-      });
+    context.trace(`Validating the '${constructorString}' constructor's term...`);
 
-      if (termValidatesAsVariable) {
-        termValidates = true;
-      }
-    } else {
-      const termValidatesAsConstructor = await validateTermAsConstructor(this.term, context);
-
+    validateTermAsConstructor(this.term, context, (termValidatesAsConstructor) => {
       if (termValidatesAsConstructor) {
-        termValidates = true;
+        context.debug(`...validated the '${constructorString}' constructor's term.`);
       }
-    }
 
-    if (termValidates) {
-      context.debug(`...validated the '${constructorString}' constructor's term.`);
-    }
-
-    return termValidates;
+      return continuation(termValidatesAsConstructor);
+    });
   }
 
-  async unifyTerm(term, context, validateForwards) {
+  unifyTerm(term, context, continuation) {
     let termUnifies = false;
 
     const termString = term.getString(),
@@ -151,7 +186,7 @@ export default define(class Constructor extends Element {
 
     context.trace(`Unifying the '${termString}' term with the '${constructorString}' constructor...`);
 
-    const hypothesesDiscardedGivenTerm = await this.dischargeHypothesesGivenTerm(term, context);
+    const hypothesesDiscardedGivenTerm = this.dischargeHypothesesGivenTerm(term, context);
 
     if (hypothesesDiscardedGivenTerm) {
       const constructor = this, ///
@@ -167,7 +202,7 @@ export default define(class Constructor extends Element {
 
         term.setProvisional(provisional);
 
-        const validatesForwards = await validateForwards(term, context);
+        const validatesForwards = validateForwards(term, context);
 
         if (validatesForwards) {
           termUnifies = true;
@@ -182,10 +217,10 @@ export default define(class Constructor extends Element {
     return termUnifies;
   }
 
-  async dischargeHypothesisGivenTerm(hypothesis, term, context) {
+  dischargeHypothesisGivenTerm(hypothesis, term, context) {
     let hypothesisDischargesGivenTerm;
 
-    await this.break(context);
+    this.break(context);
 
     const termString = term.getString(),
           hypothesisString = hypothesis.getString(),
@@ -193,7 +228,7 @@ export default define(class Constructor extends Element {
 
     context.trace(`Discharding the '${constructorString}' constructor's '${hypothesisString}' hypothesis given the '${termString}' term...`);
 
-    hypothesisDischargesGivenTerm = await hypothesis.dischargeGivenTerm(term, context);
+    hypothesisDischargesGivenTerm = hypothesis.dischargeGivenTerm(term, context);
 
     if (hypothesisDischargesGivenTerm) {
       context.trace(`...discharges the '${constructorString}' constructor's '${hypothesisString}' hypothesis given the '${termString}' term.`);
@@ -202,14 +237,14 @@ export default define(class Constructor extends Element {
     return hypothesisDischargesGivenTerm;
   }
 
-  async dischargeHypothesesGivenTerm(term, context) {
+  dischargeHypothesesGivenTerm(term, context) {
     let hypothesesDischargesGivenTerm = true;  ///
 
     const hypothetical = this.isHypothetical();
 
     if (hypothetical) {
-      hypothesesDischargesGivenTerm = await every(this.hypotheses, async (hypothesis) => {
-        const hypothesisDischarges = await this.dischargeHypothesisGivenTerm(hypothesis, term, context);
+      hypothesesDischargesGivenTerm = every(this.hypotheses, (hypothesis) => {
+        const hypothesisDischarges = this.dischargeHypothesisGivenTerm(hypothesis, term, context);
 
         if (hypothesisDischarges) {
           return true;

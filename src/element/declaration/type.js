@@ -1,9 +1,15 @@
 "use strict";
 
+import { breakPointUtilities, continuationUtilities } from "occam-languages";
+
 import Declaration from "../declaration";
 
+import { all } from "../../utilities/continuation";
 import { define } from "../../elements";
 import { baseTypeFromNothing } from "../../utilities/type";
+
+const { every } = continuationUtilities,
+      { breakable } = breakPointUtilities;
 
 export default define(class TypeDeclaration extends Declaration {
   constructor(context, string, node, breakPoint, type, superTypes, provisional) {
@@ -39,51 +45,45 @@ export default define(class TypeDeclaration extends Declaration {
     return properties;
   }
 
-  async verify(context) {
-    let verifies = false;
-
-    await this.break(context);
-
+  verify = breakable(function (context, continuation) {
     const typeDeclarationString = this.getString();  ///
 
     context.trace(`Verifying the '${typeDeclarationString}' type declaration...`);
 
-    const typeVerifies = this.verifyType(context);
+    const verifyType = this.verifyType.bind(this),
+          verifySuperTypes = this.verifySuperTypes.bind(this),
+          verifyTypePrefix = this.verifyTypePrefix.bind(this);
 
-    if (typeVerifies) {
-      const superTypesVerify = this.verifySuperTypes(context);
+    return all([
+      verifyType,
+      verifySuperTypes,
+      verifyTypePrefix
+    ], context, (verifies) => {
+      if (verifies) {
+        const properties = this.getProperties(),
+              typePrefix = context.getTypePrefix(),
+              prefixName = (typePrefix !== null) ?
+                             typePrefix.getPrefixName() :
+                               null;
 
-      if (superTypesVerify) {
-        const typePrefixVerifies = this.verifyTypePrefix(context);
+        this.type.setProvisional(this.provisional);
 
-        if (typePrefixVerifies) {
-          const properties = this.getProperties(),
-                typePrefix = context.getTypePrefix(),
-                prefixName = (typePrefix !== null) ?
-                               typePrefix.getPrefixName() :
-                                 null;
+        this.type.setProperties(properties);
 
-          this.type.setProvisional(this.provisional);
+        this.type.setPrefixName(prefixName);
 
-          this.type.setProperties(properties);
-
-          this.type.setPrefixName(prefixName);
-
-          context.addType(this.type);
-
-          verifies = true;
-        }
+        context.addType(this.type);
       }
-    }
 
-    if (verifies) {
-      context.debug(`...verified the '${typeDeclarationString}' type declaration.`);
-    }
+      if (verifies) {
+        context.debug(`...verified the '${typeDeclarationString}' type declaration.`);
+      }
 
-    return verifies;
-  }
+      return continuation(verifies);
+    });
+  });
 
-  verifyType(context) {
+  verifyType(context, continuation) {
     let typeVerifies = false;
 
     const typeString = this.type.getString(),
@@ -112,10 +112,61 @@ export default define(class TypeDeclaration extends Declaration {
       context.debug(`...verified the '${typeDeclarationString}' type declaration's '${typeString}' type`);
     }
 
-    return typeVerifies;
+    return continuation(typeVerifies);
   }
 
-  verifySuperType(superType, superTypes, context) {
+  verifyTypePrefix(context, continuation) {
+    let typePrefixVerifies = false;
+
+    const typeString = this.type.getString(),
+          typeDeclarationString = this.getString(); ///
+
+    context.trace(`Verifying the '${typeDeclarationString}' type declaration's '${typeString}' type's prefix...`);
+
+    const typePrefixed = this.type.isPrefixed();
+
+    if (!typePrefixed) {
+      typePrefixVerifies = true;
+    } else {
+      context.debug(`The '${typeDeclarationString}' type declaration's '${typeString}' type is prefixed.`);
+    }
+
+    if (typePrefixVerifies) {
+      context.debug(`...verified the '${typeDeclarationString}' type declaration's '${typeString}' type's prefix.`);
+    }
+
+    return continuation(typePrefixVerifies);
+  }
+
+  verifySuperTypes(context, continuation) {
+    const superTypes = [],
+          typeDeclarationString = this.getString(); ///
+
+    context.trace(`Verifying the '${typeDeclarationString}' type declaration's super-types...`);
+
+    every(this.superTypes, (superType, continuation) => {
+      this.verifySuperType(superType, superTypes, context, continuation);
+    }, (superTypesVerify) => {
+      if (superTypesVerify) {
+        const superTypesLength = superTypes.length;
+
+        if (superTypesLength === 0) {
+          const baseType = baseTypeFromNothing(),
+                superTyupe = baseType;  ///
+
+          superTypes.push(superTyupe);
+        }
+
+        this.type.setSuperTypes(superTypes);
+
+        context.debug(`...verified the '${typeDeclarationString}' type declaration's super-types.`);
+      }
+
+      return continuation(superTypesVerify);
+    });
+  }
+
+  verifySuperType(superType, superTypes, context, continuation) {
     let superTypeVerifies = false;
 
     const superTypeString = superType.getString(),
@@ -145,64 +196,7 @@ export default define(class TypeDeclaration extends Declaration {
       context.debug(`...verified the '${typeDeclarationString}' type declaration's '${superTypeString}' super-type.`);
     }
 
-    return superTypeVerifies;
-  }
-
-  verifySuperTypes(context) {
-    let superTypesVerify;
-
-    const superTypes = [],
-          typeDeclarationString = this.getString(); ///
-
-    context.trace(`Verifying the '${typeDeclarationString}' type declaration's super-types...`);
-
-    superTypesVerify = this.superTypes.every((superType) => {
-      const superTypeVerifies = this.verifySuperType(superType, superTypes, context);
-
-      if (superTypeVerifies) {
-        return true;
-      }
-    });
-
-    if (superTypesVerify) {
-      const superTypesLength = superTypes.length;
-
-      if (superTypesLength === 0) {
-        const baseType = baseTypeFromNothing(),
-              superTyupe = baseType;  ///
-
-        superTypes.push(superTyupe);
-      }
-
-      this.type.setSuperTypes(superTypes);
-
-      context.debug(`...verified the '${typeDeclarationString}' type declaration's super-types.`);
-    }
-
-    return superTypesVerify;
-  }
-
-  verifyTypePrefix(context) {
-    let typePrefixVerifies = false;
-
-    const typeString = this.type.getString(),
-          typeDeclarationString = this.getString(); ///
-
-    context.trace(`Verifying the '${typeDeclarationString}' type declaration's '${typeString}' type's prefix...`);
-
-    const typePrefixed = this.type.isPrefixed();
-
-    if (!typePrefixed) {
-      typePrefixVerifies = true;
-    } else {
-      context.debug(`The '${typeDeclarationString}' type declaration's '${typeString}' type is prefixed.`);
-    }
-
-    if (typePrefixVerifies) {
-      context.debug(`...verified the '${typeDeclarationString}' type declaration's '${typeString}' type's prefix.`);
-    }
-
-    return typePrefixVerifies;
+    return continuation(superTypeVerifies);
   }
 
   static name = "TypeDeclaration";

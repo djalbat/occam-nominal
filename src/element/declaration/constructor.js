@@ -1,8 +1,13 @@
 "use strict";
 
+import { breakPointUtilities } from "occam-languages";
+
 import Declaration from "../declaration";
 
+import { all } from "../../utilities/continuation";
 import { define } from "../../elements";
+
+const { breakable } = breakPointUtilities;
 
 export default define(class ConstructorDeclaration extends Declaration {
   constructor(context, string, node, breakPoint, type, provisional, constructor) {
@@ -34,37 +39,33 @@ export default define(class ConstructorDeclaration extends Declaration {
 
   setHypotheses(hypotheses) { this.constructor.setHypotheses(hypotheses); }
 
-  async verify(context) {
-    let verifies = false;
-
-    await this.break(context);
-
+  verify = breakable(function (context, continuation) {
     const constructorDeclarationString = this.getString();  ///
 
     context.trace(`Verifying the '${constructorDeclarationString}' constructor declaration...`);
 
-    const typeVerified = this.verifyType(context);
+    const verifyType = this.verifyType.bind(this),
+          verifyConstructor = this.verifyConstructor.bind(this);
 
-    if (typeVerified) {
-      const constructorVerifies = this.verifyConstructor(context);
-
-      if (constructorVerifies) {
+    return all([
+      verifyType,
+      verifyConstructor
+    ], context, (verifies) => {
+      if (verifies) {
         this.constructor.setType(this.type);
 
         context.addConstructor(this.constructor);
-
-        verifies = true;
       }
-    }
 
-    if (verifies) {
-      context.debug(`...verified the '${constructorDeclarationString}' constructor declaration.`);
-    }
+      if (verifies) {
+        context.debug(`...verified the '${constructorDeclarationString}' constructor declaration.`);
+      }
 
-    return verifies;
-  }
+      return continuation(verifies);
+    });
+  });
 
-  verifyType(context) {
+  verifyType(context, continuation) {
     let typeVerifies = false;
 
     const constructorDeclarationString = this.getString();  ///
@@ -102,25 +103,23 @@ export default define(class ConstructorDeclaration extends Declaration {
       context.debug(`...verified the '${constructorDeclarationString}' constructor declaration's type.`);
     }
 
-    return typeVerifies;
+    return continuation(typeVerifies);
   }
 
-  verifyConstructor(context) {
-    let constructorVerifies;
-
+  verifyConstructor(context, continuation) {
     const includeType = false,
           constructorString = this.constructor.getString(includeType),
           constructorDeclarationString = this.getString();  ///
 
     context.trace(`Verifying the '${constructorDeclarationString}' constructor declaration's '${constructorString}' constructor...`);
 
-    constructorVerifies = this.constructor.verify(context);
+    this.constructor.verify(context, (constructorVerifies) => {
+      if (constructorVerifies) {
+        context.debug(`...verified the '${constructorDeclarationString}' constructor declaration's '${constructorString}' constructor.`);
+      }
 
-    if (constructorVerifies) {
-      context.debug(`...verified the '${constructorDeclarationString}' constructor declaration's '${constructorString}' constructor.`);
-    }
-
-    return constructorVerifies;
+      return continuation(constructorVerifies);
+    });
   }
 
   static name = "ConstructorDeclaration";
