@@ -224,7 +224,7 @@ export default define(class Rule extends Element {
         return continuation(stepAndSubproofOrProofAssertionsUnify);
       }
 
-      this.unifySubproofOrProofAssertionsWithPremises(subproofOrProofAssertions, context, (subproofOrProofAssertionsUnifiesWithPremises) => {
+      return this.unifySubproofOrProofAssertionsWithPremises(subproofOrProofAssertions, context, (subproofOrProofAssertionsUnifiesWithPremises) => {
         let stepAndSubproofOrProofAssertionsUnify = false;
 
         if (subproofOrProofAssertionsUnifiesWithPremises) {

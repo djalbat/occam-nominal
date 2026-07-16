@@ -225,46 +225,37 @@ export default class TopLevelAssertion extends Element {
     });
   }
 
-  dischargeHypothesis(hypothesis, context) {
-    let hypothesisDischarges;
-
-    this.break(context);
-
+  dischargeHypothesis(hypothesis, context, continuation) {
     const hypothesisString = hypothesis.getString(),
           topLevelAssertionString = this.getString(); ///
 
     context.trace(`Discharding the '${topLevelAssertionString}' top level assertion's '${hypothesisString}' hypothesis...`);
 
-    hypothesisDischarges = hypothesis.discharge(context);
+    hypothesis.discharge(context, (hypothesisDischarges) => {
+      if (hypothesisDischarges) {
+        context.trace(`...discharges the '${topLevelAssertionString}' top level assertion's '${hypothesisString}' hypothesis.`);
+      }
 
-    if (hypothesisDischarges) {
-      context.trace(`...discharges the '${topLevelAssertionString}' top level assertion's '${hypothesisString}' hypothesis.`);
-    }
-
-    return hypothesisDischarges;
+      return continuation(hypothesisDischarges);
+    });
   }
 
-  dischargeHypotheses(context) {
-    const hypotheses = this.getHypotheses(),
-          hypothesesDischarge = every(hypotheses, (hypothesis) => {
-            const hypothesisDischarges = this.dischargeHypothesis(hypothesis, context);
+  dischargeHypotheses(context, continuation) {
+    const hypotheses = this.getHypotheses();
 
-            if (hypothesisDischarges) {
-              return true;
-            }
-          });
-
-    return hypothesesDischarge;
+    every(hypotheses, (hypothesis, continuation) => {
+      this.dischargeHypothesis(hypothesis, context, continuation);
+    }, continuation);
   }
 
   unifyStepWithDeduction(step, context, continuation) {
     const ruleString = this.getString(),
           stepString = step.getString(),
-          conclusionString = this.conclusion.getString();
+          deductionString = this.deduction.getString();
 
-    context.trace(`Unifying the '${stepString}' step with the '${ruleString}' rule's '${conclusionString}' conclusion...`);
+    context.trace(`Unifying the '${stepString}' step with the '${ruleString}' rule's '${deductionString}' deduction...`);
 
-    return this.conclusion.unifyStep(step, context, (stepUnifies) => {
+    return this.deduction.unifyStep(step, context, (stepUnifies) => {
       let stepUnifiesWithDeduction = false;
 
       if (stepUnifies) {
@@ -272,7 +263,7 @@ export default class TopLevelAssertion extends Element {
       }
 
       if (stepUnifiesWithDeduction) {
-        context.debug(`...unified the '${stepString}' step with the '${ruleString}' rule's '${conclusionString}' conclusion.`);
+        context.debug(`...unified the '${stepString}' step with the '${ruleString}' rule's '${deductionString}' deduction.`);
       }
 
       return continuation(stepUnifiesWithDeduction);
@@ -287,26 +278,26 @@ export default class TopLevelAssertion extends Element {
         return continuation(stepAndSubproofOrProofAssertionsUnify);
       }
 
-      const hypothesesDischarge = this.dischargeHypotheses(context);
+      return this.dischargeHypotheses(context, (hypothesesDischarge) => {
+        if (!hypothesesDischarge) {
+          const stepAndSubproofOrProofAssertionsUnify = false;
 
-      if (hypothesesDischarge) {
-        const stepAndSubproofOrProofAssertionsUnify = false;
-
-        return continuation(stepAndSubproofOrProofAssertionsUnify);
-      }
-
-      this.unifySubproofOrProofAssertionsWithSuppositions(subproofOrProofAssertions, context, (subproofOrProofAssertionsUnifiesWithSuppositions) => {
-        let stepAndSubproofOrProofAssertionsUnify = false;
-
-        if (subproofOrProofAssertionsUnifiesWithSuppositions) {
-          const derivedSubstitutionsResolved = context.areDerivedSubstitutionsResolved();
-
-          if (derivedSubstitutionsResolved) {
-            stepAndSubproofOrProofAssertionsUnify = true;
-          }
+          return continuation(stepAndSubproofOrProofAssertionsUnify);
         }
 
-        return continuation(stepAndSubproofOrProofAssertionsUnify);
+        return this.unifySubproofOrProofAssertionsWithSuppositions(subproofOrProofAssertions, context, (subproofOrProofAssertionsUnifiesWithSuppositions) => {
+          let stepAndSubproofOrProofAssertionsUnify = false;
+
+          if (subproofOrProofAssertionsUnifiesWithSuppositions) {
+            const derivedSubstitutionsResolved = context.areDerivedSubstitutionsResolved();
+
+            if (derivedSubstitutionsResolved) {
+              stepAndSubproofOrProofAssertionsUnify = true;
+            }
+          }
+
+          return continuation(stepAndSubproofOrProofAssertionsUnify);
+        });
       });
     });
   }
