@@ -30,49 +30,49 @@ export default define(class Axiom extends TopLevelAssertion {
 
     context.trace(`Verifying the '${axiomString}' axiom...`);
 
-    const signatureVerifies = this.verifySignature(context);
+    this.verifySignature(context, (signatureVerifies) => {
+      if (!signatureVerifies) {
+        const verifies = false;
 
-    if (signatureVerifies) {
-      const verifies = false;
-
-      return continuation(verifies);
-    }
-
-    return this.verifyEx(context, (verifies) => {
-      if (verifies) {
-        const axiom = this; ///
-
-        context.addAxiom(axiom);
-
-        context.debug(`...verified the '${axiomString}' axiom.`);
+        return continuation(verifies);
       }
 
-      return continuation(verifies);
+      return this.verifyEx(context, (verifies) => {
+        if (verifies) {
+          const axiom = this; ///
+
+          context.addAxiom(axiom);
+
+          context.debug(`...verified the '${axiomString}' axiom.`);
+        }
+
+        return continuation(verifies);
+      });
     });
   });
 
-  verifySignature(context) {
-    let signatureVerifies;
-
+  verifySignature(context, continuation) {
     const satisfiable = this.isSatisfiable();
 
-    if (satisfiable) {
-      const axiomString = this.getString(); ///
+    if (!satisfiable) {
+      const signatureVerifies = true; ///
 
-      context.trace(`Verifying the '${axiomString}' axiom's signature...`);
+      return continuation(signatureVerifies);
+    }
 
-      const signature = this.getSignature();
+    const axiomString = this.getString(); ///
 
-      signatureVerifies = signature.verify(context);
+    context.trace(`Verifying the '${axiomString}' axiom's signature...`);
 
+    const signature = this.getSignature();
+
+    signature.verify(context, (signatureVerifies) => {
       if (signatureVerifies) {
         context.trace(`...verified the '${axiomString}' axiom's signature.`);
       }
-    } else {
-      signatureVerifies = true
-    }
 
-    return signatureVerifies;
+      return continuation(signatureVerifies);
+    });
   }
 
   unifySignature(signature, context) {
