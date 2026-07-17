@@ -239,27 +239,23 @@ export default define(class Assumption extends Element {
   }
 
   unifyLabel(label, context, continuation) {
-    let labelUnifies;
-
     const labelString = label.getString(),
           assumptionString = this.getString();  ///
 
     context.trace(`Unifying the '${labelString}' label with the '${assumptionString}' assumption's reference...`);
 
     reconcile((context) => {
-      labelUnifies = this.reference.unifyLabel(label, context);
+      return this.reference.unifyLabel(label, context, (labelUnifies) => {
+        if (labelUnifies) {
+          context.debug(`...unified the '${labelString}' label with the '${assumptionString}' assumption's reference.`);
+        }
+
+        return continuation(labelUnifies);
+      });
     }, context);
-
-    if (labelUnifies) {
-      context.debug(`...unified the '${labelString}' label with the '${assumptionString}' assumption's reference.`);
-    }
-
-    return labelUnifies;
   }
 
   unifySchema(schema, context, continuation) {
-    let schemaUnifies = false;
-
     const schemaString = schema.getString(),
           assumptionString = this.getString();
 
@@ -268,41 +264,61 @@ export default define(class Assumption extends Element {
     const generalContext = context;  ///
 
     reconcile((context) => {
-      const label = schema.getLabel(),
-            labelUnifies = this.reference.unifyLabel(label, context);
+      const label = schema.getLabel();
 
-      if (labelUnifies) {
+      return this.reference.unifyLabel(label, context, (labelUnifies) => {
+        if (!labelUnifies) {
+          const schemaUnifies = false;
+
+          return continuation(schemaUnifies);
+        }
+
         const specificContext = context,  ///
               schemaConditional = schema.isConditional(),
               subproofAssertion = subproofAssertionFromStatement(this.statement, context)
 
         if (schemaConditional) {
-          if (subproofAssertion !== null) {
-            schemaUnifies = subproofAssertion.unifySchema(schema, generalContext, specificContext);
-          }
-        } else {
           if (subproofAssertion === null) {
-            const deduction = schema.getDeduction(),
-                  deductionUnifies = this.unifyDeduction(deduction, generalContext, specificContext);
+            const schemaUnifies = false;
 
-            if (deductionUnifies) {
-              schemaUnifies = true;
-            }
+            return continuation(schemaUnifies);
           }
+
+          return subproofAssertion.unifySchema(schema, generalContext, specificContext, (schemaUnifies) => {
+            if (schemaUnifies) {
+              context.debug(`...unified the '${schemaString}' schema with the '${assumptionString}' assumption.`);
+            }
+
+            return continuation(schemaUnifies);
+          });
         }
-      }
+
+        if (subproofAssertion !== null) {
+          const schemaUnifies = false;
+
+          return continuation(schemaUnifies);
+        }
+
+        const deduction = schema.getDeduction();
+
+        return this.unifyDeduction(deduction, generalContext, specificContext, (deductionUnifies) => {
+          let schemaUnifies = false;
+
+          if (deductionUnifies) {
+            schemaUnifies = true;
+          }
+
+          if (schemaUnifies) {
+            context.debug(`...unified the '${schemaString}' schema with the '${assumptionString}' assumption.`);
+          }
+
+          return continuation(schemaUnifies);
+        });
+      });
     }, context);
-
-    if (schemaUnifies) {
-      context.debug(`...unified the '${schemaString}' schema with the '${assumptionString}' assumption.`);
-    }
-
-    return schemaUnifies;
   }
 
   unifyDeduction(deduction, generalContext, specificContext, continuation) {
-    let deductionUnifies;
-
     const context = specificContext,  ///
           deductionString = deduction.getString(),
           assumptionString = this.getString();
@@ -315,23 +331,23 @@ export default define(class Assumption extends Element {
     specificContext = deductionContext; ///
 
     reconcile((specificContext) => {
-      const statementUnifies = this.statement.unifyStatement(statement, generalContext, specificContext);
+      this.statement.unifyStatement(statement, generalContext, specificContext, (statementUnifies) => {
+        let deductionUnifies = false;
 
-      if (statementUnifies) {
-        deductionUnifies = true;
+        if (statementUnifies) {
+          deductionUnifies = true;
 
-        specificContext.commit(context);
-      }
+          specificContext.commit(context);
+        }
+
+        if (deductionUnifies) {
+          context.debug(`...unified the '${deductionString}' deduction's statement with the '${assumptionString}' assumption's '${assumptionString}' statement.`);
+        }
+
+        return continuation(deductionUnifies);
+      });
     }, specificContext);
-
-    if (deductionUnifies) {
-      context.debug(`...unified the '${deductionString}' deduction's statement with the '${assumptionString}' assumption's '${assumptionString}' statement.`);
-    }
-
-    return deductionUnifies;
   }
-
-  static name = "Assumption";
 
   toJSON() {
     const string = this.getString();
@@ -351,6 +367,8 @@ export default define(class Assumption extends Element {
 
     return json;
   }
+
+  static name = "Assumption";
 
   static fromJSON(json, context) {
     return instantiate((context) => {

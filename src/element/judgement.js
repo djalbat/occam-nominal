@@ -1,7 +1,7 @@
 "use strict";
 
 import { arrayUtilities } from "necessary";
-import { Element, breakPointUtilities } from "occam-languages";
+import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
 
 import elements from "../elements";
 
@@ -12,7 +12,8 @@ import { equateStatements } from "../process/equate";
 import { instantiateJudgement } from "../process/instantiate";
 import { judgementFromStatementNode } from "../utilities/element";
 
-const { one, push } = arrayUtilities,
+const { one } = continuationUtilities,
+      { push } = arrayUtilities,
       { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Judgement extends Element {
@@ -281,34 +282,29 @@ export default define(class Judgement extends Element {
       return;
     }
 
-    let validatesWhenDerived = false;
-
     const judgementString = this.getString();  ///
 
     context.trace(`Validating the '${judgementString}' derived judgement...`);
 
     const schemas = context.getSchemas(),
-          judgement = this, ///
-          judgementUnifies = one(schemas, (schema) => {
-            const judgementUnifies = schema.unifyJudgement(judgement, context);
+          judgement = this; ///
 
-            if (judgementUnifies) {
-              return true;
-            }
-          });
+    return one(schemas, (schema, continuation) => {
+      schema.unifyJudgement(judgement, context, continuation);
+    }, (judgementUnifies) => {
+      let validatesWhenDerived = false;
 
-    if (judgementUnifies) {
-      validatesWhenDerived = true;
-    }
+      if (judgementUnifies) {
+        validatesWhenDerived = true;
+      }
 
-    if (validatesWhenDerived) {
-      context.debug(`...validated the '${judgementString}' derived judgement.`);
-    }
+      if (validatesWhenDerived) {
+        context.debug(`...validated the '${judgementString}' derived judgement.`);
+      }
 
-    return validatesWhenDerived;
+      return continuation(validatesWhenDerived);
+    });
   }
-
-  static name = "Judgement";
 
   toJSON() {
     const string = this.getString();
@@ -328,6 +324,8 @@ export default define(class Judgement extends Element {
 
     return json;
   }
+
+  static name = "Judgement";
 
   static fromJSON(json, context) {
     return instantiate((context) => {

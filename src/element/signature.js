@@ -219,8 +219,6 @@ export default define(class Signature extends Element {
     return signatureUnifies;
   }
 
-  static name = "Signature";
-
   toJSON() {
     const context = this.getContext();
 
@@ -244,6 +242,8 @@ export default define(class Signature extends Element {
       return json;
     }, context);
   }
+
+  static name = "Signature";
 
   static fromJSON(json, context) {
     let signature;

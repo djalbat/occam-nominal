@@ -217,8 +217,6 @@ export default define(class Hypothesis extends Element {
     return procedureCallDischarges;
   }
 
-  static name = "Hypothesis";
-
   toJSON() {
     const context = this.getContext();
 
@@ -242,6 +240,8 @@ export default define(class Hypothesis extends Element {
       return json;
     }, context);
   }
+
+  static name = "Hypothesis";
 
   static fromJSON(json, context) {
     let hypothesis;

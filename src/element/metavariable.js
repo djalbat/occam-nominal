@@ -465,59 +465,60 @@ export default define(class Metavariable extends Element {
     });
   }
 
-  unifyReference(reference, generalContext, specificContext) {
-    let referenceUnifies = false;
-
+  unifyReference(reference, generalContext, specificContext, continuation) {
     const context = specificContext,  ///
           referenceString = reference.getString(),
           metavariableString = this.getString(); ///
 
     context.trace(`Unifying the '${referenceString}' reference with the '${metavariableString}' metavariable...`);
 
-    const metavariable = this,  ///
-          referenceMetavariableCompares = this.compareReferenceMetavariable(reference, generalContext, specificContext);
+    const referenceMetavariableCompares = this.compareReferenceMetavariable(reference, generalContext, specificContext);
 
     if (referenceMetavariableCompares) {
-      referenceUnifies = true;
-    } else {
-      const metavariableNode = metavariable.getNode(),
-            derivedSubstitution = context.findDerivedSubstitutionByMetavariableNode(metavariableNode);
+      const referenceUnifies = true;
 
-      if (derivedSubstitution !== null) {
-        const derivedSubstitutionReferenceComparesToReference = derivedSubstitution.compareReference(reference, context);
+      return continuation(referenceUnifies);
+    }
 
-        if (derivedSubstitutionReferenceComparesToReference) {
-          const derivedSubstitutionString = derivedSubstitution.getString();
+    const metavariable = this,  ///
+          metavariableNode = metavariable.getNode(),
+          derivedSubstitution = context.findDerivedSubstitutionByMetavariableNode(metavariableNode);
 
-          context.trace(`The '${derivedSubstitutionString}' derived substitution is already present.`);
+    if (derivedSubstitution !== null) {
+      let referenceUnifies = false;
 
-          referenceUnifies = true;
-        }
-      } else {
-        const { ReferenceSubstitution } = elements;
+      const derivedSubstitutionReferenceComparesToReference = derivedSubstitution.compareReference(reference, context);
 
-        let referenceSubstitution;
+      if (derivedSubstitutionReferenceComparesToReference) {
+        const derivedSubstitutionString = derivedSubstitution.getString();
 
-        referenceSubstitution = ReferenceSubstitution.fromReferenceAndMetavariable(reference, metavariable, generalContext, specificContext);
-
-        referenceSubstitution = referenceSubstitution.validate(context);  ///
-
-        const derivedSubstitution = referenceSubstitution;  ///
-
-        context.addDerivedSubstitution(derivedSubstitution);
+        context.trace(`The '${derivedSubstitutionString}' derived substitution is already present.`);
 
         referenceUnifies = true;
       }
+
+      return continuation(referenceUnifies);
     }
 
-    if (referenceUnifies) {
-      context.debug(`...unified the '${referenceString}' reference with the '${metavariableString}' metavariable.`);
-    }
+    const { ReferenceSubstitution } = elements,
+          referenceSubstitution = ReferenceSubstitution.fromReferenceAndMetavariable(reference, metavariable, generalContext, specificContext);
 
-    return referenceUnifies;
+    return referenceSubstitution.validate(context, (referenceSubstitution) => {
+      const derivedSubstitution = referenceSubstitution;  ///
+
+      context.addDerivedSubstitution(derivedSubstitution);
+
+      const referenceUnifies = true;
+
+      if (referenceUnifies) {
+        context.debug(`...unified the '${referenceString}' reference with the '${metavariableString}' metavariable.`);
+      }
+
+      return continuation(referenceUnifies);
+    });
   }
 
-  unifyMetavariable(metavariable, context) {
+  unifyMetavariable(metavariable, context, continuation) {
     let metavariableUnifies;
 
     const generalContext = context, ///

@@ -75,8 +75,6 @@ export default define(class TypePrefix extends Element {
     return verifies;
   }
 
-  static name = "TypePrefix";
-
   toJSON() {
     const string = this.getString();
 
@@ -95,6 +93,8 @@ export default define(class TypePrefix extends Element {
 
     return json;
   }
+
+  static name = "TypePrefix";
 
   static fromJSON(json, context) {
     return instantiate((context) => {

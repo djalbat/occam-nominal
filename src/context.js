@@ -585,6 +585,12 @@ export default class Context extends ContextBase {
     context.addLemma(lemma);
   }
 
+  addSchema(schema) {
+    const context = this.getContext();
+
+    context.addSchema(schema);
+  }
+
   addTheorem(theorem) {
     const context = this.getContext();
 

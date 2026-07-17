@@ -128,9 +128,7 @@ export default define(class Label extends Element {
     });
   }
 
-  unifyReference(reference, context) {
-    let referenceUnifies = false;
-
+  unifyReference(reference, context, continuation) {
     const labelString = this.getString(), ///
           referenceString = reference.getString();
 
@@ -142,41 +140,44 @@ export default define(class Label extends Element {
           specificContext = referenceContext;  ///
 
     reconcile((specificContext) => {
-      const metavariable = reference.getMetavariable(),
-            metavariableUnifies = this.unifyMetavariable(metavariable, generalContext, specificContext);
+      const metavariable = reference.getMetavariable();
 
-      if (metavariableUnifies) {
-        referenceUnifies = true;
-      }
+      return this.unifyMetavariable(metavariable, generalContext, specificContext, (metavariableUnifies) => {
+        let referenceUnifies = false;
+
+        if (metavariableUnifies) {
+          referenceUnifies = true;
+        }
+
+        if (referenceUnifies) {
+          context.debug(`...unified the '${referenceString}' reference with the '${labelString}' label.`);
+        }
+
+        return continuation(referenceUnifies);
+      });
     }, specificContext);
-
-    if (referenceUnifies) {
-      context.debug(`...unified the '${referenceString}' reference with the '${labelString}' label.`);
-    }
-
-    return referenceUnifies;
   }
 
-  unifyMetavariable(metavariable, generalContext, specificContext) {
-    let metavariableUnifies = false;
-
+  unifyMetavariable(metavariable, generalContext, specificContext, continuation) {
     const context = specificContext,  ///
           labelString = this.getString(), ///
           metavariableString = metavariable.getString();
 
     context.trace(`Unifying the '${metavariableString}' metavariable with the '${labelString}' label...`);
 
-    const metavariableUnifiesIntrinsically = this.metavariable.unifyMetavariableIntrinsically(metavariable, generalContext, specificContext);
+    return this.metavariable.unifyMetavariableIntrinsically(metavariable, generalContext, specificContext, (metavariableUnifiesIntrinsically) => {
+      let metavariableUnifies = false;
 
-    if (metavariableUnifiesIntrinsically) {
-      metavariableUnifies = true;
-    }
+      if (metavariableUnifiesIntrinsically) {
+        metavariableUnifies = true;
+      }
 
-    if (metavariableUnifies) {
-      context.debug(`...unified the '${metavariableString}' metavariable with the '${labelString}' label.`);
-    }
+      if (metavariableUnifies) {
+        context.debug(`...unified the '${metavariableString}' metavariable with the '${labelString}' label.`);
+      }
 
-    return metavariableUnifies;
+      return continuation(metavariableUnifies);
+    });
   }
 
   toJSON() {

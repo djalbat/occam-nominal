@@ -4,6 +4,7 @@ import { Element, breakPointUtilities, continuationUtilities } from "occam-langu
 
 import elements from "../elements";
 
+import { all } from "../utilities/continuation";
 import { define } from "../elements";
 import { reconcile, encapsulate } from "../utilities/context";
 import { schemaStringFromLabelSuppositionsAndDeduction } from "../utilities/string";
@@ -16,7 +17,7 @@ import { labelFromJSON,
          constraintsToConstraintsJSON,
          suppositionsToSuppositionsJSON } from "../utilities/json";
 
-const { forwardsEvery } = continuationUtilities,
+const { every, forwardsEvery } = continuationUtilities,
       { breakable, breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Schema extends Element {
@@ -72,230 +73,219 @@ export default define(class Schema extends Element {
   }
 
   verify = breakable(function (context, continuation) {
-    let verifies;
-
     const schemaString = this.getString(); ///
 
     context.trace(`Verifying the '${schemaString}' schema...`);
 
     encapsulate((context) => {
-      const labelVerifies = this.verifyLabel(context);
+      const verifyLabel = this.verifyLabel.bind(this),
+            verifyProof = this.verifyProof.bind(this),
+            verifyDeduction = this.verifyDeduction.bind(this),
+            verifySuppositions = this.verifySuppositions.bind(this);
 
-      if (labelVerifies) {
-        const suppositionsVerify = this.verifySuppositions(context);
+      return all([
+        verifyLabel,
+        verifySuppositions,
+        verifyDeduction,
+        verifyProof
+      ], context, (verifies) => {
+        if (verifies) {
+          const schema = this; ///
 
-        if (suppositionsVerify) {
-          const deductionVerifies = this.verifyDeduction(context);
+          context.addSchema(schema);
 
-          if (deductionVerifies) {
-            const proofVerifies = this.verifyProof(context);
-
-            if (proofVerifies) {
-              verifies = true;
-            }
-          }
+          context.debug(`...verified the '${schemaString}' schema.`);
         }
-      }
+
+        return continuation(verifies);
+      });
     }, this.constraints, context);
-
-    if (verifies) {
-      const schema = this; ///
-
-      context.addSchema(schema);
-
-      context.debug(`...verified the '${schemaString}' schema.`);
-    }
-
-    return verifies;
   });
 
-  verifyLabel(context) {
-    let labelVerifies;
-
+  verifyLabel(context, continuation) {
     const schemaString = this.getString(),  ///
           labelString = this.label.getString();
 
     context.trace(`Verifying the '${schemaString}' schema's '${labelString}' label...`);
 
-    labelVerifies = this.label.verify();
+    return this.label.verify((labelVerifies) => {
+      if (labelVerifies) {
+        context.debug(`...verified the '${schemaString}' schema's '${labelString}' label.`);
+      }
 
-    if (labelVerifies) {
-      context.debug(`...verified the '${schemaString}' schema's '${labelString}' label.`);
-    }
-
-    return labelVerifies;
+      return continuation(labelVerifies);
+    });
   }
 
-  verifyProof(context) {
-    let proofVerifies;
-
+  verifyProof(context, continuation) {
     const schemaString = this.getString();  ///
 
     context.trace(`Verifying the '${schemaString}' schema's proof...`);
 
     const statement = this.deduction.getStatement();
 
-    proofVerifies = this.proof.verify(statement, context);
+    return this.proof.verify(statement, context, (proofVerifies) => {
+      if (proofVerifies) {
+        context.debug(`...verified the '${schemaString}' schema's proof.`);
+      }
 
-    if (proofVerifies) {
-      context.debug(`...verified the '${schemaString}' schema's proof.`);
-    }
-
-    return proofVerifies;
+      return continuation(proofVerifies);
+    });
   }
 
-  verifyDeduction(context) {
-    let deductionVerifies;
-
+  verifyDeduction(context, continuation) {
     const schemaString = this.getString(),  //
           deductionString = this.deduction.getString();
 
     context.trace(`Verifying the '${schemaString}' top level meta assertion's '${deductionString}' deduction...`);
 
-    deductionVerifies = this.deduction.verify(context);
+    return this.deduction.verify(context, (deductionVerifies) => {
+      if (deductionVerifies) {
+        context.debug(`...verified the '${schemaString}' top level meta assertion's '${deductionString}' deduction.`);
+      }
 
-    if (deductionVerifies) {
-      context.debug(`...verified the '${schemaString}' top level meta assertion's '${deductionString}' deduction.`);
-    }
-
-    return deductionVerifies;
+      return continuation(deductionVerifies);
+    });
   }
 
-  verifySupposition(supposition, context) {
-    let suppositionVerifies;
+  verifySuppositions(context, continuation) {
+    const schemaString = this.getString();  ///
 
+    context.trace(`Verifying the '${schemaString}' schema's suppositions...`);
+
+    return forwardsEvery(this.suppositions, (supposition, continuation) => {
+      return this.verifySupposition(supposition, context, continuation);
+    }, (suppositionsVerify) => {
+      if (suppositionsVerify) {
+        context.debug(`...verified the '${schemaString}' schema's suppositions.`);
+      }
+
+      return continuation(suppositionsVerify);
+    });
+  }
+
+  verifySupposition(supposition, context, continuation) {
     const schemaString = this.getString(),  ///
           suppositionString = supposition.getString();
 
     context.trace(`Verifying the '${schemaString}' schema's '${suppositionString}' supposition...`);
 
-    suppositionVerifies = supposition.verify(context)
+    return supposition.verify(context, (suppositionVerifies) => {
+      if (suppositionVerifies) {
+        const subproofOrProofAssertion = supposition;  ////
 
-    if (suppositionVerifies) {
-      const subproofOrProofAssertion = supposition;  ////
+        context.assignAssignments();
 
-      context.assignAssignments();
-
-      context.addSubproofOrProofAssertion(subproofOrProofAssertion);
-    }
-
-    if (suppositionVerifies) {
-      context.debug(`...verified the '${schemaString}' schema's '${suppositionString}' supposition.`);
-    }
-
-    return suppositionVerifies;
-  }
-
-  verifySuppositions(context) {
-    let suppositionsVerify;
-
-    const schemaString = this.getString();  ///
-
-    context.trace(`Verifying the '${schemaString}' schema's suppositions...`);
-
-    suppositionsVerify = forwardsEvery(this.suppositions, (supposition) => {
-      const suppositionVerifies = this.verifySupposition(supposition, context);
+        context.addSubproofOrProofAssertion(subproofOrProofAssertion);
+      }
 
       if (suppositionVerifies) {
-        return true;
+        context.debug(`...verified the '${schemaString}' schema's '${suppositionString}' supposition.`);
       }
+
+      return continuation(suppositionVerifies);
     });
-
-    if (suppositionsVerify) {
-      context.debug(`...verified the '${schemaString}' schema's suppositions.`);
-    }
-
-    return suppositionsVerify;
   }
 
-  unifyJudgement(judgement, context) {
-    let judgementUnifies = false;
-
+  unifyJudgement(judgement, context, continuation) {
     const schemaString = this.getString(),  ///
           judgementString = judgement.getString();
 
     context.trace(`Unifying the '${judgementString}' judgement with the '${schemaString}' schema...`);
 
     reconcile((context) => {
-      const reference = judgement.getReference(),
-            referenceUnifies = this.unifyReference(reference, context);
+      const reference = judgement.getReference();
 
-      if (referenceUnifies) {
-        let statementUnifies = false;
+      return this.unifyReference(reference, context, (referenceUnifies) => {
+        if (!referenceUnifies) {
+          const judgementUnifies = false;
 
-        const statement = judgement.getStatement(),
-              conditional = this.isConditional(),
-              subproofAssertion = subproofAssertionFromStatement(statement, context);
+          return continuation(judgementUnifies);
+        }
 
-        if (conditional) {
-          if (subproofAssertion !== null) {
-            const subproofassertionUnifies = this.unifySubproofAssertion(subproofAssertion, context);
+        const assumptions = judgement.getAssumptions(context);
 
-            if (subproofassertionUnifies) {
-              statementUnifies = true;
-            }
+        return this.unifyAssumptions(assumptions, context, (assumptionsUnify) => {
+          if (!assumptionsUnify) {
+            const judgementUnifies = false;
+
+            return continuation(judgementUnifies);
           }
-        } else {
-          if (subproofAssertion === null) {
-            const deducedStatment = statement,  ///
-                  deducedStatmentUnfifies = this.unifyDeducedStatement(deducedStatment, context);
+
+          const statement = judgement.getStatement(),
+                conditional = this.isConditional(),
+                subproofAssertion = subproofAssertionFromStatement(statement, context);
+
+          if (conditional) {
+            if (subproofAssertion === null) {
+              const judgementUnifies = false;
+
+              return continuation(judgementUnifies);
+            }
+
+            return this.unifySubproofAssertion(subproofAssertion, context, (subproofassertionUnifies) => {
+              let judgementUnifies = false;
+
+              if (subproofassertionUnifies) {
+                judgementUnifies = true;
+              }
+
+              if (judgementUnifies) {
+                context.debug(`...unified the '${judgementString}' judgement with the '${schemaString}' schema.`);
+              }
+
+              return continuation(judgementUnifies);
+            });
+          }
+
+          if (subproofAssertion !== null) {
+            const judgementUnifies = false;
+
+            return continuation(judgementUnifies);
+          }
+
+          const deducedStatment = statement;  ///
+
+          return this.unifyDeducedStatement(deducedStatment, context, (deducedStatmentUnfifies) => {
+            let judgementUnifies = false;
 
             if (deducedStatmentUnfifies) {
-              statementUnifies = true;
+              judgementUnifies = true;
             }
-          }
-        }
 
-        if (statementUnifies) {
-          const assumptions = judgement.getAssumptions(context),
-                assumptionsUnify = this.unifyAssumptions(assumptions, context);
+            if (judgementUnifies) {
+              context.debug(`...unified the '${judgementString}' judgement with the '${schemaString}' schema.`);
+            }
 
-          if (assumptionsUnify) {
-            judgementUnifies = true;
-          }
-        }
-      }
+            return continuation(judgementUnifies);
+          });
+        });
+      });
     }, context);
-
-    if (judgementUnifies) {
-      context.debug(`...unified the '${judgementString}' judgement with the '${schemaString}' schema.`);
-    }
-
-    return judgementUnifies;
   }
 
-  unifyReference(reference, context) {
-    let referenceUnifies;
-
+  unifyReference(reference, context, continuation) {
     const schemaString = this.getString(),  ///
           referenceString = reference.getString();
 
     context.trace(`Unifying the '${referenceString}' reference with the '${schemaString}' schema...`);
 
-    referenceUnifies = this.label.unifyReference(reference, context);
-
-    if (referenceUnifies) {
-      context.debug(`...unified the '${referenceString}' reference with the '${schemaString}' schema.`);
-    }
-
-    return referenceUnifies;
-  }
-
-  unifyAssumptions(assumptions, context) {
-    const assumptionsUnify = this.constraints.every((constraint) => {
-      const assumptionsUnify = constraint.unifyAssumptions(assumptions, context);
-
-      if (assumptionsUnify) {
-        return true;
+    return this.label.unifyReference(reference, context, (referenceUnifies) => {
+      if (referenceUnifies) {
+        context.debug(`...unified the '${referenceString}' reference with the '${schemaString}' schema.`);
       }
-    });
 
-    return assumptionsUnify;
+      return continuation(referenceUnifies);
+    });
   }
 
-  unifyDeducedStatement(deducedStatement, context) {
-    let deducedStatementUnifies = false;
+  unifyAssumptions(assumptions, context, continuation) {
+    every(this.constraints, (constraint, continuation) => {
+      constraint.unifyAssumptions(assumptions, context, continuation);
+    }, continuation);
+  }
 
+  unifyDeducedStatement(deducedStatement, context, continuation) {
     const deductionString = this.deduction.getString(),
           deducedStatementString = deducedStatement.getString();
 
@@ -304,50 +294,57 @@ export default define(class Schema extends Element {
     const deductionContext = this.deduction.getContext(), ///
           statement = deducedStatement, ///
           generalContext = deductionContext, ///
-          specificContext = context,  ///
-          statementUnifies = this.deduction.unifyStatement(statement, generalContext, specificContext);
+          specificContext = context;  ///
 
-    if (statementUnifies) {
-      deducedStatementUnifies = true;
-    }
+    return this.deduction.unifyStatement(statement, generalContext, specificContext, (statementUnifies) => {
+      let deducedStatementUnifies = false;
 
-    if (deducedStatementUnifies) {
-      context.debug(`...unified the '${deducedStatementString}' deduced statement with the '${deductionString}' deduction`);
-    }
+      if (statementUnifies) {
+        deducedStatementUnifies = true;
+      }
 
-    return deducedStatementUnifies;
+      if (deducedStatementUnifies) {
+        context.debug(`...unified the '${deducedStatementString}' deduced statement with the '${deductionString}' deduction`);
+      }
+
+      return continuation(deducedStatementUnifies);
+    });
   }
 
-  unifySubproofAssertion(subproofAssertion, context) {
-    let subproofAssertionUnifies = false;
-
+  unifySubproofAssertion(subproofAssertion, context, continuation) {
     const schemaString = this.getString(),  ///
           subproofAssertionString = subproofAssertion.getString();
 
     context.trace(`Unifying the '${subproofAssertionString}' subproof assertion with the '${schemaString}' schema...`);
 
-    const deducedStatement = subproofAssertion.getDeducedStatement(),
-          deducedStatementUnifies = this.unifyDeducedStatement(deducedStatement, context);
+    const deducedStatement = subproofAssertion.getDeducedStatement();
 
-    if (deducedStatementUnifies) {
-      const supposedStatements = subproofAssertion.getSupposedStatements(),
-            supposedStatementsUnify = this.unifySupposedStatements(supposedStatements, context);
+    return this.unifyDeducedStatement(deducedStatement, context, (deducedStatementUnifies) => {
+      if (!deducedStatementUnifies) {
+        const subproofAssertionUnifies = false;
 
-      if (supposedStatementsUnify) {
-        subproofAssertionUnifies = true;
+        return continuation(subproofAssertionUnifies);
       }
-    }
 
-    if (subproofAssertionUnifies) {
-      context.debug(`...unified the '${subproofAssertionString}' subproof assertion with the '${schemaString}' schema.`);
-    }
+      const supposedStatements = subproofAssertion.getSupposedStatements();
 
-    return subproofAssertionUnifies;
+      return this.unifySupposedStatements(supposedStatements, context, (supposedStatementsUnify) => {
+        let subproofAssertionUnifies = false;
+
+        if (supposedStatementsUnify) {
+          subproofAssertionUnifies = true;
+        }
+
+        if (subproofAssertionUnifies) {
+          context.debug(`...unified the '${subproofAssertionString}' subproof assertion with the '${schemaString}' schema.`);
+        }
+
+        return continuation(subproofAssertionUnifies);
+      });
+    });
   }
 
-  unifySupposedStatement(supposedStatement, index, context) {
-    let supposedStatementUnifies = false;
-
+  unifySupposedStatement(supposedStatement, index, context, continuation) {
     const supposition = this.getSupposition(index),
           suppositionString = supposition.getString(),
           supposedStatementString = supposedStatement.getString();
@@ -357,37 +354,40 @@ export default define(class Schema extends Element {
     const suppositionContext = supposition.getContext(), ///
           statement = supposedStatement, ///
           generalContext = suppositionContext, ///
-          specificContext = context,  ///
-          statementUnifies = supposition.unifyStatement(statement, generalContext, specificContext);
+          specificContext = context;  ///
 
-    if (statementUnifies) {
-      supposedStatementUnifies = true;
-    }
+    return supposition.unifyStatement(statement, generalContext, specificContext, (statementUnifies) => {
+      let supposedStatementUnifies = false;
 
-    if (supposedStatementUnifies) {
-      context.debug(`...unified the '${supposedStatementString}' supposed statement with the '${suppositionString}' supposition`);
-    }
+      if (statementUnifies) {
+        supposedStatementUnifies = true;
+      }
 
-    return supposedStatementUnifies;
+      if (supposedStatementUnifies) {
+        context.debug(`...unified the '${supposedStatementString}' supposed statement with the '${suppositionString}' supposition`);
+      }
+
+      return continuation(supposedStatementUnifies);
+    });
   }
 
-  unifySupposedStatements(supposedStatements, context) {
-    let supposedStatementsUnify = false;
-
+  unifySupposedStatements(supposedStatements, context, continuation) {
     const suppositionsLength = this.suppositions.length,
           supposedStatementsLength = supposedStatements.length;
 
-    if (suppositionsLength === supposedStatementsLength) {
-      supposedStatementsUnify = supposedStatements.every((supposedStatement, index) => {
-        const supposedStatementUnifies = this.unifySupposedStatement(supposedStatement, index, context);
+    if (suppositionsLength !== supposedStatementsLength) {
+      const supposedStatementsUnify = false;
 
-        if (supposedStatementUnifies) {
-          return true;
-        }
-      });
+      return continuation(supposedStatementsUnify);
     }
 
-    return supposedStatementsUnify;
+    let index = -1;
+
+    every(supposedStatements, (supposedStatement, continuation) => {
+      index++;
+
+      return this.unifySupposedStatement(supposedStatement, index, context, continuation);
+    });
   }
 
   toJSON() {

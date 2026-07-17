@@ -1,8 +1,9 @@
 "use strict";
 
-import { Element, breakPointUtilities } from "occam-languages";
+import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
 
 import { define } from "../elements";
+import { all, exists } from "../utilities/continuation";
 import { unifyStatement } from "../process/unify";
 import { instantiateConstraint } from "../process/instantiate";
 import { stripBracketsFromStatement } from "../utilities/brackets";
@@ -10,7 +11,8 @@ import { constraintFromConstraintNode } from "../utilities/element";
 import { constraintStringFromReferenceAndStatement } from "../utilities/string";
 import { ablate, attempt, descend, reconcile, serialise, unserialise, instantiate } from "../utilities/context";
 
-const { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
+const { some } = continuationUtilities,
+      { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Constraint extends Element {
   constructor(context, string, node, breakPoint, reference, statement) {
@@ -61,123 +63,124 @@ export default define(class Constraint extends Element {
     return validConstraint;
   }
 
-  async validate(context) {
-    let constraint = null;
-
+  validate(context, continuation) {
     const constraintString = this.getString();  ///
 
     context.trace(`Validating the '${constraintString}' constraint...`);
 
-    let validates = false;
-
     const validConstraint = this.findValidConstraint(context);
 
     if (validConstraint !== null) {
-      validates = true;
-
-      constraint = validConstraint; ///
+      const constraint = validConstraint; ///
 
       context.debug(`...the '${constraintString}' constraint is already valid.`);
-    } else {
-      const temporaryContext = context; ///
 
+      return continuation(constraint);
+    } else {
       context = this.getContext();
 
       attempt((context) => {
-        const statementValidates = this.validateStatement(context);
+        const validateStatement = this.validateStatement.bind(this),
+              validateReference = this.validateReference.bind(this);
 
-        if (statementValidates) {
-          const referenceValidates = this.validateReference(context);
+        return all([
+          validateStatement,
+          validateReference
+        ], context, (validates) => {
+          if (!validates) {
+            const constraint = null;
 
-          if (referenceValidates) {
-            const stated = context.isStated();
-
-            let validatesWhenStated = false,
-              validatesWhenDerived = false;
-
-            if (stated) {
-              validatesWhenStated = this.validateWhenStated(context);
-            } else {
-              validatesWhenDerived = this.validateWhenDerived(context);
-            }
-
-            if (validatesWhenStated || validatesWhenDerived) {
-              validates = true;
-            }
+            return continuation(constraint);
           }
-        }
 
-        if (validates) {
-          this.commit(context);
-        }
+          const validateWhenStated = this.validateWhenStated.bind(this),
+                validateWhenDerived = this.validateWhenDerived.bind(this);
+
+          return exists([
+            validateWhenStated,
+            validateWhenDerived
+          ], context, (validates) => {
+            let constraint = null;
+
+            if (validates) {
+              constraint = this;  ///
+
+              context.addConstraint(constraint);
+            }
+
+            if (validates) {
+              this.commit(context);
+            }
+
+            if (validates) {
+              context.debug(`...validated the '${constraintString}' constraint.`);
+            }
+
+            return continuation(constraint);
+          });
+        });
       }, context);
-
-      context = temporaryContext; ///
-
-      if (validates) {
-        constraint = this;  ///
-
-        context.addConstraint(constraint);
-      }
     }
-
-    if (validates) {
-      context.debug(`...validated the '${constraintString}' constraint.`);
-    }
-
-    return constraint;
   }
 
-  validateReference(context) {
+  validateReference(context, continuation) {
     let referenceValidates = false;
 
     const constraintString = this.getString();  ///
 
     context.trace(`Validating the '${constraintString}' constraint's reference...`);
 
-    const reference = this.reference.validate(context);
+    this.reference.validate(context, (reference) => {
+      if (reference !== null) {
+        const metavariable = this.reference.getMetavariable(),
+              metavariableDeclared = metavariable.isDeclared();
 
-    if (reference !== null) {
-      const metavariable = this.reference.getMetavariable(),
-            metavariableDeclared = metavariable.isDeclared();
+        if (metavariableDeclared) {
+          this.reference = reference;
 
-      if (metavariableDeclared) {
-        this.reference = reference;
-
-        referenceValidates = true;
+          referenceValidates = true;
+        }
       }
-    }
 
-    if (referenceValidates) {
-      context.debug(`...validated the '${constraintString}' constraint's reference.`);
-    }
+      if (referenceValidates) {
+        context.debug(`...validated the '${constraintString}' constraint's reference.`);
+      }
 
-    return referenceValidates;
+      return continuation(referenceValidates);
+    });
   }
 
-  async validateStatement(context) {
-    let statementValidates = false;
-
+  validateStatement(context, continuation) {
     const constraintString = this.getString();  ///
 
     context.trace(`Validating the '${constraintString}' constraint's statement...`);
 
-    descend(async (context) => {
-      const statement = this.statement.validate(context);
+    descend((context) => {
+      this.statement.validate(context, (statement) => {
+        let statementValidates = false;
 
-      if (statement !== null) {
-        statementValidates = true;
-      }
+        if (statement !== null) {
+          statementValidates = true;
+        }
+
+        if (statementValidates) {
+          context.debug(`...validated the '${constraintString}' constraint's statement.`);
+        }
+
+        return continuation(statementValidates);
+      });
     }, context);
-
-    if (statementValidates) {
-      context.debug(`...validated the '${constraintString}' constraint's statement.`);
-    }
-
-    return statementValidates;
   }
 
-  validateWhenStated(context) {
+  validateWhenStated(context, continuation) {
+    const stated = context.isStated();
+
+    if (!stated) {
+      const validatesWhenStated = false;
+
+      return continuation(validatesWhenStated);
+    }
+
     let validatesWhenStated;
 
     const constraintString = this.getString();  ///
@@ -190,10 +193,18 @@ export default define(class Constraint extends Element {
       context.debug(`...validated the '${constraintString}' stated constraint.`);
     }
 
-    return validatesWhenStated;
+    return continuation(validatesWhenStated);
   }
 
-  validateWhenDerived(context) {
+  validateWhenDerived(context, continuation) {
+    const stated = context.isStated();
+
+    if (stated) {
+      const validatesWhenDerived = false;
+
+      return continuation(validatesWhenDerived);
+    }
+
     let validatesWhenDerived;
 
     const constraintString = this.getString();  ///
@@ -206,36 +217,34 @@ export default define(class Constraint extends Element {
       context.debug(`...validated the '${constraintString}' derived constraint.`);
     }
 
-    return validatesWhenDerived;
+    return continuation(validatesWhenDerived);
   }
 
-  unifyReference(reference, generalContext, specificContext) {
-    let referenceUnifies;
+  unifyReference(reference, generalContext, specificContext, continuation) {
+    if (reference === null) {
+      const referenceUnifies = true;  ///
 
-    if (reference !== null) {
-      const context = specificContext,  ///
-            referenceString = reference.getString(),
-            constraintString = this.getString(); ///
+      return continuation(referenceUnifies);
+    }
 
-      context.trace(`Unifying the '${referenceString}' reference with the '${constraintString}' constraint's reference...`);
+    const context = specificContext,  ///
+          referenceString = reference.getString(),
+          constraintString = this.getString(); ///
 
-      const metavariable = this.getMetavariable();
+    context.trace(`Unifying the '${referenceString}' reference with the '${constraintString}' constraint's reference...`);
 
-      referenceUnifies = metavariable.unifyReference(reference, generalContext, specificContext);
+    const metavariable = this.getMetavariable();
 
+    return metavariable.unifyReference(reference, generalContext, specificContext, (referenceUnifies) => {
       if (referenceUnifies) {
         context.debug(`..unified the '${referenceString}' with the '${constraintString}' constraint's reference.`);
       }
-    } else {
-      referenceUnifies = true;  ///
-    }
 
-    return referenceUnifies;
+      return continuation(referenceUnifies);
+    });
   }
 
-  async unifyStatement(statement, generalContext, specificContext) {
-    let statementUnifies;
-
+  unifyStatement(statement, generalContext, specificContext, continuation) {
     const context = specificContext,  ///
           statementString = statement.getString(),
           constraintString = this.getString(); ///
@@ -245,18 +254,16 @@ export default define(class Constraint extends Element {
     const generalStatement = this.statement,  ///
           specificStatement = stripBracketsFromStatement(statement, context);  ///
 
-    statementUnifies = unifyStatement(generalStatement, specificStatement, generalContext, specificContext);
+    return unifyStatement(generalStatement, specificStatement, generalContext, specificContext, (statementUnifies) => {
+      if (statementUnifies) {
+        context.debug(`...unified the '${statementString}' statement with the '${constraintString}' constraint's statement.`);
+      }
 
-    if (statementUnifies) {
-      context.debug(`...unified the '${statementString}' statement with the '${constraintString}' constraint's statement.`);
-    }
-
-    return statementUnifies;
+      return continuation(statementUnifies);
+    });
   }
 
-  async unifyAssumption(assumption, context) {
-    let assumptionUnifies = false;
-
+  unifyAssumption(assumption, context, continuation) {
     const assumptionString = assumption.getString(),  ///
           constraintString = this.getString();
 
@@ -265,40 +272,42 @@ export default define(class Constraint extends Element {
     const constraintContext = this.getContext(), ///
           generalContext = constraintContext; ///
 
-    reconcile(async (context) => {
+    reconcile((context) => {
       const reference = assumption.getReference(),
-            specificContext = context,  ///
-            referneceUnifies = this.unifyReference(reference, generalContext, specificContext);
+            specificContext = context;  ///
 
-      if (referneceUnifies) {
-        const statement = assumption.getStatement(),
-              statementUnified = this.unifyStatement(statement, generalContext, specificContext);
+      return this.unifyReference(reference, generalContext, specificContext, (referneceUnifies) => {
+        if (!referneceUnifies) {
+          const assumptionUnifies = false;
 
-        if (statementUnified) {
-          context.commit();
-
-          assumptionUnifies = true;
+          return continuation(assumptionUnifies);
         }
-      }
+
+        const statement = assumption.getStatement();
+
+        return this.unifyStatement(statement, generalContext, specificContext, (statementUnifies) => {
+          let assumptionUnifies = false;
+
+          if (statementUnifies) {
+            context.commit();
+
+            assumptionUnifies = true;
+          }
+
+          if (assumptionUnifies) {
+            context.debug(`...unified the '${assumptionString}' assumption with the '${constraintString}' constraint...`);
+          }
+
+          return continuation(assumptionUnifies);
+        });
+      });
     }, context);
-
-    if (assumptionUnifies) {
-      context.debug(`...unified the '${assumptionString}' assumption with the '${constraintString}' constraint...`);
-    }
-
-    return assumptionUnifies;
   }
 
-  unifyAssumptions(assumptions, context) {
-    const assumptionsUnify = assumptions.some((assumption) => {
-      const assumptionUnifies = this.unifyAssumption(assumption, context);
-
-      if (assumptionUnifies) {
-        return true;
-      }
-    });
-
-    return assumptionsUnify;
+  unifyAssumptions(assumptions, context, continuation) {
+    some(assumptions, (assumption, continuation) => {
+      this.unifyAssumption(assumption, context, continuation);
+    }, continuation);
   }
 
   toJSON() {

@@ -53,8 +53,6 @@ export default define(class Parameter extends Element {
     return value;
   }
 
-  static name = "Parameter";
-
   toJSON() {
     const string = this.getString();
 
@@ -73,6 +71,8 @@ export default define(class Parameter extends Element {
 
     return json;
   }
+
+  static name = "Parameter";
 
   static fromJSON(json, context) {
     return instantiate((context) => {

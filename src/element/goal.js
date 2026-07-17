@@ -239,74 +239,82 @@ export default define(class Goal extends Element {
   }
 
   unifyLabel(label, context, continuation) {
-    let labelUnifies;
-
     const goalString = this.getString(),  ///
           labelString = label.getString();
-
-    debugger
 
     context.trace(`Unifying the '${labelString}' label with the '${goalString}' goal...`);
 
     reconcile((context) => {
-      labelUnifies = this.reference.unifyLabel(label, context);
+      return this.reference.unifyLabel(label, context, (labelUnifies) => {
+        if (labelUnifies) {
+          context.debug(`...unified the '${labelString}' label with the '${goalString}' goal's reference.`);
+        }
+
+        return continuation(labelUnifies);
+      });
     }, context);
-
-    if (labelUnifies) {
-      context.debug(`...unified the '${labelString}' label with the '${goalString}' goal's reference.`);
-    }
-
-    return labelUnifies;
   }
 
   unifySchema(schema, context, continuation) {
-    let schemaUnifies = false;
-
     const goalString = this.getString(),
           schemaString = schema.getString();
-
-    debugger
 
     context.trace(`Unifying the '${schemaString}' schema with the '${goalString}' goal...`);
 
     const generalContext = context;  ///
 
     reconcile((context) => {
-      const label = schema.getLabel(),
-            labelUnifies = this.reference.unifyLabel(label, context);
+      const label = schema.getLabel();
 
-      if (labelUnifies) {
-        const specificContext = context,  ///
-              schemaConditional = schema.isConditional(),
-              subproofAssertion = subproofAssertionFromStatement(this.statement, context);
+      return this.reference.unifyLabel(label, context, (labelUnifies) => {
+        if (labelUnifies) {
+          const specificContext = context,  ///
+                schemaConditional = schema.isConditional(),
+                subproofAssertion = subproofAssertionFromStatement(this.statement, context);
 
-        if (schemaConditional) {
-          if (subproofAssertion !== null) {
-            schemaUnifies = subproofAssertion.unifySchema(schema, generalContext, specificContext);
+          if (schemaConditional) {
+            if (subproofAssertion === null) {
+              const schemaUnifies = false;
+
+              return continuation(schemaUnifies);
+            }
+
+            return subproofAssertion.unifySchema(schema, generalContext, specificContext, (schemaUnifies) => {
+              if (schemaUnifies) {
+                context.debug(`...unified the '${schemaString}' schema with the '${goalString}' goal.`);
+              }
+
+              return continuation(schemaUnifies);
+            });
           }
-        } else {
-          if (subproofAssertion === null) {
-            const deduction = schema.getDeduction(),
-                  deductionUnifies = this.unifyDeduction(deduction, generalContext, specificContext);
+
+          if (subproofAssertion !== null) {
+            const schemaUnifies = false;
+
+            return continuation(schemaUnifies);
+          }
+
+          const deduction = schema.getDeduction();
+
+          this.unifyDeduction(deduction, generalContext, specificContext, (deductionUnifies) => {
+            let schemaUnifies = false;
 
             if (deductionUnifies) {
               schemaUnifies = true;
             }
-          }
+
+            if (schemaUnifies) {
+              context.debug(`...unified the '${schemaString}' schema with the '${goalString}' goal.`);
+            }
+
+            return continuation(schemaUnifies);
+          });
         }
-      }
+      });
     }, context);
-
-    if (schemaUnifies) {
-      context.debug(`...unified the '${schemaString}' schema with the '${goalString}' goal.`);
-    }
-
-    return schemaUnifies;
   }
 
-  unifyDeduction(deduction, generalContext, specificContext) {
-    let deductionUnifies;
-
+  unifyDeduction(deduction, generalContext, specificContext, continuation) {
     const context = specificContext,  ///
           goalString = this.getString(),  ///
           deductionString = deduction.getString();
@@ -319,23 +327,23 @@ export default define(class Goal extends Element {
     specificContext = deductionContext; ///
 
     reconcile((specificContext) => {
-      const statementUnifies = this.statement.unifyStatement(statement, generalContext, specificContext);
+      return this.statement.unifyStatement(statement, generalContext, specificContext, (statementUnifies) => {
+        let deductionUnifies = false;
 
-      if (statementUnifies) {
-        deductionUnifies = true;
+        if (statementUnifies) {
+          deductionUnifies = true;
 
-        specificContext.commit(context);
-      }
+          specificContext.commit(context);
+        }
+
+        if (deductionUnifies) {
+          context.debug(`...unified the '${deductionString}' deduction's statement with the '${goalString}' goal's '${goalString}' statement.`);
+        }
+
+        return continuation(deductionUnifies);
+      });
     }, specificContext);
-
-    if (deductionUnifies) {
-      context.debug(`...unified the '${deductionString}' deduction's statement with the '${goalString}' goal's '${goalString}' statement.`);
-    }
-
-    return deductionUnifies;
   }
-
-  static name = "Goal";
 
   toJSON() {
     const string = this.getString();
@@ -355,6 +363,8 @@ export default define(class Goal extends Element {
 
     return json;
   }
+
+  static name = "Goal";
 
   static fromJSON(json, context) {
     return instantiate((context) => {

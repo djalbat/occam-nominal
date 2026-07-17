@@ -342,8 +342,6 @@ export default define(class Statement extends Element {
     }
   }
 
-  static name = "Statement";
-
   toJSON() {
     const string = this.getString();
 
@@ -362,6 +360,8 @@ export default define(class Statement extends Element {
 
     return json;
   }
+
+  static name = "Statement";
 
   static fromJSON(json, context) {
     return instantiate((context) => {
