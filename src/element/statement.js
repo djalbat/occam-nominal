@@ -340,6 +340,10 @@ export default define(class Statement extends Element {
         return continuation(unifiesIndependently);
       });
     }
+
+    const unifiesIndependently = false;
+
+    return continuation(unifiesIndependently);
   }
 
   toJSON() {
