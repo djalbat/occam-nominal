@@ -4,7 +4,7 @@ import { Element, breakPointUtilities } from "occam-languages";
 
 import { define } from "../elements";
 import { instantiateConclusion } from "../process/instantiate";
-import { elide, declare, attempt, reconcile, serialise, unserialise, instantiate } from "../utilities/context";
+import { elide, derive, attempt, reconcile, serialise, unserialise, instantiate } from "../utilities/context";
 
 const { breakable, breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
@@ -47,7 +47,7 @@ export default define(class Conclusion extends Element {
       return continuation(verifies);
     }
 
-    declare((context) => {
+    derive((context) => {
       elide((context) => {
         return this.validate(context, (validates) => {
           let verifies = false;

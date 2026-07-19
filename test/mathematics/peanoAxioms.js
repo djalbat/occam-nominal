@@ -7,7 +7,7 @@ const { createSuite } = require("../utilities/test");
 const { ERROR_LEVEL } = levels;
 
 const logLevel = ERROR_LEVEL,
-      projectName = "peano-axioms",
+      projectName = "induction",
       projectsDirectoryPath = "../../Mathematics";
 
 describe(projectName, () => {

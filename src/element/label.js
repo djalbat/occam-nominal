@@ -59,7 +59,7 @@ export default define(class Label extends Element {
           labelPresent = context.isLabelPresentByLabelNode(labelNode);
 
     if (labelPresent) {
-      const verifies = true;
+      const verifies = false;
 
       context.debug(`The '${labelString}' label is already present.`);
 
