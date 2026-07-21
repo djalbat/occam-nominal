@@ -1,13 +1,11 @@
 "use strict";
 
-import { asynchronousUtilities } from "necessary";
-import { continuationUtilities } from "occam-languages";
+import { arrayUtilities, asynchronousUtilities } from "necessary";
 
-const { forEach: asynchronousForEach,
+const { filter: arrayFilter } = arrayUtilities,
+      { forEach: asynchronousForEach,
         forwardsForEach: asynchronousForwardsForEach,
         backwardsForEach: asynchronousBackwardsForEach } = asynchronousUtilities;
-
-export const { reduce, forEach, resolve } = continuationUtilities;
 
 export function one(array, callback, ...callerArguments) {
   let success = false;
@@ -18,7 +16,7 @@ export function one(array, callback, ...callerArguments) {
 
   const callerContext = context;  ///
 
-  asynchronousForEach(array, (element, next, done) => {
+  return asynchronousForEach(array, (element, next, done) => {
     return callback(element, ...callerArguments, callerContext, (...callbackArguments) => {
       const passed = callbackArguments.shift();
 
@@ -54,7 +52,7 @@ export function some(array, callback, ...callerArguments) {
 
   const callerContext = context;  ///
 
-  asynchronousForEach(array, (element, next, done) => {
+  return asynchronousForEach(array, (element, next, done) => {
     return callback(element, ...callerArguments, callerContext, (...callbackArguments) => {
       success = callbackArguments.shift();
 
@@ -82,7 +80,7 @@ export function each(array, callback, ...callerArguments) {
 
   const callerContext = context;  ///
 
-  asynchronousForEach(array, (element, next, done) => {
+  return asynchronousForEach(array, (element, next, done) => {
     return callback(element, ...callerArguments, context, (...callbackArguments) => {
       success = callbackArguments.shift();
 
@@ -112,7 +110,7 @@ export function every(array, callback, ...callerArguments) {
 
   const callerContext = context;  ///
 
-  asynchronousForEach(array, (element, next, done) => {
+  return asynchronousForEach(array, (element, next, done) => {
     return callback(element, ...callerArguments, context, (...callbackArguments) => {
       success = callbackArguments.shift();
 
@@ -130,6 +128,134 @@ export function every(array, callback, ...callerArguments) {
     });
   }, () => {
     return continuation(success, context);
+  });
+}
+
+export function reduce(array, initialValue, callback, ...callerArguments) {
+  let value = initialValue; ///
+
+  const continuation = callerArguments.pop();
+
+  let context = callerArguments.pop();
+
+  return asynchronousForEach(array, (element, next, done) => {
+    return callback(value, element, ...callerArguments, context, (...callbackArguments) => {
+      value = callbackArguments.shift();
+
+      context = callbackArguments.shift();
+
+      next();
+    });
+  }, () => {
+    return continuation(value, context);
+  });
+}
+
+export function forEach(array, callback, ...callerArguments) {
+  const continuation = callerArguments.pop();
+
+  let context = callerArguments.pop();
+
+  return asynchronousForEach(array, (element, next, done) => {
+    return callback(element, ...callerArguments, context, (...callbackArguments) => {
+      context = callbackArguments.shift();
+
+      next();
+    });
+  }, () => {
+    return continuation(context);
+  });
+}
+
+export function forwardsEvery(array, callback, ...callerArguments) {
+  let success = true;
+
+  const continuation = callerArguments.pop();
+
+  let context = callerArguments.pop();
+
+  const callerContext = context;  ///
+
+  return asynchronousForwardsForEach(array, (element, next, done) => {
+    return callback(element, ...callerArguments, context, (...callbackArguments) => {
+      success = callbackArguments.shift();
+
+      if (!success) {
+        context = callerContext;  ///
+
+        done();
+
+        return;
+      }
+
+      context = callbackArguments.shift();
+
+      next();
+    });
+  }, () => {
+    return continuation(success, context);
+  });
+}
+
+export function backwardsEvery(array, callback, ...callerArguments) {
+  let success = true;
+
+  const continuation = callerArguments.pop();
+
+  let context = callerArguments.pop();
+
+  const callerContext = context;  ///
+
+  return asynchronousBackwardsForEach(array, (element, next, done) => {
+    return callback(element, ...callerArguments, context, (...callbackArguments) => {
+      success = callbackArguments.shift();
+
+      if (!success) {
+        context = callerContext;  ///
+
+        done();
+
+        return;
+      }
+
+      context = callbackArguments.shift();
+
+      next();
+    });
+  }, () => {
+    return continuation(success, context);
+  });
+}
+
+export function forwardsForEach(array, callback, ...callerArguments) {
+  const continuation = callerArguments.pop();
+
+  let context = callerArguments.pop();
+
+  return asynchronousForwardsForEach(array, (element, next, done) => {
+    return callback(element, ...callerArguments, context, (...callbackArguments) => {
+      context = callbackArguments.shift();
+
+      next();
+    });
+  }, () => {
+    return continuation(context);
+  });
+}
+
+export function backwardsForEach(array, callback, ...callerArguments) {
+  const continuation = callerArguments.pop();
+
+  let context = callerArguments.pop();
+
+  return asynchronousBackwardsForEach(array, (element, next, done) => {
+    return callback(element, ...callerArguments, context, (...callbackArguments) => {
+      context = callbackArguments.shift();
+
+      next();
+    });
+  }, () => {
+    return continuation(context);
   });
 }
 
@@ -240,96 +366,75 @@ export function extract(array, callback, ...callerArguments) {
   });
 }
 
-export function forwardsEvery(array, callback, ...callerArguments) {
-  let success = true;
+export function resolve(arrayA, arrayB, callback, ...callerArguments) {
+  arrayA = [  ///
+    ...arrayA
+  ];
 
   const continuation = callerArguments.pop();
 
   let context = callerArguments.pop();
 
-  const callerContext = context;  ///
+  function nextPass() {
+    const arrayALength = arrayA.length;
 
-  asynchronousForwardsForEach(array, (element, next, done) => {
-    return callback(element, ...callerArguments, context, (...callbackArguments) => {
-      success = callbackArguments.shift();
+    if (arrayALength === 0) {
+      const success = true;  ///
 
-      if (!success) {
-        context = callerContext;  ///
+      return continuation(success, context);
+    }
 
-        done();
+    let success = false;
 
-        return;
+    let count = -1;
+
+    function nextElement() {
+      count++;
+
+      const terminate = (count === arrayALength);
+
+      if (terminate) {
+        if (!success) {
+          const success = false; ///
+
+          return continuation(success, context);
+        }
+
+        arrayFilter(arrayA, (elementA) => {
+          const arrayBIncludesElementA = arrayB.includes(elementA);
+
+          if (!arrayBIncludesElementA) {
+            return true;
+          }
+        });
+
+        nextPass();
+      } else {
+        const index = count,  ///
+          elementA = arrayA[index];
+
+        return callback(elementA, ...callerArguments, context, (...callbackArguments) => {
+          const passed = callbackArguments.shift();
+
+          context = callbackArguments.shift();
+
+          if (passed) {
+            const elementB = elementA;  ///
+
+            arrayB.push(elementB);
+
+            success = true;
+          }
+
+          nextElement();
+        });
       }
+    }
 
-      context = callbackArguments.shift();
+    nextElement();
+  }
 
-      next();
-    });
-  }, () => {
-    return continuation(success, context);
-  });
-}
-
-export function backwardsEvery(array, callback, ...callerArguments) {
-  let success = true;
-
-  const continuation = callerArguments.pop();
-
-  let context = callerArguments.pop();
-
-  const callerContext = context;  ///
-
-  asynchronousBackwardsForEach(array, (element, next, done) => {
-    return callback(element, ...callerArguments, context, (...callbackArguments) => {
-      success = callbackArguments.shift();
-
-      if (!success) {
-        context = callerContext;  ///
-
-        done();
-
-        return;
-      }
-
-      context = callbackArguments.shift();
-
-      next();
-    });
-  }, () => {
-    return continuation(success, context);
-  });
-}
-
-export function forwardsForEach(array, callback, ...callerArguments) {
-  const continuation = callerArguments.pop();
-
-  let context = callerArguments.pop();
-
-  asynchronousForwardsForEach(array, (element, next, done) => {
-    return callback(element, ...callerArguments, context, (...callbackArguments) => {
-      context = callbackArguments.shift();
-
-      next();
-    });
-  }, () => {
-    return continuation(context);
-  });
-}
-
-export function backwardsForEach(array, callback, ...callerArguments) {
-  const continuation = callerArguments.pop();
-
-  let context = callerArguments.pop();
-
-  asynchronousBackwardsForEach(array, (element, next, done) => {
-    return callback(element, ...callerArguments, context, (...callbackArguments) => {
-      context = callbackArguments.shift();
-
-      next();
-    });
-  }, () => {
-    return continuation(context);
-  });
+  nextPass();
 }
 
 export function all(callbacks, ...callerArguemnts) {
