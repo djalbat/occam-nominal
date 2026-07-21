@@ -210,14 +210,12 @@ export default define(class Statement extends Element {
 
       context.debug(`...the '${statementString}' statement is already valid.`);
 
-      continuation(statement);
-
-      return;
+      return continuation(statement, context);
     }
 
     const statement = this;
 
-    return exists(validateStatements, statement, context, (statementValidates) => {
+    return exists(validateStatements, statement, context, (statementValidates, context) => {
       let statement = null;
 
       if (statementValidates) {
@@ -228,7 +226,7 @@ export default define(class Statement extends Element {
         context.debug(`...validated the '${statementString}' statement.`);
       }
 
-      return continuation(statement);
+      return continuation(statement, context);
     });
   }
 

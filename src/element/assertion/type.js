@@ -50,14 +50,14 @@ export default define(class TypeAssertion extends Assertion {
 
       context.debug(`...the '${typeAssertionString}' type assertion is already valid.`);
 
-      return continuation(typeAssertion);
+      return continuation(typeAssertion, context);
     }
 
-    this.validateType(context, (typeValidates) => {
+    return this.validateType(context, (typeValidates, context) => {
       if (!typeValidates) {
         const typeAssertion = null;
 
-        return continuation(typeAssertion);
+        return continuation(typeAssertion, context);
       }
 
       const validateWhenStated = this.validateWhenStated.bind(this),
@@ -83,7 +83,7 @@ export default define(class TypeAssertion extends Assertion {
           context.debug(`...verified the '${typeAssertionString}' type assertion.`);
         }
 
-        return continuation(typeAssertion);
+        return continuation(typeAssertion, context);
       });
     });
   }
@@ -141,7 +141,7 @@ export default define(class TypeAssertion extends Assertion {
       context.debug(`...validated the '${typeAssertionString}' type assertion's type.`);
     }
 
-    return continuation(typeValidates);
+    return continuation(typeValidates, context);
   }
 
   validateWhenStated(context, continuation) {
@@ -150,7 +150,7 @@ export default define(class TypeAssertion extends Assertion {
     if (!stated) {
       const validatesWhenStated = false;
 
-      return continuation(validatesWhenStated);
+      return continuation(validatesWhenStated, context);
     }
 
     const typeAssertionString = this.getString(); ///
@@ -161,7 +161,7 @@ export default define(class TypeAssertion extends Assertion {
       if (term === null) {
         const validatesWhenStated = false;
 
-        return continuation(validatesWhenStated);
+        return continuation(validatesWhenStated, context);
       }
 
       const termType = term.getType(),
@@ -190,7 +190,7 @@ export default define(class TypeAssertion extends Assertion {
         context.debug(`...validated the '${typeAssertionString}' stated type assertion.`);
       }
 
-      return continuation(validatesWhenStated);
+      return continuation(validatesWhenStated, context);
     });
   }
 
@@ -200,14 +200,14 @@ export default define(class TypeAssertion extends Assertion {
     if (stated) {
       const validatesWhenDerived = false;
 
-      return continuation(validatesWhenDerived);
+      return continuation(validatesWhenDerived, context);
     }
 
     const typeAssertionString = this.getString(); ///
 
     context.trace(`Validating the '${typeAssertionString}' derived type assertion...`);
 
-    validateWhenDerived(this.term, this.type, context, (term) => {
+    validateWhenDerived(this.term, this.type, context, (term, context) => {
       let validatesWhenDerived = false;
 
       if (term !== null) {
@@ -220,7 +220,7 @@ export default define(class TypeAssertion extends Assertion {
         context.debug(`...validated the '${typeAssertionString}' derived type assertion.`);
       }
 
-      return continuation(validatesWhenDerived);
+      return continuation(validatesWhenDerived, context);
     });
   }
 
@@ -324,12 +324,12 @@ export default define(class TypeAssertion extends Assertion {
 
 function validateWhenDerived(term, type, context, continuation) {
   if (term === null) {
-    return continuation(term);
+    return continuation(term, context);
   }
 
   return term.validate(context, (term, context) => {
     if (term === null) {
-      return continuation(term);
+      return continuation(term, context);
     }
 
     const termType = term.getType(),
@@ -338,7 +338,7 @@ function validateWhenDerived(term, type, context, continuation) {
     if (!termTypeEqualToOrSubTypeOfType) {
       term = null;
 
-      return continuation(term);
+      return continuation(term, context);
     }
 
     const termEstablished = term.isEstablished();
@@ -346,9 +346,9 @@ function validateWhenDerived(term, type, context, continuation) {
     if (!termEstablished) {
       term = null;
 
-      return continuation(term);
+      return continuation(term, context);
     }
 
-    return continuation(term);
+    return continuation(term, context);
   });
 }

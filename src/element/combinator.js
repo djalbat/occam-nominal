@@ -35,7 +35,7 @@ export default define(class Combinator extends Element {
     context.trace(`Verifying the '${combinatorString}' combinator...`);
 
     attempt((context) => {
-      this.validateStatement(context, (statementValidates) => {
+      return this.validateStatement(context, (statementValidates, context) => {
         let verifies = false;
 
         if (statementValidates) {
@@ -48,7 +48,7 @@ export default define(class Combinator extends Element {
           context.debug(`...verified the '${combinatorString}' combinator.`);
         }
 
-        continuation(verifies);
+        return continuation(verifies, context);
       });
     }, context)
   }
@@ -58,7 +58,7 @@ export default define(class Combinator extends Element {
 
     context.trace(`Validating the '${combinatorString}' combinator's statement...`);
 
-    validateStatementAsCombinator(this.statement, context, (statementValidatesAsCombinator) => {
+    return validateStatementAsCombinator(this.statement, context, (statementValidatesAsCombinator, context) => {
       let statementValidates = false;
 
       if (statementValidatesAsCombinator) {
@@ -69,7 +69,7 @@ export default define(class Combinator extends Element {
         context.debug(`...validated the '${combinatorString}' combinator's statement.`);
       }
 
-      continuation(statementValidates);
+      return continuation(statementValidates, context);
     });
   }
 
@@ -84,7 +84,7 @@ export default define(class Combinator extends Element {
           generalContext = combinatorContext, ///
           specifiContext = context; ///
 
-    unifyStatementWithCombinator(statement, combinator, generalContext, specifiContext, (statementUnifiesWithCombinator) => {
+    return unifyStatementWithCombinator(statement, combinator, generalContext, specifiContext, (statementUnifiesWithCombinator, context) => {
       let statementUnifies = false;
 
       if (statementUnifiesWithCombinator) {
@@ -95,7 +95,7 @@ export default define(class Combinator extends Element {
         context.debug(`...unified the '${statementString}' statement with the '${combinatorString}' combinator.`);
       }
 
-      return continuation(statementUnifies);
+      return continuation(statementUnifies, context);
     });
   }
 

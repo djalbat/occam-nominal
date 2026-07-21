@@ -1,14 +1,14 @@
 "use strict";
 
-import { breakPointUtilities, continuationUtilities } from "occam-languages";
+import { breakPointUtilities } from "occam-languages";
 
 import TopLevelAssertion from "../topLevelAssertion";
 
+import { match } from "../../utilities/continuation";
 import { define } from "../../elements";
 import { reconcile } from "../../utilities/context";
 
-const { match } = continuationUtilities,
-      { breakable } = breakPointUtilities;
+const { breakable } = breakPointUtilities;
 
 export default define(class Axiom extends TopLevelAssertion {
   getAxiomNode() {

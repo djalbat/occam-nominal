@@ -1,18 +1,18 @@
 "use strict";
 
 import { arrayUtilities } from "necessary";
-import { breakPointUtilities, continuationUtilities } from "occam-languages";
+import { breakPointUtilities } from "occam-languages";
 
 import Assertion from "../assertion";
 
 import { define } from "../../elements";
+import { every, backwardsEvery } from "../../utilities/continuation";
 import { instantiateSubproofAssertion } from "../../process/instantiate";
 import { descend, reconcile, instantiate } from "../../utilities/context";
 import { subproofAssertionFromStatementNode } from "../../utilities/element";
 
 const { last, front } = arrayUtilities,
-      { breakPointFromJSON } = breakPointUtilities,
-      { every, backwardsEvery } = continuationUtilities;
+      { breakPointFromJSON } = breakPointUtilities;
 
 export default define(class SubproofAssertion extends Assertion {
   constructor(context, string, node, breakPoint, statements) {
@@ -94,7 +94,7 @@ export default define(class SubproofAssertion extends Assertion {
   }
 
   validateStatements(context, continuation) {
-    return every(this.statements, (statement, continuation) => {
+    return every(this.statements, context, (statement, continuation) => {
       descend((context) => {
         return statement.validate(context, (statement) => {
           let statementValidates = false;

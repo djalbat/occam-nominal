@@ -1,12 +1,12 @@
 "use strict";
 
+import { Element } from "occam-languages";
 import { arrayUtilities } from "necessary";
-import { Element, continuationUtilities } from "occam-languages";
 
+import { every } from "../utilities/continuation";
 import { define } from "../elements";
 
-const { last } = arrayUtilities,
-      { every } = continuationUtilities;
+const { last } = arrayUtilities;
 
 export default define(class Derivation extends Element {
   constructor(context, string, node, breakPoint, subproofOrProofAssertions) {
@@ -35,7 +35,7 @@ export default define(class Derivation extends Element {
   }
 
   verify(context, continuation) {
-    return every(this.subproofOrProofAssertions, (subproofOrProofAssertion, continuation) => {
+    return every(this.subproofOrProofAssertions, context, (subproofOrProofAssertion, continuation) => {
       subproofOrProofAssertion.verify(context, (subproofOrProofAssertionVerifies) => {
         if (subproofOrProofAssertionVerifies) {
           context.assignAssignments();

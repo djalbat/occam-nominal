@@ -17,12 +17,12 @@ export default define(class BracketedCombinator extends Combinator {
 
     context.trace(`Unifying the '${statementString}' statement with the bracketed combinator...`);
 
-    return super.unifyStatement(statement, context, (statementUnifies) => {
+    return super.unifyStatement(statement, context, (statementUnifies, context) => {
       if (statementUnifies) {
         context.debug(`...unified the '${statementString}' statement with the bracketed combinator.`);
       }
 
-      return continuation(statementUnifies);
+      return continuation(statementUnifies, context);
     });
   }
 

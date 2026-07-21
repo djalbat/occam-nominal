@@ -1,18 +1,17 @@
 "use strict";
 
 import { arrayUtilities } from "necessary";
-import { breakPointUtilities, continuationUtilities } from "occam-languages";
+import { breakPointUtilities } from "occam-languages";
 
 import elements from "../../elements";
 import ProofAssertion from "../proofAssertion";
 
-import { all } from "../../utilities/continuation";
 import { define } from "../../elements";
+import { all, some } from "../../utilities/continuation";
 import { unifySteps } from "../../process/unification";
 import { derive, declare, attempt, reconcile } from "../../utilities/context";
 
-const { some } = continuationUtilities,
-      { breakable } = breakPointUtilities,
+const { breakable } = breakPointUtilities,
       { backwardsSome } = arrayUtilities;
 
 export default define(class Step extends ProofAssertion {

@@ -199,7 +199,7 @@ export default define(class Term extends Element {
 
     let term = this;
 
-    return exists(validateTerms, term, context, (termValidates) => {
+    return exists(validateTerms, term, context, (termValidates, context) => {
       if (termValidates) {
         context.addTerm(term);
 
@@ -257,16 +257,18 @@ export default define(class Term extends Element {
         context.debug(`...validated the '${termString}' term given the '${typeString}' type.`);
       }
 
-      return continuation(term);
+      return continuation(term, context);
     });
   }
 
-  validateAsProperty(context, validateForwards) {
-    let term = null;
+  validateAsProperty(context, continuation) {
+    let term;
 
     const termString = this.getString();  ///
 
     context.trace(`Validating the '${termString}' term as a property...`);
+
+    debugger
 
     let validatesAsProperty = false;
 
@@ -275,7 +277,7 @@ export default define(class Term extends Element {
     if (validTerm !== null) {
       term = validTerm; ///
 
-      const validatesForward = validateForwards(term, context);
+      const validatesForward = continuation(term, context);
 
       if (validatesForward) {
         validatesAsProperty = true;
@@ -287,7 +289,7 @@ export default define(class Term extends Element {
     } else {
       term = this;  ///
 
-      const termUnifiesWithProperties = unifyTermWithProperties(term, context, validateForwards);
+      const termUnifiesWithProperties = unifyTermWithProperties(term, context, continuation);
 
       if (termUnifiesWithProperties) {
         validatesAsProperty = true;
@@ -309,6 +311,8 @@ export default define(class Term extends Element {
 
   unifyTerm(term, generalContext, specificContext) {
     let termUnifies = false;
+
+    debugger
 
     const context = specificContext,  ///
           generalTerm = this,

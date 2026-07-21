@@ -1,15 +1,14 @@
 "use strict";
 
-import { breakPointUtilities, continuationUtilities } from "occam-languages";
+import { breakPointUtilities } from "occam-languages";
 
 import Declaration from "../declaration";
 
-import { all } from "../../utilities/continuation";
 import { define } from "../../elements";
+import { all, every } from "../../utilities/continuation";
 import { baseTypeFromNothing } from "../../utilities/type";
 
-const { every } = continuationUtilities,
-      { breakable } = breakPointUtilities;
+const { breakable } = breakPointUtilities;
 
 export default define(class TypeDeclaration extends Declaration {
   constructor(context, string, node, breakPoint, type, superTypes, provisional) {
@@ -58,7 +57,7 @@ export default define(class TypeDeclaration extends Declaration {
       verifyType,
       verifySuperTypes,
       verifyTypePrefix
-    ], context, (verifies) => {
+    ], context, (verifies, context) => {
       if (verifies) {
         const properties = this.getProperties(),
               typePrefix = context.getTypePrefix(),
@@ -112,7 +111,7 @@ export default define(class TypeDeclaration extends Declaration {
       context.debug(`...verified the '${typeDeclarationString}' type declaration's '${typeString}' type`);
     }
 
-    return continuation(typeVerifies);
+    return continuation(typeVerifies ,context);
   }
 
   verifyTypePrefix(context, continuation) {
@@ -135,18 +134,19 @@ export default define(class TypeDeclaration extends Declaration {
       context.debug(`...verified the '${typeDeclarationString}' type declaration's '${typeString}' type's prefix.`);
     }
 
-    return continuation(typePrefixVerifies);
+    return continuation(typePrefixVerifies, context);
   }
 
   verifySuperTypes(context, continuation) {
-    const superTypes = [],
-          typeDeclarationString = this.getString(); ///
+    const typeDeclarationString = this.getString(); ///
 
     context.trace(`Verifying the '${typeDeclarationString}' type declaration's super-types...`);
 
-    every(this.superTypes, (superType, continuation) => {
-      this.verifySuperType(superType, superTypes, context, continuation);
-    }, (superTypesVerify) => {
+    const superTypes = []; ///
+
+    return every(this.superTypes, (superType, context, continuation) => {
+      return this.verifySuperType(superType, superTypes, context, continuation);
+    }, context, (superTypesVerify, context) => {
       if (superTypesVerify) {
         const superTypesLength = superTypes.length;
 
@@ -162,7 +162,7 @@ export default define(class TypeDeclaration extends Declaration {
         context.debug(`...verified the '${typeDeclarationString}' type declaration's super-types.`);
       }
 
-      return continuation(superTypesVerify);
+      return continuation(superTypesVerify, context);
     });
   }
 
@@ -196,7 +196,7 @@ export default define(class TypeDeclaration extends Declaration {
       context.debug(`...verified the '${typeDeclarationString}' type declaration's '${superTypeString}' super-type.`);
     }
 
-    return continuation(superTypeVerifies);
+    return continuation(superTypeVerifies, context);
   }
 
   static name = "TypeDeclaration";

@@ -1,11 +1,10 @@
 "use strict";
 
-import { Element, continuationUtilities } from "occam-languages";
+import { Element } from "occam-languages";
 
+import { every } from "../utilities/continuation";
 import { define } from "../elements";
 import { enclose } from "../utilities/context";
-
-const { every } = continuationUtilities;
 
 export default define(class Section extends Element {
   constructor(context, string, node, breakPoint, hypotheses, declaration, topLevelAssertion) {

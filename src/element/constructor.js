@@ -1,9 +1,9 @@
 "use strict";
 
-import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
+import { Element, breakPointUtilities } from "occam-languages";
 
 import { define } from "../elements";
-import { exists } from "../utilities/continuation";
+import { every, exists } from "../utilities/continuation";
 import { baseTypeFromNothing } from "../utilities/type";
 import { instantiateConstructor } from "../process/instantiate";
 import { validateTermAsVariable } from "../process/validation";
@@ -13,8 +13,7 @@ import { validateTermAsConstructor } from "../process/validate";
 import { attempt, serialise, unserialise, instantiate } from "../utilities/context";
 import { typeFromJSON, typeToTypeJSON, hypothesesFromJSON, hypothesesToHypothesesJSON } from "../utilities/json";
 
-const { every } = continuationUtilities,
-      { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
+const { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Constructor extends Element {
   constructor(context, string, node, breakPoint, term, type, hypotheses) {
@@ -83,7 +82,7 @@ export default define(class Constructor extends Element {
     context.trace(`Verifying the '${constructorString}' constructor...`);
 
     attempt((context) => {
-      this.validateTerm(context, (termValidates) => {
+      this.validateTerm(context, (termValidates, context) => {
         if (termValidates) {
           verifies = true;
         }
@@ -113,12 +112,12 @@ export default define(class Constructor extends Element {
     return exists([
       validateTermAsVariable,
       validateTermAsConstructor
-    ], context, (termValidates) => {
+    ], context, (termValidates, context) => {
       if (termValidates) {
         context.debug(`...validated the '${constructorString}' constructor's term.`);
       }
 
-      return continuation(termValidates);
+      return continuation(termValidates, context);
     });
   }
 
@@ -128,7 +127,7 @@ export default define(class Constructor extends Element {
     if (!hypothtical) {
       const termValidatesAsVariable = false;
 
-      return continuation(termValidatesAsVariable);
+      return continuation(termValidatesAsVariable, context);
     }
 
     const includeType = false,
@@ -136,7 +135,7 @@ export default define(class Constructor extends Element {
 
     context.trace(`Validating the '${constructorString}' constructor's term...`);
 
-    validateTermAsVariable(this.term, context, (term, context) => {
+    return validateTermAsVariable(this.term, context, (term, context) => {
       let termValidatesAsVariable = false;
 
       const type = term.getType(),
@@ -150,7 +149,7 @@ export default define(class Constructor extends Element {
         context.debug(`...validated the '${constructorString}' constructor's term.`);
       }
 
-      return continuation(termValidatesAsVariable);
+      return continuation(termValidatesAsVariable, context);
     });
   }
 
@@ -160,7 +159,7 @@ export default define(class Constructor extends Element {
     if (hypothtical) {
       const termValidatesAsConstructor = false;
 
-      return continuation(termValidatesAsConstructor);
+      return continuation(termValidatesAsConstructor, context);
     }
 
     const includeType = false,
@@ -168,12 +167,12 @@ export default define(class Constructor extends Element {
 
     context.trace(`Validating the '${constructorString}' constructor's term...`);
 
-    validateTermAsConstructor(this.term, context, (termValidatesAsConstructor) => {
+    return validateTermAsConstructor(this.term, context, (termValidatesAsConstructor) => {
       if (termValidatesAsConstructor) {
         context.debug(`...validated the '${constructorString}' constructor's term.`);
       }
 
-      return continuation(termValidatesAsConstructor);
+      return continuation(termValidatesAsConstructor, context);
     });
   }
 
@@ -184,11 +183,11 @@ export default define(class Constructor extends Element {
 
     context.trace(`Unifying the '${termString}' term with the '${constructorString}' constructor...`);
 
-    this.dischargeHypothesesGivenTerm(term, context, (hypothesesDiscardedGivenTerm) => {
+    return this.dischargeHypothesesGivenTerm(term, context, (hypothesesDiscardedGivenTerm, context) => {
       if (!hypothesesDiscardedGivenTerm) {
         const termUnifies = false;
 
-        return continuation(termUnifies);
+        return continuation(termUnifies, context);
       }
 
       const constructor = this, ///
@@ -196,11 +195,11 @@ export default define(class Constructor extends Element {
             generalContext = constructorContext,  ///
             specifiContext = context; ///
 
-      unifyTermWithConstructor(term, constructor, generalContext, specifiContext, (termUnifiesWithConstructor) => {
+      return unifyTermWithConstructor(term, constructor, generalContext, specifiContext, (termUnifiesWithConstructor, context) => {
         if (!termUnifiesWithConstructor) {
           const termUnifies = false;
 
-          return continuation(termUnifies);
+          return continuation(termUnifies, context);
         }
 
         let termUnifies;
@@ -217,7 +216,7 @@ export default define(class Constructor extends Element {
           context.debug(`...unified the '${termString}' term with the '${constructorString}' constructor.`);
         }
 
-        return continuation(termUnifies);
+        return continuation(termUnifies, context);
       });
     });
   }
@@ -248,10 +247,10 @@ export default define(class Constructor extends Element {
     if (!hypothetical) {
       const hypothesesDischargesGivenTerm = true;  ///
 
-      return continuation(hypothesesDischargesGivenTerm);
+      return continuation(hypothesesDischargesGivenTerm, context);
     }
 
-    return every(this.hypotheses, (hypothesis, continuation) => {
+    return every(this.hypotheses, context, (hypothesis, continuation) => {
       this.dischargeHypothesisGivenTerm(hypothesis, term, context, continuation);
     }, continuation);
   }
