@@ -84,7 +84,9 @@ export default define(class Combinator extends Element {
           generalContext = combinatorContext, ///
           specifiContext = context; ///
 
-    return unifyStatementWithCombinator(statement, combinator, generalContext, specifiContext, (statementUnifiesWithCombinator, context) => {
+    return unifyStatementWithCombinator(statement, combinator, generalContext, specifiContext, (statementUnifiesWithCombinator, generalContext, specifiContext) => {
+      const context = specifiContext; ///
+
       let statementUnifies = false;
 
       if (statementUnifiesWithCombinator) {

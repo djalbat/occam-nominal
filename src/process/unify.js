@@ -116,17 +116,19 @@ class ConstructorPass extends ContinuationZipPass {
         let success = false;
 
         if (type === null) {
-          return continuation(success, context);
+          return continuation(success, generalContext, specificContext);
         }
 
         const term = termFromTermNode(termNode, context);
 
         term.validateGivenType(type, context, (term, context) => {
+          const specificContext = context;  ///
+
           if (term !== null) {
             success = true;
           }
 
-          return continuation(success, context);
+          return continuation(success, generalContext, specificContext);
         });
       }
     }
@@ -290,26 +292,28 @@ class CombinatorPass extends ContinuationZipPass {
       generalNodeQuery: metaTypeNodeQuery,
       specificNodeQuery: statementNodeQuery,
       run: (generalMetaTypeNode, specificStatementNode, generalContext, specificContext, continuation) => {
-        const context = specificContext,  ///
-              metaTypeNode = generalMetaTypeNode, ///
+        const metaTypeNode = generalMetaTypeNode, ///
               metaTypeName = metaTypeNode.getMetaTypeName(),
               metaTypeNameStatementMetaTypeName = (metaTypeName === STATEMENT_META_TYPE_NAME);
 
         let success = false;
 
         if (!metaTypeNameStatementMetaTypeName) {
-          return continuation(success, context);
+          return continuation(success, generalContext, specificContext);
         }
 
         const statementNode = specificStatementNode,  ///
+              context = specificContext,  ///
               statement = statementFromStatementNode(statementNode, context);
 
         return statement.validate(context, (statement, context) => {
+          const specificContext = context;  ///
+
           if (statement !== null) {
             success = true;
           }
 
-          return continuation(success, context);
+          return continuation(success, generalContext, specificContext);
         });
       }
     },
@@ -317,26 +321,28 @@ class CombinatorPass extends ContinuationZipPass {
       generalNodeQuery: metaTypeNodeQuery,
       specificNodeQuery: frameNodeQuery,
       run: (generalMetaTypeNode, specificFrameNode, generalContext, specificContext, continuation) => {
-        const context = specificContext,  ///
-              metaTypeNode = generalMetaTypeNode, ///
+        const metaTypeNode = generalMetaTypeNode, ///
               metaTypeName = metaTypeNode.getMetaTypeName(),
               metaTypeNameFrameMetaTypeName = (metaTypeName === FRAME_META_TYPE_NAME);
 
         let success = false;
 
         if (!metaTypeNameFrameMetaTypeName) {
-          return continuation(success, context);
+          return continuation(success, generalContext, specificContext);
         }
 
         const frameNode = specificFrameNode,  ///
+              context = specificContext,  ///
               frame = frameFromFrameNode(frameNode, context);
 
         return frame.validate(context, (frame, context) => {
+          const specificContext = context; ///
+
           if (frame !== null) {
             success = true;
           }
 
-          return continuation(success, context);
+          return continuation(success, generalContext, specificContext);
         });
       }
     },
@@ -358,14 +364,16 @@ class CombinatorPass extends ContinuationZipPass {
 
         const term = termFromTermNode(termNode, context);
 
+        let success = false;
+
         return term.validateGivenType(type, context, (term, context) => {
-          let success = false;
+          const specificContext = context;  ///
 
           if (term !== null) {
             success = true;
           }
 
-          return continuation(success, context);
+          return continuation(success, generalContext, specificContext);
         });
       }
     }

@@ -195,7 +195,9 @@ export default define(class Constructor extends Element {
             generalContext = constructorContext,  ///
             specifiContext = context; ///
 
-      return unifyTermWithConstructor(term, constructor, generalContext, specifiContext, (termUnifiesWithConstructor, context) => {
+      return unifyTermWithConstructor(term, constructor, generalContext, specifiContext, (termUnifiesWithConstructor, generalContext, specifiContext) => {
+        const context = specifiContext; ///
+
         if (!termUnifiesWithConstructor) {
           const termUnifies = false;
 
