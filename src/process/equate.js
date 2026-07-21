@@ -1,7 +1,7 @@
 "use strict";
 
 import { queryUtilities } from "occam-query";
-import { EquivalencePass } from "occam-languages";
+import { ContinuationZipPass } from "occam-languages";
 
 import { findEquivalenceByTermNodes } from "../utilities/equivalences";
 
@@ -9,7 +9,7 @@ const { nodeQuery } = queryUtilities;
 
 const termNodeQuery = nodeQuery("/term");
 
-class EquationalPass extends EquivalencePass {
+class EquationalPass extends ContinuationZipPass {
   static maps = [
     {
       leftNodeQuery: termNodeQuery,  ///

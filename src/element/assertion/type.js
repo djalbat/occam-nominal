@@ -66,7 +66,7 @@ export default define(class TypeAssertion extends Assertion {
       return exists([
         validateWhenStated,
         validateWhenDerived
-      ], context, (validates) => {
+      ], context, (validates, context) => {
         let typeAssertion = null;
 
         if (validates) {
