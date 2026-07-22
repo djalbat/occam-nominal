@@ -150,7 +150,7 @@ export default class LiminalContext extends Context {
 
       if (soleDerivedSubstitution !== null) {
         const { ReferenceDerivedSubstitution } = elements,
-              context = this,
+              context = this, ///
               referenceDerivedSubstitution = ReferenceDerivedSubstitution.fromAssumptionAndConstraint(assumption, constraint, context),
               referenceDerivedSubstitutionComparesToSsoleDerivedSubstitution = referenceDerivedSubstitution.compareSubstitution(soleDerivedSubstitution);
 

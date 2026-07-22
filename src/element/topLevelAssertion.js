@@ -145,7 +145,7 @@ export default class TopLevelAssertion extends Element {
         context.debug(`...verified the '${topLevelAssertionString}' top level assertion's '${labelString}' label.`);
       }
 
-      return continuation(labelVerifies, context);
+      return continuation(labelVerifies);
     });
   }
 
@@ -210,6 +210,14 @@ export default class TopLevelAssertion extends Element {
   }
 
   verifySuppositions(context, continuation) {
+    const suppositionsLength = this.suppositions.length;
+
+    if (suppositionsLength === 0) {
+      const suppositionsVerify = true;  ///
+
+      return continuation(suppositionsVerify, context);
+    }
+
     const topLevelAssertionString = this.getString();  ///
 
     context.trace(`Verifying the '${topLevelAssertionString}' top level assertion's suppositions...`);

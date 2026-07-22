@@ -58,7 +58,7 @@ export default define(class TypeDeclaration extends Declaration {
       verifyType,
       verifySuperTypes,
       verifyTypePrefix
-    ], context, (verifies, context) => {
+    ], context, (verifies) => {
       if (verifies) {
         const properties = this.getProperties(),
               typePrefix = context.getTypePrefix(),
@@ -79,7 +79,7 @@ export default define(class TypeDeclaration extends Declaration {
         context.debug(`...verified the '${typeDeclarationString}' type declaration.`);
       }
 
-      return continuation(verifies);
+      return continuation(verifies, context);
     });
   });
 

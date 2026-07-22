@@ -1,9 +1,10 @@
 "use strict";
 
 import { arrayUtilities } from "necessary";
-import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
+import { Element, breakPointUtilities } from "occam-languages";
 
 import { define } from "../elements";
+import { exists } from "../utilities/continuation";
 import { instantiate } from "../utilities/context";
 import { instantiateTerm } from "../process/instantiate";
 import { variablesFromTerm } from "../utilities/equivalence";
@@ -12,7 +13,6 @@ import { validateTerms, unifyTermWithProperties } from "../process/validation";
 import { typeFromJSON, typeToTypeJSON, provisionalFromJSON, provisionalToProvisionalJSON } from "../utilities/json";
 
 const { filter } = arrayUtilities,
-      { exists } = continuationUtilities,
       { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Term extends Element {
@@ -197,9 +197,9 @@ export default define(class Term extends Element {
       return continuation(term, context);
     }
 
-    let term = this;
+    let term = this;  ///
 
-    return exists(validateTerms, term, context, (termValidates, context) => {
+    return exists(validateTerms, term, context, (termValidates, term, context) => {
       if (termValidates) {
         context.addTerm(term);
 
@@ -315,7 +315,7 @@ export default define(class Term extends Element {
     debugger
 
     const context = specificContext,  ///
-          generalTerm = this,
+          generalTerm = this, ///
           specificTerm = term,
           generalTermString = generalTerm.getString(),
           specifixTermString = specificTerm.getString();

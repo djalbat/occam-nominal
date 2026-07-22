@@ -3,6 +3,7 @@
 import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
 
 import { define } from "../elements";
+import { exists } from "../utilities/continuation";
 import { baseTypeFromNothing } from "../utilities/type";
 import { instantiateConstructor } from "../process/instantiate";
 import { validateTermAsVariable } from "../process/validation";
@@ -12,7 +13,7 @@ import { validateTermAsConstructor } from "../process/validate";
 import { attempt, serialise, unserialise, instantiate } from "../utilities/context";
 import { typeFromJSON, typeToTypeJSON, hypothesesFromJSON, hypothesesToHypothesesJSON } from "../utilities/json";
 
-const { every, exists } = continuationUtilities,
+const { every } = continuationUtilities,
       { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Constructor extends Element {

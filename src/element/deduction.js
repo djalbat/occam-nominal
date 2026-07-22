@@ -44,7 +44,7 @@ export default define(class Deduction extends Element {
 
       context.debug(`Unable to verify the '${deductionString}' deduction because it is nonsense.`);
 
-      return continuation(verifies);
+      return continuation(verifies, context);
     }
 
     derive((context) => {
@@ -72,7 +72,7 @@ export default define(class Deduction extends Element {
     context.trace(`Validating the '${deductionString}' deduction...`);
 
     attempt((context) => {
-      return this.validateStatement(context, (statementValidates, context) => {
+      return this.validateStatement(context, (statementValidates) => {
         let validates = false;
 
         if (statementValidates) {
@@ -97,7 +97,7 @@ export default define(class Deduction extends Element {
 
     context.trace(`Validating the '${deductionString}' deduction's statement...`);
 
-    return this.statement.validate(context, (statement, context) => {
+    return this.statement.validate(context, (statement) => {
       let statementValidates = false;
 
       if (statement !== null) {

@@ -34,7 +34,7 @@ export default define(class Lemma extends TopLevelAssertion {
             context.debug(`...verified the '${lemmaString}' lemma.`);
       }
 
-      return continuation(verifies);
+      return continuation(verifies, context);
     });
   });
 

@@ -68,7 +68,7 @@ export default class MnemicContext extends Context {
 
     context.getTerms(terms);
 
-    compressTerms(context);
+    compressTerms(terms);
 
     return terms;
   }
@@ -80,7 +80,7 @@ export default class MnemicContext extends Context {
 
     context.getGoals(goals);
 
-    compressGoals(context);
+    compressGoals(goals);
 
     return goals;
   }
@@ -92,7 +92,7 @@ export default class MnemicContext extends Context {
 
     context.getFrames(frames);
 
-    compressFrames(context);
+    compressFrames(frames);
 
     return frames;
   }
@@ -104,7 +104,7 @@ export default class MnemicContext extends Context {
 
     context.getEqualities(equalities);
 
-    compressEqualities(context);
+    compressEqualities(equalities);
 
     return equalities;
   }
@@ -116,7 +116,7 @@ export default class MnemicContext extends Context {
 
     context.getJudgements(judgements);
 
-    compressJudgements(context);
+    compressJudgements(judgements);
 
     return judgements;
   }
@@ -128,7 +128,7 @@ export default class MnemicContext extends Context {
 
     context.getStatements(statements);
 
-    compressStatements(context);
+    compressStatements(statements);
 
     return statements;
   }
@@ -140,7 +140,7 @@ export default class MnemicContext extends Context {
 
     context.getSignatures(signatures);
 
-    compressSignatures(context);
+    compressSignatures(signatures);
 
     return signatures;
   }
@@ -152,7 +152,7 @@ export default class MnemicContext extends Context {
 
     context.getAssertions(assertions);
 
-    compressAssertions(context);
+    compressAssertions(assertions);
 
     return assertions;
   }
@@ -164,7 +164,7 @@ export default class MnemicContext extends Context {
 
     context.getReferences(references);
 
-    compressReferences(context);
+    compressReferences(references);
 
     return references;
   }
@@ -176,7 +176,7 @@ export default class MnemicContext extends Context {
 
     context.getAssumptions(assumptions);
 
-    compressAssumptions(context);
+    compressAssumptions(assumptions);
 
     return assumptions;
   }
@@ -188,7 +188,7 @@ export default class MnemicContext extends Context {
 
     context.getMetavariables(metavariables);
 
-    compressMetavariables(context);
+    compressMetavariables(metavariables);
 
     return metavariables;
   }
@@ -200,7 +200,7 @@ export default class MnemicContext extends Context {
 
     context.getSubstitutions(substitutions);
 
-    compressSubstitutions(context);
+    compressSubstitutions(substitutions);
 
     return substitutions;
   }
@@ -582,8 +582,8 @@ export default class MnemicContext extends Context {
     return referencePresent;
   }
 
-  isMetavariablePresentByMetavariableNode(metavariablenNode) {
-    const metavariablen = this.findMetavariableByMetavariableNode(metavariablenNode),
+  isMetavariablePresentByMetavariableNode(metavariableNode) {
+    const metavariablen = this.findMetavariableByMetavariableNode(metavariableNode),
           metavariablenPresent = (metavariablen !== null);
 
     return metavariablenPresent;

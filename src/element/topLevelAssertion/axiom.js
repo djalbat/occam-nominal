@@ -46,7 +46,7 @@ export default define(class Axiom extends TopLevelAssertion {
           context.debug(`...verified the '${axiomString}' axiom.`);
         }
 
-        return continuation(verifies);
+        return continuation(verifies, context);
       });
     });
   });

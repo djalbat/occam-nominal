@@ -1,8 +1,9 @@
 "use strict";
 
-import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
+import { Element, breakPointUtilities } from "occam-languages";
 
 import { define } from "../elements";
+import { exists } from "../utilities/continuation";
 import { instantiate } from "../utilities/context";
 import { unifyStatement } from "../process/unify";
 import { validateStatements } from "../process/validation";
@@ -10,8 +11,7 @@ import { dischargeStatements } from "../process/discharge";
 import { instantiateStatement } from "../process/instantiate";
 import { substitutionFromStatementNode } from "../utilities/element";
 
-const { exists } = continuationUtilities,
-      { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
+const { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Statement extends Element {
   constructor(context, string, node, breakPoint, substitution) {
@@ -213,14 +213,14 @@ export default define(class Statement extends Element {
       return continuation(statement, context);
     }
 
-    const statement = this;
+    const statement = this; ///
 
-    return exists(validateStatements, statement, context, (statementValidates, context) => {
-      let statement = null;
+    return exists(validateStatements, statement, context, (statementValidates, statement, context) => {
+      if (!statementValidates) {
+        statement = null;
+      }
 
       if (statementValidates) {
-        statement = this;
-
         context.addStatement(statement);
 
         context.debug(`...validated the '${statementString}' statement.`);

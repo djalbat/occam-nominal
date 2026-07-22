@@ -202,7 +202,7 @@ export default define(class Metavariable extends Element {
       validateName,
       validateType,
       validateTerm
-    ], strict, context, (validated, context) => {
+    ], strict, context, (validated) => {
       let metavariable = null;
 
       if (validated) {
@@ -218,7 +218,7 @@ export default define(class Metavariable extends Element {
         context.debug(`...validated the '${metavariableString}' metavariable.`);
       }
 
-      return continuation(metavariable, context);
+      return continuation(metavariable);
     });
   }
 
@@ -249,14 +249,14 @@ export default define(class Metavariable extends Element {
       context.debug(`...validated the '${metavariableString}' metavariable's name.`);
     }
 
-    return continuation(nameValidates, context);
+    return continuation(nameValidates, strict, context);
   }
 
   validateType(strict, context, continuation) {
     if (this.type === null) {
       const typeValidates = true;
 
-      return continuation(typeValidates, context);
+      return continuation(typeValidates, strict, context);
     }
 
     let typeValidates;
@@ -275,14 +275,14 @@ export default define(class Metavariable extends Element {
       context.trace(`...validated  the '${metavariableString}' metavariable's type.`);
     }
 
-    return continuation(typeValidates, context);
+    return continuation(typeValidates, strict, context);
   }
 
   validateTerm(strict, context, continuation) {
     if (this.term === null) {
       const termValidates = true;
 
-      return continuation(termValidates, context);
+      return continuation(termValidates, strict, context);
     }
 
     const metavariableString = this.getString();  ///
@@ -305,9 +305,11 @@ export default define(class Metavariable extends Element {
         let termValidates = false;
 
         if (term !== null) {
-          this.term = term;
-
           termValidates = true;
+        }
+
+        if (termValidates) {
+          this.term = term;
         }
 
         if (termValidates) {
@@ -321,23 +323,25 @@ export default define(class Metavariable extends Element {
     if (strict) {
       const termValidates = false;
 
-      return continuation(termValidates, context);
+      return continuation(termValidates, strict, context);
     }
 
     return this.term.validate(context, (term, context) => {
       let termValidates = false;
 
       if (term !== null) {
-        this.term = term;
-
         termValidates = true;
+      }
+
+      if (termValidates) {
+        this.term = term;
       }
 
       if (termValidates) {
         context.debug(`...validated the '${metavariableString}' metavariable's term.`);
       }
 
-      return continuation(termValidates, context);
+      return continuation(termValidates, strict, context);
     });
   }
 

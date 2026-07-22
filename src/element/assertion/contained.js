@@ -132,9 +132,11 @@ export default define(class ContainedAssertion extends Assertion {
       let termValidates = false;
 
       if (term !== null) {
-        this.term = term; ///
-
         termValidates = true;
+      }
+
+      if (termValidates) {
+        this.term = term;
       }
 
       if (termValidates) {

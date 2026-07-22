@@ -114,7 +114,7 @@ export default define(class Variable extends Element {
 
     this.provisional = provisional;
 
-    const variable = this;
+    const variable = this;  ///
 
     context.debug(`...validated the '${variableString}' variable.`);
 

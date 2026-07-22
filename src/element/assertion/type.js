@@ -1,10 +1,11 @@
 "use strict";
 
-import { breakPointUtilities, continuationUtilities } from "occam-languages";
+import { breakPointUtilities } from "occam-languages";
 
 import Assertion from "../assertion";
 
 import { define } from "../../elements";
+import { exists } from "../../utilities/continuation";
 import { instantiate } from "../../utilities/context";
 import { instantiateTypeAssertion } from "../../process/instantiate";
 import { typeFromJSON, typeToTypeJSON } from "../../utilities/json";
@@ -12,8 +13,7 @@ import { termFromTermAndSubstitutions } from "../../utilities/substitutions";
 import { variableAssignmentFromTypeAssertion } from "../../process/assign";
 import { termFromTypeAssertionNode, typeAssertionFromStatementNode } from "../../utilities/element";
 
-const { exists } = continuationUtilities,
-      { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
+const { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class TypeAssertion extends Assertion {
   constructor(context, string, node, breakPoint, term, type) {
@@ -211,9 +211,11 @@ export default define(class TypeAssertion extends Assertion {
       let validatesWhenDerived = false;
 
       if (term !== null) {
-        this.term = term;
-
         validatesWhenDerived = true;
+      }
+
+      if (validatesWhenDerived) {
+        this.term = term;
       }
 
       if (validatesWhenDerived) {

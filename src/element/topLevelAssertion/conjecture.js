@@ -30,7 +30,7 @@ export default define(class Conjecture extends TopLevelAssertion {
         context.debug(`...verified the '${conjectureString}' conjecture.`);
       }
 
-      return continuation(verifies);
+      return continuation(verifies, context);
     });
   });
 

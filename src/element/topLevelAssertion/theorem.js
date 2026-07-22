@@ -30,7 +30,7 @@ export default define(class Theorem extends TopLevelAssertion {
         context.debug(`...verified the '${theoremString}' theorem.`);
       }
 
-      return continuation(verifies);
+      return continuation(verifies, context);
     });
   });
 

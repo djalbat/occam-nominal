@@ -180,7 +180,7 @@ export default define(class Signature extends Element {
   unifySignature(signature, context) {
     let signatureUnifies;
 
-    const generalSignature = this,
+    const generalSignature = this,  ///
           specificSignature = signature,  ///
           generalSignatureString = generalSignature.getString(),
           specificSignatureString = specificSignature.getString();
