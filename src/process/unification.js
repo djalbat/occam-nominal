@@ -1,8 +1,10 @@
 "use strict";
 
+import { continuationUtilities } from "occam-languages";
+
 import elements from "../elements";
 
-import { reduce } from "../utilities/continuation";
+const { reduce } = continuationUtilities;
 
 function unifyStepWithRule(step, context, continuation) {
   const reference = step.getReference();

@@ -1,10 +1,10 @@
 "use strict";
 
 import { arrayUtilities } from "necessary";
-import { Element, breakPointUtilities } from "occam-languages";
+import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
 
+import { all } from "../utilities/continuation";
 import { enclose } from "../utilities/context";
-import { all, every, extract, forwardsEvery, backwardsEvery } from "../utilities/continuation";
 import { topLevelAssertionStringFromLabelsSignatureSuppositionsAndDeduction } from "../utilities/string";
 import { labelsFromJSON,
          deductionFromJSON,
@@ -18,6 +18,7 @@ import { labelsFromJSON,
          suppositionsToSuppositionsJSON } from "../utilities/json";
 
 const { reverse } = arrayUtilities,
+      { every, extract, forwardsEvery, backwardsEvery } = continuationUtilities,
       { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default class TopLevelAssertion extends Element {

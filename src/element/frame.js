@@ -1,15 +1,16 @@
 "use strict";
 
-import { Element, breakPointUtilities } from "occam-languages";
+import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
 
 import { define } from "../elements";
 import { instantiate } from "../utilities/context";
+import { all, exists } from "../utilities/continuation";
 import { instantiateFrame } from "../process/instantiate";
-import { all, every, exists } from "../utilities/continuation";
 import { FRAME_META_TYPE_NAME } from "../metaTypeNames";
 import { metavariableFromFrameNode } from "../utilities/element";
 
-const { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
+const { every } = continuationUtilities,
+      { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Frame extends Element {
   constructor(context, string, node, breakPoint, assumptions, metavariable) {

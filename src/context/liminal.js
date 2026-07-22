@@ -1,14 +1,15 @@
 "use strict";
 
 import { arrayUtilities } from "necessary";
-import { metavariableNodesFromDerivedSubstitutions } from "../utilities/substitutions";
+import { continuationUtilities } from "occam-languages";
 
 import Context from "../context";
 import elements from "../elements";
 
-import { forEach } from "../utilities/continuation";
+import { metavariableNodesFromDerivedSubstitutions } from "../utilities/substitutions";
 
-const { push, find, first } = arrayUtilities;
+const { forEach } = continuationUtilities,
+      { push, find, first } = arrayUtilities;
 
 export default class LiminalContext extends Context {
   constructor(context, derivedSubstitutions) {

@@ -1,11 +1,14 @@
 "use strict";
 
+import { continuationUtilities } from "occam-languages";
+
 import elements from "../elements";
 
-import { some } from "../utilities/continuation";
 import { choose, descend } from "../utilities/context";
 import { provisionallyStringFromProvisional } from "../utilities/string";
 import { bracketedConstructorFromNothing, bracketedCombinatorFromNothing } from "../utilities/instance";
+
+const { some } = continuationUtilities;
 
 export function validateTermAsVariable(term, context, continuation) {
   const { Variable } = elements,

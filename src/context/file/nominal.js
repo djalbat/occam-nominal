@@ -6,8 +6,8 @@ import { arrayUtilities } from "necessary";
 import NominalLexer from "../../nominal/lexer";
 import NominalParser from "../../nominal/parser";
 
+import { findType} from "../../utilities/type";
 import { verifyFile } from "../../process/verify";
-import {baseTypeFromNothing, findType} from "../../utilities/type";
 import { findMetaTypeByMetaTypeName } from "../../metaTypes";
 import { typesFromJSON,
          rulesFromJSON,
@@ -68,18 +68,6 @@ export default class NominalFileContext extends FileContext {
 
   getParser() {
     return this.parser;
-  }
-
-  getEquivalences() {
-    const equivalences = [];
-
-    return equivalences;
-  }
-
-  getSubproofOrProofAssertions() {
-    const subproofOrProofAssertions = [];
-
-    return subproofOrProofAssertions;
   }
 
   getLabels(includeRelease = true) {
@@ -301,15 +289,16 @@ export default class NominalFileContext extends FileContext {
     return derivedSubstitutions;
   }
 
-  getProperties() {
-    const properties = [],
-          types = this.getTypes();
+  getEquivalences() {
+    const equivalences = [];
 
-    types.forEach((type) => {
-      type.getProperties(properties);
-    });
+    return equivalences;
+  }
 
-    return properties;
+  getSubproofOrProofAssertions() {
+    const subproofOrProofAssertions = [];
+
+    return subproofOrProofAssertions;
   }
 
   addType(type) {
@@ -603,24 +592,6 @@ export default class NominalFileContext extends FileContext {
           }) || null;
 
     return declaredMetavariable;
-  }
-
-  findMetavariableByMetavariableNode(metavariableNode) {
-    const metavariable = null;
-
-    return metavariable;
-  }
-
-  findSubstitutionBySubstitutionNode(substitutionNode) {
-    const substitution = null;
-
-    return substitution;
-  }
-
-  findConstraintByConstraintNode(constraintNode) {
-    const constraint = null;
-
-    return constraint;
   }
 
   findProcedureByProcedureName(procedureName) {

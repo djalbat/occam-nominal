@@ -1,12 +1,11 @@
 "use strict";
 
-import { Element, breakPointUtilities } from "occam-languages";
+import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
 
 import elements from "../elements";
 
 import { all } from "../utilities/continuation";
 import { define } from "../elements";
-import { every, forwardsEvery } from "../utilities/continuation";
 import { reconcile, encapsulate } from "../utilities/context";
 import { schemaStringFromLabelSuppositionsAndDeduction } from "../utilities/string";
 import { labelFromJSON,
@@ -18,7 +17,8 @@ import { labelFromJSON,
          constraintsToConstraintsJSON,
          suppositionsToSuppositionsJSON } from "../utilities/json";
 
-const { breakable, breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
+const { every, forwardsEvery } = continuationUtilities,
+      { breakable, breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Schema extends Element {
   constructor(context, string, node, breakPoint, label, suppositions, deduction, proof, constraints) {

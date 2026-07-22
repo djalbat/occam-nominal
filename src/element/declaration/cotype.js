@@ -1,11 +1,14 @@
 "use strict";
 
+import { continuationUtilities } from "occam-languages";
+
 import Declaration from "../declaration";
 
 import { define } from "../../elements";
-import { every } from "../../utilities/continuation";
 import { anticipate } from "../../utilities/context";
 import { baseTypeFromNothing } from "../../utilities/type";
+
+const { every } = continuationUtilities;
 
 export default define(class CotypeDeclaration extends Declaration {
   constructor(context, string, node, breakPoint, type, superTypes, provisional, propertyDeclarations) {

@@ -190,13 +190,6 @@ export default class Context extends ContextBase {
     return variables;
   }
 
-  getProperties() {
-    const context = this.getContext(),
-          properties = context.getProperties();
-
-    return properties;
-  }
-
   getSteps() {
     const context = this.getContext(),
           steps = context.getSteps();

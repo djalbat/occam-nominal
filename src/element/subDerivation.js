@@ -1,12 +1,12 @@
 "use strict";
 
-import { Element } from "occam-languages";
 import { arrayUtilities } from "necessary";
+import { Element, continuationUtilities } from "occam-languages";
 
-import { every } from "../utilities/continuation";
 import { define } from "../elements";
 
-const { last } = arrayUtilities;
+const { last } = arrayUtilities,
+      { every } = continuationUtilities;
 
 export default define(class SubDerivation extends Element {
   constructor(context, string, node, breakPoint, subproofOrProofAssertions) {
