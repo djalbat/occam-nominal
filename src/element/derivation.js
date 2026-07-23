@@ -35,17 +35,17 @@ export default define(class Derivation extends Element {
   }
 
   verify(context, continuation) {
-    return every(this.subproofOrProofAssertions, context, (subproofOrProofAssertion, continuation) => {
-      subproofOrProofAssertion.verify(context, (subproofOrProofAssertionVerifies) => {
+    return every(this.subproofOrProofAssertions, (subproofOrProofAssertion, context, continuation) => {
+      return subproofOrProofAssertion.verify(context, (subproofOrProofAssertionVerifies) => {
         if (subproofOrProofAssertionVerifies) {
           context.assignAssignments();
 
           context.addSubproofOrProofAssertion(subproofOrProofAssertion);
         }
 
-        return continuation(subproofOrProofAssertionVerifies);
+        return continuation(subproofOrProofAssertionVerifies, context);
       });
-    }, continuation);
+    }, context, continuation);
   }
 
   static name = "Derivation";

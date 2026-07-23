@@ -198,7 +198,7 @@ export default define(class Statement extends Element {
     return comparesToParamter;
   }
 
-  validate(context, continuation) {
+  validate(callback, context, continuation) {
     const statementString = this.getString();  ///
 
     context.trace(`Validating the '${statementString}' statement...`);
@@ -210,12 +210,12 @@ export default define(class Statement extends Element {
 
       context.debug(`...the '${statementString}' statement is already valid.`);
 
-      return continuation(statement, context);
+      return callback(statement, context, continuation);
     }
 
     const statement = this; ///
 
-    return exists(validateStatements, statement, context, (statementValidates, statement, context) => {
+    return exists(validateStatements, statement, callback, context, (statementValidates, statement, callback, context) => {
       if (!statementValidates) {
         statement = null;
       }

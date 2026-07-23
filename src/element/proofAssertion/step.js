@@ -131,9 +131,7 @@ export default define(class Step extends ProofAssertion {
 
       context.debug(`Unable to verify the '${stepString}' step because it is nonsense.`);
 
-      continuation(verifies);
-
-      return;
+      return continuation(verifies);
     }
 
     const qualified = this.isQualified(),

@@ -108,7 +108,7 @@ export default class TopLevelAssertion extends Element {
         verifySuppositions,
         verifyDeduction,
         verifyProof
-      ], context, (verifies, context) => {
+      ], context, (verifies) => {
         if (verifies) {
           context.debug(`...verified the '${topLevelAssertionString}' top level assertion.`);
         }

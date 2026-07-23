@@ -12,12 +12,12 @@ export default define(class BracketedCombinator extends Combinator {
     return bracketedCombinatorNode;
   }
 
-  unifyStatement(statement, context, continuation) {
+  unifyStatement(statement, callback, context, continuation) {
     const statementString = statement.getString();
 
     context.trace(`Unifying the '${statementString}' statement with the bracketed combinator...`);
 
-    return super.unifyStatement(statement, context, (statementUnifies, context) => {
+    return super.unifyStatement(statement, callback, context, (statementUnifies, context) => {
       if (statementUnifies) {
         context.debug(`...unified the '${statementString}' statement with the bracketed combinator.`);
       }

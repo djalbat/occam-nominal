@@ -121,7 +121,7 @@ class ConstructorPass extends ContinuationZipPass {
 
         const term = termFromTermNode(termNode, context);
 
-        term.validateGivenType(type, context, (term, context) => {
+        term.validateGivenType(type, (term, context) => {
           const specificContext = context;  ///
 
           if (term !== null) {
@@ -129,7 +129,7 @@ class ConstructorPass extends ContinuationZipPass {
           }
 
           return continuation(success, generalContext, specificContext);
-        });
+        }, context, continuation);
       }
     }
   ];
@@ -306,7 +306,7 @@ class CombinatorPass extends ContinuationZipPass {
               context = specificContext,  ///
               statement = statementFromStatementNode(statementNode, context);
 
-        return statement.validate(context, (statement, context) => {
+        return statement.validate((statement, context, continuation) => {
           const specificContext = context;  ///
 
           if (statement !== null) {
@@ -314,7 +314,7 @@ class CombinatorPass extends ContinuationZipPass {
           }
 
           return continuation(success, generalContext, specificContext);
-        });
+        }, context, continuation);
       }
     },
     {
@@ -335,7 +335,7 @@ class CombinatorPass extends ContinuationZipPass {
               context = specificContext,  ///
               frame = frameFromFrameNode(frameNode, context);
 
-        return frame.validate(context, (frame, context) => {
+        return frame.validate((frame, context) => {
           const specificContext = context; ///
 
           if (frame !== null) {
@@ -343,7 +343,7 @@ class CombinatorPass extends ContinuationZipPass {
           }
 
           return continuation(success, generalContext, specificContext);
-        });
+        }, context, continuation);
       }
     },
     {
@@ -366,7 +366,7 @@ class CombinatorPass extends ContinuationZipPass {
 
         let success = false;
 
-        return term.validateGivenType(type, context, (term, context) => {
+        return term.validateGivenType(type, (term, context) => {
           const specificContext = context;  ///
 
           if (term !== null) {
@@ -374,7 +374,7 @@ class CombinatorPass extends ContinuationZipPass {
           }
 
           return continuation(success, generalContext, specificContext);
-        });
+        }, context, continuation);
       }
     }
   ];

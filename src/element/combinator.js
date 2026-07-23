@@ -73,7 +73,7 @@ export default define(class Combinator extends Element {
     });
   }
 
-  unifyStatement(statement, context, continuation) {
+  unifyStatement(statement, callback, context, continuation) {
     const statementString = statement.getString(),
           combinatorString = this.getString();  ///
 
@@ -87,17 +87,25 @@ export default define(class Combinator extends Element {
     return unifyStatementWithCombinator(statement, combinator, generalContext, specifiContext, (statementUnifiesWithCombinator, generalContext, specifiContext) => {
       const context = specifiContext; ///
 
-      let statementUnifies = false;
+      if (!statementUnifiesWithCombinator) {
+        statement = null;
 
-      if (statementUnifiesWithCombinator) {
-        statementUnifies = true;
+        return continuation(statement, context);
       }
 
-      if (statementUnifies) {
-        context.debug(`...unified the '${statementString}' statement with the '${combinatorString}' combinator.`);
-      }
+      return callback(statement, context, (statement, context) => {
+        let statementUnifies = false;
 
-      return continuation(statementUnifies, context);
+        if (statement !== null) {
+          statementUnifies = true;
+        }
+
+        if (statementUnifies) {
+          context.debug(`...unified the '${statementString}' statement with the '${combinatorString}' combinator.`);
+        }
+
+        return continuation(statement, context);
+      });
     });
   }
 

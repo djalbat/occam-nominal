@@ -10,14 +10,14 @@ import { bracketedConstructorFromNothing, bracketedCombinatorFromNothing } from 
 
 const { some } = continuationUtilities;
 
-export function validateTermAsVariable(term, context, continuation) {
+export function validateTermAsVariable(term, callback, context, continuation) {
   const { Variable } = elements,
         variable = Variable.fromTerm(term, context);
 
   if (variable === null) {
     const termValidatesAsVariable = false;
 
-    return continuation(termValidatesAsVariable, term, context);
+    return continuation(termValidatesAsVariable, term, callback, context);
   }
 
   const termString = term.getString();
@@ -28,7 +28,7 @@ export function validateTermAsVariable(term, context, continuation) {
     if (variable === null) {
       const termValidatesAsVariable = false;
 
-      return continuation(termValidatesAsVariable, term, context);
+      return continuation(termValidatesAsVariable, term, callback, context);
     }
 
     const type = variable.getType(),
@@ -46,17 +46,17 @@ export function validateTermAsVariable(term, context, continuation) {
 
     const termValidatesAsVariable = true;
 
-    return continuation(termValidatesAsVariable, term, context);
+    return continuation(termValidatesAsVariable, term, callback, context);
   });
 }
 
-function unifyTermWithGenerators(term, context, continuation) {
+function unifyTermWithGenerators(term, callback, context, continuation) {
   const initialContext = context, ///
         generators = context.getGenerators();
 
   return some(generators, (generator, nullContext, continuation) => {
     choose((context) => {
-      return generator.unifyTerm(term, context, continuation);
+      return generator.unifyTerm(term, callback, context, continuation);
     }, initialContext);
   }, null, (termUnifies, context) => {
     let termUnifiesWithGenerators = false;
@@ -69,17 +69,17 @@ function unifyTermWithGenerators(term, context, continuation) {
       context = initialContext; ///
     }
 
-    return continuation(termUnifiesWithGenerators, term, context);
+    return continuation(termUnifiesWithGenerators, term, callback, context);
   });
 }
 
-function unifyTermWithConstructors(term, context, continuation) {
+function unifyTermWithConstructors(term, callback, context, continuation) {
   const initialContext = context, ///
         constructors = context.getConstructors();
 
   return some(constructors, (constructor, nullContext, continuation) => {
     choose((context) => {
-      return constructor.unifyTerm(term, context, continuation);
+      return constructor.unifyTerm(term, callback, context, continuation);
     }, initialContext);
   }, null, (termUnifies, context) => {
     let termUnifiesWithConstructors = false;
@@ -92,32 +92,32 @@ function unifyTermWithConstructors(term, context, continuation) {
       context = initialContext; ///
     }
 
-    return continuation(termUnifiesWithConstructors, term, context);
+    return continuation(termUnifiesWithConstructors, term, callback, context);
   });
 }
 
-function unifyTermWithBracketedConstructor(term, context, continuation) {
+function unifyTermWithBracketedConstructor(term, callback, context, continuation) {
   const bracketedConstructor = bracketedConstructorFromNothing();
 
-  return bracketedConstructor.unifyTerm(term, context, (termUnifies, context) => {
+  return bracketedConstructor.unifyTerm(term, callback, context, (termUnifies, context) => {
     let termUnifiesWithBracketedConstructor = false;
 
     if (termUnifies) {
       termUnifiesWithBracketedConstructor = true;
     }
 
-    return continuation(termUnifiesWithBracketedConstructor, term, context);
+    return continuation(termUnifiesWithBracketedConstructor, term, callback, context);
   });
 }
 
-function validateStatementAsMetavariable(statement, context, continuation) {
+function validateStatementAsMetavariable(statement, callback, context, continuation) {
   const { Metavariable } = elements,
         metavariable = Metavariable.fromStatement(statement, context);
 
   if (metavariable === null) {
     const statementValidatesAsMetavariable = false;
 
-    return continuation(statementValidatesAsMetavariable, statement, context);
+    return continuation(statementValidatesAsMetavariable, statement, callback, context);
   }
 
   const statementString = statement.getString();
@@ -130,7 +130,7 @@ function validateStatementAsMetavariable(statement, context, continuation) {
     if (metavariable === null) {
       const statementValidatesAsMetavariable = false;
 
-      return continuation(statementValidatesAsMetavariable, statement, context);
+      return continuation(statementValidatesAsMetavariable, statement, callback, context);
     }
 
     const substitution = statement.getSubstitution();
@@ -142,7 +142,7 @@ function validateStatementAsMetavariable(statement, context, continuation) {
         context.debug(`...validated the '${statementString}' statement as a metavariable.`);
       }
 
-      return continuation(statementValidatesAsMetavariable, statement, context);
+      return continuation(statementValidatesAsMetavariable, statement, callback, context);
     }
 
     const strict = true;
@@ -158,18 +158,18 @@ function validateStatementAsMetavariable(statement, context, continuation) {
         context.debug(`...validated the '${statementString}' statement as a metavariable.`);
       }
 
-      return continuation(statementValidatesAsMetavariable, statement, context);
+      return continuation(statementValidatesAsMetavariable, statement, callback, context);
     });
   });
 }
 
-function unifyStatementWithCombinators(statement, context, continuation) {
+function unifyStatementWithCombinators(statement, callback, context, continuation) {
   const initialContext = context, ///
         combinators = context.getCombinators();
 
   return some(combinators, (combinator, nullContext, continuation) => {
     descend((context) => {
-      return combinator.unifyStatement(statement, context, continuation);
+      return combinator.unifyStatement(statement, callback, context, continuation);
     }, initialContext);
   }, null, (statementUnifies, context) => {
     let statementUnifiesWithCombinators = false;
@@ -182,39 +182,39 @@ function unifyStatementWithCombinators(statement, context, continuation) {
       context = initialContext; ///
     }
 
-    return continuation(statementUnifiesWithCombinators, statement, context);
+    return continuation(statementUnifiesWithCombinators, statement, callback, context);
   });
 }
 
-function unifyStatementWithBracketedCombinator(statement, context, continuation) {
+function unifyStatementWithBracketedCombinator(statement, callback, context, continuation) {
   const bracketedCombinator = bracketedCombinatorFromNothing();
 
-  return bracketedCombinator.unifyStatement(statement, context, (statementUnifies, context) => {
+  return bracketedCombinator.unifyStatement(statement, callback, context, (statementUnifies, context) => {
     let statementUnifiesWithBracketedCombinator = false;
 
     if (statementUnifies) {
       statementUnifiesWithBracketedCombinator = true;
     }
 
-    return continuation(statementUnifiesWithBracketedCombinator, statement, context);
+    return continuation(statementUnifiesWithBracketedCombinator, statement, callback, context);
   });
 }
 
-function validateStatementAsEquality(statement, context, continuation) {
+function validateStatementAsEquality(statement, callback, context, continuation) {
   const { Equality } = elements,
         equality = Equality.fromStatement(statement, context);
 
   if (equality === null) {
     const statementValidatesAsEquality = false;
 
-    return continuation(statementValidatesAsEquality, statement, context);
+    return continuation(statementValidatesAsEquality, statement, callback, context);
   }
 
   const statementString = statement.getString();
 
   context.trace(`Validating the '${statementString}' statement as an equality...`);
 
-  return equality.validate(context, (equality, context) => {
+  return equality.validate((equality, context, continuation) => {
     let statementValidatesAsEquality = false;
 
     if (equality !== null) {
@@ -225,25 +225,25 @@ function validateStatementAsEquality(statement, context, continuation) {
       context.debug(`...validated the '${statementString}' statement as an equality.`);
     }
 
-    return continuation(statementValidatesAsEquality, statement, context);
-  });
+    return continuation(statementValidatesAsEquality, statement, callback, context);
+  }, context, continuation);
 }
 
-function validateStatementAsJudgement(statement, context, continuation) {
+function validateStatementAsJudgement(statement, callback, context, continuation) {
   const { Judgement } = elements,
         judgement = Judgement.fromStatement(statement, context);
 
   if (judgement === null) {
     const validatesStatementAsJudgement = false;
 
-    return continuation(validatesStatementAsJudgement, statement, context);
+    return continuation(validatesStatementAsJudgement, statement, callback, context);
   }
 
   const statementString = statement.getString();
 
   context.trace(`Validating the '${statementString}' statement as a judgement...`);
 
-  return judgement.validate(context, (judgement, context) => {
+  return judgement.validate((judgement, context, continuation) => {
     let validatesStatementAsJudgement = false;
 
     if (judgement !== null) {
@@ -254,53 +254,58 @@ function validateStatementAsJudgement(statement, context, continuation) {
       context.debug(`...validated the '${statementString}' statement as a judgement.`);
     }
 
-    return continuation(validatesStatementAsJudgement, statement, context);
-  });
+    return continuation(validatesStatementAsJudgement, statement, callback, context);
+  }, context, continuation);
 }
 
-function validateStatementAsTypeAssertion(statement, context, continuation) {
+function validateStatementAsTypeAssertion(statement, callback, context, continuation) {
   const { TypeAssertion } = elements,
         typeAssertion = TypeAssertion.fromStatement(statement, context);
 
   if (typeAssertion === null) {
     const validatesStatementAsTypeAssertion = false;
 
-    return continuation(validatesStatementAsTypeAssertion, statement, context);
+    return continuation(validatesStatementAsTypeAssertion, statement, callback, context);
   }
 
   const statementString = statement.getString();
 
   context.trace(`Validating the '${statementString}' statement as a type assertion...`);
 
-  return typeAssertion.validate(context, (typeAssertion, context) => {let validatesStatementAsTypeAssertion = false;
+  return typeAssertion.validate((typeAssertion, context, continuation) => {
+    let validatesStatementAsTypeAssertion = false;
 
     if (typeAssertion !== null) {
       validatesStatementAsTypeAssertion = true;
+    }
+
+    if (!validatesStatementAsTypeAssertion) {
+      return continuation(validatesStatementAsTypeAssertion, statement, callback, context);
     }
 
     if (validatesStatementAsTypeAssertion) {
       context.debug(`...validated the '${statementString}' statement as a type assertion.`);
     }
 
-    return continuation(validatesStatementAsTypeAssertion, statement, context);
-  });
+    return callback(statement, context, continuation);
+  }, context, continuation);
 }
 
-function validateStatementAsDefinedAssertion(statement, context, continuation) {
+function validateStatementAsDefinedAssertion(statement, callback, context, continuation) {
   const { DefinedAssertion } = elements,
         definedAssertion = DefinedAssertion.fromStatement(statement, context);
 
   if (definedAssertion === null) {
     const validatesStatementAsDefinedAssertion = false;
 
-    return continuation(validatesStatementAsDefinedAssertion, statement, context);
+    return continuation(validatesStatementAsDefinedAssertion, statement, callback, context);
   }
 
   const statementString = statement.getString();
 
   context.trace(`Validating the '${statementString}' statement as a defined assertion...`);
 
-  return definedAssertion.validate(context, (definedAssertion, context) => {
+  return definedAssertion.validate((definedAssertion, context, continuation) => {
     let validatesStatementAsDefinedAssertion = false;
 
     if (definedAssertion !== null) {
@@ -311,25 +316,25 @@ function validateStatementAsDefinedAssertion(statement, context, continuation) {
       context.debug(`...validated the '${statementString}' statement as a defined assertion.`);
     }
 
-    return continuation(validatesStatementAsDefinedAssertion, statement, context);
-  });
+    return continuation(validatesStatementAsDefinedAssertion, statement, callback, context);
+  }, context, continuation);
 }
 
-function validateStatementAsPropertyAssertion(statement, context, continuation) {
+function validateStatementAsPropertyAssertion(statement, callback, context, continuation) {
   const { PropertyAssertion } = elements,
         propertyAssertion = PropertyAssertion.fromStatement(statement, context);
 
   if (propertyAssertion === null) {
     const statementValidatesAsPropertyAssertion = false;
 
-    return continuation(statementValidatesAsPropertyAssertion, statement, context);
+    return continuation(statementValidatesAsPropertyAssertion, statement, callback, context);
   }
 
   const statementString = statement.getString();
 
   context.trace(`Validating the '${statementString}' statement as a property assertion...`);
 
-  return propertyAssertion.validate(context, (propertyAssertion, context) => {
+  return propertyAssertion.validate((propertyAssertion, context, continuation) => {
     let statementValidatesAsPropertyAssertion = false;
 
     if (propertyAssertion !== null) {
@@ -340,25 +345,25 @@ function validateStatementAsPropertyAssertion(statement, context, continuation) 
       context.debug(`...validated the '${statementString}' statement as a property assertion.`);
     }
 
-    return continuation(statementValidatesAsPropertyAssertion, statement, context);
-  });
+    return continuation(statementValidatesAsPropertyAssertion, statement, callback, context);
+  }, context, continuation);
 }
 
-function validateStatementAsSubproofAssertion(statement, context, continuation) {
+function validateStatementAsSubproofAssertion(statement, callback, context, continuation) {
   const { SubproofAssertion } = elements,
         subproofAssertion = SubproofAssertion.fromStatement(statement, context);
 
   if (subproofAssertion === null) {
     let statementValidatesAsSubproofAssertion = false;
 
-    return continuation(statementValidatesAsSubproofAssertion, statement, context);
+    return continuation(statementValidatesAsSubproofAssertion, statement, callback, context);
   }
 
   const statementString = statement.getString();
 
   context.trace(`Validating the '${statementString}' statement as a subproof assertion...`);
 
-  return subproofAssertion.validate(context, (subproofAssertion, context) => {
+  return subproofAssertion.validate((subproofAssertion, context, continuation) => {
     let statementValidatesAsSubproofAssertion = false;
 
     if (subproofAssertion !== null) {
@@ -369,25 +374,25 @@ function validateStatementAsSubproofAssertion(statement, context, continuation) 
       context.debug(`...validated the '${statementString}' statement as a subproof assertion.`);
     }
 
-    return continuation(statementValidatesAsSubproofAssertion, statement, context);
-  });
+    return continuation(statementValidatesAsSubproofAssertion, statement, callback, context);
+  }, context, continuation);
 }
 
-function validateStatementAsContainedAssertion(statement, context, continuation) {
+function validateStatementAsContainedAssertion(statement, callback, context, continuation) {
   const { ContainedAssertion } = elements,
         containedAssertion = ContainedAssertion.fromStatement(statement, context);
 
   if (containedAssertion === null) {
     const validatesStatementAsContainedAssertion = false;
 
-    return continuation(validatesStatementAsContainedAssertion, statement, context);
+    return continuation(validatesStatementAsContainedAssertion, statement, callback, context);
   }
 
   const statementString = statement.getString();
 
   context.trace(`Validating the '${statementString}' statement as a contained assertion...`);
 
-  return containedAssertion.validate(context, (containedAssertion, context) => {
+  return containedAssertion.validate((containedAssertion, context, continuation) => {
     let validatesStatementAsContainedAssertion = false;
 
     if (containedAssertion !== null) {
@@ -398,25 +403,25 @@ function validateStatementAsContainedAssertion(statement, context, continuation)
       context.debug(`...validated the '${statementString}' statement as a contained assertion.`);
     }
 
-    return continuation(validatesStatementAsContainedAssertion, statement, context);
-  });
+    return continuation(validatesStatementAsContainedAssertion, statement, callback, context);
+  }, context, continuation);
 }
 
-function validateStatementAsSignatureAssertion(statement, context, continuation) {
+function validateStatementAsSignatureAssertion(statement, callback, context, continuation) {
   const { SignatureAssertion } = elements,
         signatureAssertion = SignatureAssertion.fromStatement(statement, context);
 
   if (signatureAssertion === null) {
     const validatesAStatementsSignatureAssertion = false;
 
-    return continuation(validatesAStatementsSignatureAssertion, statement, context);
+    return continuation(validatesAStatementsSignatureAssertion, statement, callback, context);
   }
 
   const statementString = statement.getString();
 
   context.trace(`Validating the '${statementString}' statement as a signature assertion...`);
 
-  return signatureAssertion.validate(context, (signatureAssertion, context) => {
+  return signatureAssertion.validate((signatureAssertion, context, continuation) => {
     let validatesAStatementsSignatureAssertion = false;
 
     if (signatureAssertion !== null) {
@@ -428,10 +433,10 @@ function validateStatementAsSignatureAssertion(statement, context, continuation)
     }
 
     continuation(validatesAStatementsSignatureAssertion, context);
-  });
+  }, context, continuation);
 }
 
-export function unifyTermWithProperties(term, context, continuation) {
+export function unifyTermWithProperties(term, callback, context, continuation) {
   let termUnifiesWithProperties;
 
   const properties = context.getProperties();
@@ -440,7 +445,7 @@ export function unifyTermWithProperties(term, context, continuation) {
     let termUnifiesWithProperty = false;
 
     choose((context) => {
-      const termUnifies = property.unifyTerm(term, context, continuation);
+      const termUnifies = property.unifyTerm(term, callback, context, continuation);
 
       if (termUnifies) {
         termUnifiesWithProperty = true;

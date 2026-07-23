@@ -97,7 +97,7 @@ export default define(class Deduction extends Element {
 
     context.trace(`Validating the '${deductionString}' deduction's statement...`);
 
-    return this.statement.validate(context, (statement) => {
+    return this.statement.validate((statement) => {
       let statementValidates = false;
 
       if (statement !== null) {
@@ -109,7 +109,7 @@ export default define(class Deduction extends Element {
       }
 
       return continuation(statementValidates, context);
-    });
+    }, context, continuation);
   }
 
   unifyStep(step, context, continuation) {

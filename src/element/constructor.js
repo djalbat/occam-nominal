@@ -177,7 +177,7 @@ export default define(class Constructor extends Element {
     });
   }
 
-  unifyTerm(term, context, continuation) {
+  unifyTerm(term, callback, context, continuation) {
     const termString = term.getString(),
           includeType = true,
           constructorString = this.getString(includeType);  ///
@@ -186,9 +186,9 @@ export default define(class Constructor extends Element {
 
     return this.dischargeHypothesesGivenTerm(term, context, (hypothesesDiscardedGivenTerm, context) => {
       if (!hypothesesDiscardedGivenTerm) {
-        const termUnifies = false;
+        term = null;
 
-        return continuation(termUnifies, context);
+        return continuation(term, context);
       }
 
       const constructor = this, ///
@@ -200,26 +200,30 @@ export default define(class Constructor extends Element {
         const context = specifiContext; ///
 
         if (!termUnifiesWithConstructor) {
-          const termUnifies = false;
+          term = null;
 
-          return continuation(termUnifies, context);
+          return continuation(term, context);
         }
-
-        let termUnifies;
 
         const provisional = this.type.isProvisional();
 
-        term.setType(this.type);
-
         term.setProvisional(provisional);
 
-        termUnifies = true;
+        term.setType(this.type);
 
-        if (termUnifies) {
-          context.debug(`...unified the '${termString}' term with the '${constructorString}' constructor.`);
-        }
+        return callback(term, context, (term, context) => {
+          let termUnifies = false;
 
-        return continuation(termUnifies, context);
+          if (term !== null) {
+            termUnifies = true;
+          }
+
+          if (termUnifies) {
+            context.debug(`...unified the '${termString}' term with the '${constructorString}' constructor.`);
+          }
+
+          return continuation(term, context);
+        });
       });
     });
   }

@@ -13,12 +13,14 @@ export default define(class BracketedConstructor extends Constructor {
     return bracketedConstructorNode;
   }
 
-  unifyTerm(term, context, continuation) {
+  unifyTerm(term, callback, context, continuation) {
     const termString = term.getString();
 
     context.trace(`Unifying the '${termString}' term with the bracketed constructor...`);
 
-    return super.unifyTerm(term, context, (termUnifies) => {
+    debugger
+
+    return super.unifyTerm(term, callback, context, (termUnifies) => {
       if (!termUnifies) {
         return continuation(termUnifies);
       }

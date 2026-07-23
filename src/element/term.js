@@ -182,7 +182,7 @@ export default define(class Term extends Element {
     return validTerm;
   }
 
-  validate(context, continuation) {
+  validate(callback, context, continuation) {
     const termString = this.getString();  ///
 
     context.trace(`Validating the '${termString}' term...`);
@@ -194,34 +194,36 @@ export default define(class Term extends Element {
 
       context.debug(`...the '${termString}' term is already valid.`);
 
-      return continuation(term, context);
+      return callback(term, context, continuation);
     }
 
     let term = this;  ///
 
-    return exists(validateTerms, term, context, (termValidates, term, context) => {
-      if (termValidates) {
+    return exists(validateTerms, term, callback, context, (termValidates, term, callback, context) => {
+      if (term !== null) {
         context.addTerm(term);
 
         context.debug(`...validated the '${termString}' term.`);
-      } else {
-        term = null;
       }
 
       return continuation(term, context);
     });
   }
 
-  validateGivenType(strict, type, context, continuation) {
+  validateGivenType(strict, type, callback, context, continuation) {
     if (continuation === undefined) {
       continuation = context; ///
 
-      context = type; ///
+      context = callback; ///
+
+      callback = type;  ///
 
       type = strict;  ///
 
       strict = true;
     }
+
+    debugger
 
     const typeString = type.getString(),
           termString = this.getString();  ///
