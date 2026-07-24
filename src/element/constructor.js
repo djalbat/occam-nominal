@@ -177,7 +177,7 @@ export default define(class Constructor extends Element {
     });
   }
 
-  unifyTerm(term, callback, context, continuation) {
+  unifyTerm(term, context, continuation) {
     const termString = term.getString(),
           includeType = true,
           constructorString = this.getString(includeType);  ///
@@ -197,6 +197,8 @@ export default define(class Constructor extends Element {
             specifiContext = context; ///
 
       return unifyTermWithConstructor(term, constructor, generalContext, specifiContext, (termUnifiesWithConstructor, generalContext, specifiContext) => {
+        let termUnifies;
+
         const context = specifiContext; ///
 
         if (!termUnifiesWithConstructor) {
@@ -211,19 +213,13 @@ export default define(class Constructor extends Element {
 
         term.setType(this.type);
 
-        return callback(term, context, (term, context) => {
-          let termUnifies = false;
+        termUnifies = continuation(term, context);
 
-          if (term !== null) {
-            termUnifies = true;
-          }
+        if (termUnifies) {
+          context.debug(`...unified the '${termString}' term with the '${constructorString}' constructor.`);
+        }
 
-          if (termUnifies) {
-            context.debug(`...unified the '${termString}' term with the '${constructorString}' constructor.`);
-          }
-
-          return continuation(term, context);
-        });
+        return termUnifies;
       });
     });
   }

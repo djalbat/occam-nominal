@@ -306,7 +306,7 @@ class CombinatorPass extends ContinuationZipPass {
               context = specificContext,  ///
               statement = statementFromStatementNode(statementNode, context);
 
-        return statement.validate((statement, context, continuation) => {
+        return statement.validate(context, (statement, context) => {
           const specificContext = context;  ///
 
           if (statement !== null) {
@@ -314,7 +314,7 @@ class CombinatorPass extends ContinuationZipPass {
           }
 
           return continuation(success, generalContext, specificContext);
-        }, context, continuation);
+        });
       }
     },
     {

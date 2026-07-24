@@ -38,7 +38,7 @@ export default define(class TypeAssertion extends Assertion {
     return typeAssertionNode;
   }
 
-  validate(callback, context, continuation) {
+  validate(context, continuation) {
     const typeAssertionString = this.getString();  ///
 
     context.trace(`Validating the '${typeAssertionString}' type assertion...`);
@@ -50,14 +50,14 @@ export default define(class TypeAssertion extends Assertion {
 
       context.debug(`...the '${typeAssertionString}' type assertion is already valid.`);
 
-      return callback(typeAssertion, context, continuation);
+      return continuation(typeAssertion, context);
     }
 
     return this.validateType(context, (typeValidates, context) => {
       if (!typeValidates) {
         const typeAssertion = null;
 
-        return callback(typeAssertion, context, continuation);
+        return continuation(typeAssertion, context);
       }
 
       const validateWhenStated = this.validateWhenStated.bind(this),
@@ -66,7 +66,7 @@ export default define(class TypeAssertion extends Assertion {
       return exists([
         validateWhenStated,
         validateWhenDerived
-      ], callback, context, (validates, context) => {
+      ], context, (validates, context) => {
         let typeAssertion = null;
 
         if (validates) {
@@ -144,20 +144,20 @@ export default define(class TypeAssertion extends Assertion {
     return continuation(typeValidates, context);
   }
 
-  validateWhenStated(callback, context, continuation) {
+  validateWhenStated(context, continuation) {
     const stated = context.isStated();
 
     if (!stated) {
       const validatesWhenStated = false;
 
-      return continuation(validatesWhenStated, callback, context);
+      return continuation(validatesWhenStated, context);
     }
 
     const typeAssertionString = this.getString(); ///
 
     context.trace(`Validating the '${typeAssertionString}' stated type assertion...`);
 
-    return this.term.validate((term, context, continuation) => {
+    return this.term.validate(context, (term, context) => {
       let validatesWhenStated = false;
 
       const termType = term.getType(),
@@ -176,29 +176,25 @@ export default define(class TypeAssertion extends Assertion {
         }
       }
 
-      if (!validatesWhenStated) {
-        return continuation(validatesWhenStated, callback, context);
+      if (validatesWhenStated) {
+        this.term = term;
       }
-
-      this.term = term;
-
-      const typeAssertion = this; ///
 
       if (validatesWhenStated) {
         context.debug(`...validated the '${typeAssertionString}' stated type assertion.`);
       }
 
-      return callback(typeAssertion, context, continuation);
-    }, context, continuation);
+      return continuation(validatesWhenStated, context);
+    });
   }
 
-  validateWhenDerived(callback, context, continuation) {
+  validateWhenDerived(context, continuation) {
     const stated = context.isStated();
 
     if (stated) {
       const validatesWhenDerived = false;
 
-      return continuation(validatesWhenDerived, context, callback);
+      return continuation(validatesWhenDerived, context);
     }
 
     const typeAssertionString = this.getString(); ///

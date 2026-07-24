@@ -182,7 +182,7 @@ export default define(class Term extends Element {
     return validTerm;
   }
 
-  validate(callback, context, continuation) {
+  validate(context, continuation) {
     const termString = this.getString();  ///
 
     context.trace(`Validating the '${termString}' term...`);
@@ -194,12 +194,12 @@ export default define(class Term extends Element {
 
       context.debug(`...the '${termString}' term is already valid.`);
 
-      return callback(term, context, continuation);
+      return continuation(term, context);
     }
 
     let term = this;  ///
 
-    return exists(validateTerms, term, callback, context, (termValidates, term, callback, context) => {
+    return exists(validateTerms, term, context, (termValidates, term, context) => {
       if (term !== null) {
         context.addTerm(term);
 
