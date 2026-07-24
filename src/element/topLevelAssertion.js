@@ -97,7 +97,7 @@ export default class TopLevelAssertion extends Element {
 
     context.trace(`Verifying the '${topLevelAssertionString}' top level assertion...`);
 
-    enclose((context) => {
+    return enclose((context) => {
       const verifyProof = this.verifyProof.bind(this),
             verifyLabels = this.verifyLabels.bind(this),
             verifyDeduction = this.verifyDeduction.bind(this),

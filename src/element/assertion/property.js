@@ -194,26 +194,26 @@ export default define(class PropertyAssertion extends Assertion {
   static name = "PropertyAssertion";
 
   static fromJSON(json, context) {
-    let propertyAssertion = null;
-
     const { name } = json;
 
-    if (this.name === name) {
-      instantiate((context) => {
-        const { string } = json,
-              propertyAssertionNode = instantiatePropertyAssertion(string, context),
-              node = propertyAssertionNode,  ///
-              breakPoint = breakPointFromJSON(json),
-              subjectTerm = subjectTermFromPropertyAssertionNode(propertyAssertionNode, context),
-              propertyTerm = propertyTermFromPropertyAssertionNode(propertyAssertionNode, context);
-
-        context = null;
-
-        propertyAssertion = new PropertyAssertion(context, string, node, breakPoint, subjectTerm, propertyTerm);
-      }, context);
+    if (this.name !== name) {
+      return;
     }
 
-    return propertyAssertion;
+    return instantiate((context) => {
+      const { string } = json,
+            propertyAssertionNode = instantiatePropertyAssertion(string, context),
+            node = propertyAssertionNode,  ///
+            breakPoint = breakPointFromJSON(json),
+            subjectTerm = subjectTermFromPropertyAssertionNode(propertyAssertionNode, context),
+            propertyTerm = propertyTermFromPropertyAssertionNode(propertyAssertionNode, context);
+
+      context = null;
+
+      const propertyAssertion = new PropertyAssertion(context, string, node, breakPoint, subjectTerm, propertyTerm);
+
+      return propertyAssertion;
+    }, context);
   }
 
   static fromStatement(statement, context) {

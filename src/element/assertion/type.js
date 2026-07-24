@@ -288,26 +288,26 @@ export default define(class TypeAssertion extends Assertion {
   static name = "TypeAssertion";
 
   static fromJSON(json, context) {
-    let typeAssertion = null;
-
     const { name } = json;
 
-    if (this.name === name) {
-      instantiate((context) => {
-        const { string } = json,
-              typeAssertionNode = instantiateTypeAssertion(string, context),
-              node = typeAssertionNode, ///
-              breakPoint = breakPointFromJSON(json),
-              term = termFromTypeAssertionNode(typeAssertionNode, context),
-              type = typeFromJSON(json, context);
-
-        context = null;
-
-        typeAssertion = new TypeAssertion(context, string, node, breakPoint, term, type);
-      }, context);
+    if (this.name !== name) {
+      return;
     }
 
-    return typeAssertion;
+    return instantiate((context) => {
+      const { string } = json,
+            typeAssertionNode = instantiateTypeAssertion(string, context),
+            node = typeAssertionNode, ///
+            breakPoint = breakPointFromJSON(json),
+            term = termFromTypeAssertionNode(typeAssertionNode, context),
+            type = typeFromJSON(json, context);
+
+      context = null;
+
+      const typeAssertion = new TypeAssertion(context, string, node, breakPoint, term, type);
+
+      return typeAssertion;
+    }, context);
   }
 
   static fromStatement(statement, context) {

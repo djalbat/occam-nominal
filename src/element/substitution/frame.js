@@ -101,8 +101,8 @@ export default define(class FrameSubstitution extends Substitution {
     const generalContext = this.getGeneralContext(),
           specificContext = this.getSpecificContext();
 
-    (strict ? pass : waive)((context) => {
-      attempts((generalContext, specificContext) => {
+    return (strict ? pass : waive)((context) => {
+      return attempts((generalContext, specificContext) => {
         const validateTargetFrame = this.validateTargetFrame.bind(this),
               validateReplacementFrame = this.validateReplacementFrame.bind(this);
 
@@ -151,7 +151,7 @@ export default define(class FrameSubstitution extends Substitution {
       return continuation(targetFrameValidates);
     }
 
-    elide((context) => {
+    return elide((context) => {
       return this.targetFrame.validate(context, (targetFrame) => {
         let targetFrameValidates = false;
 
@@ -174,7 +174,7 @@ export default define(class FrameSubstitution extends Substitution {
 
     context.trace(`Validating the '${frameSubstitutionString}' frame substitution's replacement frame...`);
 
-    elide((context) => {
+    return elide((context) => {
       return this.replacementFrame.validate(context, (replacementFrame) => {
         let replacementFrameValidates = false;
 
@@ -199,7 +199,7 @@ export default define(class FrameSubstitution extends Substitution {
 
     context.trace(`Unifying the '${specificSubstitutionString}' substitution with the '${generalSubstitutionString}' substitution...`);
 
-    reconcile((context) => {
+    return reconcile((context) => {
       const unifyTargetFrame = this.unifyTargetFrame.bind(this),
             unifyReplacementFrame = this.unifyReplacementFrame.bind(this);
 
@@ -237,7 +237,7 @@ export default define(class FrameSubstitution extends Substitution {
           generalFrame = generalSubstitutionTargetFrame, ///
           specificFrame = specificSubstitutionTargetFrame; ///
 
-    reconcile((specificContext) => {
+    return reconcile((specificContext) => {
       const frameNode = generalFrame.getFrameNode(),
             metavariable = metavariableFromFrameNode(frameNode, generalContext);
 
@@ -284,7 +284,7 @@ export default define(class FrameSubstitution extends Substitution {
           generalFrame = generalSubstitutionReplacementFrame, ///
           specificFrame = specificSubstitutionReplacementFrame; ///
 
-    reconcile((specificContext) => {
+    return reconcile((specificContext) => {
       const frameNode = generalFrame.getNode(),
             metavariable = metavariableFromFrameNode(frameNode, generalContext);
 
@@ -317,30 +317,29 @@ export default define(class FrameSubstitution extends Substitution {
   static name = "FrameSubstitution";
 
   static fromJSON(json, context) {
-    let frameSubstitutionn = null;
-
     const { name } = json;
 
-    if (this.name === name) {
-      instantiate((context) => {
-        unserialises((json, generalContext, specificContext) => {
-          const { string } = json,
-                frameSubstitutionNode = instantiateFrameSubstitution(string, context),
-                node = frameSubstitutionNode, ///
-                contexts = [
-                  generalContext,
-                  specificContext
-                ],
-                breakPoint = breakPointFromJSON(json),
-                targetFrame = targetFrameFromFrameSubstitutionNode(frameSubstitutionNode, generalContext),
-                replacementFrame = replacementFrameFromFrameSubstitutionNode(frameSubstitutionNode, specificContext);
-
-          frameSubstitutionn = new FrameSubstitution(contexts, string, node, breakPoint, targetFrame, replacementFrame);
-        }, json, context);
-      }, context);
+    if (this.name !== name) {
+      return;
     }
 
-    return frameSubstitutionn;
+    return instantiate((context) => {
+      return unserialises((json, generalContext, specificContext) => {
+        const { string } = json,
+              frameSubstitutionNode = instantiateFrameSubstitution(string, context),
+              node = frameSubstitutionNode, ///
+              contexts = [
+                generalContext,
+                specificContext
+              ],
+              breakPoint = breakPointFromJSON(json),
+              targetFrame = targetFrameFromFrameSubstitutionNode(frameSubstitutionNode, generalContext),
+              replacementFrame = replacementFrameFromFrameSubstitutionNode(frameSubstitutionNode, specificContext),
+              frameSubstitutionn = new FrameSubstitution(contexts, string, node, breakPoint, targetFrame, replacementFrame);
+
+        return frameSubstitutionn;
+      }, json, context);
+    }, context);
   }
 
   static fromStatementNode(statementNode, context) {
@@ -349,12 +348,13 @@ export default define(class FrameSubstitution extends Substitution {
     const frameSubstitutionNode = statementNode.getFrameSubstitutionNode();
 
     if (frameSubstitutionNode !== null) {
-      ablate((context) => {
-        descend((context) => {
+      frameSubstitution = ablate((context) => {
+        return descend((context) => {
           const generalContext = context, ///
-                specificContext = context;  ///
+                specificContext = context,
+                frameSubstitution = frameSubstitutionFromFrameSubstitutionNode(frameSubstitutionNode, generalContext, specificContext);
 
-          frameSubstitution = frameSubstitutionFromFrameSubstitutionNode(frameSubstitutionNode, generalContext, specificContext);
+          return frameSubstitution;
         }, context);
       }, context);
     }
@@ -363,22 +363,19 @@ export default define(class FrameSubstitution extends Substitution {
   }
 
   static fromFrameAndMetavariable(frame, metavariable, generalContext, specificContext) {
-    let frameSubstitution
-
-    ablates((generalContext, specificContext) => {
-      instantiate((specificContext) => {
-        manifest((generalContext) => {
+    return ablates((generalContext, specificContext) => {
+      return instantiate((specificContext) => {
+        return manifest((generalContext) => {
           const frameSubstitutionString = frameSubstitutionStringFromFrameAndMetavariable(frame, metavariable),
                 string = frameSubstitutionString,  ///
                 context = specificContext,  ///
-                frameSubstitutionNode = instantiateFrameSubstitution(string, context);
+                frameSubstitutionNode = instantiateFrameSubstitution(string, context),
+                frameSubstitution = frameSubstitutionFromFrameSubstitutionNode(frameSubstitutionNode, generalContext, specificContext);
 
-          frameSubstitution = frameSubstitutionFromFrameSubstitutionNode(frameSubstitutionNode, generalContext, specificContext);
+          return frameSubstitution;
         }, generalContext, specificContext);
       }, specificContext);
     }, generalContext, specificContext);
-
-    return frameSubstitution;
   }
 });
 

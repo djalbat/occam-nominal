@@ -79,7 +79,7 @@ export default define(class Constraint extends Element {
     } else {
       context = this.getContext();
 
-      attempt((context) => {
+      return attempt((context) => {
         const validateStatement = this.validateStatement.bind(this),
               validateReference = this.validateReference.bind(this);
 
@@ -155,8 +155,8 @@ export default define(class Constraint extends Element {
 
     context.trace(`Validating the '${constraintString}' constraint's statement...`);
 
-    descend((context) => {
-      this.statement.validate(context, (statement) => {
+    return descend((context) => {
+      return this.statement.validate(context, (statement) => {
         let statementValidates = false;
 
         if (statement !== null) {
@@ -272,7 +272,7 @@ export default define(class Constraint extends Element {
     const constraintContext = this.getContext(), ///
           generalContext = constraintContext; ///
 
-    reconcile((context) => {
+    return reconcile((context) => {
       const reference = assumption.getReference(),
             specificContext = context;  ///
 
@@ -337,22 +337,19 @@ export default define(class Constraint extends Element {
   static name = "Constraint";
 
   static fromJSON(json, context) {
-    let constraint;
-
-    instantiate((context) => {
-      unserialise((json, context) => {
+    return instantiate((context) => {
+      return unserialise((json, context) => {
         const { string } = json,
               constraintNode = instantiateConstraint(string, context),
               node = constraintNode,  ///
               breakPoint = breakPointFromJSON(json),
               reference = referenceFromConstraintNode(constraintNode, context),
-              statement = statementFromConstraintNode(constraintNode, context);
+              statement = statementFromConstraintNode(constraintNode, context),
+              constraint = new Constraint(context, string, node, breakPoint, reference, statement);
 
-        constraint = new Constraint(context, string, node, breakPoint, reference, statement);
+        return constraint;
       }, json, context);
     }, context);
-
-    return constraint;
   }
 
   static fromStep(step, context) {
@@ -366,13 +363,14 @@ export default define(class Constraint extends Element {
 
     const reference = step.getReference();
 
-    ablate((context) => {
-      instantiate((context) => {
+    constraint = ablate((context) => {
+      return instantiate((context) => {
         const constraintString = constraintStringFromReferenceAndStatement(reference, statement),
               string = constraintString,  ///
-              constraintNode = instantiateConstraint(string, context);
+              constraintNode = instantiateConstraint(string, context),
+              constraint = constraintFromConstraintNode(constraintNode, context);
 
-        constraint = constraintFromConstraintNode(constraintNode, context);
+        return constraint;
       }, context);
     }, context);
 

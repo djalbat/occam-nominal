@@ -55,7 +55,7 @@ function unifyTermWithGenerators(term, context, continuation) {
         generators = context.getGenerators();
 
   return some(generators, (generator, nullContext, continuation) => {
-    choose((context) => {
+    return choose((context) => {
       return generator.unifyTerm(term, context, continuation);
     }, initialContext);
   }, null, (termUnifies, context) => {
@@ -78,7 +78,7 @@ function unifyTermWithConstructors(term, context, continuation) {
         constructors = context.getConstructors();
 
   return some(constructors, (constructor, nullContext, continuation) => {
-    choose((context) => {
+    return choose((context) => {
       return constructor.unifyTerm(term, context, continuation);
     }, initialContext);
   }, null, (termUnifies, context) => {
@@ -168,7 +168,7 @@ function unifyStatementWithCombinators(statement, context, continuation) {
         combinators = context.getCombinators();
 
   return some(combinators, (combinator, nullContext, continuation) => {
-    descend((context) => {
+    return descend((context) => {
       return combinator.unifyStatement(statement, context, continuation);
     }, initialContext);
   }, null, (statementUnifies, context) => {
@@ -444,7 +444,7 @@ export function unifyTermWithProperties(term, context, continuation) {
   return some(properties, (property) => {
     let termUnifiesWithProperty = false;
 
-    choose((context) => {
+    return choose((context) => {
       const termUnifies = property.unifyTerm(term, context, continuation);
 
       if (termUnifies) {

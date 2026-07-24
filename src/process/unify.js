@@ -270,7 +270,7 @@ class MetaLevelPass extends ContinuationZipPassBase {
 
         const specificSignature = context.findSignatureBySignatureNode(specificSignatureNode);
 
-        reconcile((context) => {
+        return reconcile((context) => {
           return generalSignature.unifySignature(specificSignature, context, (signatureUnifies) => {
             let success = false;
 

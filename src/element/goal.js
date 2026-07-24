@@ -244,7 +244,7 @@ export default define(class Goal extends Element {
 
     context.trace(`Unifying the '${labelString}' label with the '${goalString}' goal...`);
 
-    reconcile((context) => {
+    return reconcile((context) => {
       return this.reference.unifyLabel(label, context, (labelUnifies) => {
         if (labelUnifies) {
           context.debug(`...unified the '${labelString}' label with the '${goalString}' goal's reference.`);
@@ -263,7 +263,7 @@ export default define(class Goal extends Element {
 
     const generalContext = context;  ///
 
-    reconcile((context) => {
+    return reconcile((context) => {
       const label = schema.getLabel();
 
       return this.reference.unifyLabel(label, context, (labelUnifies) => {
@@ -326,7 +326,7 @@ export default define(class Goal extends Element {
 
     specificContext = deductionContext; ///
 
-    reconcile((specificContext) => {
+    return reconcile((specificContext) => {
       return this.statement.unifyStatement(statement, generalContext, specificContext, (statementUnifies) => {
         let deductionUnifies = false;
 

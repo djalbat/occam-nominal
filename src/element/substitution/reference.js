@@ -120,8 +120,8 @@ export default define(class ReferenceSubstitution extends Substitution {
     const generalContext = this.getGeneralContext(),
           specificContext = this.getSpecificContext();
 
-    (strict ? pass : waive)((context) => {
-      attempts((generalContext, specificContext) => {
+    return (strict ? pass : waive)((context) => {
+      return attempts((generalContext, specificContext) => {
         const validateTargetReference = this.validateTargetReference.bind(this),
               validateReplacementReference = this.validateReplacementReference.bind(this);
 
@@ -159,7 +159,7 @@ export default define(class ReferenceSubstitution extends Substitution {
 
     context.trace(`Validating the '${referenceSubstitutionString}' reference substitution's target reference...`);
 
-    elide((context) => {
+    return elide((context) => {
       return this.targetReference.validate(context, (targetReference) => {
         let targetReferenceValidates = false;
 
@@ -182,7 +182,7 @@ export default define(class ReferenceSubstitution extends Substitution {
 
     context.trace(`Validating the '${referenceSubstitutionString}' reference substitution's replacement reference...`);
 
-    elide((context) => {
+    return elide((context) => {
       return this.replacementReference.validate(context, (replacementReference) => {
         let replacementReferenceValidates = false;
 
@@ -202,70 +202,63 @@ export default define(class ReferenceSubstitution extends Substitution {
   static name = "ReferenceSubstitution";
 
   static fromJSON(json, context) {
-    let referenceSubstitutionn = null;
-
     const { name } = json;
 
-    if (this.name === name) {
-      instantiate((context) => {
-        unserialises((json, generalContext, specificContext) => {
-          const { string } = json,
-                referenceSubstitutionNode = instantiateReferenceSubstitution(string, context),
-                node = referenceSubstitutionNode, ///
-                contexts = [
-                  generalContext,
-                  specificContext
-                ],
-                breakPoint = breakPointFromJSON(json),
-                targetReference = targetReferenceFromReferenceSubstitutionNode(referenceSubstitutionNode, generalContext),
-                replacementReference = replacementReferenceFromReferenceSubstitutionNode(referenceSubstitutionNode, specificContext);
-
-          referenceSubstitutionn = new ReferenceSubstitution(contexts, string, node, breakPoint, targetReference, replacementReference);
-        }, json, context);
-      }, context);
+    if (this.name !== name) {
+      return;
     }
 
-    return referenceSubstitutionn;
+    return instantiate((context) => {
+      return unserialises((json, generalContext, specificContext) => {
+        const { string } = json,
+              referenceSubstitutionNode = instantiateReferenceSubstitution(string, context),
+              node = referenceSubstitutionNode, ///
+              contexts = [
+                generalContext,
+                specificContext
+              ],
+              breakPoint = breakPointFromJSON(json),
+              targetReference = targetReferenceFromReferenceSubstitutionNode(referenceSubstitutionNode, generalContext),
+              replacementReference = replacementReferenceFromReferenceSubstitutionNode(referenceSubstitutionNode, specificContext),
+              referenceSubstitutionn = new ReferenceSubstitution(contexts, string, node, breakPoint, targetReference, replacementReference);
+
+        return referenceSubstitutionn;
+      }, json, context);
+    }, context);
   }
 
   static fromAssumptionAndConstraint(assumption, constraint, generalContext, specificContext) {
-    let referenceSubstitution;
-
-    ablates((generalContext, specificContext) => {
-      instantiate((specificContext) => {
-        manifest((generalContext) => {
+    return ablates((generalContext, specificContext) => {
+      return instantiate((specificContext) => {
+        return manifest((generalContext) => {
           const metavariable = assumption.getMetavariable(),
                 reference = constraint.getReference(),
                 referenceSubstitutionString = referenceSubstitutionStringFromReferenceAndMetavariable(reference, metavariable),
                 string = referenceSubstitutionString,  ///
                 context = specificContext,  ///
-                referenceSubstitutionNode = instantiateReferenceSubstitution(string, context);
+                referenceSubstitutionNode = instantiateReferenceSubstitution(string, context),
+                referenceSubstitution = referenceSubstitutionFromReferenceSubstitutionNode(referenceSubstitutionNode, generalContext, specificContext);
 
-          referenceSubstitution = referenceSubstitutionFromReferenceSubstitutionNode(referenceSubstitutionNode, generalContext, specificContext);
+          return referenceSubstitution;
         }, generalContext, specificContext);
       }, specificContext);
     }, generalContext, specificContext);
-
-    return referenceSubstitution;
   }
 
   static fromReferenceAndMetavariable(reference, metavariable, generalContext, specificContext) {
-    let referenceSubstitution;
-
-    ablates((generalContext, specificContext) => {
-      instantiate((specificContext) => {
-        manifest((generalContext) => {
+    return ablates((generalContext, specificContext) => {
+      return instantiate((specificContext) => {
+        return manifest((generalContext) => {
           const referenceSubstitutionString = referenceSubstitutionStringFromReferenceAndMetavariable(reference, metavariable),
                 string = referenceSubstitutionString,  ///
                 context = specificContext,  ///
-                referenceSubstitutionNode = instantiateReferenceSubstitution(string, context);
+                referenceSubstitutionNode = instantiateReferenceSubstitution(string, context),
+                referenceSubstitution = referenceSubstitutionFromReferenceSubstitutionNode(referenceSubstitutionNode, generalContext, specificContext);
 
-          referenceSubstitution = referenceSubstitutionFromReferenceSubstitutionNode(referenceSubstitutionNode, generalContext, specificContext);
+          return referenceSubstitution;
         }, generalContext, specificContext);
       }, specificContext);
     }, generalContext, specificContext);
-
-    return referenceSubstitution;
   }
 });
 

@@ -169,21 +169,18 @@ export default define(class Property extends Element {
   static name = "Property";
 
   static fromJSON(json, context) {
-    let property;
-
-    instantiate((context) => {
-      unserialise((json, context) => {
+    return instantiate((context) => {
+      return unserialise((json, context) => {
         const { string } = json,
               propertyNode = instantiateProperty(string, context),
               node = propertyNode, ///
               breakPoint = breakPointFromJSON(json),
               term = termFromPropertyNode(propertyNode, context),
-              type = typeFromJSON(json, context);
+              type = typeFromJSON(json, context),
+              property = new Property(context, string, node, breakPoint, term, type);
 
-        property = new Property(context, string, node, breakPoint, term, type);
+        return property;
       }, json, context);
     }, context);
-
-    return property;
   }
 });

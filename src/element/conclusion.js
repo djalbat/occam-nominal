@@ -47,8 +47,8 @@ export default define(class Conclusion extends Element {
       return continuation(verifies);
     }
 
-    derive((context) => {
-      elide((context) => {
+    return derive((context) => {
+      return elide((context) => {
         return this.validate(context, (validates) => {
           let verifies = false;
 
@@ -71,7 +71,7 @@ export default define(class Conclusion extends Element {
 
     context.trace(`Validating the '${conclusionString}' conclusion...`);
 
-    attempt((context) => {
+    return attempt((context) => {
       return this.validateStatement(context, (statementValidates) => {
         let validates = false;
 
@@ -123,7 +123,7 @@ export default define(class Conclusion extends Element {
           generalContext = conclusionContext, ///
           specificContext = stepContext;  ///
 
-    reconcile((specificContext) => {
+    return reconcile((specificContext) => {
       const statement = step.getStatement();
 
       return this.statement.unifyStatement(statement, generalContext, specificContext, (statementUnifies) => {
@@ -171,21 +171,18 @@ export default define(class Conclusion extends Element {
   static name = "Conclusion";
 
   static fromJSON(json, context) {
-    let conclusion;
-
-    instantiate((context) => {
-      unserialise((json, context) => {
+    return instantiate((context) => {
+      return unserialise((json, context) => {
         const { string } = json,
               conclusionNode = instantiateConclusion(string, context),
               node = conclusionNode,  ///
               breakPoint = breakPointFromJSON(json),
-              statement = statementFromConclusionNode(conclusionNode, context);
+              statement = statementFromConclusionNode(conclusionNode, context),
+              conclusion = new Conclusion(context, string, node, breakPoint, statement);
 
-        conclusion = new Conclusion(context, string, node, breakPoint, statement);
+        return conclusion;
       }, json, context);
     }, context);
-
-    return conclusion;
   }
 });
 

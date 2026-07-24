@@ -82,7 +82,7 @@ export default define(class Constructor extends Element {
 
     context.trace(`Verifying the '${constructorString}' constructor...`);
 
-    attempt((context) => {
+    return attempt((context) => {
       this.validateTerm(context, (termValidates, context) => {
         if (termValidates) {
           verifies = true;
@@ -292,22 +292,19 @@ export default define(class Constructor extends Element {
   static name = "Constructor";
 
   static fromJSON(json, context) {
-    let constructor;
-
-    instantiate((context) => {
-      unserialise((json, context) => {
+    return instantiate((context) => {
+      return unserialise((json, context) => {
         const { string } = json,
               constructorNode = instantiateConstructor(string, context),
               node = constructorNode, ///
               breakPoint = breakPointFromJSON(json),
               term = termFromConstructorNode(constructorNode, context),
               type = typeFromJSON(json, context),
-              hypotheses = hypothesesFromJSON(json, context);
+              hypotheses = hypothesesFromJSON(json, context),
+              constructor = new Constructor(context, string, node, breakPoint, term, type, hypotheses);
 
-        constructor = new Constructor(context, string, node, breakPoint, term, type, hypotheses);
+        return constructor;
       }, json, context);
     }, context);
-
-    return constructor;
   }
 });

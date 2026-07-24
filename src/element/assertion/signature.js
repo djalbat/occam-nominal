@@ -151,7 +151,7 @@ export default define(class SignatureAssertion extends Assertion {
 
     context.trace(`Unifying the '${signatureAssertionString}' signature assertion's signature...`);
 
-    reconcile((context) => {
+    return reconcile((context) => {
       const axiom = context.findAxiomByReference(this.reference);
 
       signatureUnifies = axiom.unifySignature(this.signature, context);
@@ -204,26 +204,26 @@ export default define(class SignatureAssertion extends Assertion {
   static name = "SignatureAssertion";
 
   static fromJSON(json, context) {
-    let signatureAssertion = null;
-
     const { name } = json;
 
-    if (this.name === name) {
-      instantiate((context) => {
-        const { string } = json,
-              definedAssertionNode = instantiateSignatureAssertion(string, context),
-              node = definedAssertionNode,  ///
-              breakPoint = breakPointFromJSON(json),
-              signature = signatureFromSignatureAssertionNode(definedAssertionNode, context),
-              reference = referenceFromSignatureAssertionNode(definedAssertionNode, context);
-
-        context = null;
-
-        signatureAssertion = new SignatureAssertion(context, string, node, breakPoint, signature, reference);
-      }, context);
+    if (this.name !== name) {
+      return;
     }
 
-    return signatureAssertion;
+    return instantiate((context) => {
+      const { string } = json,
+            definedAssertionNode = instantiateSignatureAssertion(string, context),
+            node = definedAssertionNode,  ///
+            breakPoint = breakPointFromJSON(json),
+            signature = signatureFromSignatureAssertionNode(definedAssertionNode, context),
+            reference = referenceFromSignatureAssertionNode(definedAssertionNode, context);
+
+      context = null;
+
+      const signatureAssertion = new SignatureAssertion(context, string, node, breakPoint, signature, reference);
+
+      return signatureAssertion;
+    }, context);
   }
 
   static fromStep(step, context) {

@@ -116,7 +116,9 @@ export default define(class Axiom extends TopLevelAssertion {
           generalContext = generalDeductionContext, ///
           specificContext = specificDeductionContext; ///
 
-    reconcile((specificContext) => {
+    debugger
+
+    return reconcile((specificContext) => {
       let statement;
 
       statement = specificDeduction.getStatement();
@@ -161,7 +163,9 @@ export default define(class Axiom extends TopLevelAssertion {
           generalContext = generalSuppositionContext, ///
           specificContext = specificSuppositionContext; ///
 
-    reconcile((specificContext) => {
+    debugger
+
+    return reconcile((specificContext) => {
       let statement;
 
       statement = specificSupposition.getStatement();

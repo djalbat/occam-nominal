@@ -87,8 +87,8 @@ export default define(class Label extends Element {
 
     context.trace(`Validating the '${labelString}' label...`);
 
-    attempt((context) => {
-      this.validateMetavariable(context, (metavariableValidates) => {
+    return attempt((context) => {
+      return this.validateMetavariable(context, (metavariableValidates) => {
         let validates = false;
 
         if (metavariableValidates) {
@@ -139,7 +139,7 @@ export default define(class Label extends Element {
           generalContext = labelContext, ///
           specificContext = referenceContext;  ///
 
-    reconcile((specificContext) => {
+    return reconcile((specificContext) => {
       const metavariable = reference.getMetavariable();
 
       return this.unifyMetavariable(metavariable, generalContext, specificContext, (metavariableUnifies) => {
@@ -207,21 +207,18 @@ export default define(class Label extends Element {
   static name = "Label";
 
   static fromJSON(json, context) {
-    let label;
-
-    instantiate((context) => {
-      unserialise((json, context) => {
+    return instantiate((context) => {
+      return unserialise((json, context) => {
         const { string } = json,
               labelNode = instantiateLabel(string, context),
               node = labelNode, ///
               breakPoint = breakPointFromJSON(json),
-              metavariable = metavariableFromLabelNode(labelNode, context);
+              metavariable = metavariableFromLabelNode(labelNode, context),
+              label = new Label(context, string, node, breakPoint, metavariable);
 
-        label = new Label(context, string, node, breakPoint, metavariable);
+        return label;
       }, json, context);
     }, context);
-
-    return label;
   }
 
   static fromLabelString(labelString, context) {

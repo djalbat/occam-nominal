@@ -42,7 +42,7 @@ export default define(class Hypothesis extends Element {
     context.trace(`Verifying the '${hypothesisString}' hypothesis...`);
 
     if ((this.statement !== null) || (this.procedureCall !== null)) {
-      declare((context) => {
+      return declare((context) => {
         const validates = this.validate(context);
 
         if (validates) {
@@ -244,21 +244,18 @@ export default define(class Hypothesis extends Element {
   static name = "Hypothesis";
 
   static fromJSON(json, context) {
-    let hypothesis;
-
-    instantiate((context) => {
-      unserialise((json, context) => {
+    return instantiate((context) => {
+      return unserialise((json, context) => {
         const { string } = json,
               hypothesisNode = instantiateHypothesis(string, context),
               node = hypothesisNode,  ///
               breakPoint = breakPointFromJSON(json),
               statement = statementFromHypothesisNode(hypothesisNode, context),
-              procedureCall = procedureCallFromHypothesisNode(hypothesisNode, context);
+              procedureCall = procedureCallFromHypothesisNode(hypothesisNode, context),
+              hypothesis = new Hypothesis(context, string, node, breakPoint, statement, procedureCall);
 
-        hypothesis = new Hypothesis(context, string, node, breakPoint, statement, procedureCall);
+        return hypothesis;
       }, json, context);
     }, context);
-
-    return hypothesis;
   }
 });

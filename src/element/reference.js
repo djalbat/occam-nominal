@@ -103,7 +103,7 @@ export default define(class Reference extends Element {
 
     context = this.getContext();
 
-    attempt((context) => {
+    return attempt((context) => {
       return this.validateMetavariable(context, (metavariableValidates) => {
         let reference = null;
 
@@ -184,7 +184,7 @@ export default define(class Reference extends Element {
           generalContext = this.getContext(), ///
           specificContext = labelContext;  ///
 
-    reconcile((specificContext) => {
+    return reconcile((specificContext) => {
       const metavariable = label.getMetavariable();
 
       return this.unifyMetavariable(metavariable, generalContext, specificContext, (metavariableUnifies) => {
@@ -252,21 +252,18 @@ export default define(class Reference extends Element {
   static name = "Reference";
 
   static fromJSON(json, context) {
-    let reference;
-
-    instantiate((context) => {
-      unserialise((json, context) => {
+    return instantiate((context) => {
+      return unserialise((json, context) => {
         const { string } = json,
               referenceNode = instantiateReference(string, context),
               node = referenceNode,  ///
               breakPoint = breakPointFromJSON(json),
-              metavariable = metavariableFromReferenceNode(referenceNode, context);
+              metavariable = metavariableFromReferenceNode(referenceNode, context),
+              reference = new Reference(context, string, node, breakPoint, metavariable);
 
-        reference = new Reference(context, string, node, breakPoint, metavariable);
+        return reference;
       }, json, context);
     }, context);
-
-    return reference;
   }
 
   static fromReferenceString(referenceString, context) {

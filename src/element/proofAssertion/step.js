@@ -137,7 +137,7 @@ export default define(class Step extends ProofAssertion {
     const qualified = this.isQualified(),
           stated = qualified; ///
 
-    (stated ? declare : derive)((context) => {
+    return (stated ? declare : derive)((context) => {
       const unify = this.unify.bind(this),
             validate = this.validate.bind(this);
 
@@ -159,7 +159,7 @@ export default define(class Step extends ProofAssertion {
 
     context.trace(`Validating the '${stepString}' step...`);
 
-    attempt((context) => {
+    return attempt((context) => {
       const validateStatement = this.validateStatement.bind(this),
             validateReference = this.validateReference.bind(this),
             validateSignatureAssertion = this.validateSignatureAssertion.bind(this);
@@ -274,7 +274,7 @@ export default define(class Step extends ProofAssertion {
     const step = this;  ///
 
     return some(unifySteps, (unifyStep, continuation) => {
-      reconcile((context) => {
+      return reconcile((context) => {
         return unifyStep(step, context, continuation);
       }, context);
     }, (unifies) => {

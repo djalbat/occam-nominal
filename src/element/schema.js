@@ -77,7 +77,7 @@ export default define(class Schema extends Element {
 
     context.trace(`Verifying the '${schemaString}' schema...`);
 
-    encapsulate((context) => {
+    return encapsulate((context) => {
       const verifyLabel = this.verifyLabel.bind(this),
             verifyProof = this.verifyProof.bind(this),
             verifyDeduction = this.verifyDeduction.bind(this),
@@ -193,7 +193,7 @@ export default define(class Schema extends Element {
 
     context.trace(`Unifying the '${judgementString}' judgement with the '${schemaString}' schema...`);
 
-    reconcile((context) => {
+    return reconcile((context) => {
       const reference = judgement.getReference();
 
       return this.unifyReference(reference, context, (referenceUnifies) => {

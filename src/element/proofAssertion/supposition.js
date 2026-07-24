@@ -78,7 +78,7 @@ export default define(class Supposition extends ProofAssertion {
       return continuation(verifies);
     }
 
-    declare((context) => {
+    return declare((context) => {
       return this.validate(context, (validates) => {
         let verifies = false;
 
@@ -100,7 +100,7 @@ export default define(class Supposition extends ProofAssertion {
 
     context.trace(`Validatting the '${suppositionString}' supposition...`);
 
-    attempt((context) => {
+    return attempt((context) => {
       const validateStatement = this.validateStatement.bind(this),
             validateProcedureCall = this.validateProcedureCall.bind(this);
 
@@ -176,7 +176,7 @@ export default define(class Supposition extends ProofAssertion {
 
     context.trace(`Unifying the '${suppositionString}' supposition independently...`);
 
-    reconcile((context) => {
+    return reconcile((context) => {
       const statement = this.getStatement(),
             procedureCall = this.getProcedureCall();
 
@@ -236,7 +236,7 @@ export default define(class Supposition extends ProofAssertion {
           generalContext = suppositionContext, ///
           specificContext = context; ///
 
-    reconcile((context) => {
+    return reconcile((context) => {
       return subproofAssertion.unifySubproof(subproof, generalContext, specificContext, (subproofUnifies) => {
         if (subproofUnifies) {
           context.commit();
@@ -262,7 +262,7 @@ export default define(class Supposition extends ProofAssertion {
           generalContext = suppositionContext, ///
           specificContext = proofAssertionContext;  ///
 
-    reconcile((specificContext) => {
+    return reconcile((specificContext) => {
       const statement = proofAssertion.getStatement();
 
       return this.unifyStatement(statement, generalContext, specificContext, (statementUnifies) => {
@@ -324,22 +324,19 @@ export default define(class Supposition extends ProofAssertion {
   static name = "Supposition";
 
   static fromJSON(json, context) {
-    let supposition;
-
-    instantiate((context) => {
-      unserialise((json, context) => {
+    return instantiate((context) => {
+      return unserialise((json, context) => {
         const { string } = json,
               suppositionNode = instantiateSupposition(string, context),
               node = suppositionNode,  ///
               breakPoint = breakPointFromJSON(json),
               statement = statementFromSuppositionNode(suppositionNode, context),
-              procedureCall = procedureCallFromSuppositionNode(suppositionNode, context);
+              procedureCall = procedureCallFromSuppositionNode(suppositionNode, context),
+              supposition = new Supposition(context, string, node, breakPoint, statement, procedureCall);
 
-        supposition = new Supposition(context, string, node, breakPoint, statement, procedureCall);
+        return supposition;
       }, json, context);
     }, context);
-
-    return supposition;
   }
 });
 

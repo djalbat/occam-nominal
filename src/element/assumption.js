@@ -244,7 +244,7 @@ export default define(class Assumption extends Element {
 
     context.trace(`Unifying the '${labelString}' label with the '${assumptionString}' assumption's reference...`);
 
-    reconcile((context) => {
+    return reconcile((context) => {
       return this.reference.unifyLabel(label, context, (labelUnifies) => {
         if (labelUnifies) {
           context.debug(`...unified the '${labelString}' label with the '${assumptionString}' assumption's reference.`);
@@ -263,7 +263,7 @@ export default define(class Assumption extends Element {
 
     const generalContext = context;  ///
 
-    reconcile((context) => {
+    return reconcile((context) => {
       const label = schema.getLabel();
 
       return this.reference.unifyLabel(label, context, (labelUnifies) => {
@@ -329,7 +329,7 @@ export default define(class Assumption extends Element {
 
     specificContext = deductionContext; ///
 
-    reconcile((specificContext) => {
+    return reconcile((specificContext) => {
       this.statement.unifyStatement(statement, generalContext, specificContext, (statementUnifies) => {
         let deductionUnifies = false;
 

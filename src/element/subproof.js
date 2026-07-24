@@ -90,7 +90,7 @@ export default define(class Subproof extends Element {
   }
 
   verify(context, continuation) {
-    enclose((context) => {
+    return enclose((context) => {
       const verifySuppositions = this.verifySuppositions.bind(this),
             verifySubDerivation = this.verifySubDerivation.bind(this);
 

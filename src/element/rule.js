@@ -62,7 +62,7 @@ export default define(class Rule extends Element {
 
     context.trace(`Verifying the '${ruleString}' rule...`);
 
-    enclose((context) => {
+    return enclose((context) => {
       const verifyProof = this.verifyProof.bind(this),
             verifyLabels = this.verifyLabels.bind(this),
             verifyPremises = this.verifyPremises.bind(this),

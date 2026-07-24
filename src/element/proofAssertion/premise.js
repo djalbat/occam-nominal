@@ -78,7 +78,7 @@ export default define(class Premise extends ProofAssertion {
       return continuation(verifies);
     }
 
-    declare((context) => {
+    return declare((context) => {
       return this.validate(context, (validates) => {
         let verifies = false;
 
@@ -100,7 +100,7 @@ export default define(class Premise extends ProofAssertion {
 
     context.trace(`Validatting the '${premiseString}' premise...`);
 
-    attempt((context) => {
+    return attempt((context) => {
       const validateStatement = this.validateStatement.bind(this),
             validateProcedureCall = this.validateProcedureCall.bind(this);
 
@@ -176,7 +176,7 @@ export default define(class Premise extends ProofAssertion {
 
     context.trace(`Unifying the '${premiseString}' premise independently...`);
 
-    reconcile((context) => {
+    return reconcile((context) => {
       const statement = this.getStatement(),
             procedureCall = this.getProcedureCall();
 
@@ -236,7 +236,7 @@ export default define(class Premise extends ProofAssertion {
           generalContext = premiseContext, ///
           specificContext = context; ///
 
-    reconcile((context) => {
+    return reconcile((context) => {
       return subproofAssertion.unifySubproof(subproof, generalContext, specificContext, (subproofUnifies) => {
         if (subproofUnifies) {
           context.commit();
@@ -262,7 +262,7 @@ export default define(class Premise extends ProofAssertion {
           generalContext = premiseContext, ///
           specificContext = proofAssertionContext;  ///
 
-    reconcile((specificContext) => {
+    return reconcile((specificContext) => {
       const statement = proofAssertion.getStatement();
 
       return this.unifyStatement(statement, generalContext, specificContext, (statementUnifies) => {
@@ -324,22 +324,19 @@ export default define(class Premise extends ProofAssertion {
   static name = "Premise";
 
   static fromJSON(json, context) {
-    let premise;
-
-    instantiate((context) => {
-      unserialise((json, context) => {
+    return instantiate((context) => {
+      return unserialise((json, context) => {
         const { string } = json,
               premiseNode = instantiatePremise(string, context),
               node = premiseNode,  ///
               breakPoint = breakPointFromJSON(json),
               statement = statementFromPremiseNode(premiseNode, context),
-              procedureCall = procedureCallFromPremiseNode(premiseNode, context);
+              procedureCall = procedureCallFromPremiseNode(premiseNode, context),
+              premise = new Premise(context, string, node, breakPoint, statement, procedureCall);
 
-        premise = new Premise(context, string, node, breakPoint, statement, procedureCall);
+        return premise;
       }, json, context);
     }, context);
-
-    return premise;
   }
 });
 

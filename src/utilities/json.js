@@ -374,12 +374,12 @@ export function assertionsFromJSON(json, context) {
 
   assertions = assertionsJSON.map((assertionJSON) => {
     const json = assertionJSON,  ///
-          assertion = TypeAssertion.fromJSON(json, context) ||
-                       DefinedAssertion.fromJSON(json, context) ||
-                       PropertyAssertion.fromJSON(json, context) ||
-                       SubproofAssertion.fromJSON(json, context) ||
-                       SignatureAssertion.fromJSON(json, context) ||
-                       ContainedAssertion.fromJSON(json, context);
+          assertion = TypeAssertion.fromJSON(json, context)
+                   || DefinedAssertion.fromJSON(json, context)
+                   || PropertyAssertion.fromJSON(json, context)
+                   || SubproofAssertion.fromJSON(json, context)
+                   || SignatureAssertion.fromJSON(json, context)
+                   || ContainedAssertion.fromJSON(json, context);
 
     return assertion;
   });
@@ -690,10 +690,10 @@ export function mnemicContextToMnemicContextJSON(mnemicContext) {
 
 export function substitutionFromSubstitutionJSON(json, context) {
   const { TermSubstitution, FrameSubstitution, StatementSubstitution, ReferenceSubstitution } = elements,
-        substitution = TermSubstitution.fromJSON(json, context) ||
-                        FrameSubstitution.fromJSON(json, context) ||
-                        StatementSubstitution.fromJSON(json, context) ||
-                        ReferenceSubstitution.fromJSON(json, context);
+        substitution = TermSubstitution.fromJSON(json, context)
+                    || FrameSubstitution.fromJSON(json, context)
+                    || StatementSubstitution.fromJSON(json, context)
+                    || ReferenceSubstitution.fromJSON(json, context);
 
   return substitution;
 }

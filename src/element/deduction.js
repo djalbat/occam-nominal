@@ -47,8 +47,8 @@ export default define(class Deduction extends Element {
       return continuation(verifies, context);
     }
 
-    derive((context) => {
-      elide((context) => {
+    return derive((context) => {
+      return elide((context) => {
         return this.validate(context, (validates) => {
           let verifies = false;
 
@@ -71,7 +71,7 @@ export default define(class Deduction extends Element {
 
     context.trace(`Validating the '${deductionString}' deduction...`);
 
-    attempt((context) => {
+    return attempt((context) => {
       return this.validateStatement(context, (statementValidates) => {
         let validates = false;
 
@@ -97,7 +97,7 @@ export default define(class Deduction extends Element {
 
     context.trace(`Validating the '${deductionString}' deduction's statement...`);
 
-    return this.statement.validate(context, (statement) => {
+    const statementValidates = this.statement.validate(context, (statement) => {
       let statementValidates = false;
 
       if (statement !== null) {
@@ -108,8 +108,10 @@ export default define(class Deduction extends Element {
         context.trace(`...validated the '${deductionString}' deduction's statement.`);
       }
 
-      return continuation(statementValidates, context);
+      return statementValidates;
     });
+
+    return continuation(statementValidates, context);
   }
 
   unifyStep(step, context, continuation) {
@@ -123,7 +125,7 @@ export default define(class Deduction extends Element {
           generalContext = deductionContext, ///
           specificContext = stepContext;  ///
 
-    reconcile((specificContext) => {
+    return reconcile((specificContext) => {
       const statement = step.getStatement();
 
       return this.statement.unifyStatement(statement, generalContext, specificContext, (statementUnifies) => {
@@ -187,21 +189,18 @@ export default define(class Deduction extends Element {
   static name = "Deduction";
 
   static fromJSON(json, context) {
-    let deduction;
-
-    instantiate((context) => {
-      unserialise((json, context) => {
+    return instantiate((context) => {
+      return unserialise((json, context) => {
         const { string } = json,
               deductionNode = instantiateDeduction(string, context),
               node = deductionNode,  ///
               breakPoint = breakPointFromJSON(json),
-              statement = statementFromDeductionNode(deductionNode, context);
+              statement = statementFromDeductionNode(deductionNode, context),
+              deduction = new Deduction(context, string, node, breakPoint, statement);
 
-        deduction = new Deduction(context, string, node, breakPoint, statement);
+        return deduction;
       }, json, context);
     }, context);
-
-    return deduction;
   }
 });
 

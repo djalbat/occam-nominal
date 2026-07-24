@@ -196,8 +196,10 @@ export default define(class Signature extends Element {
           generalContext = generalSignatureContext, ///
           specificContext = specificSignatureContext;  ///
 
-    reconcile((specificContext) => {
-      signatureUnifies = match(generalTerms, specificTerms, (generalTerm, specificTerm) => {
+    debugger
+
+    signatureUnifies = reconcile((specificContext) => {
+      match(generalTerms, specificTerms, (generalTerm, specificTerm) => {
         let termUnifies;
 
         termUnifies = generalTerm.unifyTerm(specificTerm, generalContext, specificContext);
@@ -246,36 +248,30 @@ export default define(class Signature extends Element {
   static name = "Signature";
 
   static fromJSON(json, context) {
-    let signature;
-
-    instantiate((context) => {
-      unserialise((json, context) => {
+    return instantiate((context) => {
+      return unserialise((json, context) => {
         const { string } = json,
               signatureNode = instantiateSignature(string, context),
               node = signatureNode,  ///
               breakPoint = breakPointFromJSON(json),
-              terms = termsFromSignatureNode(signatureNode, context);
+              terms = termsFromSignatureNode(signatureNode, context),
+              signature = new Signature(context, string, node, breakPoint, terms);
 
-        signature = new Signature(context, string, node, breakPoint, terms);
+        return signature;
       }, json, context);
     }, context);
-
-    return signature;
   }
 
   static fromSignatureString(signatureString, context) {
-    let signature;
-
-    ablate((context) => {
-      instantiate((context) => {
+    return ablate((context) => {
+      return instantiate((context) => {
         const string = signatureString,  ///
-              signatureNode = instantiateSignature(string, context);
+              signatureNode = instantiateSignature(string, context),
+              signature = signatureFromSignatureNode(signatureNode, context);
 
-        signature = signatureFromSignatureNode(signatureNode, context);
+        return signature;
       }, context);
     }, context);
-
-    return signature;
   }
 });
 

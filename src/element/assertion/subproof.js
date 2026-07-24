@@ -95,7 +95,7 @@ export default define(class SubproofAssertion extends Assertion {
 
   validateStatements(context, continuation) {
     return every(this.statements, context, (statement, continuation) => {
-      descend((context) => {
+      return descend((context) => {
         return statement.validate(context, (statement) => {
           let statementValidates = false;
 
@@ -181,7 +181,7 @@ export default define(class SubproofAssertion extends Assertion {
 
     specificContext = lastStepContext;  ///
 
-    reconcile((specificContext) => {
+    return reconcile((specificContext) => {
       const lastStepStatement = lastStep.getStatement();
 
       return deducedStatement.unifyStatement(lastStepStatement, generalContext, specificContext, (lastStepStatementUnifies) => {
@@ -216,7 +216,7 @@ export default define(class SubproofAssertion extends Assertion {
 
     specificContext = deductionContext;  ///
 
-    reconcile((specificContext) => {
+    return reconcile((specificContext) => {
       const deductionStatement = deduction.getStatement(),
             deductionStatementUnifies = deducedStatement.unifyStatement(deductionStatement, generalContext, specificContext);
 
@@ -246,7 +246,7 @@ export default define(class SubproofAssertion extends Assertion {
 
     specificContext = suppositionContext;  ///
 
-    reconcile((specificContext) => {
+    return reconcile((specificContext) => {
       const suppositionStatement = supposition.getStatement();
 
       return supposedStatement.unifyStatement(suppositionStatement, generalContext, specificContext, (suppositionStatementUnifies) => {
@@ -290,25 +290,25 @@ export default define(class SubproofAssertion extends Assertion {
   static name = "SubproofAssertion";
 
   static fromJSON(json, context) {
-    let subproorAssertion = null;
-
     const { name } = json;
 
-    if (this.name === name) {
-      instantiate((context) => {
-        const { string } = json,
-              subproofAssertionNode = instantiateSubproofAssertion(string, context),
-              node = subproofAssertionNode,  ///
-              breakPoint = breakPointFromJSON(json),
-              statements = statementsFromSubproofAssertionNode(subproofAssertionNode, context);
-
-        context = null;
-
-        subproorAssertion = new SubproofAssertion(context, string, node, breakPoint, statements);
-      }, context);
+    if (this.name !== name) {
+      return;
     }
 
-    return subproorAssertion;
+    return instantiate((context) => {
+      const { string } = json,
+            subproofAssertionNode = instantiateSubproofAssertion(string, context),
+            node = subproofAssertionNode,  ///
+            breakPoint = breakPointFromJSON(json),
+            statements = statementsFromSubproofAssertionNode(subproofAssertionNode, context);
+
+      context = null;
+
+      const subproorAssertion = new SubproofAssertion(context, string, node, breakPoint, statements);
+
+      return subproorAssertion;
+    }, context);
   }
 
   static fromStatement(statement, context) {

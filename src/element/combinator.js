@@ -34,7 +34,7 @@ export default define(class Combinator extends Element {
 
     context.trace(`Verifying the '${combinatorString}' combinator...`);
 
-    attempt((context) => {
+    return attempt((context) => {
       return this.validateStatement(context, (statementValidates, context) => {
         let verifies = false;
 
@@ -95,13 +95,13 @@ export default define(class Combinator extends Element {
         return continuation(statement, context);
       }
 
-      statementUnifies = true;
+      statementUnifies = continuation(statement, context);
 
       if (statementUnifies) {
         context.debug(`...unified the '${statementString}' statement with the '${combinatorString}' combinator.`);
       }
 
-      return continuation(statement, context);
+      return statementUnifies;
     });
   }
 
@@ -132,20 +132,17 @@ export default define(class Combinator extends Element {
   static name = "Combinator";
 
   static fromJSON(json, context) {
-    let combinator;
-
-    instantiate((context) => {
-      unserialise((json, context) => {
+    return instantiate((context) => {
+      return unserialise((json, context) => {
         const { string } = json,
               combinatorNode = instantiateCombinator(string, context),
               node = combinatorNode,  ///
               breakPoint = breakPointFromJSON(json),
-              statement = statementFromCombinatorNode(combinatorNode, context);
+              statement = statementFromCombinatorNode(combinatorNode, context),
+              combinator = new Combinator(context, string, node, breakPoint, statement);
 
-        combinator = new Combinator(context, string, node, breakPoint, statement);
+        return combinator;
       }, json, context);
     }, context);
-
-    return combinator;
   }
 });

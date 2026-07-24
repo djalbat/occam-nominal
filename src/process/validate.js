@@ -112,7 +112,7 @@ class CombinatorPass extends ContinuationPass {
       run: (statementNode, context, continuation) => {
         const statement = statementFromStatementNode(statementNode, context);
 
-        descend((context) => {
+        return descend((context) => {
           return statement.validate(context, (statement) => {
             let success = false;
 
