@@ -1,7 +1,8 @@
 "use strict";
 
 import { queryUtilities } from "occam-query";
-import { ContinuationPass } from "occam-languages";
+
+import ContinuationPass from "../pass/continuation";
 
 import { descend } from "../utilities/context";
 import { termFromTermNode, statementFromStatementNode } from "../utilities/element";

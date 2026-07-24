@@ -1,7 +1,8 @@
 "use strict";
 
 import { queryUtilities } from "occam-query";
-import { ContinuationZipPass } from "occam-languages";
+
+import ContinuationZipPass from "../pass/continuation";
 
 import { findEquivalenceByTermNodes } from "../utilities/equivalences";
 

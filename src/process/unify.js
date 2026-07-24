@@ -1,9 +1,8 @@
 "use strict";
 
 import { queryUtilities } from "occam-query";
-import { ContinuationZipPass as ContinuationZipPassBase } from "occam-languages";
 
-import ContinuationZipPass from "../pass/continuationZip";
+import ContinuationZipPassBase from "../pass/continuationZip";  ///
 
 import { reconcile } from "../utilities/context";
 import { FRAME_META_TYPE_NAME, STATEMENT_META_TYPE_NAME } from "../metaTypeNames";
@@ -21,6 +20,16 @@ const typeNodeQuery = nodeQuery("/type"),
       frameMetavariableNodeQuery = nodeQuery("/frame/metavariable!"),
       statementMetavariableNodeQuery = nodeQuery("/statement/metavariable!"),
       assumptionMetavariableNodeQuery = nodeQuery("/assumption/metavariable!");
+
+class ContinuationZipPass extends ContinuationZipPassBase {
+  run(generalNonTerminalNode, specificNonTerminalNode, ...remainingArguments) {
+    const continuation = remainingArguments.pop(),
+          generalChildNodes = generalNonTerminalNode.getChildNodes(), ///
+          specificChildNodes = specificNonTerminalNode.getChildNodes(); ///
+
+    return this.descend(generalChildNodes, specificChildNodes, ...remainingArguments, continuation);
+  }
+}
 
 class PropertyPass extends ContinuationZipPass {
   static maps = [
@@ -54,6 +63,157 @@ class PropertyPass extends ContinuationZipPass {
             return continuation(success);
           });
         }
+      }
+    }
+  ];
+}
+
+class StatementPass extends ContinuationZipPass {
+  static maps = [
+    {
+      generalNodeQuery: assumptionMetavariableNodeQuery,
+      specificNodeQuery: assumptionMetavariableNodeQuery,
+      run: (generalAssumptionMetavariableNode, specificAssumptionMetavariableNode, generalContext, specificContext, continuation) => {
+        let context,
+          reference,
+          metavariableNode;
+
+        context = generalContext; ///
+
+        metavariableNode = generalAssumptionMetavariableNode;  ///
+
+        reference = context.findReferenceByMetavariableNode(metavariableNode);
+
+        const metavariable = reference.getMetavariable();
+
+        context = specificContext;  ///
+
+        metavariableNode = specificAssumptionMetavariableNode; ///
+
+        reference = context.findReferenceByMetavariableNode(metavariableNode);
+
+        return metavariable.unifyReference(reference, generalContext, specificContext, (referenceUnifies) => {
+          let success = false;
+
+          if (referenceUnifies) {
+            success = true;
+          }
+
+          return continuation(success);
+        });
+      }
+    },
+    {
+      generalNodeQuery: statementMetavariableNodeQuery,
+      specificNodeQuery: statementNodeQuery,
+      run: (generalStatementMetavariableNode, specificStatementNode, generalContext, specificContext, continuation) => {
+        const statementNode = specificStatementNode, ///
+          metavariableNode = generalStatementMetavariableNode;
+
+        let context;
+
+        context = generalContext; ///
+
+        const metavariable = context.findMetavariableByMetavariableNode(metavariableNode);
+
+        context = specificContext;  ///
+
+        const statement = context.findStatementByStatementNode(statementNode);
+
+        return metavariable.unifyStatement(statement, generalContext, specificContext, (statementUnifies) => {
+          let success = false;
+
+          if (statementUnifies) {
+            success = true;
+          }
+
+          return continuation(success);
+        });
+      }
+    },
+    {
+      generalNodeQuery: frameMetavariableNodeQuery,
+      specificNodeQuery: frameNodeQuery,
+      run: (generalFrameMetavariableNode, specificFrameNode, generalContext, specificContext, continuation) => {
+        const frameNode = specificFrameNode, ///
+          metavariableNode = generalFrameMetavariableNode;
+
+        let context;
+
+        context = generalContext; ///
+
+        const metavariable = context.findMetavariableByMetavariableNode(metavariableNode);
+
+        context = specificContext;  ///
+
+        const frame = context.findFrameByFrameNode(frameNode);
+
+        return metavariable.unifyFrame(frame, generalContext, specificContext, (frameUnifies) => {
+          let success = false;
+
+          if (frameUnifies) {
+            success = true;
+          }
+
+          return continuation(success);
+        });
+      }
+    },
+    {
+      generalNodeQuery: termVariableNodeQuery,
+      specificNodeQuery: termNodeQuery,
+      run: (generalTermVariableNode, specificTermNode, generalContext, specificContext, continuation) => {
+        const termNode = specificTermNode, ///
+          variableNode = generalTermVariableNode; ///
+
+        let context;
+
+        context = generalContext; ///
+
+        const variableIdentifier = variableNode.getVariableIdentifier(),
+          declaredVariable = context.findDeclaredVariableByVariableIdentifier(variableIdentifier),
+          variable = declaredVariable;  ///
+
+        context = specificContext;  ///
+
+        const term = context.findTermByTermNode(termNode);
+
+        return variable.unifyTerm(term, generalContext, specificContext, (termUnifies) => {
+          let success = false;
+
+          if (termUnifies) {
+            success = true;
+          }
+
+          return continuation(success);
+        });
+      }
+    },
+    {
+      generalNodeQuery: signatureNodeQuery,
+      specificNodeQuery: signatureNodeQuery,
+      run: (generalSignatureNode, specificSignatureNode, generalContext, specificContext, continuation) => {
+        let context;
+
+        context = generalContext; ///
+
+        const generalSignature = context.findSignatureBySignatureNode(generalSignatureNode);
+
+        context = specificContext;  ///
+
+        const specificSignature = context.findSignatureBySignatureNode(specificSignatureNode);
+
+        return reconcile((context) => {
+          return generalSignature.unifySignature(specificSignature, context, (signatureUnifies) => {
+            let success = false;
+
+            if (signatureUnifies) {
+              success = true;
+            }
+
+            return continuation(success);
+          });
+        }, context)
       }
     }
   ];
@@ -130,157 +290,6 @@ class ConstructorPass extends ContinuationZipPass {
 
           return continuation(success, generalContext, specificContext);
         }, context, continuation);
-      }
-    }
-  ];
-}
-
-class MetaLevelPass extends ContinuationZipPassBase {
-  static maps = [
-    {
-      generalNodeQuery: assumptionMetavariableNodeQuery,
-      specificNodeQuery: assumptionMetavariableNodeQuery,
-      run: (generalAssumptionMetavariableNode, specificAssumptionMetavariableNode, generalContext, specificContext, continuation) => {
-        let context,
-            reference,
-            metavariableNode;
-
-        context = generalContext; ///
-
-        metavariableNode = generalAssumptionMetavariableNode;  ///
-
-        reference = context.findReferenceByMetavariableNode(metavariableNode);
-
-        const metavariable = reference.getMetavariable();
-
-        context = specificContext;  ///
-
-        metavariableNode = specificAssumptionMetavariableNode; ///
-
-        reference = context.findReferenceByMetavariableNode(metavariableNode);
-
-        return metavariable.unifyReference(reference, generalContext, specificContext, (referenceUnifies) => {
-          let success = false;
-
-          if (referenceUnifies) {
-            success = true;
-          }
-
-          return continuation(success);
-        });
-      }
-    },
-    {
-      generalNodeQuery: statementMetavariableNodeQuery,
-      specificNodeQuery: statementNodeQuery,
-      run: (generalStatementMetavariableNode, specificStatementNode, generalContext, specificContext, continuation) => {
-        const statementNode = specificStatementNode, ///
-              metavariableNode = generalStatementMetavariableNode;
-
-        let context;
-
-        context = generalContext; ///
-
-        const metavariable = context.findMetavariableByMetavariableNode(metavariableNode);
-
-        context = specificContext;  ///
-
-        const statement = context.findStatementByStatementNode(statementNode);
-
-        return metavariable.unifyStatement(statement, generalContext, specificContext, (statementUnifies) => {
-          let success = false;
-
-          if (statementUnifies) {
-            success = true;
-          }
-
-          return continuation(success);
-        });
-      }
-    },
-    {
-      generalNodeQuery: frameMetavariableNodeQuery,
-      specificNodeQuery: frameNodeQuery,
-      run: (generalFrameMetavariableNode, specificFrameNode, generalContext, specificContext, continuation) => {
-        const frameNode = specificFrameNode, ///
-              metavariableNode = generalFrameMetavariableNode;
-
-        let context;
-
-        context = generalContext; ///
-
-        const metavariable = context.findMetavariableByMetavariableNode(metavariableNode);
-
-        context = specificContext;  ///
-
-        const frame = context.findFrameByFrameNode(frameNode);
-
-        return metavariable.unifyFrame(frame, generalContext, specificContext, (frameUnifies) => {
-          let success = false;
-
-          if (frameUnifies) {
-            success = true;
-          }
-
-          return continuation(success);
-        });
-      }
-    },
-    {
-      generalNodeQuery: termVariableNodeQuery,
-      specificNodeQuery: termNodeQuery,
-      run: (generalTermVariableNode, specificTermNode, generalContext, specificContext, continuation) => {
-        const termNode = specificTermNode, ///
-              variableNode = generalTermVariableNode; ///
-
-        let context;
-
-        context = generalContext; ///
-
-        const variableIdentifier = variableNode.getVariableIdentifier(),
-              declaredVariable = context.findDeclaredVariableByVariableIdentifier(variableIdentifier),
-              variable = declaredVariable;  ///
-
-        context = specificContext;  ///
-
-        const term = context.findTermByTermNode(termNode);
-
-        return variable.unifyTerm(term, generalContext, specificContext, (termUnifies) => {
-          let success = false;
-
-          if (termUnifies) {
-            success = true;
-          }
-
-          return continuation(success);
-        });
-      }
-    },
-    {
-      generalNodeQuery: signatureNodeQuery,
-      specificNodeQuery: signatureNodeQuery,
-      run: (generalSignatureNode, specificSignatureNode, generalContext, specificContext, continuation) => {
-        let context;
-
-        context = generalContext; ///
-
-        const generalSignature = context.findSignatureBySignatureNode(generalSignatureNode);
-
-        context = specificContext;  ///
-
-        const specificSignature = context.findSignatureBySignatureNode(specificSignatureNode);
-
-        return reconcile((context) => {
-          return generalSignature.unifySignature(specificSignature, context, (signatureUnifies) => {
-            let success = false;
-
-            if (signatureUnifies) {
-              success = true;
-            }
-
-            return continuation(success);
-          });
-        }, context)
       }
     }
   ];
@@ -484,8 +493,8 @@ class IntrinsicMetavariablePass extends ContinuationZipPass {
   ];
 }
 
-const metaLevelPass = new MetaLevelPass(),
-      propertyPass = new PropertyPass(),
+const propertyPass = new PropertyPass(),
+      statementPass = new StatementPass(),
       generatorPass = new GeneratorPass(),
       combinatorPass = new CombinatorPass(),
       constructorPass = new ConstructorPass(),
@@ -499,7 +508,7 @@ export function unifyStatement(generalStatement, specificStatement, generalConte
         generalNode = generalStatementNode, ///
         specificNode = specificStatementNode;  ///
 
-  return metaLevelPass.run(generalNode, specificNode, generalContext, specificContext, continuation);
+  return statementPass.run(generalNode, specificNode, generalContext, specificContext, continuation);
 }
 
 export function unifyMetavariable(generalMetavariable, specificMetavariable, generalContext, specificContext, continuation) {
