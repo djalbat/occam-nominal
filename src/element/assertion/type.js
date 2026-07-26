@@ -67,7 +67,7 @@ export default define(class TypeAssertion extends Assertion {
         validates = exists([
           validateWhenStated,
           validateWhenDerived
-        ], context, (context) => {
+        ], context, () => {
           const assertion = typeAssertion;  ///
 
           this.assign(context);
@@ -145,47 +145,49 @@ export default define(class TypeAssertion extends Assertion {
   }
 
   validateWhenStated(context, continuation) {
+    let validatesWhenStated = false;
+
     const stated = context.isStated();
 
-    if (!stated) {
-      const validatesWhenStated = false;
+    if (stated) {
+      const typeAssertionString = this.getString(); ///
 
-      return continuation(validatesWhenStated, context);
-    }
+      context.trace(`Validating the '${typeAssertionString}' stated type assertion...`);
 
-    const typeAssertionString = this.getString(); ///
+      validatesWhenStated = this.term.validate(context, (term, context) => {
+        let validatesWhenStated = false;
 
-    context.trace(`Validating the '${typeAssertionString}' stated type assertion...`);
+        const termType = term.getType(),
+              termTypeEqualToType = termType.isEqualTo(this.type),
+              termTypeSuperTypeOfType = termType.isSuperTypeOf(this.type);
 
-    return this.term.validate(context, (term, context) => {
-      let validatesWhenStated = false;
-
-      const termType = term.getType(),
-            termTypeEqualToType = termType.isEqualTo(this.type),
-            termTypeSuperTypeOfType = termType.isSuperTypeOf(this.type);
-
-      if (false) {
-        ///
-      } else if (termTypeEqualToType) {
-        validatesWhenStated = true;
-      } else if (termTypeSuperTypeOfType) {
-        const termEstablished = term.isEstablished();
-
-        if (termEstablished) {
+        if (false) {
+          ///
+        } else if (termTypeEqualToType) {
           validatesWhenStated = true;
-        }
-      }
+        } else if (termTypeSuperTypeOfType) {
+          const termEstablished = term.isEstablished();
 
-      if (validatesWhenStated) {
-        this.term = term;
-      }
+          if (termEstablished) {
+            validatesWhenStated = true;
+          }
+        }
+
+        if (validatesWhenStated) {
+          this.term = term;
+
+          validatesWhenStated = continuation(context);
+        }
+
+        return validatesWhenStated;
+      });
 
       if (validatesWhenStated) {
         context.debug(`...validated the '${typeAssertionString}' stated type assertion.`);
       }
+    }
 
-      return continuation(validatesWhenStated, context);
-    });
+    return validatesWhenStated;
   }
 
   validateWhenDerived(context, continuation) {

@@ -8,94 +8,107 @@ import { provisionallyStringFromProvisional } from "../utilities/string";
 import { bracketedConstructorFromNothing, bracketedCombinatorFromNothing } from "../utilities/instance";
 
 export function validateTermAsVariable(term, context, continuation) {
+  let termValidatesAsVariable = false;
+
   const { Variable } = elements,
         variable = Variable.fromTerm(term, context);
 
-  if (variable === null) {
-    const termValidatesAsVariable = false;
+  if (variable !== null) {
+    const termString = term.getString();
 
-    return continuation(termValidatesAsVariable, term, context);
-  }
+    context.trace(`Validating the '${termString}' term as a variable...`);
 
-  const termString = term.getString();
+    termValidatesAsVariable = variable.validate(context, (variable, context) => {
+      debugger
 
-  context.trace(`Validating the '${termString}' term as a variable...`);
+      const type = variable.getType(),
+            typeString = type.getString(),
+            provisional = variable.isProvisional(),
+            provisionallyString = provisionallyStringFromProvisional(provisional);
 
-  return variable.validate(context, (variable, context) => {
-    if (variable === null) {
-      const termValidatesAsVariable = false;
+      context.trace(`Setting the '${termString}' term's type to the '${typeString}' type${provisionallyString}.`);
+
+      term.setType(type);
+
+      term.setProvisional(provisional);
+
+      context.debug(`...validated the '${termString}' term as a variable.`);
+
+      const termValidatesAsVariable = true;
 
       return continuation(termValidatesAsVariable, term, context);
-    }
+    });
+  }
 
-    const type = variable.getType(),
-          typeString = type.getString(),
-          provisional = variable.isProvisional(),
-          provisionallyString = provisionallyStringFromProvisional(provisional);
-
-    context.trace(`Setting the '${termString}' term's type to the '${typeString}' type${provisionallyString}.`);
-
-    term.setType(type);
-
-    term.setProvisional(provisional);
-
-    context.debug(`...validated the '${termString}' term as a variable.`);
-
-    const termValidatesAsVariable = true;
-
-    return continuation(termValidatesAsVariable, term, context);
-  });
+  return termValidatesAsVariable;
 }
 
 function unifyTermWithGenerators(term, context, continuation) {
-  const generators = context.getGenerators();
+  let termUnifiesWithGenerators = false;
 
-  return some(generators, (generator, context, continuation) => {
-    return choose((context) => {
-      return generator.unifyTerm(term, context, continuation);
-    }, context);
-  }, context, (termUnifies, context) => {
-    if (!termUnifies) {
-      debugger
+  const generators = context.getGenerators(),
+        generatorsLength = generators.length;
+
+  if (generatorsLength > 0) {
+    const termString = term.getString();
+
+    context.trace(`Unifying the '${termString}' term with generators...`);
+
+    termUnifiesWithGenerators = some(generators, (generator, context, continuation) => {
+      let termUnifies;
+
+      descend((context) => {
+        termUnifies = generator.unifyTerm(term, context, continuation);
+      }, context);
+
+      return termUnifies;
+    }, context, continuation);
+
+    if (termUnifiesWithGenerators) {
+      context.debug(`...unified the '${termString}' term with generators.`);
     }
+  }
 
-    const termUnifiesWithGenerators = true;
-
-    return continuation(termUnifiesWithGenerators, term, context);
-  });
+  return termUnifiesWithGenerators;
 }
 
 function unifyTermWithConstructors(term, context, continuation) {
-  const initialContext = context, ///
-        constructors = context.getConstructors();
+  let termUnifiesWithConstructors = false;
 
-  return some(constructors, (constructor, context, continuation) => {
-    return choose((context) => {
-      return constructor.unifyTerm(term, context, continuation);
-    }, initialContext);
-  }, context, (termUnifies, context) => {
-    if (!termUnifies) {
-      debugger
+  const constructors = context.getConstructors(),
+        constructorsLength = constructors.length;
+
+  if (constructorsLength > 0) {
+    const termString = term.getString();
+
+    context.trace(`Unifying the '${termString}' term with constructors...`);
+
+    termUnifiesWithConstructors = some(constructors, (constructor, context, continuation) => {
+      let termUnifies;
+
+      descend((context) => {
+        termUnifies = constructor.unifyTerm(term, context, continuation);
+      }, context);
+
+      return termUnifies;
+    }, context, continuation);
+
+    if (termUnifiesWithConstructors) {
+      context.debug(`...unified the '${termString}' term with constructors.`);
     }
+  }
 
-    const termUnifiesWithGenerators = true;
-
-    return continuation(termUnifiesWithGenerators, term, context);
-  });
+  return termUnifiesWithConstructors;
 }
 
 function unifyTermWithBracketedConstructor(term, context, continuation) {
+  let termUnifiesWithBracketedConstructor;
+
   const bracketedConstructor = bracketedConstructorFromNothing();
 
-  return bracketedConstructor.unifyTerm(term, context, (termUnifies, context) => {
-    let termUnifiesWithBracketedConstructor = false;
+  termUnifiesWithBracketedConstructor = bracketedConstructor.unifyTerm(term, context, continuation);
 
-    if (termUnifies) {
-      termUnifiesWithBracketedConstructor = true;
-    }
-
-    return continuation(termUnifiesWithBracketedConstructor, term, context);
-  });
+  return termUnifiesWithBracketedConstructor;
 }
 
 function validateStatementAsMetavariable(statement, context, continuation) {

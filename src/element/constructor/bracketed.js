@@ -14,11 +14,13 @@ export default define(class BracketedConstructor extends Constructor {
   }
 
   unifyTerm(term, context, continuation) {
+    let termUnifiesWithBracketedConstructor;
+
     const termString = term.getString();
 
     context.trace(`Unifying the '${termString}' term with the bracketed constructor...`);
 
-    return super.unifyTerm(term, context, (termUnifies) => {
+    termUnifiesWithBracketedConstructor = super.unifyTerm(term, context, (termUnifies) => {
       if (!termUnifies) {
         return continuation(termUnifies);
       }
@@ -54,13 +56,13 @@ export default define(class BracketedConstructor extends Constructor {
 
         termUnifies = true;
 
-        if (termUnifies) {
-          context.debug(`...unified the '${termString}' term with the bracketed constructor.`);
-        }
-
         return continuation(termUnifies);
       });
     });
+
+    if (termUnifiesWithBracketedConstructor) {
+      context.debug(`...unified the '${termString}' term with the bracketed constructor.`);
+    }
   }
 
   static name = "BracketedConstructor";

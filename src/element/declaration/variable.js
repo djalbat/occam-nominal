@@ -1,13 +1,13 @@
 "use strict";
 
-import { breakPointUtilities } from "occam-languages";
+import { breakPointUtilities, continuationUtilities } from "occam-languages";
 
 import Declaration from "../declaration";
 
-import { all } from "../../utilities/continuation";
 import { define } from "../../elements";
 
-const { breakable } = breakPointUtilities;
+const { all } = continuationUtilities,
+      { breakable } = breakPointUtilities;
 
 export default define(class VariableDeclaration extends Declaration {
   constructor(context, string, node, breakPoint, type, variable, provisional) {

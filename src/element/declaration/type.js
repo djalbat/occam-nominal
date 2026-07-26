@@ -4,12 +4,11 @@ import { breakPointUtilities, continuationUtilities } from "occam-languages";
 
 import Declaration from "../declaration";
 
-import { all } from "../../utilities/continuation";
 import { define } from "../../elements";
 import { baseTypeFromNothing } from "../../utilities/type";
 
-const { every } = continuationUtilities,
-      { breakable } = breakPointUtilities;
+const { breakable } = breakPointUtilities,
+      { all, every } = continuationUtilities;
 
 export default define(class TypeDeclaration extends Declaration {
   constructor(context, string, node, breakPoint, type, superTypes, provisional) {

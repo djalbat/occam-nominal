@@ -174,40 +174,43 @@ export default define(class Term extends Element {
     return comparesToParamter;
   }
 
-  findValidTerm(context) {
+  findTerm(context) {
     const termNode = this.getTermNode(),
-          term = context.findTermByTermNode(termNode),
-          validTerm = term; ///
+          term = context.findTermByTermNode(termNode);
 
-    return validTerm;
+    return term;
   }
 
   validate(context, continuation) {
+    let validates;
+
     const termString = this.getString();  ///
 
     context.trace(`Validating the '${termString}' term...`);
 
-    const validTerm = this.findValidTerm(context);
+    let term;
 
-    if (validTerm !== null) {
-      const term = validTerm; ///
+    term = this.findTerm(context);
 
-      context.debug(`...the '${termString}' term is already valid.`);
+    if (term !== null) {
+      context.debug(`...the '${termString}' term is already present.`);
 
-      return continuation(term, context);
-    }
+      validates = continuation(term, context);
+    } else {
+      term = this;  ///
 
-    let term = this;  ///
-
-    return exists(validateTerms, term, context, (termValidates, term, context) => {
-      if (term !== null) {
+      validates = exists(validateTerms, term, context, (term, context) => {
         context.addTerm(term);
 
-        context.debug(`...validated the '${termString}' term.`);
-      }
+        return continuation(term, context);
+      });
+    }
 
-      return continuation(term, context);
-    });
+    if (validates) {
+      context.debug(`...validated the '${termString}' term.`);
+    }
+
+    return validates;
   }
 
   validateGivenType(strict, type, callback, context, continuation) {
@@ -263,53 +266,53 @@ export default define(class Term extends Element {
     });
   }
 
-  validateAsProperty(context, continuation) {
-    let term;
-
-    const termString = this.getString();  ///
-
-    context.trace(`Validating the '${termString}' term as a property...`);
-
-    debugger
-
-    let validatesAsProperty = false;
-
-    const validTerm = this.findValidTerm(context);
-
-    if (validTerm !== null) {
-      term = validTerm; ///
-
-      const validatesForward = continuation(term, context);
-
-      if (validatesForward) {
-        validatesAsProperty = true;
-
-        context.debug(`...the '${termString}' term is already valid.`);
-      } else {
-        term = null;
-      }
-    } else {
-      term = this;  ///
-
-      const termUnifiesWithProperties = unifyTermWithProperties(term, context, continuation);
-
-      if (termUnifiesWithProperties) {
-        validatesAsProperty = true;
-      } else {
-        term = null;
-      }
-
-      if (validatesAsProperty) {
-        context.addTerm(term);
-      }
-    }
-
-    if (validatesAsProperty) {
-      context.debug(`...validated the '${termString}' term as a property.`);
-    }
-
-    return term;
-  }
+  // validateAsProperty(context, continuation) {
+  //   let term;
+  //
+  //   const termString = this.getString();  ///
+  //
+  //   context.trace(`Validating the '${termString}' term as a property...`);
+  //
+  //   debugger
+  //
+  //   let validatesAsProperty = false;
+  //
+  //   const term = this.findTerm(context);
+  //
+  //   if (term !== null) {
+  //     term = term; ///
+  //
+  //     const validatesForward = continuation(term, context);
+  //
+  //     if (validatesForward) {
+  //       validatesAsProperty = true;
+  //
+  //       context.debug(`...the '${termString}' term is already valid.`);
+  //     } else {
+  //       term = null;
+  //     }
+  //   } else {
+  //     term = this;  ///
+  //
+  //     const termUnifiesWithProperties = unifyTermWithProperties(term, context, continuation);
+  //
+  //     if (termUnifiesWithProperties) {
+  //       validatesAsProperty = true;
+  //     } else {
+  //       term = null;
+  //     }
+  //
+  //     if (validatesAsProperty) {
+  //       context.addTerm(term);
+  //     }
+  //   }
+  //
+  //   if (validatesAsProperty) {
+  //     context.debug(`...validated the '${termString}' term as a property.`);
+  //   }
+  //
+  //   return term;
+  // }
 
   unifyTerm(term, generalContext, specificContext) {
     let termUnifies = false;
