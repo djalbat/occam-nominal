@@ -33,85 +33,79 @@ export default define(class Deduction extends Element {
   }
 
   verify = breakable(function (context, continuation) {
+    let verifies = false;
+
     const deductionString = this.getString();  ///
 
     context.trace(`Verifying the '${deductionString}' deduction...`);
 
     const nonsensical = this.isNonBreakable();
 
-    if (nonsensical) {
-      const verifies = false;
-
-      context.debug(`Unable to verify the '${deductionString}' deduction because it is nonsense.`);
-
-      return continuation(verifies, context);
-    }
-
-    return derive((context) => {
-      return elide((context) => {
-        return this.validate(context, (validates) => {
-          let verifies = false;
+    if (!nonsensical) {
+      derive((context) => {
+        elide((context) => {
+          const validates = this.validate(context, (deduction, context) => true);
 
           if (validates) {
             verifies = true;
           }
-
-          if (verifies) {
-            context.debug(`...verified the '${deductionString}' deduction.`);
-          }
-
-          return continuation(verifies);
-        });
+        }, context);
       }, context);
-    }, context);
+    } else {
+      context.debug(`Unable to verify the '${deductionString}' deduction because it is nonsense.`);
+    }
+
+    if (verifies) {
+      context.debug(`...verified the '${deductionString}' deduction.`);
+    }
+
+    return continuation(verifies);
   });
 
   validate(context, continuation) {
+    let validates = false;
+
     const deductionString = this.getString();  ///
 
     context.trace(`Validating the '${deductionString}' deduction...`);
 
-    return attempt((context) => {
-      return this.validateStatement(context, (statementValidates) => {
-        let validates = false;
+    attempt((context) => {
+      const statementValidates = this.validateStatement(context, (context) => {
+        const deduction = this; ///
 
-        if (statementValidates) {
-          validates = true;
-        }
+        this.commit(context);
 
-        if (validates) {
-          this.commit(context);
-        }
-
-        if (validates) {
-          context.debug(`...validated the '${deductionString}' deduction.`);
-        }
-
-        return continuation(validates);
+        return continuation(deduction, context);
       });
+
+      if (statementValidates) {
+        validates = true;
+      }
     }, context);
+
+    if (validates) {
+      context.debug(`...validated the '${deductionString}' deduction.`);
+    }
+
+    return validates;
   }
 
   validateStatement(context, continuation) {
+    let statementValidates;
+
     const deductionString = this.getString();  ///
 
     context.trace(`Validating the '${deductionString}' deduction's statement...`);
 
-    const statementValidates = this.statement.validate(context, (statement) => {
-      let statementValidates = false;
-
-      if (statement !== null) {
-        statementValidates = true;
-      }
-
-      if (statementValidates) {
-        context.trace(`...validated the '${deductionString}' deduction's statement.`);
-      }
-
-      return statementValidates;
+    statementValidates = this.statement.validate(context, (statement, context) => {
+      return continuation(context);
     });
 
-    return continuation(statementValidates, context);
+    if (statementValidates) {
+      context.trace(`...validated the '${deductionString}' deduction's statement.`);
+    }
+
+    return statementValidates;
   }
 
   unifyStep(step, context, continuation) {

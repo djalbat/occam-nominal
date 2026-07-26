@@ -47,12 +47,12 @@ export default define(class DefinedAssertion extends Assertion {
 
     context.trace(`Validating the '${definedAssertionString}' defined assertion...`);
 
-    const validAssertion = this.findValidAssertion(context);
+    const assertion = this.findAssertion(context);
 
-    if (validAssertion !== null) {
-      const definedAssertion = validAssertion;  ///
+    if (assertion !== null) {
+      const definedAssertion = assertion;  ///
 
-      context.debug(`...the '${definedAssertionString}' defined assertion is already valid.`);
+      context.debug(`The '${definedAssertionString}' defined assertion is already present.`);
 
       return continuation(definedAssertion);
     }

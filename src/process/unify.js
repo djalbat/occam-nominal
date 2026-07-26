@@ -301,64 +301,64 @@ class CombinatorPass extends ContinuationZipPass {
       generalNodeQuery: metaTypeNodeQuery,
       specificNodeQuery: statementNodeQuery,
       run: (generalMetaTypeNode, specificStatementNode, generalContext, specificContext, continuation) => {
+        let success = false;
+
         const metaTypeNode = generalMetaTypeNode, ///
               metaTypeName = metaTypeNode.getMetaTypeName(),
               metaTypeNameStatementMetaTypeName = (metaTypeName === STATEMENT_META_TYPE_NAME);
 
-        let success = false;
+        if (metaTypeNameStatementMetaTypeName) {
+          const statementNode = specificStatementNode,  ///
+                context = specificContext,  ///
+                statement = statementFromStatementNode(statementNode, context),
+                validates = statement.validate(context, (statement, context) => {
+                  const specificContext = context;  ///
 
-        if (!metaTypeNameStatementMetaTypeName) {
-          return continuation(success, generalContext, specificContext);
-        }
+                  return continuation(generalContext, specificContext);
+                });
 
-        const statementNode = specificStatementNode,  ///
-              context = specificContext,  ///
-              statement = statementFromStatementNode(statementNode, context);
-
-        return statement.validate(context, (statement, context) => {
-          const specificContext = context;  ///
-
-          if (statement !== null) {
+          if (validates) {
             success = true;
           }
+        }
 
-          return continuation(success, generalContext, specificContext);
-        });
+        return success;
       }
     },
     {
       generalNodeQuery: metaTypeNodeQuery,
       specificNodeQuery: frameNodeQuery,
       run: (generalMetaTypeNode, specificFrameNode, generalContext, specificContext, continuation) => {
+        let success = false;
+
         const metaTypeNode = generalMetaTypeNode, ///
               metaTypeName = metaTypeNode.getMetaTypeName(),
               metaTypeNameFrameMetaTypeName = (metaTypeName === FRAME_META_TYPE_NAME);
 
-        let success = false;
+        if (metaTypeNameFrameMetaTypeName) {
+          const frameNode = specificFrameNode,  ///
+                context = specificContext,  ///
+                frame = frameFromFrameNode(frameNode, context),
+                validates = frame.validate(context, (frame, context) => {
+                  const specificContext = context; ///
 
-        if (!metaTypeNameFrameMetaTypeName) {
-          return continuation(success, generalContext, specificContext);
-        }
+                  return continuation(generalContext, specificContext);
+                });
 
-        const frameNode = specificFrameNode,  ///
-              context = specificContext,  ///
-              frame = frameFromFrameNode(frameNode, context);
-
-        return frame.validate((frame, context) => {
-          const specificContext = context; ///
-
-          if (frame !== null) {
+          if (validates) {
             success = true;
           }
+        }
 
-          return continuation(success, generalContext, specificContext);
-        }, context, continuation);
+        return success;
       }
     },
     {
       generalNodeQuery: typeNodeQuery,
       specificNodeQuery: termNodeQuery,
       run: (generalTypeNode, specificTermNode, generalContext, specificContext, continuation) => {
+        let success = false;
+
         const typeNode = generalTypeNode, ///
               termNode = specificTermNode, ///
               nominalTypeName = typeNode.getNominalTypeName();
@@ -371,19 +371,18 @@ class CombinatorPass extends ContinuationZipPass {
 
         context = specificContext;  ///
 
-        const term = termFromTermNode(termNode, context);
+        const term = termFromTermNode(termNode, context),
+              validates = term.validateGivenType(type, (term, context) => {
+                const specificContext = context;  ///
 
-        let success = false;
+                return continuation(generalContext, specificContext);
+              }, context, continuation);
 
-        return term.validateGivenType(type, (term, context) => {
-          const specificContext = context;  ///
+        if (validates) {
+          success = true;
+        }
 
-          if (term !== null) {
-            success = true;
-          }
-
-          return continuation(success, generalContext, specificContext);
-        }, context, continuation);
+        return success;
       }
     }
   ];

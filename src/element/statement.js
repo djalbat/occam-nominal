@@ -170,12 +170,11 @@ export default define(class Statement extends Element {
     return metavariableNodeMatches;
   }
 
-  findValidStatement(context) {
+  findStatement(context) {
     const statementNode = this.getStatementNode(),
-          statement = context.findStatementByStatementNode(statementNode),
-          validStatement = statement;  ///
+          statement = context.findStatementByStatementNode(statementNode);
 
-    return validStatement;
+    return statement;
   }
 
   compareParameter(parameter) {
@@ -199,37 +198,35 @@ export default define(class Statement extends Element {
   }
 
   validate(context, continuation) {
+    let validates;
+
     const statementString = this.getString();  ///
 
     context.trace(`Validating the '${statementString}' statement...`);
 
-    const validStatement = this.findValidStatement(context);
+    let statement;
 
-    if (validStatement !== null) {
-      const statement = validStatement; ///
+    statement = this.findStatement(context);
 
-      context.debug(`...the '${statementString}' statement is already valid.`);
+    if (statement !== null) {
+      context.debug(`The '${statementString}' statement is already present.`);
 
-      return continuation(statement, context);
-    }
+      validates = continuation(statement, context);
+    } else {
+      statement = this; ///
 
-    const statement = this; ///
-
-    return exists(validateStatements, statement, context, (statementValidates, statement, context) => {
-      if (!statementValidates) {
-        statement = null;
+      validates = exists(validateStatements, statement, context, (statement, context) => {
+        context.addStatement(statement);
 
         return continuation(statement, context);
-      }
+      });
+    }
 
-      context.addStatement(statement);
+    if (validates) {
+      context.debug(`...validated the '${statementString}' statement.`);
+    }
 
-      if (statementValidates) {
-        context.debug(`...validated the '${statementString}' statement.`);
-      }
-
-      return continuation(statement, context);
-    });
+    return validates;
   }
 
   discharge(context) {

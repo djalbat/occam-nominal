@@ -13,17 +13,19 @@ export default define(class BracketedCombinator extends Combinator {
   }
 
   unifyStatement(statement, context, continuation) {
+    let statementUnifiesWithBracketedCombinator;
+
     const statementString = statement.getString();
 
     context.trace(`Unifying the '${statementString}' statement with the bracketed combinator...`);
 
-    return super.unifyStatement(statement, context, (statementUnifies, context) => {
-      if (statementUnifies) {
-        context.debug(`...unified the '${statementString}' statement with the bracketed combinator.`);
-      }
+    statementUnifiesWithBracketedCombinator = super.unifyStatement(statement, context, continuation);
 
-      return continuation(statementUnifies, context);
-    });
+    if (statementUnifiesWithBracketedCombinator) {
+      context.debug(`...unified the '${statementString}' statement with the bracketed combinator.`);
+    }
+
+    return statementUnifiesWithBracketedCombinator;
   }
 
   static name = "BracketedCombinator";

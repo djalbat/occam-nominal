@@ -34,12 +34,11 @@ export default class Assertion extends Element {
     return equalTo;
   }
 
-  findValidAssertion(context) {
+  findAssertion(context) {
     const assertionNode = this.getAssertionNode(),
-          assertion = context.findAssertionByAssertionNode(assertionNode),
-          validAssertion = assertion;  ///
+          assertion = context.findAssertionByAssertionNode(assertionNode);
 
-    return validAssertion;
+    return assertion;
   }
 
   toJSON() {

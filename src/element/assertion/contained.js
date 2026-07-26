@@ -55,12 +55,12 @@ export default define(class ContainedAssertion extends Assertion {
 
     context.trace(`Validating the '${containedAssertionString}' contained assertion...`);
 
-    const validAssertion = this.findValidAssertion(context);
+    const assertion = this.findAssertion(context);
 
-    if (validAssertion !== null) {
-      const containedAssertion = validAssertion;  ///
+    if (assertion !== null) {
+      const containedAssertion = assertion; ///
 
-      context.debug(`...the '${containedAssertionString}' contained assertion is already valid.`);
+      context.debug(`The '${containedAssertionString}' contained assertion is already present.`);
 
       return continuation(containedAssertion);
     }

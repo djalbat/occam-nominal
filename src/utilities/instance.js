@@ -11,14 +11,13 @@ let bracketedCombinator = null,
 
 export function bracketedCombinatorFromNothing() {
   if (bracketedCombinator === null) {
-    bracketedCombinator = ground((context) => {
+    ground((context) => {
       const bracketedCombinatorString = `(${STATEMENT_META_TYPE_NAME})`,
             string = bracketedCombinatorString, ///
             combinatorNode = instantiateCombinator(string, context),
-            bracketedCombinatorNode = combinatorNode, ///
-            bracketedCombinator = bracketedCombinatorFromBracketedCombinatorNode(bracketedCombinatorNode, context);
+            bracketedCombinatorNode = combinatorNode; ///
 
-      return bracketedCombinator;
+      bracketedCombinator = bracketedCombinatorFromBracketedCombinatorNode(bracketedCombinatorNode, context);
     });
   }
 
@@ -27,14 +26,13 @@ export function bracketedCombinatorFromNothing() {
 
 export function bracketedConstructorFromNothing() {
   if (bracketedConstructor === null) {
-    bracketedConstructor = ground((context) => {
+    ground((context) => {
       const bracketedConstructorString = `(${BASE_TYPE_SYMBOL})`,
             string = bracketedConstructorString,  ///
             constructorNode = instantiateConstructor(string, context),
-            bracketedConstructorNode = constructorNode,
-            bracketedConstructor = bracketedConstructorFromBracketedConstructorNode(bracketedConstructorNode, context);
+            bracketedConstructorNode = constructorNode;
 
-      return bracketedConstructor;
+      bracketedConstructor = bracketedConstructorFromBracketedConstructorNode(bracketedConstructorNode, context);
     });
   }
 

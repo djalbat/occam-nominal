@@ -43,14 +43,12 @@ export default define(class SignatureAssertion extends Assertion {
 
     let validates = true;
 
-    const validAssertion = this.findValidAssertion(context);
+    const assertion = this.findAssertion(context);
 
-    if (validAssertion !== null) {
-      validates = true;
+    if (assertion !== null) {
+      const signatureAssertion = assertion; ///
 
-      signatureAssertion = validAssertion; ///
-
-      context.debug(`...the '${signatureAssertionString}' signature assertion is already valid.`);
+      context.debug(`The '${signatureAssertionString}' signature assertion is already present.`);
     } else {
       const signatureVerifies = this.validateSignature(context);
 

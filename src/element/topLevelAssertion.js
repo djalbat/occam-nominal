@@ -3,7 +3,6 @@
 import { arrayUtilities } from "necessary";
 import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
 
-import { all } from "../utilities/continuation";
 import { enclose } from "../utilities/context";
 import { topLevelAssertionStringFromLabelsSignatureSuppositionsAndDeduction } from "../utilities/string";
 import { labelsFromJSON,
@@ -18,8 +17,8 @@ import { labelsFromJSON,
          suppositionsToSuppositionsJSON } from "../utilities/json";
 
 const { reverse } = arrayUtilities,
-      { every, extract, forwardsEvery, backwardsEvery } = continuationUtilities,
-      { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
+      { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities,
+      { all, every, extract, forwardsEvery, backwardsEvery } = continuationUtilities;
 
 export default class TopLevelAssertion extends Element {
   constructor(context, string, node, breakPoint, labels, suppositions, deduction, proof, signature, hypotheses) {
@@ -108,7 +107,7 @@ export default class TopLevelAssertion extends Element {
         verifySuppositions,
         verifyDeduction,
         verifyProof
-      ], context, (verifies) => {
+      ], context, (verifies, context) => {
         if (verifies) {
           context.debug(`...verified the '${topLevelAssertionString}' top level assertion.`);
         }
@@ -153,7 +152,7 @@ export default class TopLevelAssertion extends Element {
     if (this.proof === null) {
       const proofVerifies = true; ///
 
-      return continuation(proofVerifies, context);
+      return continuation(proofVerifies);
     }
 
     const topLevelAssertionString = this.getString();  ///
@@ -205,7 +204,7 @@ export default class TopLevelAssertion extends Element {
         context.debug(`...verified the '${topLevelAssertionString}' top level assertion's '${suppositionString}' supposition.`);
       }
 
-      return continuation(suppositionVerifies, context);
+      return continuation(suppositionVerifies);
     });
   }
 

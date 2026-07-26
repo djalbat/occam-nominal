@@ -51,14 +51,12 @@ export default define(class PropertyAssertion extends Assertion {
 
     let validates = false;
 
-    const validAssertion = this.findValidAssertion(context);
+    const assertion = this.findAssertion(context);
 
-    if (validAssertion !== null) {
-      validates = true;
+    if (assertion !== null) {
+      const propertyAssertion = assertion; ///
 
-      propertyAssertion = validAssertion; ///
-
-      context.debug(`...the '${propertyAssertionString}' property assertion is already valid.`);
+      context.debug(`The '${propertyAssertionString}' property assertion is already present.`);
     } else {
       const termsValidate = await this.validateTerms(context);
 

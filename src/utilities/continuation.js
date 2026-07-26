@@ -1,88 +1,49 @@
 "use strict";
 
 export function one(array, callback, ...initialArguments) {
+  let success = false;
+
   const continuation = initialArguments.pop(),
         length = array.length;
 
-  let count = 0,
-      index = -1;
+  let count = 0;
 
-  function next(...callbackArguments) {
-    index++;
-
-    if (index === length) {
-      const success = (count === 1);
-
-      return success;
-    }
-
+  for (let index = 0; index < length; index++) {
     const element = array[index];
 
-    return callback(element, ...callbackArguments, (success, ...intermediateArguments) => {
-      if (success) {
-        success = continuation(success, ...intermediateArguments);
-      }
+    success = callback(element, ...initialArguments, continuation);
 
-      if (!success) {
-        const callbackArguments = initialArguments; ///
-
-        return next(...callbackArguments);
-      }
-
-      if (count === 1) {
-        const success = false;
-
-        return success;
-      }
-
+    if (success) {
       count++;
 
-      const callbackArguments = initialArguments; ///
-
-      return next(...callbackArguments);
-    });
+      if (count > 1) {
+        break;
+      }
+    }
   }
 
-  const callbackArguments = initialArguments; ///
+  success = (count === 1);
 
-  return next(...callbackArguments);
+  return success;
 }
 
 export function some(array, callback, ...initialArguments) {
+  let success = false;
+
   const continuation = initialArguments.pop(),
         length = array.length;
 
-  let index = -1;
-
-  function next(...callbackArguments) {
-    index++;
-
-    if (index === length) {
-      const success = false;
-
-      return success;
-    }
-
+  for (let index = 0; index < length; index++) {
     const element = array[index];
 
-    return callback(element, ...callbackArguments, (success, ...intermediateArguments) => {
-      if (success) {
-        success = continuation(success, ...intermediateArguments);
-      }
+    success = callback(element, ...initialArguments, continuation);
 
-      if (!success) {
-        const callbackArguments = initialArguments; ///
-
-        return next(...callbackArguments);
-      }
-
-      return success;
-    });
+    if (success) {
+      break;
+    }
   }
 
-  const callbackArguments = initialArguments; ///
-
-  return next(...callbackArguments);
+  return success;
 }
 
 export function each(array, callback, ...initialArguments) {
@@ -95,31 +56,27 @@ export function each(array, callback, ...initialArguments) {
   function next(...callbackArguments) {
     index++;
 
+    let success;
+
     if (index === length) {
-      const success = (count > 0);
+      success = (count > 0);
 
       if (!success) {
         return success;
       }
 
-      const finalArguments = callbackArguments; ///
-
-      return continuation(success, ...finalArguments);
+      return continuation(...callbackArguments);
     }
 
     const element = array[index];
 
-    return callback(element, ...callbackArguments, (success, ...intermediateArguments) => {
-      if (!success) {
-        return success;
-      }
-
+    success = callback(element, ...callbackArguments, (...callbackArguments) => {
       count++;
-
-      const callbackArguments = intermediateArguments; ///
 
       return next(...callbackArguments);
     });
+
+    return success;
   }
 
   const callbackArguments = initialArguments; ///
@@ -136,24 +93,19 @@ export function every(array, callback, ...initialArguments) {
   function next(...callbackArguments) {
     index++;
 
-    if (index === length) {
-      const success = true,
-            finalArguments = callbackArguments; ///
+    let success;
 
-      return continuation(success, ...finalArguments);
+    if (index === length) {
+      return continuation(...callbackArguments);
     }
 
     const element = array[index];
 
-    return callback(element, ...callbackArguments, (success, ...intermediateArguments) => {
-      if (!success) {
-        return success;
-      }
-
-      const callbackArguments = intermediateArguments; ///
-
+    success = callback(element, ...callbackArguments, (...callbackArguments) => {
       return next(...callbackArguments);
     });
+
+    return success;
   }
 
   const callbackArguments = initialArguments; ///
@@ -162,44 +114,26 @@ export function every(array, callback, ...initialArguments) {
 }
 
 export function filter(array, callback, ...initialArguments) {
-  const continuation = initialArguments.pop(),
+  const deletedElements = [],
+        continuation = initialArguments.pop(),
         length = array.length;
 
-  const deletedElements = [];
+  for (let index = length - 1; index >= 0 ; index--) {
+    const element = array[index],
+          success = callback(element, ...initialArguments, continuation);
 
-  let index = length;
+    if (!success) {
+      const startIndex = index, ///
+            deleteCount = 1,
+            deletedElement = element; ///
 
-  function next(...callbackArguments) {
-    index--;
+      array.splice(startIndex, deleteCount);
 
-    if (index === -1) {
-      const finalArguments = callbackArguments; ///
-
-      return continuation(deletedElements, ...finalArguments);
+      deletedElements.unshift(deletedElement);
     }
-
-    const element = array[index];
-
-    return callback(element, ...callbackArguments, (passed, ...intermediateArguments) => {
-      if (!passed) {
-        const startIndex = index, ///
-              deleteCount = 1,
-              deletedElement = element; ///
-
-        array.splice(startIndex, deleteCount);
-
-        deletedElements.unshift(deletedElement);
-      }
-
-      const callbackArguments = intermediateArguments; ///
-
-      return next(...callbackArguments);
-    });
   }
 
-  const callbackArguments = initialArguments; ///
-
-  return next(...callbackArguments);
+  return deletedElements;
 }
 
 export function all(callbacks, ...initialArguments) {
