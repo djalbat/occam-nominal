@@ -108,9 +108,9 @@ export default define(class Generator extends Element {
 
     context.trace(`Validating the '${generatorString}' generator's term...`);
 
-    const hypothtical = this.isHypothetical();
+    const hypothetical = this.isHypothetical();
 
-    if (hypothtical) {
+    if (hypothetical) {
       const termValidatesAsVariable = await validateTermAsVariable(this.term, context, async (term, context) => { ///
         let validatesForwards = false;
 

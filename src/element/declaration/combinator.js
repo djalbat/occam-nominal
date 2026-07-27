@@ -31,7 +31,7 @@ export default define(class CombinatorDeclaration extends Declaration {
 
     context.trace(`Verifying the '${combinatorDeclarationString}' combinator declaration...`);
 
-    this.verifyCombinator(context, (combinatorVerifies) => {
+    return this.verifyCombinator(context, (combinatorVerifies) => {
       let verifies = false;
 
       if (combinatorVerifies) {
@@ -53,7 +53,7 @@ export default define(class CombinatorDeclaration extends Declaration {
 
     context.trace(`Verifying the '${combinatorDeclarationString}' combinator declaration's combinator...`);
 
-    this.combinator.verify(context, (combinatorVerifies) => {
+    return this.combinator.verify(context, (combinatorVerifies) => {
       if (combinatorVerifies) {
         context.debug(`...verified the '${combinatorDeclarationString}' combinator declaration's combinator.`);
       }

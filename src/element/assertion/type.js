@@ -67,7 +67,7 @@ export default define(class TypeAssertion extends Assertion {
         validates = exists([
           validateWhenStated,
           validateWhenDerived
-        ], context, () => {
+        ], context, (context) => {
           const assertion = typeAssertion;  ///
 
           this.assign(context);
@@ -191,35 +191,29 @@ export default define(class TypeAssertion extends Assertion {
   }
 
   validateWhenDerived(context, continuation) {
+    let validatesWhenDerived = false;
+
     const stated = context.isStated();
 
-    if (stated) {
-      const validatesWhenDerived = false;
+    if (!stated) {
+      debugger
 
-      return continuation(validatesWhenDerived, context);
-    }
+      const typeAssertionString = this.getString(); ///
 
-    const typeAssertionString = this.getString(); ///
+      context.trace(`Validating the '${typeAssertionString}' derived type assertion...`);
 
-    context.trace(`Validating the '${typeAssertionString}' derived type assertion...`);
-
-    validateWhenDerived(this.term, this.type, context, (term, context) => {
-      let validatesWhenDerived = false;
-
-      if (term !== null) {
-        validatesWhenDerived = true;
-      }
-
-      if (validatesWhenDerived) {
+      validatesWhenDerived = validateWhenDerived(this.term, this.type, context, (term, context) => {
         this.term = term;
-      }
+
+        return continuation(context);
+      });
 
       if (validatesWhenDerived) {
         context.debug(`...validated the '${typeAssertionString}' derived type assertion.`);
       }
+    }
 
-      return continuation(validatesWhenDerived, context);
-    });
+    return validatesWhenDerived;
   }
 
   unifyIndependently(generalContext, specificContext) {

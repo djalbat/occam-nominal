@@ -40,10 +40,9 @@ export default class ContinuationPass {
   }
 
   visitTerminalNode(terminalNode, ...remainingArguments) {
-    const visited = true,
-          continuation = remainingArguments.pop();
+    const continuation = remainingArguments.pop();
 
-    return continuation(visited, ...remainingArguments);
+    return continuation(...remainingArguments);
   }
 
   visitNonTerminalNode(nonTerminalNode, ...remainingArguments) {

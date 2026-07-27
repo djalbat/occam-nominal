@@ -50,7 +50,7 @@ export default define(class ConstructorDeclaration extends Declaration {
     return all([
       verifyType,
       verifyConstructor
-    ], context, (verifies) => {
+    ], context, (verifies, context) => {
       if (verifies) {
         this.constructor.setType(this.type);
 
@@ -61,7 +61,7 @@ export default define(class ConstructorDeclaration extends Declaration {
         context.debug(`...verified the '${constructorDeclarationString}' constructor declaration.`);
       }
 
-      return continuation(verifies);
+      return continuation(verifies, context);
     });
   });
 
@@ -103,7 +103,7 @@ export default define(class ConstructorDeclaration extends Declaration {
       context.debug(`...verified the '${constructorDeclarationString}' constructor declaration's type.`);
     }
 
-    return continuation(typeVerifies);
+    return continuation(typeVerifies, context);
   }
 
   verifyConstructor(context, continuation) {
@@ -113,12 +113,12 @@ export default define(class ConstructorDeclaration extends Declaration {
 
     context.trace(`Verifying the '${constructorDeclarationString}' constructor declaration's '${constructorString}' constructor...`);
 
-    this.constructor.verify(context, (constructorVerifies) => {
+    return this.constructor.verify(context, (constructorVerifies, context) => {
       if (constructorVerifies) {
         context.debug(`...verified the '${constructorDeclarationString}' constructor declaration's '${constructorString}' constructor.`);
       }
 
-      return continuation(constructorVerifies);
+      return continuation(constructorVerifies, context);
     });
   }
 

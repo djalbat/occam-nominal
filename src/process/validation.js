@@ -57,9 +57,13 @@ function unifyTermWithGenerators(term, context, continuation) {
     termUnifiesWithGenerators = some(generators, (generator, context, continuation) => {
       let termUnifies;
 
-      descend((context) => {
+      choose((context) => {
         termUnifies = generator.unifyTerm(term, context, continuation);
       }, context);
+
+      if (termUnifies) {
+        context.commit();
+      }
 
       return termUnifies;
     }, context, continuation);
@@ -86,8 +90,12 @@ function unifyTermWithConstructors(term, context, continuation) {
     termUnifiesWithConstructors = some(constructors, (constructor, context, continuation) => {
       let termUnifies;
 
-      descend((context) => {
+      choose((context) => {
         termUnifies = constructor.unifyTerm(term, context, continuation);
+
+        if (termUnifies) {
+          context.commit();
+        }
       }, context);
 
       return termUnifies;

@@ -20,49 +20,40 @@ export default define(class BracketedConstructor extends Constructor {
 
     context.trace(`Unifying the '${termString}' term with the bracketed constructor...`);
 
-    termUnifiesWithBracketedConstructor = super.unifyTerm(term, context, (termUnifies) => {
-      if (!termUnifies) {
-        return continuation(termUnifies);
-      }
+    termUnifiesWithBracketedConstructor = super.unifyTerm(term, context, (context) => {
+      let termUnifies = false;
 
       const bracketedTerm = term, ///
             bracketedTermNode = bracketedTerm.getNode(),
             singularTermNode = bracketedTermNode.getSingularTermNode();
 
-      if (singularTermNode === null) {
-        const termUnifies = false;
+      if (singularTermNode !== null) {
+        const bracketlessTermNode = singularTermNode, ///
+              bracketlessTerm = termFromTermNode(bracketlessTermNode, context),
+              validates = bracketlessTerm.validate(context, (bracketlessTerm, context) => {
+                const type = bracketlessTerm.getType(),
+                      provisional = bracketlessTerm.isProvisional();
 
-        return continuation(termUnifies);
+                bracketedTerm.setType(type);
+
+                bracketedTerm.setProvisional(provisional);
+
+                return continuation(context);
+              });
+
+        if (validates) {
+          termUnifies = true;
+        }
       }
 
-      const bracketlessTermNode = singularTermNode, ///
-            bracketlessTerm = termFromTermNode(bracketlessTermNode, context);
-
-      return bracketlessTerm.validate(context, (bracketlessTerm, context) => {
-        if (bracketlessTerm === null) {
-          const termUnifies = false;
-
-          return continuation(termUnifies);
-        }
-
-        let termUnifies;
-
-        const type = bracketlessTerm.getType(),
-              provisional = bracketlessTerm.isProvisional();
-
-        bracketedTerm.setType(type);
-
-        bracketedTerm.setProvisional(provisional);
-
-        termUnifies = true;
-
-        return continuation(termUnifies);
-      });
+      return termUnifies;
     });
 
     if (termUnifiesWithBracketedConstructor) {
       context.debug(`...unified the '${termString}' term with the bracketed constructor.`);
     }
+
+    return termUnifiesWithBracketedConstructor;
   }
 
   static name = "BracketedConstructor";

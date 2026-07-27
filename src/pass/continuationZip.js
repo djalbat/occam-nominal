@@ -2,7 +2,7 @@
 
 import { passUtilities } from "occam-languages";
 
-import { every } from "../utilities/continuation";
+import { match } from "../utilities/continuation";
 
 const { nonTerminalNodeQuery, areChildNodesCongruent } = passUtilities;
 
@@ -23,13 +23,8 @@ export default class ContinuationZipPass {
       return descended;
     }
 
-    let index = -1;
-
-    return every(generalChildNodes, (generalChildNode, ...remainingArguments) => {
-      index++;
-
+    return match(generalChildNodes, specificChildNodes, (generalChildNode, specificChildNode, ...remainingArguments) => {
       const continuation = remainingArguments.pop(),
-            specificChildNode = specificChildNodes[index],
             generalNode = generalChildNode, ///
             specificNode = specificChildNode; ///
 
@@ -64,10 +59,9 @@ export default class ContinuationZipPass {
   }
 
   visitTerminalNode(generalTerminalNode, specificTerminalNode, ...remainingArguments) { ///
-    const visited = true,
-          continuation = remainingArguments.pop();
+    const continuation = remainingArguments.pop();
 
-    return continuation(visited, ...remainingArguments);
+    return continuation(...remainingArguments);
   }
 
   visitNonTerminalNode(generalNonTerminalNode, specificNonTerminalNode, ...remainingArguments) {

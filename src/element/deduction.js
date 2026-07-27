@@ -44,11 +44,15 @@ export default define(class Deduction extends Element {
     if (!nonsensical) {
       derive((context) => {
         elide((context) => {
-          const validates = this.validate(context, (deduction, context) => true);
+          attempt((context) => {
+            const validates = this.validate(context, (deduction, context) => true);
 
-          if (validates) {
-            verifies = true;
-          }
+            if (validates) {
+              this.commit(context);
+
+              verifies = true;
+            }
+          }, context);
         }, context);
       }, context);
     } else {
@@ -69,19 +73,15 @@ export default define(class Deduction extends Element {
 
     context.trace(`Validating the '${deductionString}' deduction...`);
 
-    attempt((context) => {
-      const statementValidates = this.validateStatement(context, (context) => {
-        const deduction = this; ///
+    const statementValidates = this.validateStatement(context, (context) => {
+      const deduction = this; ///
 
-        this.commit(context);
+      return continuation(deduction, context);
+    });
 
-        return continuation(deduction, context);
-      });
-
-      if (statementValidates) {
-        validates = true;
-      }
-    }, context);
+    if (statementValidates) {
+      validates = true;
+    }
 
     if (validates) {
       context.debug(`...validated the '${deductionString}' deduction.`);
