@@ -343,6 +343,18 @@ export default class MnemicContext extends Context {
     });
   }
 
+  addAssertions(assertions) {
+    assertions.forEach((assertion) => {
+      this.addAssertion(assertion);
+    });
+  }
+
+  addMetavariables(metavariables) {
+    metavariables.forEach((metavariable) => {
+      this.addMetavariable(metavariable);
+    });
+  }
+
   findTermByTermNode(termNode) {
     const terms = this.getTerms(),
           term = terms.find((term) => {

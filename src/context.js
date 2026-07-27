@@ -560,6 +560,18 @@ export default class Context extends ContextBase {
     context.addTerms(terms);
   }
 
+  addAssertions(assertions) {
+    const context = this.getContext();
+
+    context.addAssertions(assertions);
+  }
+
+  addMetavariables(metavariables) {
+    const context = this.getContext();
+
+    context.addMetavariables(metavariables);
+  }
+
   addDerivedSubstitutions(derivedSubstitutions) {
     const context = this.getContext();
 
