@@ -87,59 +87,63 @@ export default define(class StatementSubstitution extends Substitution {
       strict = false;
     }
 
+    let validates;
+
     const statementSubstitutionString = this.getString();  ///
 
     context.trace(`Validating the '${statementSubstitutionString}' statement substitution...`);
 
-    const validSubstitution = this.findValidSubstitution(context);
+    let substitution;
 
-    if (validSubstitution !== null) {
-      const statementSubstitution = validSubstitution;  ///
+    substitution = this.findSubstitution(context);
 
-      context.debug(`...the '${statementSubstitutionString}' statement substitution is already valid.`);
+    if (substitution !== null) {
+      const statementSubstitution = substitution;  ///
 
-      continuation(statementSubstitution);
+      context.debug(`...the '${statementSubstitutionString}' statement substitution is already presenet.`);
 
-      return;
-    }
+      validates = continuation(statementSubstitution, context);
+    } else {
+      const generalContext = this.getGeneralContext(),
+            specificContext = this.getSpecificContext();
 
-    const generalContext = this.getGeneralContext(),
-          specificContext = this.getSpecificContext();
+      (strict ? pass : waive)((context) => {
+        attempts((generalContext, specificContext) => {
+          const validateTargetStatement = this.validateTargetStatement.bind(this),
+                validateReplacementStatement = this.validateReplacementStatement.bind(this);
 
-    return (strict ? pass : waive)((context) => {
-      return attempts((generalContext, specificContext) => {
-        const validateTargetStatement = this.validateTargetStatement.bind(this),
-              validateReplacementStatement = this.validateReplacementStatement.bind(this);
+          validates = all([
+            validateTargetStatement,
+            validateReplacementStatement
+          ], generalContext, specificContext, (generalContext, specificContext) => {
+            let validates;
 
-        return all([
-          validateTargetStatement,
-          validateReplacementStatement
-        ], generalContext, specificContext, (validates) => {
-          let statementSubstitution = null;
-
-          if (validates) {
-            const substitution = this;  ///
-
-            statementSubstitution = substitution; ///
+            substitution = this;  ///
 
             context.addSubstitution(substitution);
-          }
 
-          if (validates) {
             this.commit(generalContext, specificContext);
-          }
 
-          if (validates) {
-            context.debug(`...validated the '${statementSubstitutionString}' statement substitution.`);
-          }
+            const statementSubstitution = substitution; ///
 
-          return continuation(statementSubstitution);
-        });
-      }, generalContext, specificContext);
-    }, context);
+            validates = continuation(statementSubstitution, context);
+
+            return validates;
+          });
+        }, generalContext, specificContext);
+      }, context);
+    }
+
+    if (validates) {
+      context.debug(`...validated the '${statementSubstitutionString}' statement substitution.`);
+    }
+
+    return validates;
   }
 
   validateTargetStatement(generalContext, specificContext, continuation) {
+    let targetStatementValidates;
+
     const context = generalContext,  ///
           statementSubstitutionString = this.getString();  ///
 
@@ -147,55 +151,50 @@ export default define(class StatementSubstitution extends Substitution {
 
     const targetStatementSingular = this.targetStatement.isSingular();
 
-    if (!targetStatementSingular) {
-      const targetStatementString = this.targetStatement.getString(),
-            targetStatementValidates = false;
+    if (targetStatementSingular) {
+      elide((context) => {
+        targetStatementValidates = this.targetStatement.validate(context, (targetStatement, context) => {
+          const generalContext = context; ///
+
+          return continuation(generalContext, specificContext);
+        });
+      }, context);
+    } else {
+      const targetStatementString = this.targetStatement.getString();
+
+      targetStatementValidates = false;
 
       context.debug(`The '${targetStatementString}' target statement is not singular.`);
-
-      continuation(targetStatementValidates);
-
-      return;
     }
 
-    return elide((context) => {
-      return this.targetStatement.validate(context, (targetStatement) => {
-        let targetStatementValidates = false;
+    if (targetStatementValidates) {
+      context.trace(`...validated the '${statementSubstitutionString}' statement substitution's target statement.`);
+    }
 
-        if (targetStatement !== null) {
-          targetStatementValidates = true;
-        }
-
-        if (targetStatementValidates) {
-          context.debug(`...validated the '${statementSubstitutionString}' statement substitution's target statement...`);
-        }
-
-        return continuation(targetStatementValidates);
-      });
-    }, context);
+    return targetStatementValidates;
   }
 
   validateReplacementStatement(generalContext, specificContext, continuation) {
+    let replacementStatementValidates;
+
     const context = specificContext,  ///
           statementSubstitutionString = this.getString();  ///
 
     context.trace(`Validating the '${statementSubstitutionString}' statement substitution's replacement statement...`);
 
-    return elide((context) => {
-      return this.replacementStatement.validate(context, (replacementStatement) => {
-        let replacementStatementValidates = false;
+    elide((context) => {
+      replacementStatementValidates = this.replacementStatement.validate(context, (replacementStatement, context) => {
+        const specificContext = context;  ///
 
-        if (replacementStatement !== null) {
-          replacementStatementValidates = true;
-        }
-
-        if (replacementStatementValidates) {
-          context.debug(`...validated the '${statementSubstitutionString}' statement substitution's replacement statement.`);
-        }
-
-        return continuation(replacementStatementValidates);
+        return continuation(generalContext, specificContext);
       });
     }, context);
+
+    if (replacementStatementValidates) {
+      context.debug(`...validated the '${statementSubstitutionString}' statement substitution's replacement statement.`);
+    }
+
+    return replacementStatementValidates;
   }
 
   unifyTargetStatement(substitution, context, continuation) {

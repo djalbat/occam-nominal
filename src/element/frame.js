@@ -149,7 +149,7 @@ export default define(class Frame extends Element {
     if (validFrame !== null) {
       const frame = validFrame; ///
 
-      context.debug(`...the '${frameString}' frame is already valid.`);
+      context.debug(`...the '${frameString}' frame is already present.`);
 
       return continuation(frame);
     }

@@ -698,6 +698,12 @@ export default class Context extends ContextBase {
     context.addDeclaredVariable(declaredVariable);
   }
 
+  addDerivedSubstitution(derivedSubstitution) {
+    const context = this.getContext();
+
+    context.addDerivedSubstitution(derivedSubstitution);
+  }
+
   addConstraint(constraint) {
     const context = this.getContext();
 

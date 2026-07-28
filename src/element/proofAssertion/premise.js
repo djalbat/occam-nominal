@@ -234,7 +234,7 @@ export default define(class Premise extends ProofAssertion {
 
     const premiseContext = this.getContext(), ///
           generalContext = premiseContext, ///
-          specificContext = context; ///
+          specificContext = context;  ///
 
     return reconcile((context) => {
       return subproofAssertion.unifySubproof(subproof, generalContext, specificContext, (subproofUnifies) => {

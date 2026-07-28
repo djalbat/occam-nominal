@@ -73,7 +73,7 @@ export default define(class Constraint extends Element {
     if (validConstraint !== null) {
       const constraint = validConstraint; ///
 
-      context.debug(`...the '${constraintString}' constraint is already valid.`);
+      context.debug(`...the '${constraintString}' constraint is already present.`);
 
       return continuation(constraint);
     } else {

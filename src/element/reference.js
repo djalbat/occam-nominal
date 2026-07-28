@@ -54,12 +54,11 @@ export default define(class Reference extends Element {
 
   matchMetavariableNode(metavariableNode) { return this.metavariable.matchMetavariableNode(metavariableNode); }
 
-  findValidReference(context) {
+  findReference(context) {
     const referenceNode = this.getReferenceNode(),
-          reference = context.findReferenceByReferenceNode(referenceNode),
-          validReference = reference;  ///
+          reference = context.findReferenceByReferenceNode(referenceNode);
 
-    return validReference;
+    return reference;
   }
 
   compareParameter(parameter) {
@@ -83,33 +82,27 @@ export default define(class Reference extends Element {
   }
 
   validate(context, continuation) {
+    let validates;
+
     const referenceString = this.getString(); ///
 
     context.trace(`Validating the '${referenceString}' reference...`);
 
-    const validReference = this.findValidReference(context);
+    const reference = this.findReference(context);
 
-    if (validReference !== null) {
-      const reference = validReference;  ///
+    if (reference !== null) {
+      context.debug(`...the '${referenceString}' reference is already present.`);
 
-      context.debug(`...the '${referenceString}' reference is already valid.`);
+      validates = continuation(reference, context);
+    } else {
+      const specificContext = context; ///
 
-      continuation(reference);
+      context = this.getContext();
 
-      return;
-    }
+      attempt((context) => {
+        validates = this.validateMetavariable(context, (context) => {
+          let validates = false;
 
-    const temporaryContext = context; ///
-
-    context = this.getContext();
-
-    return attempt((context) => {
-      return this.validateMetavariable(context, (metavariableValidates) => {
-        let reference = null;
-
-        let validates = false;
-
-        if (metavariableValidates) {
           const metaType = this.metavariable.getMetaType();
 
           if (metaType === null) {
@@ -129,49 +122,47 @@ export default define(class Reference extends Element {
               context.debug(`The '${referenceString}' reference's '${metavariableString}' metavariable's '${metaTypeString}' meta-type should be the '${referenceMetaTypeString}' meta-type.`);
             }
           }
-        }
 
-        if (validates) {
-          this.commit(context);
-        }
+          if (validates) {
+            const reference = this; ///
 
-        context = temporaryContext; ///
+            this.commit(context);
 
-        if (validates) {
-          reference = this;  ///
+            specificContext.addReference(reference);
 
-          context.addReference(reference);
-        }
+            validates = continuation(reference, context);
+          }
 
-        if (validates) {
-          context.debug(`...validated the '${referenceString}' reference.`);
-        }
+          return validates;
+        });
+      }, context);
+    }
 
-        continuation(reference);
-      });
-    }, context);
+    if (validates) {
+      context.debug(`...validated the '${referenceString}' reference.`);
+    }
+
+    return validates;
   }
 
   validateMetavariable(context, continuation) {
+    let metavariableValidates;
+
     const referenceString = this.getString(); ///
 
     context.trace(`Validating the '${referenceString}' reference's metavariable...'`);
 
-    return this.metavariable.validate(context, (metavariable) => {
-      let metavariableValidates = true;
+    metavariableValidates = this.metavariable.validate(context, (metavariable, context) => {
+      this.metavariable = metavariable;
 
-      if (metavariable !== null) {
-        this.metavariable = metavariable;
-
-        metavariableValidates = true;
-      }
-
-      if (metavariableValidates) {
-        context.debug(`...validated the '${referenceString}' reference's metavariable.'`);
-      }
-
-      return continuation(metavariableValidates);
+      return continuation(context);
     });
+
+    if (metavariableValidates) {
+      context.debug(`...validated the '${referenceString}' reference's metavariable.'`);
+    }
+
+    return metavariableValidates;
   }
 
   unifyLabel(label, context, continuation) {

@@ -105,12 +105,12 @@ export default define(class ReferenceSubstitution extends Substitution {
 
     context.trace(`Validating the '${referenceSubstitutionString}' reference substitution...`);
 
-    const validSubstitution = this.findValidSubstitution(context);
+    const substitution = this.findSubstitution(context);
 
-    if (validSubstitution !== null) {
-      const referenceSubstitution = validSubstitution;  ///
+    if (substitution !== null) {
+      const referenceSubstitution = substitution;  ///
 
-      context.debug(`...the '${referenceSubstitutionString}' reference substitution is already valid.`);
+      context.debug(`...the '${referenceSubstitutionString}' reference substitution is already present.`);
 
       continuation(referenceSubstitution);
 

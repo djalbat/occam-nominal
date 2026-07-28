@@ -87,7 +87,7 @@ export default define(class Goal extends Element {
     if (validGoal !== null) {
       const goal = validGoal; ///
 
-      context.debug(`...the '${goalString}' goal is already valid.`);
+      context.debug(`...the '${goalString}' goal is already present.`);
 
       return continuation(goal);
     }

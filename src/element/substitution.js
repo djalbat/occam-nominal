@@ -187,12 +187,11 @@ export default class Substitution extends Element {
     return substitutionNodeMatches;
   }
 
-  findValidSubstitution(context) {
+  findSubstitution(context) {
     const substitutionNode = this.getSubstitutionNode(),
-          substitution = context.findSubstitutionBySubstitutionNode(substitutionNode),
-          validSubstitution = substitution;  ///
+          substitution = context.findSubstitutionBySubstitutionNode(substitutionNode);
 
-    return validSubstitution;
+    return substitution;
   }
 
   commit(generalContext, specificContext) {

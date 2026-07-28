@@ -109,7 +109,7 @@ export default define(class Signature extends Element {
 
       signature = validSignature;  ///
 
-      context.debug(`...the '${signatureString}' signature is already valid.`);
+      context.debug(`...the '${signatureString}' signature is already present.`);
     } else {
       const temporaryContext = context; ///
 

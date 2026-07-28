@@ -2,6 +2,8 @@
 
 import { queryUtilities } from "occam-query";
 
+import { ContinuationZipPass as AsynchronousContinuationZipPass } from "occam-languages";
+
 import ContinuationZipPassBase from "../pass/continuationZip";  ///
 
 import { reconcile } from "../utilities/context";
@@ -68,15 +70,15 @@ class PropertyPass extends ContinuationZipPass {
   ];
 }
 
-class StatementPass extends ContinuationZipPass {
+class StatementPass extends AsynchronousContinuationZipPass {
   static maps = [
     {
       generalNodeQuery: assumptionMetavariableNodeQuery,
       specificNodeQuery: assumptionMetavariableNodeQuery,
       run: (generalAssumptionMetavariableNode, specificAssumptionMetavariableNode, generalContext, specificContext, continuation) => {
         let context,
-          reference,
-          metavariableNode;
+            reference,
+            metavariableNode;
 
         context = generalContext; ///
 
@@ -99,7 +101,7 @@ class StatementPass extends ContinuationZipPass {
             success = true;
           }
 
-          return continuation(success);
+          return continuation(success, generalContext, specificContext);
         });
       }
     },
@@ -108,7 +110,7 @@ class StatementPass extends ContinuationZipPass {
       specificNodeQuery: statementNodeQuery,
       run: (generalStatementMetavariableNode, specificStatementNode, generalContext, specificContext, continuation) => {
         const statementNode = specificStatementNode, ///
-          metavariableNode = generalStatementMetavariableNode;
+              metavariableNode = generalStatementMetavariableNode;
 
         let context;
 
@@ -127,7 +129,7 @@ class StatementPass extends ContinuationZipPass {
             success = true;
           }
 
-          return continuation(success);
+          return continuation(success, generalContext, specificContext);
         });
       }
     },
@@ -136,7 +138,7 @@ class StatementPass extends ContinuationZipPass {
       specificNodeQuery: frameNodeQuery,
       run: (generalFrameMetavariableNode, specificFrameNode, generalContext, specificContext, continuation) => {
         const frameNode = specificFrameNode, ///
-          metavariableNode = generalFrameMetavariableNode;
+              metavariableNode = generalFrameMetavariableNode;
 
         let context;
 
@@ -155,7 +157,7 @@ class StatementPass extends ContinuationZipPass {
             success = true;
           }
 
-          return continuation(success);
+          return continuation(success, generalContext, specificContext);
         });
       }
     },
@@ -164,15 +166,15 @@ class StatementPass extends ContinuationZipPass {
       specificNodeQuery: termNodeQuery,
       run: (generalTermVariableNode, specificTermNode, generalContext, specificContext, continuation) => {
         const termNode = specificTermNode, ///
-          variableNode = generalTermVariableNode; ///
+              variableNode = generalTermVariableNode; ///
 
         let context;
 
         context = generalContext; ///
 
         const variableIdentifier = variableNode.getVariableIdentifier(),
-          declaredVariable = context.findDeclaredVariableByVariableIdentifier(variableIdentifier),
-          variable = declaredVariable;  ///
+              declaredVariable = context.findDeclaredVariableByVariableIdentifier(variableIdentifier),
+              variable = declaredVariable;  ///
 
         context = specificContext;  ///
 
@@ -185,7 +187,7 @@ class StatementPass extends ContinuationZipPass {
             success = true;
           }
 
-          return continuation(success);
+          return continuation(success, generalContext, specificContext);
         });
       }
     },
@@ -211,7 +213,7 @@ class StatementPass extends ContinuationZipPass {
               success = true;
             }
 
-            return continuation(success);
+            return continuation(success, generalContext, specificContext);
           });
         }, context)
       }
@@ -340,7 +342,7 @@ class CombinatorPass extends ContinuationZipPass {
                 context = specificContext,  ///
                 frame = frameFromFrameNode(frameNode, context),
                 validates = frame.validate(context, (frame, context) => {
-                  const specificContext = context; ///
+                  const specificContext = context;  ///
 
                   return continuation(generalContext, specificContext);
                 });

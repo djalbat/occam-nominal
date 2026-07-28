@@ -87,7 +87,7 @@ export default define(class Assumption extends Element {
     if (validAssumption !== null) {
       const assumption = validAssumption; ///
 
-      context.debug(`...the '${assumptionString}' assumption is already valid.`);
+      context.debug(`...the '${assumptionString}' assumption is already presenet.`);
 
       return continuation(assumption);
     }

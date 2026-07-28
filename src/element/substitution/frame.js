@@ -88,12 +88,12 @@ export default define(class FrameSubstitution extends Substitution {
 
     context.trace(`Validating the '${frameSubstitutionString}' frame substitution...`);
 
-    const validSubstitution = this.findValidSubstitution(context);
+    const substitution = this.findSubstitution(context);
 
-    if (validSubstitution !== null) {
-      const frameSubstitution = validSubstitution;  ///
+    if (substitution !== null) {
+      const frameSubstitution = substitution;  ///
 
-      context.debug(`...the '${frameSubstitutionString}' frame substitution is already valid.`);
+      context.debug(`...the '${frameSubstitutionString}' frame substitution is already present.`);
 
       return continuation(frameSubstitution);
     }
@@ -351,7 +351,7 @@ export default define(class FrameSubstitution extends Substitution {
       frameSubstitution = ablate((context) => {
         return descend((context) => {
           const generalContext = context, ///
-                specificContext = context,
+                specificContext = context,  ///
                 frameSubstitution = frameSubstitutionFromFrameSubstitutionNode(frameSubstitutionNode, generalContext, specificContext);
 
           return frameSubstitution;

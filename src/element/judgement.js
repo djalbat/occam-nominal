@@ -161,7 +161,7 @@ export default define(class Judgement extends Element {
     if (validJudgement !== null) {
       const judgement = validJudgement; ///
 
-      context.debug(`...the '${judgementString}' judgement is already valid.`);
+      context.debug(`...the '${judgementString}' judgement is already present.`);
 
       return continuation(judgement);
     }

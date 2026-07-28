@@ -129,7 +129,7 @@ export default define(class Equality extends Element {
     if (validEquality !== null) {
       const equality = validEquality; ///
 
-      context.debug(`...the '${equalityString}' equality is already valid.`);
+      context.debug(`...the '${equalityString}' equality is already present.`);
 
       return continuation(equality);
     }

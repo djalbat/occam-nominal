@@ -188,7 +188,7 @@ export default define(class Metavariable extends Element {
     metavariable = this.findMetavariable(context);
 
     if (metavariable !== null) {
-      context.debug(`...the '${metavariableString}' metavariable is already valid.`);
+      context.debug(`...the '${metavariableString}' metavariable is already present.`);
 
       validates = continuation(metavariable, context);
     } else {
@@ -256,31 +256,27 @@ export default define(class Metavariable extends Element {
   }
 
   validateType(strict, context, continuation) {
-    let typeValidates = true; ///
-
-    const metavariableString = this.getString();  ///
-
-    context.trace(`Validating  the '${metavariableString}' metavariable's type...`);
+    let typeValidates;
 
     if (this.type !== null) {
+      const metavariableString = this.getString();  ///
+
+      context.trace(`Validating  the '${metavariableString}' metavariable's type...`);
+
+      typeValidates = false;
+
       const typeName = this.type.getName(),
             typePresenet = context.isTypePresentByTypeName(typeName);
 
       if (typePresenet) {
-        const typeString = this.type.getString();
-
-        context.trace(`A '${typeString}' type is present in the '${metavariableString}' metavariable.`);
-      } else {
-        typeValidates = false;
+        typeValidates = continuation(strict, context);
       }
-    }
 
-    if (typeValidates) {
+      if (typeValidates) {
+        context.trace(`...validated  the '${metavariableString}' metavariable's type.`);
+      }
+    } else {
       typeValidates = continuation(strict, context);
-    }
-
-    if (typeValidates) {
-      context.trace(`...validated  the '${metavariableString}' metavariable's type.`);
     }
 
     return typeValidates;
@@ -289,11 +285,11 @@ export default define(class Metavariable extends Element {
   validateTerm(strict, context, continuation) {
     let termValidates;
 
-    const metavariableString = this.getString();  ///
-
-    context.trace(`Validating the '${metavariableString}' metavariable's term...`);
-
     if (this.term !== null) {
+      const metavariableString = this.getString();  ///
+
+      context.trace(`Validating the '${metavariableString}' metavariable's term...`);
+
       const metavariableName = this.getMetavariableName(),
             declaredMetavariable = context.findDeclaredMetavariableByMetavariableName(metavariableName);
 
@@ -320,12 +316,12 @@ export default define(class Metavariable extends Element {
           });
         }
       }
+
+      if (termValidates) {
+        context.debug(`...validated the '${metavariableString}' metavariable's term.`);
+      }
     } else {
       termValidates = continuation(strict, context);
-    }
-
-    if (termValidates) {
-      context.debug(`...validated the '${metavariableString}' metavariable's term.`);
     }
 
     return termValidates;
@@ -440,19 +436,25 @@ export default define(class Metavariable extends Element {
       statementSubstitution = StatementSubstitution.fromStatementAndMetavariable(statement, metavariable, generalContext, specificContext);
     }
 
-    return statementSubstitution.validate(context, (statementSubstitution) => {
+    statementSubstitution.validate(context, (statementSubstitution, context) => {
+      let validates;
+
       const derivedSubstitution = statementSubstitution;  ///
 
       context.addDerivedSubstitution(derivedSubstitution);
 
-      const statementUnifies = true;
+      validates = true;
 
-      if (statementUnifies) {
-        context.debug(`...unified the '${statementString}' statement with the '${metavariableString}' metavariable.`);
-      }
-
-      return continuation(statementUnifies);
+      return validates;
     });
+
+    const statementUnifies = true;
+
+    if (statementUnifies) {
+      context.debug(`...unified the '${statementString}' statement with the '${metavariableString}' metavariable.`);
+    }
+
+    return continuation(statementUnifies);
   }
 
   unifyReference(reference, generalContext, specificContext, continuation) {

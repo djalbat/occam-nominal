@@ -91,12 +91,12 @@ export default define(class TermSubstitution extends Substitution {
 
     context.trace(`Validating the '${termSubstitutionString}' term substitution...`);
 
-    const validSubstitution = this.findValidSubstitution(context);
+    const substitution = this.findSubstitution(context);
 
-    if (validSubstitution !== null) {
-      const termSubstitution = validSubstitution;  ///
+    if (substitution !== null) {
+      const termSubstitution = substitution;  ///
 
-      context.debug(`...the '${termSubstitutionString}' term substitution is already valid.`);
+      context.debug(`...the '${termSubstitutionString}' term substitution is already present.`);
 
       return continuation(termSubstitution);
     }
@@ -354,7 +354,7 @@ export default define(class TermSubstitution extends Substitution {
       termSubstitution = ablate((context) => {
         return descend((context) => {
           const generalContext = context, ///
-                specificContext = context,
+                specificContext = context,  ///
                 termSubstitution = termSubstitutionFromTermSubstitutionNode(termSubstitutionNode, generalContext, specificContext);
 
           return termSubstitution;
