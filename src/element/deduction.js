@@ -26,7 +26,7 @@ export default define(class Deduction extends Element {
     return deductionNode;
   }
 
-  isNonBreakable() {
+  isNonsensical() {
     const nonsensical = (this.statement === null);
 
     return nonsensical;
@@ -39,31 +39,39 @@ export default define(class Deduction extends Element {
 
     context.trace(`Verifying the '${deductionString}' deduction...`);
 
-    const nonsensical = this.isNonBreakable();
+    const nonsensical = this.isNonsensical();
 
-    if (!nonsensical) {
-      derive((context) => {
-        elide((context) => {
-          attempt((context) => {
-            const validates = this.validate(context, (deduction, context) => true);
-
-            if (validates) {
-              this.commit(context);
-
-              verifies = true;
-            }
-          }, context);
-        }, context);
-      }, context);
-    } else {
+    if (nonsensical) {
       context.debug(`Unable to verify the '${deductionString}' deduction because it is nonsense.`);
+
+      return continuation(verifies);
     }
 
-    if (verifies) {
-      context.debug(`...verified the '${deductionString}' deduction.`);
-    }
+    return derive((context) => {
+      return elide((context) => {
+        let validates;
 
-    return continuation(verifies);
+        attempt((context) => {
+          validates = this.validate(context, (deduction, context) => true);
+
+          if (validates) {
+            this.commit(context);
+          }
+        }, context);
+
+        if (!validates) {
+          return continuation(verifies);
+        }
+
+        verifies = true;
+
+        if (verifies) {
+          context.debug(`...verified the '${deductionString}' deduction.`);
+        }
+
+        return continuation(verifies);
+      }, context);
+    }, context);
   });
 
   validate(context, continuation) {

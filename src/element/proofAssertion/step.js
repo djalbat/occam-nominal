@@ -120,6 +120,8 @@ export default define(class Step extends ProofAssertion {
   }
 
   verify = breakable(function (context, continuation) {
+    let verifies = false;
+
     const stepString = this.getString(); ///
 
     context.trace(`Verifying the '${stepString}' step...`);
@@ -127,8 +129,6 @@ export default define(class Step extends ProofAssertion {
     const nonsensical = this.isNonsensical();
 
     if (nonsensical) {
-      const verifies = false;
-
       context.debug(`Unable to verify the '${stepString}' step because it is nonsense.`);
 
       return continuation(verifies);
@@ -138,13 +138,25 @@ export default define(class Step extends ProofAssertion {
           stated = qualified; ///
 
     return (stated ? declare : derive)((context) => {
-      const unify = this.unify.bind(this),
-            validate = this.validate.bind(this);
+      let validates;
 
-      return all([
-        validate,
-        unify
-      ], context, (verifies) => {
+      attempt((context) => {
+        validates = this.validate(context, (step, context) => true);
+
+        if (validates) {
+          this.commit(context);
+        }
+      }, context);
+
+      if (!validates) {
+        return continuation(verifies);
+      }
+
+      return this.unify(context, (unifies) => {
+        if (unifies) {
+          verifies = true;
+        }
+
         if (verifies) {
           context.debug(`...verified the '${stepString}' step.`);
         }
@@ -155,115 +167,101 @@ export default define(class Step extends ProofAssertion {
   });
 
   validate(context, continuation) {
+    let validates;
+
     const stepString = this.getString(); ///
 
     context.trace(`Validating the '${stepString}' step...`);
 
-    return attempt((context) => {
-      const validateStatement = this.validateStatement.bind(this),
-            validateReference = this.validateReference.bind(this),
-            validateSignatureAssertion = this.validateSignatureAssertion.bind(this);
+    const validateStatement = this.validateStatement.bind(this),
+          validateReference = this.validateReference.bind(this),
+          validateSignatureAssertion = this.validateSignatureAssertion.bind(this);
 
-      return all([
-        validateStatement,
-        validateReference,
-        validateSignatureAssertion
-      ], context, (validates) => {
-        if (validates) {
-          this.commit(context);
-        }
+    validates = all([
+      validateStatement,
+      validateReference,
+      validateSignatureAssertion
+    ], context, (context) => {
+      const step = this;  ///
 
-        if (validates) {
-          context.debug(`...validated the '${stepString}' step.`);
-        }
+      return continuation(step, context);
+    });
 
-        return continuation(validates);
-      });
-    }, context);
+    if (validates) {
+      context.debug(`...validated the '${stepString}' step.`);
+    }
+
+    return validates;
   }
 
   validateStatement(context, continuation) {
-    const stepString = this.getString();
+    let statementValidates;
+
+    const stepString = this.getString();  ///
 
     context.trace(`Validating the '${stepString}' step's statement...`);
 
     const statement = this.getStatement();
 
-    return statement.validate(context, (statement) => {
-      let statementValidates = false;
-
-      if (statement !== null) {
-        statementValidates = true;
-      }
-
-      if (statementValidates) {
-        context.debug(`...validated the '${stepString}' step's statement.`);
-      }
-
-      return continuation(statementValidates);
+    statementValidates = statement.validate(context, (statement, context) => {
+      return continuation(context);
     });
+
+    if (statementValidates) {
+      context.trace(`...validated the '${stepString}' step's statement.`);
+    }
+
+    return statementValidates;
   }
 
   validateReference(context, continuation) {
-    if (this.reference === null) {
-      const referenceValidates = true;  ///
+    let referenceValidates;
 
-      continuation(referenceValidates);
+    if (this.reference !== null) {
+      const stepString = this.getString(),  ///
+            referenceString = this.reference.getString();
 
-      return;
-    }
+      context.trace(`Validating the '${stepString}' step's '${referenceString}' reference...`);
 
-    const stepString = this.getString(),  ///
-          referenceString = this.reference.getString();
-
-    context.trace(`Validating the '${stepString}' step's '${referenceString}' reference...`);
-
-    return this.reference.validate(context, (reference) => {
-      let referenceValidates = false;
-
-      if (reference !== null) {
+      referenceValidates = this.reference.validate(context, (reference, context) => {
         this.reference = reference;
 
-        referenceValidates = true;
-      }
+        return continuation(context);
+      });
 
       if (referenceValidates) {
         context.debug(`...validated the '${stepString}' step's '${referenceString}' reference.`);
       }
+    } else {
+      referenceValidates = continuation(context);
+    }
 
-      return continuation(referenceValidates);
-    });
+    return referenceValidates;
   }
 
   validateSignatureAssertion(context, continuation) {
-    if (this.signatureAssertion === null) {
-      const signatureAssertionValidates = true; ///
+    let signatureAssertionValidates;
 
-      continuation(signatureAssertionValidates);
+    if (this.signatureAssertion !== null) {
+      const stepString = this.getString(),  ///
+            signatureAssertionString = this.signatureAssertion.getString();
 
-      return;
-    }
+      context.trace(`Validating the '${stepString}' step's '${signatureAssertionString}' signature assertion...`);
 
-    const stepString = this.getString(),  ///
-          signatureAssertionString = this.signatureAssertion.getString();
-
-    context.trace(`Validating the '${stepString}' step's '${signatureAssertionString}' signature assertion...`);
-
-    return this.signatureAssertion.validate(context, (signatureAssertion) => {
-      let signatureAssertionValidates = false;
-
-      if (signatureAssertion !== null) {
+      signatureAssertionValidates =this.signatureAssertion.validate(context, (signatureAssertion, contwext) => {
         this.signatureAssertion = signatureAssertion;
 
-        signatureAssertionValidates = true;
-      }
+        return continuation(context);
+      });
 
       if (signatureAssertionValidates) {
         context.debug(`...validated the '${stepString}' step's '${signatureAssertionString}' signature assertion.`);
       }
+    } else {
+      signatureAssertionValidates = continuation(context);
+    }
 
-      return continuation(signatureAssertionValidates);
-    });
+    return signatureAssertionValidates;
   }
 
   unify(context, continuation) {

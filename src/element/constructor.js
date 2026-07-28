@@ -197,15 +197,18 @@ export default define(class Constructor extends Element {
             specifiContext = context; ///
 
       termUnifiesWithConstructor = unifyTermWithConstructor(term, constructor, generalContext, specifiContext, (generalContext, specifiContext) => {
-        const provisional = this.type.isProvisional();
+        let termUnifiesWithConstructor;
+
+        const context = specifiContext, ///
+              provisional = this.type.isProvisional();
 
         term.setProvisional(provisional);
 
         term.setType(this.type);
 
-        const context = specifiContext; ///
+        termUnifiesWithConstructor = continuation(term, context);
 
-        return continuation(term, context);
+        return termUnifiesWithConstructor;
       });
 
       return termUnifiesWithConstructor;

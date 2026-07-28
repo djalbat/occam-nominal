@@ -47,18 +47,23 @@ export function some(array, callback, ...initialArguments) {
 }
 
 export function each(array, callback, ...initialArguments) {
+  const length = array.length;
+
+  if (length === 0) {
+    const success = false;
+
+    return success;
+  }
+
   const continuation = initialArguments.pop(),
         callbackArguments = initialArguments, ///
-        length = array.length,
         index = 0;
 
   function next(index, ...callbackArguments) {
     let success;
 
     if (index === length) {
-      success = (length > 0) ?
-                  continuation(...callbackArguments) :
-                    false;
+      success = continuation(...callbackArguments);
     } else {
       const element = array[index];
 

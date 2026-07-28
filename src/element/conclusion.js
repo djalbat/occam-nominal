@@ -26,7 +26,7 @@ export default define(class Conclusion extends Element {
     return conclusionNode;
   }
 
-  isNonBreakable() {
+  isNonsensical() {
     const nonsensical = (this.statement === null);
 
     return nonsensical;
@@ -37,7 +37,7 @@ export default define(class Conclusion extends Element {
 
     context.trace(`Verifying the '${conclusionString}' conclusion...`);
 
-    const nonsensical = this.isNonBreakable();
+    const nonsensical = this.isNonsensical();
 
     if (nonsensical) {
       const verifies = false;

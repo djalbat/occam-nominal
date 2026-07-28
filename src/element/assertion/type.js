@@ -155,7 +155,7 @@ export default define(class TypeAssertion extends Assertion {
       context.trace(`Validating the '${typeAssertionString}' stated type assertion...`);
 
       validatesWhenStated = this.term.validate(context, (term, context) => {
-        let validatesWhenStated = false;
+        let termValidates = false;
 
         const termType = term.getType(),
               termTypeEqualToType = termType.isEqualTo(this.type),
@@ -164,22 +164,22 @@ export default define(class TypeAssertion extends Assertion {
         if (false) {
           ///
         } else if (termTypeEqualToType) {
-          validatesWhenStated = true;
+          termValidates = true;
         } else if (termTypeSuperTypeOfType) {
           const termEstablished = term.isEstablished();
 
           if (termEstablished) {
-            validatesWhenStated = true;
+            termValidates = true;
           }
         }
 
-        if (validatesWhenStated) {
+        if (termValidates) {
           this.term = term;
 
-          validatesWhenStated = continuation(context);
+          termValidates = continuation(context);
         }
 
-        return validatesWhenStated;
+        return termValidates;
       });
 
       if (validatesWhenStated) {
@@ -196,16 +196,18 @@ export default define(class TypeAssertion extends Assertion {
     const stated = context.isStated();
 
     if (!stated) {
-      debugger
-
       const typeAssertionString = this.getString(); ///
 
       context.trace(`Validating the '${typeAssertionString}' derived type assertion...`);
 
       validatesWhenDerived = validateWhenDerived(this.term, this.type, context, (term, context) => {
+        let validatesWhenDerived;
+
         this.term = term;
 
-        return continuation(context);
+        validatesWhenDerived = continuation(context);
+
+        return validatesWhenDerived;
       });
 
       if (validatesWhenDerived) {
@@ -315,11 +317,9 @@ export default define(class TypeAssertion extends Assertion {
 });
 
 function validateWhenDerived(term, type, context, continuation) {
-  if (term === null) {
-    return continuation(term, context);
-  }
+  let validatesWhenDerived;
 
-  return term.validate((term, context, continuation) => {
+  validatesWhenDerived = term.validate(context, (term, context) => {
     let termValidates = false;
 
     const termType = term.getType(),
@@ -333,10 +333,12 @@ function validateWhenDerived(term, type, context, continuation) {
       }
     }
 
-    if (!termValidates) {
-      term = null;
+    if (termValidates) {
+      termValidates = continuation(term, context);
     }
 
-    return continuation(term, context);
+    return termValidates;
   }, context, continuation);
+
+  return validatesWhenDerived;
 }
