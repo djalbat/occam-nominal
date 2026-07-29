@@ -1,11 +1,12 @@
 "use strict";
 
-import { Element, continuationUtilities } from "occam-languages";
+import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
 
 import { define } from "../elements";
 import { enclose } from "../utilities/context";
 
-const { all, every } = continuationUtilities;
+const { breakable } = breakPointUtilities,
+      { all, every } = continuationUtilities;
 
 export default define(class Subproof extends Element {
   constructor(context, string, node, breakPoint, suppositions, subDerivation) {
@@ -88,7 +89,11 @@ export default define(class Subproof extends Element {
     return comparesToStatement;
   }
 
-  verify(context, continuation) {
+  verify = breakable(function(context, continuation) {
+    const subproofString = this.getString();
+
+    context.trace(`Verifying the '${subproofString}' subprpoof...`);
+
     return enclose((context) => {
       const verifySuppositions = this.verifySuppositions.bind(this),
             verifySubDerivation = this.verifySubDerivation.bind(this);
@@ -96,9 +101,15 @@ export default define(class Subproof extends Element {
       return all([
         verifySuppositions,
         verifySubDerivation
-      ], context, continuation);
+      ], context, (verifies) => {
+        if (verifies) {
+          context.debug(`...verified the '${subproofString}' subproof.`);
+        }
+
+        return continuation(verifies);
+      });
     }, context);
-  }
+  });
 
   verifySupposition(supposition, context, continuation) {
     const subproofString = this.getString(),

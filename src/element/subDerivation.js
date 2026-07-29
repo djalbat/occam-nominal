@@ -35,7 +35,7 @@ export default define(class SubDerivation extends Element {
   }
 
   verify(context, continuation) {
-    return every(this.factOrSubproofs, (factOrSubproof, continuation) => {
+    return every(this.factOrSubproofs, (factOrSubproof, context, continuation) => {
       factOrSubproof.verify(context, (factOrSubproofVerifies) => {
         if (factOrSubproofVerifies) {
           context.assignAssignments();
@@ -45,7 +45,7 @@ export default define(class SubDerivation extends Element {
 
         return continuation(factOrSubproofVerifies, context);
       });
-    }, continuation);
+    }, context, continuation);
   }
 
   static name = "SubDerivation";
