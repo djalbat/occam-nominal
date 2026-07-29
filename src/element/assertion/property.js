@@ -98,9 +98,9 @@ export default define(class PropertyAssertion extends Assertion {
   async validateTerms(context) {
     let termsValidate = false;
 
-    const proofAssertionString = this.getString(); ///
+    const factString = this.getString(); ///
 
-    context.trace(`Validating the '${proofAssertionString}' proof assertion's terms...`);
+    context.trace(`Validating the '${factString}' fact's terms...`);
 
     let subjectTerm,
         propertyTerm;
@@ -138,7 +138,7 @@ export default define(class PropertyAssertion extends Assertion {
     }
 
     if (termsValidate) {
-      context.debug(`...validated the '${proofAssertionString}' proof assertion's terms.`);
+      context.debug(`...validated the '${factString}' fact's terms.`);
     }
 
     return termsValidate;

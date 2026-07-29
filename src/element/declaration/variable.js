@@ -59,7 +59,7 @@ export default define(class VariableDeclaration extends Declaration {
         context.debug(`...verified the '${variableDeclarationString}' variable declaration.`);
       }
 
-      return continuation(verifies);
+      return continuation(verifies, context);
     });
   });
 
@@ -100,7 +100,7 @@ export default define(class VariableDeclaration extends Declaration {
       context.debug(`...verified the '${variableDeclarationString}' variable declaration's type.`);
     }
 
-    return continuation(typeVerifies);
+    return continuation(typeVerifies, context);
   }
 
   verifyVariable(context, continuation) {
@@ -124,7 +124,7 @@ export default define(class VariableDeclaration extends Declaration {
       context.debug(`...verified the '${variableDeclarationString}' variable declaration's '${variableString}' variable.`);
     }
 
-    return continuation(variableVerifies);
+    return continuation(variableVerifies, context);
   }
 
   static name = "VariableDeclaration";

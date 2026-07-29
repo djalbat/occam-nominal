@@ -8,12 +8,12 @@ import { enclose } from "../utilities/context";
 const { every } = continuationUtilities;
 
 export default define(class Section extends Element {
-  constructor(context, string, node, breakPoint, hypotheses, declaration, topLevelAssertion) {
+  constructor(context, string, node, breakPoint, hypotheses, declaration, claim) {
     super(context, string, node, breakPoint);
 
     this.hypotheses = hypotheses;
     this.declaration = declaration;
-    this.topLevelAssertion = topLevelAssertion;
+    this.claim = claim;
   }
 
   getHypotheses() {
@@ -24,8 +24,8 @@ export default define(class Section extends Element {
     return this.declaration;
   }
 
-  getTopLevelAssertion() {
-    return this.topLevelAssertion;
+  getClaim() {
+    return this.claim;
   }
 
   getSectionNode() {
@@ -60,12 +60,12 @@ export default define(class Section extends Element {
           }
         }
 
-        if (this.topLevelAssertion !== null) {
-          this.topLevelAssertion.setHypotheses(this.hypotheses);
+        if (this.claim !== null) {
+          this.claim.setHypotheses(this.hypotheses);
 
-          const topLevelAssertionVerifies = await this.topLevelAssertion.verify(context);
+          const claimVerifies = await this.claim.verify(context);
 
-          if (topLevelAssertionVerifies) {
+          if (claimVerifies) {
             verifies = true;
           }
         }

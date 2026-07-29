@@ -2,7 +2,7 @@
 
 import { breakPointUtilities } from "occam-languages";
 
-import ProofAssertion from "../proofAssertion";
+import Fact from "../fact";
 
 import { define } from "../../elements";
 import { exists } from "../../utilities/continuation";
@@ -12,7 +12,7 @@ import { declare, attempt, reconcile, serialise, unserialise, instantiate } from
 
 const { breakable, breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
-export default define(class Supposition extends ProofAssertion {
+export default define(class Supposition extends Fact {
   constructor(context, string, node, breakPoint, statement, procedureCall) {
     super(context, string, node, breakPoint, statement);
 
@@ -251,48 +251,48 @@ export default define(class Supposition extends ProofAssertion {
     }, context);
   }
 
-  unifyProofAssertion(proofAssertion, context, continuation) {
-    const suppositionString = this.getString(), ///
-          proofAssertionString = proofAssertion.getString();
+  unifyFact(fact, context, continuation) {
+    const factString = fact.getString(),
+          suppositionString = this.getString(); ///
 
-    context.trace(`Unifying the '${proofAssertionString}' proof assertion with the '${suppositionString}' supposition...`);
+    context.trace(`Unifying the '${factString}' fact with the '${suppositionString}' supposition...`);
 
-    const proofAssertionContext = proofAssertion.getContext(),
+    const factContext = fact.getContext(),
           suppositionContext = this.getContext(), ///
           generalContext = suppositionContext, ///
-          specificContext = proofAssertionContext;  ///
+          specificContext = factContext;  ///
 
     return reconcile((specificContext) => {
-      const statement = proofAssertion.getStatement();
+      const statement = fact.getStatement();
 
       return this.unifyStatement(statement, generalContext, specificContext, (statementUnifies) => {
-        let proofAssertionUnifies = false;
+        let factUnifies = false;
 
         if (statementUnifies) {
-          proofAssertionUnifies = true;
+          factUnifies = true;
 
           specificContext.commit(context);
         }
 
-        if (proofAssertionUnifies) {
-          context.debug(`...unified the '${proofAssertionString}' proof assertion with the '${suppositionString}' supposition.`);
+        if (factUnifies) {
+          context.debug(`...unified the '${factString}' fact with the '${suppositionString}' supposition.`);
         }
 
-        return continuation(proofAssertionUnifies);
+        return continuation(factUnifies);
       });
     }, specificContext);
   }
 
-  unifySubproofOrProofAssertion(subproofOrProofAssertion, context, continuation) {
-    const subproofOrProofAssertionProofAssertion = subproofOrProofAssertion.isProofAssertion();
+  unifyFactOrSubproof(factOrSubproof, context, continuation) {
+    const factOrSubproofFact = factOrSubproof.isFact();
 
-    if (subproofOrProofAssertionProofAssertion) {
-      const proofAssertion = subproofOrProofAssertion;  ///
+    if (factOrSubproofFact) {
+      const fact = factOrSubproof;  ///
 
-      return this.unifyProofAssertion(proofAssertion, context, continuation);
+      return this.unifyFact(fact, context, continuation);
     }
 
-    const subproof = subproofOrProofAssertion;  ///
+    const subproof = factOrSubproof;  ///
 
     return this.unifySubproof(subproof, context, continuation);
   }

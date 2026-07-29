@@ -88,6 +88,8 @@ export default define(class Variable extends Element {
   }
 
   validate(context, continuation) {
+    let validates;
+
     const variableString = this.getString(); ///
 
     context.trace(`Validating the '${variableString}' variable...`);
@@ -95,30 +97,32 @@ export default define(class Variable extends Element {
     const variableIdentifier = this.identifier, ///
           declaredVariable = context.findDeclaredVariableByVariableIdentifier(variableIdentifier);
 
-    if (declaredVariable === null) {
-      const variable = null;
+    if (declaredVariable !== null) {
+      const type = declaredVariable.getType(),
+            typeString = type.getString(),
+            provisional = declaredVariable.isProvisional(),
+            provisinallyString = provisionallyStringFromProvisional(provisional);
 
-      context.debug(`The '${variableString}' variable is not present.`);
+      context.trace(`Setting the '${variableString}' variable's type to the '${typeString}' type${provisinallyString}.`);
 
-      return continuation(variable);
+      this.type = type;
+
+      this.provisional = provisional;
+
+      const variable = this;  ///
+
+      validates = continuation(variable, context);
+    } else {
+      context.debug(`The '${variableString}' declared variable is not present.`);
+
+      validates = false;
     }
 
-    const type = declaredVariable.getType(),
-          typeString = type.getString(),
-          provisional = declaredVariable.isProvisional(),
-          provisinallyString = provisionallyStringFromProvisional(provisional);
+    if (validates) {
+      context.debug(`...validated the '${variableString}' variable.`);
+    }
 
-    context.trace(`Setting the '${variableString}' variable's type to the '${typeString}' type${provisinallyString}.`);
-
-    this.type = type;
-
-    this.provisional = provisional;
-
-    const variable = this;  ///
-
-    context.debug(`...validated the '${variableString}' variable.`);
-
-    return continuation(variable);
+    return validates;
   }
 
   unifyTerm(term, generalContext, specificContext, continuation) {

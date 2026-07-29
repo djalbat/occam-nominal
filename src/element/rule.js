@@ -148,11 +148,11 @@ export default define(class Rule extends Element {
 
     return premise.verify(context, (premiseVerifies) => {
       if (premiseVerifies) {
-        const subproofOrProofAssertion = premise;  ////
+        const factOrSubproof = premise;  ////
 
         context.assignAssignments();
 
-        context.addSubproofOrProofAssertion(subproofOrProofAssertion);
+        context.addFactOrSubproof(factOrSubproof);
       }
 
       if (premiseVerifies) {
@@ -216,39 +216,39 @@ export default define(class Rule extends Element {
     });
   }
 
-  unifyStepAndSubproofOrProofAssertions(step, subproofOrProofAssertions, context, continuation) {
+  unifyStepAndFactOrSubproofs(step, factOrSubproofs, context, continuation) {
     return this.unifyStepWithConclusion(step, context, (statementUnifiesWithConclusion) => {
       if (!statementUnifiesWithConclusion) {
-        const stepAndSubproofOrProofAssertionsUnify = false;
+        const stepAndFactOrSubproofsUnify = false;
 
-        return continuation(stepAndSubproofOrProofAssertionsUnify);
+        return continuation(stepAndFactOrSubproofsUnify);
       }
 
-      return this.unifySubproofOrProofAssertionsWithPremises(subproofOrProofAssertions, context, (subproofOrProofAssertionsUnifiesWithPremises) => {
-        let stepAndSubproofOrProofAssertionsUnify = false;
+      return this.unifyFactOrSubproofsWithPremises(factOrSubproofs, context, (factOrSubproofsUnifiesWithPremises) => {
+        let stepAndFactOrSubproofsUnify = false;
 
-        if (subproofOrProofAssertionsUnifiesWithPremises) {
+        if (factOrSubproofsUnifiesWithPremises) {
           const derivedSubstitutionsResolved = context.areDerivedSubstitutionsResolved();
 
           if (derivedSubstitutionsResolved) {
-            stepAndSubproofOrProofAssertionsUnify = true;
+            stepAndFactOrSubproofsUnify = true;
           }
         }
 
-        return continuation(stepAndSubproofOrProofAssertionsUnify);
+        return continuation(stepAndFactOrSubproofsUnify);
       });
     });
   }
 
-  unifySubproofOrProofAssertionsWithPremise(subproofOrProofAssertions, premise, context, continuation) {
-    return extract(subproofOrProofAssertions, (subproofOrProofAssertion, continuation) => {
-      return premise.unifySubproofOrProofAssertion(subproofOrProofAssertion, context, continuation);
-    }, (subproofOrProofAssertion = null) => {
-      if (subproofOrProofAssertion !== null) {
-        const subproofOrProofAssertionsUnifiesWithPremise = true;
+  unifyFactOrSubproofsWithPremise(factOrSubproofs, premise, context, continuation) {
+    return extract(factOrSubproofs, (factOrSubproof, continuation) => {
+      return premise.unifyFactOrSubproof(factOrSubproof, context, continuation);
+    }, (factOrSubproof = null) => {
+      if (factOrSubproof !== null) {
+        const factOrSubproofsUnifiesWithPremise = true;
 
         return context.resolveDerivedSubstitutions(() => {
-          return continuation(subproofOrProofAssertionsUnifiesWithPremise);
+          return continuation(factOrSubproofsUnifiesWithPremise);
         });
       }
 
@@ -256,11 +256,11 @@ export default define(class Rule extends Element {
     });
   }
 
-  unifySubproofOrProofAssertionsWithPremises(subproofOrProofAssertions, context, continuation) {
-    subproofOrProofAssertions = reverse(subproofOrProofAssertions); ///
+  unifyFactOrSubproofsWithPremises(factOrSubproofs, context, continuation) {
+    factOrSubproofs = reverse(factOrSubproofs); ///
 
     return backwardsEvery(this.premises, (premise, continuation) => {
-      return this.unifySubproofOrProofAssertionsWithPremise(subproofOrProofAssertions, premise, context, continuation);
+      return this.unifyFactOrSubproofsWithPremise(factOrSubproofs, premise, context, continuation);
     }, continuation);
   }
 

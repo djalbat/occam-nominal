@@ -2,7 +2,7 @@
 
 import { NonTerminalNode } from "occam-languages";
 
-export default class TopLevelAssertionNode extends NonTerminalNode {
+export default class ClaimNode extends NonTerminalNode {
   getBodyNode() {
     const { bodyRuleName } = this.constructor,
           ruleName = bodyRuleName,  ///

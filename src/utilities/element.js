@@ -8,10 +8,10 @@ import { equivalenceStringFromTerms,
          rulsStringFromLabelsPremisesAndConclusion,
          schemaStringFromLabelSuppositionsAndDeduction,
          subproofStringFromSuppositionsAndSubDerivation,
+         sectionStringFromHypothesesDeclarationAndClaim,
+         claimStringFromLabelsSignatureSuppositionsAndDeduction,
          procedureCallStringFromProcedureReferenceAndParameters,
-         cotypeDeclarationStringFromTypeSuperTypesAndProvisional,
-         sectionStringFromHypothesesDeclarationAndTopLevelAssertion,
-         topLevelAssertionStringFromLabelsSignatureSuppositionsAndDeduction } from "../utilities/string";
+         cotypeDeclarationStringFromTypeSuperTypesAndProvisional } from "../utilities/string";
 
 export function typeFromTypeNode(typeNode, context) {
   let type;
@@ -128,16 +128,16 @@ export function errorFromErrorNode(errorNode, context) {
 
 export function lemmaFromLemmaNode(lemmaNode, context) {
   const { Lemma } = elements,
-        topLevelAsssertionNode = lemmaNode,  ///
-        proof = proofFromTopLevelAssertionNode(topLevelAsssertionNode, context),
-        labels = labelsFromTopLevelAssertionNode(topLevelAsssertionNode, context),
-        deduction = deductionFromTopLevelAssertionNode(topLevelAsssertionNode, context),
-        suppositions = suppositionsFromTopLevelAssertionNode(topLevelAsssertionNode, context),
-        signature = signatureFromTopLevelAssertionNode(topLevelAsssertionNode, context),
-        hypotheses = hypothesesFromTopLevelAssertionNode(topLevelAsssertionNode, context),
-        topLevelAsssertionString = topLevelAssertionStringFromLabelsSignatureSuppositionsAndDeduction(labels, signature, suppositions, deduction),
+        claimNode = lemmaNode,  ///
+        proof = proofFromClaimNode(claimNode, context),
+        labels = labelsFromClaimNode(claimNode, context),
+        deduction = deductionFromClaimNode(claimNode, context),
+        suppositions = suppositionsFromClaimNode(claimNode, context),
+        signature = signatureFromClaimNode(claimNode, context),
+        hypotheses = hypothesesFromClaimNode(claimNode, context),
+        claimString = claimStringFromLabelsSignatureSuppositionsAndDeduction(labels, signature, suppositions, deduction),
         node = lemmaNode, ///
-        string = topLevelAsssertionString, ///
+        string = claimString, ///
         breakPoint = null;
 
   context = null;
@@ -178,16 +178,16 @@ export function proofFromProofNode(proofNode, context) {
 
 export function axiomFromAxiomNode(axiomNode, context) {
   const { Axiom } = elements,
-        topLevelAsssertionNode = axiomNode,  ///
-        proof = proofFromTopLevelAssertionNode(topLevelAsssertionNode, context),
-        labels = labelsFromTopLevelAssertionNode(topLevelAsssertionNode, context),
-        deduction = deductionFromTopLevelAssertionNode(topLevelAsssertionNode, context),
-        suppositions = suppositionsFromTopLevelAssertionNode(topLevelAsssertionNode, context),
-        signature = signatureFromTopLevelAssertionNode(topLevelAsssertionNode, context),
-        hypotheses = hypothesesFromTopLevelAssertionNode(topLevelAsssertionNode, context),
-        topLevelAsssertionString = topLevelAssertionStringFromLabelsSignatureSuppositionsAndDeduction(labels, signature, suppositions, deduction),
+        claimNode = axiomNode,  ///
+        proof = proofFromClaimNode(claimNode, context),
+        labels = labelsFromClaimNode(claimNode, context),
+        deduction = deductionFromClaimNode(claimNode, context),
+        suppositions = suppositionsFromClaimNode(claimNode, context),
+        signature = signatureFromClaimNode(claimNode, context),
+        hypotheses = hypothesesFromClaimNode(claimNode, context),
+        claimString = claimStringFromLabelsSignatureSuppositionsAndDeduction(labels, signature, suppositions, deduction),
         node = axiomNode, ///
-        string = topLevelAsssertionString, ///
+        string = claimString, ///
         breakPoint = null;
 
   context = null;
@@ -218,15 +218,15 @@ export function sectionFromSectionNode(sectionNode, context) {
         hypothesisNodes = sectionNode.getHypothesisNodes(),
         hypotheses = hypothesesFromHypothesisNodes(hypothesisNodes, context),
         declaration = declarationFromSectionNode(sectionNode, context),
-        topLevelAssertion = topLevelAssertionFromSectionNode(sectionNode, context),
-        sectionString = sectionStringFromHypothesesDeclarationAndTopLevelAssertion(hypotheses, declaration, topLevelAssertion),
+        claim = claimFromSectionNode(sectionNode, context),
+        sectionString = sectionStringFromHypothesesDeclarationAndClaim(hypotheses, declaration, claim),
         node = sectionNode, ///
         string = sectionString, ///
         breakPoint = null;
 
   context = null;
 
-  const section = new Section(context, string, node, breakPoint, hypotheses, declaration, topLevelAssertion);
+  const section = new Section(context, string, node, breakPoint, hypotheses, declaration, claim);
 
   return section;
 }
@@ -245,16 +245,16 @@ export function premiseFromPremiseNode(premiseNode, context) {
 
 export function theoremFromTheoremNode(theoremNode, context) {
   const { Theorem } = elements,
-        topLevelAsssertionNode = theoremNode,  ///
-        proof = proofFromTopLevelAssertionNode(topLevelAsssertionNode, context),
-        labels = labelsFromTopLevelAssertionNode(topLevelAsssertionNode, context),
-        deduction = deductionFromTopLevelAssertionNode(topLevelAsssertionNode, context),
-        suppositions = suppositionsFromTopLevelAssertionNode(topLevelAsssertionNode, context),
-        signature = signatureFromTopLevelAssertionNode(topLevelAsssertionNode, context),
-        hypotheses = hypothesesFromTopLevelAssertionNode(topLevelAsssertionNode, context),
-        topLevelAsssertionString = topLevelAssertionStringFromLabelsSignatureSuppositionsAndDeduction(labels, signature, suppositions, deduction),
+        claimNode = theoremNode,  ///
+        proof = proofFromClaimNode(claimNode, context),
+        labels = labelsFromClaimNode(claimNode, context),
+        deduction = deductionFromClaimNode(claimNode, context),
+        suppositions = suppositionsFromClaimNode(claimNode, context),
+        signature = signatureFromClaimNode(claimNode, context),
+        hypotheses = hypothesesFromClaimNode(claimNode, context),
+        claimString = claimStringFromLabelsSignatureSuppositionsAndDeduction(labels, signature, suppositions, deduction),
         node = theoremNode, ///
-        string = topLevelAsssertionString, ///
+        string = claimString, ///
         breakPoint = null;
 
   context = null;
@@ -452,16 +452,16 @@ export function constraintFromConstraintNode(constraintNode, context) {
 
 export function conjectureFromConjectureNode(conjectureNode, context) {
   const { Conjecture } = elements,
-        topLevelAsssertionNode = conjectureNode,  ///
-        proof = proofFromTopLevelAssertionNode(topLevelAsssertionNode, context),
-        labels = labelsFromTopLevelAssertionNode(topLevelAsssertionNode, context),
-        deduction = deductionFromTopLevelAssertionNode(topLevelAsssertionNode, context),
-        suppositions = suppositionsFromTopLevelAssertionNode(topLevelAsssertionNode, context),
-        signature = signatureFromTopLevelAssertionNode(topLevelAsssertionNode, context),
-        hypotheses = hypothesesFromTopLevelAssertionNode(topLevelAsssertionNode, context),
-        topLevelAsssertionString = topLevelAssertionStringFromLabelsSignatureSuppositionsAndDeduction(labels, signature, suppositions, deduction),
+        claimNode = conjectureNode,  ///
+        proof = proofFromClaimNode(claimNode, context),
+        labels = labelsFromClaimNode(claimNode, context),
+        deduction = deductionFromClaimNode(claimNode, context),
+        suppositions = suppositionsFromClaimNode(claimNode, context),
+        signature = signatureFromClaimNode(claimNode, context),
+        hypotheses = hypothesesFromClaimNode(claimNode, context),
+        claimString = claimStringFromLabelsSignatureSuppositionsAndDeduction(labels, signature, suppositions, deduction),
         node = conjectureNode, ///
-        string = topLevelAsssertionString, ///
+        string = claimString, ///
         breakPoint = null;
 
   context = null;
@@ -1013,8 +1013,27 @@ export function proofFromRuleNode(ruleNode, context) {
   return proof;
 }
 
+export function proofFromClaimNode(claimNode, context) {
+  let proof = null;
+
+  const proofNode = claimNode.getProofNode();
+
+  if (proofNode !== null) {
+    proof = proofFromProofNode(proofNode, context);
+  }
+
+  return proof;
+}
+
 export function labelsFromRuleNode(ruleNode, context) {
   const labelNodes = ruleNode.getLabelNodes(),
+        labels = labelsFromLabelNodes(labelNodes, context);
+
+  return labels;
+}
+
+export function labelsFromClaimNode(claimNode, context) {
+  const labelNodes = claimNode.getLabelNodes(),
         labels = labelsFromLabelNodes(labelNodes, context);
 
   return labels;
@@ -1053,6 +1072,16 @@ export function premisesFromRuleNode(ruleNode, context) {
         premises = premisesFromPremiseNodes(premiseNodes, context);
 
   return premises;
+}
+
+export function claimFromSectionNode(sectionNode, context) {
+  const axiom = axiomFromSectionNode(sectionNode, context),
+        lemma = lemmaFromSectionNode(sectionNode, context),
+        theorem = theoremFromSectionNode(sectionNode, context),
+        conjecture = conjectureFromSectionNode(sectionNode, context),
+        claim = (axiom || lemma || theorem || conjecture);
+
+  return claim;
 }
 
 export function axiomFromSectionNode(sectionNode, context) {
@@ -1202,6 +1231,28 @@ export function conclusionFromRuleNode(ruleNode, context) {
   return conclusion;
 }
 
+export function deductionFromClaimNode(claimNode, context) {
+  const deductionNode = claimNode.getDeductionNode(),
+    deduction = deductionFromDeductionNode(deductionNode, context);
+
+  return deduction;
+}
+
+export function signatureFromClaimNode(claimNode, context) {
+  let signature = null;
+
+  const signatureNode = claimNode.getSignatureNode();
+
+  if (signatureNode !== null) {
+    const { Signature } = elements,
+      signatureString = context.nodeAsString(signatureNode);
+
+    signature = Signature.fromSignatureString(signatureString, context);
+  }
+
+  return signature;
+}
+
 export function theoremFromSectionNode(sectionNode, context) {
   let theorem = null;
 
@@ -1235,11 +1286,10 @@ export function nameFromTypePrefixNode(typePrefixNode, context) {
   return name;
 }
 
-export function deductionFromSchemaNode(schemaNode, context) {
-  const deductionNode = schemaNode.getDeductionNode(),
-        deduction = deductionFromDeductionNode(deductionNode, context);
+export function hypothesesFromClaimNode(claimNode, context) {
+  const hypotheses = [];
 
-  return deduction;
+  return hypotheses;
 }
 
 export function provisionalFromTypeNode(typeNode, context) {
@@ -1259,6 +1309,13 @@ export function derivationFromProofNode(proofNode, context) {
         derivation = derivationFromDerivationNode(derivationNode, context);
 
   return derivation;
+}
+
+export function deductionFromSchemaNode(schemaNode, context) {
+  const deductionNode = schemaNode.getDeductionNode(),
+        deduction = deductionFromDeductionNode(deductionNode, context);
+
+  return deduction;
 }
 
 export function termFromConstructorNode(ocnstructorNode, context) {
@@ -1342,6 +1399,13 @@ export function typeFromMetavariableNode(metavariableNode, context) {
   }
 
   return type;
+}
+
+export function suppositionsFromClaimNode(claimNode, context) {
+  const suppositionNodes = claimNode.getSuppositionNodes(),
+    suppositions = suppositionsFromSuppositionNodes(suppositionNodes, context);
+
+  return suppositions;
 }
 
 export function metavariableFromFrameNode(frameNode, context) {
@@ -1737,18 +1801,6 @@ export function frameFromJDefinedAssertionNode(definedAssertionNode, context) {
   return frame
 }
 
-export function proofFromTopLevelAssertionNode(topLevelAsssertionNode, context) {
-  let proof = null;
-
-  const proofNode = topLevelAsssertionNode.getProofNode();
-
-  if (proofNode !== null) {
-    proof = proofFromProofNode(proofNode, context);
-  }
-
-  return proof;
-}
-
 export function subproofFromStepOrSubproofNode(subproofOrSubproofNode, context) {
   let subproof = null;
 
@@ -1812,13 +1864,6 @@ export function frameFromContainedAssertionNode(containedAssertionNode, context)
   return frame;
 }
 
-export function labelsFromTopLevelAssertionNode(topLevelAsssertionNode, context) {
-  const labelNodes = topLevelAsssertionNode.getLabelNodes(),
-        labels = labelsFromLabelNodes(labelNodes, context);
-
-  return labels;
-}
-
 export function typeFromPropertyDeclarationNode(propertyDeclarationNode, context) {
   const typeNode = propertyDeclarationNode.getTypeNode(),
         type = typeFromTypeNode(typeNode, context);
@@ -1831,16 +1876,6 @@ export function typeFromVariableDeclarationNode(variableDeclarationNode, context
         type = typeFromTypeNode(typeNode, context);
 
   return type;
-}
-
-export function topLevelAssertionFromSectionNode(sectionNode, context) {
-  const axiom = axiomFromSectionNode(sectionNode, context),
-        lemma = lemmaFromSectionNode(sectionNode, context),
-        theorem = theoremFromSectionNode(sectionNode, context),
-        conjecture = conjectureFromSectionNode(sectionNode, context),
-        topLevelAssertion = (axiom || lemma || theorem || conjecture);
-
-  return topLevelAssertion;
 }
 
 export function procedureCallFromSuppositionNode(suppositionNode, context) {
@@ -1920,28 +1955,6 @@ export function targetTermFromTermSubstitutionNode(termSubstitutionNode, general
         targetTerm = termFromTermNode(targetTermNode, context);
 
   return targetTerm;
-}
-
-export function deductionFromTopLevelAssertionNode(topLevelAsssertionNode, context) {
-  const deductionNode = topLevelAsssertionNode.getDeductionNode(),
-        deduction = deductionFromDeductionNode(deductionNode, context);
-
-  return deduction;
-}
-
-export function signatureFromTopLevelAssertionNode(topLevelAsssertionNode, context) {
-  let signature = null;
-
-  const signatureNode = topLevelAsssertionNode.getSignatureNode();
-
-  if (signatureNode !== null) {
-    const { Signature } = elements,
-          signatureString = context.nodeAsString(signatureNode);
-
-    signature = Signature.fromSignatureString(signatureString, context);
-  }
-
-  return signature;
 }
 
 export function propertyAssertionFromStatementNode(statementNode, context) {
@@ -2068,12 +2081,6 @@ export function referenceFromSignatureAssertionNode(signatureAssertionNode, cont
   return reference;
 }
 
-export function hypothesesFromTopLevelAssertionNode(topLevelAsssertionNode, context) {
-  const hypotheses = [];
-
-  return hypotheses;
-}
-
 export function propertyFromPropertyDeclarationNode(propertyDeclarationNode, context) {
   let property = null;
 
@@ -2138,13 +2145,6 @@ export function propertyTermFromPropertyAssertionNode(propertyAssertionNode, con
         propertyTerm = termFromTermNode(propertyTermNode, context);
 
   return propertyTerm;
-}
-
-export function suppositionsFromTopLevelAssertionNode(topLevelAsssertionNode, context) {
-  const suppositionNodes = topLevelAsssertionNode.getSuppositionNodes(),
-        suppositions = suppositionsFromSuppositionNodes(suppositionNodes, context);
-
-  return suppositions;
 }
 
 export function generatorFromGeneratorDeclarationNode(generatorDeclarationNode, context) {

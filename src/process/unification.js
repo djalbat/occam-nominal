@@ -28,12 +28,12 @@ function unifyStepWithRule(step, context, continuation) {
 
   context.trace(`Unifying the '${stepString}' step with the '${ruleString}' rule...`);
 
-  const subproofOrProofAssertions = context.getSubproofOrProofAssertions();
+  const factOrSubproofs = context.getFactOrSubproofs();
 
-  return rule.unifyStepAndSubproofOrProofAssertions(step, subproofOrProofAssertions, context, (stepAndSubproofOrProofAssertionsUnify) => {
+  return rule.unifyStepAndFactOrSubproofs(step, factOrSubproofs, context, (stepAndFactOrSubproofsUnify) => {
     let stepUnifiesWithRule = false;
 
-    if (stepAndSubproofOrProofAssertionsUnify) {
+    if (stepAndFactOrSubproofsUnify) {
       stepUnifiesWithRule = true;
     }
 
@@ -45,50 +45,50 @@ function unifyStepWithRule(step, context, continuation) {
   });
 }
 
-function unifyStepWithTopLevelAssertion(step, context, continuation) {
+function unifyStepWithClaim(step, context, continuation) {
   const reference = step.getReference();
 
   if (reference === null) {
-    const stepUnifiesWithTopLevelAssertion = false;
+    const stepUnifiesWithClaim = false;
 
-    return continuation(stepUnifiesWithTopLevelAssertion);
+    return continuation(stepUnifiesWithClaim);
   }
 
-  const topLevelAssertion = context.findTopLevelAssertionByReference(reference);
+  const claim = context.findClaimByReference(reference);
 
-  if (topLevelAssertion === null) {
-    const stepUnifiesWithTopLevelAssertion = false;
+  if (claim === null) {
+    const stepUnifiesWithClaim = false;
 
-    return continuation(stepUnifiesWithTopLevelAssertion);
+    return continuation(stepUnifiesWithClaim);
   }
 
-  const satisfiable = topLevelAssertion.isSatisfiable();
+  const satisfiable = claim.isSatisfiable();
 
   if (satisfiable) {
-    const stepUnifiesWithTopLevelAssertion = false;
+    const stepUnifiesWithClaim = false;
 
-    return continuation(stepUnifiesWithTopLevelAssertion);
+    return continuation(stepUnifiesWithClaim);
   }
 
   const stepString = step.getString(),
-        topLevelAssertionString = reference.getString();
+        claimString = reference.getString();
 
-  context.trace(`Unifying the '${stepString}' step with the '${topLevelAssertionString}' top level assertion...`);
+  context.trace(`Unifying the '${stepString}' step with the '${claimString}' claim...`);
 
-  const subproofOrProofAssertions = context.getSubproofOrProofAssertions();
+  const factOrSubproofs = context.getFactOrSubproofs();
 
-  return topLevelAssertion.unifyStepAndSubproofOrProofAssertions(step, subproofOrProofAssertions, context, (stepAndSubproofOrProofAssertionsUnify) => {
-    let stepUnifiesWithTopLevelAssertion = false;
+  return claim.unifyStepAndFactOrSubproofs(step, factOrSubproofs, context, (stepAndFactOrSubproofsUnify) => {
+    let stepUnifiesWithClaim = false;
 
-    if (stepAndSubproofOrProofAssertionsUnify) {
-      stepUnifiesWithTopLevelAssertion = true;
+    if (stepAndFactOrSubproofsUnify) {
+      stepUnifiesWithClaim = true;
     }
 
-    if (stepUnifiesWithTopLevelAssertion) {
-      context.debug(`...unified the '${stepString}' step with the '${topLevelAssertionString}' top level assertion.`);
+    if (stepUnifiesWithClaim) {
+      context.debug(`...unified the '${stepString}' step with the '${claimString}' claim.`);
     }
 
-    return continuation(stepUnifiesWithTopLevelAssertion);
+    return continuation(stepUnifiesWithClaim);
   });
 }
 
@@ -106,12 +106,12 @@ function unifyStepWithSignatureAssertion(step, context, continuation) {
 
   context.trace(`Unifying the '${stepString}' step with the '${signatureAssertionString}' signature assertion...`);
 
-  const subproofOrProofAssertions = context.getSubproofOrProofAssertions();
+  const factOrSubproofs = context.getFactOrSubproofs();
 
-  return signatureAssertion.unifyStepAndSubproofOrProofAssertions(step, subproofOrProofAssertions, context, (stepAndSubproofOrProofAssertionsUnify) => {
+  return signatureAssertion.unifyStepAndFactOrSubproofs(step, factOrSubproofs, context, (stepAndFactOrSubproofsUnify) => {
     let stepUnifiesWithSignatureAssertion = false;
 
-    if (stepAndSubproofOrProofAssertionsUnify) {
+    if (stepAndFactOrSubproofsUnify) {
       stepUnifiesWithSignatureAssertion = true;
     }
 
@@ -342,9 +342,9 @@ function unifyStepAsQualifiedSignatureAssertion(step, context, continuation) {
     return continuation(stepUnifiesAsQualifiedSignatureAssertion);
   }
 
-  const topLevelAssertion = context.findTopLevelAssertionByReference(reference);
+  const claim = context.findClaimByReference(reference);
 
-  if (topLevelAssertion === null) {
+  if (claim === null) {
     const stepUnifiesAsQualifiedSignatureAssertion = false;
 
     return continuation(stepUnifiesAsQualifiedSignatureAssertion);
@@ -365,10 +365,10 @@ function unifyStepAsQualifiedSignatureAssertion(step, context, continuation) {
 
   context.trace(`Unifying the '${stepString}' step as a signature assertion with the '${referenceString}' reference...`);
 
-  return signatureAssertion.unifyTopLevelAssertion(topLevelAssertion, context, (topLevelAssertionUnifies) => {
+  return signatureAssertion.unifyClaim(claim, context, (claimUnifies) => {
     let stepUnifiesAsQualifiedSignatureAssertion = false;
 
-    if (topLevelAssertionUnifies) {
+    if (claimUnifies) {
       stepUnifiesAsQualifiedSignatureAssertion = true;
     }
 
@@ -380,30 +380,30 @@ function unifyStepAsQualifiedSignatureAssertion(step, context, continuation) {
   });
 }
 
-function compareStepToSubproofOrProofAssertions(step, context, continuation) {
+function compareStepToFactOrSubproofs(step, context, continuation) {
   const qualified = step.isQualified();
 
   if (qualified) {
-    const stepComparesToSubproofOrProofAssertions = false;
+    const stepComparesToFactOrSubproofs = false;
 
-    return continuation(stepComparesToSubproofOrProofAssertions);
+    return continuation(stepComparesToFactOrSubproofs);
   }
 
   const stepString = step.getString();
 
   context.trace(`Comparing the '${stepString}' step to subproofs or proof asssertions...`);
 
-  let stepComparesToSubproofOrProofAssertions;
+  let stepComparesToFactOrSubproofs;
 
-  const subproofOrProofAssertions = context.getSubproofOrProofAssertions();
+  const factOrSubproofs = context.getFactOrSubproofs();
 
-  stepComparesToSubproofOrProofAssertions = step.compareSubproofOrProofAssertions(subproofOrProofAssertions, context);
+  stepComparesToFactOrSubproofs = step.compareFactOrSubproofs(factOrSubproofs, context);
 
-  if (stepComparesToSubproofOrProofAssertions) {
+  if (stepComparesToFactOrSubproofs) {
     context.debug(`...compared the '${stepString}' step to subproofs or proof asssertions.`);
   }
 
-  return continuation(stepComparesToSubproofOrProofAssertions);
+  return continuation(stepComparesToFactOrSubproofs);
 }
 
 function compareStepToJudgements(step, context, continuation) {
@@ -421,9 +421,9 @@ function compareStepToJudgements(step, context, continuation) {
 
   let stepComparesToJudgements;
 
-  const proofAssertions = context.getProofAssertions();
+  const facts = context.getFacts();
 
-  return judgementsFromProofAssertions(proofAssertions, context, (judgements) => {
+  return judgementsFromFacts(facts, context, (judgements) => {
     stepComparesToJudgements = step.compareJudgements(judgements, context);
 
     if (stepComparesToJudgements) {
@@ -436,7 +436,7 @@ function compareStepToJudgements(step, context, continuation) {
 
 export const unifySteps = [
   unifyStepWithRule,
-  unifyStepWithTopLevelAssertion,
+  unifyStepWithClaim,
   unifyStepWithSignatureAssertion,
   unifyStepAsQualifiedConstraint,
   unifyStepAsUnqualifiedEquality,
@@ -445,17 +445,17 @@ export const unifySteps = [
   unifyStepAsUnqualifiedPropertyAssertion,
   unifyStepAsUnqualifiedSignatureAssertion,
   unifyStepAsQualifiedSignatureAssertion,
-  compareStepToSubproofOrProofAssertions,
+  compareStepToFactOrSubproofs,
   compareStepToJudgements
 ];
 
-function judgementsFromProofAssertions(proofAssertions, context, continuation) {
+function judgementsFromFacts(facts, context, continuation) {
   const judgements = [];
 
-  return reduce(proofAssertions, judgements, (judgements, proofAssertion, continuation) => {
+  return reduce(facts, judgements, (judgements, fact, continuation) => {
     const { Judgement } = elements,
-          context = proofAssertion.getContext(),
-          judgement = Judgement.fromProofAssertion(proofAssertion, context);
+          context = fact.getContext(),
+          judgement = Judgement.fromFact(fact, context);
 
     if (judgement === null) {
       return continuation(judgements);

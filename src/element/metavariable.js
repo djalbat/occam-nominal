@@ -513,6 +513,8 @@ export default define(class Metavariable extends Element {
   unifyMetavariable(metavariable, context, continuation) {
     let metavariableUnifies;
 
+    debugger
+
     const generalContext = context, ///
           specificContext = context,  ///
           generalMetavariable = this, ///

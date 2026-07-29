@@ -9,14 +9,14 @@ import { mergeEquivalences, equivalencesFromEquality, separateGroundedTermsAndDe
 const { last, clear } = arrayUtilities;
 
 class BoundedContext extends Context {
-  constructor(context, constraints, assignments, equivalences, declaredVariables, subproofOrProofAssertions) {
+  constructor(context, constraints, assignments, equivalences, declaredVariables, factOrSubproofs) {
     super(context);
 
     this.constraints = constraints;
     this.assignments = assignments;
     this.equivalences = equivalences;
     this.declaredVariables = declaredVariables;
-    this.subproofOrProofAssertions = subproofOrProofAssertions;
+    this.factOrSubproofs = factOrSubproofs;
   }
 
   getConstraints() {
@@ -58,27 +58,27 @@ class BoundedContext extends Context {
     return declaredVariables;
   }
 
-  getSubproofOrProofAssertions() {
-    let subproofOrProofAssertions;
+  getFactOrSubproofs() {
+    let factOrSubproofs;
 
     const context = this.getContext();
 
-    subproofOrProofAssertions = context.getSubproofOrProofAssertions();
+    factOrSubproofs = context.getFactOrSubproofs();
 
-    subproofOrProofAssertions = [  ///
-      ...subproofOrProofAssertions,
-      ...this.subproofOrProofAssertions
+    factOrSubproofs = [  ///
+      ...factOrSubproofs,
+      ...this.factOrSubproofs
     ];
 
-    return subproofOrProofAssertions;
+    return factOrSubproofs;
   }
 
   getProofAssertions() {
-    const subproofOrProofAssertions = this.getSubproofOrProofAssertions(),
-          proofAssertions = subproofOrProofAssertions.filter((subproofOrProofAssertion) => {
-            const subproofOrProofAssertionproofAssertion = subproofOrProofAssertion.isProofAssertion();
+    const factOrSubproofs = this.getFactOrSubproofs(),
+          proofAssertions = factOrSubproofs.filter((factOrSubproof) => {
+            const factOrSubproofproofAssertion = factOrSubproof.isProofAssertion();
 
-            if (subproofOrProofAssertionproofAssertion) {
+            if (factOrSubproofproofAssertion) {
               return true;
             }
           });
@@ -213,15 +213,15 @@ class BoundedContext extends Context {
     context.addConstructor(constructor);
   }
 
-  addSubproofOrProofAssertion(subproofOrProofAssertion) {
+  addFactOrSubproof(factOrSubproof) {
     const context = this, ///
-          subproofOrProofAssertionString = subproofOrProofAssertion.getString();
+          factOrSubproofString = factOrSubproof.getString();
 
-    context.trace(`Adding the '${subproofOrProofAssertionString}' subproof or proof assertion to the bounded context...`);
+    context.trace(`Adding the '${factOrSubproofString}' subproof or fact to the bounded context...`);
 
-    this.subproofOrProofAssertions.push(subproofOrProofAssertion);
+    this.factOrSubproofs.push(factOrSubproof);
 
-    context.debug(`...added the '${subproofOrProofAssertionString}' subproof or proof assertion to the bounded context.`);
+    context.debug(`...added the '${factOrSubproofString}' subproof or fact to the bounded context.`);
   }
 
   findDeclaredVariableByVariableIdentifier(variableIdentifier) {
@@ -288,8 +288,8 @@ class BoundedContext extends Context {
           equivalences = [],
           declaredVariables = [],
           constraints = null,
-          subproofOrProofAssertions = [],
-          boundedContext = new BoundedContext(context, constraints, assignments, equivalences, declaredVariables, subproofOrProofAssertions);
+          factOrSubproofs = [],
+          boundedContext = new BoundedContext(context, constraints, assignments, equivalences, declaredVariables, factOrSubproofs);
 
     return boundedContext;
   }
@@ -298,8 +298,8 @@ class BoundedContext extends Context {
     const assignments = [],
           equivalences = [],
           declaredVariables = [],
-          subproofOrProofAssertions = [],
-          boundedContext = new BoundedContext(context, constraints, assignments, equivalences, declaredVariables, subproofOrProofAssertions);
+          factOrSubproofs = [],
+          boundedContext = new BoundedContext(context, constraints, assignments, equivalences, declaredVariables, factOrSubproofs);
 
     return boundedContext;
   }

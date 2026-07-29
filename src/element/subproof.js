@@ -49,10 +49,10 @@ export default define(class Subproof extends Element {
     return statements;
   }
 
-  isProofAssertion() {
-    const proofAssertion = false;
+  isFact() {
+    const fact = false;
 
-    return proofAssertion;
+    return fact;
   }
 
   compareStep(step, context) {
@@ -104,11 +104,11 @@ export default define(class Subproof extends Element {
   verifySupposition(supposition, context, continuation) {
     supposition.verify(context, (suppositionVerifies) => {
       if (suppositionVerifies) {
-        const subproofOrProofAssertion = supposition;  ////
+        const factOrSubproof = supposition;  ////
 
         context.assignAssignments(context);
 
-        context.addSubproofOrProofAssertion(subproofOrProofAssertion);
+        context.addFactOrSubproof(factOrSubproof);
       }
 
       return continuation(suppositionVerifies);

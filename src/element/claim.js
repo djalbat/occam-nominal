@@ -4,7 +4,7 @@ import { arrayUtilities } from "necessary";
 import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
 
 import { enclose } from "../utilities/context";
-import { topLevelAssertionStringFromLabelsSignatureSuppositionsAndDeduction } from "../utilities/string";
+import { claimStringFromLabelsSignatureSuppositionsAndDeduction } from "../utilities/string";
 import { labelsFromJSON,
          deductionFromJSON,
          signatureFromJSON,
@@ -20,7 +20,7 @@ const { reverse } = arrayUtilities,
       { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities,
       { all, every, extract, forwardsEvery, backwardsEvery } = continuationUtilities;
 
-export default class TopLevelAssertion extends Element {
+export default class Claim extends Element {
   constructor(context, string, node, breakPoint, labels, suppositions, deduction, proof, signature, hypotheses) {
     super(context, string, node, breakPoint);
 
@@ -92,9 +92,9 @@ export default class TopLevelAssertion extends Element {
   }
 
   verifyEx(context, continuation) {
-    const topLevelAssertionString = this.getString(); ///
+    const claimString = this.getString(); ///
 
-    context.trace(`Verifying the '${topLevelAssertionString}' top level assertion...`);
+    context.trace(`Verifying the '${claimString}' claim...`);
 
     return enclose((context) => {
       const verifyProof = this.verifyProof.bind(this),
@@ -109,7 +109,7 @@ export default class TopLevelAssertion extends Element {
         verifyProof
       ], context, (verifies, context) => {
         if (verifies) {
-          context.debug(`...verified the '${topLevelAssertionString}' top level assertion.`);
+          context.debug(`...verified the '${claimString}' claim.`);
         }
 
         return continuation(verifies);
@@ -118,15 +118,15 @@ export default class TopLevelAssertion extends Element {
   }
 
   verifyLabels(context, continuation) {
-    const topLevelAssertionString = this.getString();  ///
+    const claimString = this.getString();  ///
 
-    context.trace(`Verifying the '${topLevelAssertionString}' top level assertion's labels...`);
+    context.trace(`Verifying the '${claimString}' claim's labels...`);
 
     const verifyLabel = this.verifyLabel.bind(this);
 
     return every(this.labels, verifyLabel, context, (labelsVerify) => {
       if (labelsVerify) {
-        context.debug(`...verified the '${topLevelAssertionString}' top level assertion's labels.`);
+        context.debug(`...verified the '${claimString}' claim's labels.`);
       }
 
       return continuation(labelsVerify, context);
@@ -135,13 +135,13 @@ export default class TopLevelAssertion extends Element {
 
   verifyLabel(label, context, continuation) {
     const labelString = label.getString(),
-          topLevelAssertionString = this.getString(); ///
+          claimString = this.getString(); ///
 
-    context.trace(`Verifying the '${topLevelAssertionString}' top level assertion's '${labelString}' label...`);
+    context.trace(`Verifying the '${claimString}' claim's '${labelString}' label...`);
 
     return label.verify((labelVerifies) => {
       if (labelVerifies) {
-        context.debug(`...verified the '${topLevelAssertionString}' top level assertion's '${labelString}' label.`);
+        context.debug(`...verified the '${claimString}' claim's '${labelString}' label.`);
       }
 
       return continuation(labelVerifies);
@@ -155,15 +155,15 @@ export default class TopLevelAssertion extends Element {
       return continuation(proofVerifies);
     }
 
-    const topLevelAssertionString = this.getString();  ///
+    const claimString = this.getString();  ///
 
-    context.trace(`Verifying the '${topLevelAssertionString}' top level assertion's proof...`);
+    context.trace(`Verifying the '${claimString}' claim's proof...`);
 
     const statement = this.deduction.getStatement();
 
     return this.proof.verify(statement, context, (proofVerifies) => {
       if (proofVerifies) {
-        context.debug(`...verified the '${topLevelAssertionString}' top level assertion's proof.`);
+        context.debug(`...verified the '${claimString}' claim's proof.`);
       }
 
       return continuation(proofVerifies, context);
@@ -172,13 +172,13 @@ export default class TopLevelAssertion extends Element {
 
   verifyDeduction(context, continuation) {
     const deductionString = this.deduction.getString(),
-          topLevelAssertionString = this.getString(); ///
+          claimString = this.getString(); ///
 
-    context.trace(`Verifying the '${topLevelAssertionString}' top level assertion's '${deductionString}' deduction...`);
+    context.trace(`Verifying the '${claimString}' claim's '${deductionString}' deduction...`);
 
     return this.deduction.verify(context, (deductionVerifies) => {
       if (deductionVerifies) {
-        context.debug(`...verified the '${topLevelAssertionString}' top level assertion's '${deductionString}' deduction.`);
+        context.debug(`...verified the '${claimString}' claim's '${deductionString}' deduction.`);
       }
 
       return continuation(deductionVerifies, context);
@@ -187,21 +187,21 @@ export default class TopLevelAssertion extends Element {
 
   verifySupposition(supposition, context, continuation) {
     const suppositionString = supposition.getString(),
-          topLevelAssertionString = this.getString();  ///
+          claimString = this.getString();  ///
 
-    context.trace(`Verifying the '${topLevelAssertionString}' top level assertion's '${suppositionString}' supposition...`);
+    context.trace(`Verifying the '${claimString}' claim's '${suppositionString}' supposition...`);
 
     return supposition.verify(context, (suppositionVerifies, context) => {
       if (suppositionVerifies) {
-        const subproofOrProofAssertion = supposition;  ////
+        const factorSubproof = supposition;  ////
 
         context.assignAssignments();
 
-        context.addSubproofOrProofAssertion(subproofOrProofAssertion);
+        context.addFactOrSubproof(factorSubproof);
       }
 
       if (suppositionVerifies) {
-        context.debug(`...verified the '${topLevelAssertionString}' top level assertion's '${suppositionString}' supposition.`);
+        context.debug(`...verified the '${claimString}' claim's '${suppositionString}' supposition.`);
       }
 
       return continuation(suppositionVerifies);
@@ -217,15 +217,15 @@ export default class TopLevelAssertion extends Element {
       return continuation(suppositionsVerify, context);
     }
 
-    const topLevelAssertionString = this.getString();  ///
+    const claimString = this.getString();  ///
 
-    context.trace(`Verifying the '${topLevelAssertionString}' top level assertion's suppositions...`);
+    context.trace(`Verifying the '${claimString}' claim's suppositions...`);
 
     const verifySupposition = this.verifySupposition.bind(this);
 
     return forwardsEvery(this.suppositions, verifySupposition, context, (suppositionsVerify) => {
       if (suppositionsVerify) {
-        context.debug(`...verified the '${topLevelAssertionString}' top level assertion's suppositions.`);
+        context.debug(`...verified the '${claimString}' claim's suppositions.`);
       }
 
       return continuation(suppositionsVerify, context);
@@ -234,13 +234,13 @@ export default class TopLevelAssertion extends Element {
 
   dischargeHypothesis(hypothesis, context, continuation) {
     const hypothesisString = hypothesis.getString(),
-          topLevelAssertionString = this.getString(); ///
+          claimString = this.getString(); ///
 
-    context.trace(`Discharding the '${topLevelAssertionString}' top level assertion's '${hypothesisString}' hypothesis...`);
+    context.trace(`Discharding the '${claimString}' claim's '${hypothesisString}' hypothesis...`);
 
     hypothesis.discharge(context, (hypothesisDischarges) => {
       if (hypothesisDischarges) {
-        context.trace(`...discharges the '${topLevelAssertionString}' top level assertion's '${hypothesisString}' hypothesis.`);
+        context.trace(`...discharges the '${claimString}' claim's '${hypothesisString}' hypothesis.`);
       }
 
       return continuation(hypothesisDischarges);
@@ -276,47 +276,47 @@ export default class TopLevelAssertion extends Element {
     });
   }
 
-  unifyStepAndSubproofOrProofAssertions(step, subproofOrProofAssertions, context, continuation) {
+  unifyStepAndFactOrSubproofs(step, factorSubproofs, context, continuation) {
     return this.unifyStepWithDeduction(step, context, (statementUnifiesWithDeduction) => {
       if (!statementUnifiesWithDeduction) {
-        const stepAndSubproofOrProofAssertionsUnify = false;
+        const stepAndFactOrSubproofsUnify = false;
 
-        return continuation(stepAndSubproofOrProofAssertionsUnify);
+        return continuation(stepAndFactOrSubproofsUnify);
       }
 
       return this.dischargeHypotheses(context, (hypothesesDischarge) => {
         if (!hypothesesDischarge) {
-          const stepAndSubproofOrProofAssertionsUnify = false;
+          const stepAndFactOrSubproofsUnify = false;
 
-          return continuation(stepAndSubproofOrProofAssertionsUnify);
+          return continuation(stepAndFactOrSubproofsUnify);
         }
 
-        return this.unifySubproofOrProofAssertionsWithSuppositions(subproofOrProofAssertions, context, (subproofOrProofAssertionsUnifiesWithSuppositions) => {
-          let stepAndSubproofOrProofAssertionsUnify = false;
+        return this.unifyFactOrSubproofsWithSuppositions(factorSubproofs, context, (factorSubproofsUnifiesWithSuppositions) => {
+          let stepAndFactOrSubproofsUnify = false;
 
-          if (subproofOrProofAssertionsUnifiesWithSuppositions) {
+          if (factorSubproofsUnifiesWithSuppositions) {
             const derivedSubstitutionsResolved = context.areDerivedSubstitutionsResolved();
 
             if (derivedSubstitutionsResolved) {
-              stepAndSubproofOrProofAssertionsUnify = true;
+              stepAndFactOrSubproofsUnify = true;
             }
           }
 
-          return continuation(stepAndSubproofOrProofAssertionsUnify);
+          return continuation(stepAndFactOrSubproofsUnify);
         });
       });
     });
   }
 
-  unifySubproofOrProofAssertionsWithSupposition(subproofOrProofAssertions, supposition, context, continuation) {
-    return extract(subproofOrProofAssertions, (subproofOrProofAssertion, continuation) => {
-      return supposition.unifySubproofOrProofAssertion(subproofOrProofAssertion, context, continuation);
-    }, (subproofOrProofAssertion = null) => {
-      if (subproofOrProofAssertion !== null) {
-        const subproofOrProofAssertionsUnifiesWithSupposition = true;
+  unifyFactOrSubproofsWithSupposition(factorSubproofs, supposition, context, continuation) {
+    return extract(factorSubproofs, (factorSubproof, continuation) => {
+      return supposition.unifyFactOrSubproof(factorSubproof, context, continuation);
+    }, (factorSubproof = null) => {
+      if (factorSubproof !== null) {
+        const factorSubproofsUnifiesWithSupposition = true;
 
         return context.resolveDerivedSubstitutions(() => {
-          return continuation(subproofOrProofAssertionsUnifiesWithSupposition);
+          return continuation(factorSubproofsUnifiesWithSupposition);
         });
       }
 
@@ -324,11 +324,11 @@ export default class TopLevelAssertion extends Element {
     });
   }
 
-  unifySubproofOrProofAssertionsWithSuppositions(subproofOrProofAssertions, context, continuation) {
-    subproofOrProofAssertions = reverse(subproofOrProofAssertions); ///
+  unifyFactOrSubproofsWithSuppositions(factorSubproofs, context, continuation) {
+    factorSubproofs = reverse(factorSubproofs); ///
 
     return backwardsEvery(this.suppositions, (supposition, continuation) => {
-      return this.unifySubproofOrProofAssertionsWithSupposition(subproofOrProofAssertions, supposition, context, continuation);
+      return this.unifyFactOrSubproofsWithSupposition(factorSubproofs, supposition, context, continuation);
     }, continuation);
   }
 
@@ -372,13 +372,13 @@ export default class TopLevelAssertion extends Element {
           suppositions = suppositionsFromJSON(json, context),
           signature = signatureFromJSON(json, context),
           hypotheses = hypothesesFromJSON(json, context),
-          topLevelAssertionString = topLevelAssertionStringFromLabelsSignatureSuppositionsAndDeduction(labels, signature, suppositions, deduction),
-          string = topLevelAssertionString, ///
+          claimString = claimStringFromLabelsSignatureSuppositionsAndDeduction(labels, signature, suppositions, deduction),
+          string = claimString, ///
           node = null,
           breakPoint = breakPointFromJSON(json),
           proof = null,
-          topLevelAssertion = new Class(context, string, node, breakPoint, labels, suppositions, deduction, proof, signature, hypotheses);
+          claim = new Class(context, string, node, breakPoint, labels, suppositions, deduction, proof, signature, hypotheses);
 
-    return topLevelAssertion;
+    return claim;
   }
 }

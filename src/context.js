@@ -169,11 +169,11 @@ export default class Context extends ContextBase {
     return constructors;
   }
 
-  getTopLevelAssertions(includeRelease = true) {
+  getClaim(includeRelease = true) {
     const context = this.getContext(),
-          topLevelAssertions = context.getTopLevelAssertions(includeRelease);
+          claim = context.getClaim(includeRelease);
 
-    return topLevelAssertions;
+    return claim;
   }
 
   getSchemas(includeRelease = true) {
@@ -225,11 +225,11 @@ export default class Context extends ContextBase {
     return declaredMetavariables;
   }
 
-  getSubproofOrProofAssertions() {
+  getFactOrSubproofs() {
     const context = this.getContext(),
-          subproofOrProofAssertions = context.getSubproofOrProofAssertions();
+          factOrSubproofs = context.getFactOrSubproofs();
 
-    return subproofOrProofAssertions;
+    return factOrSubproofs;
   }
 
   findMetavariable(metavariable, context) {
@@ -260,11 +260,11 @@ export default class Context extends ContextBase {
     return axiom;
   }
 
-  findTopLevelAssertionByReference(reference) {
+  findClaimByReference(reference) {
     const context = this.getContext(),
-          topLevelAssertion = context.findTopLevelAssertionByReference(reference);
+          claim = context.findClaimByReference(reference);
 
-    return topLevelAssertion;
+    return claim;
   }
 
   findTermByTermNode(termNode) {
@@ -716,9 +716,9 @@ export default class Context extends ContextBase {
     context.addDeclaredMetavariable(declaredMetavariable);
   }
 
-  addSubproofOrProofAssertion(subproofOrProofAssertion) {
+  addFactOrSubproof(factOrSubproof) {
     const context = this.getContext();
 
-    context.addSubproofOrProofAssertion(subproofOrProofAssertion);
+    context.addFactOrSubproof(factOrSubproof);
   }
 }

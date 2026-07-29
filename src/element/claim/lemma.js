@@ -2,13 +2,13 @@
 
 import { breakPointUtilities } from "occam-languages";
 
-import TopLevelAssertion from "../topLevelAssertion";
+import Claim from "../claim";
 
 import { define } from "../../elements";
 
 const { breakable } = breakPointUtilities;
 
-export default define(class Lemma extends TopLevelAssertion {
+export default define(class Lemma extends Claim {
   getLemmaNode() {
     const node = this.getNode(),
           lemmaNode = node; ///

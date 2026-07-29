@@ -2,13 +2,13 @@
 
 import { breakPointUtilities } from "occam-languages";
 
-import TopLevelAssertion from "../topLevelAssertion";
+import Claim from "../claim";
 
 import { define } from "../../elements";
 
 const { breakable } = breakPointUtilities;
 
-export default define(class Conjecture extends TopLevelAssertion {
+export default define(class Conjecture extends Claim {
   getConjectureNode() {
     const node = this.getNode(),
           conjectureNode = node;  ///
@@ -36,5 +36,5 @@ export default define(class Conjecture extends TopLevelAssertion {
 
   static name = "Conjecture";
 
-  static fromJSON(json, context) { return TopLevelAssertion.fromJSON(Conjecture, json, context); }
+  static fromJSON(json, context) { return Claim.fromJSON(Conjecture, json, context); }
 });

@@ -9,14 +9,14 @@ const { last } = arrayUtilities,
       { every } = continuationUtilities;
 
 export default define(class SubDerivation extends Element {
-  constructor(context, string, node, breakPoint, subproofOrProofAssertions) {
+  constructor(context, string, node, breakPoint, factOrSubproofs) {
     super(context, string, node, breakPoint);
 
-    this.subproofOrProofAssertions = subproofOrProofAssertions;
+    this.factOrSubproofs = factOrSubproofs;
   }
 
-  getSubproofOrProofAssertions() {
-    return this.subproofOrProofAssertions;
+  getFactOrSubproofs() {
+    return this.factOrSubproofs;
   }
 
   getSubDerivationNode() {
@@ -27,23 +27,23 @@ export default define(class SubDerivation extends Element {
   }
 
   getLastStep() {
-    const lastSubproofOrProofAssertion = last(this.subproofOrProofAssertions),
-          lastProofAssertion = lastSubproofOrProofAssertion,  ///
+    const lastFactOrSubproof = last(this.factOrSubproofs),
+          lastProofAssertion = lastFactOrSubproof,  ///
           lastStep = lastProofAssertion;  ///
 
     return lastStep;
   }
 
   verify(context, continuation) {
-    return every(this.subproofOrProofAssertions, (subproofOrProofAssertion, continuation) => {
-      subproofOrProofAssertion.verify(context, (subproofOrProofAssertionVerifies) => {
-        if (subproofOrProofAssertionVerifies) {
+    return every(this.factOrSubproofs, (factOrSubproof, continuation) => {
+      factOrSubproof.verify(context, (factOrSubproofVerifies) => {
+        if (factOrSubproofVerifies) {
           context.assignAssignments();
 
-          context.addSubproofOrProofAssertion(subproofOrProofAssertion);
+          context.addFactOrSubproof(factOrSubproof);
         }
 
-        return continuation(subproofOrProofAssertionVerifies);
+        return continuation(factOrSubproofVerifies);
       });
     }, continuation);
   }

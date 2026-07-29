@@ -4,7 +4,7 @@ import { NonTerminalNode } from "occam-languages";
 
 import { NONSENSE_RULE_NAME, STATEMENT_RULE_NAME } from "../ruleNames";
 
-export default class ProofAssertionNode extends NonTerminalNode {
+export default class FactNode extends NonTerminalNode {
   getNonsenseNode() {
     const ruleName = NONSENSE_RULE_NAME,
           nonsenseNode = this.getNodeByRuleName(ruleName);

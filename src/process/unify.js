@@ -33,44 +33,7 @@ class ContinuationZipPass extends ContinuationZipPassBase {
   }
 }
 
-class PropertyPass extends ContinuationZipPass {
-  static maps = [
-    {
-      generalNodeQuery: typeNodeQuery,
-      specificNodeQuery: termNodeQuery,
-      run: (generalTypeNode, specificTermNode, generalContext, specificContext, continuation) => {
-        const typeNode = generalTypeNode, ///
-              termNode = specificTermNode, ///
-              nominalTypeName = typeNode.getNominalTypeName();
-
-        let context;
-
-        context = generalContext; ///
-
-        const type = context.findTypeByNominalTypeName(nominalTypeName);
-
-        if (type !== null) {
-          context = specificContext;  ///
-
-          const term = termFromTermNode(termNode, context),
-                strict = false;
-
-          term.validateGivenType(strict, type, context, (term) => {
-            let success = false;
-
-            if (term !== null) {
-              success = true;
-            }
-
-            return continuation(success);
-          });
-        }
-      }
-    }
-  ];
-}
-
-class StatementPass extends AsynchronousContinuationZipPass {
+class UnifyStatementPass extends AsynchronousContinuationZipPass {
   static maps = [
     {
       generalNodeQuery: assumptionMetavariableNodeQuery,
@@ -221,12 +184,118 @@ class StatementPass extends AsynchronousContinuationZipPass {
   ];
 }
 
-class GeneratorPass extends ContinuationZipPass {
+class UnifyMetavariablePass extends ContinuationZipPass {
   static maps = [
     {
       generalNodeQuery: typeNodeQuery,
       specificNodeQuery: termNodeQuery,
       run: (generalTypeNode, specificTermNode, generalContext, specificContext, continuation) => {
+        let success = false;
+
+        let context;
+
+        const typeNode = generalTypeNode, ///
+              termNode = specificTermNode, ///
+              nominalTypeName = typeNode.getNominalTypeName();
+
+        context = generalContext; ///
+
+        const type = context.findTypeByNominalTypeName(nominalTypeName);
+
+        context = specificContext; ///
+
+        const term = context.findTermByTermNode(termNode),
+              termType = term.getType(),
+              termTypeEqualToOrSubTypeOfGivenTypeType = termType.isEqualToOrSubTypeOf(type);
+
+        if (termTypeEqualToOrSubTypeOfGivenTypeType) {
+          success = true;
+        }
+
+        return continuation(success);
+      }
+    }
+  ];
+}
+
+class UnifyTermIntrinsicallyPass extends ContinuationZipPassBase {
+  static maps = [
+    {
+      generalNodeQuery: termVariableNodeQuery,
+      specificNodeQuery: termNodeQuery,
+      run: (generalTermVariableNode, specificTermNode, generalContext, specificContext, continuation) => {
+        const termNode = specificTermNode, ///
+            variableNode = generalTermVariableNode; ///
+
+        let context;
+
+        context = generalContext; ///
+
+        const variableIdentifier = variableNode.getVariableIdentifier(),
+              declaredVariable = context.findDeclaredVariableByVariableIdentifier(variableIdentifier),
+              variable = declaredVariable;  ///
+
+        context = specificContext;  ///
+
+        const term = context.findTermByTermNode(termNode);
+
+        return variable.unifyTerm(term, generalContext, specificContext, (termUnifies) => {
+          let success = false;
+
+          if (termUnifies) {
+            success = true;
+          }
+
+          return continuation(success);
+        });
+      }
+    }
+  ];
+}
+
+class UnifyMetavariableIntrisicallyPass extends ContinuationZipPass {
+  static maps = [
+    {
+      generalNodeQuery: termVariableNodeQuery,
+      specificNodeQuery: termNodeQuery,
+      run: (generalTermVariableNode, specificTermNode, generalContext, specificContext, continuation) => {
+        const termNode = specificTermNode, ///
+          variableNode = generalTermVariableNode; ///
+
+        let context;
+
+        context = generalContext; ///
+
+        const variableIdentifier = variableNode.getVariableIdentifier(),
+              declaredVariable = context.findDeclaredVariableByVariableIdentifier(variableIdentifier),
+              variable = declaredVariable;  ///
+
+        context = specificContext;  ///
+
+        const term = context.findTermByTermNode(termNode);
+
+        return variable.unifyTerm(term, generalContext, specificContext, (termUnifies) => {
+          let success = false;
+
+          if (termUnifies) {
+            success = true;
+          }
+
+          return continuation(success);
+        });
+      }
+    }
+  ];
+}
+
+class UnifyTermWithPropertyPass extends ContinuationZipPass {
+  static maps = [
+    {
+      generalNodeQuery: typeNodeQuery,
+      specificNodeQuery: termNodeQuery,
+      run: (generalTypeNode, specificTermNode, generalContext, specificContext, continuation) => {
+        let success = false;
+
         const typeNode = generalTypeNode, ///
               termNode = specificTermNode, ///
               nominalTypeName = typeNode.getNominalTypeName();
@@ -240,29 +309,72 @@ class GeneratorPass extends ContinuationZipPass {
         if (type !== null) {
           context = specificContext;  ///
 
-          const term = termFromTermNode(termNode, context);
+          const term = termFromTermNode(termNode, context),
+                strict = false,
+                validates = term.validateGivenType(strict, type, context, (term, context) => {
+                  const specificContext = context;  ///
 
-          term.validateGivenType(type, context, (term) => {
-            let success = false;
+                  return continuation(generalContext, specificContext);
+                });
 
-            if (term !== null) {
-              success = true;
-            }
-
-            return continuation(success);
-          });
+          if (validates) {
+            success = true;
+          }
         }
+
+        return success;
       }
     }
   ];
 }
 
-class ConstructorPass extends ContinuationZipPass {
+class UnifyTermWithGeneratorPass extends ContinuationZipPass {
   static maps = [
     {
       generalNodeQuery: typeNodeQuery,
       specificNodeQuery: termNodeQuery,
       run: (generalTypeNode, specificTermNode, generalContext, specificContext, continuation) => {
+        let success = false;
+
+        const typeNode = generalTypeNode, ///
+              termNode = specificTermNode, ///
+              nominalTypeName = typeNode.getNominalTypeName();
+
+        let context;
+
+        context = generalContext; ///
+
+        const type = context.findTypeByNominalTypeName(nominalTypeName);
+
+        if (type !== null) {
+          context = specificContext;  ///
+
+          const term = termFromTermNode(termNode, context),
+                validates = term.validateGivenType(type, context, (term, context) => {
+                  const specificContext = context;  ///
+
+                  return continuation(generalContext, specificContext);
+                });
+
+          if (validates) {
+            success = true;
+          }
+        }
+
+        return success;
+      }
+    }
+  ];
+}
+
+class UnifyTermWithConstructorPass extends ContinuationZipPass {
+  static maps = [
+    {
+      generalNodeQuery: typeNodeQuery,
+      specificNodeQuery: termNodeQuery,
+      run: (generalTypeNode, specificTermNode, generalContext, specificContext, continuation) => {
+        let success = false;
+
         const typeNode = generalTypeNode, ///
               termNode = specificTermNode, ///
               nominalTypeName = typeNode.getNominalTypeName();
@@ -275,29 +387,26 @@ class ConstructorPass extends ContinuationZipPass {
 
         context = specificContext;  ///
 
-        let success = false;
+        if (type !== null) {
+          const term = termFromTermNode(termNode, context),
+                validates = term.validateGivenType(type, context, (term, context) => {
+                  const specificContext = context;  ///
 
-        if (type === null) {
-          return continuation(success, generalContext, specificContext);
-        }
+                  return continuation(generalContext, specificContext);
+                });
 
-        const term = termFromTermNode(termNode, context);
-
-        term.validateGivenType(type, (term, context) => {
-          const specificContext = context;  ///
-
-          if (term !== null) {
+          if (validates) {
             success = true;
           }
+        }
 
-          return continuation(success, generalContext, specificContext);
-        }, context, continuation);
+        return success;
       }
     }
   ];
 }
 
-class CombinatorPass extends ContinuationZipPass {
+class UnifyStatementWithCombinatorPass extends ContinuationZipPass {
   static maps = [
     {
       generalNodeQuery: metaTypeNodeQuery,
@@ -374,11 +483,11 @@ class CombinatorPass extends ContinuationZipPass {
         context = specificContext;  ///
 
         const term = termFromTermNode(termNode, context),
-              validates = term.validateGivenType(type, (term, context) => {
+              validates = term.validateGivenType(type, context, (term, context) => {
                 const specificContext = context;  ///
 
                 return continuation(generalContext, specificContext);
-              }, context, continuation);
+              });
 
         if (validates) {
           success = true;
@@ -390,118 +499,14 @@ class CombinatorPass extends ContinuationZipPass {
   ];
 }
 
-class MetavariablePass extends ContinuationZipPass {
-  static maps = [
-    {
-      generalNodeQuery: typeNodeQuery,
-      specificNodeQuery: termNodeQuery,
-      run: (generalTypeNode, specificTermNode, generalContext, specificContext, continuation) => {
-        let success = false;
-
-        let context;
-
-        const typeNode = generalTypeNode, ///
-              termNode = specificTermNode, ///
-              nominalTypeName = typeNode.getNominalTypeName();
-
-        context = generalContext; ///
-
-        const type = context.findTypeByNominalTypeName(nominalTypeName);
-
-        context = specificContext; ///
-
-        const term = context.findTermByTermNode(termNode),
-              termType = term.getType(),
-              termTypeEqualToOrSubTypeOfGivenTypeType = termType.isEqualToOrSubTypeOf(type);
-
-        if (termTypeEqualToOrSubTypeOfGivenTypeType) {
-          success = true;
-        }
-
-        return continuation(success);
-      }
-    }
-  ];
-}
-
-class IntrinsicTermPass extends ContinuationZipPassBase {
-  static maps = [
-    {
-      generalNodeQuery: termVariableNodeQuery,
-      specificNodeQuery: termNodeQuery,
-      run: (generalTermVariableNode, specificTermNode, generalContext, specificContext, continuation) => {
-        const termNode = specificTermNode, ///
-              variableNode = generalTermVariableNode; ///
-
-        let context;
-
-        context = generalContext; ///
-
-        const variableIdentifier = variableNode.getVariableIdentifier(),
-              declaredVariable = context.findDeclaredVariableByVariableIdentifier(variableIdentifier),
-              variable = declaredVariable;  ///
-
-        context = specificContext;  ///
-
-        const term = context.findTermByTermNode(termNode);
-
-        return variable.unifyTerm(term, generalContext, specificContext, (termUnifies) => {
-          let success = false;
-
-          if (termUnifies) {
-            success = true;
-          }
-
-          return continuation(success);
-        });
-      }
-    }
-  ];
-}
-
-class IntrinsicMetavariablePass extends ContinuationZipPass {
-  static maps = [
-    {
-      generalNodeQuery: termVariableNodeQuery,
-      specificNodeQuery: termNodeQuery,
-      run: (generalTermVariableNode, specificTermNode, generalContext, specificContext, continuation) => {
-        const termNode = specificTermNode, ///
-              variableNode = generalTermVariableNode; ///
-
-        let context;
-
-        context = generalContext; ///
-
-        const variableIdentifier = variableNode.getVariableIdentifier(),
-              declaredVariable = context.findDeclaredVariableByVariableIdentifier(variableIdentifier),
-              variable = declaredVariable;  ///
-
-        context = specificContext;  ///
-
-        const term = context.findTermByTermNode(termNode);
-
-        return variable.unifyTerm(term, generalContext, specificContext, (termUnifies) => {
-          let success = false;
-
-          if (termUnifies) {
-            success = true;
-          }
-
-          return continuation(success);
-        });
-      }
-    }
-  ];
-}
-
-const propertyPass = new PropertyPass(),
-      statementPass = new StatementPass(),
-      generatorPass = new GeneratorPass(),
-      combinatorPass = new CombinatorPass(),
-      constructorPass = new ConstructorPass(),
-      metavariablePass = new MetavariablePass(),
-      intrinsicTermPass = new IntrinsicTermPass(),
-      intrinsicMetavariablePass = new IntrinsicMetavariablePass();
+const unifyStatementPass = new UnifyStatementPass(),
+      unifyMetavariablePass = new UnifyMetavariablePass(),
+      unifyTermInstrinsicallyPass = new UnifyTermIntrinsicallyPass(),
+      unifyMetavariableIntrisicallyPass = new UnifyMetavariableIntrisicallyPass(),
+      unifyTermWithPropertyPass = new UnifyTermWithPropertyPass(),
+      unifyTermWithGeneratorPass = new UnifyTermWithGeneratorPass(),
+      unifyTermWithConstructorPass = new UnifyTermWithConstructorPass(),
+      unifyStatementWithCombinatorPass = new UnifyStatementWithCombinatorPass();
 
 export function unifyStatement(generalStatement, specificStatement, generalContext, specificContext, continuation) {
   const generalStatementNode = generalStatement.getNode(),
@@ -509,46 +514,14 @@ export function unifyStatement(generalStatement, specificStatement, generalConte
         generalNode = generalStatementNode, ///
         specificNode = specificStatementNode;  ///
 
-  return statementPass.run(generalNode, specificNode, generalContext, specificContext, continuation);
+  return unifyStatementPass.run(generalNode, specificNode, generalContext, specificContext, continuation);
 }
 
 export function unifyMetavariable(generalMetavariable, specificMetavariable, generalContext, specificContext, continuation) {
   const generalMetavariableNode = generalMetavariable.getNode(),
         specificMetavariableNode = specificMetavariable.getNode();
 
-  return metavariablePass.run(generalMetavariableNode, specificMetavariableNode, generalContext, specificContext, continuation);
-}
-
-export function unifyTermWithProperty(term, property, generalContext, specificContext, continuation) {
-  const termNode = term.getNode(),
-        propertyTerm = property.getTerm(),
-        propertyTermNode = propertyTerm.getNode();
-
-  return propertyPass.run(propertyTermNode, termNode, generalContext, specificContext, continuation);
-}
-
-export function unifyTermWithGenerator(term, generator, generalContext, specificContext, continuation) {
-  const termNode = term.getNode(),
-        generatorTerm = generator.getTerm(),
-        generatorTermNode = generatorTerm.getNode();
-
-  return generatorPass.run(generatorTermNode, termNode, generalContext, specificContext, continuation);
-}
-
-export function unifyTermWithConstructor(term, constructor, generalContext, specificContext, continuation) {
-  const termNode = term.getNode(),
-        constructorTerm = constructor.getTerm(),
-        constructorTermNode = constructorTerm.getNode();
-
-  return constructorPass.run(constructorTermNode, termNode, generalContext, specificContext, continuation);
-}
-
-export function unifyStatementWithCombinator(statement, combinator, generalContext, specificContext, continuation) {
-  const statementNode = statement.getNode(),
-        combinatorStatement = combinator.getStatement(),
-        combinatorStatementNode = combinatorStatement.getNode();
-
-  return combinatorPass.run(combinatorStatementNode, statementNode, generalContext, specificContext, continuation);
+  return unifyMetavariablePass.run(generalMetavariableNode, specificMetavariableNode, generalContext, specificContext, continuation);
 }
 
 export function unifyTermIntrinsically(generalTerm, specificTerm, generalContext, specificContext, continuation) {
@@ -557,7 +530,7 @@ export function unifyTermIntrinsically(generalTerm, specificTerm, generalContext
         generalNode = generalTermNode, ///
         specificNode = specificTermNode; ///
 
-  return intrinsicTermPass.run(generalNode, specificNode, generalContext, specificContext, continuation);
+  return unifyTermInstrinsicallyPass.run(generalNode, specificNode, generalContext, specificContext, continuation);
 }
 
 export function unifyMetavariableIntrinsically(generalMetavariable, specificMetavariable, generalContext, specificContext, continuation) {
@@ -566,5 +539,37 @@ export function unifyMetavariableIntrinsically(generalMetavariable, specificMeta
         generalNode = generalMetavariableNode, ///
         specificNode = specificMetavariableNode;
 
-  return intrinsicMetavariablePass.run(generalNode, specificNode, generalContext, specificContext, continuation);
+  return unifyMetavariableIntrisicallyPass.run(generalNode, specificNode, generalContext, specificContext, continuation);
+}
+
+export function unifyTermWithProperty(term, property, generalContext, specificContext, continuation) {
+  const termNode = term.getNode(),
+        propertyTerm = property.getTerm(),
+        propertyTermNode = propertyTerm.getNode();
+
+  return unifyTermWithPropertyPass.run(propertyTermNode, termNode, generalContext, specificContext, continuation);
+}
+
+export function unifyTermWithGenerator(term, generator, generalContext, specificContext, continuation) {
+  const termNode = term.getNode(),
+        generatorTerm = generator.getTerm(),
+        generatorTermNode = generatorTerm.getNode();
+
+  return unifyTermWithGeneratorPass.run(generatorTermNode, termNode, generalContext, specificContext, continuation);
+}
+
+export function unifyTermWithConstructor(term, constructor, generalContext, specificContext, continuation) {
+  const termNode = term.getNode(),
+        constructorTerm = constructor.getTerm(),
+        constructorTermNode = constructorTerm.getNode();
+
+  return unifyTermWithConstructorPass.run(constructorTermNode, termNode, generalContext, specificContext, continuation);
+}
+
+export function unifyStatementWithCombinator(statement, combinator, generalContext, specificContext, continuation) {
+  const statementNode = statement.getNode(),
+        combinatorStatement = combinator.getStatement(),
+        combinatorStatementNode = combinatorStatement.getNode();
+
+  return unifyStatementWithCombinatorPass.run(combinatorStatementNode, statementNode, generalContext, specificContext, continuation);
 }

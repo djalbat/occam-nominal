@@ -162,41 +162,41 @@ export default define(class SignatureAssertion extends Assertion {
     return signatureUnifies;
   }
 
-  async unifyTopLevelAssertion(topLevelAssertion, context) {
-    let topLevelAssertionUnifies;
+  async unifyClaim(claim, context) {
+    let claimUnifies;
 
-    const topLevelAssertionString = topLevelAssertion.getString(),
+    const claimString = claim.getString(),
           signatureAssertionString = this.getString();
 
-    context.trace(`Unifying the '${topLevelAssertionString}' top-level assertion with the '${signatureAssertionString}' signature assertion...`);
+    context.trace(`Unifying the '${claimString}' claim with the '${signatureAssertionString}' signature assertion...`);
 
     await reconcile(async (context) => {
       const axiom = context.findAxiomByReference(this.reference);
 
       axiom.unifySignature(this.signature, context);
 
-      topLevelAssertionUnifies = await axiom.unifyTopLevelAssertion(topLevelAssertion, context);
+      claimUnifies = await axiom.unifyClaim(claim, context);
     }, context);
 
-    if (topLevelAssertionUnifies) {
-      context.trace(`...unified the '${topLevelAssertionString}' top-level assertion with the '${signatureAssertionString}' signature assertion...`);
+    if (claimUnifies) {
+      context.trace(`...unified the '${claimString}' claim with the '${signatureAssertionString}' signature assertion...`);
     }
 
-    return topLevelAssertionUnifies;
+    return claimUnifies;
   }
 
-  async unifyStepAndSubproofOrProofAssertions(step, subproofOrProofAssertions, context) {
-    let stepAndSubproofOrProofAssertionsUnify;
+  async unifyStepAndFactOrSubproofs(step, factOrSubproofs, context) {
+    let stepAndFactOrSubproofsUnify;
 
     await reconcile(async (context) => {
       const axiom = context.findAxiomByReference(this.reference);
 
       axiom.unifySignature(this.signature, context);
 
-      stepAndSubproofOrProofAssertionsUnify = await axiom.unifyStepAndSubproofOrProofAssertions(step, subproofOrProofAssertions, context);
+      stepAndFactOrSubproofsUnify = await axiom.unifyStepAndFactOrSubproofs(step, factOrSubproofs, context);
     }, context);
 
-    return stepAndSubproofOrProofAssertionsUnify;
+    return stepAndFactOrSubproofsUnify;
   }
 
   static name = "SignatureAssertion";

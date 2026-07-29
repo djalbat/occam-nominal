@@ -4,7 +4,7 @@ import { Element } from "occam-languages";
 
 import { equateStatements } from "../process/equate";
 
-export default class ProofAssertion extends Element {
+export default class Fact extends Element {
   constructor(context, string, node, breakPoint, statement) {
     super(context, string, node, breakPoint);
 
@@ -15,17 +15,17 @@ export default class ProofAssertion extends Element {
     return this.statement;
   }
 
-  getProofAssertionNode() {
+  getFactNode() {
     const node = this.getNode(),
-          proofAssertionNode = node;  ///
+          factNode = node;  ///
 
-    return proofAssertionNode;
+    return factNode;
   }
 
-  isProofAssertion() {
-    const proofAssertion = true;
+  isFact() {
+    const fact = true;
 
-    return proofAssertion;
+    return fact;
   }
 
   isStep() {
@@ -38,9 +38,9 @@ export default class ProofAssertion extends Element {
     let comparesToStep = false;
 
     const stepString = step.getString(),
-          proofAssertionString = this.getString();  ///
+          factString = this.getString();  ///
 
-    context.trace(`Comparing the '${stepString}' step to the '${proofAssertionString}' proof assertion...`);
+    context.trace(`Comparing the '${stepString}' step to the '${factString}' fact...`);
 
     const statement = step.getStatement(),
           comparesToStatement = this.compareStatement(statement, context);
@@ -50,7 +50,7 @@ export default class ProofAssertion extends Element {
     }
 
     if (comparesToStep) {
-      context.debug(`...compared the '${stepString}' step to the '${proofAssertionString}' proof assertion.`);
+      context.debug(`...compared the '${stepString}' step to the '${factString}' fact.`);
     }
 
     return comparesToStep;
@@ -60,9 +60,9 @@ export default class ProofAssertion extends Element {
     let comparesToStatement = false;
 
     const statementString = statement.getString(),
-          proofAssertionString = this.getString();  ///
+          factString = this.getString();  ///
 
-    context.trace(`Comparing the '${statementString}' statement to the '${proofAssertionString}' proof assertion...`);
+    context.trace(`Comparing the '${statementString}' statement to the '${factString}' fact...`);
 
     const leftStatement = statement,  ///
           rightStatement = this.statement,  ///
@@ -73,7 +73,7 @@ export default class ProofAssertion extends Element {
     }
 
     if (comparesToStatement) {
-      context.debug(`...compared the '${statementString}' statement to the '${proofAssertionString}' proof assertion.`);
+      context.debug(`...compared the '${statementString}' statement to the '${factString}' fact.`);
     }
 
     return comparesToStatement;
@@ -88,13 +88,13 @@ export default class ProofAssertion extends Element {
 
     const context = specificContext, ///
           statementString = statement.getString(),
-          proofAssertionString = this.getString();  ///
+          factString = this.getString();  ///
 
-    context.trace(`Unifying the '${statementString}' statement with the '${proofAssertionString}' proof assertion's statement...`);
+    context.trace(`Unifying the '${statementString}' statement with the '${factString}' fact's statement...`);
 
     return this.statement.unifyStatement(statement, generalContext, specificContext, (statementUnifies) => {
       if (statementUnifies) {
-        context.debug(`...unified the '${statementString}' statement with the '${proofAssertionString}' proof assertion's statement.`);
+        context.debug(`...unified the '${statementString}' statement with the '${factString}' fact's statement.`);
       }
 
       return continuation(statementUnifies);

@@ -1,10 +1,10 @@
 "use strict";
 
-import ProofAssertionNode from "../../node/proofAssertion";
+import FactNode from "../../node/fact";
 
 import { QUALIFICATION_RULE_NAME } from "../../ruleNames";
 
-export default class StepNode extends ProofAssertionNode {
+export default class StepNode extends FactNode {
   isStepNode() {
     const stepNode = true;
 
@@ -48,5 +48,5 @@ export default class StepNode extends ProofAssertionNode {
     return qualificationNode;
   }
 
-  static fromRuleNameChildNodesOpacityAndPrecedence(ruleName, childNodes, opacity, precedence) { return ProofAssertionNode.fromRuleNameChildNodesOpacityAndPrecedence(StepNode, ruleName, childNodes, opacity, precedence); }
+  static fromRuleNameChildNodesOpacityAndPrecedence(ruleName, childNodes, opacity, precedence) { return FactNode.fromRuleNameChildNodesOpacityAndPrecedence(StepNode, ruleName, childNodes, opacity, precedence); }
 }

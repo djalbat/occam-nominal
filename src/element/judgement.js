@@ -72,8 +72,8 @@ export default define(class Judgement extends Element {
     push(assumptions, frameAssumptions);
 
     if (metavariable !== null) {
-      const proofAssertions = context.getProofAssertions(),
-            implicitAssumptions = implicitAssumptionsFromProofAssertions(proofAssertions, context);
+      const facts = context.getFacts(),
+            implicitAssumptions = implicitAssumptionsFromFacts(facts, context);
 
       push(assumptions, implicitAssumptions);
     }
@@ -351,10 +351,10 @@ export default define(class Judgement extends Element {
     return judgement;
   }
 
-  static fromProofAssertion(proofAssertion, context) {
+  static fromFact(fact, context) {
     let judgement = null;
 
-    const statementNode = proofAssertion.getStatementNode();
+    const statementNode = fact.getStatementNode();
 
     if (statementNode !== null) {
       judgement = judgementFromStatementNode(statementNode, context);
@@ -378,10 +378,10 @@ function frameFromJudgementNode(judgementNode, context) {
   return frame;
 }
 
-function implicitAssumptionsFromProofAssertions(proofAssertions, context) {
+function implicitAssumptionsFromFacts(facts, context) {
   const { ImplicitAssumption } = elements,
-        implicitAssumptions = proofAssertions.map((proofAssertion) => {
-          const statement = proofAssertion.getStatement(),
+        implicitAssumptions = facts.map((fact) => {
+          const statement = fact.getStatement(),
                 implicitAssumption = ImplicitAssumption.fromStatement(statement, context);
 
           return implicitAssumption;

@@ -19,8 +19,6 @@ export function validateTermAsVariable(term, context, continuation) {
     context.trace(`Validating the '${termString}' term as a variable...`);
 
     termValidatesAsVariable = variable.validate(context, (variable, context) => {
-      debugger
-
       const type = variable.getType(),
             typeString = type.getString(),
             provisional = variable.isProvisional(),
@@ -32,12 +30,12 @@ export function validateTermAsVariable(term, context, continuation) {
 
       term.setProvisional(provisional);
 
-      context.debug(`...validated the '${termString}' term as a variable.`);
-
-      const termValidatesAsVariable = true;
-
-      return continuation(termValidatesAsVariable, term, context);
+      return continuation(term, context);
     });
+
+    if (termValidatesAsVariable) {
+      context.debug(`...validated the '${termString}' term as a variable.`);
+    }
   }
 
   return termValidatesAsVariable;

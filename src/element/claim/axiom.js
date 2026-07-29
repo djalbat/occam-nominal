@@ -2,7 +2,7 @@
 
 import { breakPointUtilities, continuationUtilities } from "occam-languages";
 
-import TopLevelAssertion from "../topLevelAssertion";
+import Claim from "../claim";
 
 import { define } from "../../elements";
 import { reconcile } from "../../utilities/context";
@@ -10,7 +10,7 @@ import { reconcile } from "../../utilities/context";
 const { match } = continuationUtilities,
       { breakable } = breakPointUtilities;
 
-export default define(class Axiom extends TopLevelAssertion {
+export default define(class Axiom extends Claim {
   getAxiomNode() {
     const node = this.getNode(),
           axiomNode = node; ///
@@ -212,38 +212,38 @@ export default define(class Axiom extends TopLevelAssertion {
     return suppositionsUnify;
   }
 
-  unifyTopLevelAssertion(topLevelAssertion, context) {
-    let topLevelAssertionUnifies = false;
+  unifyClaim(claim, context) {
+    let claimUnifies = false;
 
     const axiomString = this.getString(), ///
-          topLevelAssertionString = topLevelAssertion.getString();
+          claimString = claim.getString();
 
-    context.trace(`Unifying the '${topLevelAssertionString}' top level assertion with the '${axiomString}' axiom...`);
+    context.trace(`Unifying the '${claimString}' claim with the '${axiomString}' axiom...`);
 
-    const deduction = topLevelAssertion.getDeduction(),
+    const deduction = claim.getDeduction(),
           deductionUnifies = this.unifyDeduction(deduction, context);
 
     if (deductionUnifies) {
-      const hypothesesDischarges = topLevelAssertion.dischargeHypotheses(context);
+      const hypothesesDischarges = claim.dischargeHypotheses(context);
 
       if (hypothesesDischarges) {
-        const suppositions = topLevelAssertion.getSuppositions(),
+        const suppositions = claim.getSuppositions(),
               suppositionsUnify = this.unifySuppositions(suppositions, context);
 
         if (suppositionsUnify) {
-          topLevelAssertionUnifies = true;
+          claimUnifies = true;
         }
       }
     }
 
-    if (topLevelAssertionUnifies) {
-      context.debug(`...unified the '${topLevelAssertionString}' top level assertion with the '${axiomString}' axiom.`);
+    if (claimUnifies) {
+      context.debug(`...unified the '${claimString}' claim with the '${axiomString}' axiom.`);
     }
 
-    return topLevelAssertionUnifies;
+    return claimUnifies;
   }
 
   static name = "Axiom";
 
-  static fromJSON(json, context) { return TopLevelAssertion.fromJSON(Axiom, json, context); }
+  static fromJSON(json, context) { return Claim.fromJSON(Axiom, json, context); }
 });

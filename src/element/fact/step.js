@@ -3,8 +3,8 @@
 import { arrayUtilities } from "necessary";
 import { breakPointUtilities, continuationUtilities } from "occam-languages";
 
+import Fact from "../fact";
 import elements from "../../elements";
-import ProofAssertion from "../proofAssertion";
 
 import { all } from "../../utilities/continuation";
 import { define } from "../../elements";
@@ -15,7 +15,7 @@ const { some } = continuationUtilities,
       { breakable } = breakPointUtilities,
       { backwardsSome } = arrayUtilities;
 
-export default define(class Step extends ProofAssertion {
+export default define(class Step extends Fact {
   constructor(context, string, node, breakPoint, statement, reference, signatureAssertion) {
     super(context, string, node, breakPoint, statement);
 
@@ -103,20 +103,20 @@ export default define(class Step extends ProofAssertion {
     return comparesToJudgements;
   }
 
-  compareSubproofOrProofAssertions(subproofOrProofAssertions, context) {
-    let comparesToSubproofOrProofAssertions;
+  compareFactOrSubproofs(factOrSubproof, context) {
+    let comparesToFactOrSubproofs;
 
     const step = this; ///
 
-    comparesToSubproofOrProofAssertions = backwardsSome(subproofOrProofAssertions, (subproofOrProofAssertion) => {
-      const subproofOrProofAssertionComparesToStatement = subproofOrProofAssertion.compareStep(step, context);
+    comparesToFactOrSubproofs = backwardsSome(factOrSubproof, (factOrSubproof) => {
+      const factOrSubproofComparesToStatement = factOrSubproof.compareStep(step, context);
 
-      if (subproofOrProofAssertionComparesToStatement) {
+      if (factOrSubproofComparesToStatement) {
         return true;
       }
     });
 
-    return comparesToSubproofOrProofAssertions;
+    return comparesToFactOrSubproofs;
   }
 
   verify = breakable(function (context, continuation) {

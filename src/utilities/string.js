@@ -256,7 +256,7 @@ export function referenceSubstitutionStringFromReferenceAndMetavariable(referenc
   return referenceSubstitutionString;
 }
 
-export function sectionStringFromHypothesesDeclarationAndTopLevelAssertion(hypotheses, declaration, topLevelAssertion) {
+export function sectionStringFromHypothesesDeclarationAndClaim(hypotheses, declaration, claim) {
   let sectionString;
 
   const hypothesesString = hypothesesStringFromHypotheses(hypotheses);
@@ -269,37 +269,37 @@ export function sectionStringFromHypothesesDeclarationAndTopLevelAssertion(hypot
     sectionString = `${sectionString}${declarationString}`;
   }
 
-  if (topLevelAssertion !== null) {
-    const topLevelAssertionString = topLevelAssertion.getString();
+  if (claim !== null) {
+    const claimString = claim.getString();
 
-    sectionString = `${sectionString}${topLevelAssertionString}`;
+    sectionString = `${sectionString}${claimString}`;
   }
 
   return sectionString;
 }
 
-export function topLevelAssertionStringFromLabelsSignatureSuppositionsAndDeduction(labels, signature, suppositions, deduction) {
-  let topLevelAssertionString = EMPTY_STRING;
+export function claimStringFromLabelsSignatureSuppositionsAndDeduction(labels, signature, suppositions, deduction) {
+  let claimString = EMPTY_STRING;
 
   const deductionString = deduction.getString(),
         labelsString = labelsStringFromLabels(labels),
         signatureString = signatureStringFromSignature(signature),
         suppositionsString = suppositionsStringFromSuppositions(suppositions);
 
-  topLevelAssertionString = (labelsString !== null) ?
-                             `${topLevelAssertionString}${labelsString}` :
-                               `..`;
+  claimString = (labelsString !== null) ?
+                  `${claimString}${labelsString}` :
+                    `..`;
 
-  topLevelAssertionString = (signatureString !== null) ?
-                             `${topLevelAssertionString}${signatureString}` :
-                               `${topLevelAssertionString}`;
+  claimString = (signatureString !== null) ?
+                 `${claimString}${signatureString}` :
+                   `${claimString}`;
 
 
-  topLevelAssertionString = (suppositionsString !== null) ?
-                             `${topLevelAssertionString} :: [${suppositionsString}]...${deductionString}` :
-                               `${topLevelAssertionString} :: ${deductionString}`;
+  claimString = (suppositionsString !== null) ?
+                 `${claimString} :: [${suppositionsString}]...${deductionString}` :
+                   `${claimString} :: ${deductionString}`;
 
-  return topLevelAssertionString;
+  return claimString;
 }
 
 export function statementSubstitutionStringFromStatementMetavariableAndSubstitution(statement, metavariable, substitution) {

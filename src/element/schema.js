@@ -172,11 +172,11 @@ export default define(class Schema extends Element {
 
     return supposition.verify(context, (suppositionVerifies) => {
       if (suppositionVerifies) {
-        const subproofOrProofAssertion = supposition;  ////
+        const factOrSubproof = supposition;  ////
 
         context.assignAssignments();
 
-        context.addSubproofOrProofAssertion(subproofOrProofAssertion);
+        context.addFactOrSubproof(factOrSubproof);
       }
 
       if (suppositionVerifies) {

@@ -213,57 +213,59 @@ export default define(class Term extends Element {
     return validates;
   }
 
-  validateGivenType(strict, type, callback, context, continuation) {
+  validateGivenType(strict, type, context, continuation) {
     if (continuation === undefined) {
       continuation = context; ///
 
-      context = callback; ///
-
-      callback = type;  ///
+      context = type; ///
 
       type = strict;  ///
 
       strict = true;
     }
 
-    debugger
+    let validatesGivenType = false;
 
     const typeString = type.getString(),
           termString = this.getString();  ///
 
     context.trace(`Validating the '${termString}' term given the '${typeString}' type...`);
 
-    return this.validate(context, (term, context) => {
+    const validates = this.validate(context, (term, context) => {
       let validatesGivenType = false;
 
-      if (term !== null) {
-        const termType = term.getType(),
-              termTypeEqualToOrSubTypeOfType = termType.isEqualToOrSubTypeOf(type);
+      const termType = term.getType(),
+            termTypeEqualToOrSubTypeOfType = termType.isEqualToOrSubTypeOf(type);
 
-        if (termTypeEqualToOrSubTypeOfType) {
-          validatesGivenType = true;
+      if (termTypeEqualToOrSubTypeOfType) {
+        validatesGivenType = true;
 
-          if (strict) {
-            const typeEstablished = type.isEstablished(),
-                  termProvisional = term.isProvisional();
+        if (strict) {
+          const typeEstablished = type.isEstablished(),
+                termProvisional = term.isProvisional();
 
-            if (typeEstablished && termProvisional) {
-              validatesGivenType = false;
-            }
+          if (typeEstablished && termProvisional) {
+            validatesGivenType = false;
           }
         }
       }
 
-      if (!validatesGivenType) {
-        term = null;
-      }
-
       if (validatesGivenType) {
-        context.debug(`...validated the '${termString}' term given the '${typeString}' type.`);
+        validatesGivenType = continuation(term, context);
       }
 
-      return continuation(term, context);
+      return validatesGivenType;
     });
+
+    if (validates) {
+      validatesGivenType = true;
+    }
+
+    if (validatesGivenType) {
+      context.debug(`...validated the '${termString}' term given the '${typeString}' type.`);
+    }
+
+    return validatesGivenType;
   }
 
   // validateAsProperty(context, continuation) {

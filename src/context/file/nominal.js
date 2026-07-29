@@ -214,19 +214,19 @@ export default class NominalFileContext extends FileContext {
     return procedures;
   }
 
-  getTopLevelAssertions(includeRelease = true) {
+  getClaims(includeRelease = true) {
     const lemmas = this.getLemmas(includeRelease),
           axioms = this.getAxioms(includeRelease),
           theorems = this.getTheorems(includeRelease),
           conjectures = this.getConjectures(includeRelease),
-          topLevelAssertions = [
+          claims = [
             ...lemmas,
             ...axioms,
             ...theorems,
             ...conjectures
           ];
 
-    return topLevelAssertions;
+    return claims;
   }
 
   getDeclaredVariables() {
@@ -295,10 +295,10 @@ export default class NominalFileContext extends FileContext {
     return equivalences;
   }
 
-  getSubproofOrProofAssertions() {
-    const subproofOrProofAssertions = [];
+  getFactOrSubproofs() {
+    const factOrSubproofs = [];
 
-    return subproofOrProofAssertions;
+    return factOrSubproofs;
   }
 
   addType(type) {
@@ -502,18 +502,18 @@ export default class NominalFileContext extends FileContext {
     return conjecture;
   }
 
-  findTopLevelAssertionByReference(reference) {
-    const topLEvelAssertions = this.getTopLevelAssertions(),
+  findClaimByReference(reference) {
+    const claims = this.getClaims(),
           metavariableNode = reference.getMetavariableNode(),
-          topLevelAssertion = topLEvelAssertions.find((topLevelAssertion) => {
-            const metavariableNodeMatches = topLevelAssertion.matchMetavariableNode(metavariableNode);
+          claim = claims.find((claim) => {
+            const metavariableNodeMatches = claim.matchMetavariableNode(metavariableNode);
 
             if (metavariableNodeMatches) {
               return true;
             }
           }) || null;
 
-    return topLevelAssertion;
+    return claim;
   }
 
   findTypeByTypeName(typeName, includeRelease = true) {
