@@ -5,14 +5,15 @@ import { breakPointUtilities, continuationUtilities } from "occam-languages";
 
 import Assertion from "../assertion";
 
+import { every } from "../../utilities/continuation";
 import { define } from "../../elements";
 import { instantiateSubproofAssertion } from "../../process/instantiate";
-import { descend, reconcile, instantiate } from "../../utilities/context";
 import { subproofAssertionFromStatementNode } from "../../utilities/element";
+import { join, descend, reconcile, instantiate } from "../../utilities/context";
 
 const { last, front } = arrayUtilities,
-      { breakPointFromJSON } = breakPointUtilities,
-      { every, backwardsEvery } = continuationUtilities;
+      { backwardsEvery } = continuationUtilities,
+      { breakPointFromJSON } = breakPointUtilities;
 
 export default define(class SubproofAssertion extends Assertion {
   constructor(context, string, node, breakPoint, statements) {
@@ -54,59 +55,55 @@ export default define(class SubproofAssertion extends Assertion {
   }
 
   validate(context, continuation) {
+    let validates;
+
     const subproofAssertionString = this.getString();  ///
 
     context.trace(`Validating the '${subproofAssertionString}' subproof assertion...`);
 
+    let subproofAssertion;
+
     const assertion = this.findAssertion(context);
 
     if (assertion !== null) {
-      const subproofAssertion = assertion; ///
+      subproofAssertion = assertion; ///
 
       context.debug(`The '${subproofAssertionString}' subproof assertion is already present.`);
 
-      return continuation(subproofAssertion);
-    }
+      validates = continuation(subproofAssertion);
+    } else {
+      subproofAssertion = this; ///
 
-    let subproofAssertion = null;
-
-    this.validateStatements(context, (statementsValidate) => {
-      let validates = false;
-
-      if (statementsValidate) {
-        validates = true;
-      }
-
-      if (validates) {
-        const assertion = this; ///
-
-        subproofAssertion = assertion;  ///
+      validates = this.validateStatements(context, () => {
+        const assertion = subproofAssertion; ///
 
         context.addAssertion(assertion);
-      }
 
-      if (validates) {
-        context.debug(`...validated the '${subproofAssertionString}' subproof assertion.`);
-      }
+        return continuation(subproofAssertion, context);
+      });
+    }
 
-      return continuation(subproofAssertion);
-    });
+    if (validates) {
+      context.debug(`...validated the '${subproofAssertionString}' subproof assertion.`);
+    }
+
+    return validates;
   }
 
   validateStatements(context, continuation) {
-    return every(this.statements, context, (statement, continuation) => {
-      return descend((context) => {
-        return statement.validate(context, (statement) => {
-          let statementValidates = false;
+    let statementsValidate;
 
-          if (statement !== null) {
-            statementValidates = true;
-          }
-
-          return continuation(statementValidates);
+    descend((context) => {
+      statementsValidate = every(this.statements, (statement, context, continuation) => {
+        const statementValidates = statement.validate(context, (statement, context) => {
+          return continuation(context);
         });
-      }, context);
-    }, continuation);
+
+        return statementValidates;
+      }, context, continuation);
+    }, context);
+
+    return statementsValidate;
   }
 
   unifySchema(schema, generalContext, specificContext) {
@@ -181,26 +178,28 @@ export default define(class SubproofAssertion extends Assertion {
 
     specificContext = lastStepContext;  ///
 
-    return reconcile((specificContext) => {
-      const lastStepStatement = lastStep.getStatement();
+    return join((specificContext) => {
+      return reconcile((specificContext) => {
+        const lastStepStatement = lastStep.getStatement();
 
-      return deducedStatement.unifyStatement(lastStepStatement, generalContext, specificContext, (lastStepStatementUnifies) => {
-        let lastStepUnifies = false;
+        return deducedStatement.unifyStatement(lastStepStatement, generalContext, specificContext, (lastStepStatementUnifies) => {
+          let lastStepUnifies = false;
 
-        if (lastStepStatementUnifies) {
-          lastStepUnifies = true;
+          if (lastStepStatementUnifies) {
+            lastStepUnifies = true;
 
-          specificContext.commit(context);
-        }
+            specificContext.commit(context);
+          }
 
-        if (lastStepUnifies) {
-          context.debug(`...unified the '${lastStepString}' last step with the '${deducedStatementString}' deduced statement.`)
-        }
+          if (lastStepUnifies) {
+            context.debug(`...unified the '${lastStepString}' last step with the '${deducedStatementString}' deduced statement.`)
+          }
 
-        return continuation(lastStepUnifies);
-      });
-    }, specificContext);
-  }
+          return continuation(lastStepUnifies);
+        });
+      }, specificContext);
+    }, specificContext, context);
+ }
 
   unifyDeduction(deduction, generalContext, specificContext) {
     let deductionUnifies = false;
@@ -246,25 +245,27 @@ export default define(class SubproofAssertion extends Assertion {
 
     specificContext = suppositionContext;  ///
 
-    return reconcile((specificContext) => {
-      const suppositionStatement = supposition.getStatement();
+    return join((specificContext) => {
+      return reconcile((specificContext) => {
+        const suppositionStatement = supposition.getStatement();
 
-      return supposedStatement.unifyStatement(suppositionStatement, generalContext, specificContext, (suppositionStatementUnifies) => {
-        let suppositionUnifies = false;
+        return supposedStatement.unifyStatement(suppositionStatement, generalContext, specificContext, (suppositionStatementUnifies) => {
+          let suppositionUnifies = false;
 
-        if (suppositionStatementUnifies) {
-          suppositionUnifies = true;
+          if (suppositionStatementUnifies) {
+            suppositionUnifies = true;
 
-          specificContext.commit(context);
-        }
+            specificContext.commit(context);
+          }
 
-        if (suppositionUnifies) {
-          context.debug(`...unified the '${suppositionString}' supposition with the '${supposedStatementString}' supposed statement.`)
-        }
+          if (suppositionUnifies) {
+            context.debug(`...unified the '${suppositionString}' supposition with the '${supposedStatementString}' supposed statement.`)
+          }
 
-        return continuation(suppositionUnifies);
-      });
-    }, specificContext);
+          return continuation(suppositionUnifies);
+        });
+      }, specificContext);
+    }, specificContext, context);
   }
 
   unifySuppositions(suppositions, generalContext, specificContext, continuation) {

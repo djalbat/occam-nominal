@@ -73,9 +73,9 @@ class BoundedContext extends Context {
     return factOrSubproofs;
   }
 
-  getProofAssertions() {
+  getFacts() {
     const factOrSubproofs = this.getFactOrSubproofs(),
-          proofAssertions = factOrSubproofs.filter((factOrSubproof) => {
+          facts = factOrSubproofs.filter((factOrSubproof) => {
             const factOrSubproofFact = factOrSubproof.isFact();
 
             if (factOrSubproofFact) {
@@ -83,15 +83,15 @@ class BoundedContext extends Context {
             }
           });
 
-    return proofAssertions;
+    return facts;
   }
 
   getSteps() {
-    const proofAssertions = this.getProofAssertions(),
-          steps = proofAssertions.filter((proofAssertion) => {
-            const proofAssertionStep = proofAssertion.isStep();
+    const facts = this.getFacts(),
+          steps = facts.filter((fact) => {
+            const factStep = fact.isStep();
 
-            if (proofAssertionStep) {
+            if (factStep) {
               return true;
             }
           });

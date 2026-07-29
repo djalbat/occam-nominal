@@ -1,6 +1,7 @@
 "use strict";
 
 import KenonContext from "../context/kenon";
+import KrasicContext from "../context/krasic";
 import MnemicContext from "../context/mnemic";
 import NestedContext from "../context/nested";
 import TheticContext from "../context/thetic";
@@ -114,6 +115,13 @@ export function descend(innerFunction, context) {
 
 export function ablate(innerFunction, context) {
   context = ablateContext(context); ///
+
+  return innerFunction(context);
+}
+
+export function join(innerFunction, ...contexts) {
+  const krasicContext = KrasicContext.fromContexts(contexts),
+        context = krasicContext;  ///
 
   return innerFunction(context);
 }

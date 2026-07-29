@@ -233,7 +233,7 @@ export default define(class Constructor extends Element {
 
       context.trace(`Discharing the '${constructxorString}' constructor's hhypotheses...`);
 
-      hypothesesDischargesGivenTerm = every(this.hypotheses, context, (hypothesis, continuation) => {
+      hypothesesDischargesGivenTerm = every(this.hypotheses, context, (hypothesis, context, continuation) => {
         let hypothesisDischargesGivenTerm;
 
         hypothesisDischargesGivenTerm = this.dischargeHypothesisGivenTerm(hypothesis, term, context, continuation);

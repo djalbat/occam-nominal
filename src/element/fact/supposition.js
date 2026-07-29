@@ -4,8 +4,8 @@ import { breakPointUtilities } from "occam-languages";
 
 import Fact from "../fact";
 
+import { all } from "../../utilities/continuation";
 import { define } from "../../elements";
-import { all, exists } from "../../utilities/continuation";
 import { instantiateSupposition } from "../../process/instantiate";
 import { procedureCallFromSuppositionNode } from "../../utilities/element";
 import { declare, attempt, reconcile, serialise, unserialise, instantiate } from "../../utilities/context";

@@ -33,6 +33,8 @@ export default define(class Conclusion extends Element {
   }
 
   verify = breakable(function (context, continuation) {
+    let verifies = false;
+
     const conclusionString = this.getString();  ///
 
     context.trace(`Verifying the '${conclusionString}' conclusion...`);
@@ -40,8 +42,6 @@ export default define(class Conclusion extends Element {
     const nonsensical = this.isNonsensical();
 
     if (nonsensical) {
-      const verifies = false;
-
       context.debug(`Unable to verify the '${conclusionString}' conclusion because it is nonsense.`);
 
       return continuation(verifies);
@@ -49,67 +49,71 @@ export default define(class Conclusion extends Element {
 
     return derive((context) => {
       return elide((context) => {
-        return this.validate(context, (validates) => {
-          let verifies = false;
+        let validates;
+
+        attempt((context) => {
+          validates = this.validate(context, (conclusion, context) => true);
 
           if (validates) {
-            verifies = true;
+            this.commit(context);
           }
+        }, context);
 
-          if (verifies) {
-            context.debug(`...verified the '${conclusionString}' conclusion.`);
-          }
-
+        if (!validates) {
           return continuation(verifies);
-        });
+        }
+
+        verifies = true;
+
+        if (verifies) {
+          context.debug(`...verified the '${conclusionString}' conclusion.`);
+        }
+
+        return continuation(verifies);
       }, context);
     }, context);
   });
 
   validate(context, continuation) {
+    let validates = false;
+
     const conclusionString = this.getString();  ///
 
     context.trace(`Validating the '${conclusionString}' conclusion...`);
 
-    return attempt((context) => {
-      return this.validateStatement(context, (statementValidates) => {
-        let validates = false;
+    const statementValidates = this.validateStatement(context, (context) => {
+      const conclusion = this; ///
 
-        if (statementValidates) {
-          validates = true;
-        }
+      return continuation(conclusion, context);
+    });
 
-        if (validates) {
-          this.commit(context);
-        }
+    if (statementValidates) {
+      validates = true;
+    }
 
-        if (validates) {
-          context.debug(`...validated the '${conclusionString}' conclusion.`);
-        }
+    if (validates) {
+      context.debug(`...validated the '${conclusionString}' conclusion.`);
+    }
 
-        return continuation(validates);
-      });
-    }, context);
+    return validates;
   }
 
   validateStatement(context, continuation) {
+    let statementValidates;
+
     const conclusionString = this.getString();  ///
 
     context.trace(`Validating the '${conclusionString}' conclusion's statement...`);
 
-    return this.statement.validate(context, (statement) => {
-      let statementValidates = false;
-
-      if (statement !== null) {
-        statementValidates = true;
-      }
-
-      if (statementValidates) {
-        context.trace(`...validated the '${conclusionString}' conclusion's statement.`);
-      }
-
-      return continuation(statementValidates);
+    statementValidates = this.statement.validate(context, (statement, context) => {
+      return continuation(context);
     });
+
+    if (statementValidates) {
+      context.trace(`...validated the '${conclusionString}' conclusion's statement.`);
+    }
+
+    return statementValidates;
   }
 
   unifyStep(step, context, continuation) {

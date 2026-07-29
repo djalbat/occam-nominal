@@ -197,11 +197,11 @@ export default class Context extends ContextBase {
     return steps;
   }
 
-  getProofAssertions() {
+  getFacts() {
     const context = this.getContext(),
-          proofAssertions = context.getProofAssertions();
+          facts = context.getFacts();
 
-    return proofAssertions;
+    return facts;
   }
 
   getEquivalences() {
