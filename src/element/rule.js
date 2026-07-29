@@ -92,9 +92,9 @@ export default define(class Rule extends Element {
 
     context.trace(`Verifying the '${ruleString}' rule's labels...`);
 
-    return every(this.labels, context, (label, continuation) => {
-      return this.verifyLabel(label, context, continuation);
-    }, (labelsVerify) => {
+    const verifyLabel = this.verifyLabel.bind(this);
+
+    return every(this.labels, context, verifyLabel, (labelsVerify) => {
       if (labelsVerify) {
         context.debug(`...verified the '${ruleString}' rule's labels.`);
       }
@@ -159,7 +159,7 @@ export default define(class Rule extends Element {
         context.debug(`...verified the '${ruleString}' rule's '${premiseString}' premise.`);
       }
 
-      return continuation(premiseVerifies);
+      return continuation(premiseVerifies, context);
     });
   }
 
@@ -212,7 +212,7 @@ export default define(class Rule extends Element {
         context.debug(`...unified the '${stepString}' step with the '${ruleString}' rule's '${conclusionString}' conclusion.`);
       }
 
-      return continuation(stepUnifiesWithConclusion);
+      return continuation(stepUnifiesWithConclusion, context);
     });
   }
 

@@ -127,14 +127,6 @@ export function suppositionsStringFromSuppositions(suppositions) {
   return suppositionsString;
 }
 
-export function stepStringFromStep(step) {
-  const statement = step.getStatement(),
-        statementString = statement.getString(),
-        stepString = statementString; ///
-
-  return stepString;
-}
-
 export function equivalenceStringFromTerms(terms) {
   const termsString = termsStringFromTerms(terms),
         equivalenceString = `[${termsString}]`;
@@ -206,10 +198,32 @@ export function schemaStringFromLabelSuppositionsAndDeduction(label, supposition
   return schemaString;
 }
 
+export function sectionStringFromHypothesesDeclarationAndClaim(hypotheses, declaration, claim) {
+  let sectionString;
+
+  const hypothesesString = hypothesesStringFromHypotheses(hypotheses);
+
+  sectionString = `[${hypothesesString}]::: `;
+
+  if (declaration !== null) {
+    const declarationString = declaration.getString();
+
+    sectionString = `${sectionString}${declarationString}`;
+  }
+
+  if (claim !== null) {
+    const claimString = claim.getString();
+
+    sectionString = `${sectionString}${claimString}`;
+  }
+
+  return sectionString;
+}
+
 export function subproofStringFromSuppositionsAndSubDerivation(suppositions, subDerivation) {
   const lastStep = subDerivation.getLastStep(),
         suppositionsString = suppositionsStringFromSuppositions(suppositions),
-        lastStepString = stepStringFromStep(lastStep),
+        lastStepString = lastStep.getString(),
         subproofString = `[${suppositionsString}]...${lastStepString}`;
 
   return subproofString;
@@ -221,6 +235,30 @@ export function frameSubstitutionStringFromFrameAndMetavariable(frame, metavaria
         string = `[${frameString} for [${metavariableString}]]`;
 
   return string;
+}
+
+export function claimStringFromLabelsSignatureSuppositionsAndDeduction(labels, signature, suppositions, deduction) {
+  let claimString = EMPTY_STRING;
+
+  const deductionString = deduction.getString(),
+        labelsString = labelsStringFromLabels(labels),
+        signatureString = signatureStringFromSignature(signature),
+        suppositionsString = suppositionsStringFromSuppositions(suppositions);
+
+  claimString = (labelsString !== null) ?
+                 `${claimString}${labelsString}` :
+                   `..`;
+
+  claimString = (signatureString !== null) ?
+                 `${claimString}${signatureString}` :
+                   `${claimString}`;
+
+
+  claimString = (suppositionsString !== null) ?
+                 `${claimString} :: [${suppositionsString}]...${deductionString}` :
+                   `${claimString} :: ${deductionString}`;
+
+  return claimString;
 }
 
 export function procedureCallStringFromProcedureReferenceAndParameters(procedureReference, parameters) {
@@ -254,52 +292,6 @@ export function referenceSubstitutionStringFromReferenceAndMetavariable(referenc
         referenceSubstitutionString = `[${referenceString} for ${metavariableString}]`;
 
   return referenceSubstitutionString;
-}
-
-export function sectionStringFromHypothesesDeclarationAndClaim(hypotheses, declaration, claim) {
-  let sectionString;
-
-  const hypothesesString = hypothesesStringFromHypotheses(hypotheses);
-
-  sectionString = `[${hypothesesString}]::: `;
-
-  if (declaration !== null) {
-    const declarationString = declaration.getString();
-
-    sectionString = `${sectionString}${declarationString}`;
-  }
-
-  if (claim !== null) {
-    const claimString = claim.getString();
-
-    sectionString = `${sectionString}${claimString}`;
-  }
-
-  return sectionString;
-}
-
-export function claimStringFromLabelsSignatureSuppositionsAndDeduction(labels, signature, suppositions, deduction) {
-  let claimString = EMPTY_STRING;
-
-  const deductionString = deduction.getString(),
-        labelsString = labelsStringFromLabels(labels),
-        signatureString = signatureStringFromSignature(signature),
-        suppositionsString = suppositionsStringFromSuppositions(suppositions);
-
-  claimString = (labelsString !== null) ?
-                  `${claimString}${labelsString}` :
-                    `..`;
-
-  claimString = (signatureString !== null) ?
-                 `${claimString}${signatureString}` :
-                   `${claimString}`;
-
-
-  claimString = (suppositionsString !== null) ?
-                 `${claimString} :: [${suppositionsString}]...${deductionString}` :
-                   `${claimString} :: ${deductionString}`;
-
-  return claimString;
 }
 
 export function statementSubstitutionStringFromStatementMetavariableAndSubstitution(statement, metavariable, substitution) {

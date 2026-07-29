@@ -4,8 +4,8 @@ import { breakPointUtilities } from "occam-languages";
 
 import Fact from "../fact";
 
+import { all } from "../../utilities/continuation";
 import { define } from "../../elements";
-import { exists } from "../../utilities/continuation";
 import { instantiatePremise } from "../../process/instantiate";
 import { procedureCallFromPremiseNode } from "../../utilities/element";
 import { declare, attempt, reconcile, serialise, unserialise, instantiate } from "../../utilities/context";
@@ -64,7 +64,7 @@ export default define(class Premise extends Fact {
   }
 
   verify = breakable(function (context, continuation) {
-    const premiseString = this.getString();
+    const premiseString = this.getString(); ///
 
     context.trace(`Verifying the '${premiseString}' premise...`);
 
@@ -75,100 +75,104 @@ export default define(class Premise extends Fact {
 
       context.debug(`Unable to verify the '${premiseString}' premise because it is nonsense.`);
 
-      return continuation(verifies);
+      return continuation(verifies, context);
     }
 
     return declare((context) => {
-      return this.validate(context, (validates) => {
-        let verifies = false;
+      let validates;
+
+      attempt((context) => {
+        validates = this.validate(context, (premise, context) => true);
 
         if (validates) {
-          verifies = true;
+          this.commit(context);
         }
+      }, context);
 
-        if (verifies) {
-          context.debug(`...verified the '${premiseString}' premise.`);
-        }
+      if (!validates) {
+        const verifies = false;
 
-        return continuation(verifies);
-      });
+        return continuation(verifies, context);
+      }
+
+      const verifies = true;
+
+      if (verifies) {
+        context.debug(`...verified the '${premiseString}' premise.`);
+      }
+
+      return continuation(verifies, context);
     }, context);
   });
 
   validate(context, continuation) {
+    let validates;
+
     const premiseString = this.getString(); ///
 
-    context.trace(`Validatting the '${premiseString}' premise...`);
+    context.trace(`Validating the '${premiseString}' premise...`);
 
-    return attempt((context) => {
-      const validateStatement = this.validateStatement.bind(this),
-            validateProcedureCall = this.validateProcedureCall.bind(this);
+    const validateStatement = this.validateStatement.bind(this),
+      validateProcedureCall = this.validateProcedureCall.bind(this);
 
-      return exists([
-        validateStatement,
-        validateProcedureCall
-      ], context, (validates) => {
-        if (validates) {
-          this.commit(context);
-        }
+    validates = all([
+      validateStatement,
+      validateProcedureCall
+    ], context, (context) => {
+      const premise = this;  ///
 
-        if (validates) {
-          context.debug(`...validated the '${premiseString}' premise.`);
-        }
+      return continuation(premise, context);
+    });
 
-        return continuation(validates);
-      });
-    }, context);
+    if (validates) {
+      context.debug(`...validated the '${premiseString}' premise.`);
+    }
+
+    return validates;
   }
 
   validateStatement(context, continuation) {
+    let statementValidates = true;  ///
+
     const statement = this.getStatement();
 
-    if (statement === null) {
-      const statementValidates = false;
+    if (statement !== null) {
+      const premiseString = this.getString();  ///
 
-      return continuation(statementValidates);
-    }
+      context.trace(`Validating the '${premiseString}' premise's statement...`);
 
-    const premiseString = this.getString();
-
-    context.trace(`Validating the '${premiseString}' premise's statsement...`);
-
-    return statement.validate(context, (statement) => {
-      let statementValidates = false;
-
-      if (statement !== null) {
-        statementValidates = true;
-      }
+      statementValidates = statement.validate(context, (statement, context) => {
+        return continuation(context);
+      });
 
       if (statementValidates) {
-        context.debug(`...validated the '${premiseString}' premise's statement.`);
+        context.trace(`...validated the '${premiseString}' premise's statement.`);
       }
+    }
 
-      return continuation(statementValidates);
-    });
+    return statementValidates;
   }
 
   validateProcedureCall(context, continuation) {
+    let procedureCallValidates = true;  ///
+
     const procedureCall = this.getProcedureCall();
 
-    if (procedureCall === null) {
-      const procedureCallValidates = false;
+    if (procedureCall !== null) {
+      const premiseString = this.getString();  ///
 
-      return continuation(procedureCallValidates);
+      context.trace(`Validating the '${premiseString}' premise's procedure call...`);
+
+      procedureCallValidates = procedureCall.validate(context, (procedureCall, context) => {
+        return continuation(context);
+      });
+
+      if (procedureCallValidates) {
+        context.trace(`...validated the '${premiseString}' premise's procedure call.`);
+      }
     }
 
-    const premiseString = this.getString();
-
-    context.trace(`Validatting the '${premiseString}' premise's procedure call...`);
-
-    return procedureCall.validate(context, (procedureCallValidates) => {
-      if (procedureCallValidates) {
-        context.debug(`...validated the '${premiseString}' premise's procedure call.`);
-      }
-
-      return continuation(procedureCallValidates);
-    });
+    return procedureCallValidates;
   }
 
   unifyIndependently(context, continuation) {

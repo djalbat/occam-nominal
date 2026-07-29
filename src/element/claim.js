@@ -171,8 +171,8 @@ export default class Claim extends Element {
   }
 
   verifyDeduction(context, continuation) {
-    const deductionString = this.deduction.getString(),
-          claimString = this.getString(); ///
+    const claimString = this.getString(), ///
+          deductionString = this.deduction.getString();
 
     context.trace(`Verifying the '${claimString}' claim's '${deductionString}' deduction...`);
 
@@ -186,25 +186,25 @@ export default class Claim extends Element {
   }
 
   verifySupposition(supposition, context, continuation) {
-    const suppositionString = supposition.getString(),
-          claimString = this.getString();  ///
+    const claimString = this.getString(), ///
+          suppositionString = supposition.getString();
 
     context.trace(`Verifying the '${claimString}' claim's '${suppositionString}' supposition...`);
 
-    return supposition.verify(context, (suppositionVerifies, context) => {
+    return supposition.verify(context, (suppositionVerifies) => {
       if (suppositionVerifies) {
-        const factorSubproof = supposition;  ////
+        const factOrSubproof = supposition;  ////
 
         context.assignAssignments();
 
-        context.addFactOrSubproof(factorSubproof);
+        context.addFactOrSubproof(factOrSubproof);
       }
 
       if (suppositionVerifies) {
         context.debug(`...verified the '${claimString}' claim's '${suppositionString}' supposition.`);
       }
 
-      return continuation(suppositionVerifies);
+      return continuation(suppositionVerifies, context);
     });
   }
 
@@ -233,8 +233,8 @@ export default class Claim extends Element {
   }
 
   dischargeHypothesis(hypothesis, context, continuation) {
-    const hypothesisString = hypothesis.getString(),
-          claimString = this.getString(); ///
+    const claimString = this.getString(), ///
+          hypothesisString = hypothesis.getString();
 
     context.trace(`Discharding the '${claimString}' claim's '${hypothesisString}' hypothesis...`);
 
@@ -309,10 +309,10 @@ export default class Claim extends Element {
   }
 
   unifyFactOrSubproofsWithSupposition(factorSubproofs, supposition, context, continuation) {
-    return extract(factorSubproofs, (factorSubproof, continuation) => {
-      return supposition.unifyFactOrSubproof(factorSubproof, context, continuation);
-    }, (factorSubproof = null) => {
-      if (factorSubproof !== null) {
+    return extract(factorSubproofs, (factOrSubproof, continuation) => {
+      return supposition.unifyFactOrSubproof(factOrSubproof, context, continuation);
+    }, (factOrSubproof = null) => {
+      if (factOrSubproof !== null) {
         const factorSubproofsUnifiesWithSupposition = true;
 
         return context.resolveDerivedSubstitutions(() => {

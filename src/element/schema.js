@@ -183,7 +183,7 @@ export default define(class Schema extends Element {
         context.debug(`...verified the '${schemaString}' schema's '${suppositionString}' supposition.`);
       }
 
-      return continuation(suppositionVerifies);
+      return continuation(suppositionVerifies, context);
     });
   }
 

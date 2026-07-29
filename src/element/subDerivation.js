@@ -43,7 +43,7 @@ export default define(class SubDerivation extends Element {
           context.addFactOrSubproof(factOrSubproof);
         }
 
-        return continuation(factOrSubproofVerifies);
+        return continuation(factOrSubproofVerifies, context);
       });
     }, continuation);
   }

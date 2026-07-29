@@ -120,8 +120,6 @@ export default define(class Step extends Fact {
   }
 
   verify = breakable(function (context, continuation) {
-    let verifies = false;
-
     const stepString = this.getString(); ///
 
     context.trace(`Verifying the '${stepString}' step...`);
@@ -129,9 +127,11 @@ export default define(class Step extends Fact {
     const nonsensical = this.isNonsensical();
 
     if (nonsensical) {
+      const verifies = false;
+
       context.debug(`Unable to verify the '${stepString}' step because it is nonsense.`);
 
-      return continuation(verifies);
+      return continuation(verifies, context);
     }
 
     const qualified = this.isQualified(),
@@ -149,10 +149,14 @@ export default define(class Step extends Fact {
       }, context);
 
       if (!validates) {
-        return continuation(verifies);
+        const verifies = false;
+
+        return continuation(verifies, context);
       }
 
       return this.unify(context, (unifies) => {
+        let verifies = false;
+
         if (unifies) {
           verifies = true;
         }
@@ -161,7 +165,7 @@ export default define(class Step extends Fact {
           context.debug(`...verified the '${stepString}' step.`);
         }
 
-        return continuation(verifies);
+        return continuation(verifies, context);
       });
     }, context);
   });

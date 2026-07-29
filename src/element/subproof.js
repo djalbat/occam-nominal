@@ -2,11 +2,10 @@
 
 import { Element, continuationUtilities } from "occam-languages";
 
-import { all } from "../utilities/continuation";
 import { define } from "../elements";
 import { enclose } from "../utilities/context";
 
-const { every } = continuationUtilities;
+const { all, every } = continuationUtilities;
 
 export default define(class Subproof extends Element {
   constructor(context, string, node, breakPoint, suppositions, subDerivation) {
@@ -59,7 +58,7 @@ export default define(class Subproof extends Element {
     let comparesToStep;
 
     const stepString = step.getString(),
-          subproofString = step.getString();
+          subproofString = this.getString();  ///
 
     context.trace(`Comparing the '${stepString}' step to the '${subproofString}' subproof...`);
 
@@ -102,27 +101,64 @@ export default define(class Subproof extends Element {
   }
 
   verifySupposition(supposition, context, continuation) {
-    supposition.verify(context, (suppositionVerifies) => {
+    const subproofString = this.getString(),
+          suppositionString = supposition.getString();
+
+    context.trace(`Verifying the '${subproofString}' subprpoof's '${suppositionString}' supposition...`);
+
+    return supposition.verify(context, (suppositionVerifies) => {
       if (suppositionVerifies) {
         const factOrSubproof = supposition;  ////
 
-        context.assignAssignments(context);
+        context.assignAssignments();
 
         context.addFactOrSubproof(factOrSubproof);
       }
 
-      return continuation(suppositionVerifies);
+      if (suppositionVerifies) {
+        context.debug(`...verified the '${subproofString}' subprpoof's '${suppositionString}' supposition.`);
+      }
+
+      return continuation(suppositionVerifies, context);
     });
   }
 
   verifySuppositions(context, continuation) {
-    return every(this.suppositions, (supposition, continuation) => {
-      return this.verifySupposition(supposition, context, continuation);
-    }, continuation);
+    const suppositionsLength = this.suppositions.length;
+
+    if (suppositionsLength === 0) {
+      const suppositionsVerify = true;  ///
+
+      return continuation(suppositionsVerify, context);
+    }
+
+    const subproofString = this.getString();  ///
+
+    context.trace(`Verifying the '${subproofString}' subproof's suppositions...`);
+
+    const verifySupposition = this.verifySupposition.bind(this);
+
+    return every(this.suppositions, verifySupposition, context, (suppositionsVerify) => {
+      if (suppositionsVerify) {
+        context.debug(`...verified the '${subproofString}' subproof's suppositions.`);
+      }
+
+      return continuation(suppositionsVerify, context);
+    });
   }
 
   verifySubDerivation(context, continuation) {
-    return this.subDerivation.verify(context, continuation);
+    const subproofString = this.getString();  ///
+
+    context.trace(`Verifying the '${subproofString}' subroof's proof...`);
+
+    return this.subDerivation.verify(context, (subDerivationVerifies) => {
+      if (subDerivationVerifies) {
+        context.debug(`...verified the '${subproofString}' subroof's sub-derivation.`);
+      }
+
+      return continuation(subDerivationVerifies, context);
+    });
   }
 
   static name = "Subproof";

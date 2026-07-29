@@ -76,9 +76,9 @@ class BoundedContext extends Context {
   getProofAssertions() {
     const factOrSubproofs = this.getFactOrSubproofs(),
           proofAssertions = factOrSubproofs.filter((factOrSubproof) => {
-            const factOrSubproofproofAssertion = factOrSubproof.isProofAssertion();
+            const factOrSubproofFact = factOrSubproof.isFact();
 
-            if (factOrSubproofproofAssertion) {
+            if (factOrSubproofFact) {
               return true;
             }
           });
@@ -217,11 +217,11 @@ class BoundedContext extends Context {
     const context = this, ///
           factOrSubproofString = factOrSubproof.getString();
 
-    context.trace(`Adding the '${factOrSubproofString}' subproof or fact to the bounded context...`);
+    context.trace(`Adding the '${factOrSubproofString}' fact or subproof to the bounded context...`);
 
     this.factOrSubproofs.push(factOrSubproof);
 
-    context.debug(`...added the '${factOrSubproofString}' subproof or fact to the bounded context.`);
+    context.debug(`...added the '${factOrSubproofString}' fact or subproof to the bounded context.`);
   }
 
   findDeclaredVariableByVariableIdentifier(variableIdentifier) {
