@@ -131,31 +131,25 @@ function validateStatementAsMetavariable(statement, context, continuation) {
     const strict = true;  ///
 
     statementValidatesAsMetavariable = metavariable.validate(strict, context, (metavariable, context) => {
-      debugger
+      let validates;
 
       const substitution = statement.getSubstitution();
 
-      if (substitution === null) {
-        const statementValidatesAsMetavariable = true;
+      if (substitution !== null) {
+        const strict = true;
 
-        if (statementValidatesAsMetavariable) {
-          context.debug(`...validated the '${statementString}' statement as a metavariable.`);
-        }
+        validates = substitution.validate(strict, context, (substitution, context) => {
+          let validates = true;
 
-        return continuation(statementValidatesAsMetavariable, statement, context);
+          validates = continuation(statement, context);
+
+          return validates;
+        });
+      } else {
+        validates = continuation(statement, context);
       }
 
-      const strict = true;
-
-      substitution.validate(strict, context, (substitution, context) => {
-        let statementValidatesAsMetavariable = false;
-
-        if (substitution !== null) {
-          statementValidatesAsMetavariable = true;
-        }
-
-        return continuation(statementValidatesAsMetavariable, statement, context);
-      });
+      return validates;
     });
 
     if (statementValidatesAsMetavariable) {

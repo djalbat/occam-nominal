@@ -1,12 +1,13 @@
 "use strict";
 
-import { breakPointUtilities } from "occam-languages";
+import { breakPointUtilities, continuationUtilities } from "occam-languages";
 
 import Declaration from "../declaration";
 
 import { define } from "../../elements";
 
-const { breakable } = breakPointUtilities;
+const { all } = continuationUtilities,
+      { breakable } = breakPointUtilities;
 
 export default define(class MetavariableDeclaration extends Declaration {
   constructor(context, string, node, breakPoint, metaType, metavariable) {
@@ -25,34 +26,32 @@ export default define(class MetavariableDeclaration extends Declaration {
   }
 
   verify = breakable(function (context, continuation) {
-    let verifies;
-
     const metavariableDeclarationString = this.getString(); ///
 
     context.trace(`Verifying the '${metavariableDeclarationString}' metavariable declaration...`);
 
-    const metavariableVerifies = this.verifyMetavariable(context);
+    const verifyMetaType = this.verifyMetaType.bind(this),
+          verifyMetavariable = this.verifyMetavariable.bind(this);
 
-    if (metavariableVerifies) {
-      const metaTypeVerifies = this.verifyMetaType(context);
-
-      if (metaTypeVerifies) {
-        const declaredMetavariable = this.metavariable; ///
+    return all([
+      verifyMetaType,
+      verifyMetavariable
+    ],  context, (verifies) => {
+      if (verifies) {
+        const declaredMetavariable = this.metavariable;
 
         context.addDeclaredMetavariable(declaredMetavariable);
-
-        verifies = true;
       }
-    }
 
-    if (verifies) {
-      context.debug(`...verified the '${metavariableDeclarationString}' metavariable declaration.`);
-    }
+      if (verifies) {
+        context.debug(`...verified the '${metavariableDeclarationString}' metavariable declaration.`);
+      }
 
-    return continuation(verifies);
+      return continuation(verifies, context);
+    });
   });
 
-  verifyMetaType(context) {
+  verifyMetaType(context, continuation) {
     let metaTypeVerifies = true;
 
     const metaTypeDeclarationString = this.getString(); ///
@@ -65,10 +64,10 @@ export default define(class MetavariableDeclaration extends Declaration {
       context.debug(`...verified the '${metaTypeDeclarationString}' metavariable declaration's metaType.`);
     }
 
-    return metaTypeVerifies;
+    return continuation(metaTypeVerifies, context);
   }
 
-  verifyMetavariable(context) {
+  verifyMetavariable(context, continuation) {
     let metavariableVerifies = false;
 
     const metavariableDeclarationString = this.getString(); ///
@@ -88,7 +87,7 @@ export default define(class MetavariableDeclaration extends Declaration {
       context.debug(`...verified the '${metavariableDeclarationString}' metavariable declaration's metavariable.`);
     }
 
-    return metavariableVerifies;
+    return continuation(metavariableVerifies, context);
   }
 
   static name = "MetavariableDeclaration";

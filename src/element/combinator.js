@@ -3,6 +3,7 @@
 import { Element, breakPointUtilities } from "occam-languages";
 
 import { define } from "../elements";
+import { exists } from "../utilities/continuation";
 import { instantiateCombinator } from "../process/instantiate";
 import { statementFromCombinatorNode } from "../utilities/element";
 import { unifyStatementWithCombinator } from "../process/unify";
@@ -30,47 +31,67 @@ export default define(class Combinator extends Element {
   }
 
   verify(context, continuation) {
+    let verifies = false;
+
     const combinatorString = this.getString();  ///
 
     context.trace(`Verifying the '${combinatorString}' combinator...`);
 
-    return attempt((context) => {
-      return this.validateStatement(context, (statementValidates, context) => {
-        let verifies = false;
+    attempt((context) => {
+      const validates = this.validate(context, (combinator, context) => true);
 
-        if (statementValidates) {
-          verifies = true;
-        }
+      if (validates) {
+        this.commit(context);
 
-        if (verifies) {
-          this.commit(context);
+        verifies = true;
+      }
+    }, context);
 
-          context.debug(`...verified the '${combinatorString}' combinator.`);
-        }
+    if (verifies) {
+      context.debug(`...verified the '${combinatorString}' combinator.`);
+    }
 
-        return continuation(verifies, context);
-      });
-    }, context)
+    return continuation(verifies, context);
   }
 
-  validateStatement(context, continuation) {
+  validate(context, continuation) {
+    let validates;
+
     const combinatorString = this.getString();  ///
+
+    context.trace(`Validating the '${combinatorString}' combinator...`);
+
+    const validateStatementAsCombinator = this.validateStatementAsCombinator.bind(this);
+
+    validates = exists([
+      validateStatementAsCombinator
+    ], context, (context) => {
+      const combinator = this;
+
+      return continuation(combinator, context);
+    });
+
+    if (validates) {
+      context.debug(`...validated the '${combinatorString}' combinator.`);
+    }
+
+    return validates;
+  }
+
+  validateStatementAsCombinator(context, continuation) {
+    let statementValidatesAsCombinator;
+
+    const combinatorString = this.getString();
 
     context.trace(`Validating the '${combinatorString}' combinator's statement...`);
 
-    return validateStatementAsCombinator(this.statement, context, (statementValidatesAsCombinator, context) => {
-      let statementValidates = false;
+    statementValidatesAsCombinator = validateStatementAsCombinator(this.statement, context, continuation);
 
-      if (statementValidatesAsCombinator) {
-        statementValidates = true;
-      }
+    if (statementValidatesAsCombinator) {
+      context.debug(`...validated the '${combinatorString}' combinator's statement.`);
+    }
 
-      if (statementValidates) {
-        context.debug(`...validated the '${combinatorString}' combinator's statement.`);
-      }
-
-      return continuation(statementValidates, context);
-    });
+    return statementValidatesAsCombinator;
   }
 
   unifyStatement(statement, context, continuation) {

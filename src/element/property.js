@@ -58,7 +58,7 @@ export default define(class Property extends Element {
     let verifies = false;
 
     const includeType = false,
-          propertyString = this.getString(includeType);
+          propertyString = this.getString(includeType); ///
 
     context.trace(`Verifying the '${propertyString}' property...`);
 
@@ -85,7 +85,7 @@ export default define(class Property extends Element {
     let termValidates = false;
 
     const includeType = false,
-          propertyString = this.getString(includeType);
+          propertyString = this.getString(includeType); ///
 
     context.trace(`Validating the '${propertyString}' property's term...`);
 

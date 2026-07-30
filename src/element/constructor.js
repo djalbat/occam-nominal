@@ -78,7 +78,7 @@ export default define(class Constructor extends Element {
     let verifies = false;
 
     const includeType = false,
-          constructorString = this.getString(includeType);
+          constructorString = this.getString(includeType);  ///
 
     context.trace(`Verifying the '${constructorString}' constructor...`);
 
@@ -103,7 +103,7 @@ export default define(class Constructor extends Element {
     let validates;
 
     const includeType = false,
-          constructorString = this.getString(includeType);
+          constructorString = this.getString(includeType);  ///
 
     context.trace(`Validating the '${constructorString}' constructor...`);
 
@@ -133,7 +133,7 @@ export default define(class Constructor extends Element {
 
     if (!hypothetical) {
       const includeType = false,
-            constructorString = this.getString(includeType);
+            constructorString = this.getString(includeType);  ///
 
       context.trace(`Validating the '${constructorString}' constructor's term as a variable...`);
 
@@ -165,7 +165,7 @@ export default define(class Constructor extends Element {
 
     if (!hypothetical) {
       const includeType = false,
-            constructorString = this.getString(includeType);
+            constructorString = this.getString(includeType);  ///
 
       context.trace(`Validating the '${constructorString}' constructor's term...`);
 

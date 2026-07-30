@@ -3,13 +3,12 @@
 import { arrayUtilities } from "necessary";
 import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
 
-import { all } from "../utilities/continuation";
 import { define } from "../elements";
 import { enclose } from "../utilities/context";
 import { labelsFromJSON, premisesFromJSON, conclusionFromJSON, labelsToLabelsJSON, premisesToPremisesJSON, conclusionToConclusionJSON } from "../utilities/json";
 
 const { reverse } = arrayUtilities,
-      { every, extract, forwardsEvery, backwardsEvery } = continuationUtilities,
+      { all, every, extract, forwardsEvery, backwardsEvery } = continuationUtilities,
       { breakable, breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Rule extends Element {
@@ -82,30 +81,30 @@ export default define(class Rule extends Element {
           context.debug(`...verified the '${ruleString}' rule.`);
         }
 
-        return continuation(verifies);
+        return continuation(verifies, context);
       });
     }, context);
   });
 
-  verifyLabels(context, conntinuation) {
+  verifyLabels(context, continuation) {
     const ruleString = this.getString();  ///
 
     context.trace(`Verifying the '${ruleString}' rule's labels...`);
 
     const verifyLabel = this.verifyLabel.bind(this);
 
-    return every(this.labels, context, verifyLabel, (labelsVerify) => {
+    return every(this.labels, verifyLabel, context, (labelsVerify) => {
       if (labelsVerify) {
         context.debug(`...verified the '${ruleString}' rule's labels.`);
       }
 
-      return conntinuation(labelsVerify);
+      return continuation(labelsVerify, context);
     });
   }
 
   verifyLabel(label, context, continuation) {
-    const ruleString = this.getString(),  ///
-          labelString = label.getString();
+    const labelString = label.getString(),
+          ruleString = this.getString(); ///
 
     context.trace(`Verifying the '${ruleString}' rule's '${labelString}' label...`);
 
@@ -114,15 +113,15 @@ export default define(class Rule extends Element {
         context.debug(`...verified the '${ruleString}' rule's '${labelString}' label.`);
       }
 
-      return continuation(labelVerifies);
+      return continuation(labelVerifies, context);
     });
   }
 
   verifyProof(context, continuation) {
     if (this.proof === null) {
-      const proofVerifies = true;
+      const proofVerifies = true; ///
 
-      return continuation(proofVerifies);
+      return continuation(proofVerifies, context);
     }
 
     const ruleString = this.getString();  ///
@@ -136,12 +135,27 @@ export default define(class Rule extends Element {
         context.debug(`...verified the '${ruleString}' rule's proof.`);
       }
 
-      return continuation(proofVerifies);
+      return continuation(proofVerifies, context);
+    });
+  }
+
+  verifyConclusion(context, continuation) {
+    const ruleString = this.getString(), ///
+          conclusionString = this.conclusion.getString();
+
+    context.trace(`Verifying the '${ruleString}' rule's '${conclusionString}' conclusion...`);
+
+    return this.conclusion.verify(context, (conclusionVerifies) => {
+      if (conclusionVerifies) {
+        context.debug(`...verified the '${ruleString}' rule's '${conclusionString}' conclusion.`);
+      }
+
+      return continuation(conclusionVerifies, context);
     });
   }
 
   verifyPremise(premise, context, continuation) {
-    const ruleString = this.getString(),  ///
+    const ruleString = this.getString(), ///
           premiseString = premise.getString();
 
     context.trace(`Verifying the '${ruleString}' rule's '${premiseString}' premise...`);
@@ -164,33 +178,26 @@ export default define(class Rule extends Element {
   }
 
   verifyPremises(context, continuation) {
+    const premisesLength = this.premises.length;
+
+    if (premisesLength === 0) {
+      const premisesVerify = true;  ///
+
+      return continuation(premisesVerify, context);
+    }
+
     const ruleString = this.getString();  ///
 
     context.trace(`Verifying the '${ruleString}' rule's premises...`);
 
-    return forwardsEvery(this.premises, (premise, continuation) => {
-      return this.verifyPremise(premise, context, continuation);
-    }, (premisesVerify) => {
+    const verifyPremise = this.verifyPremise.bind(this);
+
+    return forwardsEvery(this.premises, verifyPremise, context, (premisesVerify) => {
       if (premisesVerify) {
         context.debug(`...verified the '${ruleString}' rule's premises.`);
       }
 
-      return continuation(premisesVerify);
-    });
-  }
-
-  verifyConclusion(context, continuation) {
-    const ruleString = this.getString(),  ///
-          conclusionString = this.conclusion.getString();
-
-    context.trace(`Verifying the '${ruleString}' rule's '${conclusionString}' conclusion...`);
-
-    return this.conclusion.verify(context, (conclusionVerifies) => {
-      if (conclusionVerifies) {
-        context.debug(`...verified the '${ruleString}' rule's '${conclusionString}' conclusion.`);
-      }
-
-      return continuation(conclusionVerifies);
+      return continuation(premisesVerify, context);
     });
   }
 

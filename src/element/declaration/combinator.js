@@ -1,12 +1,13 @@
 "use strict";
 
-import { breakPointUtilities } from "occam-languages";
+import { breakPointUtilities, continuationUtilities } from "occam-languages";
 
 import Declaration from "../declaration";
 
 import { define } from "../../elements";
 
-const { breakable } = breakPointUtilities;
+const { all } = continuationUtilities,
+      { breakable } = breakPointUtilities;
 
 export default define(class CombinatorDeclaration extends Declaration {
   constructor(context, string, node, breakPoint, combinator) {
@@ -31,20 +32,20 @@ export default define(class CombinatorDeclaration extends Declaration {
 
     context.trace(`Verifying the '${combinatorDeclarationString}' combinator declaration...`);
 
-    return this.verifyCombinator(context, (combinatorVerifies) => {
-      let verifies = false;
+    const verifyCombinator = this.verifyCombinator.bind(this);
 
-      if (combinatorVerifies) {
+    return all([
+      verifyCombinator
+    ], context, (verifies, context) => {
+      if (verifies) {
         context.addCombinator(this.combinator);
-
-        verifies = true;
       }
 
       if (verifies) {
         context.debug(`...verified the '${combinatorDeclarationString}' combinator declaration.`);
       }
 
-      return continuation(verifies);
+      return continuation(verifies, context);
     });
   });
 
@@ -58,7 +59,7 @@ export default define(class CombinatorDeclaration extends Declaration {
         context.debug(`...verified the '${combinatorDeclarationString}' combinator declaration's combinator.`);
       }
 
-      return continuation(combinatorVerifies);
+      return continuation(combinatorVerifies, context);
     });
   }
 

@@ -42,12 +42,12 @@ export default define(class VariableDeclaration extends Declaration {
 
     context.trace(`Verifying the '${variableDeclarationString}' variable declaration...`);
 
-    const typeVerifies = this.verifyType.bind(this),
-          variableVerifies = this.verifyVariable.bind(this);
+    const verifyType = this.verifyType.bind(this),
+          verifyVariable = this.verifyVariable.bind(this);
 
     return all([
-      typeVerifies,
-      variableVerifies
+      verifyType,
+      verifyVariable
     ],  context, (verifies) => {
       if (verifies) {
         const declaredVariable = this.variable;

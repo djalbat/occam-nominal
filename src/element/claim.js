@@ -107,12 +107,12 @@ export default class Claim extends Element {
         verifySuppositions,
         verifyDeduction,
         verifyProof
-      ], context, (verifies, context) => {
+      ], context, (verifies) => {
         if (verifies) {
           context.debug(`...verified the '${claimString}' claim.`);
         }
 
-        return continuation(verifies);
+        return continuation(verifies, context);
       });
     }, context);
   }
@@ -144,7 +144,7 @@ export default class Claim extends Element {
         context.debug(`...verified the '${claimString}' claim's '${labelString}' label.`);
       }
 
-      return continuation(labelVerifies);
+      return continuation(labelVerifies, context);
     });
   }
 
@@ -152,7 +152,7 @@ export default class Claim extends Element {
     if (this.proof === null) {
       const proofVerifies = true; ///
 
-      return continuation(proofVerifies);
+      return continuation(proofVerifies, context);
     }
 
     const claimString = this.getString();  ///
