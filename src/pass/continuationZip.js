@@ -8,31 +8,44 @@ const { nonTerminalNodeQuery, areChildNodesCongruent } = passUtilities;
 
 export default class ContinuationZipPass {
   run(generalNode, specificNode, ...remainingArguments) {
-    const continuation = remainingArguments.pop();
+    let success = false;
 
-    return this.visitNode(generalNode, specificNode, ...remainingArguments, continuation);
+    const continuation = remainingArguments.pop(),
+          visited = this.visitNode(generalNode, specificNode, ...remainingArguments, continuation);
+
+    if (visited) {
+      success = true;
+    }
+
+    return success;
   }
 
   descend(generalChildNodes, specificChildNodes, ...remainingArguments) {
+    let descneded = false;
+
     const continuation = remainingArguments.pop(),
           childNodesCongruent = areChildNodesCongruent(generalChildNodes, specificChildNodes);
 
-    if (!childNodesCongruent) {
-      const descended = false;
+    if (childNodesCongruent) {
+      const matches = match(generalChildNodes, specificChildNodes, (generalChildNode, specificChildNode, ...remainingArguments) => {
+        const continuation = remainingArguments.pop(),
+              generalNode = generalChildNode, ///
+              specificNode = specificChildNode; ///
 
-      return descended;
+        return this.visitNode(generalNode, specificNode, ...remainingArguments, continuation);
+      }, ...remainingArguments, continuation);
+
+      if (matches) {
+        descneded = true;
+      }
     }
 
-    return match(generalChildNodes, specificChildNodes, (generalChildNode, specificChildNode, ...remainingArguments) => {
-      const continuation = remainingArguments.pop(),
-            generalNode = generalChildNode, ///
-            specificNode = specificChildNode; ///
-
-      return this.visitNode(generalNode, specificNode, ...remainingArguments, continuation);
-    }, ...remainingArguments, continuation);
+    return descneded;
   }
 
   visitNode(generalNode, specificNode, ...remainingArguments) {
+    let visited = false;
+
     const continuation = remainingArguments.pop(),
           generalNodeTerminalNode = generalNode.isTerminalNode(),
           specificNodeTerminalNode = specificNode.isTerminalNode(),
@@ -43,28 +56,29 @@ export default class ContinuationZipPass {
       const generalTerminalNode = generalNode,  ///
             specificTerminalNode = specificNode;  ///
 
-      return this.visitTerminalNode(generalTerminalNode, specificTerminalNode, ...remainingArguments, continuation);
+      visited = this.visitTerminalNode(generalTerminalNode, specificTerminalNode, ...remainingArguments, continuation);
     }
 
     if (generalNodeNonTerminalNode && specificNodeNonTerminalNode) {
       const generalNonTerminalNode = generalNode,  ///
             specificNonTerminalNode = specificNode; ///
 
-      return this.visitNonTerminalNode(generalNonTerminalNode, specificNonTerminalNode, ...remainingArguments, continuation);
+      visited = this.visitNonTerminalNode(generalNonTerminalNode, specificNonTerminalNode, ...remainingArguments, continuation);
     }
-
-    const visited = false;
 
     return visited;
   }
 
   visitTerminalNode(generalTerminalNode, specificTerminalNode, ...remainingArguments) { ///
-    const continuation = remainingArguments.pop();
+    const continuation = remainingArguments.pop(),
+          visited = continuation(...remainingArguments);
 
-    return continuation(...remainingArguments);
+    return visited;
   }
 
   visitNonTerminalNode(generalNonTerminalNode, specificNonTerminalNode, ...remainingArguments) {
+    let visited = false;
+
     const continuation = remainingArguments.pop();
 
     let { maps } = this.constructor;
@@ -75,22 +89,25 @@ export default class ContinuationZipPass {
         generalNodeQuery: nonTerminalNodeQuery,
         specificNodeQuery: nonTerminalNodeQuery,
         run: (generalNonTerminalNode, specificNonTerminalNode, ...remainingArguments) => {
+          let success = false;
+
           const continuation = remainingArguments.pop(),
                 generalNonTerminalNodeRuleName = generalNonTerminalNode.getRuleName(), ///
                 specificNonTerminalNodeRuleName = specificNonTerminalNode.getRuleName(); ///
 
-          if (generalNonTerminalNodeRuleName !== specificNonTerminalNodeRuleName) {
-            const visited = false;
+          if (generalNonTerminalNodeRuleName === specificNonTerminalNodeRuleName) {
+            const generalNonTerminalNodeChildNodes = generalNonTerminalNode.getChildNodes(),
+                  specificNonTerminalNodeChildNodes = specificNonTerminalNode.getChildNodes(),
+                  generalChildNodes = generalNonTerminalNodeChildNodes, ///
+                  specificChildNodes = specificNonTerminalNodeChildNodes, ///
+                  descended = this.descend(generalChildNodes, specificChildNodes, ...remainingArguments, continuation);
 
-            return visited;
+            if (descended) {
+              success = true;
+            }
           }
 
-          const generalNonTerminalNodeChildNodes = generalNonTerminalNode.getChildNodes(),
-                specificNonTerminalNodeChildNodes = specificNonTerminalNode.getChildNodes(),
-                generalChildNodes = generalNonTerminalNodeChildNodes, ///
-                specificChildNodes = specificNonTerminalNodeChildNodes; ///
-
-          return this.descend(generalChildNodes, specificChildNodes, ...remainingArguments, continuation);
+          return success;
         }
       }
     ];
@@ -109,14 +126,15 @@ export default class ContinuationZipPass {
       }
     }) || null;
 
-    if (map === null) {
-      const visited = false;
+    if (map !== null) {
+      const { run } = map,
+            success = run(generalNode, specificNode, ...remainingArguments, continuation);
 
-      return visited;
+      if (success) {
+        visited = true;
+      }
     }
 
-    const { run } = map;
-
-    return run(generalNode, specificNode, ...remainingArguments, continuation);
+    return visited;
   }
 }

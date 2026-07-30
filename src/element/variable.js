@@ -128,9 +128,9 @@ export default define(class Variable extends Element {
   unifyTerm(term, generalContext, specificContext, continuation) {
     const context = specificContext,  ///
           termString = term.getString(),
-          variableString = this.getString(); ///
+          variableString = this.getString();
 
-    context.trace(`Unifying the '${termString}' term with the '${variableString}' variable...`);
+    context.trace(`Unifying the '${termString}' term with the '${variableString}}' variable...`);
 
     const termVariableCompares = this.compareTermVariable(term, generalContext, specificContext);
 
@@ -147,39 +147,41 @@ export default define(class Variable extends Element {
     if (derivedSubstitution !== null) {
       let termUnifies = false;
 
-      const derivedSubstitutionTermComparesToTerm = derivedSubstitution.compareTerm(term, context);
+      const derivedSubstitutionComparesToTerm = derivedSubstitution.compareTerm(term, context);
 
-      if (derivedSubstitutionTermComparesToTerm) {
+      if (derivedSubstitutionComparesToTerm) {
         const derivedSubstitutionString = derivedSubstitution.getString();
 
         context.trace(`The '${derivedSubstitutionString}' derived substitution is already present.`);
 
         termUnifies = true;
       }
-      
+
       return continuation(termUnifies);
     }
 
     const { TermSubstitution } = elements,
           termSubstitution = TermSubstitution.fromTermAndVariable(term, variable, generalContext, specificContext);
 
-    return termSubstitution.validate(context, (termSubstitution) => {
-      let termUnifies = false;
+    termSubstitution.validate(context, (termSubstitution, context) => {
+      let validates;
 
-      if (termSubstitution !== null) {
-        const derivedSubstitution = termSubstitution;  ///
+      const derivedSubstitution = termSubstitution;  ///
 
-        context.addDerivedSubstitution(derivedSubstitution);
+      context.addDerivedSubstitution(derivedSubstitution);
 
-        termUnifies = true;
-      }
+      validates = true;
 
-      if (termUnifies) {
-        context.debug(`...unified the '${termString}' term with the '${variableString}' variable.`);
-      }
-
-      return continuation(termUnifies);
+      return validates;
     });
+
+    const termUnifies = true;
+
+    if (termUnifies) {
+      context.debug(`...unified the '${termString}' term with the '${variableString}' variable.`);
+    }
+
+    return continuation(termUnifies);
   }
 
   compareTermVariable(term, generalContext, specificContext) {

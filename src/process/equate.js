@@ -2,7 +2,7 @@
 
 import { queryUtilities } from "occam-query";
 
-import ContinuationZipPass from "../pass/continuationZip";
+import ZipPass from "../pass/zip";
 
 import { findEquivalenceByTermNodes } from "../utilities/equivalences";
 
@@ -10,11 +10,11 @@ const { nodeQuery } = queryUtilities;
 
 const termNodeQuery = nodeQuery("/term");
 
-class EquationalPass extends ContinuationZipPass {
+class EquationalPass extends ZipPass {
   static maps = [
     {
-      leftNodeQuery: termNodeQuery,  ///
-      rightNodeQuery: termNodeQuery, ///
+      generalNodeQuery: termNodeQuery,  ///
+      specificNodeQuery: termNodeQuery, ///
       run: (leftTermNode, rightTermNode, context) => {
         let success = false;
 
@@ -72,9 +72,9 @@ export function equateTerms(leftTerm, rightTerm, context) {
 
   const leftTermNode = leftTerm.getNode(),
         rightTermNode = rightTerm.getNode(),
-        leftNode = leftTermNode, ///
-        rightNode = rightTermNode, ///
-        success = equationalPass.run(leftNode, rightNode, context);
+        generalNode = leftTermNode, ///
+        specificNode = rightTermNode, ///
+        success = equationalPass.run(generalNode, specificNode, context);
 
   termsEquate = success; ///
 
@@ -86,9 +86,9 @@ export function equateStatements(leftStatement, rightStatement, context) {
 
   const leftStatementNode = leftStatement.getNode(),
         rightStatementNode = rightStatement.getNode(),
-        leftNode = leftStatementNode, ///
-        rightNode = rightStatementNode, ///
-        success = equationalPass.run(leftNode, rightNode, context);
+        generalNode = leftStatementNode, ///
+        specificNode = rightStatementNode, ///
+        success = equationalPass.run(generalNode, specificNode, context);
 
   statementsEquate = success; ///
 

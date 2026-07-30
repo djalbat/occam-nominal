@@ -87,57 +87,63 @@ export default define(class TermSubstitution extends Substitution {
       strict = false;
     }
 
+    let validates;
+
     const termSubstitutionString = this.getString();  ///
 
     context.trace(`Validating the '${termSubstitutionString}' term substitution...`);
 
-    const substitution = this.findSubstitution(context);
+    let substitution;
+
+    substitution = this.findSubstitution(context);
 
     if (substitution !== null) {
       const termSubstitution = substitution;  ///
 
-      context.debug(`...the '${termSubstitutionString}' term substitution is already present.`);
+      context.debug(`...the '${termSubstitutionString}' term substitution is already presenet.`);
 
-      return continuation(termSubstitution);
-    }
+      validates = continuation(termSubstitution, context);
+    } else {
+      const generalContext = this.getGeneralContext(),
+            specificContext = this.getSpecificContext();
 
-    const generalContext = this.getGeneralContext(),
-          specificContext = this.getSpecificContext();
+      (strict ? pass : waive)((context) => {
+        attempts((generalContext, specificContext) => {
+          const validateTargetTerm = this.validateTargetTerm.bind(this),
+                validateReplacementTerm = this.validateReplacementTerm.bind(this);
 
-    return (strict ? pass : waive)((context) => {
-      return attempts((generalContext, specificContext) => {
-        const validateTargetTerm = this.validateTargetTerm.bind(this),
-              validateReplacementTerm = this.validateReplacementTerm.bind(this);
+          validates = all([
+            validateTargetTerm,
+            validateReplacementTerm
+          ], generalContext, specificContext, (generalContext, specificContext) => {
+            let validates;
 
-        return all([
-          validateTargetTerm,
-          validateReplacementTerm
-        ], generalContext, specificContext, (validates) => {
-          let termSubstitution = null;
-
-          if (validates) {
-            const substitution = this;  ///
-
-            termSubstitution = substitution; ///
+            substitution = this;  ///
 
             context.addSubstitution(substitution);
-          }
 
-          if (validates) {
             this.commit(generalContext, specificContext);
-          }
 
-          if (validates) {
-            context.debug(`...validated the '${termSubstitutionString}' term substitution.`);
-          }
+            const termSubstitution = substitution; ///
 
-          return continuation(termSubstitution);
-        });
-      }, generalContext, specificContext);
-    }, context);
+            validates = continuation(termSubstitution, context);
+
+            return validates;
+          });
+        }, generalContext, specificContext);
+      }, context);
+    }
+
+    if (validates) {
+      context.debug(`...validated the '${termSubstitutionString}' term substitution.`);
+    }
+
+    return validates;
   }
 
   validateTargetTerm(generalContext, specificContext, continuation) {
+    let targetTermValidates;
+
     const context = generalContext,  ///
           termSubstitutionString = this.getString();  ///
 
@@ -145,53 +151,50 @@ export default define(class TermSubstitution extends Substitution {
 
     const targetTermSingular = this.targetTerm.isSingular();
 
-    if (!targetTermSingular) {
-      const targetTermString = this.targetTerm.getString(),
-            targetTermValidates = false;
+    if (targetTermSingular) {
+      elide((context) => {
+        targetTermValidates = this.targetTerm.validate(context, (targetTerm, context) => {
+          const generalContext = context; ///
+
+          return continuation(generalContext, specificContext);
+        });
+      }, context);
+    } else {
+      const targetTermString = this.targetTerm.getString();
+
+      targetTermValidates = false;
 
       context.debug(`The '${targetTermString}' target term is not singular.`);
-
-      return continuation(targetTermValidates);
     }
 
-    return elide((context) => {
-      return this.targetTerm.validate(context, (targetTerm) => {
-        let targetTermValidates = false;
+    if (targetTermValidates) {
+      context.trace(`...validated the '${termSubstitutionString}' term substitution's target term.`);
+    }
 
-        if (targetTerm !== null) {
-          targetTermValidates = true;
-        }
-
-        if (targetTermValidates) {
-          context.debug(`...validated the '${termSubstitutionString}' term substitution's target term...`);
-        }
-
-        return continuation(targetTermValidates);
-      });
-    }, context);
+    return targetTermValidates;
   }
 
   validateReplacementTerm(generalContext, specificContext, continuation) {
+    let replacementTermValidates;
+
     const context = specificContext,  ///
           termSubstitutionString = this.getString();  ///
 
     context.trace(`Validating the '${termSubstitutionString}' term substitution's replacement term...`);
 
-    return elide((context) => {
-      return this.replacementTerm.validate(context, (replacementTerm) => {
-        let replacementTermValidates = false;
+    elide((context) => {
+      replacementTermValidates = this.replacementTerm.validate(context, (replacementTerm, context) => {
+        const specificContext = context;  ///
 
-        if (replacementTerm !== null) {
-          replacementTermValidates = true;
-        }
-
-        if (replacementTermValidates) {
-          context.debug(`...validated the '${termSubstitutionString}' term substitution's replacement term.`);
-        }
-
-        return continuation(replacementTermValidates);
+        return continuation(generalContext, specificContext);
       });
     }, context);
+
+    if (replacementTermValidates) {
+      context.debug(`...validated the '${termSubstitutionString}' term substitution's replacement term.`);
+    }
+
+    return replacementTermValidates;
   }
 
   unifySubstitution(substitution, context, continuation) {

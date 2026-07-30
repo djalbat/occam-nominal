@@ -73,7 +73,7 @@ export default class ZipPass {
   }
 
   visitNonTerminalNode(generalNonTerminalNode, specificNonTerminalNode, ...remainingArguments) {
-    let success = false;
+    let visited = false;
 
     let { maps } = this.constructor;
 
@@ -120,12 +120,15 @@ export default class ZipPass {
     }) || null;
 
     if (map !== null) {
-      const { run } = map;
+      const { run } = map,
+            success = run(generalNode, specificNode, ...remainingArguments);
 
-      success = run(generalNode, specificNode, ...remainingArguments);
+      if (success) {
+        visited = true;
+      }
     }
 
-    return success;
+    return visited;
   }
 }
 

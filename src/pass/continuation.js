@@ -8,44 +8,59 @@ const { nonTerminalNodeQuery } = passUtilities;
 
 export default class ContinuationPass {
   run(node, ...remainingArguments) {
-    const continuation = remainingArguments.pop();
+    let success = false;
 
-    return this.visitNode(node, ...remainingArguments, continuation);
+    const continuation = remainingArguments.pop(),
+          visited = this.visitNode(node, ...remainingArguments, continuation);
+
+    if (visited) {
+      success = true;
+    }
+
+    return success;
   }
 
   descend(childNodes, ...remainingArguments) {
-    const continuation = remainingArguments.pop();
+    const continuation = remainingArguments.pop(),
+          descended = every(childNodes, (childNode, ...remainingArguments) => {
+            const continuation = remainingArguments.pop(),
+                  node = childNode; ///
 
-    return every(childNodes, (childNode, ...remainingArguments) => {
-      const continuation = remainingArguments.pop(),
-            node = childNode; ///
+            return this.visitNode(node, ...remainingArguments, continuation);
+          }, ...remainingArguments, continuation);
 
-      return this.visitNode(node, ...remainingArguments, continuation);
-    }, ...remainingArguments, continuation);
+    return descended;
   }
 
   visitNode(node, ...remainingArguments) {
+    let visited;
+
     const continuation = remainingArguments.pop(),
           nodeTerminalNode = node.isTerminalNode();
 
     if (nodeTerminalNode) {
       const terminalNode = node;  ///
 
-      return this.visitTerminalNode(terminalNode, ...remainingArguments, continuation);
+      visited = this.visitTerminalNode(terminalNode, ...remainingArguments, continuation);
+    } else {
+      const nonTerminalNode = node;  ///
+
+      visited = this.visitNonTerminalNode(nonTerminalNode, ...remainingArguments, continuation);
     }
 
-    const nonTerminalNode = node;  ///
-
-    return this.visitNonTerminalNode(nonTerminalNode, ...remainingArguments, continuation);
+    return visited;
   }
 
   visitTerminalNode(terminalNode, ...remainingArguments) {
-    const continuation = remainingArguments.pop();
+    const continuation = remainingArguments.pop(),
+          visited = continuation(...remainingArguments);
 
-    return continuation(...remainingArguments);
+    return visited;
   }
 
   visitNonTerminalNode(nonTerminalNode, ...remainingArguments) {
+    let visited = false;
+
     const continuation = remainingArguments.pop();
 
     let { maps } = this.constructor;
@@ -55,10 +70,17 @@ export default class ContinuationPass {
       {
         nodeQuery: nonTerminalNodeQuery,
         run: (nonTerminalNode, ...remainingArguments) => {
-          const continuation = remainingArguments.pop(),
-                childNodes = nonTerminalNode.getChildNodes();
+          let success = false;
 
-          return this.descend(childNodes, ...remainingArguments, continuation);
+          const continuation = remainingArguments.pop(),
+                childNodes = nonTerminalNode.getChildNodes(),
+                descended = this.descend(childNodes, ...remainingArguments, continuation);
+
+          if (descended) {
+            success = true;
+          }
+
+          return success;
         }
       }
     ];
@@ -75,14 +97,15 @@ export default class ContinuationPass {
       }
     }) || null;
 
-    if (map === null) {
-      const visited = false;
+    if (map !== null) {
+      const { run } = map,
+            success = run(node, ...remainingArguments, continuation);
 
-      return visited;
+      if (success) {
+        visited = true;
+      }
     }
 
-    const { run } = map;
-
-    return run(node, ...remainingArguments, continuation);
+    return visited;
   }
 }
