@@ -113,7 +113,7 @@ export default define(class Premise extends Fact {
     context.trace(`Validating the '${premiseString}' premise...`);
 
     const validateStatement = this.validateStatement.bind(this),
-      validateProcedureCall = this.validateProcedureCall.bind(this);
+          validateProcedureCall = this.validateProcedureCall.bind(this);
 
     validates = all([
       validateStatement,

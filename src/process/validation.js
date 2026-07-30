@@ -139,11 +139,7 @@ function validateStatementAsMetavariable(statement, context, continuation) {
         const strict = true;
 
         validates = substitution.validate(strict, context, (substitution, context) => {
-          let validates = true;
-
-          validates = continuation(statement, context);
-
-          return validates;
+          return continuation(statement, context);
         });
       } else {
         validates = continuation(statement, context);
@@ -210,9 +206,9 @@ function validateStatementAsEquality(statement, context, continuation) {
 
     context.trace(`Validating the '${statementString}' statement as an equality...`);
 
-    statementValidatesAsEquality = equality.validate((equality, context) => {
+    statementValidatesAsEquality = equality.validate(context, (equality, context) => {
       return continuation(statement, context);
-    }, context, continuation);
+    });
 
     if (statementValidatesAsEquality) {
       context.debug(`...validated the '${statementString}' statement as an equality.`);

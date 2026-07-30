@@ -5,8 +5,8 @@ import { breakPointUtilities } from "occam-languages";
 import Assertion from "../assertion";
 
 import { define } from "../../elements";
-import { exists } from "../../utilities/continuation";
 import { instantiate } from "../../utilities/context";
+import { all, exists } from "../../utilities/continuation";
 import { instantiateTypeAssertion } from "../../process/instantiate";
 import { typeFromJSON, typeToTypeJSON } from "../../utilities/json";
 import { termFromTermAndSubstitutions } from "../../utilities/substitutions";
@@ -58,9 +58,13 @@ export default define(class TypeAssertion extends Assertion {
     } else {
       typeAssertion = this;
 
-      const typeValidates = this.validateType(context);
+      const validateType = this.validateType.bind(this);
 
-      if (typeValidates) {
+      validates = all([
+        validateType
+      ], context, (context) => {
+        let validates;
+
         const validateWhenStated = this.validateWhenStated.bind(this),
               validateWhenDerived = this.validateWhenDerived.bind(this);
 
@@ -76,9 +80,9 @@ export default define(class TypeAssertion extends Assertion {
 
           return continuation(typeAssertion, context);
         });
-      } else {
-        validates = false;
-      }
+
+        return validates;
+      });
     }
 
     if (validates) {
@@ -117,7 +121,7 @@ export default define(class TypeAssertion extends Assertion {
     return discharges;
   }
 
-  validateType(context) {
+  validateType(context, continuation) {
     let typeValidates = false;
 
     const typeAssertionString = this.getString();  ///
@@ -135,6 +139,10 @@ export default define(class TypeAssertion extends Assertion {
       const typeString = this.type.getString();
 
       context.debug(`The '${typeString}' type is not present.`);
+    }
+
+    if (typeValidates) {
+      typeValidates = continuation(context);
     }
 
     if (typeValidates) {
