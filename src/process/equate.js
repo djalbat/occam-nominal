@@ -2,7 +2,7 @@
 
 import { queryUtilities } from "occam-query";
 
-import ContinuationZipPass from "../pass/continuation";
+import ContinuationZipPass from "../pass/continuationZip";
 
 import { findEquivalenceByTermNodes } from "../utilities/equivalences";
 

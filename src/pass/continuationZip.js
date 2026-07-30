@@ -74,7 +74,7 @@ export default class ContinuationZipPass {
       {
         generalNodeQuery: nonTerminalNodeQuery,
         specificNodeQuery: nonTerminalNodeQuery,
-        run: (generalNode, specificNode, ...remainingArguments) => {
+        run: (generalNonTerminalNode, specificNonTerminalNode, ...remainingArguments) => {
           const continuation = remainingArguments.pop(),
                 generalNonTerminalNodeRuleName = generalNonTerminalNode.getRuleName(), ///
                 specificNonTerminalNodeRuleName = specificNonTerminalNode.getRuleName(); ///

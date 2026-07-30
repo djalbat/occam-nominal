@@ -54,7 +54,7 @@ export default class ContinuationPass {
       ...maps,
       {
         nodeQuery: nonTerminalNodeQuery,
-        run: (node, ...remainingArguments) => {
+        run: (nonTerminalNode, ...remainingArguments) => {
           const continuation = remainingArguments.pop(),
                 childNodes = nonTerminalNode.getChildNodes();
 
