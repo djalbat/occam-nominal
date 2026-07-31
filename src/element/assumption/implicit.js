@@ -63,13 +63,12 @@ export default define(class ImplicitAssumption extends Element {
     return subproofAssertion;
   }
 
-  findValidAssumption(context) {
+  findAssumption(context) {
     const implicitAssumptionNode = this.getImplicitAssumptionNode(),
           assumptionNode = implicitAssumptionNode,  ///
-          assumption = context.findAssumptionByAssumptionNode(assumptionNode),
-          validAssumption = assumption;  ///
+          assumption = context.findAssumptionByAssumptionNode(assumptionNode);
 
-    return validAssumption;
+    return assumption;
   }
 
   async validate(context) {
@@ -81,12 +80,12 @@ export default define(class ImplicitAssumption extends Element {
 
     let validates = false;
 
-    const validAssumption = this.findValidAssumption(context);
+    const assumption = this.findAssumption(context);
 
-    if (validAssumption !== null) {
+    if (assumption !== null) {
       validates = true;
 
-      implicitAssumption = validAssumption; ///
+      implicitAssumption = assumption; ///
 
       context.debug(`...the '${implicitAssumptionString}' implicit qssumption is already present.`);
     } else {

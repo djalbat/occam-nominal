@@ -55,12 +55,11 @@ export default define(class Constraint extends Element {
     return constraintNodeMatches;
   }
 
-  findValidConstraint(context) {
+  findConstraint(context) {
     const constraintNode = this.getConstraintNode(),
-          constraint = context.findConstraintByConstraintNode(constraintNode),
-          validConstraint = constraint;  ///
+          constraint = context.findConstraintByConstraintNode(constraintNode);
 
-    return validConstraint;
+    return constraint;
   }
 
   validate(context, continuation) {
@@ -68,11 +67,9 @@ export default define(class Constraint extends Element {
 
     context.trace(`Validating the '${constraintString}' constraint...`);
 
-    const validConstraint = this.findValidConstraint(context);
+    const constraint = this.findConstraint(context);
 
-    if (validConstraint !== null) {
-      const constraint = validConstraint; ///
-
+    if (constraint !== null) {
       context.debug(`...the '${constraintString}' constraint is already present.`);
 
       return continuation(constraint);

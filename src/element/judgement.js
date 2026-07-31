@@ -93,12 +93,11 @@ export default define(class Judgement extends Element {
 
   findSubproofAssertion(context) { return this.goal.findSubproofAssertion(context); }
 
-  findValidJudgement(context) {
+  findJudgement(context) {
     const judgementNode = this.getJudgementNode(),
-          judgement = context.findJudgementByJudgementNode(judgementNode),
-          validJudgemenet = judgement;  ///
+          judgement = context.findJudgementByJudgementNode(judgementNode);
 
-    return validJudgemenet;
+    return judgement;
   }
 
   compareStep(step, context) {
@@ -152,99 +151,95 @@ export default define(class Judgement extends Element {
   compareMetavariableName(metavariableName) { return this.frame.compareMetavariableName(metavariableName); }
 
   validate(context, continuation) {
-    const judgementString = this.getString();  ///
+    let validates;
 
-    context.trace(`Validating the '${judgementString}' judgement...`);
+    const judgementnString = this.getString();  ///
 
-    const validJudgement = this.findValidJudgement(context);
+    context.trace(`Validating the '${judgementnString}' judgement...`);
 
-    if (validJudgement !== null) {
-      const judgement = validJudgement; ///
+    let judgementn;
 
-      context.debug(`...the '${judgementString}' judgement is already present.`);
+    const judgement = this.findJudgement(context);
 
-      return continuation(judgement);
+    if (judgement !== null) {
+      context.debug(`The '${judgementnString}' judgement is already present.`);
+
+      validates = continuation(judgementn, context);
+    } else {
+      judgementn = this;
+
+      const validateGoal = this.validateGoal.bind(this),
+            validateFrame = this.validateFrame.bind(this);
+
+      validates = all([
+        validateGoal,
+        validateFrame
+      ], context, (context) => {
+        let validates;
+
+        const validateWhenStated = this.validateWhenStated.bind(this),
+              validateWhenDerived = this.validateWhenDerived.bind(this);
+
+        validates = exists([
+          validateWhenStated,
+          validateWhenDerived
+        ], context, (context) => {
+          const judgement = judgementn;  ///
+
+          context.addAssertion(judgement);
+
+          return continuation(judgementn, context);
+        });
+
+        return validates;
+      });
     }
 
-    const validateGoal = this.validateGoal.bind(this),
-          validateFrame = this.validateFrame.bind(this);
+    if (validates) {
+      context.debug(`...validated the '${judgementnString}' judgement.`);
+    }
 
-    return all([
-      validateFrame,
-      validateGoal
-    ], context, (validates) => {
-      if (!validates) {
-        const judgement = null;
-
-        return continuation(judgement);
-      }
-
-      const validateWhenStated = this.validateWhenStated.bind(this),
-            validateWhenDerived = this.validateWhenDerived.bind(this);
-
-      return exists([
-        validateWhenStated,
-        validateWhenDerived
-      ], context, (validates) => {
-        let judgement = null;
-
-        if (validates) {
-          judgement = this; ///
-
-          context.addJudgement(judgement);
-        }
-
-        if (validates) {
-          context.debug(`...validated the '${judgementString}' judgement.`);
-        }
-
-        return continuation(judgement);
-      });
-    });
+    return validates;
   }
 
   validateGoal(context, continuation) {
-    const judgementString = this.getString(); ///
+    let goalValidates;
+
+    const judgementString = this.getString();  ///
 
     context.trace(`Validating the '${judgementString}' judgement's goal...`);
 
-    return this.goal.validate(context, (goal) => {
-      let goalValidates = false;
+    goalValidates = this.goal.validate(context, (goal, context) => {
+      this.goal = goal;
 
-      if (goal !== null) {
-        this.goal = goal;
-
-        goalValidates = true;
-      }
-
-      if (goalValidates) {
-        context.debug(`...validated the '${judgementString}' judgement's goal.`);
-      }
-
-      return continuation(goalValidates);
+      return continuation(context);
     });
+
+    if (goalValidates) {
+      context.debug(`...validates the'${judgementString}' judgement's goal.`);
+    }
+
+    return goalValidates;
   }
 
   validateFrame(context, continuation) {
-    const judgementString = this.getString(); ///
+    let frameValidates;
+
+    const judgementString = this.getString();  ///
 
     context.trace(`Validating the '${judgementString}' judgement's frame...`);
 
-    return this.frame.validate(context, (frame) => {
-      let frameValidates = false;
+    frameValidates = this.frame.validate(context, (frame, context) => {
+      this.frame = frame;
 
-      if (frame !== null) {
-        this.frame = frame;
-
-        frameValidates = true;
-      }
-
-      if (frameValidates) {
-        context.trace(`...validated the '${judgementString}' judgement's frame.`);
-      }
-
-      return continuation(frameValidates);
+      return continuation(context);
     });
+
+    if (frameValidates) {
+      context.debug(`...validates the'${judgementString}' judgement's frame.`);
+    }
+
+    return frameValidates;
   }
 
   validateWhenStated(context, continuation) {

@@ -69,12 +69,11 @@ export default define(class Assumption extends Element {
     return subproofAssertion;
   }
 
-  findValidAssumption(context) {
+  findAssumption(context) {
     const assumptionNode = this.getAssumptionNode(),
-          assumption = context.findAssumptionByAssumptionNode(assumptionNode),
-          validAssumption = assumption;  ///
+          assumption = context.findAssumptionByAssumptionNode(assumptionNode);
 
-    return validAssumption;
+    return assumption;
   }
 
   validate(context, continuation) {
@@ -82,11 +81,9 @@ export default define(class Assumption extends Element {
 
     context.trace(`Validating the '${assumptionString}' assumption...`);
 
-    const validAssumption = this.findValidAssumption(context);
+    const assumption = this.findAssumption(context);
 
-    if (validAssumption !== null) {
-      const assumption = validAssumption; ///
-
+    if (assumption !== null) {
       context.debug(`...the '${assumptionString}' assumption is already presenet.`);
 
       return continuation(assumption);

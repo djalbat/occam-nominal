@@ -131,12 +131,11 @@ export default define(class Frame extends Element {
     return comparesToParamter;
   }
 
-  findValidFrame(context) {
+  findFrame(context) {
     const frameNode = this.getFrameNode(),
-          frame = context.findFrameByFrameNode(frameNode),
-          validFrame = frame; ///
+          frame = context.findFrameByFrameNode(frameNode);
 
-    return validFrame;
+    return frame;
   }
 
   validate(context, continuation) {
@@ -144,10 +143,10 @@ export default define(class Frame extends Element {
 
     context.trace(`Validating the '${frameString}' frame...`);
 
-    const validFrame = this.findValidFrame(context);
+    const frame = this.findFrame(context);
 
-    if (validFrame !== null) {
-      const frame = validFrame; ///
+    if (frame !== null) {
+      const frame = frame; ///
 
       context.debug(`...the '${frameString}' frame is already present.`);
 

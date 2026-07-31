@@ -59,23 +59,22 @@ export default define(class Signature extends Element {
     return signatureNodeMatches;
   }
 
-  findValidSignature(context) {
+  findSignature(context) {
     const signatureNode = this.getSignatureNode(),
-          signature = context.findSignatureBySignatureNode(signatureNode),
-          validSignature = signature;  ///
+          signature = context.findSignatureBySignatureNode(signatureNode);
 
-    return validSignature;
+    return signature;
   }
 
-  async verify(context) {
+  verify(context) {
     let verifies = false;
 
     const signatureString = this.getString();  ///
 
     context.trace(`Verifying the '${signatureString}' signature...`);
 
-    await attempt(async (context) => {
-      const termsValidate = await this.validateTerms(context);
+    attempt((context) => {
+      const termsValidate = this.validateTerms(context);
 
       if (termsValidate !== null) {
         verifies = true;
@@ -93,21 +92,17 @@ export default define(class Signature extends Element {
     return verifies;
   }
 
-  async validate(context) {
-    let signature = null;
-
+  validate(context) {
     const signatureString = this.getString();  ///
 
     context.trace(`Validating the '${signatureString}' signature...`);
 
     let validates = false;
 
-    const validSignature = this.findValidSignature(context);
+    const signature = this.findSignature(context);
 
-    if (validSignature !== null) {
+    if (signature !== null) {
       validates = true;
-
-      signature = validSignature;  ///
 
       context.debug(`...the '${signatureString}' signature is already present.`);
     } else {
@@ -115,8 +110,8 @@ export default define(class Signature extends Element {
 
       context = this.getContext();
 
-      await attempt(async (context) => {
-        const termsValidate = await this.validateTerms(context);
+      attempt((context) => {
+        const termsValidate = this.validateTerms(context);
 
         if (termsValidate !== null) {
           validates = true;
@@ -143,7 +138,7 @@ export default define(class Signature extends Element {
     return signature;
   }
 
-  async validateTerms(context) {
+  validateTerms(context) {
     let termsValidate;
 
     const signatureString = this.getString();  ///
@@ -152,8 +147,8 @@ export default define(class Signature extends Element {
 
     const terms = [];
 
-    termsValidate = await every(this.terms, async (term) => {
-      term = await term.validate(context, async (term, context) => { ///
+    termsValidate = every(this.terms, (term) => {
+      term = term.validate(context, (term, context) => { ///
         const validatesForwards = true;
 
         return validatesForwards;

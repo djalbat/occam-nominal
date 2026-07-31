@@ -1,17 +1,15 @@
 "use strict";
 
-import { arrayUtilities } from "necessary";
 import { Element, breakPointUtilities } from "occam-languages";
 
 import elements from "../elements";
 
 import { define } from "../elements";
 import { instantiateGoal } from "../process/instantiate";
+import { all, some, exists } from "../utilities/continuation";
 import { reconcile, instantiate } from "../utilities/context";
-import { all, each, exists, filter } from "../utilities/continuation";
 
-const { clone } = arrayUtilities,
-      { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
+const { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Goal extends Element {
   constructor(context, string, node, breakPoint, reference, statement) {
@@ -69,172 +67,163 @@ export default define(class Goal extends Element {
     return subproofAssertion;
   }
 
-  findValidGoal(context) {
+  findGoal(context) {
     const goalNode = this.getGoalNode(),
-          goal = context.findGoalByGoalNode(goalNode),
-          validGoal = goal;  ///
+          goal = context.findGoalByGoalNode(goalNode);
 
-    return validGoal;
+    return goal;
   }
 
   validate(context, continuation) {
-    const goalString = this.getString();  ///
+    let validates;
 
-    context.trace(`Validating the '${goalString}' goal...`);
+    const goalnString = this.getString();  ///
 
-    const validGoal = this.findValidGoal(context);
+    context.trace(`Validating the '${goalnString}' goal...`);
 
-    if (validGoal !== null) {
-      const goal = validGoal; ///
+    let goaln;
 
-      context.debug(`...the '${goalString}' goal is already present.`);
+    const goal = this.findGoal(context);
 
-      return continuation(goal);
+    if (goal !== null) {
+      context.debug(`The '${goalnString}' goal is already present.`);
+
+      validates = continuation(goaln, context);
+    } else {
+      goaln = this;
+
+      const validateStatement = this.validateStatement.bind(this),
+            validateReference = this.validateReference.bind(this);
+
+      validates = all([
+        validateStatement,
+        validateReference
+      ], context, (context) => {
+        let validates;
+
+        const validateWhenStated = this.validateWhenStated.bind(this),
+              validateWhenDerived = this.validateWhenDerived.bind(this);
+
+        validates = exists([
+          validateWhenStated,
+          validateWhenDerived
+        ], context, (context) => {
+          const goal = goaln;  ///
+
+          context.addAssertion(goal);
+
+          return continuation(goaln, context);
+        });
+
+        return validates;
+      });
     }
 
-    const validateStatement = this.validateStatement.bind(this),
-          validateReference = this.validateReference.bind(this);
+    if (validates) {
+      context.debug(`...validated the '${goalnString}' goal.`);
+    }
 
-    return all([
-      validateReference,
-      validateStatement
-    ], context, (validates) => {
-      if (!validates) {
-        const goal = null;
-
-        return continuation(goal);
-      }
-
-      const validatesWhenStated = this.validateWhenStated.bind(this),
-            validatesWhenDerived = this.validateWhenDerived.bind(this);
-
-      return exists([
-        validatesWhenStated,
-        validatesWhenDerived
-      ], context, (validates) => {
-        let goal = null;
-
-        if (validates) {
-          goal = this; ///
-
-          context.addGoal(goal);
-        }
-
-        if (validates) {
-          context.debug(`...validated the '${goalString}' goal.`);
-        }
-
-        return continuation(goal);
-      });
-    });
+    return validates;
   }
 
   validateReference(context, continuation) {
+    let referenceValidates;
+
     const goalString = this.getString();  ///
 
     context.trace(`Validating the '${goalString}' goal's reference...`);
 
-    return this.reference.validate(context, (reference) => {
-      let referenceValidates = false;
+    referenceValidates = this.reference.validate(context, (reference, context) => {
+      this.reference = reference;
 
-      if (reference !== null) {
-        this.reference = reference;
-
-        referenceValidates = true;
-      }
-
-      if (referenceValidates) {
-        context.debug(`...validated the '${goalString}' goal's reference.`);
-      }
-
-      return continuation(referenceValidates);
+      return continuation(context);
     });
+
+    if (referenceValidates) {
+      context.debug(`...validates the'${goalString}' goal's reference.`);
+    }
+
+    return referenceValidates;
   }
 
   validateStatement(context, continuation) {
+    let statementValidates;
+
     const goalString = this.getString();  ///
 
     context.trace(`Validating the '${goalString}' goal's statement...`);
 
-    return this.statement.validate(context, (statement) => {
-      let statementValidates = false;
+    statementValidates = this.statement.validate(context, (statement, context) => {
+      this.statement = statement;
 
-      if (statement !== null) {
-        statementValidates = true;
-      }
-
-      if (statementValidates) {
-        context.debug(`...validated the '${goalString}' goal's statement.`);
-      }
-
-      return continuation(statementValidates);
+      return continuation(context);
     });
+
+    if (statementValidates) {
+      context.debug(`...validates the'${goalString}' goal's statement.`);
+    }
+
+    return statementValidates;
   }
 
   validateWhenStated(context, continuation) {
-    const stated = context.isStated();
+    let validatesWhenStated = false;
 
-    if (!stated) {
-      const validatesWhenStated = false;
-
-      return continuation(validatesWhenStated);
-    }
-
-    let validatesWhenStated;
-
-    const goalString = this.getString();  ///
-
-    context.trace(`Validating the '${goalString}' stated goal...`);
-
-    validatesWhenStated = true
-
-    if (validatesWhenStated) {
-      context.debug(`...validated the '${goalString}' stated goal.`);
-    }
-
-    return continuation(validatesWhenStated);
-  }
-
-  validateWhenDerived(context, continuation) {
     const stated = context.isStated();
 
     if (stated) {
-      const validatesWhenDerived = false;
+      const goalString = this.getString(); ///
 
-      return continuation(validatesWhenDerived);
+      context.trace(`Validating the '${goalString}' stated goal...`);
+
+      validatesWhenStated = continuation(context);
+
+      if (validatesWhenStated) {
+        context.debug(`...validated the '${goalString}' stated goal.`);
+      }
     }
 
+    return validatesWhenStated;
+  }
+
+  validateWhenDerived(context, continuation) {
     let validatesWhenDerived = false;
 
-    const goalString = this.getString();  ///
+    const stated = context.isStated();
 
-    context.trace(`Validating the '${goalString}' derived goal...`);
+    if (!stated) {
+      const goalString = this.getString(); ///
 
-    let schemas;
+      context.trace(`Validating the '${goalString}' derived goal...`);
 
-    schemas = context.getSchemas();
+      const schemas = context.getSchemas();
 
-    schemas = clone(schemas); ///
+      validatesWhenDerived = some(schemas, (schema, context) => {
+        let passed;
 
-    return filter(schemas, (schema, continuation) => {
-      const label = schema.getLabel();
+        const label = schema.getLabel();
 
-      return this.unifyLabel(label, context, continuation);
-    }, () => {
-      return each(schemas, (schema, continuation) => {
-        return this.unifySchema(schema, context, continuation);
-      }, (schemasUnifiy) => {
-        if (schemasUnifiy) {
-          validatesWhenDerived = true;
-        }
+        this.unifyLabel(label, context, (labelUnifies) => {
+          if (labelUnifies) {
+            this.unifySchema(schema, context, (schemaUnifies) => {
+              passed = schemaUnifies;  ///
+            });
+          }
+        });
 
-        if (validatesWhenDerived) {
-          context.debug(`...validated the '${goalString}' derived goal.`);
-        }
+        return passed;
+      }, context, (context) => true);
 
-        return continuation(validatesWhenDerived);
-      });
-    });
+      if (validatesWhenDerived) {
+        validatesWhenDerived = continuation(context);
+      }
+
+      if (validatesWhenDerived) {
+        context.debug(`...validated the '${goalString}' derived goal.`);
+      }
+    }
+
+    return validatesWhenDerived;
   }
 
   unifyLabel(label, context, continuation) {
@@ -266,42 +255,24 @@ export default define(class Goal extends Element {
       const label = schema.getLabel();
 
       return this.reference.unifyLabel(label, context, (labelUnifies) => {
-        if (labelUnifies) {
-          const specificContext = context,  ///
-                schemaConditional = schema.isConditional(),
-                subproofAssertion = subproofAssertionFromStatement(this.statement, context);
+        if (!labelUnifies) {
+          const schemaUnifies = false;
 
-          if (schemaConditional) {
-            if (subproofAssertion === null) {
-              const schemaUnifies = false;
+          return continuation(schemaUnifies);
+        }
 
-              return continuation(schemaUnifies);
-            }
+        const specificContext = context,  ///
+              schemaConditional = schema.isConditional(),
+              subproofAssertion = subproofAssertionFromStatement(this.statement, context);
 
-            return subproofAssertion.unifySchema(schema, generalContext, specificContext, (schemaUnifies) => {
-              if (schemaUnifies) {
-                context.debug(`...unified the '${schemaString}' schema with the '${goalString}' goal.`);
-              }
-
-              return continuation(schemaUnifies);
-            });
-          }
-
-          if (subproofAssertion !== null) {
+        if (schemaConditional) {
+          if (subproofAssertion === null) {
             const schemaUnifies = false;
 
             return continuation(schemaUnifies);
           }
 
-          const deduction = schema.getDeduction();
-
-          this.unifyDeduction(deduction, generalContext, specificContext, (deductionUnifies) => {
-            let schemaUnifies = false;
-
-            if (deductionUnifies) {
-              schemaUnifies = true;
-            }
-
+          return subproofAssertion.unifySchema(schema, generalContext, specificContext, (schemaUnifies) => {
             if (schemaUnifies) {
               context.debug(`...unified the '${schemaString}' schema with the '${goalString}' goal.`);
             }
@@ -309,6 +280,28 @@ export default define(class Goal extends Element {
             return continuation(schemaUnifies);
           });
         }
+
+        if (subproofAssertion !== null) {
+          const schemaUnifies = false;
+
+          return continuation(schemaUnifies);
+        }
+
+        const deduction = schema.getDeduction();
+
+        this.unifyDeduction(deduction, generalContext, specificContext, (deductionUnifies) => {
+          let schemaUnifies = false;
+
+          if (deductionUnifies) {
+            schemaUnifies = true;
+          }
+
+          if (schemaUnifies) {
+            context.debug(`...unified the '${schemaString}' schema with the '${goalString}' goal.`);
+          }
+
+          return continuation(schemaUnifies);
+        });
       });
     }, context);
   }
