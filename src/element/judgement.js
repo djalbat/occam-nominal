@@ -184,9 +184,7 @@ export default define(class Judgement extends Element {
           validateWhenStated,
           validateWhenDerived
         ], context, (context) => {
-          const judgement = judgementn;  ///
-
-          context.addAssertion(judgement);
+          context.addJudgement(judgement);
 
           return continuation(judgementn, context);
         });
@@ -242,7 +240,7 @@ export default define(class Judgement extends Element {
     return frameValidates;
   }
 
-  validateWhenStated(context, continuation) {
+  _validateWhenStated(context, continuation) {
     const stated = context.isStated();
 
     if (!stated) {
@@ -266,7 +264,7 @@ export default define(class Judgement extends Element {
     return continuation(validatesWhenStated);
   }
 
-  validateWhenDerived(context, continuation) {
+  _validateWhenDerived(context, continuation) {
     const stated = context.isStated();
 
     if (stated) {

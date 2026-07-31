@@ -110,7 +110,7 @@ export default define(class Goal extends Element {
         ], context, (context) => {
           const goal = goaln;  ///
 
-          context.addAssertion(goal);
+          context.addGoal(goal);
 
           return continuation(goaln, context);
         });

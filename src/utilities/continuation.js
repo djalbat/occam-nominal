@@ -103,29 +103,6 @@ export function every(array, callback, ...initialArguments) {
   return next(index, ...callbackArguments);
 }
 
-export function filter(array, callback, ...initialArguments) {
-  const deletedElements = [],
-        continuation = initialArguments.pop(),
-        length = array.length;
-
-  for (let index = length - 1; index >= 0 ; index--) {
-    const element = array[index],
-          success = callback(element, ...initialArguments, continuation);
-
-    if (!success) {
-      const startIndex = index, ///
-            deleteCount = 1,
-            deletedElement = element; ///
-
-      array.splice(startIndex, deleteCount);
-
-      deletedElements.unshift(deletedElement);
-    }
-  }
-
-  return deletedElements;
-}
-
 export function match(arrayA, arrayB, callback, ...initialArguments) {
   const arrayALength = arrayA.length,
         arrayBLength = arrayB.length;
