@@ -115,7 +115,7 @@ export default define(class StatementSubstitution extends Substitution {
           validates = all([
             validateTargetStatement,
             validateReplacementStatement
-          ], generalContext, specificContext, (generalContext, specificContext) => {
+          ], generalContext, specificContext, () => {
             let validates;
 
             substitution = this;  ///
@@ -252,19 +252,10 @@ export default define(class StatementSubstitution extends Substitution {
 
     return reconcile((specificContext) => {
       return generalStatement.unifyStatement(specificStatement, generalContext, specificContext, (statementUnifies) => {
-        let replacementStatemnentUnifies = false;
+        const soleNonTrivialDerivedSubstitution = specificContext.getSoleNonTrivialDerivedSubstitution(),
+              substitution = soleNonTrivialDerivedSubstitution; ///
 
-        if (statementUnifies) {
-          specificContext.commit(context);
-
-          replacementStatemnentUnifies = true;
-        }
-
-        if (replacementStatemnentUnifies) {
-          context.trace(`...unified the '${specificSubstitutionString}' substitution's replacement statement with the '${generalSubstitutionString}' substitution's replacement statement.`);
-        }
-
-        return continuation(replacementStatemnentUnifies);
+        return continuation(substitution);
       });
     }, specificContext);
   }
@@ -276,31 +267,19 @@ export default define(class StatementSubstitution extends Substitution {
 
     context.trace(`Unifying the '${complexSubstitutionString}' complex substitution with the '${simpleSubstitutionString}' simple substitution...`);
 
-    return reconcile((context) => {
-      return this.unifyReplacementStatement(complexSubstitution, context, (replacementStatementUnifies) => {
-        let substitution = null;
+    return this.unifyReplacementStatement(complexSubstitution, context, (substitution) => {
+      let complexSubstitutionUnifies = false;
 
-        if (!replacementStatementUnifies) {
-          return continuation(substitution);
-        }
+      if (substitution !== null) {
+        complexSubstitutionUnifies = true;
+      }
 
-        let simpleSubstitutionUnifies = false;
+      if (complexSubstitutionUnifies) {
+        context.debug(`...unified the '${complexSubstitutionString}' complex substitution with the '${simpleSubstitutionString}' simple substitution.`);
+      }
 
-        const soleNonTrivialDerivedSubstitution = context.getSoleNonTrivialDerivedSubstitution();
-
-        substitution = soleNonTrivialDerivedSubstitution;  ///
-
-        if (substitution !== null) {
-          simpleSubstitutionUnifies = true;
-        }
-
-        if (simpleSubstitutionUnifies) {
-          context.debug(`...unified the '${complexSubstitutionString}' complex substitution with the '${simpleSubstitutionString}' simple substitution.`);
-        }
-
-        return continuation(substitution);
-      });
-    }, context);
+      return continuation(substitution);
+    });
   }
 
   resolve(context, continuation) {
@@ -322,16 +301,24 @@ export default define(class StatementSubstitution extends Substitution {
         return continuation();
       }
 
-      const replacementSubstitution = substitution; ///
+      const simpleSubstitution = substitution; ///
 
       substitution = this.targetStatement.getSubstitution();
 
-      const targetSubstitution = substitution; ///
+      return substitution.unifySimpleSubstitution(simpleSubstitution, context, (substitution) => {
+        let substitutionUnifies = false;
 
-      return targetSubstitution.unifySubstitution(replacementSubstitution, context, (substitutionUnifies) => {
-        if (substitutionUnifies) {
+        if (substitution !== null) {
+          const derivedSubstitution = substitution; ///
+
           this.resolved = true;
 
+          context.addDerivedSubstitution(derivedSubstitution);
+
+          substitutionUnifies = true;
+        }
+
+        if (substitutionUnifies) {
           context.debug(`...resolved the '${complexSubstitutionString}' complex substitution.`);
         }
 

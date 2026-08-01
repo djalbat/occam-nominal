@@ -157,16 +157,16 @@ export default define(class Judgement extends Element {
 
     context.trace(`Validating the '${judgementnString}' judgement...`);
 
-    let judgementn;
+    let judgement;
 
-    const judgement = this.findJudgement(context);
+    judgement = this.findJudgement(context);
 
     if (judgement !== null) {
       context.debug(`The '${judgementnString}' judgement is already present.`);
 
-      validates = continuation(judgementn, context);
+      validates = continuation(judgement, context);
     } else {
-      judgementn = this;
+      judgement = this;
 
       const validateGoal = this.validateGoal.bind(this),
             validateFrame = this.validateFrame.bind(this);
@@ -186,7 +186,7 @@ export default define(class Judgement extends Element {
         ], context, (context) => {
           context.addJudgement(judgement);
 
-          return continuation(judgementn, context);
+          return continuation(judgement, context);
         });
 
         return validates;
@@ -240,63 +240,61 @@ export default define(class Judgement extends Element {
     return frameValidates;
   }
 
-  _validateWhenStated(context, continuation) {
-    const stated = context.isStated();
+  validateWhenStated(context, continuation) {
+    let validatesWhenStated = false;
 
-    if (!stated) {
-      const validatesWhenStated = false;
-
-      return continuation(validatesWhenStated);
-    }
-
-    let validatesWhenStated;
-
-    const judgementString = this.getString();  ///
-
-    context.trace(`Validating the '${judgementString}' stated judgement...`);
-
-    validatesWhenStated = true;
-
-    if (validatesWhenStated) {
-      context.debug(`...validated the '${judgementString}' stated judgement.`);
-    }
-
-    return continuation(validatesWhenStated);
-  }
-
-  _validateWhenDerived(context, continuation) {
     const stated = context.isStated();
 
     if (stated) {
-      const validatesWhenDerived = false;
+      const judgementString = this.getString(); ///
 
-      continuation(validatesWhenDerived);
+      context.trace(`Validating the '${judgementString}' stated judgement...`);
 
-      return;
+      validatesWhenStated = continuation(context);
+
+      if (validatesWhenStated) {
+        context.debug(`...validated the '${judgementString}' stated judgement.`);
+      }
     }
 
-    const judgementString = this.getString();  ///
+    return validatesWhenStated;
+  }
 
-    context.trace(`Validating the '${judgementString}' derived judgement...`);
+  validateWhenDerived(context, continuation) {
+    let validatesWhenDerived = false;
 
-    const schemas = context.getSchemas(),
-          judgement = this; ///
+    const stated = context.isStated();
 
-    return one(schemas, (schema, continuation) => {
-      schema.unifyJudgement(judgement, context, continuation);
-    }, (judgementUnifies) => {
-      let validatesWhenDerived = false;
+    if (!stated) {
+      const judgementString = this.getString(); ///
 
-      if (judgementUnifies) {
-        validatesWhenDerived = true;
+      context.trace(`Validating the '${judgementString}' derived judgement...`);
+
+      const schemas = context.getSchemas(),
+            judgement = this; ///
+
+      validatesWhenDerived = one(schemas, (schema, context) => {
+        let passed = false;
+
+        schema.unifyJudgement(judgement, context, (judgementUnifies) => {
+          if (judgementUnifies) {
+            passed = true;
+          }
+        });
+
+        return passed;
+      }, context, (context) => true);
+
+      if (validatesWhenDerived) {
+        validatesWhenDerived = continuation(context);
       }
 
       if (validatesWhenDerived) {
         context.debug(`...validated the '${judgementString}' derived judgement.`);
       }
+    }
 
-      return continuation(validatesWhenDerived);
-    });
+    return validatesWhenDerived;
   }
 
   toJSON() {

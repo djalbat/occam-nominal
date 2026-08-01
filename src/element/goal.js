@@ -92,12 +92,12 @@ export default define(class Goal extends Element {
     } else {
       goaln = this;
 
-      const validateStatement = this.validateStatement.bind(this),
-            validateReference = this.validateReference.bind(this);
+      const validateReference = this.validateReference.bind(this),
+            validateStatement = this.validateStatement.bind(this);
 
       validates = all([
-        validateStatement,
-        validateReference
+        validateReference,
+        validateStatement
       ], context, (context) => {
         let validates;
 
@@ -199,14 +199,16 @@ export default define(class Goal extends Element {
       const schemas = context.getSchemas();
 
       validatesWhenDerived = some(schemas, (schema, context) => {
-        let passed;
+        let passed = false;
 
         const label = schema.getLabel();
 
         this.unifyLabel(label, context, (labelUnifies) => {
           if (labelUnifies) {
             this.unifySchema(schema, context, (schemaUnifies) => {
-              passed = schemaUnifies;  ///
+              if (schemaUnifies) {
+                passed = true;
+              }
             });
           }
         });

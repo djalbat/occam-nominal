@@ -82,7 +82,7 @@ export default define(class Reference extends Element {
   }
 
   validate(context, continuation) {
-    let validates;
+    let validates = false;
 
     const referenceString = this.getString(); ///
 
@@ -100,7 +100,7 @@ export default define(class Reference extends Element {
       context = this.getContext();
 
       attempt((context) => {
-        validates = this.validateMetavariable(context, (context) => {
+        const metavariableValidates = this.validateMetavariable(context, (context) => {
           let validates = false;
 
           const metaType = this.metavariable.getMetaType();
@@ -128,13 +128,19 @@ export default define(class Reference extends Element {
 
             this.commit(context);
 
-            specificContext.addReference(reference);
+            context = specificContext;  ///
+
+            context.addReference(reference);
 
             validates = continuation(reference, context);
           }
 
           return validates;
         });
+
+        if (metavariableValidates) {
+          validates = true;
+        }
       }, context);
     }
 

@@ -349,7 +349,7 @@ export default define(class Metavariable extends Element {
     if (derivedSubstitution !== null) {
       let frameUnifies = false;
 
-      const derivedSubstitutionComparesToTerm = derivedSubstitution.compareTerm(frame, context);
+      const derivedSubstitutionComparesToTerm = derivedSubstitution.compareFrame(frame, context);
 
       if (derivedSubstitutionComparesToTerm) {
         const derivedSubstitutionString = derivedSubstitution.getString();

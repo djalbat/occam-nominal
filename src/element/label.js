@@ -78,20 +78,34 @@ export default define(class Label extends Element {
   }
 
   validate(context, continuation) {
-    let validates;
+    let validates = false;
 
     const labelString = this.getString(); ///
 
     context.trace(`Validating the '${labelString}' label...`);
 
+    const specificContext = context; ///
+
+    context = this.getContext();
+
     attempt((context) => {
-      validates = this.validateMetavariable(context, (context) => {
+      const metavariableValidates = this.validateMetavariable(context, (context) => {
+        let validates;
+
         const label = this; ///
 
         this.commit(context);
 
-        return continuation(label, context);
+        context = specificContext;  ///
+
+        validates = continuation(label, context);
+
+        return validates;
       });
+
+      if (metavariableValidates) {
+        validates = true;
+      }
     }, context);
 
     if (validates) {

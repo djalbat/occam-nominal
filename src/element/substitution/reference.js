@@ -129,7 +129,7 @@ export default define(class ReferenceSubstitution extends Substitution {
           validates = all([
             validateTargetReference,
             validateReplacementReference
-          ], generalContext, specificContext, (generalContext, specificContext) => {
+          ], generalContext, specificContext, () => {
             let validates;
 
             substitution = this;  ///
