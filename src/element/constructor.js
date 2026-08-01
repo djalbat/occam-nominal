@@ -1,6 +1,6 @@
 "use strict";
 
-import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
+import { Element, breakPointUtilities } from "occam-languages";
 
 import { define } from "../elements";
 import { every, exists } from "../utilities/continuation";
@@ -13,8 +13,7 @@ import { validateTermAsConstructor } from "../process/validate";
 import { attempt, serialise, unserialise, instantiate } from "../utilities/context";
 import { typeFromJSON, typeToTypeJSON, hypothesesFromJSON, hypothesesToHypothesesJSON } from "../utilities/json";
 
-const {  } = continuationUtilities,
-      { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
+const { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Constructor extends Element {
   constructor(context, string, node, breakPoint, term, type, hypotheses) {

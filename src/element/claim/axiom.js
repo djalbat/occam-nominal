@@ -7,8 +7,8 @@ import Claim from "../claim";
 import { define } from "../../elements";
 import { reconcile } from "../../utilities/context";
 
-const { match } = continuationUtilities,
-      { breakable } = breakPointUtilities;
+const { breakable } = breakPointUtilities,
+      { asynchronousMatch } = continuationUtilities;
 
 export default define(class Axiom extends Claim {
   getAxiomNode() {
@@ -200,7 +200,7 @@ export default define(class Axiom extends Claim {
 
     const generalSuppositions = suppositions; ///
 
-    suppositionsUnify = match(generalSuppositions, specificSuppositions, (generalSupposition, specificSupposition, index) => {
+    suppositionsUnify = asynchronousMatch(generalSuppositions, specificSuppositions, (generalSupposition, specificSupposition, index) => {
       const supposition = specificSupposition,  ///
             suppositionUnifies = this.unifySupposition(supposition, index, context);
 

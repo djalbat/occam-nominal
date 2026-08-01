@@ -5,7 +5,7 @@ import { Element, continuationUtilities } from "occam-languages";
 import { define } from "../elements";
 import { enclose } from "../utilities/context";
 
-const { every } = continuationUtilities;
+const { asynchronousEvery } = continuationUtilities;
 
 export default define(class Section extends Element {
   constructor(context, string, node, breakPoint, hypotheses, declaration, claim) {
@@ -80,7 +80,7 @@ export default define(class Section extends Element {
   }
 
   async verifyHypotheses(context) {
-    const hypothesesVerify = await every(this.hypotheses, async (hypothesis) => {
+    const hypothesesVerify = await asynchronousEvery(this.hypotheses, async (hypothesis) => {
       const hypothesisVerifies = await hypothesis.verify(context);
 
       if (hypothesisVerifies) {

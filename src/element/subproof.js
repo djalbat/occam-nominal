@@ -6,7 +6,7 @@ import { define } from "../elements";
 import { enclose } from "../utilities/context";
 
 const { breakable } = breakPointUtilities,
-      { all, every } = continuationUtilities;
+      { asynchronousAll, asynchronousEvery } = continuationUtilities;
 
 export default define(class Subproof extends Element {
   constructor(context, string, node, breakPoint, suppositions, subDerivation) {
@@ -98,7 +98,7 @@ export default define(class Subproof extends Element {
       const verifySuppositions = this.verifySuppositions.bind(this),
             verifySubDerivation = this.verifySubDerivation.bind(this);
 
-      return all([
+      return asynchronousAll([
         verifySuppositions,
         verifySubDerivation
       ], context, (verifies) => {
@@ -149,7 +149,7 @@ export default define(class Subproof extends Element {
 
     const verifySupposition = this.verifySupposition.bind(this);
 
-    return every(this.suppositions, verifySupposition, context, (suppositionsVerify) => {
+    return asynchronousEvery(this.suppositions, verifySupposition, context, (suppositionsVerify) => {
       if (suppositionsVerify) {
         context.debug(`...verified the '${subproofString}' subproof's suppositions.`);
       }

@@ -17,7 +17,7 @@ import { labelFromJSON,
          constraintsToConstraintsJSON,
          suppositionsToSuppositionsJSON } from "../utilities/json";
 
-const { every, forwardsEvery } = continuationUtilities,
+const { asynchornousEvery, asynchronousForwardsEvery } = continuationUtilities,
       { breakable, breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Schema extends Element {
@@ -153,7 +153,7 @@ export default define(class Schema extends Element {
 
     context.trace(`Verifying the '${schemaString}' schema's suppositions...`);
 
-    return forwardsEvery(this.suppositions, (supposition, continuation) => {
+    return asynchronousForwardsEvery(this.suppositions, (supposition, continuation) => {
       return this.verifySupposition(supposition, context, continuation);
     }, (suppositionsVerify) => {
       if (suppositionsVerify) {
@@ -280,7 +280,7 @@ export default define(class Schema extends Element {
   }
 
   unifyAssumptions(assumptions, context, continuation) {
-    every(this.constraints, (constraint, continuation) => {
+    asynchornousEvery(this.constraints, (constraint, continuation) => {
       constraint.unifyAssumptions(assumptions, context, continuation);
     }, continuation);
   }
@@ -383,7 +383,7 @@ export default define(class Schema extends Element {
 
     let index = -1;
 
-    every(supposedStatements, (supposedStatement, continuation) => {
+    asynchornousEvery(supposedStatements, (supposedStatement, continuation) => {
       index++;
 
       return this.unifySupposedStatement(supposedStatement, index, context, continuation);

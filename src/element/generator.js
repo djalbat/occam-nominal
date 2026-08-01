@@ -12,7 +12,7 @@ import { validateTermAsGenerator } from "../process/validate";
 import { typeFromJSON, typeToTypeJSON } from "../utilities/json";
 import { attempt, serialise, unserialise, instantiate } from "../utilities/context";
 
-const { every } = continuationUtilities,
+const { asynchronousEvery } = continuationUtilities,
       { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Generator extends Element {
@@ -208,7 +208,7 @@ export default define(class Generator extends Element {
     const hypothetical = this.isHypothetical();
 
     if (hypothetical) {
-      hypothesesDischargesGivenTerm = await every(this.hypotheses, async (hypothesis) => {
+      hypothesesDischargesGivenTerm = await asynchronousEvery(this.hypotheses, async (hypothesis) => {
         const hypothesisDischarges = await this.dischargeHypothesisGivenTerm(hypothesis, term, context);
 
         if (hypothesisDischarges) {

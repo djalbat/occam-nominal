@@ -12,8 +12,8 @@ import { subproofAssertionFromStatementNode } from "../../utilities/element";
 import { join, descend, reconcile, instantiate } from "../../utilities/context";
 
 const { last, front } = arrayUtilities,
-      { backwardsEvery } = continuationUtilities,
-      { breakPointFromJSON } = breakPointUtilities;
+      { breakPointFromJSON } = breakPointUtilities,
+      { asynchronourBackwardsEvery } = continuationUtilities;
 
 export default define(class SubproofAssertion extends Assertion {
   constructor(context, string, node, breakPoint, statements) {
@@ -281,7 +281,7 @@ export default define(class SubproofAssertion extends Assertion {
 
     let index = -1;
 
-    return backwardsEvery(suppositions, (supposition, continuation) => {
+    return asynchronourBackwardsEvery(suppositions, (supposition, continuation) => {
       index++;
 
       return this.unifySupposition(supposition, index, generalContext, specificContext, continuation);

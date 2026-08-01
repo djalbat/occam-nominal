@@ -8,7 +8,7 @@ import { define } from "../../elements";
 import { baseTypeFromNothing } from "../../utilities/type";
 
 const { breakable } = breakPointUtilities,
-      { all, every } = continuationUtilities;
+      { asynchronousAll, asynchronousEvery } = continuationUtilities;
 
 export default define(class TypeDeclaration extends Declaration {
   constructor(context, string, node, breakPoint, type, superTypes, provisional) {
@@ -53,7 +53,7 @@ export default define(class TypeDeclaration extends Declaration {
           verifySuperTypes = this.verifySuperTypes.bind(this),
           verifyTypePrefix = this.verifyTypePrefix.bind(this);
 
-    return all([
+    return asynchronousAll([
       verifyType,
       verifySuperTypes,
       verifyTypePrefix
@@ -144,7 +144,7 @@ export default define(class TypeDeclaration extends Declaration {
 
     const superTypes = []; ///
 
-    return every(this.superTypes, (superType, context, continuation) => {
+    return asynchronousEvery(this.superTypes, (superType, context, continuation) => {
       return this.verifySuperType(superType, superTypes, context, continuation);
     }, context, (superTypesVerify, context) => {
       if (superTypesVerify) {

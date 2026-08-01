@@ -8,8 +8,8 @@ import elements from "../elements";
 
 import { metavariableNodesFromDerivedSubstitutions } from "../utilities/substitutions";
 
-const { forEach } = continuationUtilities,
-      { push, find, first } = arrayUtilities;
+const { push, find, first } = arrayUtilities,
+      { aynchronousForEach } = continuationUtilities;
 
 export default class LiminalContext extends Context {
   constructor(context, derivedSubstitutions) {
@@ -94,10 +94,10 @@ export default class LiminalContext extends Context {
           derivedSubstitutions = this.getDerivedSubstitutions(),
           metavariableNodes = metavariableNodesFromDerivedSubstitutions(derivedSubstitutions);
 
-    return forEach(metavariableNodes, (metavariableNode, continuation) => {
+    return aynchronousForEach(metavariableNodes, (metavariableNode, continuation) => {
       const complexDerivedSubstitutions = this.findComplexDerivedSubstitutionsByMetavariableNode(metavariableNode);
 
-      return forEach(complexDerivedSubstitutions, (complexDerivedSubstitution, continuation) => {
+      return aynchronousForEach(complexDerivedSubstitutions, (complexDerivedSubstitution, continuation) => {
         const derivedSubstitution = complexDerivedSubstitution, ///
               resolved = derivedSubstitution.isResolved();
 

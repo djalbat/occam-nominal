@@ -4,7 +4,7 @@ import { continuationUtilities } from "occam-languages";
 
 import elements from "../elements";
 
-const { reduce } = continuationUtilities;
+const { asynchronousReduce } = continuationUtilities;
 
 function unifyStepWithRule(step, context, continuation) {
   const reference = step.getReference();
@@ -432,7 +432,7 @@ export const unifySteps = [
 function judgementsFromFacts(facts, context, continuation) {
   const judgements = [];
 
-  return reduce(facts, judgements, (judgements, fact, continuation) => {
+  return asynchronousReduce(facts, judgements, (judgements, fact, continuation) => {
     const { Judgement } = elements,
           context = fact.getContext(),
           judgement = Judgement.fromFact(fact, context);

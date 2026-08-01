@@ -11,7 +11,7 @@ import { constraintFromConstraintNode } from "../utilities/element";
 import { constraintStringFromReferenceAndStatement } from "../utilities/string";
 import { ablate, attempt, descend, reconcile, serialise, unserialise, instantiate } from "../utilities/context";
 
-const { some } = continuationUtilities,
+const { asynchronousSome } = continuationUtilities,
       { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Constraint extends Element {
@@ -302,7 +302,7 @@ export default define(class Constraint extends Element {
   }
 
   unifyAssumptions(assumptions, context, continuation) {
-    some(assumptions, (assumption, continuation) => {
+    asynchronousSome(assumptions, (assumption, continuation) => {
       this.unifyAssumption(assumption, context, continuation);
     }, continuation);
   }

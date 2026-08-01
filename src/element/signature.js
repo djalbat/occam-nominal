@@ -9,7 +9,7 @@ import { signatureFromSignatureNode } from "../utilities/element";
 import { ablate, attempt, reconcile, serialise, unserialise, instantiate } from "../utilities/context";
 
 const { match } = arrayUtilities,
-      { every } = continuationUtilities,
+      { asynchronousEvery } = continuationUtilities,
       { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Signature extends Element {
@@ -147,7 +147,7 @@ export default define(class Signature extends Element {
 
     const terms = [];
 
-    termsValidate = every(this.terms, (term) => {
+    termsValidate = asynchronousEvery(this.terms, (term) => {
       term = term.validate(context, (term, context) => { ///
         const validatesForwards = true;
 

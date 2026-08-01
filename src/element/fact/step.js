@@ -11,9 +11,9 @@ import { define } from "../../elements";
 import { unifySteps } from "../../process/unification";
 import { derive, declare, attempt, reconcile } from "../../utilities/context";
 
-const { some } = continuationUtilities,
-      { breakable } = breakPointUtilities,
-      { backwardsSome } = arrayUtilities;
+const { breakable } = breakPointUtilities,
+      { backwardsSome } = arrayUtilities,
+      { asynchronousSome } = continuationUtilities;
 
 export default define(class Step extends Fact {
   constructor(context, string, node, breakPoint, statement, reference, signatureAssertion) {
@@ -275,7 +275,7 @@ export default define(class Step extends Fact {
 
     const step = this;  ///
 
-    return some(unifySteps, (unifyStep, continuation) => {
+    return asynchronousSome(unifySteps, (unifyStep, continuation) => {
       return reconcile((context) => {
         return unifyStep(step, context, continuation);
       }, context);

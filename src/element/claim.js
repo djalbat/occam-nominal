@@ -18,7 +18,7 @@ import { labelsFromJSON,
 
 const { reverse } = arrayUtilities,
       { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities,
-      { all, every, extract, forwardsEvery, backwardsEvery } = continuationUtilities;
+      { asynchronousAll, asynchronousEvery, asynchronousExtract, asynchronousForwardsEvery, asynchronousBackwardsEvery } = continuationUtilities;
 
 export default class Claim extends Element {
   constructor(context, string, node, breakPoint, labels, suppositions, deduction, proof, signature, hypotheses) {
@@ -102,7 +102,7 @@ export default class Claim extends Element {
             verifyDeduction = this.verifyDeduction.bind(this),
             verifySuppositions = this.verifySuppositions.bind(this);
 
-      return all([
+      return asynchronousAll([
         verifyLabels,
         verifySuppositions,
         verifyDeduction,
@@ -124,7 +124,7 @@ export default class Claim extends Element {
 
     const verifyLabel = this.verifyLabel.bind(this);
 
-    return every(this.labels, verifyLabel, context, (labelsVerify) => {
+    return asynchronousEvery(this.labels, verifyLabel, context, (labelsVerify) => {
       if (labelsVerify) {
         context.debug(`...verified the '${claimString}' claim's labels.`);
       }
@@ -223,7 +223,7 @@ export default class Claim extends Element {
 
     const verifySupposition = this.verifySupposition.bind(this);
 
-    return forwardsEvery(this.suppositions, verifySupposition, context, (suppositionsVerify) => {
+    return asynchronousForwardsEvery(this.suppositions, verifySupposition, context, (suppositionsVerify) => {
       if (suppositionsVerify) {
         context.debug(`...verified the '${claimString}' claim's suppositions.`);
       }
@@ -251,7 +251,7 @@ export default class Claim extends Element {
     const hypotheses = this.getHypotheses(),
           dischargeHypothesis = this.dischargeHypothesis.bind(this);
 
-    return every(hypotheses, dischargeHypothesis, context, continuation);
+    return asynchronousEvery(hypotheses, dischargeHypothesis, context, continuation);
   }
 
   unifyStepWithDeduction(step, context, continuation) {
@@ -309,7 +309,7 @@ export default class Claim extends Element {
   }
 
   unifyFactOrSubproofsWithSupposition(factorSubproofs, supposition, context, continuation) {
-    return extract(factorSubproofs, (factOrSubproof, continuation) => {
+    return asynchronousExtract(factorSubproofs, (factOrSubproof, continuation) => {
       return supposition.unifyFactOrSubproof(factOrSubproof, context, continuation);
     }, (factOrSubproof = null) => {
       if (factOrSubproof !== null) {
@@ -327,7 +327,7 @@ export default class Claim extends Element {
   unifyFactOrSubproofsWithSuppositions(factorSubproofs, context, continuation) {
     factorSubproofs = reverse(factorSubproofs); ///
 
-    return backwardsEvery(this.suppositions, (supposition, continuation) => {
+    return asynchronousBackwardsEvery(this.suppositions, (supposition, continuation) => {
       return this.unifyFactOrSubproofsWithSupposition(factorSubproofs, supposition, context, continuation);
     }, continuation);
   }

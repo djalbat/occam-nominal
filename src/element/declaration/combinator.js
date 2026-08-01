@@ -6,8 +6,8 @@ import Declaration from "../declaration";
 
 import { define } from "../../elements";
 
-const { all } = continuationUtilities,
-      { breakable } = breakPointUtilities;
+const { breakable } = breakPointUtilities,
+      { asynchronousAll } = continuationUtilities;
 
 export default define(class CombinatorDeclaration extends Declaration {
   constructor(context, string, node, breakPoint, combinator) {
@@ -34,7 +34,7 @@ export default define(class CombinatorDeclaration extends Declaration {
 
     const verifyCombinator = this.verifyCombinator.bind(this);
 
-    return all([
+    return asynchronousAll([
       verifyCombinator
     ], context, (verifies, context) => {
       if (verifies) {

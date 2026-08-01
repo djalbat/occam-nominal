@@ -4,11 +4,11 @@ import { Element, breakPointUtilities, continuationUtilities } from "occam-langu
 
 import { define } from "../elements";
 import { instantiate } from "../utilities/context";
+import { all, exists } from "../utilities/continuation";
 import { instantiateFrame } from "../process/instantiate";
-import {all, exists, every, some} from "../utilities/continuation";
 import { metavariableFromFrameNode } from "../utilities/element";
 
-const { every } = continuationUtilities,
+const { asynchronousEvery } = continuationUtilities,
       { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Frame extends Element {
@@ -218,7 +218,7 @@ export default define(class Frame extends Element {
     const assumptions = [],
           validateAssumption = this.validateAssumption.bind(this);
 
-    assumptionsValidate = every(this.assumptions, validateAssumption, assumptions, context, (assumptions, context) => {
+    assumptionsValidate = asynchronousEvery(this.assumptions, validateAssumption, assumptions, context, (assumptions, context) => {
       let assumptionsValidate;
 
       this.assumptions = assumptions;

@@ -11,8 +11,8 @@ import { frameSubstitutionFromFrameSubstitutionNode } from "../../utilities/elem
 import { frameSubstitutionStringFromFrameAndMetavariable } from "../../utilities/string";
 import { join, pass, waive, elide, ablate, ablates, descend, manifest, attempts, reconcile, instantiate, unserialises } from "../../utilities/context";
 
-const { breakPointFromJSON } = breakPointUtilities,
-      { all: aynchornousAll } = continuationUtilities;
+const { aynchornousAll } = continuationUtilities,
+      { breakPointFromJSON } = breakPointUtilities;
 
 export default define(class FrameSubstitution extends Substitution {
   constructor(contexts, string, node, breakPoint, targetFrame, replacementFrame) {
