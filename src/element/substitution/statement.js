@@ -309,15 +309,15 @@ export default define(class StatementSubstitution extends Substitution {
         let complexSubstitutionResvoles = false;
 
         if (complexSubstitutionUnifies) {
-          complexSubstitutionResvoles = true;
-
-          this.resolved = true;
-
           if (substitution !== null) {
             const derivedSubstitution = substitution; ///
 
             context.addDerivedSubstitution(derivedSubstitution);
           }
+
+          complexSubstitutionResvoles = true;
+
+          this.resolved = true;
         }
 
         if (complexSubstitutionResvoles) {

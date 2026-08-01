@@ -209,19 +209,15 @@ export default define(class FrameSubstitution extends Substitution {
       return asynchronousAll([
         unifyReplacementFrame,
         unifyTargetFrame
-      ], substitution, context, (substitutionUnifies) => {
+      ], substitution, context, (simpleSubstitutionUnifies) => {
         const soleDerivedSubstitution = context.getSoleDerivedSubstitution(),
               substitution = soleDerivedSubstitution; ///
 
-        if (substitution === null) {
-          substitutionUnifies = false;
-        }
-
-        if (substitutionUnifies) {
+        if (simpleSubstitutionUnifies) {
           context.debug(`...unified the '${simpleSubstitutionString}' simple substitution with the '${substitutionString}' substitution.`);
         }
 
-        return continuation(substitution);
+        return continuation(simpleSubstitutionUnifies, substitution);
       });
     }, context);
   }
