@@ -1,15 +1,15 @@
 "use strict";
 
-import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
+import { Element, breakPointUtilities } from "occam-languages";
 
+import { every } from "../utilities/continuation";
 import { define } from "../elements";
 import { instantiate } from "../utilities/context";
 import { all, exists } from "../utilities/continuation";
 import { instantiateFrame } from "../process/instantiate";
 import { metavariableFromFrameNode } from "../utilities/element";
 
-const { asynchronousEvery } = continuationUtilities,
-      { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
+const { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Frame extends Element {
   constructor(context, string, node, breakPoint, assumptions, metavariable) {
@@ -155,8 +155,8 @@ export default define(class Frame extends Element {
     } else {
       frame = this;
 
-      const validateMetavariable = this.validateMetavariable.bind(this),
-            validateAssumptions = this.validateAssumptions.bind(this);
+      const validateAssumptions = this.validateAssumptions.bind(this),
+            validateMetavariable = this.validateMetavariable.bind(this);
 
       validates = all([
         validateMetavariable,
@@ -218,7 +218,7 @@ export default define(class Frame extends Element {
     const assumptions = [],
           validateAssumption = this.validateAssumption.bind(this);
 
-    assumptionsValidate = asynchronousEvery(this.assumptions, validateAssumption, assumptions, context, (assumptions, context) => {
+    assumptionsValidate = every(this.assumptions, validateAssumption, assumptions, context, (assumptions, context) => {
       let assumptionsValidate;
 
       this.assumptions = assumptions;
