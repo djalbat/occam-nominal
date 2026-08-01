@@ -249,30 +249,30 @@ export default define(class ContainedAssertion extends Assertion {
   }
 
   unifyIndependently(generalContext, specificContext, continuation) {
+    let unifiesIndependently = false;
+
     const context = specificContext,  ///
           containedAssertionString = this.getString(); ///
 
     context.trace(`Unifying the '${containedAssertionString}' contained assertion independently...`);
 
-    debugger
-
     const term = termFromTermAndSubstitutions(this.term, context),
           frame = frameFromFrameAndSubstitutions(this.frame, context),
           statement = statementFromStatementAndSubstitutions(this.statement, context);
 
-    return validateWhenDerived(term, frame, statement, this.negated, context, (validatesWhenDerived) => {
-      let unifiesIndependently = false;
+    validateWhenDerived(term, frame, statement, this.negated, context, (context) => {
+      const validatesWhenDerived = true;
 
-      if (validatesWhenDerived) {
-        unifiesIndependently = true;
-      }
+      unifiesIndependently = true;
 
-      if (unifiesIndependently) {
-        context.debug(`...unified the '${containedAssertionString}' contained assertion independently.`);
-      }
-
-      return continuation(unifiesIndependently);
+      return validatesWhenDerived;
     });
+
+    if (unifiesIndependently) {
+      context.debug(`...unified the '${containedAssertionString}' contained assertion independently.`);
+    }
+
+    return continuation(unifiesIndependently);
   }
 
   static name = "ContainedAssertion";

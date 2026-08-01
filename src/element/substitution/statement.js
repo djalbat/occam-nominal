@@ -278,7 +278,7 @@ export default define(class StatementSubstitution extends Substitution {
         context.debug(`...unified the '${complexSubstitutionString}' complex substitution with the '${simpleSubstitutionString}' simple substitution.`);
       }
 
-      return continuation(substitution);
+      return continuation(complexSubstitutionUnifies, substitution);
     });
   }
 
@@ -296,8 +296,8 @@ export default define(class StatementSubstitution extends Substitution {
 
     context.trace(`Resolving the ${complexSubstitutionString}' complex substitution...`);
 
-    return simpleSubstitution.unifyComplexSubstitution(complexSubstitution, context, (substitution) => {
-      if (substitution === null) {
+    return simpleSubstitution.unifyComplexSubstitution(complexSubstitution, context, (complexSubstitutionUnifies, substitution) => {
+      if (!complexSubstitutionUnifies) {
         return continuation();
       }
 
@@ -305,20 +305,22 @@ export default define(class StatementSubstitution extends Substitution {
 
       substitution = this.targetStatement.getSubstitution();
 
-      return substitution.unifySimpleSubstitution(simpleSubstitution, context, (substitution) => {
-        let substitutionUnifies = false;
+      return substitution.unifySimpleSubstitution(simpleSubstitution, context, (simpleSubstitutionUnifies, substitution) => {
+        let complexSubstitutionResvoles = false;
 
-        if (substitution !== null) {
-          const derivedSubstitution = substitution; ///
+        if (complexSubstitutionUnifies) {
+          complexSubstitutionResvoles = true;
 
           this.resolved = true;
 
-          context.addDerivedSubstitution(derivedSubstitution);
+          if (substitution !== null) {
+            const derivedSubstitution = substitution; ///
 
-          substitutionUnifies = true;
+            context.addDerivedSubstitution(derivedSubstitution);
+          }
         }
 
-        if (substitutionUnifies) {
+        if (complexSubstitutionResvoles) {
           context.debug(`...resolved the '${complexSubstitutionString}' complex substitution.`);
         }
 

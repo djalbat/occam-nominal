@@ -12,7 +12,7 @@ import { termSubstitutionFromTermSubstitutionNode } from "../../utilities/elemen
 import { termSubstitutionStringFromTermAndVariable } from "../../utilities/string";
 import { join, pass, waive, elide, ablate, ablates, descend, manifest, attempts, reconcile, instantiate, unserialises } from "../../utilities/context";
 
-const { aynchornousAll } = continuationUtilities,
+const { asynchronousAll } = continuationUtilities,
       { breakPointFromJSON } = breakPointUtilities;
 
 export default define(class TermSubstitution extends Substitution {
@@ -209,22 +209,18 @@ export default define(class TermSubstitution extends Substitution {
             unifyTargetTerm = this.unifyTargetTerm.bind(this),
             unifyReplacementTerm = this.unifyReplacementTerm.bind(this);
 
-      return aynchornousAll([
+      return asynchronousAll([
         unifyReplacementTerm,
         unifyTargetTerm
-      ], substitution, context, (substitutionUnifies) => {
+      ], substitution, context, (simpleSubstitutionUnifies) => {
         const soleDerivedSubstitution = context.getSoleDerivedSubstitution(),
               substitution = soleDerivedSubstitution; ///
 
-        if (substitution === null) {
-          substitutionUnifies = false;
-        }
-
-        if (substitutionUnifies) {
+        if (simpleSubstitutionUnifies) {
           context.debug(`...unified the '${simpleSubstitutionString}' simple substitution with the '${substitutionString}' substitution.`);
         }
 
-        return continuation(substitution);
+        return continuation(simpleSubstitutionUnifies, substitution);
       });
     }, context);
   }
