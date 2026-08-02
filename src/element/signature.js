@@ -125,7 +125,7 @@ export default define(class Signature extends Element {
       context = temporaryContext; ///
 
       if (validates) {
-        signature = this; ///
+        const signature = this; ///
 
         context.addSignature(signature);
       }
