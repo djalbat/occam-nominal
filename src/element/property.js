@@ -89,7 +89,7 @@ export default define(class Property extends Element {
 
     context.trace(`Validating the '${propertyString}' property's term...`);
 
-    const termValidatesAsProperty = await validateTermAsProperty(this.term, context);
+    const termValidatesAsProperty = validateTermAsProperty(this.term, context);
 
     if (termValidatesAsProperty) {
       termValidates = true;

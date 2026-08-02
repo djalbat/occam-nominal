@@ -128,7 +128,7 @@ export default define(class Generator extends Element {
         termValidates = true;
       }
     } else {
-      const termValidatesAsGenerator = await validateTermAsGenerator(this.term, context);
+      const termValidatesAsGenerator = validateTermAsGenerator(this.term, context);
 
       if (termValidatesAsGenerator) {
         termValidates = true;
