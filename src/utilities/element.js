@@ -320,12 +320,13 @@ export function equalityFromEqualityNode(equalityNode, context) {
         node = equalityNode, ///
         string = context.nodeAsString(node),
         breakPoint = null,
+        negated = negatedFromEqualityNode(equalityNode, context),
         leftTerm = leftTermFromEqualityNode(equalityNode, context),
         rightTerm = rightTermFromEqualityNode(equalityNode, context);
 
   context = null;
 
-  const equality = new Equality(context, string, node, breakPoint, leftTerm, rightTerm);
+  const equality = new Equality(context, string, node, breakPoint, negated, leftTerm, rightTerm);
 
   return equality;
 }
@@ -1316,6 +1317,12 @@ export function deductionFromSchemaNode(schemaNode, context) {
         deduction = deductionFromDeductionNode(deductionNode, context);
 
   return deduction;
+}
+
+export function negatedFromEqualityNode(equalityNode, context) {
+  const negated = equalityNode.isNegated();
+
+  return negated;
 }
 
 export function termFromConstructorNode(ocnstructorNode, context) {

@@ -3,10 +3,10 @@
 export const S = "s";
 export const NULL = "null";
 export const MISSING = "missing";
+export const NOT_EQUAL = "!=";
 export const UNDEFINED = "undefined";
 export const PROVISIONAL = "Provisional";
 export const EMPTY_STRING = "";
-export const SINGLE_SPACE = " ";
 export const PROVISIONALLY = "provisionally";
 export const BASE_TYPE_SYMBOL = "<>";
 export const BRACKETED_TERM_DEPTH = 2;

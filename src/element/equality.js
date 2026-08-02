@@ -3,9 +3,9 @@
 import { Element, breakPointUtilities } from "occam-languages";
 
 import { define } from "../elements";
-import {all, exists} from "../utilities/continuation";
 import { equateTerms } from "../process/equate";
 import { instantiate } from "../utilities/context";
+import { all, exists } from "../utilities/continuation";
 import { instantiateEquality } from "../process/instantiate";
 import { equalityFromStatementNode } from "../utilities/element";
 import { equalityAssignmentFromEquality, leftVariableAssignmentFromEquality, rightVariableAssignmentFromEquality } from "../process/assign";
@@ -13,11 +13,16 @@ import { equalityAssignmentFromEquality, leftVariableAssignmentFromEquality, rig
 const { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Equality extends Element {
-  constructor(context, string, node, breakPoint, leftTerm, rightTerm) {
+  constructor(context, string, node, breakPoint, negated, leftTerm, rightTerm) {
     super(context, string, node, breakPoint);
 
+    this.negated = negated;
     this.leftTerm = leftTerm;
     this.rightTerm = rightTerm;
+  }
+
+  isNegated() {
+    return this.negated;
   }
 
   getLeftTerm() {
@@ -83,14 +88,6 @@ export default define(class Equality extends Element {
     return equalityNodeMatches;
   }
 
-  isReflexive() {
-    const leftTermString = this.leftTerm.getString(),
-          rightTermString = this.rightTerm.getString(),
-          reflexive = (leftTermString === rightTermString);
-
-    return reflexive;
-  }
-
   isEqualTo(equality) {
     const equalityNode = equality.getNode(),
           equalityNodeMatches = this.matchEqualityNode(equalityNode),
@@ -99,16 +96,18 @@ export default define(class Equality extends Element {
     return equalTo;
   }
 
-  isEqual(context) {
-    let equal = false;
+  isReflexive() {
+    let reflexive = false;
 
-    const termsEquate = equateTerms(this.leftTerm, this.rightTerm, context);
+    if (!this.negated) {
+      const leftTermEqualToRightTerm = this.leftTerm.isEqualTo(this.rightTerm);
 
-    if (termsEquate) {
-      equal = true;
+      if (leftTermEqualToRightTerm) {
+        reflexive = true;
+      }
     }
 
-    return equal;
+    return reflexive;
   }
 
   findEquality(context) {
@@ -238,7 +237,11 @@ export default define(class Equality extends Element {
 
       context.trace(`Validating the '${equalityString}' derived equality...`);
 
-      validatesWhenDerived = continuation(context);
+      const termsEquate = equateTerms(this.leftTerm, this.rightTerm, context);
+
+      if ((this.negated && !termsEquate) || (!this.negated && termsEquate)) {
+        validatesWhenDerived = continuation(context);
+      }
 
       if (validatesWhenDerived) {
         context.debug(`...validated the '${equalityString}' derived equality.`);
@@ -250,7 +253,14 @@ export default define(class Equality extends Element {
 
   assign(context) {
     const equality = this,  ///
-          equalityAssignment = equalityAssignmentFromEquality(equality, context),
+          negated = this.isNegated(),
+          reflexive = this.isReflexive();
+
+    if (negated || reflexive) {
+      return;
+    }
+
+    const equalityAssignment = equalityAssignmentFromEquality(equality, context),
           leftVariableAssignment = leftVariableAssignmentFromEquality(equality, context),
           rightVariableAssignment = rightVariableAssignmentFromEquality(equality, context);
 
@@ -288,12 +298,13 @@ export default define(class Equality extends Element {
             equalityNode = instantiateEquality(string, context),
             node = equalityNode,  ///
             breakPoint = breakPointFromJSON(json),
+            negated = negatedFromEqualityNode(equalityNode, context),
             leftTerm = leftTermFromEqualityNode(equalityNode, context),
             rightTerm = rightTermFromEqualityNode(equalityNode, context);
 
       context = null;
 
-      const equality = new Equality(context, string, node, breakPoint, leftTerm, rightTerm);
+      const equality = new Equality(context, string, node, breakPoint, negated, leftTerm, rightTerm);
 
       return equality;
     }, context);
@@ -306,6 +317,12 @@ export default define(class Equality extends Element {
     return equality;
   }
 });
+
+function negatedFromEqualityNode(equalityNode, context) {
+  const negated = context.isNegated();
+
+  return negated;
+}
 
 function leftTermFromEqualityNode(equalityNode, context) {
   const leftTermNode = equalityNode.getLeftTermNode(),

@@ -4,7 +4,7 @@ import { arrayUtilities } from "necessary";
 
 import Context from "../context";
 
-import { mergeEquivalences, equivalencesFromEquality, separateGroundedTermsAndDefinedVariables } from "../utilities/equivalences";
+import { mergeEquivalences, separateGroundedTermsAndDefinedVariables } from "../utilities/equivalences";
 
 const { last, clear } = arrayUtilities;
 
@@ -73,6 +73,10 @@ class BoundedContext extends Context {
     return factOrSubproofs;
   }
 
+  setEquivalences(equivalences) {
+    this.equivalences = equivalences;
+  }
+
   getFacts() {
     const factOrSubproofs = this.getFactOrSubproofs(),
           facts = factOrSubproofs.filter((factOrSubproof) => {
@@ -124,25 +128,6 @@ class BoundedContext extends Context {
     }
 
     return metaLevel;
-  }
-
-  addEquality(equality) {
-    const context = this, ///
-          equalityString = equality.getString();
-
-    context.trace(`Adding the '${equalityString}' equality to the bounded context...`);
-
-    const equalityRelfexive = equality.isReflexive();
-
-    if (!equalityRelfexive) {
-      const equivalences = equivalencesFromEquality(equality, context);
-
-      this.equivalences = mergeEquivalences(this.equivalences, equivalences, context);
-
-      context.debug(`...added the '${equalityString}' equality to the bounded context.`);
-    } else {
-      context.debug(`The reflexive '${equalityString}' equality has not been added to the bounded context.`);
-    }
   }
 
   addAssignment(assignment) {
