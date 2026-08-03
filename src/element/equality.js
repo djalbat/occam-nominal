@@ -161,9 +161,11 @@ export default define(class Equality extends Element {
 
         const leftTermType = leftTerm.getType(),
               rightTermType = rightTerm.getType(),
+              leftTermTypeBaseType = leftTermType.isBaseType(),
+              rightTermTypeBaseType = rightTermType.isBaseType(),
               leftTermTypeJoinedToRightTermType = leftTermType.isJoinedTo(rightTermType);
 
-        if (leftTermTypeJoinedToRightTermType) {
+        if (leftTermTypeBaseType || rightTermTypeBaseType || leftTermTypeJoinedToRightTermType) {
           this.leftTerm = leftTerm;
 
           this.rightTerm = rightTerm;

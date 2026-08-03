@@ -6,6 +6,7 @@ import { Element, breakPointUtilities } from "occam-languages";
 import { define } from "../elements";
 import { instantiate } from "../utilities/context";
 import { instantiateType } from "../process/instantiate";
+import { BASE_TYPE_SYMBOL } from "../constants";
 import { nameFromTypeNode } from "../utilities/element";
 import { baseTypeFromNothing } from "../utilities/type";
 import { propertiesFromJSON,
@@ -16,7 +17,6 @@ import { propertiesFromJSON,
          superTypesToSuperTypesJSON,
          propertiesToPropertiesJSON,
          provisionalToProvisionalJSON } from "../utilities/json";
-import {BASE_TYPE_SYMBOL} from "../constants";
 
 const { push, first, intersection } = arrayUtilities,
       { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
