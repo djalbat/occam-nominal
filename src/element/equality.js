@@ -52,25 +52,6 @@ export default define(class Equality extends Element {
     return rightTermNode;
   }
 
-  getType() {
-    let type;
-
-    const leftTermType = this.leftTerm.getType(),
-          rightTermType = this.rightTerm.getType(),
-          leftTermTypeEqualToOrSubTypeOfRightTermType = leftTermType.isEqualToOrSubTypeOf(rightTermType),
-          rightTermTypeEqualToOrSubTypeOfLeftTermType = rightTermType.isEqualToOrSubTypeOf(leftTermType);
-
-    if (leftTermTypeEqualToOrSubTypeOfRightTermType) {
-      type = leftTermType;  ///
-    }
-
-    if (rightTermTypeEqualToOrSubTypeOfLeftTermType) {
-      type = rightTermType; ///
-    }
-
-    return type;
-  }
-
   getTerms() {
     const terms = [
       this.leftTerm,
@@ -180,9 +161,9 @@ export default define(class Equality extends Element {
 
         const leftTermType = leftTerm.getType(),
               rightTermType = rightTerm.getType(),
-              leftTermTypeEqualToSubTypeOrSuperTypeOfRightTermType = leftTermType.isEqualToSubTypeOrSuperTypeOf(rightTermType);
+              leftTermTypeJoinedToRightTermType = leftTermType.isJoinedTo(rightTermType);
 
-        if (leftTermTypeEqualToSubTypeOrSuperTypeOfRightTermType) {
+        if (leftTermTypeJoinedToRightTermType) {
           this.leftTerm = leftTerm;
 
           this.rightTerm = rightTerm;

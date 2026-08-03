@@ -13,27 +13,14 @@ import { equivalenceFromEquivalenceNode } from "../utilities/element";
 const { compress } = arrayUtilities;
 
 export default define(class Equivalence extends Element {
-  constructor(context, string, node, breakPoint, type, terms) {
+  constructor(context, string, node, breakPoint, terms) {
     super(context, string, node, breakPoint);
 
-    this.type = type;
     this.terms = terms;
-  }
-
-  getType() {
-    return this.type;
   }
 
   getTerms() {
     return this.terms;
-  }
-
-  setType(type) {
-    this.type = type;
-  }
-
-  setTerms(terms) {
-    this.terms = terms;
   }
 
   getEquivalenceNode() {
@@ -192,9 +179,9 @@ export default define(class Equivalence extends Element {
     ];
 
     compress(combinedTerms, (combinedTermA, combinedTermB) => {
-      const combinedTermEqualToToCombinedTermB = combinedTermA.isEqualTo(combinedTermB);
+      const combinedTermEqualToCombinedTermB = combinedTermA.isEqualTo(combinedTermB);
 
-      if (!combinedTermEqualToToCombinedTermB) {
+      if (!combinedTermEqualToCombinedTermB) {
         return true;
       }
     });
@@ -203,30 +190,21 @@ export default define(class Equivalence extends Element {
   }
 
   mergedWith(equivalence, context) {
-    let type;
-
-    type = equivalence.getType();
-
-    const types = [
-            this.type,
-            type
-          ],
-          terms = equivalence.getTerms(),
-          combinedType = combinedTypeFromTypes(types),
-          combinedTerms = this.combineTerms(terms);
-
-    type = combinedType;  ///
-
     instantiate((context) => {
-      const terms = combinedTerms,  ///
-            equivalenceString = equivalenceStringFromTerms(terms),
+      let terms;
+
+      terms = equivalence.getTerms();
+
+      const combinedTerms = this.combineTerms(terms);
+
+      terms = combinedTerms;  ///
+
+      const equivalenceString = equivalenceStringFromTerms(terms),
             string = equivalenceString,  ///
             equivalenceNode = instantiateEquivalence(string, context);
 
       equivalence = equivalenceFromEquivalenceNode(equivalenceNode, context);
     }, context);
-
-    equivalence.setType(type);
 
     return equivalence;
   }
@@ -235,8 +213,6 @@ export default define(class Equivalence extends Element {
 
   static fromEquality(equality, context) {
     let equivalence;
-
-    const type = equality.getType();
 
     instantiate((context) => {
       const terms = equality.getTerms(),
@@ -247,26 +223,6 @@ export default define(class Equivalence extends Element {
       equivalence = equivalenceFromEquivalenceNode(equivalenceNode, context);
     }, context);
 
-    equivalence.setType(type);
-
     return equivalence;
   }
 });
-
-function combinedTypeFromTypes(types) {
-  const combinedType = types.reduce((combinedType, type) => {
-    if (combinedType === null) {
-      combinedType = type;  ///
-    } else {
-      const typeSubTypeOfCombinedType = type.isSubTypeOf(combinedType);
-
-      if (typeSubTypeOfCombinedType) {
-        combinedType = type;  ///
-      }
-    }
-
-    return combinedType;
-  }, null);
-
-  return combinedType;
-}

@@ -16,8 +16,9 @@ import { propertiesFromJSON,
          superTypesToSuperTypesJSON,
          propertiesToPropertiesJSON,
          provisionalToProvisionalJSON } from "../utilities/json";
+import {BASE_TYPE_SYMBOL} from "../constants";
 
-const { push, first } = arrayUtilities,
+const { push, first, intersection } = arrayUtilities,
       { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Type extends Element {
@@ -100,11 +101,40 @@ export default define(class Type extends Element {
     this.provisional = provisional;
   }
 
+  isBaseType() {
+    let baseType = false;
+
+    if (this.name === BASE_TYPE_SYMBOL) {
+      baseType = true;
+    }
+
+    return baseType;
+  }
+
   isEstablished(includeSuperTypes = true) {
     const provisional = this.isProvisional(includeSuperTypes),
           established = !provisional;
 
     return established;
+  }
+
+  retrieveAncestorTypes(ancestorTypes = []) {
+    const baseType = this.isBaseType();
+
+    if (!baseType) {
+      const ancestorType = this,  ///
+            ancestorTypesIncludeAncestorType = ancestorTypes.includes(ancestorType);
+
+      if (!ancestorTypesIncludeAncestorType) {
+        ancestorTypes.push(ancestorType);
+
+        this.superTypes.forEach((superType) => {
+          superType.retrieveAncestorTypes(ancestorTypes);
+        });
+      }
+    }
+
+    return ancestorTypes;
   }
 
   isCotype() {
@@ -176,6 +206,27 @@ export default define(class Type extends Element {
     }
 
     return refined;
+  }
+
+  isJoinedTo(type) {
+    let joinedTo = false;
+
+    const ancestorTypes = this.retrieveAncestorTypes(),
+          typeAncestorTypes = type.retrieveAncestorTypes(),
+          intersectingAncestorTypes = intersection(ancestorTypes, typeAncestorTypes, (ancestorType, typeAncestorType) => {
+            const ancestorTypeEqualToATypencestorType = ancestorType.isEqualTo(typeAncestorType);
+
+            if (ancestorTypeEqualToATypencestorType) {
+              return true;
+            }
+          }),
+          intersectingAncestorTypesLength = intersectingAncestorTypes.length;
+
+    if (intersectingAncestorTypesLength > 0) {
+      joinedTo = true;
+    }
+
+    return joinedTo;
   }
 
   isEqualTo(type) {

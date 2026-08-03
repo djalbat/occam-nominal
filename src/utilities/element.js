@@ -572,14 +572,13 @@ export function equivalenceFromEquivalenceNode(equivalenceNode, context) {
   const { Equivalence } = elements,
         node = equivalenceNode, ///
         breakPoint = null,
-        type = typeFromEquivalenceNode(equivalenceNode, context),
         terms = termsFromEquivalenceNode(equivalenceNode, context),
         equivalenceString = equivalenceStringFromTerms(terms),
         string = equivalenceString; ///
 
   context = null;
 
-  const equivalence = new Equivalence(context, string, node, breakPoint, type, terms);
+  const equivalence = new Equivalence(context, string, node, breakPoint, terms);
 
   return equivalence;
 }
@@ -1333,12 +1332,6 @@ export function termFromConstructorNode(ocnstructorNode, context) {
 }
 
 export function typeFromConstructorNode(ocnstructorNode, context) {
-  const type = null;
-
-  return type;
-}
-
-export function typeFromEquivalenceNode(equivalenceNode, context) {
   const type = null;
 
   return type;

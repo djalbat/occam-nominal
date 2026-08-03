@@ -25,17 +25,21 @@ export function equalityAssignmentFromEquality(equality, context) {
 
 export function leftVariableAssignmentFromEquality(equality, context) {
   const leftTerm = equality.getLeftTerm(),
-        type = equality.getType(),
+        rightTerm = equality.getRightTerm(),
+        rightTermType = rightTerm.getType(),
         term = leftTerm,  ///
+        type = rightTermType, ///
         leftVariableAssignment = variableAssignmentFromTermAndType(term, type, context);
 
   return leftVariableAssignment;
 }
 
 export function rightVariableAssignmentFromEquality(equality, context) {
-  const rightTerm = equality.getRightTerm(),
-        type = equality.getType(),
+  const leftTerm = equality.getLeftTerm(),
+        rightTerm = equality.getRightTerm(),
+        leftTermType = leftTerm.getType(),
         term = rightTerm, ///
+        type = leftTermType,  ///
         rightVariableAssignment = variableAssignmentFromTermAndType(term, type, context);
 
   return rightVariableAssignment;
