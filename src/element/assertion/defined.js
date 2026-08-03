@@ -78,11 +78,15 @@ export default define(class DefinedAssertion extends Assertion {
           validateWhenStated,
           validateWhenDerived
         ], context, (context) => {
+          let validates;
+
           const assertion = definedAssertion;  ///
 
           context.addAssertion(assertion);
 
-          return continuation(definedAssertion, context);
+          validates = continuation(definedAssertion, context);
+
+          return validates;
         });
 
         return validates;
@@ -108,9 +112,13 @@ export default define(class DefinedAssertion extends Assertion {
 
       if (termSingular) {
         termValidates = this.term.validate(context, (term, context) => {
+          let validates;
+
           this.term = term;
 
-          return continuation(context);
+          validates = continuation(context);
+
+          return validates;
         });
       } else {
         const termString = this.term.getString() ///
@@ -142,9 +150,13 @@ export default define(class DefinedAssertion extends Assertion {
 
       if (frameSingular) {
         frameValidates = this.frame.validate(context, (frame, context) => {
+          let validates;
+
           this.frame = frame;
 
-          return continuation(context);
+          validates = continuation(context);
+
+          return validates;
         });
       } else {
         const frameString = this.frame.getString() ///

@@ -159,9 +159,13 @@ export default define(class Reference extends Element {
     context.trace(`Validating the '${referenceString}' reference's metavariable...'`);
 
     metavariableValidates = this.metavariable.validate(context, (metavariable, context) => {
+      let validates;
+
       this.metavariable = metavariable;
 
-      return continuation(context);
+      validates = continuation(context);
+
+      return validates;
     });
 
     if (metavariableValidates) {

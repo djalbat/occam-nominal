@@ -88,11 +88,15 @@ export default define(class ContainedAssertion extends Assertion {
           validateWhenStated,
           validateWhenDerived
         ], context, (context) => {
+          let validates;
+
           const assertion = containedAssertion;  ///
 
           context.addAssertion(assertion);
 
-          return continuation(containedAssertion, context);
+          validates = continuation(containedAssertion, context);
+
+          return validates;
         });
 
         return validates;
@@ -118,9 +122,13 @@ export default define(class ContainedAssertion extends Assertion {
 
       if (termSingular) {
         termValidates = this.term.validate(context, (term, context) => {
+          let validates;
+
           this.term = term;
 
-          return continuation(context);
+          validates = continuation(context);
+
+          return validates;
         });
       } else {
         const termString = this.term.getString() ///
@@ -152,9 +160,13 @@ export default define(class ContainedAssertion extends Assertion {
 
       if (frameSingular) {
         frameValidates = this.frame.validate(context, (frame, context) => {
+          let validates;
+
           this.frame = frame;
 
-          return continuation(context);
+          validates = continuation(context);
+
+          return validates;
         });
       } else {
         const frameString = this.frame.getString() ///
@@ -186,9 +198,13 @@ export default define(class ContainedAssertion extends Assertion {
 
       if (statementSingular) {
         statementValidates = this.statement.validate(context, (statement, context) => {
+          let validates;
+
           this.statement = statement;
 
-          return continuation(context);
+          validates = continuation(context);
+
+          return validates;
         });
       } else {
         const statementString = this.statement.getString() ///

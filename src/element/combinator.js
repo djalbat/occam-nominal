@@ -66,9 +66,13 @@ export default define(class Combinator extends Element {
     validates = exists([
       validateStatementAsCombinator
     ], context, (context) => {
+      let validates;
+
       const combinator = this;
 
-      return continuation(combinator, context);
+      validates = continuation(combinator, context);
+
+      return validates;
     });
 
     if (validates) {

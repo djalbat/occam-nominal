@@ -184,9 +184,13 @@ export default define(class Judgement extends Element {
           validateWhenStated,
           validateWhenDerived
         ], context, (context) => {
+          let validates;
+
           context.addJudgement(judgement);
 
-          return continuation(judgement, context);
+          validates = continuation(judgement, context);
+
+          return validates;
         });
 
         return validates;
@@ -208,9 +212,13 @@ export default define(class Judgement extends Element {
     context.trace(`Validating the '${judgementString}' judgement's goal...`);
 
     goalValidates = this.goal.validate(context, (goal, context) => {
+      let validates;
+
       this.goal = goal;
 
-      return continuation(context);
+      validates = continuation(context);
+
+      return validates;
     });
 
     if (goalValidates) {
@@ -228,9 +236,13 @@ export default define(class Judgement extends Element {
     context.trace(`Validating the '${judgementString}' judgement's frame...`);
 
     frameValidates = this.frame.validate(context, (frame, context) => {
+      let validates;
+
       this.frame = frame;
 
-      return continuation(context);
+      validates = continuation(context);
+
+      return validates;
     });
 
     if (frameValidates) {

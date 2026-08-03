@@ -123,9 +123,13 @@ export default define(class Label extends Element {
     context.trace(`Validating the '${labelString}' label's metavariable...`);
 
     metavariableValidates = this.metavariable.validate(context, (metavariable, context) => {
+      let validates;
+
       this.metavariable = metavariable;
 
-      return continuation(context);
+      validates = continuation(context);
+
+      return validates;
     });
 
     if (metavariableValidates) {

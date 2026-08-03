@@ -96,7 +96,11 @@ export default define(class SubproofAssertion extends Assertion {
     descend((context) => {
       statementsValidate = every(this.statements, (statement, context, continuation) => {
         const statementValidates = statement.validate(context, (statement, context) => {
-          return continuation(context);
+          let validates;
+
+          validates = continuation(context);
+
+          return validates;
         });
 
         return statementValidates;

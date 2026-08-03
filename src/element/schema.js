@@ -4,7 +4,6 @@ import { Element, breakPointUtilities, continuationUtilities } from "occam-langu
 
 import elements from "../elements";
 
-import { all } from "../utilities/continuation";
 import { define } from "../elements";
 import { reconcile, encapsulate } from "../utilities/context";
 import { schemaStringFromLabelSuppositionsAndDeduction } from "../utilities/string";
@@ -17,8 +16,8 @@ import { labelFromJSON,
          constraintsToConstraintsJSON,
          suppositionsToSuppositionsJSON } from "../utilities/json";
 
-const { asynchornousEvery, asynchronousForwardsEvery } = continuationUtilities,
-      { breakable, breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
+const { breakable, breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities,
+      { asynchronousAll, asynchornousEvery, asynchronousForwardsEvery } = continuationUtilities;
 
 export default define(class Schema extends Element {
   constructor(context, string, node, breakPoint, label, suppositions, deduction, proof, constraints) {
@@ -78,12 +77,12 @@ export default define(class Schema extends Element {
     context.trace(`Verifying the '${schemaString}' schema...`);
 
     return encapsulate((context) => {
-      const verifyLabel = this.verifyLabel.bind(this),
-            verifyProof = this.verifyProof.bind(this),
+      const verifyProof = this.verifyProof.bind(this),
+            verifyLabel = this.verifyLabel.bind(this),
             verifyDeduction = this.verifyDeduction.bind(this),
             verifySuppositions = this.verifySuppositions.bind(this);
 
-      return all([
+      return asynchronousAll([
         verifyLabel,
         verifySuppositions,
         verifyDeduction,
@@ -97,14 +96,14 @@ export default define(class Schema extends Element {
           context.debug(`...verified the '${schemaString}' schema.`);
         }
 
-        return continuation(verifies);
+        return continuation(verifies, context);
       });
     }, this.constraints, context);
   });
 
   verifyLabel(context, continuation) {
-    const schemaString = this.getString(),  ///
-          labelString = this.label.getString();
+    const labelString = this.label.getString(),
+          schemaString = this.getString(); ///
 
     context.trace(`Verifying the '${schemaString}' schema's '${labelString}' label...`);
 
@@ -113,11 +112,17 @@ export default define(class Schema extends Element {
         context.debug(`...verified the '${schemaString}' schema's '${labelString}' label.`);
       }
 
-      return continuation(labelVerifies);
+      return continuation(labelVerifies, context);
     });
   }
 
   verifyProof(context, continuation) {
+    if (this.proof === null) {
+      const proofVerifies = true; ///
+
+      return continuation(proofVerifies, context);
+    }
+
     const schemaString = this.getString();  ///
 
     context.trace(`Verifying the '${schemaString}' schema's proof...`);
@@ -129,43 +134,51 @@ export default define(class Schema extends Element {
         context.debug(`...verified the '${schemaString}' schema's proof.`);
       }
 
-      return continuation(proofVerifies);
+      return continuation(proofVerifies, context);
     });
   }
 
   verifyDeduction(context, continuation) {
-    const schemaString = this.getString(),  //
+    const schemaString = this.getString(), ///
           deductionString = this.deduction.getString();
 
-    context.trace(`Verifying the '${schemaString}' top level meta assertion's '${deductionString}' deduction...`);
+    context.trace(`Verifying the '${schemaString}' schema's '${deductionString}' deduction...`);
 
     return this.deduction.verify(context, (deductionVerifies) => {
       if (deductionVerifies) {
-        context.debug(`...verified the '${schemaString}' top level meta assertion's '${deductionString}' deduction.`);
+        context.debug(`...verified the '${schemaString}' schema's '${deductionString}' deduction.`);
       }
 
-      return continuation(deductionVerifies);
+      return continuation(deductionVerifies, context);
     });
   }
 
   verifySuppositions(context, continuation) {
+    const suppositionsLength = this.suppositions.length;
+
+    if (suppositionsLength === 0) {
+      const suppositionsVerify = true;  ///
+
+      return continuation(suppositionsVerify, context);
+    }
+
     const schemaString = this.getString();  ///
 
     context.trace(`Verifying the '${schemaString}' schema's suppositions...`);
 
-    return asynchronousForwardsEvery(this.suppositions, (supposition, continuation) => {
-      return this.verifySupposition(supposition, context, continuation);
-    }, (suppositionsVerify) => {
+    const verifySupposition = this.verifySupposition.bind(this);
+
+    return asynchronousForwardsEvery(this.suppositions, verifySupposition, context, (suppositionsVerify) => {
       if (suppositionsVerify) {
         context.debug(`...verified the '${schemaString}' schema's suppositions.`);
       }
 
-      return continuation(suppositionsVerify);
+      return continuation(suppositionsVerify, context);
     });
   }
 
   verifySupposition(supposition, context, continuation) {
-    const schemaString = this.getString(),  ///
+    const schemaString = this.getString(), ///
           suppositionString = supposition.getString();
 
     context.trace(`Verifying the '${schemaString}' schema's '${suppositionString}' supposition...`);

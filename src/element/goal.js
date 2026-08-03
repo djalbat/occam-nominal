@@ -77,20 +77,20 @@ export default define(class Goal extends Element {
   validate(context, continuation) {
     let validates;
 
-    const goalnString = this.getString();  ///
+    const goalString = this.getString();  ///
 
-    context.trace(`Validating the '${goalnString}' goal...`);
+    context.trace(`Validating the '${goalString}' goal...`);
 
-    let goaln;
+    let goal;
 
-    const goal = this.findGoal(context);
+    goal = this.findGoal(context);
 
     if (goal !== null) {
-      context.debug(`The '${goalnString}' goal is already present.`);
+      context.debug(`The '${goalString}' goal is already present.`);
 
-      validates = continuation(goaln, context);
+      validates = continuation(goal, context);
     } else {
-      goaln = this;
+      goal = this;
 
       const validateReference = this.validateReference.bind(this),
             validateStatement = this.validateStatement.bind(this);
@@ -108,11 +108,13 @@ export default define(class Goal extends Element {
           validateWhenStated,
           validateWhenDerived
         ], context, (context) => {
-          const goal = goaln;  ///
+          let validates;
 
           context.addGoal(goal);
 
-          return continuation(goaln, context);
+          validates = continuation(goal, context);
+
+          return validates;
         });
 
         return validates;
@@ -120,7 +122,7 @@ export default define(class Goal extends Element {
     }
 
     if (validates) {
-      context.debug(`...validated the '${goalnString}' goal.`);
+      context.debug(`...validated the '${goalString}' goal.`);
     }
 
     return validates;
@@ -134,9 +136,13 @@ export default define(class Goal extends Element {
     context.trace(`Validating the '${goalString}' goal's reference...`);
 
     referenceValidates = this.reference.validate(context, (reference, context) => {
+      let validates;
+
       this.reference = reference;
 
-      return continuation(context);
+      validates = continuation(context);
+
+      return validates;
     });
 
     if (referenceValidates) {
@@ -154,9 +160,13 @@ export default define(class Goal extends Element {
     context.trace(`Validating the '${goalString}' goal's statement...`);
 
     statementValidates = this.statement.validate(context, (statement, context) => {
+      let validates;
+
       this.statement = statement;
 
-      return continuation(context);
+      validates = continuation(context);
+
+      return validates;
     });
 
     if (statementValidates) {

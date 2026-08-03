@@ -200,9 +200,13 @@ export default define(class Term extends Element {
       term = this;  ///
 
       validates = exists(validateTerms, term, context, (term, context) => {
+        let validates;
+
         context.addTerm(term);
 
-        return continuation(term, context);
+        validates = continuation(term, context);
+
+        return validates;
       });
     }
 

@@ -186,9 +186,13 @@ export default define(class Step extends Fact {
       validateReference,
       validateSignatureAssertion
     ], context, (context) => {
+      let validates;
+
       const step = this;  ///
 
-      return continuation(step, context);
+      validates = continuation(step, context);
+
+      return validates;
     });
 
     if (validates) {
@@ -208,7 +212,11 @@ export default define(class Step extends Fact {
     const statement = this.getStatement();
 
     statementValidates = statement.validate(context, (statement, context) => {
-      return continuation(context);
+      let validates;
+
+      validates = continuation(context);
+
+      return validates;
     });
 
     if (statementValidates) {
@@ -228,9 +236,13 @@ export default define(class Step extends Fact {
       context.trace(`Validating the '${stepString}' step's '${referenceString}' reference...`);
 
       referenceValidates = this.reference.validate(context, (reference, context) => {
+        let validates;
+
         this.reference = reference;
 
-        return continuation(context);
+        validates = continuation(context);
+
+        return validates;
       });
 
       if (referenceValidates) {
@@ -253,9 +265,13 @@ export default define(class Step extends Fact {
       context.trace(`Validating the '${stepString}' step's '${signatureAssertionString}' signature assertion...`);
 
       signatureAssertionValidates =this.signatureAssertion.validate(context, (signatureAssertion, contwext) => {
+        let validates;
+
         this.signatureAssertion = signatureAssertion;
 
-        return continuation(context);
+        validates = continuation(context);
+
+        return validates;
       });
 
       if (signatureAssertionValidates) {

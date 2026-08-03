@@ -203,6 +203,8 @@ export default define(class Metavariable extends Element {
         validateType,
         validateTerm
       ], strict, context, (strict, context) => {
+        let validates;
+
         const metavariableName = this.getMetavariableName(),  ///
               declaredMetavariable = context.findDeclaredMetavariableByMetavariableName(metavariableName);
 
@@ -210,7 +212,9 @@ export default define(class Metavariable extends Element {
           context.addMetavariable(metavariable);
         }
 
-        return continuation(metavariable, context);
+        validates = continuation(metavariable, context);
+
+        return validates;
       });
     }
 
@@ -295,25 +299,39 @@ export default define(class Metavariable extends Element {
 
       if (declaredMetavariable === null) {
         if (strict) {
-          termValidates = false;
+          termValidates = continuation(strict, context);
         } else {
           termValidates = this.term.validate(context, (term, context) => {
+            let validates;
+
             this.term = term;
 
-            return continuation(strict, context);
+            validates = continuation(strict, context);
+
+            return validates;
           });
         }
       } else {
         const type = declaredMetavariable.getType();
 
         if (type === null) {
-          termValidates = false;
+          termValidates = continuation(strict, context);
         } else {
-          termValidates = this.term.validateGivenType(type, context, (term, context) => {
+          termValidates = false;
+
+          const termValidatesGivenType = this.term.validateGivenType(type, context, (term, context) => {
+            let validatesGivenType;
+
             this.term = term;
 
-            return continuation(strict, context);
+            validatesGivenType = continuation(strict, context);
+
+            return validatesGivenType;
           });
+
+          if (termValidatesGivenType) {
+            termValidates = true;
+          }
         }
       }
 

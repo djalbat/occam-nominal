@@ -216,9 +216,13 @@ export default define(class Statement extends Element {
       statement = this; ///
 
       validates = exists(validateStatements, statement, context, (statement, context) => {
+        let validates;
+
         context.addStatement(statement);
 
-        return continuation(statement, context);
+        validates = continuation(statement, context);
+
+        return validates;
       });
     }
 

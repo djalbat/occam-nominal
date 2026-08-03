@@ -72,13 +72,17 @@ export default define(class TypeAssertion extends Assertion {
           validateWhenStated,
           validateWhenDerived
         ], context, (context) => {
+          let validates;
+
           const assertion = typeAssertion;  ///
 
           this.assign(context);
 
           context.addAssertion(assertion);
 
-          return continuation(typeAssertion, context);
+          validates = continuation(typeAssertion, context);
+
+          return validates;
         });
 
         return validates;

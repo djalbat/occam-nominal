@@ -171,9 +171,13 @@ export default define(class Frame extends Element {
           validateWhenStated,
           validateWhenDerived
         ], context, (context) => {
+          let validates;
+
           context.addFrame(frame);
 
-          return continuation(frame, context);
+          validates = continuation(frame, context);
+
+          return validates;
         });
 
         return validates;
@@ -196,9 +200,13 @@ export default define(class Frame extends Element {
     context.trace(`Validating the '${frameString}' frame's '${assumptionString}' assumption...`);
 
     assumptionValidates = assumption.validate(context, (assumption, context) => {
+      let validates;
+
       assumptions.push(assumption);
 
-      return continuation(context);
+      validates = continuation(context);
+
+      return validates;
     });
 
     if (assumptionValidates) {
@@ -243,9 +251,13 @@ export default define(class Frame extends Element {
     context.trace(`Validating the '${frameString}' frame's metavariable...`);
 
     metavariableValidates = this.metavariable.validate(context, (metavariable, context) => {
+      let validates;
+
       this.metavariable = metavariable;
 
-      return continuation(context);
+      validates = continuation(context);
+
+      return validates;
     });
 
     if (metavariableValidates) {

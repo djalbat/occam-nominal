@@ -130,11 +130,15 @@ export default define(class Equality extends Element {
           validateWhenStated,
           validateWhenDerived
         ], context, (context) => {
+          let validates;
+
           this.assign(context);
 
           context.addEquality(equality);
 
-          return continuation(equality, context);
+          validates = continuation(equality, context);
+
+          return validates;
         });
 
         return validates;

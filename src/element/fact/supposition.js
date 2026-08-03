@@ -119,9 +119,13 @@ export default define(class Supposition extends Fact {
       validateStatement,
       validateProcedureCall
     ], context, (context) => {
+      let validates;
+
       const supposition = this;  ///
 
-      return continuation(supposition, context);
+      validates = continuation(supposition, context);
+
+      return validates;
     });
 
     if (validates) {
@@ -142,7 +146,11 @@ export default define(class Supposition extends Fact {
       context.trace(`Validating the '${suppositionString}' supposition's statement...`);
 
       statementValidates = statement.validate(context, (statement, context) => {
-        return continuation(context);
+        let validates;
+
+        validates = continuation(context);
+
+        return validates;
       });
 
       if (statementValidates) {
@@ -164,7 +172,11 @@ export default define(class Supposition extends Fact {
       context.trace(`Validating the '${suppositionString}' supposition's procedure call...`);
 
       procedureCallValidates = procedureCall.validate(context, (procedureCall, context) => {
-        return continuation(context);
+        let validates;
+
+        validates = continuation(context);
+
+        return validates;
       });
 
       if (procedureCallValidates) {

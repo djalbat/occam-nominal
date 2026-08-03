@@ -113,9 +113,13 @@ export default define(class Constructor extends Element {
       validateTermAsVariable,
       validateTermAsConstructor
     ], context, (context) => {
+      let validates;
+
       const constructor = this;
 
-      return continuation(constructor, context);
+      validates = continuation(constructor, context);
+
+      return validates;
     });
 
     if (validates) {
