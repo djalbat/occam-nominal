@@ -15,16 +15,16 @@ import { statementSubstitutionStringFromStatementAndMetavariable, statementSubst
 const { breakPointFromJSON } = breakPointUtilities;
 
 export default define(class StatementSubstitution extends Substitution {
-  constructor(contexts, string, node, breakPoint, resolved, targetStatement, replacementStatement) {
+  constructor(contexts, string, node, breakPoint, solved, targetStatement, replacementStatement) {
     super(contexts, string, node, breakPoint);
 
-    this.resolved = resolved;
+    this.solved = solved;
     this.targetStatement = targetStatement;
     this.replacementStatement = replacementStatement;
   }
 
-  isResolved() {
-    return this.resolved;
+  isSolved() {
+    return this.solved;
   }
 
   getTargetStatement() {
@@ -282,7 +282,7 @@ export default define(class StatementSubstitution extends Substitution {
     });
   }
 
-  resolve(context, continuation) {
+  solve(context, continuation) {
     const metavariableNode = this.getMetavariableNode(),
           simpleDerivedSubstitution = context.findSimpleDerivedSubstitutionByMetavariableNode(metavariableNode);
 
@@ -317,11 +317,11 @@ export default define(class StatementSubstitution extends Substitution {
 
           complexSubstitutionResvoles = true;
 
-          this.resolved = true;
+          this.solved = true;
         }
 
         if (complexSubstitutionResvoles) {
-          context.debug(`...resolved the '${complexSubstitutionString}' complex substitution.`);
+          context.debug(`...solved the '${complexSubstitutionString}' complex substitution.`);
         }
 
         return continuation();
@@ -348,10 +348,10 @@ export default define(class StatementSubstitution extends Substitution {
                 specificContext
               ],
               breakPoint = breakPointFromJSON(json),
-              resolved = resolvedFromStatementSubstitutionNode(statementSubstitutionNode, generalContext, specificContext),
+              solved = solvedFromStatementSubstitutionNode(statementSubstitutionNode, generalContext, specificContext),
               targetStatement = targetStatementFromStatementSubstitutionNode(statementSubstitutionNode, generalContext),
               replacementStatement = replacementStatementFromStatementSubstitutionNode(statementSubstitutionNode, specificContext),
-              statementSubstitutionn = new StatementSubstitution(contexts, string, node, breakPoint, resolved, targetStatement, replacementStatement);
+              statementSubstitutionn = new StatementSubstitution(contexts, string, node, breakPoint, solved, targetStatement, replacementStatement);
 
         return statementSubstitutionn;
       }, json, context);
@@ -399,10 +399,10 @@ export default define(class StatementSubstitution extends Substitution {
   }
 });
 
-function resolvedFromStatementSubstitutionNode(statementSubstitutionNode, generalContext, specificContext) {
-  const resolved = true;
+function solvedFromStatementSubstitutionNode(statementSubstitutionNode, generalContext, specificContext) {
+  const solved = true;
 
-  return resolved;
+  return solved;
 }
 
 function targetStatementFromStatementSubstitutionNode(statementSubstitutionNode, generalContext) {

@@ -235,9 +235,9 @@ export default define(class Rule extends Element {
         let stepAndFactOrSubproofsUnify = false;
 
         if (factOrSubproofsUnifiesWithPremises) {
-          const derivedSubstitutionsResolved = context.areDerivedSubstitutionsResolved();
+          const derivedSubstitutionsSolved = context.areDerivedSubstitutionsSolved();
 
-          if (derivedSubstitutionsResolved) {
+          if (derivedSubstitutionsSolved) {
             stepAndFactOrSubproofsUnify = true;
           }
         }
@@ -254,7 +254,7 @@ export default define(class Rule extends Element {
       if (factOrSubproof !== null) {
         const factOrSubproofsUnifiesWithPremise = true;
 
-        return context.resolveDerivedSubstitutions(() => {
+        return context.solveDerivedSubstitutions(() => {
           return continuation(factOrSubproofsUnifiesWithPremise);
         });
       }

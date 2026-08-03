@@ -205,10 +205,10 @@ export default define(class Premise extends Fact {
       }
 
       if (procedureCall !== null) {
-        return procedureCall.unifyIndependently(context, (procedureCallResolvedIndependently) => {
+        return procedureCall.unifyIndependently(context, (procedureCallUnifiedIndependently) => {
           let unifiesIndependently = false;
 
-          if (procedureCallResolvedIndependently) {
+          if (procedureCallUnifiedIndependently) {
             unifiesIndependently = true;
           }
 

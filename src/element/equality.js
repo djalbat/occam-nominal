@@ -319,7 +319,7 @@ export default define(class Equality extends Element {
 });
 
 function negatedFromEqualityNode(equalityNode, context) {
-  const negated = context.isNegated();
+  const negated = equalityNode.isNegated();
 
   return negated;
 }

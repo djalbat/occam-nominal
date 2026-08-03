@@ -5,21 +5,21 @@ import SubstitutionNode from "../../node/substitution";
 import { STATEMENT_RULE_NAME } from "../../ruleNames";
 
 export default class StatementSubstitutionNode extends SubstitutionNode {
-  isResolved() {
-    let resolved = true;
+  isSolved() {
+    let solved = true;
 
     const substitutionNode = this.getSubstitutionNode();
 
     if (substitutionNode !== null) {
-      resolved = false;
+      solved = false;
     }
 
-    return resolved;
+    return solved;
   }
 
   getSubstitutionNode() {
     const targetStatementNode = this.getTargetStatementNode(),
-      substitutionNode = targetStatementNode.getSubstitutionNode();
+          substitutionNode = targetStatementNode.getSubstitutionNode();
 
     return substitutionNode;
   }

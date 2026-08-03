@@ -89,7 +89,7 @@ export default class LiminalContext extends Context {
     });
   }
 
-  resolveDerivedSubstitutions(continuation) {
+  solveDerivedSubstitutions(continuation) {
     const context = this, ///
           derivedSubstitutions = this.getDerivedSubstitutions(),
           metavariableNodes = metavariableNodesFromDerivedSubstitutions(derivedSubstitutions);
@@ -99,36 +99,36 @@ export default class LiminalContext extends Context {
 
       return asynchronousForEach(complexDerivedSubstitutions, (complexDerivedSubstitution, continuation) => {
         const derivedSubstitution = complexDerivedSubstitution, ///
-              resolved = derivedSubstitution.isResolved();
+              solved = derivedSubstitution.isSolved();
 
-        if (resolved) {
+        if (solved) {
           return continuation();
         }
 
-        return derivedSubstitution.resolve(context, continuation);
+        return derivedSubstitution.solve(context, continuation);
       }, continuation);
     }, continuation);
   }
 
-  areDerivedSubstitutionsResolved() {
+  areDerivedSubstitutionsSolved() {
     const derivedSubstitutions = this.getDerivedSubstitutions(),
           metavariableNodes = metavariableNodesFromDerivedSubstitutions(derivedSubstitutions),
-          resolved = metavariableNodes.every((metavariableNode) => {
+          solved = metavariableNodes.every((metavariableNode) => {
             const complexDerivedSubstitutions = this.findComplexDerivedSubstitutionsByMetavariableNode(metavariableNode),
-                  complexDerivedSubstitutionsResolved = complexDerivedSubstitutions.every((complexDerivedSubstitution) => {
-                    const complexDerivedSubstitutionResolved = complexDerivedSubstitution.isResolved();
+                  complexDerivedSubstitutionsSolved = complexDerivedSubstitutions.every((complexDerivedSubstitution) => {
+                    const complexDerivedSubstitutionSolved = complexDerivedSubstitution.isSolved();
 
-                    if (complexDerivedSubstitutionResolved) {
+                    if (complexDerivedSubstitutionSolved) {
                       return true;
                     }
                   });
 
-            if (complexDerivedSubstitutionsResolved) {
+            if (complexDerivedSubstitutionsSolved) {
               return true;
             }
           });
 
-    return resolved;
+    return solved;
   }
 
   isEmpty() {

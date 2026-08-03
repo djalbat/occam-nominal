@@ -950,10 +950,10 @@ export function statementSubstitutionFromStatementSubstitutionNode(statementSubs
           specificContext
         ],
         breakPoint = null,
-        resolved = resolvedFromStatementSubstitutionNode(statementSubstitutionNode, generalContext, specificContext),
+        solved = solvedFromStatementSubstitutionNode(statementSubstitutionNode, generalContext, specificContext),
         targetStatement = targetStatementFromStatementSubstitutionNode(statementSubstitutionNode, generalContext),
         replacementStatement = replacementStatementFromStatementSubstitutionNode(statementSubstitutionNode, specificContext),
-        statementSubstitution = new StatementSubstitution(contexts, string, node, breakPoint, resolved, targetStatement, replacementStatement);
+        statementSubstitution = new StatementSubstitution(contexts, string, node, breakPoint, solved, targetStatement, replacementStatement);
 
   return statementSubstitution;
 }
@@ -2161,10 +2161,10 @@ export function generatorFromGeneratorDeclarationNode(generatorDeclarationNode, 
   return generator;
 }
 
-export function resolvedFromStatementSubstitutionNode(statementSubstitutionNode, generalContext, specificContext) {
-  const resolved = statementSubstitutionNode.isResolved();
+export function solvedFromStatementSubstitutionNode(statementSubstitutionNode, generalContext, specificContext) {
+  const solved = statementSubstitutionNode.isSolved();
 
-  return resolved;
+  return solved;
 }
 
 export function provisionalFromVariableDeclarationNode(variableDeclarationNode, context) {
