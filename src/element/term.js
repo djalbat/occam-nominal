@@ -6,10 +6,10 @@ import { Element, breakPointUtilities } from "occam-languages";
 import { define } from "../elements";
 import { exists } from "../utilities/continuation";
 import { instantiate } from "../utilities/context";
+import { validateTerms } from "../process/validation";
 import { instantiateTerm } from "../process/instantiate";
 import { variablesFromTerm } from "../utilities/equivalence";
 import { unifyTermIntrinsically } from "../process/unify";
-import { validateTerms, unifyTermWithProperties } from "../process/validation";
 import { typeFromJSON, typeToTypeJSON, provisionalFromJSON, provisionalToProvisionalJSON } from "../utilities/json";
 
 const { filter } = arrayUtilities,

@@ -210,8 +210,8 @@ export default define(class FrameSubstitution extends Substitution {
         unifyReplacementFrame,
         unifyTargetFrame
       ], substitution, context, (simpleSubstitutionUnifies) => {
-        const soleDerivedSubstitution = context.getSoleDerivedSubstitution(),
-              substitution = soleDerivedSubstitution; ///
+        const solInferredSubstitution = context.getSolInferredSubstitution(),
+              substitution = solInferredSubstitution; ///
 
         if (simpleSubstitutionUnifies) {
           context.debug(`...unified the '${simpleSubstitutionString}' simple substitution with the '${substitutionString}' substitution.`);

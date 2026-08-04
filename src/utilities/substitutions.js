@@ -13,10 +13,10 @@ export function termFromTermAndSubstitutions(term, context) {
 
     if (termSingular) {
       const variableNode = termNode.getVariableNode(),
-            derivedSubstitution = context.findDerivedSubstitutionByVariableNode(variableNode);
+            inferredSubstitution = context.findInferredSubstitutionByVariableNode(variableNode);
 
-      if (derivedSubstitution !== null) {
-        const replacementTerm = derivedSubstitution.getReplacementTerm();
+      if (inferredSubstitution !== null) {
+        const replacementTerm = inferredSubstitution.getReplacementTerm();
 
         term = replacementTerm; ///
       }
@@ -35,10 +35,10 @@ export function frameFromFrameAndSubstitutions(frame, context) {
 
     if (frameSingular) {
       const metavariableNode = frameNode.getMetavariableNode(),
-            derivedSubstitution = context.findDerivedSubstitutionByMetavariableNode(metavariableNode);
+            inferredSubstitution = context.findInferredSubstitutionByMetavariableNode(metavariableNode);
 
-      if (derivedSubstitution !== null) {
-        const replacementFrame = derivedSubstitution.getReplacementFrame();
+      if (inferredSubstitution !== null) {
+        const replacementFrame = inferredSubstitution.getReplacementFrame();
 
         frame = replacementFrame; ///
       }
@@ -57,10 +57,10 @@ export function statementFromStatementAndSubstitutions(statement, context) {
 
     if (statementSingular) {
       const metavariableNode = statementNode.getMetavariableNode(),
-            derivedSubstitution = context.findDerivedSubstitutionByMetavariableNode(metavariableNode);
+            inferredSubstitution = context.findInferredSubstitutionByMetavariableNode(metavariableNode);
 
-      if (derivedSubstitution !== null) {
-        const replacementStatement = derivedSubstitution.getReplacementStatement();
+      if (inferredSubstitution !== null) {
+        const replacementStatement = inferredSubstitution.getReplacementStatement();
 
         statement = replacementStatement; ///
       }
@@ -70,11 +70,11 @@ export function statementFromStatementAndSubstitutions(statement, context) {
   return statement;
 }
 
-export function metavariableNodesFromDerivedSubstitutions(derivedSubstitutions) {
+export function metavariableNodesFromInferredSubstitutions(inferredSubstitutions) {
   const metavariableNodes = [];
 
-  derivedSubstitutions.forEach((derivedSubstitution) => {
-    const metavariableNode = derivedSubstitution.getMetavariableNode();
+  inferredSubstitutions.forEach((inferredSubstitution) => {
+    const metavariableNode = inferredSubstitution.getMetavariableNode();
 
     if (metavariableNode !== null) {
       metavariableNodes.push(metavariableNode);

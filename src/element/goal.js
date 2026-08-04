@@ -211,15 +211,9 @@ export default define(class Goal extends Element {
       validatesWhenDerived = some(schemas, (schema, context) => {
         let passed = false;
 
-        const label = schema.getLabel();
-
-        this.unifyLabel(label, context, (labelUnifies) => {
-          if (labelUnifies) {
-            this.unifySchema(schema, context, (schemaUnifies) => {
-              if (schemaUnifies) {
-                passed = true;
-              }
-            });
+        this.unifySchema(schema, context, (schemaUnifies) => {
+          if (schemaUnifies) {
+            passed = true;
           }
         });
 
@@ -244,15 +238,13 @@ export default define(class Goal extends Element {
 
     context.trace(`Unifying the '${labelString}' label with the '${goalString}' goal...`);
 
-    return reconcile((context) => {
-      return this.reference.unifyLabel(label, context, (labelUnifies) => {
-        if (labelUnifies) {
-          context.debug(`...unified the '${labelString}' label with the '${goalString}' goal's reference.`);
-        }
+    return this.reference.unifyLabel(label, context, (labelUnifies) => {
+      if (labelUnifies) {
+        context.debug(`...unified the '${labelString}' label with the '${goalString}' goal's reference.`);
+      }
 
-        return continuation(labelUnifies);
-      });
-    }, context);
+      return continuation(labelUnifies);
+    });
   }
 
   unifySchema(schema, context, continuation) {
@@ -261,11 +253,10 @@ export default define(class Goal extends Element {
 
     context.trace(`Unifying the '${schemaString}' schema with the '${goalString}' goal...`);
 
-    const generalContext = context;  ///
+    const label = schema.getLabel(),
+          generalContext = context;  ///
 
     return reconcile((context) => {
-      const label = schema.getLabel();
-
       return this.reference.unifyLabel(label, context, (labelUnifies) => {
         if (!labelUnifies) {
           const schemaUnifies = false;

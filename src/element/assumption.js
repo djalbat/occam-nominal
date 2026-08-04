@@ -127,45 +127,49 @@ export default define(class Assumption extends Element {
   }
 
   validateReference(context, continuation) {
+    let referenceValidates;
+
     const assumptionString = this.getString();  ///
 
     context.trace(`Validating the '${assumptionString}' assumption's reference...`);
 
-    this.reference.validate(context, (reference) => {
-      let referenceValidates = false;
+    referenceValidates = this.reference.validate(context, (reference, context) => {
+      let validates;
 
-      if (reference !== null) {
-        this.reference = reference;
+      this.reference = reference;
 
-        referenceValidates = true;
-      }
+      validates = continuation(context);
 
-      if (referenceValidates) {
-        context.debug(`...validated the '${assumptionString}' assumption's reference.`);
-      }
-
-      return continuation(referenceValidates);
+      return validates;
     });
+
+    if (referenceValidates) {
+      context.debug(`...validated the '${assumptionString}' assumption's reference.`);
+    }
   }
 
   validateStatement(context, continuation) {
+    let statementValidates;
+
     const assumptionString = this.getString();  ///
 
     context.trace(`Validating the '${assumptionString}' assumption's statement...`);
 
-    this.statement.validate(context, (statement) => {
-      let statementValidates = false;
+    statementValidates = this.statement.validate(context, (statement, context) => {
+      let validates;
 
-      if (statement !== null) {
-        statementValidates = true;
-      }
+      this.statement = statement;
 
-      if (statementValidates) {
-        context.debug(`...validated the '${assumptionString}' assumption's statement.`);
-      }
+      validates = continuation(context);
 
-      return continuation(statementValidates);
+      return validates;
     });
+
+    if (statementValidates) {
+      context.debug(`...validated the '${assumptionString}' assumption's statement.`);
+    }
+
+    return statementValidates;
   }
 
   validateWhenStated(context, continuation) {

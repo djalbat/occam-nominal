@@ -213,8 +213,8 @@ export default define(class TermSubstitution extends Substitution {
         unifyReplacementTerm,
         unifyTargetTerm
       ], substitution, context, (simpleSubstitutionUnifies) => {
-        const soleDerivedSubstitution = context.getSoleDerivedSubstitution(),
-              substitution = soleDerivedSubstitution; ///
+        const soleInferredSubstitution = context.getSoleInferredSubstitution(),
+              substitution = soleInferredSubstitution; ///
 
         if (simpleSubstitutionUnifies) {
           context.debug(`...unified the '${simpleSubstitutionString}' simple substitution with the '${substitutionString}' substitution.`);

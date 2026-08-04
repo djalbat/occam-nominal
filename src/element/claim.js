@@ -295,9 +295,9 @@ export default class Claim extends Element {
           let stepAndFactOrSubproofsUnify = false;
 
           if (factorSubproofsUnifiesWithSuppositions) {
-            const derivedSubstitutionsSolved = context.areDerivedSubstitutionsSolved();
+            const inferredSubstitutionsSolved = context.areInferredSubstitutionsSolved();
 
-            if (derivedSubstitutionsSolved) {
+            if (inferredSubstitutionsSolved) {
               stepAndFactOrSubproofsUnify = true;
             }
           }
@@ -315,7 +315,7 @@ export default class Claim extends Element {
       if (factOrSubproof !== null) {
         const factorSubproofsUnifiesWithSupposition = true;
 
-        return context.solveDerivedSubstitutions(() => {
+        return context.solveInferredSubstitutions(() => {
           return continuation(factorSubproofsUnifiesWithSupposition);
         });
       }

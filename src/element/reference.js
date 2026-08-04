@@ -5,8 +5,8 @@ import { Element, breakPointUtilities } from "occam-languages";
 import { define } from "../elements";
 import { instantiateReference } from "../process/instantiate";
 import { REFERENCE_META_TYPE_NAME } from "../metaTypeNames";
+import { ablate, attempt, serialise, unserialise, instantiate } from "../utilities/context";
 import { referenceFromReferenceNode, metavariableFromReferenceNode } from "../utilities/element";
-import { ablate, attempt, reconcile, serialise, unserialise, instantiate } from "../utilities/context";
 
 const { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
@@ -100,7 +100,7 @@ export default define(class Reference extends Element {
       context = this.getContext();
 
       attempt((context) => {
-        const metavariableValidates = this.validateMetavariable(context, (context) => {
+        const metavariableValidates = this.validateMetavariable(context, () => {
           let validates = false;
 
           const metaType = this.metavariable.getMetaType();
@@ -181,27 +181,24 @@ export default define(class Reference extends Element {
 
     context.trace(`Unifying the '${labelString}' label with the '${referenceString}' reference...`);
 
-    const labelContext = label.getContext(),
+    const metavariable = label.getMetavariable(),
+          labelContext = label.getContext(),
           generalContext = this.getContext(), ///
           specificContext = labelContext;  ///
 
-    return reconcile((specificContext) => {
-      const metavariable = label.getMetavariable();
+    return this.unifyMetavariable(metavariable, generalContext, specificContext, (metavariableUnifies) => {
+      let labelUnifies = false;
 
-      return this.unifyMetavariable(metavariable, generalContext, specificContext, (metavariableUnifies) => {
-        let labelUnifies = false;
+      if (metavariableUnifies) {
+        labelUnifies = true;
+      }
 
-        if (metavariableUnifies) {
-          labelUnifies = true;
-        }
+      if (labelUnifies) {
+        context.debug(`...unified the '${labelString}' label with the '${referenceString}' reference.`);
+      }
 
-        if (labelUnifies) {
-          context.debug(`...unified the '${labelString}' label with the '${referenceString}' reference.`);
-        }
-
-        return continuation(labelUnifies);
-      });
-    }, specificContext);
+      return continuation(labelUnifies);
+    });
   }
 
   unifyMetavariable(metavariable, generalContext, specificContext, continuation) {

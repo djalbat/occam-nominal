@@ -89,7 +89,7 @@ export default define(class Label extends Element {
     context = this.getContext();
 
     attempt((context) => {
-      const metavariableValidates = this.validateMetavariable(context, (context) => {
+      const metavariableValidates = this.validateMetavariable(context, () => {
         let validates;
 
         const label = this; ///

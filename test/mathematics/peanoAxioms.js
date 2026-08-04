@@ -10,6 +10,6 @@ const logLevel = ERROR_LEVEL,
       projectName = "peano-axioms",
       projectsDirectoryPath = "../../Mathematics";
 
-describe(projectName, () => {
+describe.only(projectName, () => {
   createSuite(logLevel, projectName, projectsDirectoryPath);
 });

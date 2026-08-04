@@ -142,17 +142,17 @@ export default define(class Variable extends Element {
 
     const variable = this,  ///
           variableNode = variable.getNode(),
-          derivedSubstitution = context.findDerivedSubstitutionByVariableNode(variableNode);
+          inferredSubstitution = context.findInferredSubstitutionByVariableNode(variableNode);
 
-    if (derivedSubstitution !== null) {
+    if (inferredSubstitution !== null) {
       let termUnifies = false;
 
-      const derivedSubstitutionComparesToTerm = derivedSubstitution.compareTerm(term, context);
+      const inferredSubstitutionComparesToTerm = inferredSubstitution.compareTerm(term, context);
 
-      if (derivedSubstitutionComparesToTerm) {
-        const derivedSubstitutionString = derivedSubstitution.getString();
+      if (inferredSubstitutionComparesToTerm) {
+        const inferredSubstitutionString = inferredSubstitution.getString();
 
-        context.trace(`The '${derivedSubstitutionString}' derived substitution is already present.`);
+        context.trace(`The '${inferredSubstitutionString}' derived substitution is already present.`);
 
         termUnifies = true;
       }
@@ -166,9 +166,9 @@ export default define(class Variable extends Element {
     termSubstitution.validate(context, (termSubstitution, context) => {
       let validates;
 
-      const derivedSubstitution = termSubstitution;  ///
+      const inferredSubstitution = termSubstitution;  ///
 
-      context.addDerivedSubstitution(derivedSubstitution);
+      context.addInferredSubstitution(inferredSubstitution);
 
       validates = true;
 

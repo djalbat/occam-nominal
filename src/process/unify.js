@@ -253,14 +253,14 @@ class UnifyTermIntrinsicallyPass extends ContinuationZipPassBase {
   ];
 }
 
-class UnifyMetavariableIntrisicallyPass extends ContinuationZipPass {
+class UnifyMetavariableIntrisicallyPass extends AsynchronousContinuationZipPass {
   static maps = [
     {
       generalNodeQuery: termVariableNodeQuery,
       specificNodeQuery: termNodeQuery,
       run: (generalTermVariableNode, specificTermNode, generalContext, specificContext, continuation) => {
         const termNode = specificTermNode, ///
-          variableNode = generalTermVariableNode; ///
+              variableNode = generalTermVariableNode; ///
 
         let context;
 

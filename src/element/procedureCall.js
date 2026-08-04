@@ -44,8 +44,8 @@ export default define(class ProcedureCall extends Element {
   }
 
   findValues(context) {
-    const derivedSubstitutions = context.getDerivedSubstitutions(),
-          substitutions = derivedSubstitutions, ///
+    const inferredSubstitutions = context.getInferredSubstitutions(),
+          substitutions = inferredSubstitutions, ///
           values = this.parameters.map((parameter) => {
             const value = parameter.findValue(substitutions);
 

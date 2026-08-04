@@ -133,12 +133,12 @@ export default class Context extends ContextBase {
     return substitutions;
   }
 
-  getDerivedSubstitutions(derivedSubstitutions = []) {
+  getInferredSubstitutions(inferredSubstitutions = []) {
     const context = this.getContext();
 
-    context.getDerivedSubstitutions(derivedSubstitutions);
+    context.getInferredSubstitutions(inferredSubstitutions);
 
-    return derivedSubstitutions;
+    return inferredSubstitutions;
   }
 
   getGenerators(includeRelease = true) {
@@ -365,18 +365,18 @@ export default class Context extends ContextBase {
     return substitution;
   }
 
-  findDerivedSubstitutionByVariableNode(variableNode) {
+  findInferredSubstitutionByVariableNode(variableNode) {
     const context = this.getContext(),
-          derivedSubstitution = context.findDerivedSubstitutionByVariableNode(variableNode);
+          inferredSubstitution = context.findInferredSubstitutionByVariableNode(variableNode);
 
-    return derivedSubstitution;
+    return inferredSubstitution;
   }
 
-  findDerivedSubstitutionByMetavariableNode(metavariableNode) {
+  findInferredSubstitutionByMetavariableNode(metavariableNode) {
     const context = this.getContext(),
-          derivedSubstitution = context.findDerivedSubstitutionByMetavariableNode(metavariableNode);
+          inferredSubstitution = context.findInferredSubstitutionByMetavariableNode(metavariableNode);
 
-    return derivedSubstitution;
+    return inferredSubstitution;
   }
 
   findConstraintByConstraintNode(constraintNode) {
@@ -526,18 +526,18 @@ export default class Context extends ContextBase {
     return referencePresent;
   }
 
-  isDerivedSubstitutionPresentByMetavariableNode(metavariableNode) {
+  isInferredSubstitutionPresentByMetavariableNode(metavariableNode) {
     const context = this.getContext(),
-          derivedSubstitutionPresent = context.isDerivedSubstitutionPresentByMetavariableNode(metavariableNode);
+          inferredSubstitutionPresent = context.isInferredSubstitutionPresentByMetavariableNode(metavariableNode);
 
-    return derivedSubstitutionPresent;
+    return inferredSubstitutionPresent;
   }
 
-  isDerivedSubstitutionPresentByMetavariableNodeAndSubstitutionNode(metavariableNode, substitutionNode) {
+  isInferredSubstitutionPresentByMetavariableNodeAndSubstitutionNode(metavariableNode, substitutionNode) {
     const context = this.getContext(),
-          derivedSubstitutionPresent = context.isDerivedSubstitutionPresentByMetavariableNodeAndSubstitutionNode(metavariableNode, substitutionNode);
+          inferredSubstitutionPresent = context.isInferredSubstitutionPresentByMetavariableNodeAndSubstitutionNode(metavariableNode, substitutionNode);
 
-    return derivedSubstitutionPresent;
+    return inferredSubstitutionPresent;
   }
 
   isStated() {
@@ -572,10 +572,10 @@ export default class Context extends ContextBase {
     context.addMetavariables(metavariables);
   }
 
-  addDerivedSubstitutions(derivedSubstitutions) {
+  addInferredSubstitutions(inferredSubstitutions) {
     const context = this.getContext();
 
-    context.addDerivedSubstitutions(derivedSubstitutions);
+    context.addInferredSubstitutions(inferredSubstitutions);
   }
 
   addAxiom(axiom) {
@@ -698,10 +698,10 @@ export default class Context extends ContextBase {
     context.addDeclaredVariable(declaredVariable);
   }
 
-  addDerivedSubstitution(derivedSubstitution) {
+  addInferredSubstitution(inferredSubstitution) {
     const context = this.getContext();
 
-    context.addDerivedSubstitution(derivedSubstitution);
+    context.addInferredSubstitution(inferredSubstitution);
   }
 
   addConstraint(constraint) {

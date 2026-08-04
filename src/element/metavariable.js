@@ -362,17 +362,17 @@ export default define(class Metavariable extends Element {
 
     const metavariable = this,  ///
           metavariableNode = metavariable.getNode(),
-          derivedSubstitution = context.findDerivedSubstitutionByMetavariableNode(metavariableNode);
+          inferredSubstitution = context.findInferredSubstitutionByMetavariableNode(metavariableNode);
 
-    if (derivedSubstitution !== null) {
+    if (inferredSubstitution !== null) {
       let frameUnifies = false;
 
-      const derivedSubstitutionComparesToTerm = derivedSubstitution.compareFrame(frame, context);
+      const inferredSubstitutionComparesToTerm = inferredSubstitution.compareFrame(frame, context);
 
-      if (derivedSubstitutionComparesToTerm) {
-        const derivedSubstitutionString = derivedSubstitution.getString();
+      if (inferredSubstitutionComparesToTerm) {
+        const inferredSubstitutionString = inferredSubstitution.getString();
 
-        context.trace(`The '${derivedSubstitutionString}' derived substitution is already present.`);
+        context.trace(`The '${inferredSubstitutionString}' derived substitution is already present.`);
 
         frameUnifies = true;
       }
@@ -386,9 +386,9 @@ export default define(class Metavariable extends Element {
     frameSubstitution.validate(context, (frameSubstitution, context) => {
       let validates;
 
-      const derivedSubstitution = frameSubstitution;  ///
+      const inferredSubstitution = frameSubstitution;  ///
 
-      context.addDerivedSubstitution(derivedSubstitution);
+      context.addInferredSubstitution(inferredSubstitution);
 
       validates = true;
 
@@ -423,19 +423,19 @@ export default define(class Metavariable extends Element {
           metavariableNode = metavariable.getNode(),
           sublingSubstitutionNode = metavariableNode.getSiblingSubstitutionNode(),
           substitutionNode = sublingSubstitutionNode, ///
-          derivedSubstitution = (substitutionNode !== null) ?
-                                  context.findDerivedSubstitutionByMetavariableNodeAndSubstitutionNode(metavariableNode, substitutionNode) :
-                                    context.findDerivedSubstitutionByMetavariableNode(metavariableNode);
+          inferredSubstitution = (substitutionNode !== null) ?
+                                  context.findInferredSubstitutionByMetavariableNodeAndSubstitutionNode(metavariableNode, substitutionNode) :
+                                    context.findInferredSubstitutionByMetavariableNode(metavariableNode);
 
-    if (derivedSubstitution !== null) {
+    if (inferredSubstitution !== null) {
       let statementUnifies = false;
 
-      const derivedSubstitutionComparesToStatement = derivedSubstitution.compareStatement(statement, context);
+      const inferredSubstitutionComparesToStatement = inferredSubstitution.compareStatement(statement, context);
 
-      if (derivedSubstitutionComparesToStatement) {
-        const derivedSubstitutionString = derivedSubstitution.getString();
+      if (inferredSubstitutionComparesToStatement) {
+        const inferredSubstitutionString = inferredSubstitution.getString();
 
-        context.trace(`The '${derivedSubstitutionString}' derived substitution is already present.`);
+        context.trace(`The '${inferredSubstitutionString}' derived substitution is already present.`);
 
         statementUnifies = true;
       }
@@ -459,9 +459,9 @@ export default define(class Metavariable extends Element {
     statementSubstitution.validate(context, (statementSubstitution, context) => {
       let validates;
 
-      const derivedSubstitution = statementSubstitution;  ///
+      const inferredSubstitution = statementSubstitution;  ///
 
-      context.addDerivedSubstitution(derivedSubstitution);
+      context.addInferredSubstitution(inferredSubstitution);
 
       validates = true;
 
@@ -494,17 +494,17 @@ export default define(class Metavariable extends Element {
 
     const metavariable = this,  ///
           metavariableNode = metavariable.getNode(),
-          derivedSubstitution = context.findDerivedSubstitutionByMetavariableNode(metavariableNode);
+          inferredSubstitution = context.findInferredSubstitutionByMetavariableNode(metavariableNode);
 
-    if (derivedSubstitution !== null) {
+    if (inferredSubstitution !== null) {
       let referenceUnifies = false;
 
-      const derivedSubstitutionComparesToTerm = derivedSubstitution.compareTerm(reference, context);
+      const inferredSubstitutionComparesToTerm = inferredSubstitution.compareTerm(reference, context);
 
-      if (derivedSubstitutionComparesToTerm) {
-        const derivedSubstitutionString = derivedSubstitution.getString();
+      if (inferredSubstitutionComparesToTerm) {
+        const inferredSubstitutionString = inferredSubstitution.getString();
 
-        context.trace(`The '${derivedSubstitutionString}' derived substitution is already present.`);
+        context.trace(`The '${inferredSubstitutionString}' derived substitution is already present.`);
 
         referenceUnifies = true;
       }
@@ -518,9 +518,9 @@ export default define(class Metavariable extends Element {
     referenceSubstitution.validate(context, (referenceSubstitution, context) => {
       let validates;
 
-      const derivedSubstitution = referenceSubstitution;  ///
+      const inferredSubstitution = referenceSubstitution;  ///
 
-      context.addDerivedSubstitution(derivedSubstitution);
+      context.addInferredSubstitution(inferredSubstitution);
 
       validates = true;
 
@@ -568,7 +568,7 @@ export default define(class Metavariable extends Element {
 
     context.trace(`Unifying the '${specificMetavariableString}' metavariable with the '${generalMetavariableString}' metavariable intrinsically...`);
 
-    unifyMetavariableIntrinsically(generalMetavariable, specificMetavariable, generalContext, specificContext, (metavariableUnifiesIntrinsically) => {
+    return unifyMetavariableIntrinsically(generalMetavariable, specificMetavariable, generalContext, specificContext, (metavariableUnifiesIntrinsically) => {
       if (metavariableUnifiesIntrinsically) {
         context.debug(`...unified the '${specificMetavariableString}' metavariable with the '${generalMetavariableString}' metavariable intrinsically.`);
       }

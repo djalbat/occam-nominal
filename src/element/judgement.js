@@ -153,16 +153,16 @@ export default define(class Judgement extends Element {
   validate(context, continuation) {
     let validates;
 
-    const judgementnString = this.getString();  ///
+    const judgementString = this.getString();  ///
 
-    context.trace(`Validating the '${judgementnString}' judgement...`);
+    context.trace(`Validating the '${judgementString}' judgement...`);
 
     let judgement;
 
     judgement = this.findJudgement(context);
 
     if (judgement !== null) {
-      context.debug(`The '${judgementnString}' judgement is already present.`);
+      context.debug(`The '${judgementString}' judgement is already present.`);
 
       validates = continuation(judgement, context);
     } else {
@@ -198,7 +198,7 @@ export default define(class Judgement extends Element {
     }
 
     if (validates) {
-      context.debug(`...validated the '${judgementnString}' judgement.`);
+      context.debug(`...validated the '${judgementString}' judgement.`);
     }
 
     return validates;
