@@ -134,7 +134,7 @@ export default define(class Constraint extends Element {
 
     context.trace(`Validating the '${constraintString}' constraint's reference...`);
 
-    referenceValidates = this.reference.validate(context, (reference, context) => {
+    referenceValidates = this.reference.validate(context, (reference) => {
       let validates;
 
       this.reference = reference;

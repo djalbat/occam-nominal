@@ -133,7 +133,7 @@ export default define(class Assumption extends Element {
 
     context.trace(`Validating the '${assumptionString}' assumption's reference...`);
 
-    referenceValidates = this.reference.validate(context, (reference, context) => {
+    referenceValidates = this.reference.validate(context, (reference) => {
       let validates;
 
       this.reference = reference;
@@ -155,7 +155,7 @@ export default define(class Assumption extends Element {
 
     context.trace(`Validating the '${assumptionString}' assumption's statement...`);
 
-    statementValidates = this.statement.validate(context, (statement, context) => {
+    statementValidates = this.statement.validate(context, (statement) => {
       let validates;
 
       this.statement = statement;

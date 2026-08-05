@@ -7,7 +7,7 @@ import elements from "../elements";
 import { define } from "../elements";
 import { instantiateGoal } from "../process/instantiate";
 import { all, some, exists } from "../utilities/continuation";
-import { reconcile, instantiate } from "../utilities/context";
+import { join, reconcile, instantiate } from "../utilities/context";
 
 const { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
@@ -135,7 +135,7 @@ export default define(class Goal extends Element {
 
     context.trace(`Validating the '${goalString}' goal's reference...`);
 
-    referenceValidates = this.reference.validate(context, (reference, context) => {
+    referenceValidates = this.reference.validate(context, (reference) => {
       let validates;
 
       this.reference = reference;
@@ -159,7 +159,7 @@ export default define(class Goal extends Element {
 
     context.trace(`Validating the '${goalString}' goal's statement...`);
 
-    statementValidates = this.statement.validate(context, (statement, context) => {
+    statementValidates = this.statement.validate(context, (statement) => {
       let validates;
 
       this.statement = statement;
@@ -232,31 +232,17 @@ export default define(class Goal extends Element {
     return validatesWhenDerived;
   }
 
-  unifyLabel(label, context, continuation) {
-    const goalString = this.getString(),  ///
-          labelString = label.getString();
-
-    context.trace(`Unifying the '${labelString}' label with the '${goalString}' goal...`);
-
-    return this.reference.unifyLabel(label, context, (labelUnifies) => {
-      if (labelUnifies) {
-        context.debug(`...unified the '${labelString}' label with the '${goalString}' goal's reference.`);
-      }
-
-      return continuation(labelUnifies);
-    });
-  }
-
   unifySchema(schema, context, continuation) {
     const goalString = this.getString(),
           schemaString = schema.getString();
 
     context.trace(`Unifying the '${schemaString}' schema with the '${goalString}' goal...`);
 
-    const label = schema.getLabel(),
-          generalContext = context;  ///
+    const generalContext = context;  ///
 
     return reconcile((context) => {
+      const label = schema.getLabel();
+
       return this.reference.unifyLabel(label, context, (labelUnifies) => {
         if (!labelUnifies) {
           const schemaUnifies = false;
@@ -321,23 +307,25 @@ export default define(class Goal extends Element {
 
     specificContext = deductionContext; ///
 
-    return reconcile((specificContext) => {
-      return this.statement.unifyStatement(statement, generalContext, specificContext, (statementUnifies) => {
-        let deductionUnifies = false;
+    return join((specificContext) => {
+      return reconcile((specificContext) => {
+        return this.statement.unifyStatement(statement, generalContext, specificContext, (statementUnifies) => {
+          let deductionUnifies = false;
 
-        if (statementUnifies) {
-          deductionUnifies = true;
+          if (statementUnifies) {
+            specificContext.commit(context);
 
-          specificContext.commit(context);
-        }
+            deductionUnifies = true;
+          }
 
-        if (deductionUnifies) {
-          context.debug(`...unified the '${deductionString}' deduction's statement with the '${goalString}' goal's '${goalString}' statement.`);
-        }
+          if (deductionUnifies) {
+            context.debug(`...unified the '${deductionString}' deduction's statement with the '${goalString}' goal's '${goalString}' statement.`);
+          }
 
-        return continuation(deductionUnifies);
-      });
-    }, specificContext);
+          return continuation(deductionUnifies);
+        });
+      }, specificContext);
+    }, specificContext, context);
   }
 
   toJSON() {
@@ -398,7 +386,7 @@ function subproofAssertionFromStatement(statement, context) {
   subproofAssertion = SubproofAssertion.fromStatement(statement, context);
 
   if (subproofAssertion !== null) {
-    subproofAssertion = subproofAssertion.validate(context);  ///
+    subproofAssertion = subproofAssertion.validate(context, (subproofAssertion, context) => true);  ///
   }
 
   return subproofAssertion;

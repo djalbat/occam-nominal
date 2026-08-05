@@ -129,7 +129,7 @@ export default define(class ImplicitAssumption extends Element {
 
     const implicitAssumptionString = this.getString();  ///
 
-    context.trace(`Validating the '${implicitAssumptionString}' implicitAssumption's statement...`);
+    context.trace(`Validating the '${implicitAssumptionString}' implicit assumption's statement...`);
 
     const statement = await this.statement.validate(context);
 
@@ -138,7 +138,7 @@ export default define(class ImplicitAssumption extends Element {
     }
 
     if (statementValidates) {
-      context.debug(`...validated the '${implicitAssumptionString}' implicitAssumption's statement.`);
+      context.debug(`...validated the '${implicitAssumptionString}' implicit assumption's statement.`);
     }
 
     return statementValidates;

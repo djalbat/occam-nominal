@@ -145,7 +145,7 @@ export default define(class Premise extends Fact {
 
       context.trace(`Validating the '${premiseString}' premise's statement...`);
 
-      statementValidates = statement.validate(context, (statement, context) => {
+      statementValidates = statement.validate(context, (statement) => {
         let validates;
 
         validates = continuation(context);

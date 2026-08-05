@@ -235,7 +235,7 @@ export default define(class Judgement extends Element {
 
     context.trace(`Validating the '${judgementString}' judgement's frame...`);
 
-    frameValidates = this.frame.validate(context, (frame, context) => {
+    frameValidates = this.frame.validate(context, (frame) => {
       let validates;
 
       this.frame = frame;

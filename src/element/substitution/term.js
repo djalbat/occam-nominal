@@ -357,13 +357,12 @@ export default define(class TermSubstitution extends Substitution {
     const termSubstitutionNode = statementNode.getTermSubstitutionNode();
 
     if (termSubstitutionNode !== null) {
-      termSubstitution = ablate((context) => {
-        return descend((context) => {
+      ablate((context) => {
+        descend((context) => {
           const generalContext = context, ///
-                specificContext = context,  ///
-                termSubstitution = termSubstitutionFromTermSubstitutionNode(termSubstitutionNode, generalContext, specificContext);
+                specificContext = context;  ///
 
-          return termSubstitution;
+          termSubstitution = termSubstitutionFromTermSubstitutionNode(termSubstitutionNode, generalContext, specificContext);
         }, context);
       }, context);
     }

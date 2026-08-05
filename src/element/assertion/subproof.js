@@ -5,8 +5,8 @@ import { breakPointUtilities, continuationUtilities } from "occam-languages";
 
 import Assertion from "../assertion";
 
-import { every } from "../../utilities/continuation";
 import { define } from "../../elements";
+import {all, exists, every, some} from "../../utilities/continuation";
 import { instantiateSubproofAssertion } from "../../process/instantiate";
 import { subproofAssertionFromStatementNode } from "../../utilities/element";
 import { join, descend, reconcile, instantiate } from "../../utilities/context";
@@ -65,21 +65,41 @@ export default define(class SubproofAssertion extends Assertion {
 
     const assertion = this.findAssertion(context);
 
-    if (assertion !== null) {
-      subproofAssertion = assertion; ///
+    subproofAssertion = assertion;  ///
 
-      context.debug(`The '${subproofAssertionString}' subproof assertion is already present.`);
+    if (subproofAssertion !== null) {
+      context.debug(`The '${subproofAssertionString}' subproofAssertion is already present.`);
 
-      validates = continuation(subproofAssertion);
+      validates = continuation(subproofAssertion, context);
     } else {
-      subproofAssertion = this; ///
+      subproofAssertion = this;
 
-      validates = this.validateStatements(context, () => {
-        const assertion = subproofAssertion; ///
+      const validateStatements = this.validateStatements.bind(this);
 
-        context.addAssertion(assertion);
+      validates = all([
+        validateStatements
+      ], context, (context) => {
+        let validates;
 
-        return continuation(subproofAssertion, context);
+        const validateWhenStated = this.validateWhenStated.bind(this),
+              validateWhenDerived = this.validateWhenDerived.bind(this);
+
+        validates = exists([
+          validateWhenStated,
+          validateWhenDerived
+        ], context, (context) => {
+          let validates;
+
+          const assertion = subproofAssertion;  ///
+
+          context.addAssertion(assertion);
+
+          validates = continuation(subproofAssertion, context);
+
+          return validates;
+        });
+
+        return validates;
       });
     }
 
@@ -92,6 +112,10 @@ export default define(class SubproofAssertion extends Assertion {
 
   validateStatements(context, continuation) {
     let statementsValidate;
+
+    const subproofAssertionString = this.getString();  ///
+
+    context.trace(`Validating the '${subproofAssertionString}' subproof assertion's statements...`);
 
     descend((context) => {
       statementsValidate = every(this.statements, (statement, context, continuation) => {
@@ -107,7 +131,53 @@ export default define(class SubproofAssertion extends Assertion {
       }, context, continuation);
     }, context);
 
+    if (statementsValidate) {
+      context.debug(`...validated the '${subproofAssertionString}' subproof assertion's statements.`);
+    }
+
     return statementsValidate;
+  }
+
+  validateWhenStated(context, continuation) {
+    let validatesWhenStated = false;
+
+    const stated = context.isStated();
+
+    if (stated) {
+      const subproofAssertionString = this.getString(); ///
+
+      context.trace(`Validating the '${subproofAssertionString}' stated subproof assertion...`);
+
+      validatesWhenStated = continuation(context);
+
+      if (validatesWhenStated) {
+        context.debug(`...validated the '${subproofAssertionString}' stated subproof assertion.`);
+      }
+    }
+
+    return validatesWhenStated;
+  }
+
+  validateWhenDerived(context, continuation) {
+    let validatesWhenDerived = false;
+
+    const stated = context.isStated();
+
+    if (!stated) {
+      const subproofAssertionString = this.getString(); ///
+
+      context.trace(`Validating the '${subproofAssertionString}' derived subproof assertion...`);
+
+      validatesWhenDerived = true;
+
+      validatesWhenDerived = continuation(context);
+
+      if (validatesWhenDerived) {
+        context.debug(`...validated the '${subproofAssertionString}' derived subproof assertion.`);
+      }
+    }
+
+    return validatesWhenDerived;
   }
 
   unifySchema(schema, generalContext, specificContext) {

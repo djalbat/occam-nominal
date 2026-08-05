@@ -159,7 +159,7 @@ export default define(class ContainedAssertion extends Assertion {
       const frameSingular = this.frame.isSingular();
 
       if (frameSingular) {
-        frameValidates = this.frame.validate(context, (frame, context) => {
+        frameValidates = this.frame.validate(context, (frame) => {
           let validates;
 
           this.frame = frame;
@@ -197,7 +197,7 @@ export default define(class ContainedAssertion extends Assertion {
       const statementSingular = this.statement.isSingular();
 
       if (statementSingular) {
-        statementValidates = this.statement.validate(context, (statement, context) => {
+        statementValidates = this.statement.validate(context, (statement) => {
           let validates;
 
           this.statement = statement;

@@ -354,13 +354,12 @@ export default define(class FrameSubstitution extends Substitution {
     const frameSubstitutionNode = statementNode.getFrameSubstitutionNode();
 
     if (frameSubstitutionNode !== null) {
-      frameSubstitution = ablate((context) => {
-        return descend((context) => {
+      ablate((context) => {
+        descend((context) => {
           const generalContext = context, ///
-                specificContext = context,  ///
-                frameSubstitution = frameSubstitutionFromFrameSubstitutionNode(frameSubstitutionNode, generalContext, specificContext);
+                specificContext = context;  ///
 
-          return frameSubstitution;
+          frameSubstitution = frameSubstitutionFromFrameSubstitutionNode(frameSubstitutionNode, generalContext, specificContext);
         }, context);
       }, context);
     }

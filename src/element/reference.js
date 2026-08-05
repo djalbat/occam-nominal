@@ -5,8 +5,8 @@ import { Element, breakPointUtilities } from "occam-languages";
 import { define } from "../elements";
 import { instantiateReference } from "../process/instantiate";
 import { REFERENCE_META_TYPE_NAME } from "../metaTypeNames";
-import { ablate, attempt, serialise, unserialise, instantiate } from "../utilities/context";
 import { referenceFromReferenceNode, metavariableFromReferenceNode } from "../utilities/element";
+import { join, ablate, attempt, reconcile, serialise, unserialise, instantiate } from "../utilities/context";
 
 const { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
@@ -186,19 +186,25 @@ export default define(class Reference extends Element {
           generalContext = this.getContext(), ///
           specificContext = labelContext;  ///
 
-    return this.unifyMetavariable(metavariable, generalContext, specificContext, (metavariableUnifies) => {
-      let labelUnifies = false;
+    return join((specificContext) => {
+      return reconcile((specificContext) => {
+        return this.unifyMetavariable(metavariable, generalContext, specificContext, (metavariableUnifies) => {
+          let labelUnifies = false;
 
-      if (metavariableUnifies) {
-        labelUnifies = true;
-      }
+          if (metavariableUnifies) {
+            specificContext.commit(context);
 
-      if (labelUnifies) {
-        context.debug(`...unified the '${labelString}' label with the '${referenceString}' reference.`);
-      }
+            labelUnifies = true;
+          }
 
-      return continuation(labelUnifies);
-    });
+          if (labelUnifies) {
+            context.debug(`...unified the '${labelString}' label with the '${referenceString}' reference.`);
+          }
+
+          return continuation(labelUnifies);
+        });
+      }, specificContext);
+    }, specificContext, context);
   }
 
   unifyMetavariable(metavariable, generalContext, specificContext, continuation) {

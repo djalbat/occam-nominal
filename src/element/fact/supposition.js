@@ -145,7 +145,7 @@ export default define(class Supposition extends Fact {
 
       context.trace(`Validating the '${suppositionString}' supposition's statement...`);
 
-      statementValidates = statement.validate(context, (statement, context) => {
+      statementValidates = statement.validate(context, (statement) => {
         let validates;
 
         validates = continuation(context);

@@ -54,8 +54,10 @@ export default class Resolution extends Element {
 
     context.trace(`Validating the '${resolutionString}' resolution's statement...`);
 
-    statementValidates = this.statement.validate(context, (statement, context) => {
+    statementValidates = this.statement.validate(context, (statement) => {
       let validates;
+
+      this.statement = statement;
 
       validates = continuation(context);
 

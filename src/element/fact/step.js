@@ -211,8 +211,10 @@ export default define(class Step extends Fact {
 
     const statement = this.getStatement();
 
-    statementValidates = statement.validate(context, (statement, context) => {
+    statementValidates = statement.validate(context, (statement) => {
       let validates;
+
+      this.setStatement(statement);
 
       validates = continuation(context);
 
