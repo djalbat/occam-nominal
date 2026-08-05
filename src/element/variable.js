@@ -87,7 +87,7 @@ export default define(class Variable extends Element {
     return comparesToVariableIdentifier;
   }
 
-  validate(context, continuation) {
+  validate(stated, context, continuation) {
     let validates;
 
     const variableString = this.getString(); ///

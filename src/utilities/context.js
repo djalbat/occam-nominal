@@ -4,7 +4,6 @@ import KenonContext from "../context/kenon";
 import KrasicContext from "../context/krasic";
 import MnemicContext from "../context/mnemic";
 import NestedContext from "../context/nested";
-import TheticContext from "../context/thetic";
 import AmnesicContext from "../context/amnedic";
 import AphasicContext from "../context/aphasic";
 import BoundedContext from "../context/bounded";
@@ -12,7 +11,6 @@ import NominalContext from "../context/nominal";
 import LiteralContext from "../context/literal";
 import LiminalContext from "../context/liminal";
 import PhanericContext from "../context/phaneric";
-import IllativeContext from "../context/illative";
 import BranchingContext from "../context/branching";
 import ProlepticContext from "../context/proleptic";
 import NominalFileContext from "../context/file/nominal";
@@ -45,22 +43,6 @@ export function waive(innerFunction, context) {
   const amnesicContext = AmnesicContext.fromNothing(context);
 
   context = amnesicContext;  ///
-
-  return innerFunction(context);
-}
-
-export function declare(innerFunction, context) {
-  const theticContext = TheticContext.fromNothing(context);
-
-  context = theticContext;  ///
-
-  return innerFunction(context);
-}
-
-export function derive(innerFunction, context) {
-  const illativeContext = IllativeContext.fromNothing(context);
-
-  context = illativeContext;  ///
 
   return innerFunction(context);
 }
@@ -101,14 +83,6 @@ export function choose(innerFunction, context) {
   const branchingContext = BranchingContext.fromNothing(context);
 
   context = branchingContext;  ///
-
-  return innerFunction(context);
-}
-
-export function descend(innerFunction, context) {
-  const nestedContext = NestedContext.fromNothing(context);
-
-  context = nestedContext;  ///
 
   return innerFunction(context);
 }

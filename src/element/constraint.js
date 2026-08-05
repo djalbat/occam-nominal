@@ -9,8 +9,7 @@ import { instantiateConstraint } from "../process/instantiate";
 import { stripBracketsFromStatement } from "../utilities/brackets";
 import { constraintFromConstraintNode } from "../utilities/element";
 import { constraintStringFromReferenceAndStatement } from "../utilities/string";
-import { ablate, attempt, descend, reconcile, serialise, unserialise, instantiate } from "../utilities/context";
-import {equateTerms} from "../process/equate";
+import { ablate, attempt, reconcile, serialise, unserialise, instantiate } from "../utilities/context";
 
 const { asynchronousSome } = continuationUtilities,
       { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
@@ -63,7 +62,7 @@ export default define(class Constraint extends Element {
     return constraint;
   }
 
-  validate(context, continuation) {
+  validate(stated, context, continuation) {
     let validates;
 
     const constraintString = this.getString();  ///
@@ -90,7 +89,7 @@ export default define(class Constraint extends Element {
         validates = all([
           validateStatement,
           validateReference
-        ], context, () => {
+        ], stated, context, (stated, context) => {
           let validates;
 
           const validateWhenStated = this.validateWhenStated.bind(this),
@@ -99,7 +98,7 @@ export default define(class Constraint extends Element {
           validates = exists([
             validateWhenStated,
             validateWhenDerived
-          ], context, () => {
+          ], stated, context, (stated, context) => {
             let validates;
 
             constraint = this;
@@ -127,14 +126,14 @@ export default define(class Constraint extends Element {
     return validates;
   }
 
-  validateReference(context, continuation) {
+  validateReference(stated, context, continuation) {
     let referenceValidates;
 
     const constraintString = this.getString();  ///
 
     context.trace(`Validating the '${constraintString}' constraint's reference...`);
 
-    referenceValidates = this.reference.validate(context, (reference) => {
+    referenceValidates = this.reference.validate(stated, context, (reference, context) => {
       let validates;
 
       this.reference = reference;
@@ -151,24 +150,22 @@ export default define(class Constraint extends Element {
     return referenceValidates;
   }
 
-  validateStatement(context, continuation) {
+  validateStatement(stated, context, continuation) {
     let statementValidates;
 
     const constraintString = this.getString();  ///
 
     context.trace(`Validating the '${constraintString}' constraint's statement...`);
 
-    descend((context) => {
-      statementValidates = this.statement.validate(context, (statement, context) => {
-        let validates;
+    statementValidates = this.statement.validate(stated, context, (statement, context) => {
+      let validates;
 
-        this.statement = statement;
+      this.statement = statement;
 
-        validates = continuation(context);
+      validates = continuation(stated, context);
 
-        return validates;
-      });
-    }, context);
+      return validates;
+    });
 
     if (statementValidates) {
       context.debug(`...validated the '${constraintString}' constraint's statement.`);
@@ -177,17 +174,15 @@ export default define(class Constraint extends Element {
     return statementValidates;
   }
 
-  validateWhenStated(context, continuation) {
+  validateWhenStated(stated, context, continuation) {
     let validatesWhenStated = false;
-
-    const stated = context.isStated();
 
     if (stated) {
       const constraintString = this.getString(); ///
 
       context.trace(`Validating the '${constraintString}' stated constraint...`);
 
-      validatesWhenStated = continuation(context);
+      validatesWhenStated = continuation(stated, context);
 
       if (validatesWhenStated) {
         context.debug(`...validated the '${constraintString}' stated constraint.`);
@@ -197,10 +192,8 @@ export default define(class Constraint extends Element {
     return validatesWhenStated;
   }
 
-  validateWhenDerived(context, continuation) {
+  validateWhenDerived(stated, context, continuation) {
     let validatesWhenDerived = false;
-
-    const stated = context.isStated();
 
     if (!stated) {
       const constraintString = this.getString(); ///

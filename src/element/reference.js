@@ -81,7 +81,7 @@ export default define(class Reference extends Element {
     return comparesToParamter;
   }
 
-  validate(context, continuation) {
+  validate(stated, context, continuation) {
     let validates = false;
 
     const referenceString = this.getString(); ///

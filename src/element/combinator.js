@@ -54,7 +54,7 @@ export default define(class Combinator extends Element {
     return continuation(verifies, context);
   }
 
-  validate(context, continuation) {
+  validate(stated, context, continuation) {
     let validates;
 
     const combinatorString = this.getString();  ///
@@ -65,7 +65,7 @@ export default define(class Combinator extends Element {
 
     validates = exists([
       validateStatementAsCombinator
-    ], context, (context) => {
+    ], stated, context, (stated, context) => {
       let validates;
 
       const combinator = this;
@@ -82,7 +82,7 @@ export default define(class Combinator extends Element {
     return validates;
   }
 
-  validateStatementAsCombinator(context, continuation) {
+  validateStatementAsCombinator(stated, context, continuation) {
     let statementValidatesAsCombinator;
 
     const combinatorString = this.getString();

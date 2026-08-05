@@ -150,7 +150,7 @@ export default define(class Judgement extends Element {
 
   compareMetavariableName(metavariableName) { return this.frame.compareMetavariableName(metavariableName); }
 
-  validate(context, continuation) {
+  validate(stated, context, continuation) {
     let validates;
 
     const judgementString = this.getString();  ///
@@ -204,19 +204,19 @@ export default define(class Judgement extends Element {
     return validates;
   }
 
-  validateGoal(context, continuation) {
+  validateGoal(stated, context, continuation) {
     let goalValidates;
 
     const judgementString = this.getString();  ///
 
     context.trace(`Validating the '${judgementString}' judgement's goal...`);
 
-    goalValidates = this.goal.validate(context, (goal, context) => {
+    goalValidates = this.goal.validate(stated, context, (goal, context) => {
       let validates;
 
       this.goal = goal;
 
-      validates = continuation(context);
+      validates = continuation(stated, context);
 
       return validates;
     });
@@ -228,19 +228,19 @@ export default define(class Judgement extends Element {
     return goalValidates;
   }
 
-  validateFrame(context, continuation) {
+  validateFrame(stated, context, continuation) {
     let frameValidates;
 
     const judgementString = this.getString();  ///
 
     context.trace(`Validating the '${judgementString}' judgement's frame...`);
 
-    frameValidates = this.frame.validate(context, (frame) => {
+    frameValidates = this.frame.validate(stated, context, (frame, context) => {
       let validates;
 
       this.frame = frame;
 
-      validates = continuation(context);
+      validates = continuation(stated, context);
 
       return validates;
     });
@@ -252,17 +252,15 @@ export default define(class Judgement extends Element {
     return frameValidates;
   }
 
-  validateWhenStated(context, continuation) {
+  validateWhenStated(stated, context, continuation) {
     let validatesWhenStated = false;
-
-    const stated = context.isStated();
 
     if (stated) {
       const judgementString = this.getString(); ///
 
       context.trace(`Validating the '${judgementString}' stated judgement...`);
 
-      validatesWhenStated = continuation(context);
+      validatesWhenStated = continuation(stated, context);
 
       if (validatesWhenStated) {
         context.debug(`...validated the '${judgementString}' stated judgement.`);
@@ -272,10 +270,8 @@ export default define(class Judgement extends Element {
     return validatesWhenStated;
   }
 
-  validateWhenDerived(context, continuation) {
+  validateWhenDerived(stated, context, continuation) {
     let validatesWhenDerived = false;
-
-    const stated = context.isStated();
 
     if (!stated) {
       const judgementString = this.getString(); ///
@@ -298,7 +294,7 @@ export default define(class Judgement extends Element {
       }, context, (context) => true);
 
       if (validatesWhenDerived) {
-        validatesWhenDerived = continuation(context);
+        validatesWhenDerived = continuation(stated, context);
       }
 
       if (validatesWhenDerived) {

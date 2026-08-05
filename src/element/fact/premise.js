@@ -8,7 +8,7 @@ import { all } from "../../utilities/continuation";
 import { define } from "../../elements";
 import { instantiatePremise } from "../../process/instantiate";
 import { procedureCallFromPremiseNode } from "../../utilities/element";
-import { declare, attempt, reconcile, serialise, unserialise, instantiate } from "../../utilities/context";
+import { attempt, reconcile, serialise, unserialise, instantiate } from "../../utilities/context";
 
 const { breakable, breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
@@ -78,34 +78,34 @@ export default define(class Premise extends Fact {
       return continuation(verifies, context);
     }
 
-    return declare((context) => {
-      let validates;
+    let validates;
 
-      attempt((context) => {
-        validates = this.validate(context, (premise, context) => true);
+    attempt((context) => {
+      const stated = true;
 
-        if (validates) {
-          this.commit(context);
-        }
-      }, context);
+      validates = this.validate(stated, context, (premise, context) => true);
 
-      if (!validates) {
-        const verifies = false;
-
-        return continuation(verifies, context);
+      if (validates) {
+        this.commit(context);
       }
+    }, context);
 
-      const verifies = true;
-
-      if (verifies) {
-        context.debug(`...verified the '${premiseString}' premise.`);
-      }
+    if (!validates) {
+      const verifies = false;
 
       return continuation(verifies, context);
-    }, context);
+    }
+
+    const verifies = true;
+
+    if (verifies) {
+      context.debug(`...verified the '${premiseString}' premise.`);
+    }
+
+    return continuation(verifies, context);
   });
 
-  validate(context, continuation) {
+  validate(stated, context, continuation) {
     let validates;
 
     const premiseString = this.getString(); ///
@@ -118,7 +118,7 @@ export default define(class Premise extends Fact {
     validates = all([
       validateStatement,
       validateProcedureCall
-    ], context, (context) => {
+    ], stated, context, (stated, context) => {
       let validates;
 
       const premise = this;  ///
@@ -135,33 +135,7 @@ export default define(class Premise extends Fact {
     return validates;
   }
 
-  validateStatement(context, continuation) {
-    let statementValidates = true;  ///
-
-    const statement = this.getStatement();
-
-    if (statement !== null) {
-      const premiseString = this.getString();  ///
-
-      context.trace(`Validating the '${premiseString}' premise's statement...`);
-
-      statementValidates = statement.validate(context, (statement) => {
-        let validates;
-
-        validates = continuation(context);
-
-        return validates;
-      });
-
-      if (statementValidates) {
-        context.trace(`...validated the '${premiseString}' premise's statement.`);
-      }
-    }
-
-    return statementValidates;
-  }
-
-  validateProcedureCall(context, continuation) {
+  validateProcedureCall(stated, context, continuation) {
     let procedureCallValidates = true;  ///
 
     const procedureCall = this.getProcedureCall();

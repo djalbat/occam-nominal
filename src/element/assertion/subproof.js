@@ -6,10 +6,10 @@ import { breakPointUtilities, continuationUtilities } from "occam-languages";
 import Assertion from "../assertion";
 
 import { define } from "../../elements";
-import {all, exists, every, some} from "../../utilities/continuation";
+import { all, every, exists } from "../../utilities/continuation";
+import { join, reconcile, instantiate } from "../../utilities/context";
 import { instantiateSubproofAssertion } from "../../process/instantiate";
 import { subproofAssertionFromStatementNode } from "../../utilities/element";
-import { join, descend, reconcile, instantiate } from "../../utilities/context";
 
 const { last, front } = arrayUtilities,
       { breakPointFromJSON } = breakPointUtilities,
@@ -54,7 +54,7 @@ export default define(class SubproofAssertion extends Assertion {
     return subproofAssertionNode;
   }
 
-  validate(context, continuation) {
+  validate(stated, context, continuation) {
     let validates;
 
     const subproofAssertionString = this.getString();  ///
@@ -117,19 +117,18 @@ export default define(class SubproofAssertion extends Assertion {
 
     context.trace(`Validating the '${subproofAssertionString}' subproof assertion's statements...`);
 
-    descend((context) => {
-      statementsValidate = every(this.statements, (statement, context, continuation) => {
-        const statementValidates = statement.validate(context, (statement, context) => {
-          let validates;
+    statementsValidate = every(this.statements, (statement, context, continuation) => {
+      const stated = true,
+            statementValidates = statement.validate(stated, context, (statement, context) => {
+              let validates;
 
-          validates = continuation(context);
+              validates = continuation(context);
 
-          return validates;
-        });
+              return validates;
+            });
 
-        return statementValidates;
-      }, context, continuation);
-    }, context);
+      return statementValidates;
+    }, context, continuation);
 
     if (statementsValidate) {
       context.debug(`...validated the '${subproofAssertionString}' subproof assertion's statements.`);

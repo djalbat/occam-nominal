@@ -55,7 +55,7 @@ export default define(class ProcedureCall extends Element {
     return values;
   }
 
-  validate(context, continuation) {
+  validate(stated, context, continuation) {
     let validates = false;
 
     const procedureCallString = this.getString(); ///

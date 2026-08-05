@@ -38,7 +38,7 @@ export default define(class TypeAssertion extends Assertion {
     return typeAssertionNode;
   }
 
-  validate(context, continuation) {
+  validate(stated, context, continuation) {
     let validates;
 
     const typeAssertionString = this.getString();  ///
@@ -62,7 +62,7 @@ export default define(class TypeAssertion extends Assertion {
 
       validates = all([
         validateType
-      ], context, (context) => {
+      ], stated, context, (stated, context) => {
         let validates;
 
         const validateWhenStated = this.validateWhenStated.bind(this),
@@ -71,7 +71,7 @@ export default define(class TypeAssertion extends Assertion {
         validates = exists([
           validateWhenStated,
           validateWhenDerived
-        ], context, (context) => {
+        ], stated, context, (stated, context) => {
           let validates;
 
           const assertion = typeAssertion;  ///
@@ -125,7 +125,7 @@ export default define(class TypeAssertion extends Assertion {
     return discharges;
   }
 
-  validateType(context, continuation) {
+  validateType(stated, context, continuation) {
     let typeValidates = false;
 
     const typeAssertionString = this.getString();  ///
@@ -146,7 +146,7 @@ export default define(class TypeAssertion extends Assertion {
     }
 
     if (typeValidates) {
-      typeValidates = continuation(context);
+      typeValidates = continuation(stated, context);
     }
 
     if (typeValidates) {
@@ -156,10 +156,8 @@ export default define(class TypeAssertion extends Assertion {
     return typeValidates;
   }
 
-  validateWhenStated(context, continuation) {
+  validateWhenStated(stated, context, continuation) {
     let validatesWhenStated = false;
-
-    const stated = context.isStated();
 
     if (stated) {
       const typeAssertionString = this.getString(); ///
@@ -188,7 +186,7 @@ export default define(class TypeAssertion extends Assertion {
         if (termValidates) {
           this.term = term;
 
-          termValidates = continuation(context);
+          termValidates = continuation(stated, context);
         }
 
         return termValidates;
@@ -202,10 +200,8 @@ export default define(class TypeAssertion extends Assertion {
     return validatesWhenStated;
   }
 
-  validateWhenDerived(context, continuation) {
+  validateWhenDerived(stated, context, continuation) {
     let validatesWhenDerived = false;
-
-    const stated = context.isStated();
 
     if (!stated) {
       const typeAssertionString = this.getString(); ///
@@ -217,7 +213,7 @@ export default define(class TypeAssertion extends Assertion {
 
         this.term = term;
 
-        validatesWhenDerived = continuation(context);
+        validatesWhenDerived = continuation(stated, context);
 
         return validatesWhenDerived;
       });

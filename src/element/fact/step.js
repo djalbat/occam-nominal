@@ -9,7 +9,7 @@ import elements from "../../elements";
 import { all } from "../../utilities/continuation";
 import { define } from "../../elements";
 import { unifySteps } from "../../process/unification";
-import { derive, declare, attempt, reconcile } from "../../utilities/context";
+import { attempt, reconcile } from "../../utilities/context";
 
 const { breakable } = breakPointUtilities,
       { backwardsSome } = arrayUtilities,
@@ -134,43 +134,41 @@ export default define(class Step extends Fact {
       return continuation(verifies, context);
     }
 
-    const qualified = this.isQualified(),
-          stated = qualified; ///
+    let validates;
 
-    return (stated ? declare : derive)((context) => {
-      let validates;
+    attempt((context) => {
+      const qualified = this.isQualified(),
+            stated = qualified; ///
 
-      attempt((context) => {
-        validates = this.validate(context, (step, context) => true);
+      validates = this.validate(stated, context, (step, context) => true);
 
-        if (validates) {
-          this.commit(context);
-        }
-      }, context);
+      if (validates) {
+        this.commit(context);
+      }
+    }, context);
 
-      if (!validates) {
-        const verifies = false;
+    if (!validates) {
+      const verifies = false;
 
-        return continuation(verifies, context);
+      return continuation(verifies, context);
+    }
+
+    return this.unify(context, (unifies) => {
+      let verifies = false;
+
+      if (unifies) {
+        verifies = true;
       }
 
-      return this.unify(context, (unifies) => {
-        let verifies = false;
+      if (verifies) {
+        context.debug(`...verified the '${stepString}' step.`);
+      }
 
-        if (unifies) {
-          verifies = true;
-        }
-
-        if (verifies) {
-          context.debug(`...verified the '${stepString}' step.`);
-        }
-
-        return continuation(verifies, context);
-      });
-    }, context);
+      return continuation(verifies, context);
+    });
   });
 
-  validate(context, continuation) {
+  validate(stated, context, continuation) {
     let validates;
 
     const stepString = this.getString(); ///
@@ -185,7 +183,7 @@ export default define(class Step extends Fact {
       validateStatement,
       validateReference,
       validateSignatureAssertion
-    ], context, (context) => {
+    ], stated, context, (stated, context) => {
       let validates;
 
       const step = this;  ///
@@ -202,33 +200,7 @@ export default define(class Step extends Fact {
     return validates;
   }
 
-  validateStatement(context, continuation) {
-    let statementValidates;
-
-    const stepString = this.getString();  ///
-
-    context.trace(`Validating the '${stepString}' step's statement...`);
-
-    const statement = this.getStatement();
-
-    statementValidates = statement.validate(context, (statement) => {
-      let validates;
-
-      this.setStatement(statement);
-
-      validates = continuation(context);
-
-      return validates;
-    });
-
-    if (statementValidates) {
-      context.trace(`...validated the '${stepString}' step's statement.`);
-    }
-
-    return statementValidates;
-  }
-
-  validateReference(context, continuation) {
+  validateReference(stated, context, continuation) {
     let referenceValidates;
 
     if (this.reference !== null) {
@@ -237,12 +209,12 @@ export default define(class Step extends Fact {
 
       context.trace(`Validating the '${stepString}' step's '${referenceString}' reference...`);
 
-      referenceValidates = this.reference.validate(context, (reference, context) => {
+      referenceValidates = this.reference.validate(stated, context, (reference, context) => {
         let validates;
 
         this.reference = reference;
 
-        validates = continuation(context);
+        validates = continuation(stated, context);
 
         return validates;
       });
@@ -251,13 +223,13 @@ export default define(class Step extends Fact {
         context.debug(`...validated the '${stepString}' step's '${referenceString}' reference.`);
       }
     } else {
-      referenceValidates = continuation(context);
+      referenceValidates = continuation(stated, context);
     }
 
     return referenceValidates;
   }
 
-  validateSignatureAssertion(context, continuation) {
+  validateSignatureAssertion(stated, context, continuation) {
     let signatureAssertionValidates;
 
     if (this.signatureAssertion !== null) {
@@ -266,12 +238,12 @@ export default define(class Step extends Fact {
 
       context.trace(`Validating the '${stepString}' step's '${signatureAssertionString}' signature assertion...`);
 
-      signatureAssertionValidates =this.signatureAssertion.validate(context, (signatureAssertion, contwext) => {
+      signatureAssertionValidates =this.signatureAssertion.validate(stated, context, (signatureAssertion, contwext) => {
         let validates;
 
         this.signatureAssertion = signatureAssertion;
 
-        validates = continuation(context);
+        validates = continuation(stated, context);
 
         return validates;
       });
@@ -280,7 +252,7 @@ export default define(class Step extends Fact {
         context.debug(`...validated the '${stepString}' step's '${signatureAssertionString}' signature assertion.`);
       }
     } else {
-      signatureAssertionValidates = continuation(context);
+      signatureAssertionValidates = continuation(stated, context);
     }
 
     return signatureAssertionValidates;

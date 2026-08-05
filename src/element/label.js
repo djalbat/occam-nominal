@@ -77,7 +77,7 @@ export default define(class Label extends Element {
     return continuation(verifies);
   }
 
-  validate(context, continuation) {
+  validate(stated, context, continuation) {
     let validates = false;
 
     const labelString = this.getString(); ///

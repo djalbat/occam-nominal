@@ -181,7 +181,7 @@ export default define(class Term extends Element {
     return term;
   }
 
-  validate(context, continuation) {
+  validate(stated, context, continuation) {
     let validates;
 
     const termString = this.getString();  ///

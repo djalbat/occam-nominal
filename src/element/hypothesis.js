@@ -4,7 +4,7 @@ import { Element, breakPointUtilities } from "occam-languages";
 
 import { define } from "../elements";
 import { instantiateHypothesis } from "../process/instantiate";
-import { declare, attempt, serialise, unserialise, instantiate } from "../utilities/context";
+import { attempt, serialise, unserialise, instantiate } from "../utilities/context";
 import { statementFromHypothesisNode, procedureCallFromHypothesisNode } from "../utilities/element";
 
 const { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
@@ -42,13 +42,12 @@ export default define(class Hypothesis extends Element {
     context.trace(`Verifying the '${hypothesisString}' hypothesis...`);
 
     if ((this.statement !== null) || (this.procedureCall !== null)) {
-      return declare((context) => {
-        const validates = this.validate(context);
+      const stated = true,
+            validates = this.validate(stated, context);
 
-        if (validates) {
-          verifies = true;
-        }
-      }, context)
+      if (validates) {
+        verifies = true;
+      }
     } else {
       context.debug(`Unable to verify the '${hypothesisString}' hypothesis because it is nonsense.`);
     }
@@ -60,15 +59,17 @@ export default define(class Hypothesis extends Element {
     return verifies;
   }
 
-  async validate(context) {
+  validate(stated, context) {
     let validates = false;
 
     const hypothesisString = this.getString(); ///
 
     context.trace(`Validating the '${hypothesisString}' hypothesis...`);
 
-    await attempt(async (context) => {
-      const statementValidates = await this.validateStatement(context),
+    debugger
+
+    attempt((context) => {
+      const statementValidates = this.validateStatement(context),
             procedureCallValidates =  this.validateProcedureCall(context);
 
       if (statementValidates || procedureCallValidates) {

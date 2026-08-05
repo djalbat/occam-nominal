@@ -98,7 +98,7 @@ export default define(class Equality extends Element {
     return equality;
   }
 
-  validate(context, continuation) {
+  validate(stated, context, continuation) {
     let validates;
 
     const equalityString = this.getString();  ///
@@ -120,7 +120,7 @@ export default define(class Equality extends Element {
 
       validates = all([
         validateTerms
-      ], context, (context) => {
+      ], stated, context, (stated, context) => {
         let validates;
 
         const validateWhenStated = this.validateWhenStated.bind(this),
@@ -129,7 +129,7 @@ export default define(class Equality extends Element {
         validates = exists([
           validateWhenStated,
           validateWhenDerived
-        ], context, (context) => {
+        ], stated, context, (stated, context) => {
           let validates;
 
           this.assign(context);
@@ -152,14 +152,14 @@ export default define(class Equality extends Element {
     return validates;
   }
 
-  validateTerms(context, continuation) {
+  validateTerms(stated, context, continuation) {
     let termsValidate = false;
 
     const equalityString = this.getString(); ///
 
     context.trace(`Validating the '${equalityString}' equality's terms...`);
 
-    const leftTermValidates = this.leftTerm.validate(context, (leftTerm, context) => {
+    const leftTermValidates = this.leftTerm.validate(stated, context, (leftTerm, context) => {
       const rightTermValidtes = this.rightTerm.validate(context, (rightTerm, context) => {
         let validates = false;
 
@@ -174,7 +174,7 @@ export default define(class Equality extends Element {
 
           this.rightTerm = rightTerm;
 
-          validates = continuation(context);
+          validates = continuation(stated, context);
         }
 
         return validates;
@@ -194,17 +194,15 @@ export default define(class Equality extends Element {
     return termsValidate;
   }
 
-  validateWhenStated(context, continuation) {
+  validateWhenStated(stated, context, continuation) {
     let validatesWhenStated = false;
-
-    const stated = context.isStated();
 
     if (stated) {
       const equalityString = this.getString(); ///
 
       context.trace(`Validating the '${equalityString}' stated equality...`);
 
-      validatesWhenStated = continuation(context);
+      validatesWhenStated = continuation(stated, context);
 
       if (validatesWhenStated) {
         context.debug(`...validated the '${equalityString}' stated equality.`);
@@ -214,10 +212,8 @@ export default define(class Equality extends Element {
     return validatesWhenStated;
   }
 
-  validateWhenDerived(context, continuation) {
+  validateWhenDerived(stated, context, continuation) {
     let validatesWhenDerived = false;
-
-    const stated = context.isStated();
 
     if (!stated) {
       const equalityString = this.getString(); ///
@@ -227,7 +223,7 @@ export default define(class Equality extends Element {
       const termsEquate = equateTerms(this.leftTerm, this.rightTerm, context);
 
       if ((this.negated && !termsEquate) || (!this.negated && termsEquate)) {
-        validatesWhenDerived = continuation(context);
+        validatesWhenDerived = continuation(stated, context);
       }
 
       if (validatesWhenDerived) {

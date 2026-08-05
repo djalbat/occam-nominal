@@ -131,7 +131,7 @@ export default define(class ImplicitAssumption extends Element {
 
     context.trace(`Validating the '${implicitAssumptionString}' implicit assumption's statement...`);
 
-    const statement = await this.statement.validate(context);
+    const statement = await this.statement.validate(context, context);
 
     if (statement !== null) {
       statementValidates = true;

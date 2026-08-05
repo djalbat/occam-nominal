@@ -6,9 +6,9 @@ import Resolution from "../resolution";
 
 import { define } from "../../elements";
 import { instantiateDeduction } from "../../process/instantiate";
-import { elide, declare, attempt, unserialise, instantiate } from "../../utilities/context";
+import { elide, attempt, unserialise, instantiate } from "../../utilities/context";
 
-const { breakable, breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
+const { breakable, breakPointFromJSON } = breakPointUtilities;
 
 export default define(class Deduction extends Resolution {
   getDeductionNode() {
@@ -33,30 +33,30 @@ export default define(class Deduction extends Resolution {
       return continuation(verifies);
     }
 
-    return declare((context) => {
-      return elide((context) => {
-        let validates;
+    return elide((context) => {
+      let validates;
 
-        attempt((context) => {
-          validates = this.validate(context, (deduction, context) => true);
+      attempt((context) => {
+        const stated = true;
 
-          if (validates) {
-            this.commit(context);
-          }
-        }, context);
+        validates = this.validate(stated, context, (deduction, context) => true);
 
-        if (!validates) {
-          return continuation(verifies);
+        if (validates) {
+          this.commit(context);
         }
-
-        verifies = true;
-
-        if (verifies) {
-          context.debug(`...verified the '${deductionString}' deduction.`);
-        }
-
-        return continuation(verifies);
       }, context);
+
+      if (!validates) {
+        return continuation(verifies);
+      }
+
+      verifies = true;
+
+      if (verifies) {
+        context.debug(`...verified the '${deductionString}' deduction.`);
+      }
+
+      return continuation(verifies);
     }, context);
   });
 

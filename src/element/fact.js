@@ -34,6 +34,34 @@ export default class Fact extends Element {
     return step;
   }
 
+  validateStatement(stated, context, continuation) {
+    let statementValidates = true;  ///
+
+    const statement = this.getStatement();
+
+    if (statement !== null) {
+      const factString = this.getString();  ///
+
+      context.trace(`Validating the '${factString}' fact's statement...`);
+
+      statementValidates = statement.validate(stated, context, (statement, context) => {
+        let validates;
+
+        this.statement = statement;
+
+        validates = continuation(context);
+
+        return validates;
+      });
+
+      if (statementValidates) {
+        context.trace(`...validated the '${factString}' fact's statement.`);
+      }
+    }
+
+    return statementValidates;
+  }
+
   compareStep(step, context) {
     let comparesToStep = false;
 

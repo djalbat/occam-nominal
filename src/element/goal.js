@@ -74,7 +74,7 @@ export default define(class Goal extends Element {
     return goal;
   }
 
-  validate(context, continuation) {
+  validate(stated, context, continuation) {
     let validates;
 
     const goalString = this.getString();  ///
@@ -98,7 +98,7 @@ export default define(class Goal extends Element {
       validates = all([
         validateReference,
         validateStatement
-      ], context, (context) => {
+      ], stated, context, (stated, context) => {
         let validates;
 
         const validateWhenStated = this.validateWhenStated.bind(this),
@@ -107,7 +107,7 @@ export default define(class Goal extends Element {
         validates = exists([
           validateWhenStated,
           validateWhenDerived
-        ], context, (context) => {
+        ], stated, context, (stated, context) => {
           let validates;
 
           context.addGoal(goal);
@@ -128,14 +128,14 @@ export default define(class Goal extends Element {
     return validates;
   }
 
-  validateReference(context, continuation) {
+  validateReference(stated, context, continuation) {
     let referenceValidates;
 
     const goalString = this.getString();  ///
 
     context.trace(`Validating the '${goalString}' goal's reference...`);
 
-    referenceValidates = this.reference.validate(context, (reference) => {
+    referenceValidates = this.reference.validate(stated, context, (reference, context) => {
       let validates;
 
       this.reference = reference;
@@ -152,14 +152,14 @@ export default define(class Goal extends Element {
     return referenceValidates;
   }
 
-  validateStatement(context, continuation) {
+  validateStatement(stated, context, continuation) {
     let statementValidates;
 
     const goalString = this.getString();  ///
 
     context.trace(`Validating the '${goalString}' goal's statement...`);
 
-    statementValidates = this.statement.validate(context, (statement) => {
+    statementValidates = this.statement.validate(stated, context, (statement, context) => {
       let validates;
 
       this.statement = statement;
@@ -176,10 +176,8 @@ export default define(class Goal extends Element {
     return statementValidates;
   }
 
-  validateWhenStated(context, continuation) {
+  validateWhenStated(stated, context, continuation) {
     let validatesWhenStated = false;
-
-    const stated = context.isStated();
 
     if (stated) {
       const goalString = this.getString(); ///
@@ -196,10 +194,8 @@ export default define(class Goal extends Element {
     return validatesWhenStated;
   }
 
-  validateWhenDerived(context, continuation) {
+  validateWhenDerived(stated, context, continuation) {
     let validatesWhenDerived = false;
-
-    const stated = context.isStated();
 
     if (!stated) {
       const goalString = this.getString(); ///

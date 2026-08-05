@@ -8,7 +8,7 @@ import { all } from "../../utilities/continuation";
 import { define } from "../../elements";
 import { instantiateSupposition } from "../../process/instantiate";
 import { procedureCallFromSuppositionNode } from "../../utilities/element";
-import { declare, attempt, reconcile, serialise, unserialise, instantiate } from "../../utilities/context";
+import { attempt, reconcile, serialise, unserialise, instantiate } from "../../utilities/context";
 
 const { breakable, breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
@@ -78,34 +78,34 @@ export default define(class Supposition extends Fact {
       return continuation(verifies, context);
     }
 
-    return declare((context) => {
-      let validates;
+    let validates;
 
-      attempt((context) => {
-        validates = this.validate(context, (supposition, context) => true);
+    attempt((context) => {
+      const stated = true;
 
-        if (validates) {
-          this.commit(context);
-        }
-      }, context);
+      validates = this.validate(stated, context, (supposition, context) => true);
 
-      if (!validates) {
-        const verifies = false;
-
-        return continuation(verifies, context);
+      if (validates) {
+        this.commit(context);
       }
+    }, context);
 
-      const verifies = true;
-
-      if (verifies) {
-        context.debug(`...verified the '${suppositionString}' supposition.`);
-      }
+    if (!validates) {
+      const verifies = false;
 
       return continuation(verifies, context);
-    }, context);
+    }
+
+    const verifies = true;
+
+    if (verifies) {
+      context.debug(`...verified the '${suppositionString}' supposition.`);
+    }
+
+    return continuation(verifies, context);
   });
 
-  validate(context, continuation) {
+  validate(stated, context, continuation) {
     let validates;
 
     const suppositionString = this.getString(); ///
@@ -118,7 +118,7 @@ export default define(class Supposition extends Fact {
     validates = all([
       validateStatement,
       validateProcedureCall
-    ], context, (context) => {
+    ], stated, context, (stated, context) => {
       let validates;
 
       const supposition = this;  ///
@@ -133,32 +133,6 @@ export default define(class Supposition extends Fact {
     }
 
     return validates;
-  }
-
-  validateStatement(context, continuation) {
-    let statementValidates = true;  ///
-
-    const statement = this.getStatement();
-
-    if (statement !== null) {
-      const suppositionString = this.getString();  ///
-
-      context.trace(`Validating the '${suppositionString}' supposition's statement...`);
-
-      statementValidates = statement.validate(context, (statement) => {
-        let validates;
-
-        validates = continuation(context);
-
-        return validates;
-      });
-
-      if (statementValidates) {
-        context.trace(`...validated the '${suppositionString}' supposition's statement.`);
-      }
-    }
-
-    return statementValidates;
   }
 
   validateProcedureCall(context, continuation) {

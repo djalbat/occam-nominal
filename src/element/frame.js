@@ -137,7 +137,7 @@ export default define(class Frame extends Element {
     return frame;
   }
 
-  validate(context, continuation) {
+  validate(stated, context, continuation) {
     let validates;
 
     const frameString = this.getString();  ///
@@ -161,7 +161,7 @@ export default define(class Frame extends Element {
       validates = all([
         validateMetavariable,
         validateAssumptions
-      ], context, (context) => {
+      ], stated, context, (stated, context) => {
         let validates;
 
         const validateWhenStated = this.validateWhenStated.bind(this),
@@ -170,7 +170,7 @@ export default define(class Frame extends Element {
         validates = exists([
           validateWhenStated,
           validateWhenDerived
-        ], context, (context) => {
+        ], stated, context, (stated, context) => {
           let validates;
 
           context.addFrame(frame);
@@ -191,7 +191,7 @@ export default define(class Frame extends Element {
     return validates;
   }
 
-  validateAssumption(assumption, assumptions, context, continuation) {
+  validateAssumption(assumption, assumptions, stated, context, continuation) {
     let assumptionValidates;
 
     const frameString = this.getString(),  ///
@@ -204,7 +204,7 @@ export default define(class Frame extends Element {
 
       assumptions.push(assumption);
 
-      validates = continuation(context);
+      validates = continuation(stated, context);
 
       return validates;
     });
@@ -216,7 +216,7 @@ export default define(class Frame extends Element {
     return assumptionValidates;
   }
 
-  validateAssumptions(context, continuation) {
+  validateAssumptions(context, stated, continuation) {
     let assumptionsValidate;
 
     const frameString = this.getString();  ///
@@ -231,7 +231,7 @@ export default define(class Frame extends Element {
 
       this.assumptions = assumptions;
 
-      assumptionsValidate = continuation(context);
+      assumptionsValidate = continuation(stated, context);
 
       return assumptionsValidate;
     });
@@ -243,19 +243,19 @@ export default define(class Frame extends Element {
     return assumptionsValidate;
   }
 
-  validateMetavariable(context, continuation) {
+  validateMetavariable(stated, context, continuation) {
     let metavariableValidates;
 
     const frameString = this.getString();  ///
 
     context.trace(`Validating the '${frameString}' frame's metavariable...`);
 
-    metavariableValidates = this.metavariable.validate(context, (metavariable, context) => {
+    metavariableValidates = this.metavariable.validate(stated, context, (metavariable, context) => {
       let validates;
 
       this.metavariable = metavariable;
 
-      validates = continuation(context);
+      validates = continuation(stated, context);
 
       return validates;
     });
@@ -267,10 +267,8 @@ export default define(class Frame extends Element {
     return metavariableValidates;
   }
 
-  validateWhenStated(context, continuation) {
+  validateWhenStated(stated, context, continuation) {
     let validatesWhenStated = false;
-
-    const stated = context.isStated();
 
     if (stated) {
       const frameString = this.getString(); ///
@@ -280,7 +278,7 @@ export default define(class Frame extends Element {
       const singular = this.isSingular();
 
       if (singular) {
-        validatesWhenStated = continuation(context);
+        validatesWhenStated = continuation(stated, context);
       } else {
         validatesWhenStated = false;
 
@@ -295,10 +293,8 @@ export default define(class Frame extends Element {
     return validatesWhenStated;
   }
 
-  validateWhenDerived(context, continuation) {
+  validateWhenDerived(stated, context, continuation) {
     let validatesWhenDerived = false;
-
-    const stated = context.isStated();
 
     if (!stated) {
       const frameString = this.getString(); ///

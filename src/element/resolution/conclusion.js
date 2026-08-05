@@ -6,7 +6,7 @@ import Resolution from "../resolution";
 
 import { define } from "../../elements";
 import { instantiateConclusion } from "../../process/instantiate";
-import { elide, declare, attempt, unserialise, instantiate } from "../../utilities/context";
+import { elide, attempt, unserialise, instantiate } from "../../utilities/context";
 
 const { breakable, breakPointFromJSON } = breakPointUtilities;
 
@@ -33,30 +33,30 @@ export default define(class Conclusion extends Resolution {
       return continuation(verifies);
     }
 
-    return declare((context) => {
-      return elide((context) => {
-        let validates;
+    return elide((context) => {
+      let validates;
 
-        attempt((context) => {
-          validates = this.validate(context, (conclusion, context) => true);
+      attempt((context) => {
+        const stated = true;
 
-          if (validates) {
-            this.commit(context);
-          }
-        }, context);
+        validates = this.validate(stated, context, (conclusion, context) => true);
 
-        if (!validates) {
-          return continuation(verifies);
+        if (validates) {
+          this.commit(context);
         }
-
-        verifies = true;
-
-        if (verifies) {
-          context.debug(`...verified the '${conclusionString}' conclusion.`);
-        }
-
-        return continuation(verifies);
       }, context);
+
+      if (!validates) {
+        return continuation(verifies);
+      }
+
+      verifies = true;
+
+      if (verifies) {
+        context.debug(`...verified the '${conclusionString}' conclusion.`);
+      }
+
+      return continuation(verifies);
     }, context);
   });
 

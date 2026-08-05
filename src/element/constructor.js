@@ -98,7 +98,7 @@ export default define(class Constructor extends Element {
     return continuation(verifies, context);
   }
 
-  validate(context, continuation) {
+  validate(stated, context, continuation) {
     let validates;
 
     const includeType = false,
@@ -112,7 +112,7 @@ export default define(class Constructor extends Element {
     validates = exists([
       validateTermAsVariable,
       validateTermAsConstructor
-    ], context, (context) => {
+    ], stated, context, (stated, context) => {
       let validates;
 
       const constructor = this;
@@ -129,7 +129,7 @@ export default define(class Constructor extends Element {
     return validates;
   }
 
-  validateTermAsVariable(context, continuation) {
+  validateTermAsVariable(stated, context, continuation) {
     let termValidatesAsVariable = false;
 
     const hypothetical = this.isHypothetical();
@@ -147,7 +147,7 @@ export default define(class Constructor extends Element {
               baseType = baseTypeFromNothing();
 
         if (type === baseType) {
-          termValidatesAsVariable = continuation(context);
+          termValidatesAsVariable = continuation(stated, context);
         }
 
         return termValidatesAsVariable;
@@ -161,7 +161,7 @@ export default define(class Constructor extends Element {
     return termValidatesAsVariable;
   }
 
-  validateTermAsConstructor(context, continuation) {
+  validateTermAsConstructor(stated, context, continuation) {
     let termValidatesAsConstructor = false;
 
     const hypothetical = this.isHypothetical();
@@ -172,7 +172,13 @@ export default define(class Constructor extends Element {
 
       context.trace(`Validating the '${constructorString}' constructor's term...`);
 
-      termValidatesAsConstructor = validateTermAsConstructor(this.term, context, continuation);
+      termValidatesAsConstructor = validateTermAsConstructor(this.term, context, (context) => {
+        let validates;
+
+        validates = continuation(stated, context);
+
+        return validates;
+      });
 
       if (termValidatesAsConstructor) {
         context.debug(`...validated the '${constructorString}' constructor's term.`);
