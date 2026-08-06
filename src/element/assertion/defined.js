@@ -112,7 +112,7 @@ export default define(class DefinedAssertion extends Assertion {
       const termSingular = this.term.isSingular();
 
       if (termSingular) {
-        termValidates = this.term.validate(context, (term, context) => {
+        termValidates = this.term.validate(state, context, (term, context) => {
           let validates;
 
           this.term = term;
@@ -150,7 +150,7 @@ export default define(class DefinedAssertion extends Assertion {
       const frameSingular = this.frame.isSingular();
 
       if (frameSingular) {
-        frameValidates = this.frame.validate(context, (frame, context) => {
+        frameValidates = this.frame.validate(state, context, (frame, context) => {
           let validates;
 
           this.frame = frame;

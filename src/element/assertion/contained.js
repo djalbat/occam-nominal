@@ -122,7 +122,7 @@ export default define(class ContainedAssertion extends Assertion {
       const termSingular = this.term.isSingular();
 
       if (termSingular) {
-        termValidates = this.term.validate(context, (term, context) => {
+        termValidates = this.term.validate(state, context, (term, context) => {
           let validates;
 
           this.term = term;

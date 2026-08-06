@@ -299,7 +299,7 @@ export default define(class Metavariable extends Element {
         if (strict) {
           termValidates = continuation(strict, state, context);
         } else {
-          termValidates = this.term.validate(context, (term, context) => {
+          termValidates = this.term.validate(state, context, (term, context) => {
             let validates;
 
             this.term = term;

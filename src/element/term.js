@@ -235,7 +235,7 @@ export default define(class Term extends Element {
 
     context.trace(`Validating the '${termString}' term given the '${typeString}' type...`);
 
-    const validates = this.validate(context, (term, context) => {
+    const validates = this.validate(state, context, (term, context) => {
       let validatesGivenType = false;
 
       const termType = term.getType(),

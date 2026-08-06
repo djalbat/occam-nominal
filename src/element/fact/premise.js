@@ -146,7 +146,7 @@ export default define(class Premise extends Fact {
 
       context.trace(`Validating the '${premiseString}' premise's procedure call...`);
 
-      procedureCallValidates = procedureCall.validate(context, (procedureCall, context) => {
+      procedureCallValidates = procedureCall.validate(state, context, (procedureCall, context) => {
         let validates;
 
         validates = continuation(state, context);

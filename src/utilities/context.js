@@ -1,10 +1,7 @@
 "use strict";
 
-import KenonContext from "../context/kenon";
 import KrasicContext from "../context/krasic";
 import MnemicContext from "../context/mnemic";
-import AmnesicContext from "../context/amnedic";
-import AphasicContext from "../context/aphasic";
 import BoundedContext from "../context/bounded";
 import NominalContext from "../context/nominal";
 import LiteralContext from "../context/literal";
@@ -26,30 +23,6 @@ export function ground(innerFunction) {
   const literalContext = LiteralContext.fromNothing(context);
 
   context = literalContext;  ///
-
-  return innerFunction(context);
-}
-
-export function pass(innerFunction, context) {
-  const kenonContext = KenonContext.fromNothing(context);
-
-  context = kenonContext;  ///
-
-  return innerFunction(context);
-}
-
-export function waive(innerFunction, context) {
-  const amnesicContext = AmnesicContext.fromNothing(context);
-
-  context = amnesicContext;  ///
-
-  return innerFunction(context);
-}
-
-export function elide(innerFunction, context) {
-  const aphasicContext = AphasicContext.fromNothing(context);
-
-  context = aphasicContext;  ///
 
   return innerFunction(context);
 }

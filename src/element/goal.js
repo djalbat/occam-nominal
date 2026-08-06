@@ -387,7 +387,7 @@ function subproofAssertionFromStatement(statement, context) {
   subproofAssertion = SubproofAssertion.fromStatement(statement, context);
 
   if (subproofAssertion !== null) {
-    subproofAssertion = subproofAssertion.validate(context, (subproofAssertion, context) => true);  ///
+    subproofAssertion = subproofAssertion.validate(state, context, (subproofAssertion, context) => true);  ///
   }
 
   return subproofAssertion;

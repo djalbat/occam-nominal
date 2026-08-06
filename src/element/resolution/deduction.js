@@ -5,9 +5,9 @@ import { breakPointUtilities } from "occam-languages";
 import Resolution from "../resolution";
 
 import { define } from "../../elements";
-import { declare } from "../../utilities/state";
+import { desist, declare } from "../../utilities/state";
 import { instantiateDeduction } from "../../process/instantiate";
-import { elide, attempt, unserialise, instantiate } from "../../utilities/context";
+import { attempt, unserialise, instantiate } from "../../utilities/context";
 
 const { breakable, breakPointFromJSON } = breakPointUtilities;
 
@@ -22,43 +22,43 @@ export default define(class Deduction extends Resolution {
   verify = breakable(function (context, continuation) {
     let verifies = false;
 
-    const deductionString = this.getString();  ///
+    const decudtionString = this.getString();  ///
 
-    context.trace(`Verifying the '${deductionString}' deduction...`);
+    context.trace(`Verifying the '${decudtionString}' decudtion...`);
 
     const nonsensical = this.isNonsensical();
 
     if (nonsensical) {
-      context.debug(`Unable to verify the '${deductionString}' deduction because it is nonsense.`);
+      context.debug(`Unable to verify the '${decudtionString}' decudtion because it is nonsense.`);
 
       return continuation(verifies);
     }
 
-    return elide((context) => {
-      let validates;
+    let validates;
 
-      attempt((context) => {
-        declare((state) => {
-          validates = this.validate(state, context, (deduction, context) => true);
+    attempt((context) => {
+      declare((state) => {
+        desist((state) => {
+          validates = this.validate(state, context, (decudtion, context) => true);
+        }, state);
 
-          if (validates) {
-            this.commit(context);
-          }
-        });
-      }, context);
-
-      if (!validates) {
-        return continuation(verifies);
-      }
-
-      verifies = true;
-
-      if (verifies) {
-        context.debug(`...verified the '${deductionString}' deduction.`);
-      }
-
-      return continuation(verifies);
+        if (validates) {
+          this.commit(context);
+        }
+      });
     }, context);
+
+    if (!validates) {
+      return continuation(verifies);
+    }
+
+    verifies = true;
+
+    if (verifies) {
+      context.debug(`...verified the '${decudtionString}' decudtion.`);
+    }
+
+    return continuation(verifies);
   });
 
   unifyStatement(statement, generalContext, specificContext, continuation) {

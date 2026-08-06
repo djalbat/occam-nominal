@@ -30,7 +30,7 @@ class ValidateTermAsPropertyPass extends ContinuationPass {
         let success = false;
 
         const term = termFromTermNode(termNode, context),
-              termValidates = term.validate(context, (term, context) => {
+              termValidates = term.validate(state, context, (term, context) => {
                 let validates;
 
                 validates = continuation(context);
@@ -80,7 +80,7 @@ class ValidateTermAsGeneratorPass extends ContinuationPass {
         let success = false;
 
         const term = termFromTermNode(termNode, context),
-              termValidates = term.validate(context, (term, context) => {
+              termValidates = term.validate(state, context, (term, context) => {
                 let validates;
 
                 validates = continuation(context);
@@ -130,7 +130,7 @@ class ValidateTermAsConstructorPass extends ContinuationPass {
         let success = false;
 
         const term = termFromTermNode(termNode, context),
-              termValidates = term.validate(context, (term, context) => {
+              termValidates = term.validate(state, context, (term, context) => {
                 let validates;
 
                 validates = continuation(context);
@@ -204,7 +204,7 @@ class ValidateStatementAsCombinatorPass extends ContinuationPass {
         let success = false;
 
         const term = termFromTermNode(termNode, context),
-              termValidates = term.validate(context, (term, context) => {
+              termValidates = term.validate(state, context, (term, context) => {
                 let validates;
 
                 validates = continuation(context);

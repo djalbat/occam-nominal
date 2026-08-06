@@ -136,7 +136,7 @@ function unifyStepAsQualifiedConstraint(step, context, continuation) {
 
   context.trace(`Unifying the '${stepString}' step as a constraint with the '${referenceString}' reference...`);
 
-  const constraintValidates = constraint.validate(context, (constraint, context) => true);
+  const constraintValidates = constraint.validate(state, context, (constraint, context) => true);
 
   if (constraintValidates) {
     stepUnifiesAsQualifiedConstraint = true;
@@ -417,7 +417,7 @@ function judgementsFromFacts(facts, context, continuation) {
       return continuation(judgements);
     }
 
-    return judgement.validate(context, (judgement) => {
+    return judgement.validate(state, context, (judgement) => {
       judgements.push(judgement);
 
       return continuation(judgements);

@@ -10,7 +10,7 @@ import { stripBracketsFromTerm } from "../../utilities/brackets";
 import { instantiateTermSubstitution } from "../../process/instantiate";
 import { termSubstitutionFromTermSubstitutionNode } from "../../utilities/element";
 import { termSubstitutionStringFromTermAndVariable } from "../../utilities/string";
-import { join, pass, waive, elide, ablate, ablates, manifest, attempts, reconcile, instantiate, unserialises } from "../../utilities/context";
+import { join, ablate, ablates, manifest, attempts, reconcile, instantiate, unserialises } from "../../utilities/context";
 
 const { asynchronousAll } = continuationUtilities,
       { breakPointFromJSON } = breakPointUtilities;
@@ -79,17 +79,7 @@ export default define(class TermSubstitution extends Substitution {
     return comparedToTerm;
   }
 
-  validate(strict, state, context, continuation) {
-    if (continuation === undefined) {
-      continuation = context; ///
-
-      context = state;
-
-      state = strict; ///
-
-      strict = false;
-    }
-
+  validate(state, context, continuation) {
     let validates;
 
     const termSubstitutionString = this.getString();  ///
@@ -110,31 +100,29 @@ export default define(class TermSubstitution extends Substitution {
       const generalContext = this.getGeneralContext(),
             specificContext = this.getSpecificContext();
 
-      (strict ? pass : waive)((context) => {
-        attempts((generalContext, specificContext) => {
-          const validateTargetTerm = this.validateTargetTerm.bind(this),
-                validateReplacementTerm = this.validateReplacementTerm.bind(this);
+      attempts((generalContext, specificContext) => {
+        const validateTargetTerm = this.validateTargetTerm.bind(this),
+              validateReplacementTerm = this.validateReplacementTerm.bind(this);
 
-          validates = all([
-            validateTargetTerm,
-            validateReplacementTerm
-          ], generalContext, specificContext, () => {
-            let validates;
+        validates = all([
+          validateTargetTerm,
+          validateReplacementTerm
+        ], state, generalContext, specificContext, () => {
+          let validates;
 
-            substitution = this;  ///
+          substitution = this;  ///
 
-            context.addSubstitution(substitution);
+          context.addSubstitution(substitution);
 
-            this.commit(generalContext, specificContext);
+          this.commit(generalContext, specificContext);
 
-            const termSubstitution = substitution; ///
+          const termSubstitution = substitution; ///
 
-            validates = continuation(termSubstitution, context);
+          validates = continuation(termSubstitution, context);
 
-            return validates;
-          });
-        }, generalContext, specificContext);
-      }, context);
+          return validates;
+        });
+      }, generalContext, specificContext);
     }
 
     if (validates) {
@@ -144,7 +132,7 @@ export default define(class TermSubstitution extends Substitution {
     return validates;
   }
 
-  validateTargetTerm(generalContext, specificContext, continuation) {
+  validateTargetTerm(state, generalContext, specificContext, continuation) {
     let targetTermValidates;
 
     const context = generalContext,  ///
@@ -155,13 +143,11 @@ export default define(class TermSubstitution extends Substitution {
     const targetTermSingular = this.targetTerm.isSingular();
 
     if (targetTermSingular) {
-      elide((context) => {
-        targetTermValidates = this.targetTerm.validate(context, (targetTerm, context) => {
-          const generalContext = context; ///
+      targetTermValidates = this.targetTerm.validate(state, context, (targetTerm, context) => {
+        const generalContext = context; ///
 
-          return continuation(generalContext, specificContext);
-        });
-      }, context);
+        return continuation(generalContext, specificContext);
+      });
     } else {
       const targetTermString = this.targetTerm.getString();
 
@@ -177,7 +163,7 @@ export default define(class TermSubstitution extends Substitution {
     return targetTermValidates;
   }
 
-  validateReplacementTerm(generalContext, specificContext, continuation) {
+  validateReplacementTerm(state, generalContext, specificContext, continuation) {
     let replacementTermValidates;
 
     const context = specificContext,  ///
@@ -185,13 +171,11 @@ export default define(class TermSubstitution extends Substitution {
 
     context.trace(`Validating the '${termSubstitutionString}' term substitution's replacement term...`);
 
-    elide((context) => {
-      replacementTermValidates = this.replacementTerm.validate(context, (replacementTerm, context) => {
-        const specificContext = context;  ///
+    replacementTermValidates = this.replacementTerm.validate(state, context, (replacementTerm, context) => {
+      const specificContext = context;  ///
 
-        return continuation(generalContext, specificContext);
-      });
-    }, context);
+      return continuation(generalContext, specificContext);
+    });
 
     if (replacementTermValidates) {
       context.debug(`...validated the '${termSubstitutionString}' term substitution's replacement term.`);

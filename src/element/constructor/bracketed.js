@@ -30,7 +30,7 @@ export default define(class BracketedConstructor extends Constructor {
       if (singularTermNode !== null) {
         const bracketlessTermNode = singularTermNode, ///
               bracketlessTerm = termFromTermNode(bracketlessTermNode, context),
-              validates = bracketlessTerm.validate(context, (bracketlessTerm, context) => {
+              validates = bracketlessTerm.validate(state, context, (bracketlessTerm, context) => {
                 const type = bracketlessTerm.getType(),
                       provisional = bracketlessTerm.isProvisional();
 

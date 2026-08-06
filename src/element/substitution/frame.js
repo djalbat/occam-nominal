@@ -9,7 +9,7 @@ import { define } from "../../elements";
 import { instantiateFrameSubstitution } from "../../process/instantiate";
 import { frameSubstitutionFromFrameSubstitutionNode } from "../../utilities/element";
 import { frameSubstitutionStringFromFrameAndMetavariable } from "../../utilities/string";
-import { join, pass, waive, elide, ablate, ablates, manifest, attempts, reconcile, instantiate, unserialises } from "../../utilities/context";
+import { join, ablate, ablates, manifest, attempts, reconcile, instantiate, unserialises } from "../../utilities/context";
 
 const { asynchronousAll } = continuationUtilities,
       { breakPointFromJSON } = breakPointUtilities;
@@ -76,17 +76,7 @@ export default define(class FrameSubstitution extends Substitution {
     return comparedToFrame;
   }
 
-  validate(strict, state, context, continuation) {
-    if (continuation === undefined) {
-      continuation = context; ///
-
-      context = state;
-
-      state = strict; ///
-
-      strict = false;
-    }
-
+  validate(state, context, continuation) {
     let validates;
 
     const frameSubstitutionString = this.getString();  ///
@@ -107,31 +97,29 @@ export default define(class FrameSubstitution extends Substitution {
       const generalContext = this.getGeneralContext(),
             specificContext = this.getSpecificContext();
 
-      (strict ? pass : waive)((context) => {
-        attempts((generalContext, specificContext) => {
-          const validateTargetFrame = this.validateTargetFrame.bind(this),
-                validateReplacementFrame = this.validateReplacementFrame.bind(this);
+      attempts((generalContext, specificContext) => {
+        const validateTargetFrame = this.validateTargetFrame.bind(this),
+              validateReplacementFrame = this.validateReplacementFrame.bind(this);
 
-          validates = all([
-            validateTargetFrame,
-            validateReplacementFrame
-          ], generalContext, specificContext, () => {
-            let validates;
+        validates = all([
+          validateTargetFrame,
+          validateReplacementFrame
+        ], state, generalContext, specificContext, () => {
+          let validates;
 
-            substitution = this;  ///
+          substitution = this;  ///
 
-            context.addSubstitution(substitution);
+          context.addSubstitution(substitution);
 
-            this.commit(generalContext, specificContext);
+          this.commit(generalContext, specificContext);
 
-            const frameSubstitution = substitution; ///
+          const frameSubstitution = substitution; ///
 
-            validates = continuation(frameSubstitution, context);
+          validates = continuation(frameSubstitution, context);
 
-            return validates;
-          });
-        }, generalContext, specificContext);
-      }, context);
+          return validates;
+        });
+      }, generalContext, specificContext);
     }
 
     if (validates) {
@@ -141,7 +129,7 @@ export default define(class FrameSubstitution extends Substitution {
     return validates;
   }
 
-  validateTargetFrame(generalContext, specificContext, continuation) {
+  validateTargetFrame(state, generalContext, specificContext, continuation) {
     let targetFrameValidates;
 
     const context = generalContext,  ///
@@ -152,13 +140,11 @@ export default define(class FrameSubstitution extends Substitution {
     const targetFrameSingular = this.targetFrame.isSingular();
 
     if (targetFrameSingular) {
-      elide((context) => {
-        targetFrameValidates = this.targetFrame.validate(context, (targetFrame, context) => {
-          const generalContext = context; ///
+      targetFrameValidates = this.targetFrame.validate(state, context, (targetFrame, context) => {
+        const generalContext = context; ///
 
-          return continuation(generalContext, specificContext);
-        });
-      }, context);
+        return continuation(generalContext, specificContext);
+      });
     } else {
       const targetFrameString = this.targetFrame.getString();
 
@@ -174,7 +160,7 @@ export default define(class FrameSubstitution extends Substitution {
     return targetFrameValidates;
   }
 
-  validateReplacementFrame(generalContext, specificContext, continuation) {
+  validateReplacementFrame(state, generalContext, specificContext, continuation) {
     let replacementFrameValidates;
 
     const context = specificContext,  ///
@@ -182,13 +168,11 @@ export default define(class FrameSubstitution extends Substitution {
 
     context.trace(`Validating the '${frameSubstitutionString}' frame substitution's replacement frame...`);
 
-    elide((context) => {
-      replacementFrameValidates = this.replacementFrame.validate(context, (replacementFrame, context) => {
-        const specificContext = context;  ///
+    replacementFrameValidates = this.replacementFrame.validate(state, context, (replacementFrame, context) => {
+      const specificContext = context;  ///
 
-        return continuation(generalContext, specificContext);
-      });
-    }, context);
+      return continuation(generalContext, specificContext);
+    });
 
     if (replacementFrameValidates) {
       context.debug(`...validated the '${frameSubstitutionString}' frame substitution's replacement frame.`);

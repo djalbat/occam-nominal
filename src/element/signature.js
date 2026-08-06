@@ -148,7 +148,7 @@ export default define(class Signature extends Element {
     const terms = [];
 
     termsValidate = asynchronousEvery(this.terms, (term) => {
-      term = term.validate(context, (term, context) => { ///
+      term = term.validate(state, context, (term, context) => { ///
         const validatesForwards = true;
 
         return validatesForwards;

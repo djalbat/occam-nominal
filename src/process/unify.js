@@ -475,7 +475,7 @@ class UnifyStatementWithCombinatorPass extends ContinuationZipPass {
           const frameNode = specificFrameNode,  ///
                 context = specificContext,  ///
                 frame = frameFromFrameNode(frameNode, context),
-                frameValidates = frame.validate(context, (frame, context) => {
+                frameValidates = frame.validate(state, context, (frame, context) => {
                   let validates;
 
                   const specificContext = context;  ///

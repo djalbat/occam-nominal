@@ -85,7 +85,7 @@ export default define(class SignatureAssertion extends Assertion {
 
     context.trace(`Validating the '${signatureAssertionString}' signature assertion's signature...`);
 
-    const signature = this.signature.validate(context);
+    const signature = this.signature.validate(state, context);
 
     if (signature !== null) {
       this.signature = signature;
@@ -107,7 +107,7 @@ export default define(class SignatureAssertion extends Assertion {
 
     context.trace(`Validating the '${signatureAssertionString}' signature assertion's reference...`);
 
-    const reference = this.reference.validate(context);
+    const reference = this.reference.validate(state, context);
 
     if (reference !== null) {
       const axiom = context.findAxiomByReference(reference);

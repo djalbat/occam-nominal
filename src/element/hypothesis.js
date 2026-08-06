@@ -98,7 +98,7 @@ export default define(class Hypothesis extends Element {
 
       context.trace(`Validating the '${hypothesisString}' hypothesis's statement...`);
 
-      const statement = await this.statement.validate(context);  ///
+      const statement = await this.statement.validate(state, context);  ///
 
       if (statement !== null) {
         statementValidates = true;
@@ -120,7 +120,7 @@ export default define(class Hypothesis extends Element {
 
       context.trace(`Validating the '${hypothesisString}' hypothesis's procedure call...`);
 
-      const procedureCall = this.procedureCall.validate(context);  ///
+      const procedureCall = this.procedureCall.validate(state, context);  ///
 
       if (procedureCall !== null) {
         procedureCallValidates = true;

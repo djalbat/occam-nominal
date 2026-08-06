@@ -111,7 +111,7 @@ export default define(class PropertyAssertion extends Assertion {
     propertyTerm = this.propertyTerm.validateAsProperty(context, (propertyTerm, context) => {
       let validatesForwards = false;
 
-      subjectTerm = this.subjectTerm.validate(context, (subjectTerm, context) => {
+      subjectTerm = this.subjectTerm.validate(state, context, (subjectTerm, context) => {
         let validatesForwards = false;
 
         const subjectTermType = subjectTerm.getType(),

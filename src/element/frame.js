@@ -200,7 +200,7 @@ export default define(class Frame extends Element {
 
     context.trace(`Validating the '${frameString}' frame's '${assumptionString}' assumption...`);
 
-    assumptionValidates = assumption.validate(context, (assumption, context) => {
+    assumptionValidates = assumption.validate(state, context, (assumption, context) => {
       let validates;
 
       assumptions.push(assumption);

@@ -161,7 +161,7 @@ export default define(class Equality extends Element {
     context.trace(`Validating the '${equalityString}' equality's terms...`);
 
     const leftTermValidates = this.leftTerm.validate(state, context, (leftTerm, context) => {
-      const rightTermValidtes = this.rightTerm.validate(context, (rightTerm, context) => {
+      const rightTermValidtes = this.rightTerm.validate(state, context, (rightTerm, context) => {
         let validates = false;
 
         const leftTermType = leftTerm.getType(),

@@ -82,7 +82,7 @@ export default define(class Constructor extends Element {
     context.trace(`Verifying the '${constructorString}' constructor...`);
 
     attempt((context) => {
-      const validates = this.validate(context, (constructor, context) => true);
+      const validates = this.validate(state, context, (constructor, context) => true);
 
       if (validates) {
         this.commit(context);

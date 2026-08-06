@@ -4,6 +4,7 @@ import elements from "../elements";
 
 import { some } from "../utilities/continuation";
 import { choose } from "../utilities/context";
+import { desist, declare } from "../utilities/state";
 import { provisionallyStringFromProvisional } from "../utilities/string";
 import { bracketedConstructorFromNothing, bracketedCombinatorFromNothing } from "../utilities/instance";
 
@@ -18,7 +19,7 @@ export function validateTermAsVariable(term, context, continuation) {
 
     context.trace(`Validating the '${termString}' term as a variable...`);
 
-    const variableValidaets = variable.validate(context, (variable, context) => {
+    const variableValidaets = variable.validate(state, context, (variable, context) => {
       let validates;
 
       const type = variable.getType(),
@@ -149,32 +150,24 @@ function validateStatementAsMetavariable(statement, state, context, continuation
 
     context.trace(`Validating the '${statementString}' statement as a metavariable...`);
 
-    const strict = true;  ///
+    const strict = true,  ///
+          metavaraibleValidates = metavariable.validate(strict, state, context, (metavariable, context) => {
+            let validates;
 
-    const metavaraibleValidates = metavariable.validate(strict, state, context, (metavariable, context) => {
-      let validates;
+            const substitutionValidates = validateSubstitution(statement, context, (context) => {
+              let validaets;
 
-      const substitution = statement.getSubstitution();
+              validates = continuation(statement, state, context);
 
-      if (substitution !== null) {
-        const strict = true,
-              substitutionValidates = substitution.validate(strict, state, context, (substitution, context) => {
-                let validaets;
+              return validaets;
+            });
 
-                validates = continuation(statement, state, context);
+            if (substitutionValidates) {
+              validates = true;
+            }
 
-                return validaets;
-              });
-
-        if (substitutionValidates) {
-          validates = true;
-        }
-      } else {
-        validates = continuation(statement, state, context);
-      }
-
-      return validates;
-    });
+            return validates;
+          });
 
     if (metavaraibleValidates) {
       statementValidatesAsMetavariable = true;
@@ -534,3 +527,28 @@ export const validateStatements = [
   validateStatementAsContainedAssertion,
   validateStatementAsSignatureAssertion
 ];
+
+function validateSubstitution(statement, context, continuation) {
+  let substitutionValidates;
+
+  const substitution = statement.getSubstitution();
+
+  if (substitution !== null) {
+    declare((state) => {
+      desist((state) => {
+        substitutionValidates = substitution.validate(state, context, (substitution, context) => {
+          let validates;
+
+          validates = continuation(context);
+
+          return validates;
+        });
+
+      }, state);
+    });
+  } else {
+    substitutionValidates = continuation(context);
+  }
+
+  return substitutionValidates;
+}
