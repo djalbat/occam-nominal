@@ -81,15 +81,9 @@ export default define(class Premise extends Fact {
 
     let validates;
 
-    attempt((context) => {
-      declare((state) => {
-        validates = this.validate(state, context, (premise, context) => true);
-
-        if (validates) {
-          this.commit(context);
-        }
-      });
-    }, context);
+    declare((state) => {
+      validates = this.validate(state, context, (premise, context) => true);
+    });
 
     if (!validates) {
       const verifies = false;
@@ -113,21 +107,25 @@ export default define(class Premise extends Fact {
 
     context.trace(`Validating the '${premiseString}' premise...`);
 
-    const validateStatement = this.validateStatement.bind(this),
-          validateProcedureCall = this.validateProcedureCall.bind(this);
+    attempt((context) => {
+      const validateStatement = this.validateStatement.bind(this),
+            validateProcedureCall = this.validateProcedureCall.bind(this);
 
-    validates = all([
-      validateStatement,
-      validateProcedureCall
-    ], state, context, (state, context) => {
-      let validates;
+      validates = all([
+        validateStatement,
+        validateProcedureCall
+      ], state, context, (state, context) => {
+        let validates;
 
-      const premise = this;  ///
+        const premise = this;  ///
 
-      validates = continuation(premise, context);
+        this.commit(context);
 
-      return validates;
-    });
+        validates = continuation(premise, context);
+
+        return validates;
+      });
+    }, context);
 
     if (validates) {
       context.debug(`...validated the '${premiseString}' premise.`);

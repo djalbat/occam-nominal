@@ -144,17 +144,11 @@ export default define(class Step extends Fact {
 
     let validates;
 
-    attempt((context) => {
-      const declared = this.idDeclared();
+    const declared = this.idDeclared();
 
-      (declared ? declare : derive)((state) => {
-        validates = this.validate(state, context, (step, context) => true);
-      });
-
-      if (validates) {
-        this.commit(context);
-      }
-    }, context);
+    (declared ? declare : derive)((state) => {
+      validates = this.validate(state, context, (step, context) => true);
+    });
 
     if (!validates) {
       const verifies = false;
@@ -184,23 +178,27 @@ export default define(class Step extends Fact {
 
     context.trace(`Validating the '${stepString}' step...`);
 
-    const validateStatement = this.validateStatement.bind(this),
-          validateReference = this.validateReference.bind(this),
-          validateSignatureAssertion = this.validateSignatureAssertion.bind(this);
+    attempt((context) => {
+      const validateStatement = this.validateStatement.bind(this),
+            validateReference = this.validateReference.bind(this),
+            validateSignatureAssertion = this.validateSignatureAssertion.bind(this);
 
-    validates = all([
-      validateStatement,
-      validateReference,
-      validateSignatureAssertion
-    ], state, context, (state, context) => {
-      let validates;
+      validates = all([
+        validateStatement,
+        validateReference,
+        validateSignatureAssertion
+      ], state, context, (state, context) => {
+        let validates;
 
-      const step = this;  ///
+        const step = this;  ///
 
-      validates = continuation(step, context);
+        this.commit(context);
 
-      return validates;
-    });
+        validates = continuation(step, context);
+
+        return validates;
+      });
+    }, context);
 
     if (validates) {
       context.debug(`...validated the '${stepString}' step.`);

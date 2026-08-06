@@ -3,7 +3,7 @@
 import { Element, breakPointUtilities } from "occam-languages";
 
 import { all } from "../utilities/continuation";
-import { reconcile, serialise } from "../utilities/context";
+import { attempt, reconcile, serialise } from "../utilities/context";
 
 const { breakPointToBreakPointJSON } = breakPointUtilities;
 
@@ -31,19 +31,23 @@ export default class Resolution extends Element {
 
     context.trace(`Validating the '${resolutionString}' resolution...`);
 
-    const validateStatement = this.validateStatement.bind(this);
+    attempt((context) => {
+      const validateStatement = this.validateStatement.bind(this);
 
-    validates = all([
-      validateStatement
-    ], state, context, (state, context) => {
-      let validates;
+      validates = all([
+        validateStatement
+      ], state, context, (state, context) => {
+        let validates;
 
-      const resolution = this;  ///
+        this.commit(context);
 
-      validates = continuation(resolution, context);
+        const resolution = this;  ///
 
-      return validates;
-    });
+        validates = continuation(resolution, context);
+
+        return validates;
+      });
+    }, context);
 
     if (validates) {
       context.debug(`...validated the '${resolutionString}' resolution.`);

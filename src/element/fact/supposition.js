@@ -81,15 +81,9 @@ export default define(class Supposition extends Fact {
 
     let validates;
 
-    attempt((context) => {
-      declare((state) => {
-        validates = this.validate(state, context, (supposition, context) => true);
-
-        if (validates) {
-          this.commit(context);
-        }
-      });
-    }, context);
+    declare((state) => {
+      validates = this.validate(state, context, (supposition, context) => true);
+    });
 
     if (!validates) {
       const verifies = false;
@@ -113,21 +107,25 @@ export default define(class Supposition extends Fact {
 
     context.trace(`Validating the '${suppositionString}' supposition...`);
 
-    const validateStatement = this.validateStatement.bind(this),
-          validateProcedureCall = this.validateProcedureCall.bind(this);
+    attempt((context) => {
+      const validateStatement = this.validateStatement.bind(this),
+            validateProcedureCall = this.validateProcedureCall.bind(this);
 
-    validates = all([
-      validateStatement,
-      validateProcedureCall
-    ], state, context, (state, context) => {
-      let validates;
+      validates = all([
+        validateStatement,
+        validateProcedureCall
+      ], state, context, (state, context) => {
+        let validates;
 
-      const supposition = this;  ///
+        const supposition = this;  ///
 
-      validates = continuation(supposition, context);
+        this.commit(context);
 
-      return validates;
-    });
+        validates = continuation(supposition, context);
+
+        return validates;
+      });
+    }, context);
 
     if (validates) {
       context.debug(`...validated the '${suppositionString}' supposition.`);
