@@ -76,11 +76,13 @@ export default define(class FrameSubstitution extends Substitution {
     return comparedToFrame;
   }
 
-  validate(strict, context, continuation) {
+  validate(strict, state, context, continuation) {
     if (continuation === undefined) {
       continuation = context; ///
 
-      context = strict; ///
+      context = state;
+
+      state = strict; ///
 
       strict = false;
     }

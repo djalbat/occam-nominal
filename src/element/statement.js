@@ -197,7 +197,7 @@ export default define(class Statement extends Element {
     return comparesToParamter;
   }
 
-  validate(stated, context, continuation) {
+  validate(state, context, continuation) {
     let validates;
 
     const statementString = this.getString();  ///
@@ -215,7 +215,7 @@ export default define(class Statement extends Element {
     } else {
       statement = this; ///
 
-      validates = exists(validateStatements, statement, stated, context, (statement, context) => {
+      validates = exists(validateStatements, statement, state, context, (statement, state, context) => {
         let validates;
 
         context.addStatement(statement);

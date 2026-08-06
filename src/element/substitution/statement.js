@@ -6,6 +6,7 @@ import Substitution from "../substitution";
 
 import { all } from "../../utilities/continuation";
 import { define } from "../../elements";
+import { declare } from "../../utilities/state";
 import { stripBracketsFromStatement } from "../../utilities/brackets";
 import { instantiateStatementSubstitution } from "../../process/instantiate";
 import { statementSubstitutionFromStatementSubstitutionNode } from "../../utilities/element";
@@ -78,11 +79,13 @@ export default define(class StatementSubstitution extends Substitution {
     return comparesToParameter;
   }
 
-  validate(strict, context, continuation) {
+  validate(strict, state, context, continuation) {
     if (continuation === undefined) {
       continuation = context; ///
 
-      context = strict; ///
+      context = state;
+
+      state = strict; ///
 
       strict = false;
     }
@@ -153,10 +156,12 @@ export default define(class StatementSubstitution extends Substitution {
 
     if (targetStatementSingular) {
       elide((context) => {
-        targetStatementValidates = this.targetStatement.validate(context, (targetStatement, context) => {
-          const generalContext = context; ///
+        declare((state) => {
+          targetStatementValidates = this.targetStatement.validate(state, context, (targetStatement, context) => {
+            const generalContext = context; ///
 
-          return continuation(generalContext, specificContext);
+            return continuation(generalContext, specificContext);
+          });
         });
       }, context);
     } else {
@@ -183,10 +188,12 @@ export default define(class StatementSubstitution extends Substitution {
     context.trace(`Validating the '${statementSubstitutionString}' statement substitution's replacement statement...`);
 
     elide((context) => {
-      replacementStatementValidates = this.replacementStatement.validate(context, (replacementStatement, context) => {
-        const specificContext = context;  ///
+      declare((state) => {
+        replacementStatementValidates = this.replacementStatement.validate(state, context, (replacementStatement, context) => {
+          const specificContext = context;  ///
 
-        return continuation(generalContext, specificContext);
+          return continuation(generalContext, specificContext);
+        });
       });
     }, context);
 

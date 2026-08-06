@@ -2,8 +2,9 @@
 
 import { Element, breakPointUtilities } from "occam-languages";
 
+import { all } from "../utilities/continuation";
 import { define } from "../elements";
-import { exists } from "../utilities/continuation";
+import { declare } from "../utilities/state";
 import { instantiateCombinator } from "../process/instantiate";
 import { statementFromCombinatorNode } from "../utilities/element";
 import { unifyStatementWithCombinator } from "../process/unify";
@@ -38,13 +39,15 @@ export default define(class Combinator extends Element {
     context.trace(`Verifying the '${combinatorString}' combinator...`);
 
     attempt((context) => {
-      const validates = this.validate(context, (combinator, context) => true);
+      declare((state) => {
+        const validates = this.validate(state, context, (combinator, context) => true);
 
-      if (validates) {
-        this.commit(context);
+        if (validates) {
+          this.commit(context);
 
-        verifies = true;
-      }
+          verifies = true;
+        }
+      });
     }, context);
 
     if (verifies) {
@@ -54,7 +57,7 @@ export default define(class Combinator extends Element {
     return continuation(verifies, context);
   }
 
-  validate(stated, context, continuation) {
+  validate(state, context, continuation) {
     let validates;
 
     const combinatorString = this.getString();  ///
@@ -63,9 +66,9 @@ export default define(class Combinator extends Element {
 
     const validateStatementAsCombinator = this.validateStatementAsCombinator.bind(this);
 
-    validates = exists([
+    validates = all([
       validateStatementAsCombinator
-    ], stated, context, (stated, context) => {
+    ], state, context, (state, context) => {
       let validates;
 
       const combinator = this;
@@ -82,14 +85,20 @@ export default define(class Combinator extends Element {
     return validates;
   }
 
-  validateStatementAsCombinator(stated, context, continuation) {
+  validateStatementAsCombinator(state, context, continuation) {
     let statementValidatesAsCombinator;
 
     const combinatorString = this.getString();
 
     context.trace(`Validating the '${combinatorString}' combinator's statement...`);
 
-    statementValidatesAsCombinator = validateStatementAsCombinator(this.statement, context, continuation);
+    statementValidatesAsCombinator = validateStatementAsCombinator(this.statement, context, (context) => {
+      let validates;
+
+      validates = continuation(state, context);
+
+      return validates;
+    });
 
     if (statementValidatesAsCombinator) {
       context.debug(`...validated the '${combinatorString}' combinator's statement.`);
@@ -99,7 +108,7 @@ export default define(class Combinator extends Element {
   }
 
   unifyStatement(statement, context, continuation) {
-    let statementUnifies;
+    let statementUnifies = false;
 
     const statementString = statement.getString(),
           combinatorString = this.getString();  ///
@@ -109,13 +118,20 @@ export default define(class Combinator extends Element {
     const combinator = this, ///
           combinatorContext = combinator.getContext(),
           generalContext = combinatorContext, ///
-          specifiContext = context; ///
+          specifiContext = context,
+          statementUnifiesWithCombinator = unifyStatementWithCombinator(statement, combinator, generalContext, specifiContext, (generalContext, specifiContext) => {
+            let statementUnifiesWithCombinator;
 
-    statementUnifies = unifyStatementWithCombinator(statement, combinator, generalContext, specifiContext, (generalContext, specifiContext) => {
-      const context = specifiContext; ///
+            const context = specifiContext; ///
 
-      return continuation(statement, context);
-    });
+            statementUnifiesWithCombinator = continuation(statement, context);
+
+            return statementUnifiesWithCombinator;
+          });
+
+    if (statementUnifiesWithCombinator) {
+      statementUnifies = true;
+    }
 
     if (statementUnifies) {
       context.debug(`...unified the '${statementString}' statement with the '${combinatorString}' combinator.`);

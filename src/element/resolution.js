@@ -2,6 +2,7 @@
 
 import { Element, breakPointUtilities } from "occam-languages";
 
+import { all } from "../utilities/continuation";
 import { reconcile, serialise } from "../utilities/context";
 
 const { breakPointToBreakPointJSON } = breakPointUtilities;
@@ -23,22 +24,26 @@ export default class Resolution extends Element {
     return nonsensical;
   }
 
-  validate(stated, context, continuation) {
-    let validates = false;
+  validate(state, context, continuation) {
+    let validates;
 
-    const resolutionString = this.getString();  ///
+    const resolutionString = this.getString(); ///
 
     context.trace(`Validating the '${resolutionString}' resolution...`);
 
-    const statementValidates = this.validateStatement(stated, context, (context) => {
-      const resolution = this; ///
+    const validateStatement = this.validateStatement.bind(this);
 
-      return continuation(resolution, context);
+    validates = all([
+      validateStatement
+    ], state, context, (state, context) => {
+      let validates;
+
+      const resolution = this;  ///
+
+      validates = continuation(resolution, context);
+
+      return validates;
     });
-
-    if (statementValidates) {
-      validates = true;
-    }
 
     if (validates) {
       context.debug(`...validated the '${resolutionString}' resolution.`);
@@ -47,25 +52,29 @@ export default class Resolution extends Element {
     return validates;
   }
 
-  validateStatement(context, continuation) {
+  validateStatement(state, context, continuation) {
     let statementValidates;
 
-    const resolutionString = this.getString();  ///
+    if (this.statement !== null) {
+      const resolutionString = this.getString();  ///
 
-    context.trace(`Validating the '${resolutionString}' resolution's statement...`);
+      context.trace(`Validating the '${resolutionString}' resolution's statement...`);
 
-    statementValidates = this.statement.validate(context, (statement, context) => {
-      let validates;
+      statementValidates = this.statement.validate(state, context, (statement, context) => {
+        let validates;
 
-      this.statement = statement;
+        this.statement = statement;
 
-      validates = continuation(context);
+        validates = continuation(state, context);
 
-      return validates;
-    });
+        return validates;
+      });
 
-    if (statementValidates) {
-      context.trace(`...validated the '${resolutionString}' resolution's statement.`);
+      if (statementValidates) {
+        context.trace(`...validated the '${resolutionString}' resolution's statement.`);
+      }
+    } else {
+      statementValidates = continuation(state, context);
     }
 
     return statementValidates;

@@ -8,6 +8,7 @@ import { instantiate } from "../utilities/context";
 import { all, exists } from "../utilities/continuation";
 import { instantiateEquality } from "../process/instantiate";
 import { equalityFromStatementNode } from "../utilities/element";
+import { isDerived, isDeclared, isTransient } from "../utilities/state";
 import { equalityAssignmentFromEquality, leftVariableAssignmentFromEquality, rightVariableAssignmentFromEquality } from "../process/assign";
 
 const { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
@@ -98,7 +99,7 @@ export default define(class Equality extends Element {
     return equality;
   }
 
-  validate(stated, context, continuation) {
+  validate(state, context, continuation) {
     let validates;
 
     const equalityString = this.getString();  ///
@@ -120,16 +121,16 @@ export default define(class Equality extends Element {
 
       validates = all([
         validateTerms
-      ], stated, context, (stated, context) => {
+      ], state, context, (state, context) => {
         let validates;
 
-        const validateWhenStated = this.validateWhenStated.bind(this),
+        const validateWhenDeclared = this.validateWhenDeclared.bind(this),
               validateWhenDerived = this.validateWhenDerived.bind(this);
 
         validates = exists([
-          validateWhenStated,
+          validateWhenDeclared,
           validateWhenDerived
-        ], stated, context, (stated, context) => {
+        ], state, context, (state, context) => {
           let validates;
 
           this.assign(context);
@@ -152,14 +153,14 @@ export default define(class Equality extends Element {
     return validates;
   }
 
-  validateTerms(stated, context, continuation) {
+  validateTerms(state, context, continuation) {
     let termsValidate = false;
 
     const equalityString = this.getString(); ///
 
     context.trace(`Validating the '${equalityString}' equality's terms...`);
 
-    const leftTermValidates = this.leftTerm.validate(stated, context, (leftTerm, context) => {
+    const leftTermValidates = this.leftTerm.validate(state, context, (leftTerm, context) => {
       const rightTermValidtes = this.rightTerm.validate(context, (rightTerm, context) => {
         let validates = false;
 
@@ -174,7 +175,7 @@ export default define(class Equality extends Element {
 
           this.rightTerm = rightTerm;
 
-          validates = continuation(stated, context);
+          validates = continuation(state, context);
         }
 
         return validates;
@@ -194,28 +195,32 @@ export default define(class Equality extends Element {
     return termsValidate;
   }
 
-  validateWhenStated(stated, context, continuation) {
-    let validatesWhenStated = false;
+  validateWhenDeclared(state, context, continuation) {
+    let validatesWhenDeclared = false;
 
-    if (stated) {
+    const declared = isDeclared(state);
+
+    if (declared) {
       const equalityString = this.getString(); ///
 
-      context.trace(`Validating the '${equalityString}' stated equality...`);
+      context.trace(`Validating the '${equalityString}' declared equality...`);
 
-      validatesWhenStated = continuation(stated, context);
+      validatesWhenDeclared = continuation(state, context);
 
-      if (validatesWhenStated) {
-        context.debug(`...validated the '${equalityString}' stated equality.`);
+      if (validatesWhenDeclared) {
+        context.debug(`...validated the '${equalityString}' declared equality.`);
       }
     }
 
-    return validatesWhenStated;
+    return validatesWhenDeclared;
   }
 
-  validateWhenDerived(stated, context, continuation) {
+  validateWhenDerived(state, context, continuation) {
     let validatesWhenDerived = false;
 
-    if (!stated) {
+    const derived = isDerived(state);
+
+    if (derived) {
       const equalityString = this.getString(); ///
 
       context.trace(`Validating the '${equalityString}' derived equality...`);
@@ -223,7 +228,7 @@ export default define(class Equality extends Element {
       const termsEquate = equateTerms(this.leftTerm, this.rightTerm, context);
 
       if ((this.negated && !termsEquate) || (!this.negated && termsEquate)) {
-        validatesWhenDerived = continuation(stated, context);
+        validatesWhenDerived = continuation(state, context);
       }
 
       if (validatesWhenDerived) {
@@ -234,7 +239,13 @@ export default define(class Equality extends Element {
     return validatesWhenDerived;
   }
 
-  assign(context) {
+  assign(state, context) {
+    const transient = isTransient(state);
+
+    if (transient) {
+      return;
+    }
+
     const equality = this,  ///
           negated = this.isNegated(),
           reflexive = this.isReflexive();

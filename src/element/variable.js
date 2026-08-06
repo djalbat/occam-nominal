@@ -6,6 +6,7 @@ import elements from "../elements";
 
 import { define } from "../elements";
 import { instantiate } from "../utilities/context";
+import { declare, desist  } from "../utilities/state";
 import { instantiateVariable } from "../process/instantiate";
 import { provisionallyStringFromProvisional } from "../utilities/string";
 import { variableFromTermNode, identifierFromVariableNode } from "../utilities/element";
@@ -87,7 +88,7 @@ export default define(class Variable extends Element {
     return comparesToVariableIdentifier;
   }
 
-  validate(stated, context, continuation) {
+  validate(state, context, continuation) {
     let validates;
 
     const variableString = this.getString(); ///
@@ -163,16 +164,20 @@ export default define(class Variable extends Element {
     const { TermSubstitution } = elements,
           termSubstitution = TermSubstitution.fromTermAndVariable(term, variable, generalContext, specificContext);
 
-    termSubstitution.validate(context, (termSubstitution, context) => {
-      let validates;
+    declare((state) => {
+      desist((state) => {
+        termSubstitution.validate(state, context, (termSubstitution, context) => {
+          let validates;
 
-      const inferredSubstitution = termSubstitution;  ///
+          const inferredSubstitution = termSubstitution;  ///
 
-      context.addInferredSubstitution(inferredSubstitution);
+          context.addInferredSubstitution(inferredSubstitution);
 
-      validates = true;
+          validates = true;
 
-      return validates;
+          return validates;
+        });
+      }, state);
     });
 
     const termUnifies = true;

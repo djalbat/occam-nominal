@@ -6,6 +6,7 @@ import Fact from "../fact";
 
 import { all } from "../../utilities/continuation";
 import { define } from "../../elements";
+import { declare } from "../../utilities/state";
 import { instantiateSupposition } from "../../process/instantiate";
 import { procedureCallFromSuppositionNode } from "../../utilities/element";
 import { attempt, reconcile, serialise, unserialise, instantiate } from "../../utilities/context";
@@ -81,13 +82,13 @@ export default define(class Supposition extends Fact {
     let validates;
 
     attempt((context) => {
-      const stated = true;
+      declare((state) => {
+        validates = this.validate(state, context, (supposition, context) => true);
 
-      validates = this.validate(stated, context, (supposition, context) => true);
-
-      if (validates) {
-        this.commit(context);
-      }
+        if (validates) {
+          this.commit(context);
+        }
+      });
     }, context);
 
     if (!validates) {
@@ -105,7 +106,7 @@ export default define(class Supposition extends Fact {
     return continuation(verifies, context);
   });
 
-  validate(stated, context, continuation) {
+  validate(state, context, continuation) {
     let validates;
 
     const suppositionString = this.getString(); ///
@@ -118,7 +119,7 @@ export default define(class Supposition extends Fact {
     validates = all([
       validateStatement,
       validateProcedureCall
-    ], stated, context, (stated, context) => {
+    ], state, context, (state, context) => {
       let validates;
 
       const supposition = this;  ///
@@ -135,8 +136,8 @@ export default define(class Supposition extends Fact {
     return validates;
   }
 
-  validateProcedureCall(context, continuation) {
-    let procedureCallValidates = true;  ///
+  validateProcedureCall(state, context, continuation) {
+    let procedureCallValidates;
 
     const procedureCall = this.getProcedureCall();
 
@@ -148,7 +149,7 @@ export default define(class Supposition extends Fact {
       procedureCallValidates = procedureCall.validate(context, (procedureCall, context) => {
         let validates;
 
-        validates = continuation(context);
+        validates = continuation(state, context);
 
         return validates;
       });
@@ -156,6 +157,8 @@ export default define(class Supposition extends Fact {
       if (procedureCallValidates) {
         context.trace(`...validated the '${suppositionString}' supposition's procedure call.`);
       }
+    } else {
+      procedureCallValidates = continuation(state, context);
     }
 
     return procedureCallValidates;

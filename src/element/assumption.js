@@ -76,7 +76,7 @@ export default define(class Assumption extends Element {
     return assumption;
   }
 
-  validate(stated, context, continuation) {
+  validate(state, context, continuation) {
     const assumptionString = this.getString();  ///
 
     context.trace(`Validating the '${assumptionString}' assumption...`);
@@ -95,15 +95,15 @@ export default define(class Assumption extends Element {
     return all([
       validateStatement,
       validateReference
-    ], stated, context, (stated, context) => {
+    ], state, context, (state, context) => {
 
-      const validateWhenStated = this.validateWhenStated.bind(this),
+      const validateWhenDeclared = this.validateWhenDeclared.bind(this),
             validateWhenDerived = this.validateWhenDerived.bind(this);
 
       return exists([
-        validateWhenStated,
+        validateWhenDeclared,
         validateWhenDerived
-      ], stated, context, (stated, context) => {
+      ], state, context, (state, context) => {
         const assumption = this;  ///
 
         context.addAssumption(assumption);
@@ -115,19 +115,19 @@ export default define(class Assumption extends Element {
     });
   }
 
-  validateReference(stated, context, continuation) {
+  validateReference(state, context, continuation) {
     let referenceValidates;
 
     const assumptionString = this.getString();  ///
 
     context.trace(`Validating the '${assumptionString}' assumption's reference...`);
 
-    referenceValidates = this.reference.validate(stated, context, (reference, stated, context) => {
+    referenceValidates = this.reference.validate(state, context, (reference, state, context) => {
       let validates;
 
       this.reference = reference;
 
-      validates = continuation(stated, context);
+      validates = continuation(state, context);
 
       return validates;
     });
@@ -137,19 +137,19 @@ export default define(class Assumption extends Element {
     }
   }
 
-  validateStatement(stated, context, continuation) {
+  validateStatement(state, context, continuation) {
     let statementValidates;
 
     const assumptionString = this.getString();  ///
 
     context.trace(`Validating the '${assumptionString}' assumption's statement...`);
 
-    statementValidates = this.statement.validate(stated, context, (statement, stated, context) => {
+    statementValidates = this.statement.validate(state, context, (statement, state, context) => {
       let validates;
 
       this.statement = statement;
 
-      validates = continuation(stated, context);
+      validates = continuation(state, context);
 
       return validates;
     });
@@ -161,30 +161,30 @@ export default define(class Assumption extends Element {
     return statementValidates;
   }
 
-  validateWhenStated(stated, context, continuation) {
-    if (!stated) {
-      const validatesWhenStated = false;
+  validateWhenDeclared(state, context, continuation) {
+    if (!state) {
+      const validatesWhenDeclared = false;
 
-      return continuation(validatesWhenStated);
+      return continuation(validatesWhenDeclared);
     }
 
-    let validatesWhenStated;
+    let validatesWhenDeclared;
 
     const assumptionString = this.getString();  ///
 
-    context.trace(`Validating the '${assumptionString}' stated assumption...`);
+    context.trace(`Validating the '${assumptionString}' state assumption...`);
 
-    validatesWhenStated = true
+    validatesWhenDeclared = true
 
-    if (validatesWhenStated) {
-      context.debug(`...validated the '${assumptionString}' stated assumption.`);
+    if (validatesWhenDeclared) {
+      context.debug(`...validated the '${assumptionString}' state assumption.`);
     }
 
-    return continuation(validatesWhenStated);
+    return continuation(validatesWhenDeclared);
   }
 
-  validateWhenDerived(stated, context, continuation) {
-    if (stated) {
+  validateWhenDerived(state, context, continuation) {
+    if (state) {
       const validatesWhenDerived = false;
 
       return continuation(validatesWhenDerived);

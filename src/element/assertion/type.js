@@ -10,6 +10,7 @@ import { all, exists } from "../../utilities/continuation";
 import { instantiateTypeAssertion } from "../../process/instantiate";
 import { typeFromJSON, typeToTypeJSON } from "../../utilities/json";
 import { termFromTermAndSubstitutions } from "../../utilities/substitutions";
+import { isDerived, isDeclared, isTransient } from "../../utilities/state";
 import { variableAssignmentFromTypeAssertion } from "../../process/assign";
 import { termFromTypeAssertionNode, typeAssertionFromStatementNode } from "../../utilities/element";
 
@@ -38,7 +39,7 @@ export default define(class TypeAssertion extends Assertion {
     return typeAssertionNode;
   }
 
-  validate(stated, context, continuation) {
+  validate(state, context, continuation) {
     let validates;
 
     const typeAssertionString = this.getString();  ///
@@ -62,16 +63,16 @@ export default define(class TypeAssertion extends Assertion {
 
       validates = all([
         validateType
-      ], stated, context, (stated, context) => {
+      ], state, context, (state, context) => {
         let validates;
 
-        const validateWhenStated = this.validateWhenStated.bind(this),
+        const validateWhenDeclared = this.validateWhenDeclared.bind(this),
               validateWhenDerived = this.validateWhenDerived.bind(this);
 
         validates = exists([
-          validateWhenStated,
+          validateWhenDeclared,
           validateWhenDerived
-        ], stated, context, (stated, context) => {
+        ], state, context, (state, context) => {
           let validates;
 
           const assertion = typeAssertion;  ///
@@ -125,7 +126,7 @@ export default define(class TypeAssertion extends Assertion {
     return discharges;
   }
 
-  validateType(stated, context, continuation) {
+  validateType(state, context, continuation) {
     let typeValidates = false;
 
     const typeAssertionString = this.getString();  ///
@@ -146,7 +147,7 @@ export default define(class TypeAssertion extends Assertion {
     }
 
     if (typeValidates) {
-      typeValidates = continuation(stated, context);
+      typeValidates = continuation(state, context);
     }
 
     if (typeValidates) {
@@ -156,15 +157,17 @@ export default define(class TypeAssertion extends Assertion {
     return typeValidates;
   }
 
-  validateWhenStated(stated, context, continuation) {
-    let validatesWhenStated = false;
+  validateWhenDeclared(state, context, continuation) {
+    let validatesWhenDeclared = false;
 
-    if (stated) {
+    const declared = isDeclared(state);
+
+    if (declared) {
       const typeAssertionString = this.getString(); ///
 
-      context.trace(`Validating the '${typeAssertionString}' stated type assertion...`);
+      context.trace(`Validating the '${typeAssertionString}' declared type assertion...`);
 
-      validatesWhenStated = this.term.validate(context, (term, context) => {
+      validatesWhenDeclared = this.term.validate(context, (term, context) => {
         let termValidates = false;
 
         const termType = term.getType(),
@@ -186,24 +189,26 @@ export default define(class TypeAssertion extends Assertion {
         if (termValidates) {
           this.term = term;
 
-          termValidates = continuation(stated, context);
+          termValidates = continuation(state, context);
         }
 
         return termValidates;
       });
 
-      if (validatesWhenStated) {
-        context.debug(`...validated the '${typeAssertionString}' stated type assertion.`);
+      if (validatesWhenDeclared) {
+        context.debug(`...validated the '${typeAssertionString}' declared type assertion.`);
       }
     }
 
-    return validatesWhenStated;
+    return validatesWhenDeclared;
   }
 
-  validateWhenDerived(stated, context, continuation) {
+  validateWhenDerived(state, context, continuation) {
     let validatesWhenDerived = false;
 
-    if (!stated) {
+    const derived = isDerived(state);
+
+    if (derived) {
       const typeAssertionString = this.getString(); ///
 
       context.trace(`Validating the '${typeAssertionString}' derived type assertion...`);
@@ -213,7 +218,7 @@ export default define(class TypeAssertion extends Assertion {
 
         this.term = term;
 
-        validatesWhenDerived = continuation(stated, context);
+        validatesWhenDerived = continuation(state, context);
 
         return validatesWhenDerived;
       });
@@ -254,10 +259,10 @@ export default define(class TypeAssertion extends Assertion {
     return unifiesIndependently;
   }
 
-  assign(context) {
-    const stated = context.isStated();
+  assign(state, context) {
+    const transient = isTransient(state);
 
-    if (!stated) {
+    if (transient) {
       return;
     }
 

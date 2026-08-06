@@ -7,6 +7,7 @@ import Assertion from "../assertion";
 
 import { define } from "../../elements";
 import { all, every, exists } from "../../utilities/continuation";
+import { isDerived, isDeclared } from "../../utilities/state";
 import { join, reconcile, instantiate } from "../../utilities/context";
 import { instantiateSubproofAssertion } from "../../process/instantiate";
 import { subproofAssertionFromStatementNode } from "../../utilities/element";
@@ -54,7 +55,7 @@ export default define(class SubproofAssertion extends Assertion {
     return subproofAssertionNode;
   }
 
-  validate(stated, context, continuation) {
+  validate(state, context, continuation) {
     let validates;
 
     const subproofAssertionString = this.getString();  ///
@@ -78,16 +79,16 @@ export default define(class SubproofAssertion extends Assertion {
 
       validates = all([
         validateStatements
-      ], context, (context) => {
+      ], state, context, (state, context) => {
         let validates;
 
-        const validateWhenStated = this.validateWhenStated.bind(this),
+        const validateWhenDeclared = this.validateWhenDeclared.bind(this),
               validateWhenDerived = this.validateWhenDerived.bind(this);
 
         validates = exists([
-          validateWhenStated,
+          validateWhenDeclared,
           validateWhenDerived
-        ], context, (context) => {
+        ], state, context, (state, context) => {
           let validates;
 
           const assertion = subproofAssertion;  ///
@@ -110,7 +111,7 @@ export default define(class SubproofAssertion extends Assertion {
     return validates;
   }
 
-  validateStatements(context, continuation) {
+  validateStatements(state, context, continuation) {
     let statementsValidate;
 
     const subproofAssertionString = this.getString();  ///
@@ -118,8 +119,8 @@ export default define(class SubproofAssertion extends Assertion {
     context.trace(`Validating the '${subproofAssertionString}' subproof assertion's statements...`);
 
     statementsValidate = every(this.statements, (statement, context, continuation) => {
-      const stated = true,
-            statementValidates = statement.validate(stated, context, (statement, context) => {
+      const state = true,
+            statementValidates = statement.validate(state, context, (statement, context) => {
               let validates;
 
               validates = continuation(context);
@@ -128,7 +129,13 @@ export default define(class SubproofAssertion extends Assertion {
             });
 
       return statementValidates;
-    }, context, continuation);
+    }, context, (context) => {
+      let validates;
+
+      validates = continuation(state, context);
+
+      return validates;
+    });
 
     if (statementsValidate) {
       context.debug(`...validated the '${subproofAssertionString}' subproof assertion's statements.`);
@@ -137,39 +144,39 @@ export default define(class SubproofAssertion extends Assertion {
     return statementsValidate;
   }
 
-  validateWhenStated(context, continuation) {
-    let validatesWhenStated = false;
+  validateWhenDeclared(state, context, continuation) {
+    let validatesWhenDeclared = false;
 
-    const stated = context.isStated();
+    const declared = isDeclared(state);
 
-    if (stated) {
+    if (declared) {
       const subproofAssertionString = this.getString(); ///
 
-      context.trace(`Validating the '${subproofAssertionString}' stated subproof assertion...`);
+      context.trace(`Validating the '${subproofAssertionString}' declared subproof assertion...`);
 
-      validatesWhenStated = continuation(context);
+      validatesWhenDeclared = continuation(state, context);
 
-      if (validatesWhenStated) {
-        context.debug(`...validated the '${subproofAssertionString}' stated subproof assertion.`);
+      if (validatesWhenDeclared) {
+        context.debug(`...validated the '${subproofAssertionString}' declared subproof assertion.`);
       }
     }
 
-    return validatesWhenStated;
+    return validatesWhenDeclared;
   }
 
-  validateWhenDerived(context, continuation) {
+  validateWhenDerived(state, context, continuation) {
     let validatesWhenDerived = false;
 
-    const stated = context.isStated();
+    const derived = isDerived(state);
 
-    if (!stated) {
+    if (derived) {
       const subproofAssertionString = this.getString(); ///
 
       context.trace(`Validating the '${subproofAssertionString}' derived subproof assertion...`);
 
       validatesWhenDerived = true;
 
-      validatesWhenDerived = continuation(context);
+      validatesWhenDerived = continuation(state, context);
 
       if (validatesWhenDerived) {
         context.debug(`...validated the '${subproofAssertionString}' derived subproof assertion.`);

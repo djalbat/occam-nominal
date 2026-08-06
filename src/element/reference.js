@@ -2,6 +2,7 @@
 
 import { Element, breakPointUtilities } from "occam-languages";
 
+import { all } from "../utilities/continuation";
 import { define } from "../elements";
 import { instantiateReference } from "../process/instantiate";
 import { REFERENCE_META_TYPE_NAME } from "../metaTypeNames";
@@ -81,7 +82,7 @@ export default define(class Reference extends Element {
     return comparesToParamter;
   }
 
-  validate(stated, context, continuation) {
+  validate(state, context, continuation) {
     let validates = false;
 
     const referenceString = this.getString(); ///
@@ -100,7 +101,11 @@ export default define(class Reference extends Element {
       context = this.getContext();
 
       attempt((context) => {
-        const metavariableValidates = this.validateMetavariable(context, () => {
+        const validateMetavariable = this.validateMetavariable.bind(this);
+
+        validates = all([
+          validateMetavariable
+        ], state, context, (state, context) => {
           let validates = false;
 
           const metaType = this.metavariable.getMetaType();
@@ -137,10 +142,6 @@ export default define(class Reference extends Element {
 
           return validates;
         });
-
-        if (metavariableValidates) {
-          validates = true;
-        }
       }, context);
     }
 
@@ -151,19 +152,19 @@ export default define(class Reference extends Element {
     return validates;
   }
 
-  validateMetavariable(context, continuation) {
+  validateMetavariable(state, context, continuation) {
     let metavariableValidates;
 
     const referenceString = this.getString(); ///
 
     context.trace(`Validating the '${referenceString}' reference's metavariable...'`);
 
-    metavariableValidates = this.metavariable.validate(context, (metavariable, context) => {
+    metavariableValidates = this.metavariable.validate(state, context, (metavariable, context) => {
       let validates;
 
       this.metavariable = metavariable;
 
-      validates = continuation(context);
+      validates = continuation(state, context);
 
       return validates;
     });

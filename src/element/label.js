@@ -2,7 +2,9 @@
 
 import { Element, breakPointUtilities } from "occam-languages";
 
+import { all } from "../utilities/continuation";
 import { define } from "../elements";
+import { declare } from "../utilities/state";
 import { instantiateLabel } from "../process/instantiate";
 import { labelFromLabelNode, metavariableFromLabelNode } from "../utilities/element";
 import { attempt, reconcile, serialise, unserialise, instantiate} from "../utilities/context";
@@ -61,11 +63,13 @@ export default define(class Label extends Element {
           labelPresent = context.isLabelPresentByLabelNode(labelNode);
 
     if (!labelPresent) {
-      const validates = this.validate(context, (label, context) => true);
+      declare((state) => {
+        const validates = this.validate(state, context, (label, context) => true);
 
-      if (validates) {
-        verifies = true;
-      }
+        if (validates) {
+          verifies = true;
+        }
+      });
     } else {
       context.debug(`The '${labelString}' label is already present.`);
     }
@@ -77,35 +81,31 @@ export default define(class Label extends Element {
     return continuation(verifies);
   }
 
-  validate(stated, context, continuation) {
-    let validates = false;
+  validate(state, context, continuation) {
+    let validates;
 
-    const labelString = this.getString(); ///
+    const labelString = this.getString();  ///
 
     context.trace(`Validating the '${labelString}' label...`);
-
-    const specificContext = context; ///
 
     context = this.getContext();
 
     attempt((context) => {
-      const metavariableValidates = this.validateMetavariable(context, () => {
+      const validateMetavariable = this.validateMetavariable.bind(this);
+
+      validates = all([
+        validateMetavariable
+      ], state, context, (state, context) => {
         let validates;
 
-        const label = this; ///
+        const label = this;
 
         this.commit(context);
-
-        context = specificContext;  ///
 
         validates = continuation(label, context);
 
         return validates;
       });
-
-      if (metavariableValidates) {
-        validates = true;
-      }
     }, context);
 
     if (validates) {
@@ -115,19 +115,19 @@ export default define(class Label extends Element {
     return validates;
   }
 
-  validateMetavariable(context, continuation) {
+  validateMetavariable(state, context, continuation) {
     let metavariableValidates;
 
     const labelString = this.getString(); ///
 
     context.trace(`Validating the '${labelString}' label's metavariable...`);
 
-    metavariableValidates = this.metavariable.validate(context, (metavariable, context) => {
+    metavariableValidates = this.metavariable.validate(state, context, (metavariable, context) => {
       let validates;
 
       this.metavariable = metavariable;
 
-      validates = continuation(context);
+      validates = continuation(state, context);
 
       return validates;
     });

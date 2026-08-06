@@ -3,6 +3,7 @@
 import { Element, breakPointUtilities } from "occam-languages";
 
 import { define } from "../elements";
+import { declare } from "../utilities/state";
 import { instantiateHypothesis } from "../process/instantiate";
 import { attempt, serialise, unserialise, instantiate } from "../utilities/context";
 import { statementFromHypothesisNode, procedureCallFromHypothesisNode } from "../utilities/element";
@@ -42,12 +43,13 @@ export default define(class Hypothesis extends Element {
     context.trace(`Verifying the '${hypothesisString}' hypothesis...`);
 
     if ((this.statement !== null) || (this.procedureCall !== null)) {
-      const stated = true,
-            validates = this.validate(stated, context);
+      declare((state) => {
+        const validates = this.validate(state, context);
 
-      if (validates) {
-        verifies = true;
-      }
+        if (validates) {
+          verifies = true;
+        }
+      })
     } else {
       context.debug(`Unable to verify the '${hypothesisString}' hypothesis because it is nonsense.`);
     }
@@ -59,7 +61,7 @@ export default define(class Hypothesis extends Element {
     return verifies;
   }
 
-  validate(stated, context) {
+  validate(state, context) {
     let validates = false;
 
     const hypothesisString = this.getString(); ///

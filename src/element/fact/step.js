@@ -9,6 +9,7 @@ import elements from "../../elements";
 import { all } from "../../utilities/continuation";
 import { define } from "../../elements";
 import { unifySteps } from "../../process/unification";
+import { derive, declare } from "../../utilities/state";
 import { attempt, reconcile } from "../../utilities/context";
 
 const { breakable } = breakPointUtilities,
@@ -49,6 +50,13 @@ export default define(class Step extends Fact {
     const step = true;
 
     return step;
+  }
+
+  idDeclared() {
+    const qualified = this.isQualified(),
+          declared = qualified; ///
+
+    return declared;
   }
 
   isQualified() {
@@ -137,10 +145,11 @@ export default define(class Step extends Fact {
     let validates;
 
     attempt((context) => {
-      const qualified = this.isQualified(),
-            stated = qualified; ///
+      const declared = this.idDeclared();
 
-      validates = this.validate(stated, context, (step, context) => true);
+      (declared ? declare : derive)((state) => {
+        validates = this.validate(state, context, (step, context) => true);
+      });
 
       if (validates) {
         this.commit(context);
@@ -168,7 +177,7 @@ export default define(class Step extends Fact {
     });
   });
 
-  validate(stated, context, continuation) {
+  validate(state, context, continuation) {
     let validates;
 
     const stepString = this.getString(); ///
@@ -183,7 +192,7 @@ export default define(class Step extends Fact {
       validateStatement,
       validateReference,
       validateSignatureAssertion
-    ], stated, context, (stated, context) => {
+    ], state, context, (state, context) => {
       let validates;
 
       const step = this;  ///
@@ -200,7 +209,7 @@ export default define(class Step extends Fact {
     return validates;
   }
 
-  validateReference(stated, context, continuation) {
+  validateReference(state, context, continuation) {
     let referenceValidates;
 
     if (this.reference !== null) {
@@ -209,12 +218,12 @@ export default define(class Step extends Fact {
 
       context.trace(`Validating the '${stepString}' step's '${referenceString}' reference...`);
 
-      referenceValidates = this.reference.validate(stated, context, (reference, context) => {
+      referenceValidates = this.reference.validate(state, context, (reference, context) => {
         let validates;
 
         this.reference = reference;
 
-        validates = continuation(stated, context);
+        validates = continuation(state, context);
 
         return validates;
       });
@@ -223,13 +232,13 @@ export default define(class Step extends Fact {
         context.debug(`...validated the '${stepString}' step's '${referenceString}' reference.`);
       }
     } else {
-      referenceValidates = continuation(stated, context);
+      referenceValidates = continuation(state, context);
     }
 
     return referenceValidates;
   }
 
-  validateSignatureAssertion(stated, context, continuation) {
+  validateSignatureAssertion(state, context, continuation) {
     let signatureAssertionValidates;
 
     if (this.signatureAssertion !== null) {
@@ -238,12 +247,12 @@ export default define(class Step extends Fact {
 
       context.trace(`Validating the '${stepString}' step's '${signatureAssertionString}' signature assertion...`);
 
-      signatureAssertionValidates =this.signatureAssertion.validate(stated, context, (signatureAssertion, contwext) => {
+      signatureAssertionValidates =this.signatureAssertion.validate(state, context, (signatureAssertion, contwext) => {
         let validates;
 
         this.signatureAssertion = signatureAssertion;
 
-        validates = continuation(stated, context);
+        validates = continuation(state, context);
 
         return validates;
       });
@@ -252,7 +261,7 @@ export default define(class Step extends Fact {
         context.debug(`...validated the '${stepString}' step's '${signatureAssertionString}' signature assertion.`);
       }
     } else {
-      signatureAssertionValidates = continuation(stated, context);
+      signatureAssertionValidates = continuation(state, context);
     }
 
     return signatureAssertionValidates;

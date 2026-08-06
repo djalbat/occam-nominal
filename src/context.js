@@ -540,13 +540,6 @@ export default class Context extends ContextBase {
     return inferredSubstitutionPresent;
   }
 
-  isStated() {
-    const context = this.getContext(),
-          stated = context.isStated();
-
-    return stated;
-  }
-
   isMetaLevel() {
     const context = this.getContext(),
           metaLevel = context.isMetaLevel();

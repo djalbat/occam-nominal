@@ -13,13 +13,17 @@ export default define(class BracketedCombinator extends Combinator {
   }
 
   unifyStatement(statement, context, continuation) {
-    let statementUnifiesWithBracketedCombinator;
+    let statementUnifiesWithBracketedCombinator = false;
 
     const statementString = statement.getString();
 
     context.trace(`Unifying the '${statementString}' statement with the bracketed combinator...`);
 
-    statementUnifiesWithBracketedCombinator = super.unifyStatement(statement, context, continuation);
+    const statementUnifies = super.unifyStatement(statement, context, continuation);
+
+    if (statementUnifies) {
+      statementUnifiesWithBracketedCombinator = true;
+    }
 
     if (statementUnifiesWithBracketedCombinator) {
       context.debug(`...unified the '${statementString}' statement with the bracketed combinator.`);

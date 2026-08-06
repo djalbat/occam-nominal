@@ -7,6 +7,7 @@ import { pare, instantiate } from "../../utilities/context";
 import { instantiateImplicitAssumption } from "../../process/instantiate";
 import { implicitAssumptionStringFromStatement } from "../../utilities/string";
 import { implicitAssumptionFromImplicitAssumptionNode } from "../../utilities/element";
+import {isDeclared} from "../../utilities/state";
 
 export default define(class ImplicitAssumption extends Element {
   constructor(context, string, node, breakPoint, statement) {
@@ -71,7 +72,7 @@ export default define(class ImplicitAssumption extends Element {
     return assumption;
   }
 
-  async validate(context) {
+  async validate(state, context) {
     let implicitAssumption = null;
 
     const implicitAssumptionString = this.getString();  ///
@@ -92,18 +93,20 @@ export default define(class ImplicitAssumption extends Element {
       const statementValidates = await this.validateStatement(context);
 
       if (statementValidates) {
-        const stated = context.isStated();
+        debugger
 
-        let validatesWhenStated = false,
+        let validateWhenDeclared = false,
             validatesWhenDerived = false;
 
-        if (stated) {
-          validatesWhenStated = this.validateWhenStated(context);
+        const declared = isDeclared(state);
+
+        if (declared) {
+          validateWhenDeclared = this.validateWhenStated(context);
         } else {
           validatesWhenDerived = this.validateWhenDerived(context);
         }
 
-        if (validatesWhenStated || validatesWhenDerived) {
+        if (validateWhenDeclared || validatesWhenDerived) {
           validates = true;
         }
       }
@@ -145,19 +148,19 @@ export default define(class ImplicitAssumption extends Element {
   }
 
   validateWhenStated(context) {
-    let validatesWhenStated;
+    let validateWhenDeclared;
 
     const implicitAssumptionString = this.getString();  ///
 
-    context.trace(`Validating the '${implicitAssumptionString}' stated implicitAssumption...`);
+    context.trace(`Validating the '${implicitAssumptionString}' declared implicitAssumption...`);
 
-    validatesWhenStated = true
+    validateWhenDeclared = true
 
-    if (validatesWhenStated) {
-      context.debug(`...validated the '${implicitAssumptionString}' stated implicitAssumption.`);
+    if (validateWhenDeclared) {
+      context.debug(`...validated the '${implicitAssumptionString}' declared implicitAssumption.`);
     }
 
-    return validatesWhenStated;
+    return validateWhenDeclared;
   }
 
   validateWhenDerived(context) {

@@ -7,6 +7,7 @@ import elements from "../elements";
 import { all } from "../utilities/continuation";
 import { define } from "../elements";
 import { instantiate } from "../utilities/context";
+import { declare, desist } from "../utilities/state";
 import { instantiateMetavariable } from "../process/instantiate";
 import { metaTypeFromJSON, metaTypeToMetaTypeJSON } from "../utilities/json";
 import { unifyMetavariable, unifyMetavariableIntrinsically } from "../process/unify";
@@ -168,11 +169,13 @@ export default define(class Metavariable extends Element {
     return typeVerifies;
   }
 
-  validate(strict, context, continuation) {
+  validate(strict, state, context, continuation) {
     if (continuation === undefined) {
       continuation = context; ///
 
-      context = strict; ///
+      context = state;
+
+      state = strict; ///
 
       strict = false;
     }
@@ -202,15 +205,10 @@ export default define(class Metavariable extends Element {
         validateName,
         validateType,
         validateTerm
-      ], strict, context, (strict, context) => {
+      ], strict, state, context, (strict, state, context) => {
         let validates;
 
-        const metavariableName = this.getMetavariableName(),  ///
-              declaredMetavariable = context.findDeclaredMetavariableByMetavariableName(metavariableName);
-
-        if (declaredMetavariable !== null) {
-          context.addMetavariable(metavariable);
-        }
+        context.addMetavariable(metavariable);
 
         validates = continuation(metavariable, context);
 
@@ -225,7 +223,7 @@ export default define(class Metavariable extends Element {
     return validates;
   }
 
-  validateName(strict, context, continuation) {
+  validateName(strict, state, context, continuation) {
     let nameValidates = true; ///
 
     const metavariableString = this.getString();  ///
@@ -249,7 +247,7 @@ export default define(class Metavariable extends Element {
     }
 
     if (nameValidates) {
-      nameValidates = continuation(strict, context);
+      nameValidates = continuation(strict, state, context);
     }
 
     if (nameValidates) {
@@ -259,7 +257,7 @@ export default define(class Metavariable extends Element {
     return nameValidates;
   }
 
-  validateType(strict, context, continuation) {
+  validateType(strict, state, context, continuation) {
     let typeValidates;
 
     if (this.type !== null) {
@@ -273,20 +271,20 @@ export default define(class Metavariable extends Element {
             typePresenet = context.isTypePresentByTypeName(typeName);
 
       if (typePresenet) {
-        typeValidates = continuation(strict, context);
+        typeValidates = continuation(strict, state, context);
       }
 
       if (typeValidates) {
         context.trace(`...validated  the '${metavariableString}' metavariable's type.`);
       }
     } else {
-      typeValidates = continuation(strict, context);
+      typeValidates = continuation(strict, state, context);
     }
 
     return typeValidates;
   }
 
-  validateTerm(strict, context, continuation) {
+  validateTerm(strict, state, context, continuation) {
     let termValidates;
 
     if (this.term !== null) {
@@ -299,14 +297,14 @@ export default define(class Metavariable extends Element {
 
       if (declaredMetavariable === null) {
         if (strict) {
-          termValidates = continuation(strict, context);
+          termValidates = continuation(strict, state, context);
         } else {
           termValidates = this.term.validate(context, (term, context) => {
             let validates;
 
             this.term = term;
 
-            validates = continuation(strict, context);
+            validates = continuation(strict, state, context);
 
             return validates;
           });
@@ -315,7 +313,7 @@ export default define(class Metavariable extends Element {
         const type = declaredMetavariable.getType();
 
         if (type === null) {
-          termValidates = continuation(strict, context);
+          termValidates = continuation(strict, state, context);
         } else {
           termValidates = false;
 
@@ -324,7 +322,7 @@ export default define(class Metavariable extends Element {
 
             this.term = term;
 
-            validatesGivenType = continuation(strict, context);
+            validatesGivenType = continuation(strict, state, context);
 
             return validatesGivenType;
           });
@@ -339,7 +337,7 @@ export default define(class Metavariable extends Element {
         context.debug(`...validated the '${metavariableString}' metavariable's term.`);
       }
     } else {
-      termValidates = continuation(strict, context);
+      termValidates = continuation(strict, state, context);
     }
 
     return termValidates;
@@ -383,16 +381,20 @@ export default define(class Metavariable extends Element {
     const { FrameSubstitution } = elements,
           frameSubstitution = FrameSubstitution.fromFrameAndMetavariable(frame, metavariable, generalContext, specificContext);
 
-    frameSubstitution.validate(context, (frameSubstitution, context) => {
-      let validates;
+    declare((state) => {
+      desist((state) => {
+        frameSubstitution.validate(state, context, (frameSubstitution, context) => {
+          let validates;
 
-      const inferredSubstitution = frameSubstitution;  ///
+          const inferredSubstitution = frameSubstitution;  ///
 
-      context.addInferredSubstitution(inferredSubstitution);
+          context.addInferredSubstitution(inferredSubstitution);
 
-      validates = true;
+          validates = true;
 
-      return validates;
+          return validates;
+        });
+      }, state)
     });
 
     const frameUnifies = true;
@@ -456,16 +458,20 @@ export default define(class Metavariable extends Element {
       statementSubstitution = StatementSubstitution.fromStatementAndMetavariable(statement, metavariable, generalContext, specificContext);
     }
 
-    statementSubstitution.validate(context, (statementSubstitution, context) => {
-      let validates;
+    declare((state) => {
+      desist((state) => {
+        statementSubstitution.validate(state, context, (statementSubstitution, context) => {
+          let validates;
 
-      const inferredSubstitution = statementSubstitution;  ///
+          const inferredSubstitution = statementSubstitution;  ///
 
-      context.addInferredSubstitution(inferredSubstitution);
+          context.addInferredSubstitution(inferredSubstitution);
 
-      validates = true;
+          validates = true;
 
-      return validates;
+          return validates;
+        });
+      }, state);
     });
 
     const statementUnifies = true;
@@ -515,16 +521,20 @@ export default define(class Metavariable extends Element {
     const { ReferenceSubstitution } = elements,
           referenceSubstitution = ReferenceSubstitution.fromReferenceAndMetavariable(reference, metavariable, generalContext, specificContext);
 
-    referenceSubstitution.validate(context, (referenceSubstitution, context) => {
-      let validates;
+    declare((state) => {
+      desist((state) => {
+        referenceSubstitution.validate(state, context, (referenceSubstitution, context) => {
+          let validates;
 
-      const inferredSubstitution = referenceSubstitution;  ///
+          const inferredSubstitution = referenceSubstitution;  ///
 
-      context.addInferredSubstitution(inferredSubstitution);
+          context.addInferredSubstitution(inferredSubstitution);
 
-      validates = true;
+          validates = true;
 
-      return validates;
+          return validates;
+        });
+      }, state);
     });
 
     const referenceUnifies = true;

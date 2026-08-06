@@ -5,11 +5,12 @@ import { Element, breakPointUtilities } from "occam-languages";
 import Value from "../value";
 
 import { define } from "../elements";
+import { isDeclared } from "../utilities/state";
 import { instantiate } from "../utilities/context";
 import { instantiateProcedureCall } from "../process/instantiate";
 import { parametersFromProcedureCallNode, procedureReferenceFromProcedureCallNode } from "../utilities/element";
 
-const { breakable, breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
+const { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class ProcedureCall extends Element {
   constructor(context, string, node, breakPoint, parameters, procedureReference) {
@@ -55,7 +56,7 @@ export default define(class ProcedureCall extends Element {
     return values;
   }
 
-  validate(stated, context, continuation) {
+  validate(state, context, continuation) {
     let validates = false;
 
     const procedureCallString = this.getString(); ///
@@ -84,7 +85,7 @@ export default define(class ProcedureCall extends Element {
     continuation(validates);
   }
 
-  unifyIndependently = breakable(function (context, continuation) {
+  unifyIndependently(context, continuation) {
     const procedureCallString = this.getString(); ///
 
     context.trace(`Unifying the '${procedureCallString}' procedure call independently...`);
@@ -122,7 +123,7 @@ export default define(class ProcedureCall extends Element {
 
       context.info(message);
     }
-  });
+  }
 
   dischargeGivenTerm(term, context) {
     let dischargedGivenTerm = false;

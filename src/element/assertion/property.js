@@ -6,6 +6,7 @@ import Assertion from "../assertion";
 
 import { define } from "../../elements";
 import { instantiate } from "../../utilities/context";
+import { isDeclared, isTransient } from "../../utilities/state";
 import { instantiatePropertyAssertion } from "../../process/instantiate";
 import { variableAssignmentFromPrepertyAssertion } from "../../process/assign";
 import { propertyAssertionFromStatementNode, subjectTermFromPropertyAssertionNode, propertyTermFromPropertyAssertionNode } from "../../utilities/element";
@@ -42,7 +43,7 @@ export default define(class PropertyAssertion extends Assertion {
     return propertyType;
   }
 
-  async validate(context) {
+  validate(state, context) {
     let propertyAssertion = null;
 
     const propertyAssertionString = this.getString(); ///
@@ -58,21 +59,23 @@ export default define(class PropertyAssertion extends Assertion {
 
       context.debug(`The '${propertyAssertionString}' property assertion is already present.`);
     } else {
-      const termsValidate = await this.validateTerms(context);
+      const termsValidate = this.validateTerms(context);
 
       if (termsValidate) {
-        const stated = context.isStated();
+        debugger
 
-        let validatesWhenStated = false,
+        let validateWhenDeclared = false,
             validatesWhenDerived = false;
 
-        if (stated) {
-          validatesWhenStated = this.validateWhenStated(context);
+        const declared = isDeclared(state);
+
+        if (declared) {
+          validateWhenDeclared = this.validateWhenDeclared(context);
         } else {
           validatesWhenDerived = this.validateWhenDerived(context);
         }
 
-        if (validatesWhenStated || validatesWhenDerived) {
+        if (validateWhenDeclared || validatesWhenDerived) {
           validates = true;
         }
       }
@@ -95,7 +98,7 @@ export default define(class PropertyAssertion extends Assertion {
     return propertyAssertion;
   }
 
-  async validateTerms(context) {
+  validateTerms(context) {
     let termsValidate = false;
 
     const factString = this.getString(); ///
@@ -105,10 +108,10 @@ export default define(class PropertyAssertion extends Assertion {
     let subjectTerm,
         propertyTerm;
 
-    propertyTerm = await this.propertyTerm.validateAsProperty(context, async (propertyTerm, context) => {
+    propertyTerm = this.propertyTerm.validateAsProperty(context, (propertyTerm, context) => {
       let validatesForwards = false;
 
-      subjectTerm = await this.subjectTerm.validate(context, async (subjectTerm, context) => {
+      subjectTerm = this.subjectTerm.validate(context, (subjectTerm, context) => {
         let validatesForwards = false;
 
         const subjectTermType = subjectTerm.getType(),
@@ -144,20 +147,20 @@ export default define(class PropertyAssertion extends Assertion {
     return termsValidate;
   }
 
-  validateWhenStated(context) {
-    let validatesWhenStated;
+  validateWhenDeclared(context) {
+    let validateWhenDeclared;
 
     const typeAssertionString = this.getString(); ///
 
-    context.trace(`Validating the '${typeAssertionString}' stated property assertion...`);
+    context.trace(`Validating the '${typeAssertionString}' declared property assertion...`);
 
-    validatesWhenStated = true;
+    validateWhenDeclared = true;
 
-    if (validatesWhenStated) {
-      context.debug(`...validated the '${typeAssertionString}' stated property assertion.`);
+    if (validateWhenDeclared) {
+      context.debug(`...validated the '${typeAssertionString}' declared property assertion.`);
     }
 
-    return validatesWhenStated;
+    return validateWhenDeclared;
   }
 
   validateWhenDerived(context) {
@@ -176,10 +179,10 @@ export default define(class PropertyAssertion extends Assertion {
     return validatesWhenDerived;
   }
 
-  assign(context) {
-    const stated = context.isStated();
+  assign(state, context) {
+    const transient = isTransient(state);
 
-    if (!stated) {
+    if (transient) {
       return;
     }
 

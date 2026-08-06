@@ -34,22 +34,20 @@ export default class Fact extends Element {
     return step;
   }
 
-  validateStatement(stated, context, continuation) {
-    let statementValidates = true;  ///
+  validateStatement(state, context, continuation) {
+    let statementValidates;
 
-    const statement = this.getStatement();
-
-    if (statement !== null) {
+    if (this.statement !== null) {
       const factString = this.getString();  ///
 
       context.trace(`Validating the '${factString}' fact's statement...`);
 
-      statementValidates = statement.validate(stated, context, (statement, context) => {
+      statementValidates = this.statement.validate(state, context, (statement, context) => {
         let validates;
 
         this.statement = statement;
 
-        validates = continuation(context);
+        validates = continuation(state, context);
 
         return validates;
       });
@@ -57,6 +55,8 @@ export default class Fact extends Element {
       if (statementValidates) {
         context.trace(`...validated the '${factString}' fact's statement.`);
       }
+    } else {
+      statementValidates = continuation(state, context);
     }
 
     return statementValidates;

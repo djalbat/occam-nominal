@@ -3,7 +3,6 @@
 import KenonContext from "../context/kenon";
 import KrasicContext from "../context/krasic";
 import MnemicContext from "../context/mnemic";
-import NestedContext from "../context/nested";
 import AmnesicContext from "../context/amnedic";
 import AphasicContext from "../context/aphasic";
 import BoundedContext from "../context/bounded";
@@ -228,12 +227,12 @@ function ablateContext(context) {
       context = phanericContext.detach();
     }
 
-    let contextGroundedContext = isContextGroundedContext(context);
+    let contextNominalFileContext = NominalFileContext.prototype.isPrototypeOf(context);
 
-    while (!contextGroundedContext) {
+    while (!contextNominalFileContext) {
       context = context.getContext();
 
-      contextGroundedContext = isContextGroundedContext(context);
+      contextNominalFileContext = NominalFileContext.prototype.isPrototypeOf(context);
     }
 
     if (phanericContext !== null) {
@@ -244,13 +243,4 @@ function ablateContext(context) {
   }
 
   return context;
-}
-
-function isContextGroundedContext(context) {
-  const contextTheticContext = TheticContext.prototype.isPrototypeOf(context),
-        contextIllativeContext = IllativeContext.prototype.isPrototypeOf(context),
-        contextNominalFileContext = NominalFileContext.prototype.isPrototypeOf(context),
-        contextGroundedContext = (contextTheticContext || contextIllativeContext || contextNominalFileContext);
-
-  return contextGroundedContext;
 }

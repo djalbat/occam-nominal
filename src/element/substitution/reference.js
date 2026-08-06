@@ -92,11 +92,13 @@ export default define(class ReferenceSubstitution extends Substitution {
     return substitutionCompares;
   }
 
-  validate(strict, context, continuation) {
+  validate(strict, state, context, continuation) {
     if (continuation === undefined) {
       continuation = context; ///
 
-      context = strict; ///
+      context = state;
+
+      state = strict; ///
 
       strict = false;
     }

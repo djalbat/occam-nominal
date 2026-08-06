@@ -98,7 +98,7 @@ export default define(class Constructor extends Element {
     return continuation(verifies, context);
   }
 
-  validate(stated, context, continuation) {
+  validate(state, context, continuation) {
     let validates;
 
     const includeType = false,
@@ -112,7 +112,7 @@ export default define(class Constructor extends Element {
     validates = exists([
       validateTermAsVariable,
       validateTermAsConstructor
-    ], stated, context, (stated, context) => {
+    ], state, context, (state, context) => {
       let validates;
 
       const constructor = this;
@@ -129,7 +129,7 @@ export default define(class Constructor extends Element {
     return validates;
   }
 
-  validateTermAsVariable(stated, context, continuation) {
+  validateTermAsVariable(state, context, continuation) {
     let termValidatesAsVariable = false;
 
     const hypothetical = this.isHypothetical();
@@ -147,7 +147,7 @@ export default define(class Constructor extends Element {
               baseType = baseTypeFromNothing();
 
         if (type === baseType) {
-          termValidatesAsVariable = continuation(stated, context);
+          termValidatesAsVariable = continuation(state, context);
         }
 
         return termValidatesAsVariable;
@@ -161,7 +161,7 @@ export default define(class Constructor extends Element {
     return termValidatesAsVariable;
   }
 
-  validateTermAsConstructor(stated, context, continuation) {
+  validateTermAsConstructor(state, context, continuation) {
     let termValidatesAsConstructor = false;
 
     const hypothetical = this.isHypothetical();
@@ -175,7 +175,7 @@ export default define(class Constructor extends Element {
       termValidatesAsConstructor = validateTermAsConstructor(this.term, context, (context) => {
         let validates;
 
-        validates = continuation(stated, context);
+        validates = continuation(state, context);
 
         return validates;
       });
@@ -189,7 +189,7 @@ export default define(class Constructor extends Element {
   }
 
   unifyTerm(term, context, continuation) {
-    let termUnifies;
+    let termUnifies = false;
 
     const termString = term.getString(),
           includeType = true,
@@ -197,31 +197,38 @@ export default define(class Constructor extends Element {
 
     context.trace(`Unifying the '${termString}' term with the '${constructorString}' constructor...`);
 
-    termUnifies = this.dischargeHypothesesGivenTerm(term, context, (context) => {
-      let termUnifiesWithConstructor;
+    const hypothesesDischargesGivenTerm = this.dischargeHypothesesGivenTerm(term, context, (context) => {
+      let hypothesesDischargesGivenTerm = false;
 
       const constructor = this, ///
             constructorContext = constructor.getContext(),
             generalContext = constructorContext,  ///
-            specifiContext = context; ///
+            specifiContext = context, ///
+            termUnifiesWithConstructor = unifyTermWithConstructor(term, constructor, generalContext, specifiContext, (generalContext, specifiContext) => {
+              let termUnifiesWithConstructor;
 
-      termUnifiesWithConstructor = unifyTermWithConstructor(term, constructor, generalContext, specifiContext, (generalContext, specifiContext) => {
-        let termUnifiesWithConstructor;
+              const context = specifiContext, ///
+                    provisional = this.type.isProvisional();
 
-        const context = specifiContext, ///
-              provisional = this.type.isProvisional();
+              term.setProvisional(provisional);
 
-        term.setProvisional(provisional);
+              term.setType(this.type);
 
-        term.setType(this.type);
+              termUnifiesWithConstructor = continuation(term, context);
 
-        termUnifiesWithConstructor = continuation(term, context);
+              return termUnifiesWithConstructor;
+            });
 
-        return termUnifiesWithConstructor;
-      });
+      if (termUnifiesWithConstructor) {
+        hypothesesDischargesGivenTerm = true;
+      }
 
-      return termUnifiesWithConstructor;
+      return hypothesesDischargesGivenTerm;
     });
+
+    if (hypothesesDischargesGivenTerm) {
+      termUnifies = true;
+    }
 
     if (termUnifies) {
       context.debug(`...unified the '${termString}' term with the '${constructorString}' constructor.`);

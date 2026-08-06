@@ -5,6 +5,7 @@ import { breakPointUtilities } from "occam-languages";
 import Resolution from "../resolution";
 
 import { define } from "../../elements";
+import { declare } from "../../utilities/state";
 import { instantiateDeduction } from "../../process/instantiate";
 import { elide, attempt, unserialise, instantiate } from "../../utilities/context";
 
@@ -37,13 +38,13 @@ export default define(class Deduction extends Resolution {
       let validates;
 
       attempt((context) => {
-        const stated = true;
+        declare((state) => {
+          validates = this.validate(state, context, (deduction, context) => true);
 
-        validates = this.validate(stated, context, (deduction, context) => true);
-
-        if (validates) {
-          this.commit(context);
-        }
+          if (validates) {
+            this.commit(context);
+          }
+        });
       }, context);
 
       if (!validates) {

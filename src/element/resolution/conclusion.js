@@ -5,6 +5,7 @@ import { breakPointUtilities } from "occam-languages";
 import Resolution from "../resolution";
 
 import { define } from "../../elements";
+import { declare, desist } from "../../utilities/state";
 import { instantiateConclusion } from "../../process/instantiate";
 import { elide, attempt, unserialise, instantiate } from "../../utilities/context";
 
@@ -37,13 +38,15 @@ export default define(class Conclusion extends Resolution {
       let validates;
 
       attempt((context) => {
-        const stated = true;
+        declare((state) => {
+          desist((state) => {
+            validates = this.validate(state, context, (conclusion, context) => true);
+          }, state);
 
-        validates = this.validate(stated, context, (conclusion, context) => true);
-
-        if (validates) {
-          this.commit(context);
-        }
+          if (validates) {
+            this.commit(context);
+          }
+        });
       }, context);
 
       if (!validates) {

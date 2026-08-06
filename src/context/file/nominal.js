@@ -332,7 +332,7 @@ export default class NominalFileContext extends FileContext {
     this.lemmas.push(lemma);
 
     const filePath = this.getFilePath(),
-          lemmaString = lemma.getString();
+      lemmaString = lemma.getString();
 
     this.trace(`Added the '${lemmaString}' lemma to the '${filePath}' file context.`)
   }

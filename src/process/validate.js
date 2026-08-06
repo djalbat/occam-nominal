@@ -4,6 +4,7 @@ import { queryUtilities } from "occam-query";
 
 import ContinuationPass from "../pass/continuation";
 
+import { declare } from "../utilities/state";
 import { termFromTermNode, statementFromStatementNode } from "../utilities/element";
 
 const { nodeQuery } = queryUtilities;
@@ -180,18 +181,19 @@ class ValidateStatementAsCombinatorPass extends ContinuationPass {
 
         const statement = statementFromStatementNode(statementNode, context);
 
-        const stated = true,
-              statementValidates = statement.validate(stated, context, (statement) => {
-                let validates;
+        declare((state) => {
+          const statementValidates = statement.validate(state, context, (statement, context) => {
+            let validates;
 
-                validates = continuation(success);
+            validates = continuation(success, context);
 
-                return validates;
-              });
+            return validates;
+          });
 
-        if (statementValidates) {
-          success = true;
-        }
+          if (statementValidates) {
+            success = true;
+          }
+        });
 
         return true;
       }

@@ -79,11 +79,13 @@ export default define(class TermSubstitution extends Substitution {
     return comparedToTerm;
   }
 
-  validate(strict, context, continuation) {
+  validate(strict, state, context, continuation) {
     if (continuation === undefined) {
       continuation = context; ///
 
-      context = strict; ///
+      context = state;
+
+      state = strict; ///
 
       strict = false;
     }

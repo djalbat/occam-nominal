@@ -2,9 +2,11 @@
 
 export const S = "s";
 export const NULL = "null";
+export const DERIVED = 0b01;
 export const MISSING = "missing";
 export const NOT_EQUAL = "!=";
 export const UNDEFINED = "undefined";
+export const TRANSIENT = 0b10;
 export const PROVISIONAL = "Provisional";
 export const EMPTY_STRING = "";
 export const PROVISIONALLY = "provisionally";
