@@ -17,15 +17,10 @@ const { breakable } = breakPointUtilities,
       { asynchronousSome } = continuationUtilities;
 
 export default define(class Step extends Fact {
-  constructor(context, string, node, breakPoint, statement, reference, signatureAssertion) {
-    super(context, string, node, breakPoint, statement);
+  constructor(context, string, node, breakPoint, statement, reference, procedureCall, signatureAssertion) {
+    super(context, string, node, breakPoint, statement, reference, procedureCall);
 
-    this.reference = reference;
     this.signatureAssertion = signatureAssertion;
-  }
-
-  getReference() {
-    return this.reference;
   }
 
   getSignatureAssertion() {
@@ -205,35 +200,6 @@ export default define(class Step extends Fact {
     }
 
     return validates;
-  }
-
-  validateReference(state, context, continuation) {
-    let referenceValidates;
-
-    if (this.reference !== null) {
-      const stepString = this.getString(),  ///
-            referenceString = this.reference.getString();
-
-      context.trace(`Validating the '${stepString}' step's '${referenceString}' reference...`);
-
-      referenceValidates = this.reference.validate(state, context, (reference, context) => {
-        let validates;
-
-        this.reference = reference;
-
-        validates = continuation(state, context);
-
-        return validates;
-      });
-
-      if (referenceValidates) {
-        context.debug(`...validated the '${stepString}' step's '${referenceString}' reference.`);
-      }
-    } else {
-      referenceValidates = continuation(state, context);
-    }
-
-    return referenceValidates;
   }
 
   validateSignatureAssertion(state, context, continuation) {

@@ -98,7 +98,7 @@ export default define(class Label extends Element {
       ], state, context, (state, context) => {
         let validates;
 
-        const label = this;
+        const label = this; ///
 
         this.commit(context);
 

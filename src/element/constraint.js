@@ -102,7 +102,7 @@ export default define(class Constraint extends Element {
           ], state, context, (state, context) => {
             let validates;
 
-            constraint = this;
+            constraint = this;  ///
 
             this.commit(context);
 

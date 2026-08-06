@@ -8,22 +8,12 @@ import { all } from "../../utilities/continuation";
 import { define } from "../../elements";
 import { declare } from "../../utilities/state";
 import { instantiatePremise } from "../../process/instantiate";
-import { procedureCallFromPremiseNode } from "../../utilities/element";
+import { referenceFromPremiseNode, procedureCallFromPremiseNode } from "../../utilities/element";
 import { attempt, reconcile, serialise, unserialise, instantiate } from "../../utilities/context";
 
 const { breakable, breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Premise extends Fact {
-  constructor(context, string, node, breakPoint, statement, procedureCall) {
-    super(context, string, node, breakPoint, statement);
-
-    this.procedureCall = procedureCall;
-  }
-
-  getProcedureCall() {
-    return this.procedureCall;
-  }
-
   getPremiseNode() {
     const node = this.getNode(),
           premiseNode = node; ///
@@ -132,34 +122,6 @@ export default define(class Premise extends Fact {
     }
 
     return validates;
-  }
-
-  validateProcedureCall(state, context, continuation) {
-    let procedureCallValidates;
-
-    const procedureCall = this.getProcedureCall();
-
-    if (procedureCall !== null) {
-      const premiseString = this.getString();  ///
-
-      context.trace(`Validating the '${premiseString}' premise's procedure call...`);
-
-      procedureCallValidates = procedureCall.validate(state, context, (procedureCall, context) => {
-        let validates;
-
-        validates = continuation(state, context);
-
-        return validates;
-      });
-
-      if (procedureCallValidates) {
-        context.trace(`...validated the '${premiseString}' premise's procedure call.`);
-      }
-    } else {
-      procedureCallValidates = continuation(state, context);
-    }
-
-    return procedureCallValidates;
   }
 
   unifyIndependently(context, continuation) {
@@ -322,8 +284,9 @@ export default define(class Premise extends Fact {
               node = premiseNode,  ///
               breakPoint = breakPointFromJSON(json),
               statement = statementFromPremiseNode(premiseNode, context),
+              reference = referenceFromPremiseNode(premiseNode, context),
               procedureCall = procedureCallFromPremiseNode(premiseNode, context),
-              premise = new Premise(context, string, node, breakPoint, statement, procedureCall);
+              premise = new Premise(context, string, node, breakPoint, statement, reference, procedureCall);
 
         return premise;
       }, json, context);

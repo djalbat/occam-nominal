@@ -167,7 +167,7 @@ export default define(class Judgement extends Element {
 
       validates = continuation(judgement, context);
     } else {
-      judgement = this;
+      judgement = this; ///
 
       const validateGoal = this.validateGoal.bind(this),
             validateFrame = this.validateFrame.bind(this);

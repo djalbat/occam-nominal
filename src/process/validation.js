@@ -8,7 +8,7 @@ import { desist, declare } from "../utilities/state";
 import { provisionallyStringFromProvisional } from "../utilities/string";
 import { bracketedConstructorFromNothing, bracketedCombinatorFromNothing } from "../utilities/instance";
 
-export function validateTermAsVariable(term, context, continuation) {
+export function validateTermAsVariable(term, state, context, continuation) {
   let termValidatesAsVariable = false;
 
   const { Variable } = elements,
@@ -33,7 +33,7 @@ export function validateTermAsVariable(term, context, continuation) {
 
       term.setProvisional(provisional);
 
-      validates = continuation(term, context);
+      validates = continuation(term, state, context);
 
       return validates;
     });
@@ -50,7 +50,7 @@ export function validateTermAsVariable(term, context, continuation) {
   return termValidatesAsVariable;
 }
 
-function unifyTermWithGenerators(term, context, continuation) {
+function unifyTermWithGenerators(term, state, context, continuation) {
   let termUnifiesWithGenerators;
 
   const generators = context.getGenerators(),
@@ -65,7 +65,7 @@ function unifyTermWithGenerators(term, context, continuation) {
       let termUnifies;
 
       choose((context) => {
-        termUnifies = generator.unifyTerm(term, context, continuation);
+        termUnifies = generator.unifyTerm(term, state, context, continuation);
       }, context);
 
       if (termUnifies) {
@@ -83,7 +83,7 @@ function unifyTermWithGenerators(term, context, continuation) {
   return termUnifiesWithGenerators;
 }
 
-function unifyTermWithConstructors(term, context, continuation) {
+function unifyTermWithConstructors(term, state, context, continuation) {
   let termUnifiesWithConstructors;
 
   const constructors = context.getConstructors(),
@@ -98,7 +98,7 @@ function unifyTermWithConstructors(term, context, continuation) {
       let termUnifies;
 
       choose((context) => {
-        termUnifies = constructor.unifyTerm(term, context, continuation);
+        termUnifies = constructor.unifyTerm(term, state, context, continuation);
 
         if (termUnifies) {
           context.commit();
@@ -116,7 +116,7 @@ function unifyTermWithConstructors(term, context, continuation) {
   return termUnifiesWithConstructors;
 }
 
-function unifyTermWithBracketedConstructor(term, context, continuation) {
+function unifyTermWithBracketedConstructor(term, state, context, continuation) {
   let termUnifiesWithBracketedConstructor = false;
 
   const termString = term.getString();
@@ -481,7 +481,7 @@ function validateStatementAsSignatureAssertion(statement, state, context, contin
   return statementValidatesAsSignatureAssertion;
 }
 
-export function unifyTermWithProperties(term, context, continuation) {
+export function unifyTermWithProperties(term, state, context, continuation) {
   let termUnifiesWithProperties;
 
   const properties = context.getProperties();
@@ -490,7 +490,7 @@ export function unifyTermWithProperties(term, context, continuation) {
     let termUnifiesWithProperty = false;
 
     return choose((context) => {
-      const termUnifies = property.unifyTerm(term, context, continuation);
+      const termUnifies = property.unifyTerm(term, state, context, continuation);
 
       if (termUnifies) {
         termUnifiesWithProperty = true;

@@ -154,7 +154,7 @@ export default define(class Frame extends Element {
 
       validates = continuation(frame, context);
     } else {
-      frame = this;
+      frame = this; ///
 
       const validateAssumptions = this.validateAssumptions.bind(this),
             validateMetavariable = this.validateMetavariable.bind(this);

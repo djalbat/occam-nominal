@@ -320,16 +320,23 @@ class UnifyTermWithPropertyPass extends ContinuationZipPass {
           context = specificContext;  ///
 
           const term = termFromTermNode(termNode, context),
-                strict = false,
-                validates = term.validateGivenType(strict, type, context, (term, context) => {
-                  const specificContext = context;  ///
+                strict = false;
 
-                  return continuation(generalContext, specificContext);
-                });
+          declare((state) => {
+            const termValidaetsGivenType = term.validateGivenType(strict, type, state, context, (term, context) => {
+              let validatesGivenType;
 
-          if (validates) {
-            success = true;
-          }
+              const specificContext = context;  ///
+
+              validatesGivenType = continuation(generalContext, specificContext);
+
+              return validatesGivenType;
+            });
+
+            if (termValidaetsGivenType) {
+              success = true;
+            }
+          });
         }
 
         return success;
@@ -359,20 +366,23 @@ class UnifyTermWithGeneratorPass extends ContinuationZipPass {
         if (type !== null) {
           context = specificContext;  ///
 
-          const term = termFromTermNode(termNode, context),
-                termValidatesGivenType = term.validateGivenType(type, context, (term, context) => {
-                  let validatesGivenType;
+          const term = termFromTermNode(termNode, context);
 
-                  const specificContext = context;  ///
+          declare((state) => {
+            const termValidatesGivenType = term.validateGivenType(type, state, context, (term, context) => {
+              let validatesGivenType;
 
-                  validatesGivenType = continuation(generalContext, specificContext);
+              const specificContext = context;  ///
 
-                  return validatesGivenType;
-                });
+              validatesGivenType = continuation(generalContext, specificContext);
 
-          if (termValidatesGivenType) {
-            success = true;
-          }
+              return validatesGivenType;
+            });
+
+            if (termValidatesGivenType) {
+              success = true;
+            }
+          });
         }
 
         return success;
@@ -402,20 +412,23 @@ class UnifyTermWithConstructorPass extends ContinuationZipPass {
         context = specificContext;  ///
 
         if (type !== null) {
-          const term = termFromTermNode(termNode, context),
-                termValidatesGivenType = term.validateGivenType(type, context, (term, context) => {
-                  let validatesGivenType;
+          const term = termFromTermNode(termNode, context);
 
-                  const specificContext = context;  ///
+          declare((state) => {
+            const termValidatesGivenType = term.validateGivenType(type, state, context, (term, context) => {
+              let validatesGivenType;
 
-                  validatesGivenType = continuation(generalContext, specificContext);
+              const specificContext = context;  ///
 
-                  return validatesGivenType;
-                });
+              validatesGivenType = continuation(generalContext, specificContext);
 
-          if (termValidatesGivenType) {
-            success = true;
-          }
+              return validatesGivenType;
+            });
+
+            if (termValidatesGivenType) {
+              success = true;
+            }
+          });
         }
 
         return success;
@@ -474,20 +487,23 @@ class UnifyStatementWithCombinatorPass extends ContinuationZipPass {
         if (metaTypeNameFrameMetaTypeName) {
           const frameNode = specificFrameNode,  ///
                 context = specificContext,  ///
-                frame = frameFromFrameNode(frameNode, context),
-                frameValidates = frame.validate(state, context, (frame, context) => {
-                  let validates;
+                frame = frameFromFrameNode(frameNode, context);
 
-                  const specificContext = context;  ///
+          declare((state) => {
+            const frameValidates = frame.validate(state, context, (frame, context) => {
+              let validates;
 
-                  validates = continuation(generalContext, specificContext);
+              const specificContext = context;  ///
 
-                  return validates;
-                });
+              validates = continuation(generalContext, specificContext);
 
-          if (frameValidates) {
-            success = true;
-          }
+              return validates;
+            });
+
+            if (frameValidates) {
+              success = true;
+            }
+          });
         }
 
         return success;
@@ -511,20 +527,23 @@ class UnifyStatementWithCombinatorPass extends ContinuationZipPass {
 
         context = specificContext;  ///
 
-        const term = termFromTermNode(termNode, context),
-              termValidatesGivenType = term.validateGivenType(type, context, (term, context) => {
-                let validatesGivenType;
+        const term = termFromTermNode(termNode, context);
 
-                const specificContext = context;  ///
+        declare((state) => {
+          const termValidatesGivenType = term.validateGivenType(type, state, context, (term, context) => {
+            let validatesGivenType;
 
-                validatesGivenType = continuation(generalContext, specificContext);
+            const specificContext = context;  ///
 
-                return validatesGivenType;
-              });
+            validatesGivenType = continuation(generalContext, specificContext);
 
-        if (termValidatesGivenType) {
-          success = true;
-        }
+            return validatesGivenType;
+          });
+
+          if (termValidatesGivenType) {
+            success = true;
+          }
+        });
 
         return success;
       }

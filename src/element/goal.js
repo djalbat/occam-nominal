@@ -91,7 +91,7 @@ export default define(class Goal extends Element {
 
       validates = continuation(goal, context);
     } else {
-      goal = this;
+      goal = this;  ///
 
       const validateReference = this.validateReference.bind(this),
             validateStatement = this.validateStatement.bind(this);

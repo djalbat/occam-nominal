@@ -199,7 +199,7 @@ export default define(class Term extends Element {
     } else {
       term = this;  ///
 
-      validates = exists(validateTerms, term, context, (term, context) => {
+      validates = exists(validateTerms, term, state, context, (term, state, context) => {
         let validates;
 
         context.addTerm(term);
@@ -217,11 +217,13 @@ export default define(class Term extends Element {
     return validates;
   }
 
-  validateGivenType(strict, type, context, continuation) {
+  validateGivenType(strict, type, state, context, continuation) {
     if (continuation === undefined) {
       continuation = context; ///
 
-      context = type; ///
+      context = state; ///
+
+      state = type; ///
 
       type = strict;  ///
 

@@ -8,22 +8,12 @@ import { all } from "../../utilities/continuation";
 import { define } from "../../elements";
 import { declare } from "../../utilities/state";
 import { instantiateSupposition } from "../../process/instantiate";
-import { procedureCallFromSuppositionNode } from "../../utilities/element";
 import { attempt, reconcile, serialise, unserialise, instantiate } from "../../utilities/context";
+import { referenceFromSuppositionNode, procedureCallFromSuppositionNode } from "../../utilities/element";
 
 const { breakable, breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Supposition extends Fact {
-  constructor(context, string, node, breakPoint, statement, procedureCall) {
-    super(context, string, node, breakPoint, statement);
-
-    this.procedureCall = procedureCall;
-  }
-
-  getProcedureCall() {
-    return this.procedureCall;
-  }
-
   getSuppositionNode() {
     const node = this.getNode(),
           suppositionNode = node; ///
@@ -132,34 +122,6 @@ export default define(class Supposition extends Fact {
     }
 
     return validates;
-  }
-
-  validateProcedureCall(state, context, continuation) {
-    let procedureCallValidates;
-
-    const procedureCall = this.getProcedureCall();
-
-    if (procedureCall !== null) {
-      const suppositionString = this.getString();  ///
-
-      context.trace(`Validating the '${suppositionString}' supposition's procedure call...`);
-
-      procedureCallValidates = procedureCall.validate(state, context, (procedureCall, context) => {
-        let validates;
-
-        validates = continuation(state, context);
-
-        return validates;
-      });
-
-      if (procedureCallValidates) {
-        context.trace(`...validated the '${suppositionString}' supposition's procedure call.`);
-      }
-    } else {
-      procedureCallValidates = continuation(state, context);
-    }
-
-    return procedureCallValidates;
   }
 
   unifyIndependently(context, continuation) {
@@ -322,8 +284,9 @@ export default define(class Supposition extends Fact {
               node = suppositionNode,  ///
               breakPoint = breakPointFromJSON(json),
               statement = statementFromSuppositionNode(suppositionNode, context),
+              reference = referenceFromSuppositionNode(suppositionNode, context),
               procedureCall = procedureCallFromSuppositionNode(suppositionNode, context),
-              supposition = new Supposition(context, string, node, breakPoint, statement, procedureCall);
+              supposition = new Supposition(context, string, node, breakPoint, statement, reference, procedureCall);
 
         return supposition;
       }, json, context);

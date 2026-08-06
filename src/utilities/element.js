@@ -63,11 +63,12 @@ export function stepFromStepNode(stepNode, context) {
         breakPoint = null,
         statement = statementFromStepNode(stepNode, context),
         reference = referenceFromStepNode(stepNode, context),
+        procedureCall = procedureCallFromStepNode(stepNode, context),
         signatureAssertion = signatureAssertionFromStepNode(stepNode, context);
 
   context = null;
 
-  const step = new Step(context, string, node, breakPoint, statement, reference, signatureAssertion);
+  const step = new Step(context, string, node, breakPoint, statement, reference, procedureCall, signatureAssertion);
 
   return step;
 }
@@ -237,8 +238,9 @@ export function premiseFromPremiseNode(premiseNode, context) {
         string = context.nodeAsString(node),
         breakPoint = null,
         statement = statementFromPremiseNode(premiseNode, context),
+        reference = referenceFromPremiseNode(premiseNode, context),
         procedureCall = procedureCallFromPremiseNode(premiseNode, context),
-        premise = new Premise(context, string, node, breakPoint, statement, procedureCall);
+        premise = new Premise(context, string, node, breakPoint, statement, reference, procedureCall);
 
   return premise
 }
@@ -562,8 +564,9 @@ export function suppositionFromSuppositionNode(suppositionNode, context) {
         string = context.nodeAsString(node),
         breakPoint = null,
         statement = statementFromSuppositionNode(suppositionNode, context),
+        reference = referenceFromSuppositionNode(suppositionNode, context),
         procedureCall = procedureCallFromSuppositionNode(suppositionNode, context),
-        supposition = new Supposition(context, string, node, breakPoint, statement, procedureCall);
+        supposition = new Supposition(context, string, node, breakPoint, statement, reference, procedureCall);
 
   return supposition
 }
@@ -1356,6 +1359,12 @@ export function statementFromPremiseNode(premiseNode, context) {
   return statement;
 }
 
+export function referenceFromPremiseNode(premiseNode, context) {
+  const procedureCall = null;
+
+  return procedureCall;
+}
+
 export function leftTermFromEqualityNode(equalityNode, context) {
   const leftTermNode = equalityNode.getLeftTermNode(),
         leftTerm = termFromTermNode(leftTermNode, context);
@@ -1399,6 +1408,12 @@ export function typeFromMetavariableNode(metavariableNode, context) {
   }
 
   return type;
+}
+
+export function procedureCallFromStepNode(stepNode, context) {
+  const procedureCall = null;
+
+  return procedureCall;
 }
 
 export function suppositionsFromClaimNode(claimNode, context) {
@@ -1670,6 +1685,12 @@ export function statementFromSuppositionNode(suppositionNode, context) {
   }
 
   return statement; ///
+}
+
+export function referenceFromSuppositionNode(suppositionNode, context) {
+  let referencel = null;
+
+  return referencel;
 }
 
 export function termFromDefinedAssertionNode(definedAssertionNode, context) {

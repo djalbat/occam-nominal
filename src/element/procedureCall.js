@@ -70,7 +70,9 @@ export default define(class ProcedureCall extends Element {
       const procedureBoolean = procedure.isBoolean();
 
       if (procedureBoolean) {
-        validates = true;
+        const procedureCall = this; ///
+
+        validates = continuation(procedureCall, context);
       } else {
         context.debug(`The '${procedureCallString}' procedure is not boolean.`);
       }
@@ -82,7 +84,7 @@ export default define(class ProcedureCall extends Element {
       context.debug(`...validated the '${procedureCallString}' procedure call.`);
     }
 
-    continuation(validates);
+    return validates;
   }
 
   unifyIndependently(context, continuation) {

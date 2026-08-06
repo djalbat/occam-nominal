@@ -317,7 +317,7 @@ export default define(class Metavariable extends Element {
         } else {
           termValidates = false;
 
-          const termValidatesGivenType = this.term.validateGivenType(type, context, (term, context) => {
+          const termValidatesGivenType = this.term.validateGivenType(type, state, context, (term, context) => {
             let validatesGivenType;
 
             this.term = term;

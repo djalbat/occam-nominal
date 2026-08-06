@@ -115,7 +115,7 @@ export default define(class Equality extends Element {
 
       validates = continuation(equality, context);
     } else {
-      equality = this;
+      equality = this;  ///
 
       const validateTerms = this.validateTerms.bind(this);
 
