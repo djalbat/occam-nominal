@@ -153,7 +153,7 @@ export default define(class Variable extends Element {
       if (inferredSubstitutionComparesToTerm) {
         const inferredSubstitutionString = inferredSubstitution.getString();
 
-        context.trace(`The '${inferredSubstitutionString}' derived substitution is already present.`);
+        context.trace(`The '${inferredSubstitutionString}' inferred substitution is already present.`);
 
         termUnifies = true;
       }

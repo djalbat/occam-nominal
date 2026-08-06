@@ -343,7 +343,7 @@ function validateWhenDerived(term, frame, negated, context, continuation) {
   }
 
   if (validatesWhenDerived) {
-    validatesWhenDerived = continuation(state, context);
+    validatesWhenDerived = continuation(context);
   }
 
   return validatesWhenDerived;

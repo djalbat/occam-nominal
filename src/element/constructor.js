@@ -4,6 +4,7 @@ import { Element, breakPointUtilities } from "occam-languages";
 
 import { define } from "../elements";
 import { every, exists } from "../utilities/continuation";
+import { declare, desist } from "../utilities/state";
 import { baseTypeFromNothing } from "../utilities/type";
 import { instantiateConstructor } from "../process/instantiate";
 import { validateTermAsVariable } from "../process/validation";
@@ -81,15 +82,15 @@ export default define(class Constructor extends Element {
 
     context.trace(`Verifying the '${constructorString}' constructor...`);
 
-    attempt((context) => {
-      const validates = this.validate(state, context, (constructor, context) => true);
+    declare((state) => {
+      desist((state) => {
+        const validates = this.validate(state, context, (constructor, context) => true);
 
-      if (validates) {
-        this.commit(context);
-
-        verifies = true;
-      }
-    }, context);
+        if (validates) {
+          verifies = true;
+        }
+      }, state);
+    });
 
     if (verifies) {
       context.debug(`...verified the '${constructorString}' constructor.`);
@@ -106,21 +107,25 @@ export default define(class Constructor extends Element {
 
     context.trace(`Validating the '${constructorString}' constructor...`);
 
-    const validateTermAsVariable = this.validateTermAsVariable.bind(this),
-          validateTermAsConstructor = this.validateTermAsConstructor.bind(this);
+    attempt((context) => {
+      const validateTermAsVariable = this.validateTermAsVariable.bind(this),
+            validateTermAsConstructor = this.validateTermAsConstructor.bind(this);
 
-    validates = exists([
-      validateTermAsVariable,
-      validateTermAsConstructor
-    ], state, context, (state, context) => {
-      let validates;
+      validates = exists([
+        validateTermAsVariable,
+        validateTermAsConstructor
+      ], state, context, (state, context) => {
+        let validates;
 
-      const constructor = this;
+        const constructor = this;
 
-      validates = continuation(constructor, context);
+        this.commit(context);
 
-      return validates;
-    });
+        validates = continuation(constructor, context);
+
+        return validates;
+      });
+    }, context);
 
     if (validates) {
       context.debug(`...validated the '${constructorString}' constructor.`);
@@ -140,7 +145,7 @@ export default define(class Constructor extends Element {
 
       context.trace(`Validating the '${constructorString}' constructor's term as a variable...`);
 
-      termValidatesAsVariable = validateTermAsVariable(this.term, context, (term, context) => {
+      termValidatesAsVariable = validateTermAsVariable(this.term, state, context, (term, context) => {
         let termValidatesAsVariable = false;
 
         const type = term.getType(),

@@ -85,7 +85,7 @@ export default define(class PropertyAssertion extends Assertion {
 
         propertyAssertion = assertion;  ///
 
-        this.assign(context);
+        this.assign(state, context);
 
         context.addAssertion(assertion);
       }

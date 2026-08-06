@@ -4,7 +4,7 @@ import { Element, breakPointUtilities } from "occam-languages";
 
 import { all } from "../utilities/continuation";
 import { define } from "../elements";
-import { declare } from "../utilities/state";
+import { desist, declare } from "../utilities/state";
 import { instantiateCombinator } from "../process/instantiate";
 import { statementFromCombinatorNode } from "../utilities/element";
 import { unifyStatementWithCombinator } from "../process/unify";
@@ -38,17 +38,15 @@ export default define(class Combinator extends Element {
 
     context.trace(`Verifying the '${combinatorString}' combinator...`);
 
-    attempt((context) => {
-      declare((state) => {
-        const validates = this.validate(state, context, (combinator, context) => true);
+    declare((state) => {
+      desist((state) => {
+        const validates = this.validate(state, context, (ocmbinator, context) => true);
 
         if (validates) {
-          this.commit(context);
-
           verifies = true;
         }
-      });
-    }, context);
+      }, state);
+    });
 
     if (verifies) {
       context.debug(`...verified the '${combinatorString}' combinator.`);
@@ -64,19 +62,23 @@ export default define(class Combinator extends Element {
 
     context.trace(`Validating the '${combinatorString}' combinator...`);
 
-    const validateStatementAsCombinator = this.validateStatementAsCombinator.bind(this);
+    attempt((context) => {
+      const validateStatementAsCombinator = this.validateStatementAsCombinator.bind(this);
 
-    validates = all([
-      validateStatementAsCombinator
-    ], state, context, (state, context) => {
-      let validates;
+      validates = all([
+        validateStatementAsCombinator
+      ], state, context, (state, context) => {
+        let validates;
 
-      const combinator = this;
+        const combinator = this;
 
-      validates = continuation(combinator, context);
+        this.commit(context)
 
-      return validates;
-    });
+        validates = continuation(combinator, context);
+
+        return validates;
+      });
+    }, context);
 
     if (validates) {
       context.debug(`...validated the '${combinatorString}' combinator.`);

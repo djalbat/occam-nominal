@@ -34,19 +34,15 @@ export default define(class Conclusion extends Resolution {
       return continuation(verifies);
     }
 
-    let validates;
-
     declare((state) => {
       desist((state) => {
-        validates = this.validate(state, context, (conclusion, context) => true);
+        const validates = this.validate(state, context, (conclusion, context) => true);
+
+        if (validates) {
+          verifies = true;
+        }
       }, state);
     });
-
-    if (!validates) {
-      return continuation(verifies);
-    }
-
-    verifies = true;
 
     if (verifies) {
       context.debug(`...verified the '${conclusionString}' conclusion.`);

@@ -7,6 +7,7 @@ import { choose } from "../utilities/context";
 import { desist, declare } from "../utilities/state";
 import { provisionallyStringFromProvisional } from "../utilities/string";
 import { bracketedConstructorFromNothing, bracketedCombinatorFromNothing } from "../utilities/instance";
+import generator from "../element/generator";
 
 export function validateTermAsVariable(term, state, context, continuation) {
   let termValidatesAsVariable = false;
@@ -98,7 +99,13 @@ function unifyTermWithConstructors(term, state, context, continuation) {
       let termUnifies;
 
       choose((context) => {
-        termUnifies = constructor.unifyTerm(term, state, context, continuation);
+        termUnifies = constructor.unifyTerm(term, context, (term, context) => {
+          let termUnifies;
+
+          termUnifies = continuation(term, state, context);
+
+          return termUnifies;
+        });
 
         if (termUnifies) {
           context.commit();

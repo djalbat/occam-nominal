@@ -370,7 +370,7 @@ export default define(class Metavariable extends Element {
       if (inferredSubstitutionComparesToTerm) {
         const inferredSubstitutionString = inferredSubstitution.getString();
 
-        context.trace(`The '${inferredSubstitutionString}' derived substitution is already present.`);
+        context.trace(`The '${inferredSubstitutionString}' inferred substitution is already present.`);
 
         frameUnifies = true;
       }
@@ -437,7 +437,7 @@ export default define(class Metavariable extends Element {
       if (inferredSubstitutionComparesToStatement) {
         const inferredSubstitutionString = inferredSubstitution.getString();
 
-        context.trace(`The '${inferredSubstitutionString}' derived substitution is already present.`);
+        context.trace(`The '${inferredSubstitutionString}' inferred substitution is already present.`);
 
         statementUnifies = true;
       }
@@ -510,7 +510,7 @@ export default define(class Metavariable extends Element {
       if (inferredSubstitutionComparesToTerm) {
         const inferredSubstitutionString = inferredSubstitution.getString();
 
-        context.trace(`The '${inferredSubstitutionString}' derived substitution is already present.`);
+        context.trace(`The '${inferredSubstitutionString}' inferred substitution is already present.`);
 
         referenceUnifies = true;
       }

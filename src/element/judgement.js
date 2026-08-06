@@ -175,7 +175,7 @@ export default define(class Judgement extends Element {
       validates = all([
         validateGoal,
         validateFrame
-      ], context, (context) => {
+      ], state, context, (state, context) => {
         let validates;
 
         const validateWhenDeclared = this.validateWhenDeclared.bind(this),

@@ -133,7 +133,7 @@ export default define(class Equality extends Element {
         ], state, context, (state, context) => {
           let validates;
 
-          this.assign(context);
+          this.assign(state, context);
 
           context.addEquality(equality);
 

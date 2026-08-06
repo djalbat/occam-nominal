@@ -7,9 +7,9 @@ import Assertion from "../assertion";
 
 import { define } from "../../elements";
 import { all, every, exists } from "../../utilities/continuation";
-import { isDerived, isDeclared } from "../../utilities/state";
 import { join, reconcile, instantiate } from "../../utilities/context";
 import { instantiateSubproofAssertion } from "../../process/instantiate";
+import { declare, isDerived, isDeclared } from "../../utilities/state";
 import { subproofAssertionFromStatementNode } from "../../utilities/element";
 
 const { last, front } = arrayUtilities,
@@ -119,14 +119,17 @@ export default define(class SubproofAssertion extends Assertion {
     context.trace(`Validating the '${subproofAssertionString}' subproof assertion's statements...`);
 
     statementsValidate = every(this.statements, (statement, context, continuation) => {
-      const state = true,
-            statementValidates = statement.validate(state, context, (statement, context) => {
-              let validates;
+      let statementValidates;
 
-              validates = continuation(context);
+      declare((state) => {
+        statementValidates = statement.validate(state, context, (statement, context) => {
+          let validates;
 
-              return validates;
-            });
+          validates = continuation(context);
+
+          return validates;
+        });
+      });
 
       return statementValidates;
     }, context, (context) => {

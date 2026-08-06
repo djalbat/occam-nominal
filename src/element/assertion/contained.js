@@ -194,28 +194,24 @@ export default define(class ContainedAssertion extends Assertion {
 
     context.trace(`Validating the '${containedAssertionString}' contained assertion's statement...`);
 
-    if (this.statement !== null) {
-      const statementSingular = this.statement.isSingular();
+    const statementSingular = this.statement.isSingular();
 
-      if (statementSingular) {
-        statementValidates = this.statement.validate(state, context, (statement, context) => {
-          let validates;
+    if (statementSingular) {
+      statementValidates = this.statement.validate(state, context, (statement, context) => {
+        let validates;
 
-          this.statement = statement;
+        this.statement = statement;
 
-          validates = continuation(state, context);
+        validates = continuation(state, context);
 
-          return validates;
-        });
-      } else {
-        const statementString = this.statement.getString() ///
-
-        statementValidates = false
-
-        context.debug(`The '${statementString}' statement is not singular.`);
-      }
+        return validates;
+      });
     } else {
-      statementValidates = continuation(state, context);
+      const statementString = this.statement.getString() ///
+
+      statementValidates = false
+
+      context.debug(`The '${statementString}' statement is not singular.`);
     }
 
     if (statementValidates) {

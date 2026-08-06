@@ -55,6 +55,8 @@ export default define(class Premise extends Fact {
   }
 
   verify = breakable(function (context, continuation) {
+    let verifies = false;
+
     const premiseString = this.getString(); ///
 
     context.trace(`Verifying the '${premiseString}' premise...`);
@@ -62,26 +64,18 @@ export default define(class Premise extends Fact {
     const nonsensical = this.isNonsensical();
 
     if (nonsensical) {
-      const verifies = false;
-
       context.debug(`Unable to verify the '${premiseString}' premise because it is nonsense.`);
 
       return continuation(verifies, context);
     }
 
-    let validates;
-
     declare((state) => {
-      validates = this.validate(state, context, (premise, context) => true);
+      const validates = this.validate(state, context, (conclusion, context) => true);
+
+      if (validates) {
+        verifies = true;
+      }
     });
-
-    if (!validates) {
-      const verifies = false;
-
-      return continuation(verifies, context);
-    }
-
-    const verifies = true;
 
     if (verifies) {
       context.debug(`...verified the '${premiseString}' premise.`);

@@ -147,7 +147,7 @@ export default define(class StatementSubstitution extends Substitution {
 
         const generalContext = context; ///
 
-        validates = (state, generalContext, specificContext);
+        validates = continuation(state, generalContext, specificContext);
 
         return validates;
       });

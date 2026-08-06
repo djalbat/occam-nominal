@@ -3,6 +3,7 @@
 import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
 
 import { define } from "../elements";
+import { desist, declare } from "../utilities/state";
 import { baseTypeFromNothing } from "../utilities/type";
 import { instantiateGenerator } from "../process/instantiate";
 import { termFromGeneratorNode } from "../utilities/element";
@@ -73,34 +74,32 @@ export default define(class Generator extends Element {
     this.type = type;
   }
 
-  async verify(context) {
+  verify(context, continuation) {
     let verifies = false;
 
     const includeType = false,
-          generatorString = this.getString(includeType);
+          generatorString = this.getString(includeType);  ///
 
     context.trace(`Verifying the '${generatorString}' generator...`);
 
-    await attempt(async (context) => {
-      const termValidates = await this.validateTerm(context);
+    declare((state) => {
+      desist((state) => {
+        const validates = this.validate(state, context, (generator, context) => true);
 
-      if (termValidates) {
-        verifies = true;
-      }
-
-      if (verifies) {
-        this.commit(context);
-      }
-    }, context);
+        if (validates) {
+          verifies = true;
+        }
+      }, state);
+    });
 
     if (verifies) {
       context.debug(`...verified the '${generatorString}' generator.`);
     }
 
-    return verifies;
+    return continuation(verifies, context);
   }
 
-  async validateTerm(context) {
+  validateTerm(context) {
     let termValidates = false;
 
     const includeType = false,
@@ -111,7 +110,7 @@ export default define(class Generator extends Element {
     const hypothetical = this.isHypothetical();
 
     if (hypothetical) {
-      const termValidatesAsVariable = await validateTermAsVariable(this.term, context, async (term, context) => { ///
+      const termValidatesAsVariable = validateTermAsVariable(this.term, context, (term, context) => { ///
         let validatesForwards = false;
 
         const type = term.getType(),
@@ -142,7 +141,7 @@ export default define(class Generator extends Element {
     return termValidates;
   }
 
-  async unifyTerm(term, context, validateForwards) {
+  unifyTerm(term, context, validateForwards) {
     let termUnifies = false;
 
     const termString = term.getString(),
@@ -151,7 +150,7 @@ export default define(class Generator extends Element {
 
     context.trace(`Unifying the '${termString}' term with the '${generatorString}' generator...`);
 
-    const hypothesesDiscardedGivenTerm = await this.dischargeHypothesesGivenTerm(term, context);
+    const hypothesesDiscardedGivenTerm = this.dischargeHypothesesGivenTerm(term, context);
 
     if (hypothesesDiscardedGivenTerm) {
       const generator = this, ///
@@ -167,7 +166,7 @@ export default define(class Generator extends Element {
 
         term.setProvisional(provisional);
 
-        const validatesForwards = await validateForwards(term, context);
+        const validatesForwards = validateForwards(term, context);
 
         if (validatesForwards) {
           termUnifies = true;
@@ -182,10 +181,10 @@ export default define(class Generator extends Element {
     return termUnifies;
   }
 
-  async dischargeHypothesisGivenTerm(hypothesis, term, context) {
+  dischargeHypothesisGivenTerm(hypothesis, term, context) {
     let hypothesisDischargesGivenTerm;
 
-    await this.break(context);
+    this.break(context);
 
     const termString = term.getString(),
           hypothesisString = hypothesis.getString(),
@@ -193,7 +192,7 @@ export default define(class Generator extends Element {
 
     context.trace(`Discharding the '${generatorString}' generator's '${hypothesisString}' hypothesis given the '${termString}' term...`);
 
-    hypothesisDischargesGivenTerm = await hypothesis.dischargeGivenTerm(term, context);
+    hypothesisDischargesGivenTerm = hypothesis.dischargeGivenTerm(term, context);
 
     if (hypothesisDischargesGivenTerm) {
       context.trace(`...discharges the '${generatorString}' generator's '${hypothesisString}' hypothesis given the '${termString}' term.`);
@@ -202,14 +201,14 @@ export default define(class Generator extends Element {
     return hypothesisDischargesGivenTerm;
   }
 
-  async dischargeHypothesesGivenTerm(term, context) {
+  dischargeHypothesesGivenTerm(term, context) {
     let hypothesesDischargesGivenTerm = true;  ///
 
     const hypothetical = this.isHypothetical();
 
     if (hypothetical) {
-      hypothesesDischargesGivenTerm = await asynchronousEvery(this.hypotheses, async (hypothesis) => {
-        const hypothesisDischarges = await this.dischargeHypothesisGivenTerm(hypothesis, term, context);
+      hypothesesDischargesGivenTerm = asynchronousEvery(this.hypotheses, (hypothesis) => {
+        const hypothesisDischarges = this.dischargeHypothesisGivenTerm(hypothesis, term, context);
 
         if (hypothesisDischarges) {
           return true;
