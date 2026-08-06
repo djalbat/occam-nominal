@@ -157,9 +157,13 @@ export default define(class ReferenceSubstitution extends Substitution {
 
     if (targetReferenceSingular) {
       targetReferenceValidates = this.targetReference.validate(state, context, (targetReference, context) => {
+        let validates;
+
         const generalContext = context; ///
 
-        return continuation(generalContext, specificContext);
+        validates = continuation(state, generalContext, specificContext);
+
+        return validates;
       });
     } else {
       const targetReferenceString = this.targetReference.getString();
@@ -185,9 +189,13 @@ export default define(class ReferenceSubstitution extends Substitution {
     context.trace(`Validating the '${referenceSubstitutionString}' reference substitution's replacement reference...`);
 
     replacementReferenceValidates = this.replacementReference.validate(state, context, (replacementReference, context) => {
+      let validates;
+
       const specificContext = context;  ///
 
-      return continuation(generalContext, specificContext);
+      validates = continuation(state, generalContext, specificContext);
+
+      return validates;
     });
 
     if (replacementReferenceValidates) {

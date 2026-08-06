@@ -143,9 +143,13 @@ export default define(class StatementSubstitution extends Substitution {
 
     if (targetStatementSingular) {
       targetStatementValidates = this.targetStatement.validate(state, context, (targetStatement, context) => {
+        let validates;
+
         const generalContext = context; ///
 
-        return continuation(generalContext, specificContext);
+        validates = (state, generalContext, specificContext);
+
+        return validates;
       });
     } else {
       const targetStatementString = this.targetStatement.getString();
@@ -171,9 +175,13 @@ export default define(class StatementSubstitution extends Substitution {
     context.trace(`Validating the '${statementSubstitutionString}' statement substitution's replacement statement...`);
 
     replacementStatementValidates = this.replacementStatement.validate(state, context, (replacementStatement, context) => {
+      let validates;
+
       const specificContext = context;  ///
 
-      return continuation(generalContext, specificContext);
+      validates = continuation(state, generalContext, specificContext);
+
+      return validates;
     });
 
     if (replacementStatementValidates) {

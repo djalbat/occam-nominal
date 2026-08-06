@@ -141,9 +141,13 @@ export default define(class FrameSubstitution extends Substitution {
 
     if (targetFrameSingular) {
       targetFrameValidates = this.targetFrame.validate(state, context, (targetFrame, context) => {
+        let validates;
+
         const generalContext = context; ///
 
-        return continuation(generalContext, specificContext);
+        validates = continuation(state, generalContext, specificContext);
+
+        return validates;
       });
     } else {
       const targetFrameString = this.targetFrame.getString();
@@ -169,9 +173,13 @@ export default define(class FrameSubstitution extends Substitution {
     context.trace(`Validating the '${frameSubstitutionString}' frame substitution's replacement frame...`);
 
     replacementFrameValidates = this.replacementFrame.validate(state, context, (replacementFrame, context) => {
+      let validates;
+
       const specificContext = context;  ///
 
-      return continuation(generalContext, specificContext);
+      validates = continuation(state, generalContext, specificContext);
+
+      return validates;
     });
 
     if (replacementFrameValidates) {

@@ -144,9 +144,13 @@ export default define(class TermSubstitution extends Substitution {
 
     if (targetTermSingular) {
       targetTermValidates = this.targetTerm.validate(state, context, (targetTerm, context) => {
+        let validates;
+
         const generalContext = context; ///
 
-        return continuation(generalContext, specificContext);
+        validates = continuation(state, generalContext, specificContext);
+
+        return validates;
       });
     } else {
       const targetTermString = this.targetTerm.getString();
@@ -172,9 +176,13 @@ export default define(class TermSubstitution extends Substitution {
     context.trace(`Validating the '${termSubstitutionString}' term substitution's replacement term...`);
 
     replacementTermValidates = this.replacementTerm.validate(state, context, (replacementTerm, context) => {
+      let validates;
+
       const specificContext = context;  ///
 
-      return continuation(generalContext, specificContext);
+      validates = continuation(state, generalContext, specificContext);
+
+      return validates;
     });
 
     if (replacementTermValidates) {
