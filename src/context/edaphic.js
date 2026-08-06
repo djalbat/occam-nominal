@@ -15,7 +15,7 @@ const nominalLexer = nominalLexerFromNothing(NominalLexer),
 
 let baseType = null;
 
-export default class NominalContext extends Context {
+export default class EdaphicContext extends Context {
   constructor(context, lexer, parser) {
     super(context);
 
@@ -53,8 +53,8 @@ export default class NominalContext extends Context {
     const context = null,
           lexer = nominalLexer, ///
           parser = nominalParser, ///
-          nominalContext = Context.fromNothing(NominalContext, lexer, parser, context);
+          edapicContext = Context.fromNothing(EdaphicContext, lexer, parser, context);
 
-    return nominalContext;
+    return edapicContext;
   }
 }

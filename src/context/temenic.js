@@ -8,15 +8,15 @@ import { mergeEquivalences, separateGroundedTermsAndDefinedVariables } from "../
 
 const { last, clear } = arrayUtilities;
 
-class BoundedContext extends Context {
-  constructor(context, constraints, assignments, equivalences, declaredVariables, factOrSubproofs) {
+class TemenicContext extends Context {
+  constructor(context, constraints, assignments, equivalences, factOrSubproofs, declaredVariables) {
     super(context);
 
     this.constraints = constraints;
     this.assignments = assignments;
     this.equivalences = equivalences;
-    this.declaredVariables = declaredVariables;
     this.factOrSubproofs = factOrSubproofs;
+    this.declaredVariables = declaredVariables;
   }
 
   getConstraints() {
@@ -43,21 +43,6 @@ class BoundedContext extends Context {
     return equivalences;
   }
 
-  getDeclaredVariables() {
-    let declaredVariables;
-
-    const context = this.getContext();
-
-    declaredVariables = context.getDeclaredVariables();
-
-    declaredVariables = [
-      ...this.declaredVariables,
-      ...declaredVariables
-    ];
-
-    return declaredVariables;
-  }
-
   getFactOrSubproofs() {
     let factOrSubproofs;
 
@@ -71,6 +56,21 @@ class BoundedContext extends Context {
     ];
 
     return factOrSubproofs;
+  }
+
+  getDeclaredVariables() {
+    let declaredVariables;
+
+    const context = this.getContext();
+
+    declaredVariables = context.getDeclaredVariables();
+
+    declaredVariables = [
+      ...this.declaredVariables,
+      ...declaredVariables
+    ];
+
+    return declaredVariables;
   }
 
   setEquivalences(equivalences) {
@@ -271,23 +271,23 @@ class BoundedContext extends Context {
   static fromNothing(context) {
     const assignments = [],
           equivalences = [],
-          declaredVariables = [],
           constraints = null,
           factOrSubproofs = [],
-          boundedContext = new BoundedContext(context, constraints, assignments, equivalences, declaredVariables, factOrSubproofs);
+          declaredVariables = [],
+          temenicContext = new TemenicContext(context, constraints, assignments, equivalences, factOrSubproofs, declaredVariables);
 
-    return boundedContext;
+    return temenicContext;
   }
 
   static fromConstraints(constraints, context) {
     const assignments = [],
           equivalences = [],
-          declaredVariables = [],
           factOrSubproofs = [],
-          boundedContext = new BoundedContext(context, constraints, assignments, equivalences, declaredVariables, factOrSubproofs);
+          declaredVariables = [],
+          temenicContext = new TemenicContext(context, constraints, assignments, equivalences, factOrSubproofs, declaredVariables);
 
-    return boundedContext;
+    return temenicContext;
   }
 }
 
-export default BoundedContext;
+export default TemenicContext;

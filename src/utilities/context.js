@@ -1,13 +1,13 @@
 "use strict";
 
+import LexicContext from "../context/lexic";
+import CladicContext from "../context/cladic";
 import KrasicContext from "../context/krasic";
 import MnemicContext from "../context/mnemic";
-import BoundedContext from "../context/bounded";
-import NominalContext from "../context/nominal";
-import LiteralContext from "../context/literal";
+import TemenicContext from "../context/temenic";
+import EdaphicContext from "../context/edaphic";
 import LiminalContext from "../context/liminal";
 import PhanericContext from "../context/phaneric";
-import BranchingContext from "../context/branching";
 import ProlepticContext from "../context/proleptic";
 import NominalFileContext from "../context/file/nominal";
 
@@ -16,21 +16,20 @@ import { mnemicContextFromJSON, mnemicContextsFromJSON, mnemicContextToMnemicCon
 export function ground(innerFunction) {
   let context;
 
-  const nominalContext = NominalContext.fromNothing();
+  const edaphicContext = EdaphicContext.fromNothing();
 
-  context = nominalContext; ///
+  context = edaphicContext; ///
 
-  const literalContext = LiteralContext.fromNothing(context);
+  const lexicContext = LexicContext.fromNothing(context);
 
-  context = literalContext;  ///
-
+  context = lexicContext;  ///
   return innerFunction(context);
 }
 
 export function enclose(innerFunction, context) {
-  const boundedContext = BoundedContext.fromNothing(context);
+  const temenicContext = TemenicContext.fromNothing(context);
 
-  context = boundedContext;  ///
+  context = temenicContext;  ///
 
   return innerFunction(context);
 }
@@ -44,17 +43,17 @@ export function anticipate(innerFunction, type, context) {
 }
 
 export function encapsulate(innerFunction, constraints, context) {
-  const boundedContext = BoundedContext.fromConstraints(constraints, context);
+  const temenicContext = TemenicContext.fromConstraints(constraints, context);
 
-  context = boundedContext;  ///
+  context = temenicContext;  ///
 
   return innerFunction(context);
 }
 
 export function choose(innerFunction, context) {
-  const branchingContext = BranchingContext.fromNothing(context);
+  const cladicContext = CladicContext.fromNothing(context);
 
-  context = branchingContext;  ///
+  context = cladicContext;  ///
 
   return innerFunction(context);
 }
@@ -124,9 +123,9 @@ export function unserialises(innerFunction, json, context) {
 }
 
 export function instantiate(innerFunction, context) {
-  const literalContext = LiteralContext.fromNothing(context);
+  const lexicContext = LexicContext.fromNothing(context);
 
-  context = literalContext;  ///
+  context = lexicContext;  ///
 
   return innerFunction(context);
 }

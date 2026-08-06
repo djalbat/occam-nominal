@@ -6,7 +6,7 @@ import Context from "../context";
 
 const { nodeAsString, nodesAsString } = nodeUtilities;
 
-export default class LiteralContext extends Context {
+export default class LexicContext extends Context {
   constructor(context, tokens) {
     super(context);
 
@@ -35,8 +35,8 @@ export default class LiteralContext extends Context {
 
   static fromNothing(context) {
     const tokens = null,
-          literalContext = new LiteralContext(context, tokens);
+          lexicContext = new LexicContext(context, tokens);
 
-    return literalContext;
+    return lexicContext;
   }
 }

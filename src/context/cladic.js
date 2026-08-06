@@ -8,7 +8,7 @@ import { compressTerms, compressAssertions, compressMetavariables } from "../uti
 
 const { push } = arrayUtilities;
 
-export default class BranchingContext extends Context {
+export default class CladicContext extends Context {
   constructor(context, terms, assertions, metavariables) {
     super(context);
 
@@ -178,8 +178,8 @@ export default class BranchingContext extends Context {
     const terms = [],
           assertions = [],
           metavariables = [],
-          branchingContext = new BranchingContext(context, terms, assertions ,metavariables);
+          cladicContext = new CladicContext(context, terms, assertions ,metavariables);
 
-    return branchingContext;
+    return cladicContext;
   }
 }
