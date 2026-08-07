@@ -202,26 +202,26 @@ export default define(class SignatureAssertion extends Assertion {
   static name = "SignatureAssertion";
 
   static fromJSON(json, context) {
+    let signatureAssertion = null;
+
     const { name } = json;
 
-    if (this.name !== name) {
-      return;
+    if (this.name === name) {
+      instantiate((context) => {
+        const { string } = json,
+              definedAssertionNode = instantiateSignatureAssertion(string, context),
+              node = definedAssertionNode,  ///
+              breakPoint = breakPointFromJSON(json),
+              signature = signatureFromSignatureAssertionNode(definedAssertionNode, context),
+              reference = referenceFromSignatureAssertionNode(definedAssertionNode, context);
+
+        context = null;
+
+        signatureAssertion = new SignatureAssertion(context, string, node, breakPoint, signature, reference);
+      }, context);
     }
 
-    return instantiate((context) => {
-      const { string } = json,
-            definedAssertionNode = instantiateSignatureAssertion(string, context),
-            node = definedAssertionNode,  ///
-            breakPoint = breakPointFromJSON(json),
-            signature = signatureFromSignatureAssertionNode(definedAssertionNode, context),
-            reference = referenceFromSignatureAssertionNode(definedAssertionNode, context);
-
-      context = null;
-
-      const signatureAssertion = new SignatureAssertion(context, string, node, breakPoint, signature, reference);
-
-      return signatureAssertion;
-    }, context);
+    return signatureAssertion;
   }
 
   static fromStep(step, context) {

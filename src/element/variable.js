@@ -245,7 +245,9 @@ export default define(class Variable extends Element {
   static name = "Variable";
 
   static fromJSON(json, context) {
-    return instantiate((context) => {
+    let variable;
+
+    instantiate((context) => {
       const { string } = json,
             variableNode = instantiateVariable(string, context),
             node = variableNode,  ///
@@ -256,10 +258,10 @@ export default define(class Variable extends Element {
 
       context = null;
 
-      const variable = new Variable(context, string, node, breakPoint, type, identifier, provisional);
-
-      return variable;
+      variable = new Variable(context, string, node, breakPoint, type, identifier, provisional);
     }, context);
+
+    return variable;
   }
 
   static fromTerm(term, context) {

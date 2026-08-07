@@ -369,7 +369,9 @@ export default define(class Statement extends Element {
   static name = "Statement";
 
   static fromJSON(json, context) {
-    return instantiate((context) => {
+    let statement;
+
+    instantiate((context) => {
       const { string } = json,
             statementNode = instantiateStatement(string, context),
             node = statementNode, ///
@@ -378,9 +380,9 @@ export default define(class Statement extends Element {
 
       context = null;
 
-      const statement = new Statement(context, string, node, breakPoint, substitution);
-
-      return statement;
+      statement = new Statement(context, string, node, breakPoint, substitution);
     }, context);
+
+    return statement;
   }
 });

@@ -87,9 +87,12 @@ export default define(class Premise extends Fact {
   validate(state, context, continuation) {
     let validates;
 
-    const premiseString = this.getString(); ///
+    const premiseString = this.getString(),
+          specificContext = context; ///
 
     context.trace(`Validating the '${premiseString}' premise...`);
+
+    const premise = this;  ///
 
     attempt((context) => {
       const validateStatement = this.validateStatement.bind(this),
@@ -101,15 +104,19 @@ export default define(class Premise extends Fact {
       ], state, context, (state, context) => {
         let validates;
 
-        const premise = this;  ///
-
-        this.commit(context);
+        context = specificContext;  ///
 
         validates = continuation(premise, context);
 
         return validates;
       });
+
+      if (validates) {
+        this.commit(context);
+      }
     }, context);
+
+    context = specificContext;  ///
 
     if (validates) {
       context.debug(`...validated the '${premiseString}' premise.`);
@@ -271,20 +278,23 @@ export default define(class Premise extends Fact {
   static name = "Premise";
 
   static fromJSON(json, context) {
-    return instantiate((context) => {
-      return unserialise((json, context) => {
+    let premise;
+
+    instantiate((context) => {
+      unserialise((json, context) => {
         const { string } = json,
               premiseNode = instantiatePremise(string, context),
               node = premiseNode,  ///
               breakPoint = breakPointFromJSON(json),
               statement = statementFromPremiseNode(premiseNode, context),
               reference = referenceFromPremiseNode(premiseNode, context),
-              procedureCall = procedureCallFromPremiseNode(premiseNode, context),
-              premise = new Premise(context, string, node, breakPoint, statement, reference, procedureCall);
+              procedureCall = procedureCallFromPremiseNode(premiseNode, context);
 
-        return premise;
+        premise = new Premise(context, string, node, breakPoint, statement, reference, procedureCall);
       }, json, context);
     }, context);
+
+    return premise;
   }
 });
 

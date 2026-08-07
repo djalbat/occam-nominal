@@ -55,7 +55,9 @@ export default define(class ProcedureReference extends Element {
   static name = "ProcedureReference";
 
   static fromJSON(json, context) {
-    return instantiate((context) => {
+    let procedureReference;
+
+    instantiate((context) => {
       const { string } = json,
             procedureReferenceNode = instantiateProcedureReference(string, context),
             node = procedureReferenceNode,  ///
@@ -64,9 +66,9 @@ export default define(class ProcedureReference extends Element {
 
       context = null;
 
-      const procedureReference = new ProcedureReference(context, string, node, breakPoint, name);
-
-      return procedureReference;
+      procedureReference = new ProcedureReference(context, string, node, breakPoint, name);
     }, context);
+
+    return procedureReference;
   }
 });

@@ -103,9 +103,12 @@ export default define(class Constructor extends Element {
     let validates;
 
     const includeType = false,
+          specificContext = context,  ///
           constructorString = this.getString(includeType);  ///
 
     context.trace(`Validating the '${constructorString}' constructor...`);
+
+    const constructor = this;
 
     attempt((context) => {
       const validateTermAsVariable = this.validateTermAsVariable.bind(this),
@@ -117,15 +120,19 @@ export default define(class Constructor extends Element {
       ], state, context, (state, context) => {
         let validates;
 
-        const constructor = this;
-
-        this.commit(context);
+        context = specificContext;  ///
 
         validates = continuation(constructor, context);
 
         return validates;
       });
+
+      if (validates) {
+        this.commit(context);
+      }
     }, context);
+
+    context = specificContext;  ///
 
     if (validates) {
       context.debug(`...validated the '${constructorString}' constructor.`);
@@ -324,19 +331,22 @@ export default define(class Constructor extends Element {
   static name = "Constructor";
 
   static fromJSON(json, context) {
-    return instantiate((context) => {
-      return unserialise((json, context) => {
+    let constructor;
+
+    instantiate((context) => {
+      unserialise((json, context) => {
         const { string } = json,
               constructorNode = instantiateConstructor(string, context),
               node = constructorNode, ///
               breakPoint = breakPointFromJSON(json),
               term = termFromConstructorNode(constructorNode, context),
               type = typeFromJSON(json, context),
-              hypotheses = hypothesesFromJSON(json, context),
-              constructor = new Constructor(context, string, node, breakPoint, term, type, hypotheses);
+              hypotheses = hypothesesFromJSON(json, context);
 
-        return constructor;
+        constructor = new Constructor(context, string, node, breakPoint, term, type, hypotheses);
       }, json, context);
     }, context);
+
+    return constructor;
   }
 });

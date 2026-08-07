@@ -97,7 +97,9 @@ export default define(class TypePrefix extends Element {
   static name = "TypePrefix";
 
   static fromJSON(json, context) {
-    return instantiate((context) => {
+    let typePrefix;
+
+    instantiate((context) => {
       const { string } = json,
             typePrefixNode = instantiateTypePrefix(string, context),
             node = typePrefixNode, ///
@@ -106,9 +108,9 @@ export default define(class TypePrefix extends Element {
 
       context = null; ///
 
-      const typePrefix = new TypePrefix(context, string, node, breakPoint, name);
-
-      return typePrefix;
+      typePrefix = new TypePrefix(context, string, node, breakPoint, name);
     }, context);
+
+    return typePrefix;
   }
 });

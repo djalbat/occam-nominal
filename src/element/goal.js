@@ -147,7 +147,7 @@ export default define(class Goal extends Element {
     });
 
     if (referenceValidates) {
-      context.debug(`...validates the'${goalString}' goal's reference.`);
+      context.debug(`...validates the '${goalString}' goal's reference.`);
     }
 
     return referenceValidates;
@@ -171,7 +171,7 @@ export default define(class Goal extends Element {
     });
 
     if (statementValidates) {
-      context.debug(`...validates the'${goalString}' goal's statement.`);
+      context.debug(`...validates the '${goalString}' goal's statement.`);
     }
 
     return statementValidates;
@@ -351,17 +351,20 @@ export default define(class Goal extends Element {
   static name = "Goal";
 
   static fromJSON(json, context) {
-    return instantiate((context) => {
+    let goal;
+
+    instantiate((context) => {
       const { string } = json,
             goalNode = instantiateGoal(string, context),
             node = goalNode,  ///
             breakPoint = breakPointFromJSON(json),
             reference = referenceFromGoalNode(goalNode, context),
-            statement = statementFromGoalNode(goalNode, context),
-            goal = new Goal(context, string, node, breakPoint, reference, statement);
+            statement = statementFromGoalNode(goalNode, context);
 
-      return goal;
+      goal = new Goal(context, string, node, breakPoint, reference, statement);
     }, context);
+
+    return goal;
   }
 });
 

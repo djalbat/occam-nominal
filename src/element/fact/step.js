@@ -165,9 +165,12 @@ export default define(class Step extends Fact {
   validate(state, context, continuation) {
     let validates;
 
-    const stepString = this.getString(); ///
+    const stepString = this.getString(),  ///
+          specificContext = context;  ///
 
     context.trace(`Validating the '${stepString}' step...`);
+
+    const step = this;  ///
 
     attempt((context) => {
       const validateStatement = this.validateStatement.bind(this),
@@ -181,15 +184,19 @@ export default define(class Step extends Fact {
       ], state, context, (state, context) => {
         let validates;
 
-        const step = this;  ///
-
-        this.commit(context);
+        context = specificContext;  ///
 
         validates = continuation(step, context);
 
         return validates;
       });
+
+      if (validates) {
+        this.commit(context);
+      }
     }, context);
+
+    context = specificContext;  ///
 
     if (validates) {
       context.debug(`...validated the '${stepString}' step.`);

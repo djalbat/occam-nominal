@@ -21,18 +21,6 @@ export default class PhanericContext extends Context {
     this.setContext(context);
   }
 
-  attach(context) {
-    this.setContext(context);
-  }
-
-  detach() {
-    const context = this.getContext();
-
-    this.nullifyContext();
-
-    return context;
-  }
-
   nodeAsString(node) {
     let string = EMPTY_STRING;
 

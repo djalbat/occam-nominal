@@ -97,6 +97,8 @@ export default define(class TermSubstitution extends Substitution {
 
       validates = continuation(termSubstitution, context);
     } else {
+      substitution = this;  ///
+
       const generalContext = this.getGeneralContext(),
             specificContext = this.getSpecificContext();
 
@@ -110,18 +112,16 @@ export default define(class TermSubstitution extends Substitution {
         ], state, generalContext, specificContext, () => {
           let validates;
 
-          substitution = this;  ///
-
-          context.addSubstitution(substitution);
-
-          this.commit(generalContext, specificContext);
-
-          const termSubstitution = substitution; ///
-
-          validates = continuation(termSubstitution, context);
+          validates = continuation(substitution, context);
 
           return validates;
         });
+
+        if (validates) {
+          this.commit(generalContext, specificContext);
+
+          context.addSubstitution(substitution);
+        }
       }, generalContext, specificContext);
     }
 
@@ -320,29 +320,30 @@ export default define(class TermSubstitution extends Substitution {
   static name = "TermSubstitution";
 
   static fromJSON(json, context) {
+    let termSubstitutionn;
+
     const { name } = json;
 
-    if (this.name !== name) {
-      return;
+    if (this.name === name) {
+      instantiate((context) => {
+        unserialises((json, generalContext, specificContext) => {
+          const { string } = json,
+                termSubstitutionNode = instantiateTermSubstitution(string, context),
+                node = termSubstitutionNode,  ///
+                contexts = [
+                  generalContext,
+                  specificContext
+                ],
+                breakPoint = breakPointFromJSON(json),
+                targetTerm = targetTermFromTermSubstitutionNode(termSubstitutionNode, generalContext),
+                replacementTerm = replacementTermFromTermSubstitutionNode(termSubstitutionNode, specificContext);
+
+          termSubstitutionn = new TermSubstitution(contexts, string, node, breakPoint, targetTerm, replacementTerm);
+        }, json, context);
+      }, context);
     }
 
-    return instantiate((context) => {
-      return unserialises((json, generalContext, specificContext) => {
-        const { string } = json,
-              termSubstitutionNode = instantiateTermSubstitution(string, context),
-              node = termSubstitutionNode,  ///
-              contexts = [
-                generalContext,
-                specificContext
-              ],
-              breakPoint = breakPointFromJSON(json),
-              targetTerm = targetTermFromTermSubstitutionNode(termSubstitutionNode, generalContext),
-              replacementTerm = replacementTermFromTermSubstitutionNode(termSubstitutionNode, specificContext),
-              termSubstitutionn = new TermSubstitution(contexts, string, node, breakPoint, targetTerm, replacementTerm);
-
-        return termSubstitutionn;
-      }, json, context);
-    }, context);
+    return termSubstitutionn;
   }
 
   static fromStatementNode(statementNode, context) {
@@ -351,35 +352,48 @@ export default define(class TermSubstitution extends Substitution {
     const termSubstitutionNode = statementNode.getTermSubstitutionNode();
 
     if (termSubstitutionNode !== null) {
-      ablate((context) => {
-        const generalContext = context, ///
-              specificContext = context;  ///
+      const generalContext = context, ///
+            specificContext = context,  ///
+            termSubstitutionString = context.nodeAsString(termSubstitutionNode);
 
-        termSubstitution = termSubstitutionFromTermSubstitutionNode(termSubstitutionNode, generalContext, specificContext);
-      }, context);
+      ablates((generalContext, specificContext) => {
+        instantiate((specificContext) => {
+          manifest((generalContext) => {
+            const string = termSubstitutionString,  ///
+                  context = specificContext,  ///
+                  termSubstitutionNode = instantiateTermSubstitution(string, context);
+
+            termSubstitution = termSubstitutionFromTermSubstitutionNode(termSubstitutionNode, generalContext, specificContext);
+          }, generalContext, specificContext);
+        }, specificContext);
+      }, generalContext, specificContext);
     }
 
     return termSubstitution;
   }
 
   static fromTermAndVariable(term, variable, generalContext, specificContext) {
+    let termSubstitution;
+
     const context = specificContext;  ///
 
     term = stripBracketsFromTerm(term, context); ///
 
-    return ablates((generalContext, specificContext) => {
-      return instantiate((specificContext) => {
-        return manifest((generalContext) => {
-          const termSubstitutionString = termSubstitutionStringFromTermAndVariable(term, variable),
-                string = termSubstitutionString,  ///
-                context = specificContext,  ///
-                termSubstitutionNode = instantiateTermSubstitution(string, context),
-                termSubstitution = termSubstitutionFromTermSubstitutionNode(termSubstitutionNode, generalContext, specificContext);
+    const termSubstitutionString = termSubstitutionStringFromTermAndVariable(term, variable);
 
-          return termSubstitution;
+    ablates((generalContext, specificContext) => {
+      instantiate((specificContext) => {
+        manifest((generalContext) => {
+          const string = termSubstitutionString,  ///
+                context = specificContext,  ///
+                termSubstitutionNode = instantiateTermSubstitution(string, context);
+
+          termSubstitution = termSubstitutionFromTermSubstitutionNode(termSubstitutionNode, generalContext, specificContext);
         }, generalContext, specificContext);
       }, specificContext);
     }, generalContext, specificContext);
+
+    return termSubstitution;
   }
 });
 

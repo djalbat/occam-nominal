@@ -250,18 +250,21 @@ export default define(class Generator extends Element {
   static name = "Generator";
 
   static fromJSON(json, context) {
-    return instantiate((context) => {
-      return unserialise((json, context) => {
+    let generator;
+
+    instantiate((context) => {
+      unserialise((json, context) => {
         const { string } = json,
               generatorNode = instantiateGenerator(string, context),
               node = generatorNode, ///
               breakPoint = breakPointFromJSON(json),
               term = termFromGeneratorNode(generatorNode, context),
-              type = typeFromJSON(json, context),
-              generator = new Generator(context, string, node, breakPoint, term, type);
+              type = typeFromJSON(json, context);
 
-        return generator;
+        generator = new Generator(context, string, node, breakPoint, term, type);
       }, json, context);
     }, context);
+
+    return generator;
   }
 });

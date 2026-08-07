@@ -27,9 +27,12 @@ export default class Resolution extends Element {
   validate(state, context, continuation) {
     let validates;
 
-    const resolutionString = this.getString(); ///
+    const specificContext = context,  ///
+          resolutionString = this.getString(); ///
 
     context.trace(`Validating the '${resolutionString}' resolution...`);
+
+    const resolution = this;  ///
 
     attempt((context) => {
       const validateStatement = this.validateStatement.bind(this);
@@ -39,15 +42,19 @@ export default class Resolution extends Element {
       ], state, context, (state, context) => {
         let validates;
 
-        this.commit(context);
-
-        const resolution = this;  ///
+        context = specificContext;  ///
 
         validates = continuation(resolution, context);
 
         return validates;
       });
+
+      if (validates) {
+        this.commit(context);
+      }
     }, context);
+
+    context = specificContext;  ///
 
     if (validates) {
       context.debug(`...validated the '${resolutionString}' resolution.`);

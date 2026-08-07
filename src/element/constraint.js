@@ -2,10 +2,9 @@
 
 import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
 
+import { all } from "../utilities/continuation";
 import { define } from "../elements";
-import { all, exists } from "../utilities/continuation";
 import { unifyStatement } from "../process/unify";
-import { isDerived, isDeclared } from "../utilities/state";
 import { instantiateConstraint } from "../process/instantiate";
 import { stripBracketsFromStatement } from "../utilities/brackets";
 import { constraintFromConstraintNode } from "../utilities/element";
@@ -66,7 +65,8 @@ export default define(class Constraint extends Element {
   validate(state, context, continuation) {
     let validates;
 
-    const constraintString = this.getString();  ///
+    const specificContext = context,  ///
+          constraintString = this.getString();  ///
 
     context.trace(`Validating the '${constraintString}' constraint...`);
 
@@ -79,7 +79,7 @@ export default define(class Constraint extends Element {
 
       validates = continuation(constraint, context);
     } else {
-      const specificContext = context; ///
+      constraint = this;  ///
 
       context = this.getContext();
 
@@ -93,32 +93,24 @@ export default define(class Constraint extends Element {
         ], state, context, (state, context) => {
           let validates;
 
-          const validateWhenDeclared = this.validateWhenDeclared.bind(this),
-                validateWhenDerived = this.validateWhenDerived.bind(this);
+          context = specificContext;  ///
 
-          validates = exists([
-            validateWhenDeclared,
-            validateWhenDerived
-          ], state, context, (state, context) => {
-            let validates;
-
-            constraint = this;  ///
-
-            this.commit(context);
-
-            context = specificContext;  ///
-
-            context.addConstraint(constraint);
-
-            validates = continuation(constraint, context);
-
-            return validates;
-          });
+          validates = continuation(constraint, context);
 
           return validates;
         });
+
+        if (validates) {
+          this.commit(context);
+
+          context = specificContext;  ///
+
+          context.addConstraint(constraint);
+        }
       }, context);
     }
+
+    context = specificContext;  ///
 
     if (validates) {
       context.debug(`...validated the '${constraintString}' constraint.`);
@@ -173,46 +165,6 @@ export default define(class Constraint extends Element {
     }
 
     return statementValidates;
-  }
-
-  validateWhenDeclared(state, context, continuation) {
-    let validatesWhenDeclared = false;
-
-    const declared = isDeclared(state);
-
-    if (declared) {
-      const constraintString = this.getString(); ///
-
-      context.trace(`Validating the '${constraintString}' declared constraint...`);
-
-      validatesWhenDeclared = continuation(state, context);
-
-      if (validatesWhenDeclared) {
-        context.debug(`...validated the '${constraintString}' declared constraint.`);
-      }
-    }
-
-    return validatesWhenDeclared;
-  }
-
-  validateWhenDerived(state, context, continuation) {
-    let validatesWhenDerived = false;
-
-    const derived = isDerived(state);
-
-    if (derived) {
-      const constraintString = this.getString(); ///
-
-      context.trace(`Validating the '${constraintString}' derived constraint...`);
-
-      validatesWhenDerived = continuation(state, context);
-
-      if (validatesWhenDerived) {
-        context.debug(`...validated the '${constraintString}' derived constraint.`);
-      }
-    }
-
-    return validatesWhenDerived;
   }
 
   unifyReference(reference, generalContext, specificContext, continuation) {
@@ -332,19 +284,22 @@ export default define(class Constraint extends Element {
   static name = "Constraint";
 
   static fromJSON(json, context) {
-    return instantiate((context) => {
-      return unserialise((json, context) => {
+    let constraint;
+
+    instantiate((context) => {
+      unserialise((json, context) => {
         const { string } = json,
               constraintNode = instantiateConstraint(string, context),
               node = constraintNode,  ///
               breakPoint = breakPointFromJSON(json),
               reference = referenceFromConstraintNode(constraintNode, context),
-              statement = statementFromConstraintNode(constraintNode, context),
-              constraint = new Constraint(context, string, node, breakPoint, reference, statement);
+              statement = statementFromConstraintNode(constraintNode, context);
 
-        return constraint;
+        constraint = new Constraint(context, string, node, breakPoint, reference, statement);
       }, json, context);
     }, context);
+
+    return constraint;
   }
 
   static fromStep(step, context) {
@@ -358,14 +313,13 @@ export default define(class Constraint extends Element {
 
     const reference = step.getReference();
 
-    constraint = ablate((context) => {
-      return instantiate((context) => {
+    ablate((context) => {
+      instantiate((context) => {
         const constraintString = constraintStringFromReferenceAndStatement(reference, statement),
               string = constraintString,  ///
-              constraintNode = instantiateConstraint(string, context),
-              constraint = constraintFromConstraintNode(constraintNode, context);
+              constraintNode = instantiateConstraint(string, context);
 
-        return constraint;
+        constraint = constraintFromConstraintNode(constraintNode, context);
       }, context);
     }, context);
 

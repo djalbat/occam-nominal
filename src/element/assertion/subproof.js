@@ -374,25 +374,25 @@ export default define(class SubproofAssertion extends Assertion {
   static name = "SubproofAssertion";
 
   static fromJSON(json, context) {
+    let subproorAssertion = null;
+
     const { name } = json;
 
-    if (this.name !== name) {
-      return;
+    if (this.name === name) {
+      instantiate((context) => {
+        const { string } = json,
+              subproofAssertionNode = instantiateSubproofAssertion(string, context),
+              node = subproofAssertionNode,  ///
+              breakPoint = breakPointFromJSON(json),
+              statements = statementsFromSubproofAssertionNode(subproofAssertionNode, context);
+
+        context = null;
+
+        subproorAssertion = new SubproofAssertion(context, string, node, breakPoint, statements);
+      }, context);
     }
 
-    return instantiate((context) => {
-      const { string } = json,
-            subproofAssertionNode = instantiateSubproofAssertion(string, context),
-            node = subproofAssertionNode,  ///
-            breakPoint = breakPointFromJSON(json),
-            statements = statementsFromSubproofAssertionNode(subproofAssertionNode, context);
-
-      context = null;
-
-      const subproorAssertion = new SubproofAssertion(context, string, node, breakPoint, statements);
-
-      return subproorAssertion;
-    }, context);
+    return subproorAssertion;
   }
 
   static fromStatement(statement, context) {

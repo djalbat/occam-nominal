@@ -355,17 +355,20 @@ export default define(class Assumption extends Element {
   static name = "Assumption";
 
   static fromJSON(json, context) {
-    return instantiate((context) => {
+    let assumption;
+
+    instantiate((context) => {
       const { string } = json,
             assumptionNode = instantiateAssumption(string, context),
             node = assumptionNode,  ///
             breakPoint = breakPointFromJSON(json),
             reference = referenceFromAssumptionNode(assumptionNode, context),
-            statement = statementFromAssumptionNode(assumptionNode, context),
-            assumption = new Assumption(context, string, node, breakPoint, reference, statement);
+            statement = statementFromAssumptionNode(assumptionNode, context);
 
-      return assumption;
+      assumption = new Assumption(context, string, node, breakPoint, reference, statement);
     }, context);
+
+    return assumption;
   }
 });
 

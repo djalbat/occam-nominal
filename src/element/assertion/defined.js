@@ -133,7 +133,7 @@ export default define(class DefinedAssertion extends Assertion {
     }
 
     if (termValidates) {
-      context.debug(`...validates the'${definedAssertionString}' defined assertion's term.`);
+      context.debug(`...validates the '${definedAssertionString}' defined assertion's term.`);
     }
 
     return termValidates;
@@ -171,7 +171,7 @@ export default define(class DefinedAssertion extends Assertion {
     }
 
     if (frameValidates) {
-      context.debug(`...validates the'${definedAssertionString}' defined assertion's frame.`);
+      context.debug(`...validates the '${definedAssertionString}' defined assertion's frame.`);
     }
 
     return frameValidates;

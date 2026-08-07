@@ -2,6 +2,7 @@
 
 import { Element, breakPointUtilities } from "occam-languages";
 
+import { all } from "../utilities/continuation";
 import { define } from "../elements";
 import { declare } from "../utilities/state";
 import { instantiateHypothesis } from "../process/instantiate";
@@ -33,10 +34,10 @@ export default define(class Hypothesis extends Element {
     return hypothesisNode;
   }
 
-  async verify(context) {
+  verify(context) {
     let verifies = false;
 
-    await this.break(context);
+    this.break(context);
 
     const hypothesisString = this.getString(); ///
 
@@ -61,27 +62,51 @@ export default define(class Hypothesis extends Element {
     return verifies;
   }
 
-  validate(state, context) {
-    let validates = false;
+  validate(state, context, continuation) {
+    let validates;
 
-    const hypothesisString = this.getString(); ///
+    const specificContext = context,  ///
+          hypothesisString = this.getString();  ///
 
     context.trace(`Validating the '${hypothesisString}' hypothesis...`);
 
-    debugger
+    let hypothesis;
 
-    attempt((context) => {
-      const statementValidates = this.validateStatement(context),
-            procedureCallValidates =  this.validateProcedureCall(context);
+    hypothesis = this.findConstraint(context);
 
-      if (statementValidates || procedureCallValidates) {
-        validates = true;
-      }
+    if (hypothesis !== null) {
+      context.debug(`The '${hypothesisString}' hypothesis is already present.`);
 
-      if (validates) {
-        this.commit(context);
-      }
-    }, context);
+      validates = continuation(hypothesis, context);
+    } else {
+      hypothesis = this;  ///
+
+      context = this.getContext();
+
+      attempt((context) => {
+        const validateStatement = this.validateStatement.bind(this),
+              validateProcedureCall = this.validateProcedureCall.bind(this);
+
+        validates = all([
+          validateStatement,
+          validateProcedureCall
+        ], state, context, (state, context) => {
+          let validates;
+
+          context = specificContext;  ///
+
+          validates = continuation(hypothesis, context);
+
+          return validates;
+        });
+
+        if (validates) {
+          this.commit(context);
+        }
+      }, context);
+    }
+
+    context = specificContext;  ///
 
     if (validates) {
       context.debug(`...validated the '${hypothesisString}' hypothesis.`);
@@ -90,7 +115,7 @@ export default define(class Hypothesis extends Element {
     return validates;
   }
 
-  async validateStatement(context) {
+  validateStatement(context) {
     let statementValidates = false;
 
     if (this.statement !== null) {
@@ -98,7 +123,7 @@ export default define(class Hypothesis extends Element {
 
       context.trace(`Validating the '${hypothesisString}' hypothesis's statement...`);
 
-      const statement = await this.statement.validate(state, context);  ///
+      const statement = this.statement.validate(state, context);  ///
 
       if (statement !== null) {
         statementValidates = true;
@@ -176,7 +201,7 @@ export default define(class Hypothesis extends Element {
     return statementDischarges;
   }
 
-  async dischargeGivenTerm(term, context) {
+  dischargeGivenTerm(term, context) {
     let dischargesGivenTerm = false;
 
     const termString = term.getString(),
@@ -184,7 +209,7 @@ export default define(class Hypothesis extends Element {
 
     context.trace(`Discharging the '${hypothesisString}' hypothesis given the '${termString}' term...`);
 
-    const procedureCallDischargesGivenTerm = await this.dischargeProcedureCallGivenTerm(term, context);
+    const procedureCallDischargesGivenTerm = this.dischargeProcedureCallGivenTerm(term, context);
 
     if (procedureCallDischargesGivenTerm) {
       dischargesGivenTerm = true;
@@ -197,7 +222,7 @@ export default define(class Hypothesis extends Element {
     return dischargesGivenTerm;
   }
 
-  async dischargeProcedureCallGivenTerm(term, context) {
+  dischargeProcedureCallGivenTerm(term, context) {
     let procedureCallDischarges = false;
 
     if (this.procedureCall !== null) {
@@ -206,7 +231,7 @@ export default define(class Hypothesis extends Element {
 
       context.trace(`Discharging the '${hypothesisString}' hypothesis's procedure call given the '${termString}' term...`);
 
-      const discharges = await this.procedureCall.dischargeGivenTerm(term, context);  ///
+      const discharges = this.procedureCall.dischargeGivenTerm(term, context);  ///
 
       if (discharges) {
         procedureCallDischarges = true;
@@ -247,18 +272,21 @@ export default define(class Hypothesis extends Element {
   static name = "Hypothesis";
 
   static fromJSON(json, context) {
-    return instantiate((context) => {
-      return unserialise((json, context) => {
+    let hypothesis;
+
+    instantiate((context) => {
+      unserialise((json, context) => {
         const { string } = json,
               hypothesisNode = instantiateHypothesis(string, context),
               node = hypothesisNode,  ///
               breakPoint = breakPointFromJSON(json),
               statement = statementFromHypothesisNode(hypothesisNode, context),
-              procedureCall = procedureCallFromHypothesisNode(hypothesisNode, context),
-              hypothesis = new Hypothesis(context, string, node, breakPoint, statement, procedureCall);
+              procedureCall = procedureCallFromHypothesisNode(hypothesisNode, context);
 
-        return hypothesis;
+        hypothesis = new Hypothesis(context, string, node, breakPoint, statement, procedureCall);
       }, json, context);
     }, context);
+
+    return hypothesis;
   }
 });

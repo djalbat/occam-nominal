@@ -70,18 +70,21 @@ export default define(class Deduction extends Resolution {
   static name = "Deduction";
 
   static fromJSON(json, context) {
-    return instantiate((context) => {
-      return unserialise((json, context) => {
+    let deduction;
+
+    instantiate((context) => {
+      unserialise((json, context) => {
         const { string } = json,
               deductionNode = instantiateDeduction(string, context),
               node = deductionNode,  ///
               breakPoint = breakPointFromJSON(json),
-              statement = statementFromDeductionNode(deductionNode, context),
-              deduction = new Deduction(context, string, node, breakPoint, statement);
+              statement = statementFromDeductionNode(deductionNode, context);
 
-        return deduction;
+        deduction = new Deduction(context, string, node, breakPoint, statement);
       }, json, context);
     }, context);
+
+    return deduction;
   }
 });
 

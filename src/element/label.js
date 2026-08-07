@@ -84,9 +84,12 @@ export default define(class Label extends Element {
   validate(state, context, continuation) {
     let validates;
 
-    const labelString = this.getString();  ///
+    const labelString = this.getString(),  ///
+          specificContext = context;  ///
 
     context.trace(`Validating the '${labelString}' label...`);
+
+    const label = this; ///
 
     context = this.getContext();
 
@@ -98,15 +101,19 @@ export default define(class Label extends Element {
       ], state, context, (state, context) => {
         let validates;
 
-        const label = this; ///
-
-        this.commit(context);
+        context = specificContext;  ///
 
         validates = continuation(label, context);
 
         return validates;
       });
+
+      if (validates) {
+        this.commit(context);
+      }
     }, context);
+
+    context = specificContext;  ///
 
     if (validates) {
       context.debug(`...validated the '${labelString}' label.`);
@@ -218,18 +225,21 @@ export default define(class Label extends Element {
   static name = "Label";
 
   static fromJSON(json, context) {
-    return instantiate((context) => {
-      return unserialise((json, context) => {
+    let label;
+
+    instantiate((context) => {
+      unserialise((json, context) => {
         const { string } = json,
               labelNode = instantiateLabel(string, context),
               node = labelNode, ///
               breakPoint = breakPointFromJSON(json),
-              metavariable = metavariableFromLabelNode(labelNode, context),
-              label = new Label(context, string, node, breakPoint, metavariable);
+              metavariable = metavariableFromLabelNode(labelNode, context);
 
-        return label;
+        label = new Label(context, string, node, breakPoint, metavariable);
       }, json, context);
     }, context);
+
+    return label;
   }
 
   static fromLabelString(labelString, context) {

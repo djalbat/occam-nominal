@@ -696,7 +696,9 @@ export default define(class Metavariable extends Element {
   static name = "Metavariable";
 
   static fromJSON(json, context) {
-    return instantiate((context) => {
+    let metavariable;
+
+    instantiate((context) => {
       const { string } = json,
             metavariableNode = instantiateMetavariable(string, context),
             node = metavariableNode,  ///
@@ -704,11 +706,12 @@ export default define(class Metavariable extends Element {
             name = nameFromMetavariableNode(metavariableNode, context),
             term = termFromMetavariableNode(metavariableNode, context),
             type = typeFromMetavariableNode(metavariableNode, context),
-            metaType = metaTypeFromJSON(json, context),
-            metavariable = new Metavariable(context, string, node, breakPoint, name, term, type, metaType);
+            metaType = metaTypeFromJSON(json, context);
 
-      return metavariable;
+      metavariable = new Metavariable(context, string, node, breakPoint, name, term, type, metaType);
     }, context);
+
+    return metavariable;
   }
 
   static fromStatement(statement, context) {

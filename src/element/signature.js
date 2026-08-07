@@ -7,6 +7,7 @@ import { define } from "../elements";
 import { instantiateSignature } from "../process/instantiate";
 import { signatureFromSignatureNode } from "../utilities/element";
 import { ablate, attempt, reconcile, serialise, unserialise, instantiate } from "../utilities/context";
+import {all} from "../utilities/continuation";
 
 const { match } = arrayUtilities,
       { asynchronousEvery } = continuationUtilities,
@@ -73,17 +74,17 @@ export default define(class Signature extends Element {
 
     context.trace(`Verifying the '${signatureString}' signature...`);
 
-    attempt((context) => {
-      const termsValidate = this.validateTerms(context);
+    debugger
 
-      if (termsValidate !== null) {
-        verifies = true;
-      }
+    const termsValidate = this.validateTerms(context);
 
-      if (verifies) {
-        this.commit(context);
-      }
-    }, context);
+    if (termsValidate !== null) {
+      verifies = true;
+    }
+
+    if (verifies) {
+      this.commit(context);
+    }
 
     if (verifies) {
       context.debug(`...validated the '${signatureString}' signature.`);
@@ -92,50 +93,43 @@ export default define(class Signature extends Element {
     return verifies;
   }
 
-  validate(context) {
-    const signatureString = this.getString();  ///
+  validate(state, context, continuation) {
+    let validates;
+
+    const specificContext = context,  ///
+          signatureString = this.getString(); ///
 
     context.trace(`Validating the '${signatureString}' signature...`);
 
-    let validates = false;
+    const signature = this;  ///
 
-    const signature = this.findSignature(context);
+    attempt((context) => {
+      const validateTerms = this.validateTerms.bind(this);
 
-    if (signature !== null) {
-      validates = true;
+      validates = all([
+        validateTerms
+      ], state, context, (state, context) => {
+        let validates;
 
-      context.debug(`...the '${signatureString}' signature is already present.`);
-    } else {
-      const temporaryContext = context; ///
+        context = specificContext;  ///
 
-      context = this.getContext();
+        validates = continuation(signature, context);
 
-      attempt((context) => {
-        const termsValidate = this.validateTerms(context);
-
-        if (termsValidate !== null) {
-          validates = true;
-        }
-
-        if (validates) {
-          this.commit(context);
-        }
-      }, context);
-
-      context = temporaryContext; ///
+        return validates;
+      });
 
       if (validates) {
-        const signature = this; ///
-
-        context.addSignature(signature);
+        this.commit(context);
       }
-    }
+    }, context);
+
+    context = specificContext;  ///
 
     if (validates) {
       context.debug(`...validated the '${signatureString}' signature.`);
     }
 
-    return signature;
+    return validates;
   }
 
   validateTerms(context) {
@@ -243,30 +237,36 @@ export default define(class Signature extends Element {
   static name = "Signature";
 
   static fromJSON(json, context) {
-    return instantiate((context) => {
-      return unserialise((json, context) => {
+    let signature;
+
+    instantiate((context) => {
+      unserialise((json, context) => {
         const { string } = json,
               signatureNode = instantiateSignature(string, context),
               node = signatureNode,  ///
               breakPoint = breakPointFromJSON(json),
-              terms = termsFromSignatureNode(signatureNode, context),
-              signature = new Signature(context, string, node, breakPoint, terms);
+              terms = termsFromSignatureNode(signatureNode, context);
 
-        return signature;
+        signature = new Signature(context, string, node, breakPoint, terms);
       }, json, context);
     }, context);
+
+    return signature;
   }
 
   static fromSignatureString(signatureString, context) {
-    return ablate((context) => {
-      return instantiate((context) => {
-        const string = signatureString,  ///
-              signatureNode = instantiateSignature(string, context),
-              signature = signatureFromSignatureNode(signatureNode, context);
+    let signature;
 
-        return signature;
+    ablate((context) => {
+      instantiate((context) => {
+        const string = signatureString,  ///
+              signatureNode = instantiateSignature(string, context);
+
+        signature = signatureFromSignatureNode(signatureNode, context);
       }, context);
     }, context);
+
+    return signature;
   }
 });
 

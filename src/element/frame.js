@@ -238,7 +238,7 @@ export default define(class Frame extends Element {
     });
 
     if (assumptionsValidate) {
-      context.debug(`...validates the'${frameString}' frame's assumptions.`);
+      context.debug(`...validates the '${frameString}' frame's assumptions.`);
     }
 
     return assumptionsValidate;
@@ -262,7 +262,7 @@ export default define(class Frame extends Element {
     });
 
     if (metavariableValidates) {
-      context.debug(`...validates the'${frameString}' frame's metavariable.`);
+      context.debug(`...validates the '${frameString}' frame's metavariable.`);
     }
 
     return metavariableValidates;
@@ -338,7 +338,9 @@ export default define(class Frame extends Element {
   static name = "Frame";
 
   static fromJSON(json, context) {
-    return instantiate((context) => {
+    let frame;
+
+    instantiate((context) => {
       const { string } = json,
             frameNode = instantiateFrame(string, context),
             node = frameNode, ///
@@ -348,10 +350,10 @@ export default define(class Frame extends Element {
 
       context = null;
 
-      const frame = new Frame(context, string, node, breakPoint, assumptions, metavariable);
-
-      return frame;
+      frame = new Frame(context, string, node, breakPoint, assumptions, metavariable);
     }, context);
+
+    return frame;
   }
 });
 

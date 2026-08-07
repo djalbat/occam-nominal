@@ -189,28 +189,12 @@ function ablateContext(context) {
   const unreleased = context.isUnreleased();
 
   if (unreleased) {
-    let phanericContext = null;
-
-    const contextPhanericContext = PhanericContext.prototype.isPrototypeOf(context);
-
-    if (contextPhanericContext) {
-      phanericContext = context;  ///
-
-      context = phanericContext.detach();
-    }
-
     let contextNominalFileContext = NominalFileContext.prototype.isPrototypeOf(context);
 
     while (!contextNominalFileContext) {
       context = context.getContext();
 
       contextNominalFileContext = NominalFileContext.prototype.isPrototypeOf(context);
-    }
-
-    if (phanericContext !== null) {
-      phanericContext.attach(context);
-
-      context = phanericContext;  ///
     }
   }
 

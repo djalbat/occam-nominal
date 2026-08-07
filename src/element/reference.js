@@ -85,18 +85,21 @@ export default define(class Reference extends Element {
   validate(state, context, continuation) {
     let validates = false;
 
-    const referenceString = this.getString(); ///
+    const specificContext = context,  ///
+          referenceString = this.getString(); ///
 
     context.trace(`Validating the '${referenceString}' reference...`);
 
-    const reference = this.findReference(context);
+    let reference;
+
+    reference = this.findReference(context);
 
     if (reference !== null) {
       context.debug(`...the '${referenceString}' reference is already present.`);
 
       validates = continuation(reference, context);
     } else {
-      const specificContext = context; ///
+      reference = this; ///
 
       context = this.getContext();
 
@@ -106,44 +109,26 @@ export default define(class Reference extends Element {
         validates = all([
           validateMetavariable
         ], state, context, (state, context) => {
-          let validates = false;
+          let validates;
 
-          const metaType = this.metavariable.getMetaType();
+          context = specificContext;  ///
 
-          if (metaType === null) {
-            validates = true;
-          } else {
-            const referenceMetaTypeName = REFERENCE_META_TYPE_NAME,
-                  referenceMetaType = context.findMetaTypeByMetaTypeName(referenceMetaTypeName),
-                  metavariableMetaTypeEqualToReferenceMetaType = this.metavariable.isMetaTypeEqualTo(referenceMetaType);
-
-            if (metavariableMetaTypeEqualToReferenceMetaType) {
-              validates = true;
-            } else {
-              const metaTypeString = metaType.getString(),
-                    metavariableString = this.metavariable.getString(),
-                    referenceMetaTypeString = referenceMetaType.getString();
-
-              context.debug(`The '${referenceString}' reference's '${metavariableString}' metavariable's '${metaTypeString}' meta-type should be the '${referenceMetaTypeString}' meta-type.`);
-            }
-          }
-
-          if (validates) {
-            const reference = this; ///
-
-            this.commit(context);
-
-            context = specificContext;  ///
-
-            context.addReference(reference);
-
-            validates = continuation(reference, context);
-          }
+          validates = continuation(reference, context);
 
           return validates;
         });
+
+        if (validates) {
+          this.commit(context);
+
+          context = specificContext;  ///
+
+          context.addReference(reference);
+        }
       }, context);
     }
+
+    context = specificContext;  ///
 
     if (validates) {
       context.debug(`...validated the '${referenceString}' reference.`);
@@ -160,11 +145,33 @@ export default define(class Reference extends Element {
     context.trace(`Validating the '${referenceString}' reference's metavariable...'`);
 
     metavariableValidates = this.metavariable.validate(state, context, (metavariable, context) => {
-      let validates;
+      let validates = false;
 
-      this.metavariable = metavariable;
+      const metaType = metavariable.getMetaType();
 
-      validates = continuation(state, context);
+      if (metaType === null) {
+        validates = true;
+      } else {
+        const referenceMetaTypeName = REFERENCE_META_TYPE_NAME,
+              referenceMetaType = context.findMetaTypeByMetaTypeName(referenceMetaTypeName),
+              metavariableMetaTypeEqualToReferenceMetaType = metavariable.isMetaTypeEqualTo(referenceMetaType);
+
+        if (metavariableMetaTypeEqualToReferenceMetaType) {
+          validates = true;
+        } else {
+          const metaTypeString = metaType.getString(),
+                metavariableString = metavariable.getString(),
+                referenceMetaTypeString = referenceMetaType.getString();
+
+          context.debug(`The '${referenceString}' reference's '${metavariableString}' metavariable's '${metaTypeString}' meta-type should be the '${referenceMetaTypeString}' meta-type.`);
+        }
+      }
+
+      if (validates) {
+        this.metavariable = metavariable;
+
+        validates = continuation(state, context);
+      }
 
       return validates;
     });
@@ -257,18 +264,21 @@ export default define(class Reference extends Element {
   static name = "Reference";
 
   static fromJSON(json, context) {
-    return instantiate((context) => {
-      return unserialise((json, context) => {
+    let reference;
+
+    instantiate((context) => {
+      unserialise((json, context) => {
         const { string } = json,
               referenceNode = instantiateReference(string, context),
               node = referenceNode,  ///
               breakPoint = breakPointFromJSON(json),
-              metavariable = metavariableFromReferenceNode(referenceNode, context),
-              reference = new Reference(context, string, node, breakPoint, metavariable);
+              metavariable = metavariableFromReferenceNode(referenceNode, context);
 
-        return reference;
+        reference = new Reference(context, string, node, breakPoint, metavariable);
       }, json, context);
     }, context);
+
+    return reference;
   }
 
   static fromReferenceString(referenceString, context) {

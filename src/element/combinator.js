@@ -58,9 +58,12 @@ export default define(class Combinator extends Element {
   validate(state, context, continuation) {
     let validates;
 
-    const combinatorString = this.getString();  ///
+    const specificContext = context,  ///
+          combinatorString = this.getString();  ///
 
     context.trace(`Validating the '${combinatorString}' combinator...`);
+
+    const combinator = this;
 
     attempt((context) => {
       const validateStatementAsCombinator = this.validateStatementAsCombinator.bind(this);
@@ -70,15 +73,19 @@ export default define(class Combinator extends Element {
       ], state, context, (state, context) => {
         let validates;
 
-        const combinator = this;
-
-        this.commit(context)
+        context = specificContext;  ///
 
         validates = continuation(combinator, context);
 
         return validates;
       });
+
+      if (validates) {
+        this.commit(context)
+      }
     }, context);
+
+    context = specificContext;  ///
 
     if (validates) {
       context.debug(`...validated the '${combinatorString}' combinator.`);
@@ -169,17 +176,20 @@ export default define(class Combinator extends Element {
   static name = "Combinator";
 
   static fromJSON(json, context) {
-    return instantiate((context) => {
-      return unserialise((json, context) => {
+    let combinator;
+
+    instantiate((context) => {
+      unserialise((json, context) => {
         const { string } = json,
               combinatorNode = instantiateCombinator(string, context),
               node = combinatorNode,  ///
               breakPoint = breakPointFromJSON(json),
-              statement = statementFromCombinatorNode(combinatorNode, context),
-              combinator = new Combinator(context, string, node, breakPoint, statement);
+              statement = statementFromCombinatorNode(combinatorNode, context);
 
-        return combinator;
+        combinator = new Combinator(context, string, node, breakPoint, statement);
       }, json, context);
     }, context);
+
+    return combinator;
   }
 });

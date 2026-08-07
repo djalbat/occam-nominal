@@ -223,7 +223,7 @@ export default define(class Judgement extends Element {
     });
 
     if (goalValidates) {
-      context.debug(`...validates the'${judgementString}' judgement's goal.`);
+      context.debug(`...validates the '${judgementString}' judgement's goal.`);
     }
 
     return goalValidates;
@@ -332,7 +332,9 @@ export default define(class Judgement extends Element {
   static name = "Judgement";
 
   static fromJSON(json, context) {
-    return instantiate((context) => {
+    let judgement;
+
+    instantiate((context) => {
       const { string } = json,
             judgementNode = instantiateJudgement(string, context),
             node = judgementNode,  ///
@@ -342,10 +344,10 @@ export default define(class Judgement extends Element {
 
       context = null;
 
-      const judgement = new Judgement(context, string, node, breakPoint, frame, goal);
-
-      return judgement;
+      judgement = new Judgement(context, string, node, breakPoint, frame, goal);
     }, context);
+
+    return judgement;
   }
 
   static fromStatement(statement, context) {

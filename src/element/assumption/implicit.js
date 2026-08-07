@@ -200,14 +200,15 @@ export default define(class ImplicitAssumption extends Element {
   static name = "ImplicitAssumption";
 
   static fromStatement(statement, context) {
-    const implicitAssumption = pare((context) => {
-      return instantiate((context) => {
+    let implicitAssumption;
+
+    pare((context) => {
+      instantiate((context) => {
         const implicitAssumptionString = implicitAssumptionStringFromStatement(statement),
               string = implicitAssumptionString,  ///
-              implicitAssumptionNode = instantiateImplicitAssumption(string, context),
-              implicitAssumption = implicitAssumptionFromImplicitAssumptionNode(implicitAssumptionNode, context);
+              implicitAssumptionNode = instantiateImplicitAssumption(string, context);
 
-        return implicitAssumption;
+        implicitAssumption = implicitAssumptionFromImplicitAssumptionNode(implicitAssumptionNode, context);
       }, context);
     }, context);
 

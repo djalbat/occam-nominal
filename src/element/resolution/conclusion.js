@@ -54,18 +54,21 @@ export default define(class Conclusion extends Resolution {
   static name = "Conclusion";
 
   static fromJSON(json, context) {
-    return instantiate((context) => {
-      return unserialise((json, context) => {
+    let conclusion;
+
+    instantiate((context) => {
+      unserialise((json, context) => {
         const { string } = json,
               conclusionNode = instantiateConclusion(string, context),
               node = conclusionNode,  ///
               breakPoint = breakPointFromJSON(json),
-              statement = statementFromConclusionNode(conclusionNode, context),
-              conclusion = new Conclusion(context, string, node, breakPoint, statement);
+              statement = statementFromConclusionNode(conclusionNode, context);
 
-        return conclusion;
+        conclusion = new Conclusion(context, string, node, breakPoint, statement);
       }, json, context);
     }, context);
+
+    return conclusion;
   }
 });
 

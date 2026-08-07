@@ -162,11 +162,11 @@ function validateStatementAsMetavariable(statement, state, context, continuation
             let validates;
 
             const substitutionValidates = validateSubstitution(statement, context, (context) => {
-              let validaets;
+              let validates;
 
               validates = continuation(statement, state, context);
 
-              return validaets;
+              return validates;
             });
 
             if (substitutionValidates) {

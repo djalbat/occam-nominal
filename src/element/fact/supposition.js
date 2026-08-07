@@ -87,9 +87,12 @@ export default define(class Supposition extends Fact {
   validate(state, context, continuation) {
     let validates;
 
-    const suppositionString = this.getString(); ///
+    const specificContext = context,  ///
+          suppositionString = this.getString(); ///
 
     context.trace(`Validating the '${suppositionString}' supposition...`);
+
+    const supposition = this;  ///
 
     attempt((context) => {
       const validateStatement = this.validateStatement.bind(this),
@@ -101,15 +104,19 @@ export default define(class Supposition extends Fact {
       ], state, context, (state, context) => {
         let validates;
 
-        const supposition = this;  ///
-
-        this.commit(context);
+        context = specificContext;  ///
 
         validates = continuation(supposition, context);
 
         return validates;
       });
+
+      if (validates) {
+        this.commit(context);
+      }
     }, context);
+
+    context = specificContext;  ///
 
     if (validates) {
       context.debug(`...validated the '${suppositionString}' supposition.`);
@@ -271,20 +278,23 @@ export default define(class Supposition extends Fact {
   static name = "Supposition";
 
   static fromJSON(json, context) {
-    return instantiate((context) => {
-      return unserialise((json, context) => {
+    let supposition;
+
+    instantiate((context) => {
+      unserialise((json, context) => {
         const { string } = json,
               suppositionNode = instantiateSupposition(string, context),
               node = suppositionNode,  ///
               breakPoint = breakPointFromJSON(json),
               statement = statementFromSuppositionNode(suppositionNode, context),
               reference = referenceFromSuppositionNode(suppositionNode, context),
-              procedureCall = procedureCallFromSuppositionNode(suppositionNode, context),
-              supposition = new Supposition(context, string, node, breakPoint, statement, reference, procedureCall);
+              procedureCall = procedureCallFromSuppositionNode(suppositionNode, context);
 
-        return supposition;
+        supposition = new Supposition(context, string, node, breakPoint, statement, reference, procedureCall);
       }, json, context);
     }, context);
+
+    return supposition;
   }
 });
 

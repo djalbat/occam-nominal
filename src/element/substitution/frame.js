@@ -94,6 +94,8 @@ export default define(class FrameSubstitution extends Substitution {
 
       validates = continuation(frameSubstitution, context);
     } else {
+      substitution = this;  ///
+
       const generalContext = this.getGeneralContext(),
             specificContext = this.getSpecificContext();
 
@@ -107,18 +109,16 @@ export default define(class FrameSubstitution extends Substitution {
         ], state, generalContext, specificContext, () => {
           let validates;
 
-          substitution = this;  ///
-
-          context.addSubstitution(substitution);
-
-          this.commit(generalContext, specificContext);
-
-          const frameSubstitution = substitution; ///
-
-          validates = continuation(frameSubstitution, context);
+          validates = continuation(substitution, context);
 
           return validates;
         });
+
+        if (validates) {
+          this.commit(generalContext, specificContext);
+
+          context.addSubstitution(substitution);
+        }
       }, generalContext, specificContext);
     }
 
@@ -317,29 +317,30 @@ export default define(class FrameSubstitution extends Substitution {
   static name = "FrameSubstitution";
 
   static fromJSON(json, context) {
+    let frameSubstitutionn;
+
     const { name } = json;
 
-    if (this.name !== name) {
-      return;
+    if (this.name === name) {
+      instantiate((context) => {
+        unserialises((json, generalContext, specificContext) => {
+          const { string } = json,
+                frameSubstitutionNode = instantiateFrameSubstitution(string, context),
+                node = frameSubstitutionNode, ///
+                contexts = [
+                  generalContext,
+                  specificContext
+                ],
+                breakPoint = breakPointFromJSON(json),
+                targetFrame = targetFrameFromFrameSubstitutionNode(frameSubstitutionNode, generalContext),
+                replacementFrame = replacementFrameFromFrameSubstitutionNode(frameSubstitutionNode, specificContext);
+
+          frameSubstitutionn = new FrameSubstitution(contexts, string, node, breakPoint, targetFrame, replacementFrame);
+        }, json, context);
+      }, context);
     }
 
-    return instantiate((context) => {
-      return unserialises((json, generalContext, specificContext) => {
-        const { string } = json,
-              frameSubstitutionNode = instantiateFrameSubstitution(string, context),
-              node = frameSubstitutionNode, ///
-              contexts = [
-                generalContext,
-                specificContext
-              ],
-              breakPoint = breakPointFromJSON(json),
-              targetFrame = targetFrameFromFrameSubstitutionNode(frameSubstitutionNode, generalContext),
-              replacementFrame = replacementFrameFromFrameSubstitutionNode(frameSubstitutionNode, specificContext),
-              frameSubstitutionn = new FrameSubstitution(contexts, string, node, breakPoint, targetFrame, replacementFrame);
-
-        return frameSubstitutionn;
-      }, json, context);
-    }, context);
+    return frameSubstitutionn;
   }
 
   static fromStatementNode(statementNode, context) {
@@ -348,31 +349,44 @@ export default define(class FrameSubstitution extends Substitution {
     const frameSubstitutionNode = statementNode.getFrameSubstitutionNode();
 
     if (frameSubstitutionNode !== null) {
-      ablate((context) => {
-        const generalContext = context, ///
-              specificContext = context;  ///
+      const generalContext = context, ///
+            specificContext = context,  ///
+            frameSubstitutionString = context.nodeAsString(frameSubstitutionNode);
 
-        frameSubstitution = frameSubstitutionFromFrameSubstitutionNode(frameSubstitutionNode, generalContext, specificContext);
-      }, context);
+      ablates((generalContext, specificContext) => {
+        instantiate((specificContext) => {
+          manifest((generalContext) => {
+            const string = frameSubstitutionString,  ///
+              context = specificContext,  ///
+              frameSubstitutionNode = instantiateFrameSubstitution(string, context);
+
+            frameSubstitution = frameSubstitutionFromFrameSubstitutionNode(frameSubstitutionNode, generalContext, specificContext);
+          }, generalContext, specificContext);
+        }, specificContext);
+      }, generalContext, specificContext);
     }
 
     return frameSubstitution;
   }
 
   static fromFrameAndMetavariable(frame, metavariable, generalContext, specificContext) {
-    return ablates((generalContext, specificContext) => {
-      return instantiate((specificContext) => {
-        return manifest((generalContext) => {
-          const frameSubstitutionString = frameSubstitutionStringFromFrameAndMetavariable(frame, metavariable),
-                string = frameSubstitutionString,  ///
-                context = specificContext,  ///
-                frameSubstitutionNode = instantiateFrameSubstitution(string, context),
-                frameSubstitution = frameSubstitutionFromFrameSubstitutionNode(frameSubstitutionNode, generalContext, specificContext);
+    let frameSubstitution;
 
-          return frameSubstitution;
+    const frameSubstitutionString = frameSubstitutionStringFromFrameAndMetavariable(frame, metavariable);
+
+    ablates((generalContext, specificContext) => {
+      instantiate((specificContext) => {
+        manifest((generalContext) => {
+          const string = frameSubstitutionString,  ///
+                context = specificContext,  ///
+                frameSubstitutionNode = instantiateFrameSubstitution(string, context);
+
+          frameSubstitution = frameSubstitutionFromFrameSubstitutionNode(frameSubstitutionNode, generalContext, specificContext);
         }, generalContext, specificContext);
       }, specificContext);
     }, generalContext, specificContext);
+
+    return frameSubstitution;
   }
 });
 

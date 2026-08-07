@@ -143,7 +143,7 @@ export default define(class ContainedAssertion extends Assertion {
     }
 
     if (termValidates) {
-      context.debug(`...validates the'${containedAssertionString}' contained assertion's term.`);
+      context.debug(`...validates the '${containedAssertionString}' contained assertion's term.`);
     }
 
     return termValidates;
@@ -181,7 +181,7 @@ export default define(class ContainedAssertion extends Assertion {
     }
 
     if (frameValidates) {
-      context.debug(`...validates the'${containedAssertionString}' contained assertion's frame.`);
+      context.debug(`...validates the '${containedAssertionString}' contained assertion's frame.`);
     }
 
     return frameValidates;
@@ -215,7 +215,7 @@ export default define(class ContainedAssertion extends Assertion {
     }
 
     if (statementValidates) {
-      context.debug(`...validates the'${containedAssertionString}' contained assertion's statement.`);
+      context.debug(`...validates the '${containedAssertionString}' contained assertion's statement.`);
     }
 
     return statementValidates;
