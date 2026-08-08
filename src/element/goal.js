@@ -2,8 +2,6 @@
 
 import { Element, breakPointUtilities } from "occam-languages";
 
-import elements from "../elements";
-
 import { define } from "../elements";
 import { instantiateGoal } from "../process/instantiate";
 import { all, some, exists } from "../utilities/continuation";
@@ -45,6 +43,19 @@ export default define(class Goal extends Element {
           equalTo = goalNodeMatches;  ///
 
     return equalTo;
+  }
+
+  isConditional() {
+    let conditional = false;
+
+    const statementNode = this.getStatementNode(),
+          subproofAssertionNode = statementNode.getSubproofAssertionNode();
+
+    if (subproofAssertionNode !== null) {
+      conditional = true;
+    }
+
+    return conditional;
   }
 
   matchGoalNode(goalNode) {
@@ -210,15 +221,15 @@ export default define(class Goal extends Element {
       const schemas = context.getSchemas();
 
       validatesWhenDerived = some(schemas, (schema, context) => {
-        let passed = false;
+        let success = false;
 
         this.unifySchema(schema, context, (schemaUnifies) => {
           if (schemaUnifies) {
-            passed = true;
+            success = true;
           }
         });
 
-        return passed;
+        return success;
       }, context, (context) => true);
 
       if (validatesWhenDerived) {
@@ -245,33 +256,9 @@ export default define(class Goal extends Element {
       const label = schema.getLabel();
 
       return this.reference.unifyLabel(label, context, (labelUnifies) => {
+        const specificContext = context;  ///
+
         if (!labelUnifies) {
-          const schemaUnifies = false;
-
-          return continuation(schemaUnifies);
-        }
-
-        const specificContext = context,  ///
-              schemaConditional = schema.isConditional(),
-              subproofAssertion = subproofAssertionFromStatement(this.statement, context);
-
-        if (schemaConditional) {
-          if (subproofAssertion === null) {
-            const schemaUnifies = false;
-
-            return continuation(schemaUnifies);
-          }
-
-          return subproofAssertion.unifySchema(schema, generalContext, specificContext, (schemaUnifies) => {
-            if (schemaUnifies) {
-              context.debug(`...unified the '${schemaString}' schema with the '${goalString}' goal.`);
-            }
-
-            return continuation(schemaUnifies);
-          });
-        }
-
-        if (subproofAssertion !== null) {
           const schemaUnifies = false;
 
           return continuation(schemaUnifies);
@@ -279,18 +266,47 @@ export default define(class Goal extends Element {
 
         const deduction = schema.getDeduction();
 
-        this.unifyDeduction(deduction, generalContext, specificContext, (deductionUnifies) => {
+        return this.unifyDeduction(deduction, generalContext, specificContext, (deductionUnifies) => {
           let schemaUnifies = false;
 
-          if (deductionUnifies) {
+          if (!deductionUnifies) {
+            return continuation(schemaUnifies);
+          }
+
+          const conditional = this.isConditional(),
+                schemaConditional = schema.isConditional();
+
+          if (conditional !== schemaConditional) {
+            context.trace(`The '${schemaString}' schema is unconditional but the '${goalString}' goal is conditional.`);
+
+            return continuation(schemaUnifies);
+          }
+
+          if (!conditional && schemaConditional) {
+            context.trace(`The '${schemaString}' schema is conditional but the '${goalString}' goal is unconditional.`);
+
+            return continuation(schemaUnifies);
+          }
+
+          if (!conditional) {
             schemaUnifies = true;
           }
 
-          if (schemaUnifies) {
-            context.debug(`...unified the '${schemaString}' schema with the '${goalString}' goal.`);
-          }
+          const suppositions = schema.getSuppositions(),
+                subprpoofAssertion = this.findSubproofAssertion(context),
+                supposedStatements = subprpoofAssertion.getSupposedStatements();
 
-          return continuation(schemaUnifies);
+          return this.unifySuppositions(suppositions, supposedStatements, generalContext, specificContext, (suppositionsUUnify) => {
+            if (suppositionsUUnify) {
+              schemaUnifies = true;
+            }
+
+            if (schemaUnifies) {
+              context.debug(`...unified the '${schemaString}' schema with the '${goalString}' goal.`);
+            }
+
+            return continuation(schemaUnifies);
+          });
         });
       });
     }, context);
@@ -324,6 +340,40 @@ export default define(class Goal extends Element {
           }
 
           return continuation(deductionUnifies);
+        });
+      }, specificContext);
+    }, specificContext, context);
+  }
+
+  unifySupposition(supposition, supposedStatement, generalContext, specificContext, continuation) {
+    const context = specificContext,  ///
+          goalString = this.getString(),  ///
+          suppositionString = supposition.getString(),
+          supposedStatementString = supposedStatement.getString();
+
+    context.trace(`Unifying the '${suppositionString}' supposition's statement  with the '${supposedStatementString}' supposed statement...`);
+
+    const statement = supposition.getStatement(),
+          suppositionContext = supposition.getContext(); ///
+
+    specificContext = suppositionContext; ///
+
+    return join((specificContext) => {
+      return reconcile((specificContext) => {
+        return supposedStatement.unifyStatement(statement, generalContext, specificContext, (statementUnifies) => {
+          let suppositionUnifies = false;
+
+          if (statementUnifies) {
+            specificContext.commit(context);
+
+            suppositionUnifies = true;
+          }
+
+          if (suppositionUnifies) {
+            context.debug(`...unified the '${suppositionString}' supposition's statement  with the '${supposedStatementString}' supposed statement.`);
+          }
+
+          return continuation(suppositionUnifies);
         });
       }, specificContext);
     }, specificContext, context);
@@ -380,18 +430,4 @@ function statementFromGoalNode(goalNode, context) {
         statement = context.findStatementByStatementNode(statementNode);
 
   return statement;
-}
-
-function subproofAssertionFromStatement(statement, context) {
-  let subproofAssertion;
-
-  const { SubproofAssertion } = elements;
-
-  subproofAssertion = SubproofAssertion.fromStatement(statement, context);
-
-  if (subproofAssertion !== null) {
-    subproofAssertion = subproofAssertion.validate(state, context, (subproofAssertion, context) => true);  ///
-  }
-
-  return subproofAssertion;
 }

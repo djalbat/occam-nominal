@@ -287,15 +287,15 @@ export default define(class Judgement extends Element {
             judgement = this; ///
 
       validatesWhenDerived = one(schemas, (schema, context) => {
-        let passed = false;
+        let success = false;
 
         schema.unifyJudgement(judgement, context, (judgementUnifies) => {
           if (judgementUnifies) {
-            passed = true;
+            success = true;
           }
         });
 
-        return passed;
+        return success;
       }, context, (context) => true);
 
       if (validatesWhenDerived) {
