@@ -131,7 +131,7 @@ export default define(class Constraint extends Element {
 
       this.reference = reference;
 
-      validates = continuation(context);
+      validates = continuation(state, context);
 
       return validates;
     });

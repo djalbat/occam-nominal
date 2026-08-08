@@ -4,6 +4,8 @@ import { continuationUtilities } from "occam-languages";
 
 import elements from "../elements";
 
+import { declare } from "../utilities/state";
+
 const { asynchronousReduce } = continuationUtilities;
 
 function unifyStepWithRule(step, context, continuation) {
@@ -136,11 +138,17 @@ function unifyStepAsQualifiedConstraint(step, context, continuation) {
 
   context.trace(`Unifying the '${stepString}' step as a constraint with the '${referenceString}' reference...`);
 
-  const constraintValidates = constraint.validate(state, context, (constraint, context) => true);
+  declare((state) => {
+    constraint.validate(state, context, (constraint, context) => {
+      let validates;
 
-  if (constraintValidates) {
-    stepUnifiesAsQualifiedConstraint = true;
-  }
+      stepUnifiesAsQualifiedConstraint = true;
+
+      validates = true;
+
+      return validates;
+    });
+  });
 
   if (stepUnifiesAsQualifiedConstraint) {
     context.debug(`...unified the '${stepString}' step as a constraint with the '${referenceString}' reference.`);
