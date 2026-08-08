@@ -289,9 +289,9 @@ function isVariableDefined(variable, context) {
   separateGroundedTermsAndDefinedVariables(equivalences, groundedTerms, definedVariables, context);
 
   const variableMatchesDefinedVariable = definedVariables.some((definedVariable) => {
-          const definedVariableComparesToVariable = definedVariable.compareVariable(variable);
+          const definedVariableEqualToVariable = definedVariable.isEqualTo(variable);
 
-          if (definedVariableComparesToVariable === variable) {
+          if (definedVariableEqualToVariable === variable) {
             return true;
           }
         }),

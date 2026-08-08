@@ -58,6 +58,10 @@ export default class LiminalContext extends Context {
     return singularNonTrivialInferredSubstitution;
   }
 
+  addSubstitution(substitution) {
+    ///
+  }
+
   addInferredSubstitution(inferredSubstitution) {
     const context = this, ///
           inferredSubstitutionA = inferredSubstitution, ///

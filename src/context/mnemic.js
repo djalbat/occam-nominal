@@ -4,18 +4,6 @@ import { arrayUtilities } from "necessary";
 
 import Context from "../context";
 
-import { compressTerms,
-         compressGoals,
-         compressFrames,
-         compressEqualities,
-         compressJudgements,
-         compressAssertions,
-         compressStatements,
-         compressSignatures,
-         compressReferences,
-         compressAssumptions,
-         compressMetavariables,
-         compressSubstitutions } from "../utilities/compression";
 import { termsFromJSON,
          goalsFromJSON,
          framesFromJSON,
@@ -41,7 +29,7 @@ import { termsFromJSON,
          metavariablesToMetavariablesJSON,
          substitutionsToSubstitutionsJSON } from "../utilities/json";
 
-const { push } = arrayUtilities;
+const { push, extract } = arrayUtilities;
 
 export default class MnemicContext extends Context {
   constructor(context, terms, goals, frames, equalities, judgements, assertions, statements, signatures, references, assumptions, metavariables, substitutions) {
@@ -68,8 +56,6 @@ export default class MnemicContext extends Context {
 
     context.getTerms(terms);
 
-    compressTerms(terms);
-
     return terms;
   }
 
@@ -79,8 +65,6 @@ export default class MnemicContext extends Context {
     push(goals, this.goals);
 
     context.getGoals(goals);
-
-    compressGoals(goals);
 
     return goals;
   }
@@ -92,8 +76,6 @@ export default class MnemicContext extends Context {
 
     context.getFrames(frames);
 
-    compressFrames(frames);
-
     return frames;
   }
 
@@ -103,8 +85,6 @@ export default class MnemicContext extends Context {
     push(equalities, this.equalities);
 
     context.getEqualities(equalities);
-
-    compressEqualities(equalities);
 
     return equalities;
   }
@@ -116,8 +96,6 @@ export default class MnemicContext extends Context {
 
     context.getJudgements(judgements);
 
-    compressJudgements(judgements);
-
     return judgements;
   }
 
@@ -127,8 +105,6 @@ export default class MnemicContext extends Context {
     push(statements, this.statements);
 
     context.getStatements(statements);
-
-    compressStatements(statements);
 
     return statements;
   }
@@ -140,8 +116,6 @@ export default class MnemicContext extends Context {
 
     context.getSignatures(signatures);
 
-    compressSignatures(signatures);
-
     return signatures;
   }
 
@@ -151,8 +125,6 @@ export default class MnemicContext extends Context {
     push(assertions, this.assertions);
 
     context.getAssertions(assertions);
-
-    compressAssertions(assertions);
 
     return assertions;
   }
@@ -164,8 +136,6 @@ export default class MnemicContext extends Context {
 
     context.getReferences(references);
 
-    compressReferences(references);
-
     return references;
   }
 
@@ -175,8 +145,6 @@ export default class MnemicContext extends Context {
     push(assumptions, this.assumptions);
 
     context.getAssumptions(assumptions);
-
-    compressAssumptions(assumptions);
 
     return assumptions;
   }
@@ -188,8 +156,6 @@ export default class MnemicContext extends Context {
 
     context.getMetavariables(metavariables);
 
-    compressMetavariables(metavariables);
-
     return metavariables;
   }
 
@@ -200,8 +166,6 @@ export default class MnemicContext extends Context {
 
     context.getSubstitutions(substitutions);
 
-    compressSubstitutions(substitutions);
-
     return substitutions;
   }
 
@@ -210,6 +174,21 @@ export default class MnemicContext extends Context {
           termString = term.getString();
 
     context.trace(`Adding the '${termString}' term to the mnemic context...`);
+
+    const termA = term; ///
+
+    extract(this.terms, (term) => {
+      const termB = term, ///
+            termAEqualToTermB = termA.isEqualTo(termB);
+
+      if (termAEqualToTermB) {
+        const termString = term.getString();
+
+        context.trace(`Removed the existing '${termString}' term from the mnemic context...`);
+
+        return true;
+      }
+    });
 
     this.terms.push(term);
 
@@ -222,6 +201,21 @@ export default class MnemicContext extends Context {
 
     context.trace(`Adding the '${goalString}' goal to the mnemic context...`);
 
+    const goalA = goal; ///
+
+    extract(this.goals, (goal) => {
+      const goalB = goal, ///
+            goalAEqualToGoalB = goalA.isEqualTo(goalB);
+
+      if (goalAEqualToGoalB) {
+        const goalString = goal.getString();
+
+        context.trace(`Removed the existing '${goalString}' goal from the mnemic context...`);
+
+        return true;
+      }
+    });
+
     this.goals.push(goal);
 
     context.debug(`...added the '${goalString}' goal to the mnemic context.`);
@@ -232,6 +226,21 @@ export default class MnemicContext extends Context {
           frameString = frame.getString();
 
     context.trace(`Adding the '${frameString}' frame to the mnemic context...`);
+
+    const frameA = frame; ///
+
+    extract(this.frames, (frame) => {
+      const frameB = frame, ///
+            frameAEqualToFrameB = frameA.isEqualTo(frameB);
+
+      if (frameAEqualToFrameB) {
+        const frameString = frame.getString();
+
+        context.trace(`Removed the existing '${frameString}' frame from the mnemic context...`);
+
+        return true;
+      }
+    });
 
     this.frames.push(frame);
 
@@ -244,6 +253,21 @@ export default class MnemicContext extends Context {
 
     context.trace(`Adding the '${equalityString}' equality to the mnemic context...`);
 
+    const equalityA = equality; ///
+
+    extract(this.equalities, (equality) => {
+      const equalityB = equality, ///
+            equalityAEqualToEqualityB = equalityA.isEqualTo(equalityB);
+
+      if (equalityAEqualToEqualityB) {
+        const equalityString = equality.getString();
+
+        context.trace(`Removed the existing '${equalityString}' equality from the mnemic context...`);
+
+        return true;
+      }
+    });
+
     this.equalities.push(equality);
 
     context.debug(`...added the '${equalityString}' equality to the mnemic context.`);
@@ -254,6 +278,21 @@ export default class MnemicContext extends Context {
           judgementString = judgement.getString();
 
     context.trace(`Adding the '${judgementString}' judgement to the mnemic context...`);
+
+    const judgementA = judgement; ///
+
+    extract(this.judgements, (judgement) => {
+      const judgementB = judgement, ///
+            judgementAEqualToJudgementB = judgementA.isEqualTo(judgementB);
+
+      if (judgementAEqualToJudgementB) {
+        const judgementString = judgement.getString();
+
+        context.trace(`Removed the existing '${judgementString}' judgement from the mnemic context...`);
+
+        return true;
+      }
+    });
 
     this.judgements.push(judgement);
 
@@ -266,6 +305,21 @@ export default class MnemicContext extends Context {
 
     context.trace(`Adding the '${assertionString}' assertion to the mnemic context...`);
 
+    const assertionA = assertion; ///
+
+    extract(this.assertions, (assertion) => {
+      const assertionB = assertion, ///
+            assertionAEqualToAssertionB = assertionA.isEqualTo(assertionB);
+
+      if (assertionAEqualToAssertionB) {
+        const assertionString = assertion.getString();
+
+        context.trace(`Removed the existing '${assertionString}' assertion from the mnemic context...`);
+
+        return true;
+      }
+    });
+
     this.assertions.push(assertion);
 
     context.debug(`...added the '${assertionString}' assertion to the mnemic context.`);
@@ -276,6 +330,21 @@ export default class MnemicContext extends Context {
           statementString = statement.getString();
 
     context.trace(`Adding the '${statementString}' statement to the mnemic context...`);
+
+    const statementA = statement; ///
+
+    extract(this.statements, (statement) => {
+      const statementB = statement, ///
+            statementAEqualToStatementB = statementA.isEqualTo(statementB);
+
+      if (statementAEqualToStatementB) {
+        const statementString = statement.getString();
+
+        context.trace(`Removed the existing '${statementString}' statement from the mnemic context...`);
+
+        return true;
+      }
+    });
 
     this.statements.push(statement);
 
@@ -288,6 +357,21 @@ export default class MnemicContext extends Context {
 
     context.trace(`Adding the '${signatureString}' signature to the mnemic context...`);
 
+    const signatureA = signature; ///
+
+    extract(this.signatures, (signature) => {
+      const signatureB = signature, ///
+            signatureAEqualToSignatureB = signatureA.isEqualTo(signatureB);
+
+      if (signatureAEqualToSignatureB) {
+        const signatureString = signature.getString();
+
+        context.trace(`Removed the existing '${signatureString}' signature from the mnemic context...`);
+
+        return true;
+      }
+    });
+
     this.signatures.push(signature);
 
     context.debug(`...added the '${signatureString}' signature to the mnemic context.`);
@@ -298,6 +382,21 @@ export default class MnemicContext extends Context {
           referenceString = reference.getString();
 
     context.trace(`Adding the '${referenceString}' reference to the mnemic context...`);
+
+    const referenceA = reference; ///
+
+    extract(this.references, (reference) => {
+      const referenceB = reference, ///
+            referenceAEqualToReferenceB = referenceA.isEqualTo(referenceB);
+
+      if (referenceAEqualToReferenceB) {
+        const referenceString = reference.getString();
+
+        context.trace(`Removed the existing '${referenceString}' reference from the mnemic context...`);
+
+        return true;
+      }
+    });
 
     this.references.push(reference);
 
@@ -310,6 +409,21 @@ export default class MnemicContext extends Context {
 
     context.trace(`Adding the '${assumptionString}' assumption to the mnemic context...`);
 
+    const assumptionA = assumption; ///
+
+    extract(this.assumptions, (assumption) => {
+      const assumptionB = assumption, ///
+            assumptionAEqualToAssumptionB = assumptionA.isEqualTo(assumptionB);
+
+      if (assumptionAEqualToAssumptionB) {
+        const assumptionString = assumption.getString();
+
+        context.trace(`Removed the existing '${assumptionString}' assumption from the mnemic context...`);
+
+        return true;
+      }
+    });
+
     this.assumptions.push(assumption);
 
     context.debug(`...added the '${assumptionString}' assumption to the mnemic context.`);
@@ -321,6 +435,21 @@ export default class MnemicContext extends Context {
 
     context.trace(`Adding the '${metavariableString}' metavariable to the mnemic context...`);
 
+    const metavariableA = metavariable; ///
+
+    extract(this.metavariables, (metavariable) => {
+      const metavariableB = metavariable, ///
+            metavariableAEqualToMetavariableB = metavariableA.isEqualTo(metavariableB);
+
+      if (metavariableAEqualToMetavariableB) {
+        const metavariableString = metavariable.getString();
+
+        context.trace(`Removed the existing '${metavariableString}' metavariable from the mnemic context...`);
+
+        return true;
+      }
+    });
+
     this.metavariables.push(metavariable);
 
     context.debug(`...added the '${metavariableString}' metavariable to the mnemic context.`);
@@ -331,6 +460,21 @@ export default class MnemicContext extends Context {
           substitutionString = substitution.getString();
 
     context.trace(`Adding the '${substitutionString}' substitution to the mnemic context...`);
+
+    const substitutionA = substitution; ///
+
+    extract(this.substitutions, (substitution) => {
+      const substitutionB = substitution, ///
+            substitutionAEqualToSubstitutionB = substitutionA.isEqualTo(substitutionB);
+
+      if (substitutionAEqualToSubstitutionB) {
+        const substitutionString = substitution.getString();
+
+        context.trace(`Removed the existing '${substitutionString}' substitution from the mnemic context...`);
+
+        return true;
+      }
+    });
 
     this.substitutions.push(substitution);
 
@@ -621,6 +765,12 @@ export default class MnemicContext extends Context {
     this.assertions = assertionsFromJSON(json, context);
     this.signatures = signaturesFromJSON(json, context);
     this.substitutions = substitutionsFromJSON(json, context);
+  }
+
+  commit() {
+    const context = this;
+
+    return context;
   }
 
   toJSON() {

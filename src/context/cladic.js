@@ -4,9 +4,7 @@ import { arrayUtilities } from "necessary";
 
 import Context from "../context";
 
-import { compressTerms, compressAssertions, compressMetavariables } from "../utilities/compression";
-
-const { push } = arrayUtilities;
+const { push, extract } = arrayUtilities;
 
 export default class CladicContext extends Context {
   constructor(context, terms, assertions, metavariables) {
@@ -24,8 +22,6 @@ export default class CladicContext extends Context {
 
     context.getTerms(terms);
 
-    compressTerms(terms);
-
     return terms;
   }
 
@@ -35,8 +31,6 @@ export default class CladicContext extends Context {
     push(assertions, this.assertions);
 
     context.getAssertions(assertions);
-
-    compressAssertions(assertions);
 
     return assertions;
   }
@@ -48,8 +42,6 @@ export default class CladicContext extends Context {
 
     context.getMetavariables(metavariables);
 
-    compressMetavariables(metavariables);
-
     return metavariables;
   }
 
@@ -58,6 +50,21 @@ export default class CladicContext extends Context {
           termString = term.getString();
 
     context.trace(`Adding the '${termString}' term to the cladic context...`);
+
+    const termA = term; ///
+
+    extract(this.terms, (term) => {
+      const termB = term, ///
+            termAEqualToTermB = termA.isEqualTo(termB);
+
+      if (termAEqualToTermB) {
+        const termString = term.getString();
+
+        context.trace(`Removed the existing '${termString}' term from the cladic context...`);
+
+        return true;
+      }
+    });
 
     this.terms.push(term);
 
@@ -70,6 +77,21 @@ export default class CladicContext extends Context {
 
     context.trace(`Adding the '${assertionString}' assertion to the cladic context...`);
 
+    const assertionA = assertion; ///
+
+    extract(this.assertions, (assertion) => {
+      const assertionB = assertion, ///
+            assertionAEqualToAssertionB = assertionA.isEqualTo(assertionB);
+
+      if (assertionAEqualToAssertionB) {
+        const assertionString = assertion.getString();
+
+        context.trace(`Removed the existing '${assertionString}' assertion from the cladic context...`);
+
+        return true;
+      }
+    });
+
     this.assertions.push(assertion);
 
     context.debug(`...added the '${assertionString}' assertion to the cladic context.`);
@@ -80,6 +102,21 @@ export default class CladicContext extends Context {
           metavariableString = metavariable.getString();
 
     context.trace(`Adding the '${metavariableString}' metavariable to the cladic context...`);
+
+    const metavariableA = metavariable; ///
+
+    extract(this.metavariables, (metavariable) => {
+      const metavariableB = metavariable, ///
+            metavariableAEqualToMetavariableB = metavariableA.isEqualTo(metavariableB);
+
+      if (metavariableAEqualToMetavariableB) {
+        const metavariableString = metavariable.getString();
+
+        context.trace(`Removed the existing '${metavariableString}' metavariable from the cladic context...`);
+
+        return true;
+      }
+    });
 
     this.metavariables.push(metavariable);
 

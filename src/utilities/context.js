@@ -4,6 +4,7 @@ import LexicContext from "../context/lexic";
 import CladicContext from "../context/cladic";
 import KrasicContext from "../context/krasic";
 import MnemicContext from "../context/mnemic";
+import MetexicContext from "../context/metexic";
 import TemenicContext from "../context/temenic";
 import EdaphicContext from "../context/edaphic";
 import LiminalContext from "../context/liminal";
@@ -64,13 +65,6 @@ export function ablate(innerFunction, context) {
   return innerFunction(context);
 }
 
-export function join(innerFunction, ...contexts) {
-  const krasicContext = KrasicContext.fromContexts(contexts),
-        context = krasicContext;  ///
-
-  return innerFunction(context);
-}
-
 export function pare(innerFunction, context) {
   context = pareContext(context); ///
 
@@ -126,6 +120,20 @@ export function instantiate(innerFunction, context) {
   const lexicContext = LexicContext.fromNothing(context);
 
   context = lexicContext;  ///
+
+  return innerFunction(context);
+}
+
+export function participate(innerFunction, ...contexts) {
+  const metexicContext = MetexicContext.fromContexts(contexts),
+        context = metexicContext;  ///
+
+  return innerFunction(context);
+}
+
+export function join(innerFunction, ...contexts) {
+  const krasicContext = KrasicContext.fromContexts(contexts),
+    context = krasicContext;  ///
 
   return innerFunction(context);
 }

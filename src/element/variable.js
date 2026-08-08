@@ -65,19 +65,20 @@ export default define(class Variable extends Element {
     return identifierEqualTo;
   }
 
-  compareVariable(variable) {
-    const variableIdentifier = variable.getIdentifier(),
-          comparesToVariable = (this.identifier === variableIdentifier);
+  matchVariableNode(variableNode) {
+    const node = variableNode, ///
+          nodeMatches = this.matchNode(node),
+          variableNodeMatches = nodeMatches; ///
 
-    return comparesToVariable;
+    return variableNodeMatches;
   }
 
-  compareParamter(parameter) {
-    const identifier = parameter.getIdentifier(),
-          identifierEqualTo = this.isIdentifierEqualTo(identifier),
-          comparesToParamter = identifierEqualTo; ///
+  isEqualTo(variable) {
+    const variableNode = variable.getNode(),
+          variableNodeMatches = this.matchVariableNode(variableNode),
+          equalTo = variableNodeMatches;  ///
 
-    return comparesToParamter;
+    return equalTo;
   }
 
   compareVariableIdentifier(variableIdentifier) {

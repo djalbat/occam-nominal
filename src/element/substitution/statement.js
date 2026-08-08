@@ -9,7 +9,7 @@ import { define } from "../../elements";
 import { stripBracketsFromStatement } from "../../utilities/brackets";
 import { instantiateStatementSubstitution } from "../../process/instantiate";
 import { statementSubstitutionFromStatementSubstitutionNode } from "../../utilities/element";
-import { ablates, manifest, attempts, reconcile, instantiate, unserialises } from "../../utilities/context";
+import { ablates, manifest, attempts, reconcile, participate, instantiate, unserialises } from "../../utilities/context";
 import { statementSubstitutionStringFromStatementAndMetavariable, statementSubstitutionStringFromStatementMetavariableAndSubstitution } from "../../utilities/string";
 
 const { breakPointFromJSON } = breakPointUtilities;
@@ -108,7 +108,7 @@ export default define(class StatementSubstitution extends Substitution {
         validates = all([
           validateTargetStatement,
           validateReplacementStatement
-        ], state, generalContext, specificContext, () => {
+        ], state, context, generalContext, specificContext, () => {
           let validates;
 
           this.commit(generalContext, specificContext);
@@ -133,23 +133,20 @@ export default define(class StatementSubstitution extends Substitution {
     return validates;
   }
 
-  validateTargetStatement(state, generalContext, specificContext, continuation) {
+  validateTargetStatement(state, context, generalContext, specificContext, continuation) {
     let targetStatementValidates;
 
-    const context = generalContext,  ///
-          statementSubstitutionString = this.getString();  ///
+    const statementSubstitutionString = this.getString();  ///
 
     context.trace(`Validating the '${statementSubstitutionString}' statement substitution's target statement...`);
 
     const targetStatementSingular = this.targetStatement.isSingular();
 
     if (targetStatementSingular) {
-      targetStatementValidates = this.targetStatement.validate(state, context, (targetStatement, context) => {
+      targetStatementValidates = this.targetStatement.validate(state, generalContext, (targetStatement, generalContext) => {
         let validates;
 
-        const generalContext = context; ///
-
-        validates = continuation(state, generalContext, specificContext);
+        validates = continuation(state, context, generalContext, specificContext);
 
         return validates;
       });
@@ -168,23 +165,22 @@ export default define(class StatementSubstitution extends Substitution {
     return targetStatementValidates;
   }
 
-  validateReplacementStatement(state, generalContext, specificContext, continuation) {
+  validateReplacementStatement(state, context, generalContext, specificContext, continuation) {
     let replacementStatementValidates;
 
-    const context = specificContext,  ///
-          statementSubstitutionString = this.getString();  ///
+    const statementSubstitutionString = this.getString();  ///
 
     context.trace(`Validating the '${statementSubstitutionString}' statement substitution's replacement statement...`);
 
-    replacementStatementValidates = this.replacementStatement.validate(state, context, (replacementStatement, context) => {
-      let validates;
+    participate((specificContext) => {
+      replacementStatementValidates = this.replacementStatement.validate(state, specificContext, (replacementStatement, specificContext) => {
+        let validates;
 
-      const specificContext = context;  ///
+        validates = continuation(state, context, generalContext, specificContext);
 
-      validates = continuation(state, generalContext, specificContext);
-
-      return validates;
-    });
+        return validates;
+      });
+    }, specificContext, context);
 
     if (replacementStatementValidates) {
       context.debug(`...validated the '${statementSubstitutionString}' statement substitution's replacement statement.`);

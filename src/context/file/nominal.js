@@ -229,8 +229,10 @@ export default class NominalFileContext extends FileContext {
     return claims;
   }
 
-  getDeclaredVariables() {
-    return this.declaredVariables;
+  getDeclaredVariables(declaredVariables = []) {
+    push(declaredVariables, this.declaredVariables);
+
+    return declaredVariables;
   }
 
   getDeclaredMetavariables() {

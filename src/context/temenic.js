@@ -6,7 +6,7 @@ import Context from "../context";
 
 import { mergeEquivalences, separateGroundedTermsAndDefinedVariables } from "../utilities/equivalences";
 
-const { last, clear } = arrayUtilities;
+const { last, push, clear } = arrayUtilities;
 
 class TemenicContext extends Context {
   constructor(context, constraints, assignments, equivalences, factOrSubproofs, declaredVariables) {
@@ -58,17 +58,12 @@ class TemenicContext extends Context {
     return factOrSubproofs;
   }
 
-  getDeclaredVariables() {
-    let declaredVariables;
-
+  getDeclaredVariables(declaredVariables = []) {
     const context = this.getContext();
 
-    declaredVariables = context.getDeclaredVariables();
+    push(declaredVariables, this.declaredVariables);
 
-    declaredVariables = [
-      ...this.declaredVariables,
-      ...declaredVariables
-    ];
+    context.getDeclaredVariables(declaredVariables);
 
     return declaredVariables;
   }

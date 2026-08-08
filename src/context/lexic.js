@@ -21,6 +21,10 @@ export default class LexicContext extends Context {
     this.tokens = tokens;
   }
 
+  addAssignment(assignment) {
+    ///
+  }
+
   nodeAsString(node) {
     const string = nodeAsString(node, this.tokens);
 

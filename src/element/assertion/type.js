@@ -50,7 +50,7 @@ export default define(class TypeAssertion extends Assertion {
 
     if (term !== null) {
       const termType = term.getType(),
-        typeEqualToTermType = this.type.isEqualTo(termType);
+            typeEqualToTermType = this.type.isEqualTo(termType);
 
       if (typeEqualToTermType) {
         const termEstablished = term.isEstablished();

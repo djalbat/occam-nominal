@@ -211,9 +211,10 @@ export default class Context extends ContextBase {
     return equivalences;
   }
 
-  getDeclaredVariables() {
-    const context = this.getContext(),
-          declaredVariables = context.getDeclaredVariables();
+  getDeclaredVariables(declaredVariables = []) {
+    const context = this.getContext();
+
+    context.getDeclaredVariables(declaredVariables);
 
     return declaredVariables;
   }
