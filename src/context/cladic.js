@@ -164,8 +164,8 @@ export default class CladicContext extends Context {
     return metavariablenPresent;
   }
 
-  commit() {
-    const context = this.getContext();
+  merge(context) {
+    context.debug(`Merging the cladic context`);
 
     context.addTerms(this.terms);
 

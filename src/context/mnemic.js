@@ -601,12 +601,6 @@ export default class MnemicContext extends Context {
     return metavariablenPresent;
   }
 
-  commit(element) {
-    const context = this; ///
-
-    element.setContext(context);
-  }
-
   initialise(json) {
     const context = this; ///
 

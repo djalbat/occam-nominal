@@ -163,12 +163,8 @@ export default class LiminalContext extends Context {
     return qualifies;
   }
 
-  commit(context) {
-    if (context === undefined) {
-      context = this.getContext();
-    }
-
-    context.debug(`Committing the liminal context`);
+  merge(context) {
+    context.debug(`Merging the liminal context`);
 
     context.addInferredSubstitutions(this.inferredSubstitutions);
   }
