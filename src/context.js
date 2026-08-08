@@ -421,6 +421,13 @@ export default class Context extends ContextBase {
     return declaredVariable;
   }
 
+  findDeclaredVariablesByVariableIdentifier(variableIdentifier) {
+    const context = this.getContext(),
+          declaredVariables = context.findDeclaredVariablesByVariableIdentifier(variableIdentifier);
+
+    return declaredVariables;
+  }
+
   findDeclaredMetavariableByMetavariableName(metavariableName) {
     const context = this.getContext(),
           declaredMetavariable = context.findDeclaredMetavariableByMetavariableName(metavariableName);

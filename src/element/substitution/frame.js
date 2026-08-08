@@ -109,14 +109,16 @@ export default define(class FrameSubstitution extends Substitution {
         ], state, generalContext, specificContext, () => {
           let validates;
 
-          validates = continuation(substitution, context);
+          this.commit(generalContext, specificContext);
+
+          const frameSubstitution = substitution; ///
+
+          validates = continuation(frameSubstitution, context);
 
           return validates;
         });
 
         if (validates) {
-          this.commit(generalContext, specificContext);
-
           context.addSubstitution(substitution);
         }
       }, generalContext, specificContext);

@@ -42,8 +42,8 @@ export default class LiminalContext extends Context {
     return soleInferredSubstitution;
   }
 
-  getSoleNonTrivialInferredSubstitution() {
-    let soleNonTrivialInferredSubstitution = null;
+  getSingularNonTrivialInferredSubstitution() {
+    let singularNonTrivialInferredSubstitution = null;
 
     const soleInferredSubstitution = this.getSoleInferredSubstitution();
 
@@ -51,11 +51,11 @@ export default class LiminalContext extends Context {
       const soleInferredSubstitutionNonTrivial = soleInferredSubstitution.isNonTrivial();
 
       if (soleInferredSubstitutionNonTrivial) {
-        soleNonTrivialInferredSubstitution = soleInferredSubstitution;  ///
+        singularNonTrivialInferredSubstitution = soleInferredSubstitution;  ///
       }
     }
 
-    return soleNonTrivialInferredSubstitution;
+    return singularNonTrivialInferredSubstitution;
   }
 
   addInferredSubstitution(inferredSubstitution) {

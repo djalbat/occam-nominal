@@ -111,16 +111,14 @@ export default define(class Signature extends Element {
       ], state, context, (state, context) => {
         let validates;
 
+        this.commit(context);
+
         context = specificContext;  ///
 
         validates = continuation(signature, context);
 
         return validates;
       });
-
-      if (validates) {
-        this.commit(context);
-      }
     }, context);
 
     context = specificContext;  ///

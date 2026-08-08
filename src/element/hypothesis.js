@@ -93,16 +93,14 @@ export default define(class Hypothesis extends Element {
         ], state, context, (state, context) => {
           let validates;
 
+          this.commit(context);
+
           context = specificContext;  ///
 
           validates = continuation(hypothesis, context);
 
           return validates;
         });
-
-        if (validates) {
-          this.commit(context);
-        }
       }, context);
     }
 

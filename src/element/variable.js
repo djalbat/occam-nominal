@@ -88,36 +88,20 @@ export default define(class Variable extends Element {
     return comparesToVariableIdentifier;
   }
 
-  validate(state, context, continuation) {
+  validate(state, type, provisional, context, continuation) {
     let validates;
 
     const variableString = this.getString(); ///
 
     context.trace(`Validating the '${variableString}' variable...`);
 
-    const variableIdentifier = this.identifier, ///
-          declaredVariable = context.findDeclaredVariableByVariableIdentifier(variableIdentifier);
+    const variable = this;  ///
 
-    if (declaredVariable !== null) {
-      const type = declaredVariable.getType(),
-            typeString = type.getString(),
-            provisional = declaredVariable.isProvisional(),
-            provisinallyString = provisionallyStringFromProvisional(provisional);
+    this.type = type;
 
-      context.trace(`Setting the '${variableString}' variable's type to the '${typeString}' type${provisinallyString}.`);
+    this.provisional = provisional;
 
-      this.type = type;
-
-      this.provisional = provisional;
-
-      const variable = this;  ///
-
-      validates = continuation(variable, context);
-    } else {
-      context.debug(`The '${variableString}' declared variable is not present.`);
-
-      validates = false;
-    }
+    validates = continuation(variable, context);
 
     if (validates) {
       context.debug(`...validated the '${variableString}' variable.`);
@@ -127,16 +111,18 @@ export default define(class Variable extends Element {
   }
 
   unifyTerm(term, generalContext, specificContext, continuation) {
+    let termUnifies = false;
+
     const context = specificContext,  ///
           termString = term.getString(),
           variableString = this.getString();
 
-    context.trace(`Unifying the '${termString}' term with the '${variableString}}' variable...`);
+    context.trace(`Unifying the '${termString}' term with the '${variableString}' variable...`);
 
     const termVariableCompares = this.compareTermVariable(term, generalContext, specificContext);
 
     if (termVariableCompares) {
-      const termUnifies = true;
+      termUnifies = true;
 
       return continuation(termUnifies);
     }
@@ -146,8 +132,6 @@ export default define(class Variable extends Element {
           inferredSubstitution = context.findInferredSubstitutionByVariableNode(variableNode);
 
     if (inferredSubstitution !== null) {
-      let termUnifies = false;
-
       const inferredSubstitutionComparesToTerm = inferredSubstitution.compareTerm(term, context);
 
       if (inferredSubstitutionComparesToTerm) {
@@ -180,7 +164,7 @@ export default define(class Variable extends Element {
       }, state);
     });
 
-    const termUnifies = true;
+    termUnifies = true;
 
     if (termUnifies) {
       context.debug(`...unified the '${termString}' term with the '${variableString}' variable.`);

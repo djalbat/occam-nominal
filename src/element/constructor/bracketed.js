@@ -13,35 +13,38 @@ export default define(class BracketedConstructor extends Constructor {
     return bracketedConstructorNode;
   }
 
-  unifyTerm(term, context, continuation) {
+  unifyTerm(term, state, context, continuation) {
     let termUnifiesWithBracketedConstructor;
 
     const termString = term.getString();
 
     context.trace(`Unifying the '${termString}' term with the bracketed constructor...`);
 
-    termUnifiesWithBracketedConstructor = super.unifyTerm(term, context, (context) => {
+    termUnifiesWithBracketedConstructor = super.unifyTerm(term, context, (term, context) => {
       let termUnifies = false;
 
-      const bracketedTerm = term, ///
-            bracketedTermNode = bracketedTerm.getNode(),
-            singularTermNode = bracketedTermNode.getSingularTermNode();
+      const termNode = term.getNode(),
+            singularTermNode = termNode.getSingularTermNode();
 
       if (singularTermNode !== null) {
         const bracketlessTermNode = singularTermNode, ///
               bracketlessTerm = termFromTermNode(bracketlessTermNode, context),
-              validates = bracketlessTerm.validate(state, context, (bracketlessTerm, context) => {
+              bracketlessTermValidates = bracketlessTerm.validate(state, context, (bracketlessTerm, context) => {
+                let validates;
+
                 const type = bracketlessTerm.getType(),
                       provisional = bracketlessTerm.isProvisional();
 
-                bracketedTerm.setType(type);
+                term.setType(type);
 
-                bracketedTerm.setProvisional(provisional);
+                term.setProvisional(provisional);
 
-                return continuation(context);
+                validates = continuation(term, context);
+
+                return validates;
               });
 
-        if (validates) {
+        if (bracketlessTermValidates) {
           termUnifies = true;
         }
       }

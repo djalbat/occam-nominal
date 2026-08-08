@@ -93,6 +93,8 @@ export default define(class Constraint extends Element {
         ], state, context, (state, context) => {
           let validates;
 
+          this.commit(context);
+
           context = specificContext;  ///
 
           validates = continuation(constraint, context);
@@ -101,8 +103,6 @@ export default define(class Constraint extends Element {
         });
 
         if (validates) {
-          this.commit(context);
-
           context = specificContext;  ///
 
           context.addConstraint(constraint);

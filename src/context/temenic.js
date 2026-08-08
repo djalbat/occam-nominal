@@ -222,6 +222,22 @@ class TemenicContext extends Context {
     return declaredVariable;
   }
 
+  findDeclaredVariablesByVariableIdentifier(variableIdentifier) {
+    let declaredVariables;
+
+    declaredVariables = this.getDeclaredVariables();
+
+    declaredVariables = declaredVariables.filter((declaredVariable) => {
+      const variableComparesToVariableIdentifier = declaredVariable.compareVariableIdentifier(variableIdentifier);
+
+      if (variableComparesToVariableIdentifier) {
+        return true;
+      }
+    });
+
+    return declaredVariables;
+  }
+
   findConstraintByConstraintNode(constraintNode) {
     let constraint;
 

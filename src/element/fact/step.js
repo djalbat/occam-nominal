@@ -184,16 +184,14 @@ export default define(class Step extends Fact {
       ], state, context, (state, context) => {
         let validates;
 
+        this.commit(context);
+
         context = specificContext;  ///
 
         validates = continuation(step, context);
 
         return validates;
       });
-
-      if (validates) {
-        this.commit(context);
-      }
     }, context);
 
     context = specificContext;  ///

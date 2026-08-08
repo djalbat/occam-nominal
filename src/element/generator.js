@@ -4,14 +4,11 @@ import { Element, breakPointUtilities, continuationUtilities } from "occam-langu
 
 import { define } from "../elements";
 import { desist, declare } from "../utilities/state";
-import { baseTypeFromNothing } from "../utilities/type";
 import { instantiateGenerator } from "../process/instantiate";
 import { termFromGeneratorNode } from "../utilities/element";
-import { validateTermAsVariable } from "../process/validation";
 import { unifyTermWithGenerator } from "../process/unify";
-import { validateTermAsGenerator } from "../process/validate";
 import { typeFromJSON, typeToTypeJSON } from "../utilities/json";
-import { attempt, serialise, unserialise, instantiate } from "../utilities/context";
+import { serialise, unserialise, instantiate } from "../utilities/context";
 
 const { asynchronousEvery } = continuationUtilities,
       { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
@@ -97,48 +94,6 @@ export default define(class Generator extends Element {
     }
 
     return continuation(verifies, context);
-  }
-
-  validateTerm(context) {
-    let termValidates = false;
-
-    const includeType = false,
-          generatorString = this.getString(includeType);
-
-    context.trace(`Validating the '${generatorString}' generator's term...`);
-
-    const hypothetical = this.isHypothetical();
-
-    if (hypothetical) {
-      const termValidatesAsVariable = validateTermAsVariable(this.term, context, (term, context) => { ///
-        let validatesForwards = false;
-
-        const type = term.getType(),
-              baseType = baseTypeFromNothing();
-
-        if (type === baseType) {
-          validatesForwards = true;
-        }
-
-        return validatesForwards;
-      });
-
-      if (termValidatesAsVariable) {
-        termValidates = true;
-      }
-    } else {
-      const termValidatesAsGenerator = validateTermAsGenerator(this.term, context);
-
-      if (termValidatesAsGenerator) {
-        termValidates = true;
-      }
-    }
-
-    if (termValidates) {
-      context.debug(`...validated the '${generatorString}' generator's term.`);
-    }
-
-    return termValidates;
   }
 
   unifyTerm(term, context, validateForwards) {

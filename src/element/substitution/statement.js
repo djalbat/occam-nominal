@@ -111,14 +111,16 @@ export default define(class StatementSubstitution extends Substitution {
         ], state, generalContext, specificContext, () => {
           let validates;
 
-          validates = continuation(substitution, context);
+          this.commit(generalContext, specificContext);
+
+          const statementSubstitution = substitution;  ///
+
+          validates = continuation(statementSubstitution, context);
 
           return validates;
         });
 
         if (validates) {
-          this.commit(generalContext, specificContext);
-
           context.addSubstitution(substitution);
         }
       }, generalContext, specificContext);
@@ -246,8 +248,8 @@ export default define(class StatementSubstitution extends Substitution {
 
     return reconcile((specificContext) => {
       return generalStatement.unifyStatement(specificStatement, generalContext, specificContext, (statementUnifies) => {
-        const soleNonTrivialInferredSubstitution = specificContext.getSoleNonTrivialInferredSubstitution(),
-              substitution = soleNonTrivialInferredSubstitution; ///
+        const singularNonTrivialInferredSubstitution = specificContext.getSingularNonTrivialInferredSubstitution(),
+              substitution = singularNonTrivialInferredSubstitution; ///
 
         return continuation(substitution);
       });

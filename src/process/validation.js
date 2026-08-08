@@ -5,46 +5,58 @@ import elements from "../elements";
 import { some } from "../utilities/continuation";
 import { choose } from "../utilities/context";
 import { desist, declare } from "../utilities/state";
-import { provisionallyStringFromProvisional } from "../utilities/string";
 import { bracketedConstructorFromNothing, bracketedCombinatorFromNothing } from "../utilities/instance";
-import generator from "../element/generator";
 
-export function validateTermAsVariable(term, state, context, continuation) {
+function validateTermAsVariable(term, state, context, continuation) {
   let termValidatesAsVariable = false;
 
   const { Variable } = elements,
         variable = Variable.fromTerm(term, context);
 
   if (variable !== null) {
-    const termString = term.getString();
+    const variableIdentifier = variable.getIdentifier(),
+          declaredVariables = context.findDeclaredVariablesByVariableIdentifier(variableIdentifier),
+          declaredVariablesLength = declaredVariables.length;
 
-    context.trace(`Validating the '${termString}' term as a variable...`);
+    if (declaredVariablesLength > 0) {
+      const termString = term.getString();
 
-    const variableValidaets = variable.validate(state, context, (variable, context) => {
-      let validates;
+      context.trace(`Validating the '${termString}' term as a variable...`);
 
-      const type = variable.getType(),
-            typeString = type.getString(),
-            provisional = variable.isProvisional(),
-            provisionallyString = provisionallyStringFromProvisional(provisional);
+      const variableValidates = some(declaredVariables, (declaredVariable, context, continuation) => {
+        let variableValidates;
 
-      context.trace(`Setting the '${termString}' term's type to the '${typeString}' type${provisionallyString}.`);
+        const type = declaredVariable.getType(),
+              provisional = declaredVariable.isProvisional();
 
-      term.setType(type);
+        choose((context) => {
+          variableValidates = variable.validate(state, type, provisional, context, (variable, context) => {
+            let validates;
 
-      term.setProvisional(provisional);
+            term.setType(type);
 
-      validates = continuation(term, state, context);
+            term.setProvisional(provisional);
 
-      return validates;
-    });
+            validates = continuation(term, state, context);
 
-    if (variableValidaets) {
-      termValidatesAsVariable = true;
-    }
+            return validates;
+          });
 
-    if (termValidatesAsVariable) {
-      context.debug(`...validated the '${termString}' term as a variable.`);
+          if (variableValidates) {
+            context.commit();
+          }
+        }, context);
+
+        return variableValidates;
+      }, context, continuation);
+
+      if (variableValidates) {
+        termValidatesAsVariable = true;
+      }
+
+      if (termValidatesAsVariable) {
+        context.debug(`...validated the '${termString}' term as a variable.`);
+      }
     }
   }
 
@@ -52,7 +64,7 @@ export function validateTermAsVariable(term, state, context, continuation) {
 }
 
 function unifyTermWithGenerators(term, state, context, continuation) {
-  let termUnifiesWithGenerators;
+  let termUnifiesWithGenerators = false;
 
   const generators = context.getGenerators(),
         generatorsLength = generators.length;
@@ -66,12 +78,18 @@ function unifyTermWithGenerators(term, state, context, continuation) {
       let termUnifies;
 
       choose((context) => {
-        termUnifies = generator.unifyTerm(term, state, context, continuation);
-      }, context);
+        termUnifies = generator.unifyTerm(term, context, (term, context) => {
+          let termUnifies;
 
-      if (termUnifies) {
-        context.commit();
-      }
+          termUnifies = continuation(term, state, context);
+
+          return termUnifies;
+        });
+
+        if (termUnifies) {
+          context.commit();
+        }
+      }, context);
 
       return termUnifies;
     }, context, continuation);
@@ -85,7 +103,7 @@ function unifyTermWithGenerators(term, state, context, continuation) {
 }
 
 function unifyTermWithConstructors(term, state, context, continuation) {
-  let termUnifiesWithConstructors;
+  let termUnifiesWithConstructors = false;
 
   const constructors = context.getConstructors(),
         constructorsLength = constructors.length;
@@ -131,8 +149,12 @@ function unifyTermWithBracketedConstructor(term, state, context, continuation) {
   context.trace(`Unifying the '${termString}' term with the bracketed constructor...`);
 
   const bracketedConstructor = bracketedConstructorFromNothing(),
-        termUnifies = bracketedConstructor.unifyTerm(term, context, () => {
-          debugger
+        termUnifies = bracketedConstructor.unifyTerm(term, state, context, (term, context) => {
+          let termUnifies;
+
+          termUnifies = continuation(term, state, context);
+
+          return termUnifies;
         });
 
   if (termUnifies) {

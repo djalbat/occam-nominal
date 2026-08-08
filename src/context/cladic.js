@@ -57,33 +57,33 @@ export default class CladicContext extends Context {
     const context = this, ///
           termString = term.getString();
 
-    context.trace(`Adding the '${termString}' term to the branching context...`);
+    context.trace(`Adding the '${termString}' term to the cladic context...`);
 
     this.terms.push(term);
 
-    context.debug(`...added the '${termString}' term to the branching context.`);
+    context.debug(`...added the '${termString}' term to the cladic context.`);
   }
 
   addAssertion(assertion) {
     const context = this, ///
           assertionString = assertion.getString();
 
-    context.trace(`Adding the '${assertionString}' assertion to the branching context...`);
+    context.trace(`Adding the '${assertionString}' assertion to the cladic context...`);
 
     this.assertions.push(assertion);
 
-    context.debug(`...added the '${assertionString}' assertion to the branching context.`);
+    context.debug(`...added the '${assertionString}' assertion to the cladic context.`);
   }
 
   addMetavariable(metavariable) {
     const context = this, ///
           metavariableString = metavariable.getString();
 
-    context.trace(`Adding the '${metavariableString}' metavariable to the branching context...`);
+    context.trace(`Adding the '${metavariableString}' metavariable to the cladic context...`);
 
     this.metavariables.push(metavariable);
 
-    context.debug(`...added the '${metavariableString}' metavariable to the branching context.`);
+    context.debug(`...added the '${metavariableString}' metavariable to the cladic context.`);
   }
 
   addTerms(terms) {

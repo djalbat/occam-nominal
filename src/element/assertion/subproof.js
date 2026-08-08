@@ -58,22 +58,22 @@ export default define(class SubproofAssertion extends Assertion {
   validate(state, context, continuation) {
     let validates;
 
-    const subproofAssertionString = this.getString();  ///
+    const subprpoofAssertionString = this.getString();  ///
 
-    context.trace(`Validating the '${subproofAssertionString}' subproof assertion...`);
+    context.trace(`Validating the '${subprpoofAssertionString}' subprpoof assertion...`);
 
-    let subproofAssertion;
+    let assertion;
 
-    const assertion = this.findAssertion(context);
+    assertion = this.findAssertion(context);
 
-    subproofAssertion = assertion;  ///
+    if (assertion !== null) {
+      const subprpoofAssertion = assertion; ///
 
-    if (subproofAssertion !== null) {
-      context.debug(`The '${subproofAssertionString}' subproofAssertion is already present.`);
+      context.debug(`The '${subprpoofAssertionString}' subprpoof assertion is already present.`);
 
-      validates = continuation(subproofAssertion, context);
+      validates = continuation(subprpoofAssertion, context);
     } else {
-      subproofAssertion = this;
+      assertion = this; ///
 
       const validateStatements = this.validateStatements.bind(this);
 
@@ -91,11 +91,11 @@ export default define(class SubproofAssertion extends Assertion {
         ], state, context, (state, context) => {
           let validates;
 
-          const assertion = subproofAssertion;  ///
-
           context.addAssertion(assertion);
 
-          validates = continuation(subproofAssertion, context);
+          const subprpoofAssertion = assertion; ///
+
+          validates = continuation(subprpoofAssertion, context);
 
           return validates;
         });
@@ -105,7 +105,7 @@ export default define(class SubproofAssertion extends Assertion {
     }
 
     if (validates) {
-      context.debug(`...validated the '${subproofAssertionString}' subproof assertion.`);
+      context.debug(`...validated the '${subprpoofAssertionString}' subprpoof assertion.`);
     }
 
     return validates;

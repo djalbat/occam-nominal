@@ -50,18 +50,18 @@ export default define(class DefinedAssertion extends Assertion {
 
     context.trace(`Validating the '${definedAssertionString}' defined assertion...`);
 
-    let definedAssertion;
+    let assertion;
 
-    const assertion = this.findAssertion(context);
+    assertion = this.findAssertion(context);
 
     if (assertion !== null) {
-      definedAssertion = assertion; ///
+      const definedAssertion = assertion; ///
 
       context.debug(`The '${definedAssertionString}' defined assertion is already present.`);
 
       validates = continuation(definedAssertion, context);
     } else {
-      definedAssertion = this;
+      assertion = this;
 
       const validateTerm = this.validateTerm.bind(this),
             validateFrame = this.validateFrame.bind(this);
@@ -81,9 +81,9 @@ export default define(class DefinedAssertion extends Assertion {
         ], state, context, (state, context) => {
           let validates;
 
-          const assertion = definedAssertion;  ///
-
           context.addAssertion(assertion);
+
+          const definedAssertion = assertion; ///
 
           validates = continuation(definedAssertion, context);
 
@@ -231,9 +231,11 @@ export default define(class DefinedAssertion extends Assertion {
           frame = frameFromFrameAndSubstitutions(this.frame, context);
 
     validateWhenDerived(term, frame, this.negated, context, (context) => {
-      const validatesWhenDerived = true;
+      let validatesWhenDerived;
 
       unifiesIndependently = true;
+
+      validatesWhenDerived = true;
 
       return validatesWhenDerived;
     });

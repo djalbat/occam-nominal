@@ -8,6 +8,7 @@ import { define } from "../../elements";
 import { reconcile, instantiate } from "../../utilities/context";
 import { instantiateSignatureAssertion } from "../../process/instantiate";
 import { signatureFromSignatureAssertionNode, referenceFromSignatureAssertionNode, signatureAssertionFromStatementNode } from "../../utilities/element";
+import {all, exists} from "../../utilities/continuation";
 
 const { breakPointFromJSON } = breakPointUtilities;
 
@@ -34,48 +35,50 @@ export default define(class SignatureAssertion extends Assertion {
     return signatureAssertionNode;
   }
 
-  async validate(context) {
-    let signatureAssertion = null;
+  validate(state, context, continuation) {
+    let validates;
 
-    const signatureAssertionString = this.getString(); ///
+    const signatureAssertionString = this.getString();  ///
 
     context.trace(`Validating the '${signatureAssertionString}' signature assertion...`);
 
-    let validates = true;
+    let assertion;
 
-    const assertion = this.findAssertion(context);
+    assertion = this.findAssertion(context);
 
     if (assertion !== null) {
       const signatureAssertion = assertion; ///
 
       context.debug(`The '${signatureAssertionString}' signature assertion is already present.`);
+
+      validates = continuation(signatureAssertion, context);
     } else {
-      const signatureVerifies = this.validateSignature(context);
+      assertion = this; ///
 
-      if (signatureVerifies) {
-        const referenceVerifies = this.validateReference(context);
+      const validateSignature = this.validateSignature.bind(this),
+            validateReference = this.validateReference.bind(this);
 
-        if (referenceVerifies) {
-          validates = true;
-        }
+      validates = all([
+        validateSignature,
+        validateReference
+      ], state, context, (state, context) => {
+        let validates;
 
-        validates = true;
-      }
+        context.addAssertion(assertion);
 
-      if (validates) {
-        const assertion = this; ///
+        const signatureAssertion = assertion; ///
 
-        signatureAssertion = assertion; ///
+        validates = continuation(signatureAssertion, context);
 
-        context.addAssertion(signatureAssertion);
-      }
+        return validates;
+      });
     }
 
     if (validates) {
       context.debug(`...validated the '${signatureAssertionString}' signature assertion.`);
     }
 
-    return signatureAssertion;
+    return validates;
   }
 
   validateSignature(context) {

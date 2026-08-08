@@ -58,18 +58,18 @@ export default define(class ContainedAssertion extends Assertion {
 
     context.trace(`Validating the '${containedAssertionString}' contained assertion...`);
 
-    let containedAssertion;
+    let assertion;
 
-    const assertion = this.findAssertion(context);
+    assertion = this.findAssertion(context);
 
     if (assertion !== null) {
-      containedAssertion = assertion; ///
+      const containedAssertion = assertion; ///
 
       context.debug(`The '${containedAssertionString}' contained assertion is already present.`);
 
       validates = continuation(containedAssertion, context);
     } else {
-      containedAssertion = this;
+      assertion = this; ///
 
       const validateTerm = this.validateTerm.bind(this),
             validateFrame = this.validateFrame.bind(this),
@@ -91,9 +91,9 @@ export default define(class ContainedAssertion extends Assertion {
         ], state, context, (state, context) => {
           let validates;
 
-          const assertion = containedAssertion;  ///
-
           context.addAssertion(assertion);
+
+          const containedAssertion = assertion; ///
 
           validates = continuation(containedAssertion, context);
 
@@ -276,9 +276,11 @@ export default define(class ContainedAssertion extends Assertion {
           statement = statementFromStatementAndSubstitutions(this.statement, context);
 
     validateWhenDerived(term, frame, statement, this.negated, context, (context) => {
-      const validatesWhenDerived = true;
+      let validatesWhenDerived
 
       unifiesIndependently = true;
+
+      validatesWhenDerived = true;
 
       return validatesWhenDerived;
     });

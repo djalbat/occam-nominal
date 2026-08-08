@@ -104,16 +104,14 @@ export default define(class Supposition extends Fact {
       ], state, context, (state, context) => {
         let validates;
 
+        this.commit(context);
+
         context = specificContext;  ///
 
         validates = continuation(supposition, context);
 
         return validates;
       });
-
-      if (validates) {
-        this.commit(context);
-      }
     }, context);
 
     context = specificContext;  ///

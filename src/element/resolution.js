@@ -42,16 +42,14 @@ export default class Resolution extends Element {
       ], state, context, (state, context) => {
         let validates;
 
+        this.commit(context);
+
         context = specificContext;  ///
 
         validates = continuation(resolution, context);
 
         return validates;
       });
-
-      if (validates) {
-        this.commit(context);
-      }
     }, context);
 
     context = specificContext;  ///

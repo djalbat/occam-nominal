@@ -5,9 +5,7 @@ import { Element, breakPointUtilities } from "occam-languages";
 import { define } from "../elements";
 import { every, exists } from "../utilities/continuation";
 import { declare, desist } from "../utilities/state";
-import { baseTypeFromNothing } from "../utilities/type";
 import { instantiateConstructor } from "../process/instantiate";
-import { validateTermAsVariable } from "../process/validation";
 import { termFromConstructorNode } from "../utilities/element";
 import { unifyTermWithConstructor } from "../process/unify";
 import { validateTermAsConstructor } from "../process/validate";
@@ -120,16 +118,14 @@ export default define(class Constructor extends Element {
       ], state, context, (state, context) => {
         let validates;
 
+        this.commit(context);
+
         context = specificContext;  ///
 
         validates = continuation(constructor, context);
 
         return validates;
       });
-
-      if (validates) {
-        this.commit(context);
-      }
     }, context);
 
     context = specificContext;  ///
@@ -152,18 +148,20 @@ export default define(class Constructor extends Element {
 
       context.trace(`Validating the '${constructorString}' constructor's term as a variable...`);
 
-      termValidatesAsVariable = validateTermAsVariable(this.term, state, context, (term, context) => {
-        let termValidatesAsVariable = false;
+      debugger
 
-        const type = term.getType(),
-              baseType = baseTypeFromNothing();
-
-        if (type === baseType) {
-          termValidatesAsVariable = continuation(state, context);
-        }
-
-        return termValidatesAsVariable;
-      });
+      // termValidatesAsVariable = validateTermAsVariable(this.term, state, context, (term, context) => {
+      //   let termValidatesAsVariable = false;
+      //
+      //   const type = term.getType(),
+      //         baseType = baseTypeFromNothing();
+      //
+      //   if (type === baseType) {
+      //     termValidatesAsVariable = continuation(state, context);
+      //   }
+      //
+      //   return termValidatesAsVariable;
+      // });
 
       if (termValidatesAsVariable) {
         context.debug(`...validated the '${constructorString}' constructor's term as a variable.`);

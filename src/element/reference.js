@@ -111,6 +111,8 @@ export default define(class Reference extends Element {
         ], state, context, (state, context) => {
           let validates;
 
+          this.commit(context);
+
           context = specificContext;  ///
 
           validates = continuation(reference, context);
@@ -119,8 +121,6 @@ export default define(class Reference extends Element {
         });
 
         if (validates) {
-          this.commit(context);
-
           context = specificContext;  ///
 
           context.addReference(reference);

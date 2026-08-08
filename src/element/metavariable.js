@@ -344,16 +344,18 @@ export default define(class Metavariable extends Element {
   }
 
   unifyFrame(frame, generalContext, specificContext, continuation) {
+    let frameUnifies = false;
+
     const context = specificContext,  ///
           frameString = frame.getString(),
           metavariableString = this.getString();
 
-    context.trace(`Unifying the '${frameString}' frame with the '${metavariableString}}' metavariable...`);
+    context.trace(`Unifying the '${frameString}' frame with the '${metavariableString}' metavariable...`);
 
     const frameMetavariableCompares = this.compareFrameMetavariable(frame, generalContext, specificContext);
 
     if (frameMetavariableCompares) {
-      const frameUnifies = true;
+      frameUnifies = true;
 
       return continuation(frameUnifies);
     }
@@ -363,8 +365,6 @@ export default define(class Metavariable extends Element {
           inferredSubstitution = context.findInferredSubstitutionByMetavariableNode(metavariableNode);
 
     if (inferredSubstitution !== null) {
-      let frameUnifies = false;
-
       const inferredSubstitutionComparesToTerm = inferredSubstitution.compareFrame(frame, context);
 
       if (inferredSubstitutionComparesToTerm) {
@@ -397,7 +397,7 @@ export default define(class Metavariable extends Element {
       }, state)
     });
 
-    const frameUnifies = true;
+    frameUnifies = true;
 
     if (frameUnifies) {
       context.debug(`...unified the '${frameString}' frame with the '${metavariableString}' variable.`);
@@ -407,16 +407,18 @@ export default define(class Metavariable extends Element {
   }
 
   unifyStatement(statement, generalContext, specificContext, continuation) {
+    let statementUnifies = false;
+
     const context = specificContext,  ///
           statementString = statement.getString(),
           metavariableString = this.getString();
 
-    context.trace(`Unifying the '${statementString}' statement with the '${metavariableString}}' metavariable...`);
+    context.trace(`Unifying the '${statementString}' statement with the '${metavariableString}' metavariable...`);
 
     const statementMetavariableCompares = this.compareStatementMetavariable(statement, generalContext, specificContext);
 
     if (statementMetavariableCompares) {
-      const statementUnifies = true;
+      statementUnifies = true;
 
       return continuation(statementUnifies);
     }
@@ -430,8 +432,6 @@ export default define(class Metavariable extends Element {
                                     context.findInferredSubstitutionByMetavariableNode(metavariableNode);
 
     if (inferredSubstitution !== null) {
-      let statementUnifies = false;
-
       const inferredSubstitutionComparesToStatement = inferredSubstitution.compareStatement(statement, context);
 
       if (inferredSubstitutionComparesToStatement) {
@@ -474,7 +474,7 @@ export default define(class Metavariable extends Element {
       }, state);
     });
 
-    const statementUnifies = true;
+    statementUnifies = true;
 
     if (statementUnifies) {
       context.debug(`...unified the '${statementString}' statement with the '${metavariableString}' metavariable.`);
@@ -484,16 +484,18 @@ export default define(class Metavariable extends Element {
   }
 
   unifyReference(reference, generalContext, specificContext, continuation) {
+    let referenceUnifies = false;
+
     const context = specificContext,  ///
           referenceString = reference.getString(),
           metavariableString = this.getString();
 
-    context.trace(`Unifying the '${referenceString}' reference with the '${metavariableString}}' metavariable...`);
+    context.trace(`Unifying the '${referenceString}' reference with the '${metavariableString}' metavariable...`);
 
     const referenceMetavariableCompares = this.compareReferenceMetavariable(reference, generalContext, specificContext);
 
     if (referenceMetavariableCompares) {
-      const referenceUnifies = true;
+      referenceUnifies = true;
 
       return continuation(referenceUnifies);
     }
@@ -503,8 +505,6 @@ export default define(class Metavariable extends Element {
           inferredSubstitution = context.findInferredSubstitutionByMetavariableNode(metavariableNode);
 
     if (inferredSubstitution !== null) {
-      let referenceUnifies = false;
-
       const inferredSubstitutionComparesToTerm = inferredSubstitution.compareTerm(reference, context);
 
       if (inferredSubstitutionComparesToTerm) {
@@ -537,7 +537,7 @@ export default define(class Metavariable extends Element {
       }, state);
     });
 
-    const referenceUnifies = true;
+    referenceUnifies = true;
 
     if (referenceUnifies) {
       context.debug(`...unified the '${referenceString}' reference with the '${metavariableString}' variable.`);

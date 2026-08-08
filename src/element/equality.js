@@ -133,8 +133,6 @@ export default define(class Equality extends Element {
         ], state, context, (state, context) => {
           let validates;
 
-          this.assign(state, context);
-
           context.addEquality(equality);
 
           validates = continuation(equality, context);
@@ -144,6 +142,10 @@ export default define(class Equality extends Element {
 
         return validates;
       });
+
+      if (validates) {
+        this.assign(state, context);
+      }
     }
 
     if (validates) {
@@ -254,11 +256,18 @@ export default define(class Equality extends Element {
       return;
     }
 
-    const equalityAssignment = equalityAssignmentFromEquality(equality, context),
-          leftVariableAssignment = leftVariableAssignmentFromEquality(equality, context),
-          rightVariableAssignment = rightVariableAssignmentFromEquality(equality, context);
+    const equalityAssignment = equalityAssignmentFromEquality(equality, context);
 
     context.addAssignment(equalityAssignment);
+
+    const derived = isDerived(state);
+
+    if (derived) {
+      return;
+    }
+
+    const leftVariableAssignment = leftVariableAssignmentFromEquality(equality, context),
+          rightVariableAssignment = rightVariableAssignmentFromEquality(equality, context);
 
     context.addAssignment(leftVariableAssignment);
 
