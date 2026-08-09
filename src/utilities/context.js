@@ -127,7 +127,7 @@ export function participate(innerFunction, ...contexts) {
 
 export function join(innerFunction, ...contexts) {
   const krasicContext = KrasicContext.fromContexts(contexts),
-    context = krasicContext;  ///
+        context = krasicContext;  ///
 
   return innerFunction(context);
 }

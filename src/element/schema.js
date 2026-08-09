@@ -15,6 +15,7 @@ import { labelFromJSON,
          deductionToDeductionJSON,
          constraintsToConstraintsJSON,
          suppositionsToSuppositionsJSON } from "../utilities/json";
+import assumption from "./binding/assumption";
 
 const { breakable, breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities,
       { asynchronousAll, asynchronousEvery, asynchronousFilter, asynchronousForwardsEvery } = continuationUtilities;
@@ -221,54 +222,62 @@ export default define(class Schema extends Element {
                 ...this.constraints
               ];
 
-        return this.unifyAssumptions(assumptions, constraints, context, (assumptionsUnify) => {
-          const statement = judgement.getStatement(),
-                conditional = this.isConditional(),
-                subproofAssertion = subproofAssertionFromStatement(statement, context);
+        return this.unifyAssumptions(assumptions, constraints, context, () => {
+          const implicitAssumptions = judgement.getImplicitAssumptions(context);
 
-          if (conditional) {
-            if (subproofAssertion === null) {
-              const judgementUnifies = false;
-
-              return continuation(judgementUnifies);
-            }
-
-            return this.unifySubproofAssertion(subproofAssertion, context, (subproofassertionUnifies) => {
-              let judgementUnifies = false;
-
-              if (subproofassertionUnifies) {
-                judgementUnifies = true;
-              }
-
-              if (judgementUnifies) {
-                context.debug(`...unified the '${judgementString}' judgement with the '${schemaString}' schema.`);
-              }
-
-              return continuation(judgementUnifies);
-            });
-          }
-
-          if (subproofAssertion !== null) {
-            const judgementUnifies = false;
-
-            return continuation(judgementUnifies);
-          }
-
-          const deducedStatment = statement;  ///
-
-          return this.unifyDeducedStatement(deducedStatment, context, (deducedStatmentUnfifies) => {
-            let judgementUnifies = false;
-
-            if (deducedStatmentUnfifies) {
-              judgementUnifies = true;
-            }
-
-            if (judgementUnifies) {
-              context.debug(`...unified the '${judgementString}' judgement with the '${schemaString}' schema.`);
-            }
-
-            return continuation(judgementUnifies);
+          return this.unifyImplicitAssumptions(implicitAssumptions, constraints, context, () => {
+            debugger
           });
+
+
+
+          // const statement = judgement.getStatement(),
+          //       conditional = this.isConditional(),
+          //       subproofAssertion = subproofAssertionFromStatement(statement, context);
+          //
+          // if (conditional) {
+          //   if (subproofAssertion === null) {
+          //     const judgementUnifies = false;
+          //
+          //     return continuation(judgementUnifies);
+          //   }
+          //
+          //   return this.unifySubproofAssertion(subproofAssertion, context, (subproofassertionUnifies) => {
+          //     let judgementUnifies = false;
+          //
+          //     if (subproofassertionUnifies) {
+          //       judgementUnifies = true;
+          //     }
+          //
+          //     if (judgementUnifies) {
+          //       context.debug(`...unified the '${judgementString}' judgement with the '${schemaString}' schema.`);
+          //     }
+          //
+          //     return continuation(judgementUnifies);
+          //   });
+          // }
+          //
+          // if (subproofAssertion !== null) {
+          //   const judgementUnifies = false;
+          //
+          //   return continuation(judgementUnifies);
+          // }
+          //
+          // const deducedStatment = statement;  ///
+          //
+          // return this.unifyDeducedStatement(deducedStatment, context, (deducedStatmentUnfifies) => {
+          //   let judgementUnifies = false;
+          //
+          //   if (deducedStatmentUnfifies) {
+          //     judgementUnifies = true;
+          //   }
+          //
+          //   if (judgementUnifies) {
+          //     context.debug(`...unified the '${judgementString}' judgement with the '${schemaString}' schema.`);
+          //   }
+          //
+          //   return continuation(judgementUnifies);
+          // });
         });
       });
     }, context);
@@ -291,7 +300,29 @@ export default define(class Schema extends Element {
 
   unifyAssumptions(assumptions, constraints, context, continuation) {
     asynchronousFilter(constraints, (constraint, continuation) => {
-      constraint.unifyAssumptions(assumptions, context, continuation);
+      constraint.unifyAssumptions(assumptions, context, (assumptionsUnify) => {
+        let passed = false;
+
+        if (!assumptionsUnify) {
+          passed = true;
+        }
+
+        return continuation(passed);
+      });
+    }, continuation);
+  }
+
+  unifyImplicitAssumptions(implicitAssumptions, constraints, context, continuation) {
+    asynchronousFilter(constraints, (constraint, continuation) => {
+      constraint.unifyImplicitAssumptions(implicitAssumptions, context, (implicitAssumptionsUnify) => {
+        let passed = false;
+
+        if (!implicitAssumptionsUnify) {
+          passed = true;
+        }
+
+        return continuation(passed);
+      });
     }, continuation);
   }
 
@@ -318,39 +349,6 @@ export default define(class Schema extends Element {
       }
 
       return continuation(deducedStatementUnifies);
-    });
-  }
-
-  unifySubproofAssertion(subproofAssertion, context, continuation) {
-    const schemaString = this.getString(),  ///
-          subproofAssertionString = subproofAssertion.getString();
-
-    context.trace(`Unifying the '${subproofAssertionString}' subproof assertion with the '${schemaString}' schema...`);
-
-    const deducedStatement = subproofAssertion.getDeducedStatement();
-
-    return this.unifyDeducedStatement(deducedStatement, context, (deducedStatementUnifies) => {
-      if (!deducedStatementUnifies) {
-        const subproofAssertionUnifies = false;
-
-        return continuation(subproofAssertionUnifies);
-      }
-
-      const supposedStatements = subproofAssertion.getSupposedStatements();
-
-      return this.unifySupposedStatements(supposedStatements, context, (supposedStatementsUnify) => {
-        let subproofAssertionUnifies = false;
-
-        if (supposedStatementsUnify) {
-          subproofAssertionUnifies = true;
-        }
-
-        if (subproofAssertionUnifies) {
-          context.debug(`...unified the '${subproofAssertionString}' subproof assertion with the '${schemaString}' schema.`);
-        }
-
-        return continuation(subproofAssertionUnifies);
-      });
     });
   }
 

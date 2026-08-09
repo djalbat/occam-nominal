@@ -9,7 +9,7 @@ import { instantiateConstraint } from "../process/instantiate";
 import { stripBracketsFromStatement } from "../utilities/brackets";
 import { constraintFromConstraintNode } from "../utilities/element";
 import { constraintStringFromReferenceAndStatement } from "../utilities/string";
-import { ablate, attempt, reconcile, serialise, unserialise, instantiate } from "../utilities/context";
+import { join, ablate, attempt, reconcile, serialise, unserialise, instantiate } from "../utilities/context";
 
 const { asynchronousSome } = continuationUtilities,
       { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
@@ -192,8 +192,13 @@ export default define(class Constraint extends Element {
 
     context.trace(`Unifying the '${statementString}' statement with the '${constraintString}' constraint's statement...`);
 
-    const generalStatement = this.statement,  ///
-          specificStatement = stripBracketsFromStatement(statement, context);  ///
+    let specificStatement;
+
+    specificStatement = statement;  ///
+
+    specificStatement = stripBracketsFromStatement(specificStatement, context);  ///
+
+    const generalStatement = this.statement;  ///
 
     return unifyStatement(generalStatement, specificStatement, generalContext, specificContext, (statementUnifies) => {
       if (statementUnifies) {
@@ -205,8 +210,8 @@ export default define(class Constraint extends Element {
   }
 
   unifyAssumption(assumption, context, continuation) {
-    const assumptionString = assumption.getString(),  ///
-          constraintString = this.getString();
+    const constraintString = this.getString(),  ///
+          assumptionString = assumption.getString()  ///
 
     context.trace(`Unifying the '${assumptionString}' assumption with the '${constraintString}' constraint...`);
 
@@ -258,6 +263,56 @@ export default define(class Constraint extends Element {
       }
 
       return continuation(assumptionsUnify);
+    });
+  }
+
+  unifyImplicitAssumption(implicitAssumption, context, continuation) {
+    const constraintString = this.getString(),  ///
+          implicitAssumptionString = implicitAssumption.getString();  ///
+
+    context.trace(`Unifying the '${implicitAssumptionString}' implicit assumption with the '${constraintString}' constraint...`);
+
+    const constraintContext = this.getContext(), ///
+          implicitAssumptionContext = implicitAssumption.getContext(),
+          generalContext = constraintContext, ///
+          specificContext = implicitAssumptionContext;  ///
+
+    return join((specificContext) => {
+      return reconcile((specificContext) => {
+        const statement = implicitAssumption.getStatement();
+
+        return this.unifyStatement(statement, generalContext, specificContext, (statementUnifies) => {
+          let implicitAssumptionUnifies = false;
+
+          if (statementUnifies) {
+            specificContext.commit(context);
+
+            implicitAssumptionUnifies = true;
+          }
+
+          if (implicitAssumptionUnifies) {
+            context.debug(`...unified the '${implicitAssumptionString}' impllicit assumption with the '${constraintString}' constraint...`);
+          }
+
+          return continuation(implicitAssumptionUnifies);
+        });
+      }, specificContext);
+    }, specificContext, context);
+  }
+
+  unifyImplicitAssumptions(implicitAssumptions, context, continuation) {
+    const constraintString = this.getString();
+
+    context.trace(`Unifying the implicit assumptions with the '${constraintString}' constraint...`);
+
+    asynchronousSome(implicitAssumptions, (implicitAssumption, continuation) => {
+      this.unifyImplicitAssumption(implicitAssumption, context, continuation);
+    }, (implicitAssumptionsUnify) => {
+      if (implicitAssumptionsUnify) {
+        context.trace(`...unified the implicit assumptions with the '${constraintString}' constraint.`);
+      }
+
+      return continuation(implicitAssumptionsUnify);
     });
   }
 
