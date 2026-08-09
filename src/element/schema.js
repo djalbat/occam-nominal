@@ -17,7 +17,7 @@ import { labelFromJSON,
          suppositionsToSuppositionsJSON } from "../utilities/json";
 
 const { breakable, breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities,
-      { asynchronousAll, asynchornousEvery, asynchronousForwardsEvery } = continuationUtilities;
+      { asynchronousAll, asynchronousEvery, asynchronousFilter, asynchronousForwardsEvery } = continuationUtilities;
 
 export default define(class Schema extends Element {
   constructor(context, string, node, breakPoint, label, suppositions, deduction, proof, constraints) {
@@ -216,15 +216,12 @@ export default define(class Schema extends Element {
           return continuation(judgementUnifies);
         }
 
-        const assumptions = judgement.getAssumptions(context);
+        const assumptions = judgement.getAssumptions(context),
+              constraints = [
+                ...this.constraints
+              ];
 
-        return this.unifyAssumptions(assumptions, context, (assumptionsUnify) => {
-          if (!assumptionsUnify) {
-            const judgementUnifies = false;
-
-            return continuation(judgementUnifies);
-          }
-
+        return this.unifyAssumptions(assumptions, constraints, context, (assumptionsUnify) => {
           const statement = judgement.getStatement(),
                 conditional = this.isConditional(),
                 subproofAssertion = subproofAssertionFromStatement(statement, context);
@@ -292,8 +289,8 @@ export default define(class Schema extends Element {
     });
   }
 
-  unifyAssumptions(assumptions, context, continuation) {
-    asynchornousEvery(this.constraints, (constraint, continuation) => {
+  unifyAssumptions(assumptions, constraints, context, continuation) {
+    asynchronousFilter(constraints, (constraint, continuation) => {
       constraint.unifyAssumptions(assumptions, context, continuation);
     }, continuation);
   }
@@ -396,7 +393,7 @@ export default define(class Schema extends Element {
 
     let index = -1;
 
-    asynchornousEvery(supposedStatements, (supposedStatement, continuation) => {
+    asynchronousEvery(supposedStatements, (supposedStatement, continuation) => {
       index++;
 
       return this.unifySupposedStatement(supposedStatement, index, context, continuation);

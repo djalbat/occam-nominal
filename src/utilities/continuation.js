@@ -1,5 +1,28 @@
 "use strict";
 
+export function any(array, callback, ...initialArguments) {
+  let success = false;
+
+  const continuation = initialArguments.pop(),
+        length = array.length;
+
+  let count = 0;
+
+  for (let index = 0; index < length; index++) {
+    const element = array[index];
+
+    success = callback(element, ...initialArguments, continuation);
+
+    if (success) {
+      count++;
+    }
+  }
+
+  success = (count >= 1);
+
+  return success;
+}
+
 export function one(array, callback, ...initialArguments) {
   let success = false;
 

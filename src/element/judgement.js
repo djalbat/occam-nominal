@@ -1,6 +1,5 @@
 "use strict";
 
-import { arrayUtilities } from "necessary";
 import { Element, breakPointUtilities } from "occam-languages";
 
 import elements from "../elements";
@@ -11,11 +10,10 @@ import { instantiate,} from "../utilities/context";
 import { all, exists } from "../utilities/continuation";
 import { equateStatements } from "../process/equate";
 import { instantiateJudgement } from "../process/instantiate";
-import { isDerived, isDeclared } from "../utilities/state";
 import { judgementFromStatementNode } from "../utilities/element";
+import { declare, isDerived, isDeclared } from "../utilities/state";
 
-const { push } = arrayUtilities,
-      { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
+const { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Judgement extends Element {
   constructor(context, string, node, breakPoint, frame, goal) {
@@ -63,23 +61,31 @@ export default define(class Judgement extends Element {
 
   getReference() { return this.goal.getReference(); }
 
+  getAssumptions() { return this.frame.getAssumptions(); }
+
   getMetavariable() { return this.frame.getMetavariable(); }
 
-  getAssumptions(context) {
-    const assumptions = [],
-          metavariable = this.getMetavariable(),
-          frameAssumptions = this.frame.getAssumptions();
-
-    push(assumptions, frameAssumptions);
+  getImplicitAssumptions(context) {
+    const implicitAssumptions = [],
+          metavariable = this.getMetavariable();
 
     if (metavariable !== null) {
-      const facts = context.getFacts(),
-            implicitAssumptions = implicitAssumptionsFromFacts(facts, context);
+      const { ImplicitAssumption } = elements,
+            facts = context.getFacts();
 
-      push(assumptions, implicitAssumptions);
+      facts.forEach((fact) => {
+        const statement = fact.getStatement(),
+              implicitAssumption = ImplicitAssumption.fromStatement(statement, context);
+
+        declare((state) => {
+          implicitAssumption.validate(state, context, (implicitAssumption, context) => true)
+        });
+
+        implicitAssumptions.push(implicitAssumption);
+      });
     }
 
-    return assumptions;
+    return implicitAssumptions;
   }
 
   matchJudgementNode(judgementNode) {
@@ -350,13 +356,6 @@ export default define(class Judgement extends Element {
     return judgement;
   }
 
-  static fromStatement(statement, context) {
-    const statementNode = statement.getNode(),
-      judgement = judgementFromStatementNode(statementNode, context);
-
-    return judgement;
-  }
-
   static fromFact(fact, context) {
     let judgement = null;
 
@@ -365,6 +364,13 @@ export default define(class Judgement extends Element {
     if (statementNode !== null) {
       judgement = judgementFromStatementNode(statementNode, context);
     }
+
+    return judgement;
+  }
+
+  static fromStatement(statement, context) {
+    const statementNode = statement.getNode(),
+          judgement = judgementFromStatementNode(statementNode, context);
 
     return judgement;
   }
@@ -382,17 +388,5 @@ function frameFromJudgementNode(judgementNode, context) {
         frame = context.findFrameByFrameNode(frameNode);
 
   return frame;
-}
-
-function implicitAssumptionsFromFacts(facts, context) {
-  const { ImplicitAssumption } = elements,
-        implicitAssumptions = facts.map((fact) => {
-          const statement = fact.getStatement(),
-                implicitAssumption = ImplicitAssumption.fromStatement(statement, context);
-
-          return implicitAssumption;
-        });
-
-  return implicitAssumptions;
 }
 

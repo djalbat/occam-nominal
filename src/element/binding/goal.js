@@ -7,7 +7,7 @@ import Binding from "../binding";
 import { define } from "../../elements";
 import { instantiate } from "../../utilities/context";
 import { instantiateGoal } from "../../process/instantiate";
-import { all, some, exists } from "../../utilities/continuation";
+import { all, any, exists } from "../../utilities/continuation";
 import { isDerived, isDeclared } from "../../utilities/state";
 
 const { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
@@ -120,16 +120,16 @@ export default define(class Goal extends Binding {
   validateWhenDerived(state, context, continuation) {
     let validatesWhenDerived = false;
 
-    const dervied = isDerived(state);
+    const derived = isDerived(state);
 
-    if (dervied) {
+    if (derived) {
       const goalString = this.getString(); ///
 
       context.trace(`Validating the '${goalString}' derived goal...`);
 
       const schemas = context.getSchemas();
 
-      validatesWhenDerived = some(schemas, (schema, context) => {
+      validatesWhenDerived = any(schemas, (schema, context) => {
         let success = false;
 
         this.unifySchema(schema, context, (schemaUnifies) => {

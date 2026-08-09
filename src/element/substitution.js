@@ -195,6 +195,12 @@ export default class Substitution extends Element {
   }
 
   commit(generalContext, specificContext) {
+    const recursive = true;
+
+    generalContext = generalContext.commit(recursive);
+
+    specificContext = specificContext.commit(recursive);
+
     const contexts = [
       generalContext,
       specificContext

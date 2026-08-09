@@ -108,7 +108,7 @@ export default define(class StatementSubstitution extends Substitution {
         validates = all([
           validateTargetStatement,
           validateReplacementStatement
-        ], state, context, generalContext, specificContext, () => {
+        ], state, context, generalContext, specificContext, (state, context, generalContext, specificContext) => {
           let validates;
 
           this.commit(generalContext, specificContext);

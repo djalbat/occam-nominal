@@ -2,12 +2,12 @@
 
 import { Element } from "occam-languages";
 
+import { all } from "../../utilities/continuation";
 import { define } from "../../elements";
-import { pare, instantiate } from "../../utilities/context";
+import { ablate, attempt, instantiate } from "../../utilities/context";
 import { instantiateImplicitAssumption } from "../../process/instantiate";
 import { implicitAssumptionStringFromStatement } from "../../utilities/string";
 import { implicitAssumptionFromImplicitAssumptionNode } from "../../utilities/element";
-import {isDeclared} from "../../utilities/state";
 
 export default define(class ImplicitAssumption extends Element {
   constructor(context, string, node, breakPoint, statement) {
@@ -72,73 +72,81 @@ export default define(class ImplicitAssumption extends Element {
     return assumption;
   }
 
-  async validate(state, context) {
-    let implicitAssumption = null;
+  validate(state, context, continuation) {
+    let validates;
 
-    const implicitAssumptionString = this.getString();  ///
+    const specificContext = context,  ///
+          implicitAssumptionString = this.getString();  ///
 
-    context.trace(`Validating the '${implicitAssumptionString}' implicit qssumption...`);
+    context.trace(`Validating the '${implicitAssumptionString}' implicit assumption...`);
 
-    let validates = false;
+    let assumption;
 
-    const assumption = this.findAssumption(context);
+    assumption = this.findAssumption(context);
 
     if (assumption !== null) {
-      validates = true;
+      const implicitAssumption = assumption;  ///
 
-      implicitAssumption = assumption; ///
+      context.debug(`The '${implicitAssumptionString}' implicitA asumption is already present.`);
 
-      context.debug(`...the '${implicitAssumptionString}' implicit qssumption is already present.`);
+      validates = continuation(implicitAssumption, context);
     } else {
-      const statementValidates = await this.validateStatement(context);
+      assumption = this;  ///
 
-      if (statementValidates) {
-        debugger
+      context = this.getContext();
 
-        let validateWhenDeclared = false,
-            validatesWhenDerived = false;
+      attempt((context) => {
+        const validateStatement = this.validateStatement.bind(this);
 
-        const declared = isDeclared(state);
+        validates = all([
+          validateStatement
+        ], state, context, (state, context) => {
+          let validates;
 
-        if (declared) {
-          validateWhenDeclared = this.validateWhenStated(context);
-        } else {
-          validatesWhenDerived = this.validateWhenDerived(context);
+          this.commit(context);
+
+          const implicitAssumption = assumption;  ///
+
+          context = specificContext;  ///
+
+          validates = continuation(implicitAssumption, context);
+
+          return validates;
+        });
+
+        if (validates) {
+          context = specificContext;  ///
+
+          context.addAssumption(assumption);
         }
-
-        if (validateWhenDeclared || validatesWhenDerived) {
-          validates = true;
-        }
-      }
-
-      if (validates) {
-        implicitAssumption = this;  ///
-
-        const assumption = implicitAssumption;  ///
-
-        context.addAssumption(assumption);
-      }
+      }, context);
     }
+
+    context = specificContext;  ///
 
     if (validates) {
-      context.debug(`...validated the '${implicitAssumptionString}' implicitAssumption.`);
+      context.debug(`...validated the '${implicitAssumptionString}' implicit assumption.`);
     }
 
-    return implicitAssumption;
+    return validates;
   }
 
-  async validateStatement(context) {
-    let statementValidates = false;
+  validateStatement(state, context, continuation) {
+    let statementValidates;
 
     const implicitAssumptionString = this.getString();  ///
 
     context.trace(`Validating the '${implicitAssumptionString}' implicit assumption's statement...`);
 
-    const statement = await this.statement.validate(state, context, context);
+    statementValidates = this.statement.validate(state, context, (statement, context) => {
+      let validates;
 
-    if (statement !== null) {
-      statementValidates = true;
-    }
+      this.statement = statement;
+
+      validates = continuation(state, context);
+
+      return validates;
+    });
 
     if (statementValidates) {
       context.debug(`...validated the '${implicitAssumptionString}' implicit assumption's statement.`);
@@ -147,39 +155,9 @@ export default define(class ImplicitAssumption extends Element {
     return statementValidates;
   }
 
-  validateWhenStated(context) {
-    let validateWhenDeclared;
+  unifyStatement(statement, generalContext, specificContext) {
+    debugger
 
-    const implicitAssumptionString = this.getString();  ///
-
-    context.trace(`Validating the '${implicitAssumptionString}' declared implicitAssumption...`);
-
-    validateWhenDeclared = true
-
-    if (validateWhenDeclared) {
-      context.debug(`...validated the '${implicitAssumptionString}' declared implicitAssumption.`);
-    }
-
-    return validateWhenDeclared;
-  }
-
-  validateWhenDerived(context) {
-    let validatesWhenDerived;
-
-    const implicitAssumptionString = this.getString();  ///
-
-    context.trace(`Validating the '${implicitAssumptionString}' derived implicitAssumption...`);
-
-    validatesWhenDerived = true
-
-    if (validatesWhenDerived) {
-      context.debug(`...validated the '${implicitAssumptionString}' derived implicitAssumption.`);
-    }
-
-    return validatesWhenDerived;
-  }
-
-  async unifyStatement(statement, generalContext, specificContext) {
     let statementUnifies;
 
     const context = specificContext, ///
@@ -188,7 +166,7 @@ export default define(class ImplicitAssumption extends Element {
 
     context.trace(`Unifying the '${statementString}' statement with the '${proofAssertionString}' implicitAssumption's statement...`);
 
-    statementUnifies = await this.statement.unifyStatement(statement, generalContext, specificContext);
+    statementUnifies = this.statement.unifyStatement(statement, generalContext, specificContext);
 
     if (statementUnifies) {
       context.debug(`...unified the '${statementString}' statement with the '${proofAssertionString}' implicitAssumption's statement.`);
@@ -202,7 +180,7 @@ export default define(class ImplicitAssumption extends Element {
   static fromStatement(statement, context) {
     let implicitAssumption;
 
-    pare((context) => {
+    ablate((context) => {
       instantiate((context) => {
         const implicitAssumptionString = implicitAssumptionStringFromStatement(statement),
               string = implicitAssumptionString,  ///

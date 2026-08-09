@@ -168,23 +168,17 @@ export default define(class Constraint extends Element {
   }
 
   unifyReference(reference, generalContext, specificContext, continuation) {
-    if (reference === null) {
-      const referenceUnifies = true;  ///
-
-      return continuation(referenceUnifies);
-    }
-
     const context = specificContext,  ///
           referenceString = reference.getString(),
           constraintString = this.getString(); ///
 
-    context.trace(`Unifying the '${referenceString}' reference with the '${constraintString}' constraint's reference...`);
+    context.trace(`Unifying the '${referenceString}' reference with the '${constraintString}' constraint's metavaraiable...`);
 
     const metavariable = this.getMetavariable();
 
     return metavariable.unifyReference(reference, generalContext, specificContext, (referenceUnifies) => {
       if (referenceUnifies) {
-        context.debug(`..unified the '${referenceString}' with the '${constraintString}' constraint's reference.`);
+        context.debug(`..unified the '${referenceString}' with the '${constraintString}' constraint's metavariable.`);
       }
 
       return continuation(referenceUnifies);
@@ -223,8 +217,8 @@ export default define(class Constraint extends Element {
       const reference = assumption.getReference(),
             specificContext = context;  ///
 
-      return this.unifyReference(reference, generalContext, specificContext, (referneceUnifies) => {
-        if (!referneceUnifies) {
+      return this.unifyReference(reference, generalContext, specificContext, (referenceUnifies) => {
+        if (!referenceUnifies) {
           const assumptionUnifies = false;
 
           return continuation(assumptionUnifies);
@@ -252,9 +246,19 @@ export default define(class Constraint extends Element {
   }
 
   unifyAssumptions(assumptions, context, continuation) {
+    const constraintString = this.getString();
+
+    context.trace(`Unifying the assumptions with the '${constraintString}' constraint...`);
+
     asynchronousSome(assumptions, (assumption, continuation) => {
       this.unifyAssumption(assumption, context, continuation);
-    }, continuation);
+    }, (assumptionsUnify) => {
+      if (assumptionsUnify) {
+        context.trace(`...unified the assumptions with the '${constraintString}' constraint.`);
+      }
+
+      return continuation(assumptionsUnify);
+    });
   }
 
   toJSON() {

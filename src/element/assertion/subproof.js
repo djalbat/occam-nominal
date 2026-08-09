@@ -234,9 +234,9 @@ export default define(class SubproofAssertion extends Assertion {
           let lastStepUnifies = false;
 
           if (lastStepStatementUnifies) {
-            lastStepUnifies = true;
-
             specificContext.commit(context);
+
+            lastStepUnifies = true;
           }
 
           if (lastStepUnifies) {
@@ -268,9 +268,9 @@ export default define(class SubproofAssertion extends Assertion {
           let suppositionUnifies = false;
 
           if (suppositionStatementUnifies) {
-            suppositionUnifies = true;
-
             specificContext.commit(context);
+
+            suppositionUnifies = true;
           }
 
           if (suppositionUnifies) {

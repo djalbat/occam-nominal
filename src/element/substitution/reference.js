@@ -8,8 +8,8 @@ import { all } from "../../utilities/continuation";
 import { define } from "../../elements";
 import { instantiateReferenceSubstitution } from "../../process/instantiate";
 import { referenceSubstitutionFromReferenceSubstitutionNode } from "../../utilities/element";
-import { ablates, manifest, attempts, instantiate, unserialises } from "../../utilities/context";
 import { referenceSubstitutionStringFromReferenceAndMetavariable } from "../../utilities/string";
+import { ablates, manifest, attempts, participate, instantiate, unserialises } from "../../utilities/context";
 
 const { breakPointFromJSON } = breakPointUtilities;
 
@@ -122,7 +122,7 @@ export default define(class ReferenceSubstitution extends Substitution {
         validates = all([
           validateTargetReference,
           validateReplacementReference
-        ], state, generalContext, specificContext, () => {
+        ], state, context, generalContext, specificContext, (state, context, generalContext, specificContext) => {
           let validates;
 
           this.commit(generalContext, specificContext);
@@ -147,33 +147,20 @@ export default define(class ReferenceSubstitution extends Substitution {
     return validates;
   }
 
-  validateTargetReference(state, generalContext, specificContext, continuation) {
+  validateTargetReference(state, context, generalContext, specificContext, continuation) {
     let targetReferenceValidates;
 
-    const context = generalContext,  ///
-          referenceSubstitutionString = this.getString();  ///
+    const referenceSubstitutionString = this.getString();  ///
 
     context.trace(`Validating the '${referenceSubstitutionString}' reference substitution's target reference...`);
 
-    const targetReferenceSingular = this.targetReference.isSingular();
+    targetReferenceValidates = this.targetReference.validate(state, generalContext, (targetReference, generalContext) => {
+      let validates;
 
-    if (targetReferenceSingular) {
-      targetReferenceValidates = this.targetReference.validate(state, context, (targetReference, context) => {
-        let validates;
+      validates = continuation(state, context, generalContext, specificContext);
 
-        const generalContext = context; ///
-
-        validates = continuation(state, generalContext, specificContext);
-
-        return validates;
-      });
-    } else {
-      const targetReferenceString = this.targetReference.getString();
-
-      targetReferenceValidates = false;
-
-      context.debug(`The '${targetReferenceString}' target reference is not singular.`);
-    }
+      return validates;
+    });
 
     if (targetReferenceValidates) {
       context.trace(`...validated the '${referenceSubstitutionString}' reference substitution's target reference.`);
@@ -182,23 +169,22 @@ export default define(class ReferenceSubstitution extends Substitution {
     return targetReferenceValidates;
   }
 
-  validateReplacementReference(state, generalContext, specificContext, continuation) {
+  validateReplacementReference(state, context, generalContext, specificContext, continuation) {
     let replacementReferenceValidates;
 
-    const context = specificContext,  ///
-          referenceSubstitutionString = this.getString();  ///
+    const referenceSubstitutionString = this.getString();  ///
 
     context.trace(`Validating the '${referenceSubstitutionString}' reference substitution's replacement reference...`);
 
-    replacementReferenceValidates = this.replacementReference.validate(state, context, (replacementReference, context) => {
-      let validates;
+    participate((specificContext) => {
+      replacementReferenceValidates = this.replacementReference.validate(state, specificContext, (replacementReference, specificContext) => {
+        let validates;
 
-      const specificContext = context;  ///
+        validates = continuation(state, context, generalContext, specificContext);
 
-      validates = continuation(state, generalContext, specificContext);
-
-      return validates;
-    });
+        return validates;
+      });
+    }, specificContext, context);
 
     if (replacementReferenceValidates) {
       context.debug(`...validated the '${referenceSubstitutionString}' reference substitution's replacement reference.`);

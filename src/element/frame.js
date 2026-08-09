@@ -7,6 +7,7 @@ import { define } from "../elements";
 import { instantiate } from "../utilities/context";
 import { all, exists } from "../utilities/continuation";
 import { instantiateFrame } from "../process/instantiate";
+import { FRAME_META_TYPE_NAME } from "../metaTypeNames";
 import { isDerived, isDeclared } from "../utilities/state";
 import { metavariableFromFrameNode } from "../utilities/element";
 
@@ -205,7 +206,7 @@ export default define(class Frame extends Element {
 
       assumptions.push(assumption);
 
-      validates = continuation(state, context);
+      validates = continuation(assumptions, state, context);
 
       return validates;
     });
@@ -227,7 +228,7 @@ export default define(class Frame extends Element {
     const assumptions = [],
           validateAssumption = this.validateAssumption.bind(this);
 
-    assumptionsValidate = every(this.assumptions, validateAssumption, assumptions, context, (assumptions, context) => {
+    assumptionsValidate = every(this.assumptions, validateAssumption, assumptions, state, context, (assumptions, state, context) => {
       let assumptionsValidate;
 
       this.assumptions = assumptions;
@@ -252,11 +253,31 @@ export default define(class Frame extends Element {
     context.trace(`Validating the '${frameString}' frame's metavariable...`);
 
     metavariableValidates = this.metavariable.validate(state, context, (metavariable, context) => {
-      let validates;
+      let validates = false;
 
-      this.metavariable = metavariable;
+      const metaType = metavariable.getMetaType();
 
-      validates = continuation(state, context);
+      if (metaType !== null) {
+        const frameMetaTypeName = FRAME_META_TYPE_NAME,
+              frameMetaType = context.findMetaTypeByMetaTypeName(frameMetaTypeName),
+              metavariableMetaTypeEqualToFrameMetaType = metavariable.isMetaTypeEqualTo(frameMetaType);
+
+        if (metavariableMetaTypeEqualToFrameMetaType) {
+          validates = true;
+        } else {
+          const metaTypeString = metaType.getString(),
+                metavariableString = metavariable.getString(),
+                frameMetaTypeString = frameMetaType.getString();
+
+          context.debug(`The '${frameString}' frame's '${metavariableString}' metavariable's '${metaTypeString}' meta-type should be the '${frameMetaTypeString}' meta-type.`);
+        }
+      }
+
+      if (validates) {
+        this.metavariable = metavariable;
+
+        validates = continuation(state, context);
+      }
 
       return validates;
     });
@@ -283,8 +304,6 @@ export default define(class Frame extends Element {
       if (singular) {
         validatesWhenDeclared = continuation(state, context);
       } else {
-        validatesWhenDeclared = false;
-
         context.debug(`The '${frameString}' declared frame must be singular.`);
       }
 

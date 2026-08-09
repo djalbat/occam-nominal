@@ -7,7 +7,7 @@ import { define } from "../elements";
 import { declare } from "../utilities/state";
 import { instantiateLabel } from "../process/instantiate";
 import { labelFromLabelNode, metavariableFromLabelNode } from "../utilities/element";
-import { attempt, reconcile, serialise, unserialise, instantiate} from "../utilities/context";
+import { join, ablate, attempt, reconcile, serialise, unserialise, instantiate} from "../utilities/context";
 
 const { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
@@ -155,23 +155,27 @@ export default define(class Label extends Element {
           generalContext = labelContext, ///
           specificContext = referenceContext;  ///
 
-    return reconcile((specificContext) => {
-      const metavariable = reference.getMetavariable();
+    return join((specificContext) => {
+      return reconcile((specificContext) => {
+        const metavariable = reference.getMetavariable();
 
-      return this.unifyMetavariable(metavariable, generalContext, specificContext, (metavariableUnifies) => {
-        let referenceUnifies = false;
+        return this.unifyMetavariable(metavariable, generalContext, specificContext, (metavariableUnifies) => {
+          let referenceUnifies = false;
 
-        if (metavariableUnifies) {
-          referenceUnifies = true;
-        }
+          if (metavariableUnifies) {
+            specificContext.commit(context);
 
-        if (referenceUnifies) {
-          context.debug(`...unified the '${referenceString}' reference with the '${labelString}' label.`);
-        }
+            referenceUnifies = true;
+          }
 
-        return continuation(referenceUnifies);
-      });
-    }, specificContext);
+          if (referenceUnifies) {
+            context.debug(`...unified the '${referenceString}' reference with the '${labelString}' label.`);
+          }
+
+          return continuation(referenceUnifies);
+        });
+      }, specificContext);
+    }, specificContext, context);
   }
 
   unifyMetavariable(metavariable, generalContext, specificContext, continuation) {
@@ -243,11 +247,13 @@ export default define(class Label extends Element {
   static fromLabelString(labelString, context) {
     let label;
 
-    instantiate((context) => {
+    ablate((context) => {
+      instantiate((context) => {
       const string = labelString,  ///
             labelNode = instantiateLabel(string, context);
 
       label = labelFromLabelNode(labelNode, context);
+      }, context);
     }, context);
 
     return label;

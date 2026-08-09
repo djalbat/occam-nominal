@@ -65,12 +65,6 @@ export function ablate(innerFunction, context) {
   return innerFunction(context);
 }
 
-export function pare(innerFunction, context) {
-  context = pareContext(context); ///
-
-  return innerFunction(context);
-}
-
 export function attempt(innerFunction, context) {
   const unreleased = context.isUnreleased();
 
@@ -179,18 +173,6 @@ export function ablates(innerFunction, ...contexts) {
   });
 
   return innerFunction(...contexts);
-}
-
-function pareContext(context) {
-  let contextLiminalContext = LiminalContext.prototype.isPrototypeOf(context);
-
-  while (contextLiminalContext) {
-    context = context.getContext();
-
-    contextLiminalContext = LiminalContext.prototype.isPrototypeOf(context)
-  }
-
-  return context;
 }
 
 function ablateContext(context) {

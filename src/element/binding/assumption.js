@@ -120,9 +120,9 @@ export default define(class Assumption extends Binding {
   validateWhenDerived(state, context, continuation) {
     let validatesWhenDerived = false;
 
-    const dervied = isDerived(state);
+    const derived = isDerived(state);
 
-    if (dervied) {
+    if (derived) {
       const assumptionString = this.getString(); ///
 
       context.trace(`Validating the '${assumptionString}' derived assumption...`);
