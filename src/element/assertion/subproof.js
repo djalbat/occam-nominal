@@ -11,7 +11,6 @@ import { join, reconcile, instantiate } from "../../utilities/context";
 import { instantiateSubproofAssertion } from "../../process/instantiate";
 import { declare, isDerived, isDeclared } from "../../utilities/state";
 import { subproofAssertionFromStatementNode } from "../../utilities/element";
-import {inCommentFromTokenAndInComment} from "../../../example";
 
 const { last, front } = arrayUtilities,
       { breakPointFromJSON } = breakPointUtilities,
@@ -35,13 +34,6 @@ export default define(class SubproofAssertion extends Assertion {
     return deducedStatement;
   }
 
-  getSupposedStatement(index) {
-    const statement = this.statements[index],
-          supposedStatement = statement;  ///
-
-    return supposedStatement;
-  }
-
   getSupposedStatements() {
     const frontStatements = front(this.statements),
           supposedStatements = frontStatements;  ///
@@ -59,20 +51,20 @@ export default define(class SubproofAssertion extends Assertion {
   validate(state, context, continuation) {
     let validates;
 
-    const subprpoofAssertionString = this.getString();  ///
+    const subproofAssertionString = this.getString();  ///
 
-    context.trace(`Validating the '${subprpoofAssertionString}' subprpoof assertion...`);
+    context.trace(`Validating the '${subproofAssertionString}' subproof assertion...`);
 
     let assertion;
 
     assertion = this.findAssertion(context);
 
     if (assertion !== null) {
-      const subprpoofAssertion = assertion; ///
+      const subproofAssertion = assertion; ///
 
-      context.debug(`The '${subprpoofAssertionString}' subprpoof assertion is already present.`);
+      context.debug(`The '${subproofAssertionString}' subproof assertion is already present.`);
 
-      validates = continuation(subprpoofAssertion, context);
+      validates = continuation(subproofAssertion, context);
     } else {
       assertion = this; ///
 
@@ -94,9 +86,9 @@ export default define(class SubproofAssertion extends Assertion {
 
           context.addAssertion(assertion);
 
-          const subprpoofAssertion = assertion; ///
+          const subproofAssertion = assertion; ///
 
-          validates = continuation(subprpoofAssertion, context);
+          validates = continuation(subproofAssertion, context);
 
           return validates;
         });
@@ -106,7 +98,7 @@ export default define(class SubproofAssertion extends Assertion {
     }
 
     if (validates) {
-      context.debug(`...validated the '${subprpoofAssertionString}' subprpoof assertion.`);
+      context.debug(`...validated the '${subproofAssertionString}' subproof assertion.`);
     }
 
     return validates;
@@ -257,9 +249,8 @@ export default define(class SubproofAssertion extends Assertion {
     }, specificContext, context);
  }
 
-  unifySupposition(supposition, index, generalContext, specificContext, continuation) {
+  unifySupposition(supposition, supposedStatement, generalContext, specificContext, continuation) {
     const context = specificContext,  ///
-          supposedStatement = this.getSupposedStatement(index),
           suppositionString = supposition.getString(),
           supposedStatementString = supposedStatement.getString();
 
@@ -303,12 +294,14 @@ export default define(class SubproofAssertion extends Assertion {
       return continuation(suppositionsUnify);
     }
 
-    let index = -1;
+    let index = suppositionsLength; ///
 
     return asynchronousBackwardsEvery(suppositions, (supposition, continuation) => {
-      index++;
+      index--;
 
-      return this.unifySupposition(supposition, index, generalContext, specificContext, continuation);
+      const supposedStatement = supposedStatements[index];
+
+      return this.unifySupposition(supposition, supposedStatement, generalContext, specificContext, continuation);
     }, continuation);
   }
 
