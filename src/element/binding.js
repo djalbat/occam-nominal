@@ -22,9 +22,9 @@ export default class Binding extends Element {
     return this.statement;
   }
 
-  getStatementNode() { return this.statement.getStatementNode(); }
-
   getMetavariable() { return this.reference.getMetavariable(); }
+
+  getStatementNode() { return this.statement.getStatementNode(); }
 
   isConditional() {
     let conditional = false;

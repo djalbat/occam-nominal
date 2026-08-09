@@ -2,8 +2,6 @@
 
 import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
 
-import elements from "../elements";
-
 import { define } from "../elements";
 import { reconcile, encapsulate } from "../utilities/context";
 import { schemaStringFromLabelSuppositionsAndDeduction } from "../utilities/string";
@@ -15,10 +13,9 @@ import { labelFromJSON,
          deductionToDeductionJSON,
          constraintsToConstraintsJSON,
          suppositionsToSuppositionsJSON } from "../utilities/json";
-import assumption from "./binding/assumption";
 
 const { breakable, breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities,
-      { asynchronousAll, asynchronousEvery, asynchronousFilter, asynchronousForwardsEvery } = continuationUtilities;
+      { asynchronousAll, asynchronousFilter, asynchronousForwardsEvery, asynchronousBackwardsEvery } = continuationUtilities;
 
 export default define(class Schema extends Element {
   constructor(context, string, node, breakPoint, label, suppositions, deduction, proof, constraints) {
@@ -49,12 +46,6 @@ export default define(class Schema extends Element {
 
   getMConstraint() {
     return this.constraints;
-  }
-
-  getSupposition(index) {
-    const supposition = this.suppositions[index] || null;
-
-    return supposition;
   }
 
   isConditional() {
@@ -202,6 +193,8 @@ export default define(class Schema extends Element {
   }
 
   unifyJudgement(judgement, context, continuation) {
+    let judgementUnifies = false;
+
     const schemaString = this.getString(),  ///
           judgementString = judgement.getString();
 
@@ -212,8 +205,6 @@ export default define(class Schema extends Element {
 
       return this.unifyReference(reference, context, (referenceUnifies) => {
         if (!referenceUnifies) {
-          const judgementUnifies = false;
-
           return continuation(judgementUnifies);
         }
 
@@ -226,58 +217,43 @@ export default define(class Schema extends Element {
           const implicitAssumptions = judgement.getImplicitAssumptions(context);
 
           return this.unifyImplicitAssumptions(implicitAssumptions, constraints, context, () => {
-            debugger
+            const constraintsLength = constraints.length;
+
+            if (constraintsLength > 0) {
+              return continuation(judgementUnifies);
+            }
+
+            const conditional = this.isConditional(),
+                  judgementConditional = judgement.isConditional();
+
+            if (conditional !== judgementConditional) {
+              context.trace(`Either the '${judgementString}' judgement is unconditional but the '${schemaString}' schema is conditional or vice verse.`);
+
+              return continuation(judgementUnifies);
+            }
+
+            const deducedStatement = judgement.findDeducedStatement(context);
+
+            return this.unifyDeducedStatement(deducedStatement, context, (deducedStatementUnifies) => {
+              if (!deducedStatementUnifies) {
+                return continuation(judgementUnifies);
+              }
+
+              const supposedStatements = judgement.findSupposedStatements(context);
+
+              return this.unifySupposedStatements(supposedStatements, context, (supposedStatementsUnify) => {
+                if (supposedStatementsUnify) {
+                  judgementUnifies = true;
+                }
+
+                if (judgementUnifies) {
+                  context.trace(`...unified the '${judgementString}' judgement with the '${schemaString}' schema.`);
+                }
+
+                return continuation(judgementUnifies);
+              });
+            });
           });
-
-
-
-          // const statement = judgement.getStatement(),
-          //       conditional = this.isConditional(),
-          //       subproofAssertion = subproofAssertionFromStatement(statement, context);
-          //
-          // if (conditional) {
-          //   if (subproofAssertion === null) {
-          //     const judgementUnifies = false;
-          //
-          //     return continuation(judgementUnifies);
-          //   }
-          //
-          //   return this.unifySubproofAssertion(subproofAssertion, context, (subproofassertionUnifies) => {
-          //     let judgementUnifies = false;
-          //
-          //     if (subproofassertionUnifies) {
-          //       judgementUnifies = true;
-          //     }
-          //
-          //     if (judgementUnifies) {
-          //       context.debug(`...unified the '${judgementString}' judgement with the '${schemaString}' schema.`);
-          //     }
-          //
-          //     return continuation(judgementUnifies);
-          //   });
-          // }
-          //
-          // if (subproofAssertion !== null) {
-          //   const judgementUnifies = false;
-          //
-          //   return continuation(judgementUnifies);
-          // }
-          //
-          // const deducedStatment = statement;  ///
-          //
-          // return this.unifyDeducedStatement(deducedStatment, context, (deducedStatmentUnfifies) => {
-          //   let judgementUnifies = false;
-          //
-          //   if (deducedStatmentUnfifies) {
-          //     judgementUnifies = true;
-          //   }
-          //
-          //   if (judgementUnifies) {
-          //     context.debug(`...unified the '${judgementString}' judgement with the '${schemaString}' schema.`);
-          //   }
-          //
-          //   return continuation(judgementUnifies);
-          // });
         });
       });
     }, context);
@@ -312,20 +288,6 @@ export default define(class Schema extends Element {
     }, continuation);
   }
 
-  unifyImplicitAssumptions(implicitAssumptions, constraints, context, continuation) {
-    asynchronousFilter(constraints, (constraint, continuation) => {
-      constraint.unifyImplicitAssumptions(implicitAssumptions, context, (implicitAssumptionsUnify) => {
-        let passed = false;
-
-        if (!implicitAssumptionsUnify) {
-          passed = true;
-        }
-
-        return continuation(passed);
-      });
-    }, continuation);
-  }
-
   unifyDeducedStatement(deducedStatement, context, continuation) {
     const deductionString = this.deduction.getString(),
           deducedStatementString = deducedStatement.getString();
@@ -333,50 +295,59 @@ export default define(class Schema extends Element {
     context.trace(`Unifying the '${deducedStatementString}' deduced statement with the '${deductionString}' deductino...`);
 
     const deductionContext = this.deduction.getContext(), ///
-          statement = deducedStatement, ///
-          generalContext = deductionContext, ///
-          specificContext = context;  ///
+          generalContext = deductionContext; ///
 
-    return this.deduction.unifyStatement(statement, generalContext, specificContext, (statementUnifies) => {
-      let deducedStatementUnifies = false;
+    return reconcile((context) => {
+      const statement = deducedStatement, ///
+            specificContext = context;  ///
 
-      if (statementUnifies) {
-        deducedStatementUnifies = true;
-      }
+      return this.deduction.unifyStatement(statement, generalContext, specificContext, (statementUnifies) => {
+        let deducedStatementUnifies = false;
 
-      if (deducedStatementUnifies) {
-        context.debug(`...unified the '${deducedStatementString}' deduced statement with the '${deductionString}' deduction`);
-      }
+        if (statementUnifies) {
+          context.commit();
 
-      return continuation(deducedStatementUnifies);
-    });
+          deducedStatementUnifies = true;
+        }
+
+        if (deducedStatementUnifies) {
+          context.debug(`...unified the '${deducedStatementString}' deduced statement with the '${deductionString}' deduction.`);
+        }
+
+        return continuation(deducedStatementUnifies);
+      });
+    }, context);
   }
 
-  unifySupposedStatement(supposedStatement, index, context, continuation) {
-    const supposition = this.getSupposition(index),
-          suppositionString = supposition.getString(),
+  unifySupposedStatement(supposedStatement, supposition, context, continuation) {
+    const suppositionString = supposition.getString(),
           supposedStatementString = supposedStatement.getString();
 
-    context.trace(`Unifying the '${supposedStatementString}' supposed statement with the '${suppositionString}' supposition...`);
+    context.trace(`Unifying the '${supposedStatementString}' supposed statement with the '${suppositionString}' deductino...`);
 
     const suppositionContext = supposition.getContext(), ///
-          statement = supposedStatement, ///
-          generalContext = suppositionContext, ///
-          specificContext = context;  ///
+          generalContext = suppositionContext; ///
 
-    return supposition.unifyStatement(statement, generalContext, specificContext, (statementUnifies) => {
-      let supposedStatementUnifies = false;
+    return reconcile((context) => {
+      const statement = supposedStatement, ///
+            specificContext = context;  ///
 
-      if (statementUnifies) {
-        supposedStatementUnifies = true;
-      }
+      return supposition.unifyStatement(statement, generalContext, specificContext, (statementUnifies) => {
+        let supposedStatementUnifies = false;
 
-      if (supposedStatementUnifies) {
-        context.debug(`...unified the '${supposedStatementString}' supposed statement with the '${suppositionString}' supposition`);
-      }
+        if (statementUnifies) {
+          context.commit();
 
-      return continuation(supposedStatementUnifies);
-    });
+          supposedStatementUnifies = true;
+        }
+
+        if (supposedStatementUnifies) {
+          context.debug(`...unified the '${supposedStatementString}' supposed statement with the '${suppositionString}' supposition.`);
+        }
+
+        return continuation(supposedStatementUnifies);
+      });
+    }, context);
   }
 
   unifySupposedStatements(supposedStatements, context, continuation) {
@@ -389,13 +360,29 @@ export default define(class Schema extends Element {
       return continuation(supposedStatementsUnify);
     }
 
-    let index = -1;
+    let index = supposedStatementsLength;
 
-    asynchronousEvery(supposedStatements, (supposedStatement, continuation) => {
-      index++;
+    asynchronousBackwardsEvery(supposedStatements, (supposedStatement, continuation) => {
+      index--;
 
-      return this.unifySupposedStatement(supposedStatement, index, context, continuation);
-    });
+      const supposition = this.suppositions[index];
+
+      return this.unifySupposedStatement(supposedStatement, supposition, context, continuation);
+    }, continuation);
+  }
+
+  unifyImplicitAssumptions(implicitAssumptions, constraints, context, continuation) {
+    asynchronousFilter(constraints, (constraint, continuation) => {
+      constraint.unifyImplicitAssumptions(implicitAssumptions, context, (implicitAssumptionsUnify) => {
+        let passed = false;
+
+        if (!implicitAssumptionsUnify) {
+          passed = true;
+        }
+
+        return continuation(passed);
+      });
+    }, continuation);
   }
 
   toJSON() {
@@ -445,18 +432,3 @@ export default define(class Schema extends Element {
     return schema;
   }
 });
-
-function subproofAssertionFromStatement(statement, context) {
-  let subproofAssertion;
-
-  const { SubproofAssertion } = elements;
-
-  subproofAssertion = SubproofAssertion.fromStatement(statement, context);
-
-  if (subproofAssertion !== null) {
-    subproofAssertion = subproofAssertion.validate(state, context);
-  }
-
-  return subproofAssertion;
-
-}

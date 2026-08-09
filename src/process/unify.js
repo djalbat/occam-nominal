@@ -179,7 +179,7 @@ class UnifyStatementPass extends AsynchronousContinuationZipPass {
 
             return continuation(success, generalContext, specificContext);
           });
-        }, context)
+        }, context);
       }
     }
   ];

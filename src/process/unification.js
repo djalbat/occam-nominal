@@ -6,8 +6,6 @@ import elements from "../elements";
 
 import { declare } from "../utilities/state";
 
-const { asynchronousReduce } = continuationUtilities;
-
 function unifyStepWithRule(step, context, continuation) {
   let stepUnifiesWithRule = false;
 
@@ -373,31 +371,6 @@ function compareStepToFactOrSubproofs(step, context, continuation) {
   return continuation(stepComparesToFactOrSubproofs);
 }
 
-function compareStepToJudgements(step, context, continuation) {
-  let stepComparesToJudgements = false;
-
-  const qualified = step.isQualified();
-
-  if (qualified) {
-    return continuation(stepComparesToJudgements);
-  }
-
-  const facts = context.getFacts(),
-        stepString = step.getString();
-
-  context.trace(`Comparing the '${stepString}' step to judgements...`);
-
-  return judgementsFromFacts(facts, context, (judgements) => {
-    const stepComparesToJudgements = step.compareJudgements(judgements, context);
-
-    if (stepComparesToJudgements) {
-      context.debug(`...compared the '${stepString}' step to judgements.`);
-    }
-
-    return continuation(stepComparesToJudgements);
-  });
-}
-
 export const unifySteps = [
   unifyStepWithRule,
   unifyStepWithClaim,
@@ -409,26 +382,5 @@ export const unifySteps = [
   unifyStepAsUnqualifiedPropertyAssertion,
   unifyStepAsUnqualifiedSignatureAssertion,
   unifyStepAsQualifiedSignatureAssertion,
-  compareStepToFactOrSubproofs,
-  compareStepToJudgements
+  compareStepToFactOrSubproofs
 ];
-
-function judgementsFromFacts(facts, context, continuation) {
-  const judgements = [];
-
-  return asynchronousReduce(facts, judgements, (judgements, fact, continuation) => {
-    const { Judgement } = elements,
-          context = fact.getContext(),
-          judgement = Judgement.fromFact(fact, context);
-
-    if (judgement === null) {
-      return continuation(judgements);
-    }
-
-    return judgement.validate(state, context, (judgement) => {
-      judgements.push(judgement);
-
-      return continuation(judgements);
-    });
-  }, continuation);
-}

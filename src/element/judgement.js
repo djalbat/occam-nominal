@@ -61,9 +61,15 @@ export default define(class Judgement extends Element {
 
   getReference() { return this.goal.getReference(); }
 
+  isConditional() { return this.goal.isConditional(); }
+
   getAssumptions() { return this.frame.getAssumptions(); }
 
   getMetavariable() { return this.frame.getMetavariable(); }
+
+  findDeducedStatement(context) { return this.goal.findDeducedStatement(context); }
+
+  findSupposedStatements(context) { return this.goal.findSupposedStatements(context); }
 
   getImplicitAssumptions(context) {
     const implicitAssumptions = [],
@@ -352,18 +358,6 @@ export default define(class Judgement extends Element {
 
       judgement = new Judgement(context, string, node, breakPoint, frame, goal);
     }, context);
-
-    return judgement;
-  }
-
-  static fromFact(fact, context) {
-    let judgement = null;
-
-    const statementNode = fact.getStatementNode();
-
-    if (statementNode !== null) {
-      judgement = judgementFromStatementNode(statementNode, context);
-    }
 
     return judgement;
   }
