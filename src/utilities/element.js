@@ -91,18 +91,6 @@ export function ruleFromRuleNode(ruleNode, context) {
   return rule;
 }
 
-export function goalFromGoalNode(goalNode, context) {
-  const { Goal } = elements,
-        node = goalNode,  ///
-        string = context.nodeAsString(node),
-        breakPoint = null,
-        reference = referenceFromGoalNode(goalNode, context),
-        statement = statementFromGoalNode(goalNode, context),
-        goal = new Goal(context, string, node, breakPoint, reference, statement);
-
-  return goal;
-}
-
 export function labelFromLabelNode(labelNode, context) {
   const { Label } = elements,
         node = labelNode, ///
@@ -663,12 +651,11 @@ export function definedAssertionFromDefinedAssertionNode(definedAssertionNode, c
         string = context.nodeAsString(node),
         breakPoint = null,
         negated = definedAssertionNode.isNegated(),
-        term = termFromDefinedAssertionNode(definedAssertionNode, context),
-        frame = frameFromDefinedAssertionNode(definedAssertionNode, context);
+        term = termFromDefinedAssertionNode(definedAssertionNode, context);
 
   context = null;
 
-  const definedAssertion = new DefinedAssertion(context, string, node, breakPoint, term, frame, negated);
+  const definedAssertion = new DefinedAssertion(context, string, node, breakPoint, term, negated);
 
   return definedAssertion;
 }
@@ -1119,25 +1106,6 @@ export function nameFromParamterNode(parameterNode, context) {
   const name = parameterNode.getName();
 
   return name;
-}
-
-export function referenceFromGoalNode(goalNode, context) {
-  let reference = null;
-
-  const metavariableNode = goalNode.getMetavariableNode();
-
-  if (metavariableNode !== null) {
-    reference = referenceFromMetavariableNode(metavariableNode, context);
-  }
-
-  return reference;
-}
-
-export function statementFromGoalNode(goalNode, context) {
-  const statesmentNode = goalNode.getStatementNode(),
-        statement = statementFromStatementNode(statesmentNode, context);
-
-  return statement;
 }
 
 export function statementFromStepNode(stepNode, context) {
@@ -1726,18 +1694,6 @@ export function termFromJDefinedAssertionNode(definedAssertionNode, context) {
   return term
 }
 
-export function frameFromDefinedAssertionNode(definedAssertionNode, context) {
-  let frame = null;
-
-  const frameNode = definedAssertionNode.getFrameNode();
-
-  if (frameNode !== null) {
-    frame = frameFromFrameNode(frameNode, context);
-  }
-
-  return frame;
-}
-
 export function typeFromCotypeDeclarationNode(cotypeDeclarationNode, context) {
   const typeNode = cotypeDeclarationNode.getTypeNode(),
         type = typeFromTypeNode(typeNode, context);
@@ -1767,18 +1723,6 @@ export function typeAssertionFromStatementNode(statementNode, context) {
   }
 
   return typeAssertion;
-}
-
-export function frameFromJDefinedAssertionNode(definedAssertionNode, context) {
-  let frame = null;
-
-  const frameNode = definedAssertionNode.getFrameNode();
-
-  if (frameNode !== null) {
-    frame = frameFromFrameNode(frameNode, context);
-  }
-
-  return frame
 }
 
 export function subproofFromStepOrSubproofNode(subproofOrSubproofNode, context) {

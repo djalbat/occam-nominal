@@ -4,7 +4,6 @@ import TermNode from "./node/term";
 import RuleNode from "./node/rule";
 import StepNode from "./node/fact/step";
 import TypeNode from "./node/type";
-import GoalNode from "./node/binding/goal";
 import TypesNode from "./node/types";
 import ErrorNode from "./node/error";
 import FrameNode from "./node/frame";
@@ -40,7 +39,7 @@ import ConclusionNode from "./node/resolution/conclusion";
 import ConjectureNode from "./node/claim/conjecture";
 import HypothesisNode from "./node/hypothesis";
 import TypePrefixNode from "./node/typePrefix";
-import AssumptionNode from "./node/binding/assumption";
+import AssumptionNode from "./node/assumption";
 import RuleHeaderNode from "./node/header/rule";
 import SchemaBodyNode from "./node/body/schema";
 import SuppositionNode from "./node/fact/supposition";
@@ -89,7 +88,6 @@ import {
   STEP_RULE_NAME,
   TERM_RULE_NAME,
   TYPE_RULE_NAME,
-  GOAL_RULE_NAME,
   TYPES_RULE_NAME,
   PROOF_RULE_NAME,
   ERROR_RULE_NAME,
@@ -174,7 +172,6 @@ const NonTerminalNodeMap = {
   [STEP_RULE_NAME]: StepNode,
   [TERM_RULE_NAME]: TermNode,
   [TYPE_RULE_NAME]: TypeNode,
-  [GOAL_RULE_NAME]: GoalNode,
   [TYPES_RULE_NAME]: TypesNode,
   [ERROR_RULE_NAME]: ErrorNode,
   [FRAME_RULE_NAME]: FrameNode,

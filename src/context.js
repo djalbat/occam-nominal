@@ -45,14 +45,6 @@ export default class Context extends ContextBase {
     return terms;
   }
 
-  getGoals(goals = []) {
-    const context = this.getContext();
-
-    context.getGoals(goals);
-
-    return goals;
-  }
-
   getFrames(frames = []) {
     const context = this.getContext();
 
@@ -267,13 +259,6 @@ export default class Context extends ContextBase {
     return term;
   }
 
-  findGoalByGoalNode(goalNode) {
-    const context = this.getContext(),
-          goal = context.findGoalByGoalNode(goalNode);
-
-    return goal;
-  }
-
   findFrameByFrameNode(frameNode) {
     const context = this.getContext(),
           frame = context.findFrameByFrameNode(frameNode);
@@ -419,13 +404,6 @@ export default class Context extends ContextBase {
           termPresent = context.isTermPresentByTermNode(termNode);
 
     return termPresent;
-  }
-
-  isGoalPresentByGoalNode(goalNode) {
-    const context = this.getContext(),
-          goalPresent = context.isGoalPresentByGoalNode(goalNode);
-
-    return goalPresent;
   }
 
   isLabelPresentByLabelNode(labelNode) {
@@ -590,12 +568,6 @@ export default class Context extends ContextBase {
     const context = this.getContext();
 
     context.addTerm(term);
-  }
-
-  addGoal(goal) {
-    const context = this.getContext();
-
-    context.addGoal(goal);
   }
 
   addFrame(frame) {

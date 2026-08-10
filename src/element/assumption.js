@@ -1,12 +1,18 @@
 "use strict";
 
-import { Element, continuationUtilities } from "occam-languages";
+import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
 
+import { define } from "../elements";
+import { instantiate } from "../utilities/context";
 import { join, reconcile } from "../utilities/context";
+import { all, some, exists } from "../utilities/continuation";
+import { isDerived, isDeclared } from "../utilities/state";
+import { instantiateAssumption } from "../process/instantiate";
 
-const { asynchronousBackwardsEvery } = continuationUtilities;
+const { asynchronousBackwardsEvery } = continuationUtilities,
+      { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
-export default class Binding extends Element {
+export default define(class Assumption extends Element {
   constructor(context, string, node, breakPoint, reference, statement) {
     super(context, string, node, breakPoint);
 
@@ -37,6 +43,36 @@ export default class Binding extends Element {
     }
 
     return conditional;
+  }
+
+  getAssumptionNode() {
+    const node = this.getNode(),
+      assumptionNode = node;  ///
+
+    return assumptionNode;
+  }
+
+  isEqualTo(assumption) {
+    const assumptionNode = assumption.getNode(),
+          assumptionNodeMatches = this.matchAssumptionNode(assumptionNode),
+          equalTo = assumptionNodeMatches;  ///
+
+    return equalTo;
+  }
+
+  matchAssumptionNode(assumptionNode) {
+    const node = assumptionNode, ///
+      nodeMatches = this.matchNode(node),
+      assumptionNodeMatches = nodeMatches; ///
+
+    return assumptionNodeMatches;
+  }
+
+  findAssumption(context) {
+    const assumptionNode = this.getAssumptionNode(),
+      assumption = context.findAssumptionByAssumptionNode(assumptionNode);
+
+    return assumption;
   }
 
   findDeducedStatement(context) {
@@ -70,12 +106,122 @@ export default class Binding extends Element {
     return subproofAssertion;
   }
 
+  validate(state, context, continuation) {
+    let validates;
+
+    const assumptionString = this.getString();  ///
+
+    context.trace(`Validating the '${assumptionString}' assumption...`);
+
+    let assumption;
+
+    assumption = this.findAssumption(context);
+
+    if (assumption !== null) {
+      context.debug(`The '${assumptionString}' assumption is already present.`);
+
+      validates = continuation(assumption, context);
+    } else {
+      assumption = this;  ///
+
+      const validateReference = this.validateReference.bind(this),
+            validateStatement = this.validateStatement.bind(this);
+
+      validates = all([
+        validateReference,
+        validateStatement
+      ], state, context, (state, context) => {
+        let validates;
+
+        const validateWhenDeclared = this.validateWhenDeclared.bind(this),
+              validateWhenDerived = this.validateWhenDerived.bind(this);
+
+        validates = exists([
+          validateWhenDeclared,
+          validateWhenDerived
+        ], state, context, (state, context) => {
+          let validates;
+
+          context.addAssumption(assumption);
+
+          validates = continuation(assumption, context);
+
+          return validates;
+        });
+
+        return validates;
+      });
+    }
+
+    if (validates) {
+      context.debug(`...validated the '${assumptionString}' assumption.`);
+    }
+
+    return validates;
+  }
+
+  validateWhenDeclared(state, context, continuation) {
+    let validatesWhenDeclared = false;
+
+    const declared = isDeclared(state);
+
+    if (declared) {
+      const assumptionString = this.getString(); ///
+
+      context.trace(`Validating the '${assumptionString}' declared assumption...`);
+
+      validatesWhenDeclared = continuation(state, context);
+
+      if (validatesWhenDeclared) {
+        context.debug(`...validated the '${assumptionString}' declared assumption.`);
+      }
+    }
+
+    return validatesWhenDeclared;
+  }
+
+  validateWhenDerived(state, context, continuation) {
+    let validatesWhenDerived = false;
+
+    const derived = isDerived(state);
+
+    if (derived) {
+      const assumptionString = this.getString(); ///
+
+      context.trace(`Validating the '${assumptionString}' derived assumption...`);
+
+      const schemas = context.getSchemas();
+
+      validatesWhenDerived = some(schemas, (schema, context) => {
+        let success = false;
+
+        this.unifySchema(schema, context, (schemaUnifies) => {
+          if (schemaUnifies) {
+            success = true;
+          }
+        });
+
+        return success;
+      }, context, (context) => true);
+
+      if (validatesWhenDerived) {
+        validatesWhenDerived = continuation(state, context);
+      }
+
+      if (validatesWhenDerived) {
+        context.debug(`...validated the '${assumptionString}' derived assumption.`);
+      }
+    }
+
+    return validatesWhenDerived;
+  }
+
   validateReference(state, context, continuation) {
     let referenceValidates;
 
-    const bindingString = this.getString();  ///
+    const assumptionString = this.getString();  ///
 
-    context.trace(`Validating the '${bindingString}' binding's reference...`);
+    context.trace(`Validating the '${assumptionString}' assumption's reference...`);
 
     referenceValidates = this.reference.validate(state, context, (reference, context) => {
       let validates;
@@ -88,7 +234,7 @@ export default class Binding extends Element {
     });
 
     if (referenceValidates) {
-      context.debug(`...validates the '${bindingString}' binding's reference.`);
+      context.debug(`...validates the '${assumptionString}' assumption's reference.`);
     }
 
     return referenceValidates;
@@ -97,9 +243,9 @@ export default class Binding extends Element {
   validateStatement(state, context, continuation) {
     let statementValidates;
 
-    const bindingString = this.getString();  ///
+    const assumptionString = this.getString();  ///
 
-    context.trace(`Validating the '${bindingString}' binding's statement...`);
+    context.trace(`Validating the '${assumptionString}' assumption's statement...`);
 
     statementValidates = this.statement.validate(state, context, (statement, context) => {
       let validates;
@@ -112,17 +258,17 @@ export default class Binding extends Element {
     });
 
     if (statementValidates) {
-      context.debug(`...validates the '${bindingString}' binding's statement.`);
+      context.debug(`...validates the '${assumptionString}' assumption's statement.`);
     }
 
     return statementValidates;
   }
 
   unifySchema(schema, context, continuation) {
-    const bindingString = this.getString(),
+    const assumptionString = this.getString(),
           schemaString = schema.getString();
 
-    context.trace(`Unifying the '${schemaString}' schema with the '${bindingString}' binding...`);
+    context.trace(`Unifying the '${schemaString}' schema with the '${assumptionString}' assumption...`);
 
     const generalContext = context;  ///
 
@@ -152,7 +298,7 @@ export default class Binding extends Element {
                 schemaConditional = schema.isConditional();
 
           if (conditional !== schemaConditional) {
-            context.trace(`Either the '${schemaString}' schema is unconditional but the '${bindingString}' binding is conditional or vice verse.`);
+            context.trace(`Either the '${schemaString}' schema is unconditional but the '${assumptionString}' assumption is conditional or vice verse.`);
 
             return continuation(schemaUnifies);
           }
@@ -166,7 +312,7 @@ export default class Binding extends Element {
             }
 
             if (schemaUnifies) {
-              context.debug(`...unified the '${schemaString}' schema with the '${bindingString}' binding.`);
+              context.debug(`...unified the '${schemaString}' schema with the '${assumptionString}' assumption.`);
             }
 
             return continuation(schemaUnifies);
@@ -178,13 +324,13 @@ export default class Binding extends Element {
 
   unifyDeduction(deduction, deducedStatement, generalContext, specificContext, continuation) {
     const context = specificContext,  ///
-          bindingString = this.getString(),  ///
+          assumptionString = this.getString(),  ///
           deductionString = deduction.getString();
 
-    context.trace(`Unifying the '${deductionString}' deduction's statement  with the '${bindingString}' binding's '${bindingString}' statement...`);
+    context.trace(`Unifying the '${deductionString}' deduction's statement  with the '${assumptionString}' assumption's '${assumptionString}' statement...`);
 
     const statement = deduction.getStatement(),
-          deductionContext = deduction.getContext(); ///
+          deductionContext = deduction.getContext();
 
     specificContext = deductionContext; ///
 
@@ -200,7 +346,7 @@ export default class Binding extends Element {
           }
 
           if (deductionUnifies) {
-            context.debug(`...unified the '${deductionString}' deduction's statement with the '${bindingString}' binding's '${bindingString}' statement.`);
+            context.debug(`...unified the '${deductionString}' deduction's statement with the '${assumptionString}' assumption's '${assumptionString}' statement.`);
           }
 
           return continuation(deductionUnifies);
@@ -217,7 +363,7 @@ export default class Binding extends Element {
     context.trace(`Unifying the '${suppositionString}' supposition's statement  with the '${supposedStatementString}' supposed statement...`);
 
     const statement = supposition.getStatement(),
-      suppositionContext = supposition.getContext(); ///
+          suppositionContext = supposition.getContext();
 
     specificContext = suppositionContext; ///
 
@@ -262,4 +408,56 @@ export default class Binding extends Element {
       return this.unifySupposition(supposition, supposedStatement, generalContext, specificContext, continuation);
     }, continuation);
   }
+
+  toJSON() {
+    const string = this.getString();
+
+    let breakPoint;
+
+    breakPoint = this.getBreakPoint();
+
+    const breakPointJSON = breakPointToBreakPointJSON(breakPoint);
+
+    breakPoint = breakPointJSON;  ///
+
+    const json = {
+      string,
+      breakPoint
+    };
+
+    return json;
+  }
+
+  static name = "Assumption";
+
+  static fromJSON(json, context) {
+    let assumption;
+
+    instantiate((context) => {
+      const { string } = json,
+            assumptionNode = instantiateAssumption(string, context),
+            node = assumptionNode,  ///
+            breakPoint = breakPointFromJSON(json),
+            reference = referenceFromAssumptionNode(assumptionNode, context),
+            statement = statementFromAssumptionNode(assumptionNode, context);
+
+      assumption = new Assumption(context, string, node, breakPoint, reference, statement);
+    }, context);
+
+    return assumption;
+  }
+});
+
+function referenceFromAssumptionNode(assumptionNode, context) {
+  const metavariableNode = assumptionNode.getMetavariableNode(context),
+        reference = context.findReferenceByMetavariableNode(metavariableNode);
+
+  return reference;
+}
+
+function statementFromAssumptionNode(assumptionNode, context) {
+  const statementNode = assumptionNode.getStatementNode(),
+        statement = context.findStatementByStatementNode(statementNode);
+
+  return statement;
 }

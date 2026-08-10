@@ -4,7 +4,6 @@ export const RULE_RULE_NAME = "rule";
 export const STEP_RULE_NAME = "step";
 export const TERM_RULE_NAME = "term";
 export const TYPE_RULE_NAME = "type";
-export const GOAL_RULE_NAME = "goal";
 export const TYPES_RULE_NAME = "types";
 export const LEMMA_RULE_NAME = "lemma";
 export const AXIOM_RULE_NAME = "axiom";

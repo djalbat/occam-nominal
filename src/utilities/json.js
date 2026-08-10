@@ -136,22 +136,6 @@ export function termsFromJSON(json, context) {
   return terms;
 }
 
-export function goalsFromJSON(json, context) {
-  let { goals } = json;
-
-  const { Goal } = elements,
-        goalsJSON = goals; ///
-
-  goals = goalsJSON.map((goalJSON) => {
-    const json = goalJSON,  ///
-          goal = Goal.fromJSON(json, context);
-
-    return goal;
-  });
-
-  return goals;
-}
-
 export function rulesFromJSON(json, context) {
   let { rules } = json;
 
@@ -700,16 +684,6 @@ export function termsToTermsJSON(terms) {
   });
 
   return termsJSON;
-}
-
-export function goalsToGoalsJSON(goals) {
-  const goalsJSON = goals.map((goal) => {
-    const goalJSON = goal.toJSON();
-
-    return goalJSON;
-  });
-
-  return goalsJSON;
 }
 
 export function rulesToRulesJSON(rules) {

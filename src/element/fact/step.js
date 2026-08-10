@@ -73,23 +73,6 @@ export default define(class Step extends Fact {
     return nonsensical;
   }
 
-  isMetavariableDefined(metavariable, context) {
-    let metavariableDefined = false;
-
-    const unqualified = this.isUnqualified();
-
-    if (unqualified) {
-      const { Judgement } = elements,
-            judgement = Judgement.fromStatement(this.statement, context);
-
-      if (judgement !== null) {
-        metavariableDefined = judgement.isMetavariableDefined(metavariable);
-      }
-    }
-
-    return metavariableDefined;
-  }
-
   compareFactOrSubproofs(factOrSubproof, context) {
     let comparesToFactOrSubproofs;
 

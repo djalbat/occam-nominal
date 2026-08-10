@@ -9,27 +9,22 @@ import { instantiate } from "../../utilities/context";
 import { all, exists } from "../../utilities/continuation";
 import { isDerived, isDeclared } from "../../utilities/state";
 import { instantiateDefinedAssertion } from "../../process/instantiate";
+import { termFromTermAndSubstitutions } from "../../utilities/substitutions";
 import { separateGroundedTermsAndDefinedVariables } from "../../utilities/equivalences";
-import { termFromTermAndSubstitutions, frameFromFrameAndSubstitutions } from "../../utilities/substitutions";
-import { termFromJDefinedAssertionNode, frameFromJDefinedAssertionNode, negatedFromJDefinedAssertionNode, definedAssertionFromStatementNode } from "../../utilities/element";
+import { termFromJDefinedAssertionNode, negatedFromJDefinedAssertionNode, definedAssertionFromStatementNode } from "../../utilities/element";
 
 const { breakPointFromJSON } = breakPointUtilities;
 
 export default define(class DefinedAssertion extends Assertion {
-  constructor(context, string, node, breakPoint, term, frame, negated) {
+  constructor(context, string, node, breakPoint, term, negated) {
     super(context, string, node, breakPoint);
 
     this.term = term;
-    this.frame= frame;
     this.negated = negated;
   }
 
   getTerm() {
     return this.term;
-  }
-
-  getFrame() {
-    return this.frame;
   }
 
   isNegated() {
@@ -63,12 +58,10 @@ export default define(class DefinedAssertion extends Assertion {
     } else {
       assertion = this;
 
-      const validateTerm = this.validateTerm.bind(this),
-            validateFrame = this.validateFrame.bind(this);
+      const validateTerm = this.validateTerm.bind(this);
 
       validates = all([
-        validateTerm,
-        validateFrame
+        validateTerm
       ], state, context, (state, context) => {
         let validates;
 
@@ -108,28 +101,24 @@ export default define(class DefinedAssertion extends Assertion {
 
     context.trace(`Validating the '${definedAssertionString}' defined assertion's term...`);
 
-    if (this.term !== null) {
-      const termSingular = this.term.isSingular();
+    const termSingular = this.term.isSingular();
 
-      if (termSingular) {
-        termValidates = this.term.validate(state, context, (term, context) => {
-          let validates;
+    if (termSingular) {
+      termValidates = this.term.validate(state, context, (term, context) => {
+        let validates;
 
-          this.term = term;
+        this.term = term;
 
-          validates = continuation(state, context);
+        validates = continuation(state, context);
 
-          return validates;
-        });
-      } else {
-        const termString = this.term.getString() ///
-
-        termValidates = false
-
-        context.debug(`The '${termString}' term is not singular.`);
-      }
+        return validates;
+      });
     } else {
-      termValidates = continuation(state, context);
+      const termString = this.term.getString() ///
+
+      termValidates = false
+
+      context.debug(`The '${termString}' term is not singular.`);
     }
 
     if (termValidates) {
@@ -137,44 +126,6 @@ export default define(class DefinedAssertion extends Assertion {
     }
 
     return termValidates;
-  }
-
-  validateFrame(state, context, continuation) {
-    let frameValidates;
-
-    const definedAssertionString = this.getString();  ///
-
-    context.trace(`Validating the '${definedAssertionString}' defined assertion's frame...`);
-
-    if (this.frame !== null) {
-      const frameSingular = this.frame.isSingular();
-
-      if (frameSingular) {
-        frameValidates = this.frame.validate(state, context, (frame, context) => {
-          let validates;
-
-          this.frame = frame;
-
-          validates = continuation(state, context);
-
-          return validates;
-        });
-      } else {
-        const frameString = this.frame.getString() ///
-
-        frameValidates = false
-
-        context.debug(`The '${frameString}' frame is not singular.`);
-      }
-    } else {
-      frameValidates = continuation(state, context);
-    }
-
-    if (frameValidates) {
-      context.debug(`...validates the '${definedAssertionString}' defined assertion's frame.`);
-    }
-
-    return frameValidates;
   }
 
   validateWhenDeclared(state, context, continuation) {
@@ -207,7 +158,7 @@ export default define(class DefinedAssertion extends Assertion {
 
       context.trace(`Validating the '${definedAssertionString}' derived defined assertion...`);
 
-      validatesWhenDerived = validateWhenDerived(this.term, this.frame, this.negated, context, (context) => {
+      validatesWhenDerived = validateWhenDerived(this.term, this.negated, context, (context) => {
         continuation(state, context);
       });
 
@@ -227,10 +178,9 @@ export default define(class DefinedAssertion extends Assertion {
 
     context.trace(`Unifying the '${definedAssertionString}' defined assertion independently...`);
 
-    const term = termFromTermAndSubstitutions(this.term, context),
-          frame = frameFromFrameAndSubstitutions(this.frame, context);
+    const term = termFromTermAndSubstitutions(this.term, context);
 
-    validateWhenDerived(term, frame, this.negated, context, (context) => {
+    validateWhenDerived(term, this.negated, context, (context) => {
       let validatesWhenDerived;
 
       unifiesIndependently = true;
@@ -261,12 +211,11 @@ export default define(class DefinedAssertion extends Assertion {
               node = definedAssertionNode,  ///
               breakPoint = breakPointFromJSON(json),
               term = termFromJDefinedAssertionNode(definedAssertionNode, context),
-              frame = frameFromJDefinedAssertionNode(definedAssertionNode, context),
               negated = negatedFromJDefinedAssertionNode(definedAssertionNode, context);
 
         context = null;
 
-        definedAssertion = new DefinedAssertion(context, string, node, breakPoint, term, frame, negated);
+        definedAssertion = new DefinedAssertion(context, string, node, breakPoint, term, negated);
       }, context);
     }
 
@@ -300,48 +249,19 @@ function isVariableDefined(variable, context) {
   return variableDefined;
 }
 
-function isMetavariableDefined(metavariable, context) {
-  const steps = context.getSteps(),
-        metavariableDefined = steps.some((step) => {
-          const metavariableDefined = step.isMetavariableDefined(metavariable, context);
-
-          if (metavariableDefined) {
-            return true;
-          }
-        });
-
-  return metavariableDefined;
-}
-
-function validateWhenDerived(term, frame, negated, context, continuation) {
+function validateWhenDerived(term, negated, context, continuation) {
   let validatesWhenDerived = false;
 
-  if (term !== null) {
-    const variableIdentifier = term.getVariableIdentifier(),
-          declaredDariable = context.findDeclaredVariableByVariableIdentifier(variableIdentifier),
-          declaredDariableDefined = isVariableDefined(declaredDariable, context);
+  const variableIdentifier = term.getVariableIdentifier(),
+        declaredDariable = context.findDeclaredVariableByVariableIdentifier(variableIdentifier),
+        declaredDariableDefined = isVariableDefined(declaredDariable, context);
 
-    if (!negated && declaredDariableDefined) {
-      validatesWhenDerived = true;
-    }
-
-    if (negated && !declaredDariableDefined) {
-      validatesWhenDerived = true;
-    }
+  if (!negated && declaredDariableDefined) {
+    validatesWhenDerived = true;
   }
 
-  if (frame!== null) {
-    const metavariableName = frame.getMetavariableName(),
-          declaredMetavariable = context.findDeclaredMetavariableByMetavariableName(metavariableName),
-          declaredMetavariableDefined = isMetavariableDefined(declaredMetavariable, context);
-
-    if (!negated && declaredMetavariableDefined) {
-      validatesWhenDerived = true;
-    }
-
-    if (negated && !declaredMetavariableDefined) {
-      validatesWhenDerived = true;
-    }
+  if (negated && !declaredDariableDefined) {
+    validatesWhenDerived = true;
   }
 
   if (validatesWhenDerived) {
