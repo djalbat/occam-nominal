@@ -1,7 +1,5 @@
 "use strict";
 
-import { continuationUtilities } from "occam-languages";
-
 import elements from "../elements";
 
 import { declare } from "../utilities/state";
@@ -81,6 +79,35 @@ function unifyStepWithClaim(step, context, continuation) {
     }
 
     return continuation(stepUnifiesWithClaim);
+  });
+}
+
+function unifyStepWithSchemaAssertion(step, context, continuation) {
+  let stepUnifiesWithSchemaAssertion = false;
+
+  const schemaAssertion = step.getSchemaAssertion();
+
+  if (schemaAssertion === null) {
+    return continuation(stepUnifiesWithSchemaAssertion);
+  }
+
+  const stepString = step.getString(),
+        schemaAssertionString = schemaAssertion.getString();
+
+  context.trace(`Unifying the '${stepString}' step with the '${schemaAssertionString}' schema assertion...`);
+
+  return schemaAssertion.unifyStep(step, context, (stepUnifies) => {
+    let stepUnifiesWithSchemaAssertion = false;
+
+    if (stepUnifies) {
+      stepUnifiesWithSchemaAssertion = true;
+    }
+
+    if (stepUnifiesWithSchemaAssertion) {
+      context.debug(`...unified the '${stepString}' step with the '${schemaAssertionString}' schema assertion.`);
+    }
+
+    return continuation(stepUnifiesWithSchemaAssertion);
   });
 }
 
@@ -344,6 +371,7 @@ function compareStepToFactOrSubproofs(step, context, continuation) {
 export const unifySteps = [
   unifyStepWithRule,
   unifyStepWithClaim,
+  unifyStepWithSchemaAssertion,
   unifyStepWithSignatureAssertion,
   unifyStepAsQualifiedConstraint,
   unifyStepAsUnqualifiedEquality,

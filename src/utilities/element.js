@@ -64,11 +64,12 @@ export function stepFromStepNode(stepNode, context) {
         statement = statementFromStepNode(stepNode, context),
         reference = referenceFromStepNode(stepNode, context),
         procedureCall = procedureCallFromStepNode(stepNode, context),
+        schemaAssertion = schemaAssertionFromStepNode(stepNode, context),
         signatureAssertion = signatureAssertionFromStepNode(stepNode, context);
 
   context = null;
 
-  const step = new Step(context, string, node, breakPoint, statement, reference, procedureCall, signatureAssertion);
+  const step = new Step(context, string, node, breakPoint, statement, reference, procedureCall, schemaAssertion, signatureAssertion);
 
   return step;
 }
@@ -643,6 +644,21 @@ export function typeDeclarationFromTypeDeclarationNode(typeDeclarationNode, cont
   const typeDeclaration = new TypeDeclaration(context, string, node, breakPoint, type, superTypes, provisional);
 
   return typeDeclaration;
+}
+
+export function schemaAssertionFromSchemaAssertionNode(schemaAssertionNode, context) {
+  const { SchemaAssertion } = elements,
+        node = schemaAssertionNode,  ///
+        string = context.nodeAsString(node),
+        breakPoint = null,
+        frame = frameFromSchemaAssertionNode(schemaAssertionNode, context),
+        reference = referenceFromSchemaAssertionNode(schemaAssertionNode, context);
+
+  context = null;
+
+  const schemaAssertion = new SchemaAssertion(context, string, node, breakPoint, frame, reference);
+
+  return schemaAssertion;
 }
 
 export function definedAssertionFromDefinedAssertionNode(definedAssertionNode, context) {
@@ -1492,6 +1508,18 @@ export function nominalTypeNameFromTypeNode(typeNode, context) {
   return nominalTypeName;
 }
 
+export function schemaAssertionFromStepNode(stepNode, context) {
+  let schemaAssertion = null;
+
+  const schemaAssertionNode = stepNode.getSchemaAssertionNode();
+
+  if (schemaAssertionNode !== null) {
+    schemaAssertion = schemaAssertionFromSchemaAssertionNode(schemaAssertionNode, context);
+  }
+
+  return schemaAssertion;
+}
+
 export function provisionalFromVariableNode(variableNode, context) {
   const provisional = null;
 
@@ -1618,6 +1646,13 @@ export function referenceFromSuppositionNode(suppositionNode, context) {
   let referencel = null;
 
   return referencel;
+}
+
+export function frameFromSchemaAssertionNode(schemaAssertionNode, context) {
+  const frameNode = schemaAssertionNode.getFrameNode(),
+        frame = frameFromFrameNode(frameNode, context);
+
+  return frame;
 }
 
 export function termFromDefinedAssertionNode(definedAssertionNode, context) {
@@ -1812,6 +1847,13 @@ export function procedureCallFromSuppositionNode(suppositionNode, context) {
   }
 
   return procedureCall;
+}
+
+export function referenceFromSchemaAssertionNode(schemaAssertionNode, context) {
+  const metavariableNode = schemaAssertionNode.getMetavariableNode(),
+        reference = referenceFromMetavariableNode(metavariableNode, context);
+
+  return reference;
 }
 
 export function negatedFromJDefinedAssertionNode(definedAssertionNode, context) {

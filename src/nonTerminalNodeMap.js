@@ -60,6 +60,7 @@ import TypeAssertionNode from "./node/assertion/type";
 import ProcedureCallNode from "./node/procedureCall";
 import ConjectureBodyNode from "./node/body/conjecture";
 import TypeDeclarationNode from "./node/declaration/type";
+import SchemaAssertionNode from "./node/assertion/schema";
 import DefinedAssertionNode from "./node/assertion/defined";
 import TermSubstitutionNode from "./node/substitution/term";
 import ConjectureHeaderNode from "./node/header/conjecture";
@@ -144,6 +145,7 @@ import {
   TYPE_ASSERTION_RULE_NAME,
   CONJECTURE_BODY_RULE_NAME,
   TYPE_DECLARATION_RULE_NAME,
+  SCHEMA_ASSERTION_RULE_NAME,
   CONJECTURE_HEADER_RULE_NAME,
   DEFINED_ASSERTION_RULE_NAME,
   TERM_SUBSTITUTION_RULE_NAME,
@@ -227,6 +229,7 @@ const NonTerminalNodeMap = {
   [SUB_DERIVATION_RULE_NAME]: SubDerivationNode,
   [THEOREM_HEADER_RULE_NAME]: TheoremHeaderNode,
   [CONJECTURE_BODY_RULE_NAME]: ConjectureBodyNode,
+  [SCHEMA_ASSERTION_RULE_NAME]: SchemaAssertionNode,
   [TYPE_DECLARATION_RULE_NAME]: TypeDeclarationNode,
   [CONJECTURE_HEADER_RULE_NAME]: ConjectureHeaderNode,
   [DEFINED_ASSERTION_RULE_NAME]: DefinedAssertionNode,

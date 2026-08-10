@@ -403,6 +403,10 @@ export default class MnemicContext extends Context {
     context.debug(`...added the '${substitutionString}' substitution to the mnemic context.`);
   }
 
+  addInferredSubstitutions(inferredSubstitutions) {
+    ///
+  }
+
   addTerms(terms) {
     terms.forEach((term) => {
       this.addTerm(term);

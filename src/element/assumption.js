@@ -32,22 +32,11 @@ export default define(class Assumption extends Element {
 
   getStatementNode() { return this.statement.getStatementNode(); }
 
-  isConditional() {
-    let conditional = false;
-
-    const statementNode = this.getStatementNode(),
-          subproofAssertionNode = statementNode.getSubproofAssertionNode();
-
-    if (subproofAssertionNode !== null) {
-      conditional = true;
-    }
-
-    return conditional;
-  }
+  isConditional() { return this.statement.isConditional() }
 
   getAssumptionNode() {
     const node = this.getNode(),
-      assumptionNode = node;  ///
+          assumptionNode = node;  ///
 
     return assumptionNode;
   }
@@ -70,41 +59,16 @@ export default define(class Assumption extends Element {
 
   findAssumption(context) {
     const assumptionNode = this.getAssumptionNode(),
-      assumption = context.findAssumptionByAssumptionNode(assumptionNode);
+          assumption = context.findAssumptionByAssumptionNode(assumptionNode);
 
     return assumption;
   }
 
-  findDeducedStatement(context) {
-    const subproofAssertion = this.findSubproofAssertion(context),
-          deducedStatement = (subproofAssertion !== null) ?
-                               subproofAssertion.getDeducedStatement() :
-                                 this.statement;
+  findDeducedStatement(context) { return this.statement.findDeducedStatement(context); }
 
-    return deducedStatement;
-  }
+  findSupposedStatements(context) { return this.statement.findSupposedStatements(context); }
 
-  findSupposedStatements(context) {
-    const subproofAssertion = this.findSubproofAssertion(context),
-          supposedStatements = (subproofAssertion !== null) ?
-                                 subproofAssertion.getSupposedStatements() :
-                                   [];
-
-    return supposedStatements;
-  }
-
-  findSubproofAssertion(context) {
-    let subproofAssertion = null;
-
-    const statementNode = this.getStatementNode(),
-          subproofAssertionNode = statementNode.getSubproofAssertionNode();
-
-    if (subproofAssertionNode !== null) {
-      subproofAssertion = context.findAssertionByAssertionNode(subproofAssertionNode);
-    }
-
-    return subproofAssertion;
-  }
+  findSubproofAssertion(context) { return this.statement.findSubproofAssertion(context); }
 
   validate(state, context, continuation) {
     let validates;
@@ -298,7 +262,7 @@ export default define(class Assumption extends Element {
                 schemaConditional = schema.isConditional();
 
           if (conditional !== schemaConditional) {
-            context.trace(`Either the '${schemaString}' schema is unconditional but the '${assumptionString}' assumption is conditional or vice verse.`);
+            context.trace(`Either the '${schemaString}' schema is unconditional whilst the '${assumptionString}' assumption is conditional or vice verse.`);
 
             return continuation(schemaUnifies);
           }

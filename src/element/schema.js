@@ -63,6 +63,8 @@ export default define(class Schema extends Element {
     return comparesToReference;
   }
 
+  matchMetavariableNode(metavariableNode) { return this.label.matchMetavariableNode(metavariableNode); }
+
   verify = breakable(function (context, continuation) {
     const schemaString = this.getString(); ///
 
@@ -192,73 +194,6 @@ export default define(class Schema extends Element {
     });
   }
 
-  unifyJudgement(judgement, context, continuation) {
-    let judgementUnifies = false;
-
-    const schemaString = this.getString(),  ///
-          judgementString = judgement.getString();
-
-    context.trace(`Unifying the '${judgementString}' judgement with the '${schemaString}' schema...`);
-
-    return reconcile((context) => {
-      const reference = judgement.getReference();
-
-      return this.unifyReference(reference, context, (referenceUnifies) => {
-        if (!referenceUnifies) {
-          return continuation(judgementUnifies);
-        }
-
-        const assumptions = judgement.getAssumptions(context),
-              constraints = [
-                ...this.constraints
-              ];
-
-        return this.unifyAssumptions(assumptions, constraints, context, () => {
-          const implicitAssumptions = judgement.getImplicitAssumptions(context);
-
-          return this.unifyImplicitAssumptions(implicitAssumptions, constraints, context, () => {
-            const constraintsLength = constraints.length;
-
-            if (constraintsLength > 0) {
-              return continuation(judgementUnifies);
-            }
-
-            const conditional = this.isConditional(),
-                  judgementConditional = judgement.isConditional();
-
-            if (conditional !== judgementConditional) {
-              context.trace(`Either the '${judgementString}' judgement is unconditional but the '${schemaString}' schema is conditional or vice verse.`);
-
-              return continuation(judgementUnifies);
-            }
-
-            const deducedStatement = judgement.findDeducedStatement(context);
-
-            return this.unifyDeducedStatement(deducedStatement, context, (deducedStatementUnifies) => {
-              if (!deducedStatementUnifies) {
-                return continuation(judgementUnifies);
-              }
-
-              const supposedStatements = judgement.findSupposedStatements(context);
-
-              return this.unifySupposedStatements(supposedStatements, context, (supposedStatementsUnify) => {
-                if (supposedStatementsUnify) {
-                  judgementUnifies = true;
-                }
-
-                if (judgementUnifies) {
-                  context.trace(`...unified the '${judgementString}' judgement with the '${schemaString}' schema.`);
-                }
-
-                return continuation(judgementUnifies);
-              });
-            });
-          });
-        });
-      });
-    }, context);
-  }
-
   unifyReference(reference, context, continuation) {
     const schemaString = this.getString(),  ///
           referenceString = reference.getString();
@@ -383,6 +318,74 @@ export default define(class Schema extends Element {
         return continuation(passed);
       });
     }, continuation);
+  }
+
+  unifyStatementAndSchemaAssertion(statement, schameAssertion, context, continuation) {
+    let schameAssertionUnifies = false;
+
+    const schemaString = this.getString(),  ///
+          statementString = statement.getString(),  ///
+          schameAssertionString = schameAssertion.getString();
+
+    context.trace(`Unifying the '${statementString}' statement and ${schameAssertionString}' schame assertion with the '${schemaString}' schema...`);
+
+    return reconcile((context) => {
+      const reference = schameAssertion.getReference();
+
+      return this.unifyReference(reference, context, (referenceUnifies) => {
+        if (!referenceUnifies) {
+          return continuation(schameAssertionUnifies);
+        }
+
+        const assumptions = schameAssertion.getAssumptions(context),
+              constraints = [
+                ...this.constraints
+              ];
+
+        return this.unifyAssumptions(assumptions, constraints, context, () => {
+          const implicitAssumptions = schameAssertion.getImplicitAssumptions(context);
+
+          return this.unifyImplicitAssumptions(implicitAssumptions, constraints, context, () => {
+            const constraintsLength = constraints.length;
+
+            if (constraintsLength > 0) {
+              return continuation(schameAssertionUnifies);
+            }
+
+            const conditional = this.isConditional(),
+                  statementConditional = statement.isConditional();
+
+            if (conditional !== statementConditional) {
+              context.trace(`Either the '${statementString}' statement is unconditional whilst the '${schemaString}' schema is conditional or vice verse.`);
+
+              return continuation(schameAssertionUnifies);
+            }
+
+            const deducedStatement = statement.findDeducedStatement(context);
+
+            return this.unifyDeducedStatement(deducedStatement, context, (deducedStatementUnifies) => {
+              if (!deducedStatementUnifies) {
+                return continuation(schameAssertionUnifies);
+              }
+
+              const supposedStatements = statement.findSupposedStatements(context);
+
+              return this.unifySupposedStatements(supposedStatements, context, (supposedStatementsUnify) => {
+                if (supposedStatementsUnify) {
+                  schameAssertionUnifies = true;
+                }
+
+                if (schameAssertionUnifies) {
+                  context.debug(`...unified the '${statementString}' statement and ${schameAssertionString}' schame assertion with the '${schemaString}' schema.`);
+                }
+
+                return continuation(schameAssertionUnifies);
+              });
+            });
+          });
+        });
+      });
+    }, context);
   }
 
   toJSON() {

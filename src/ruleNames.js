@@ -59,6 +59,7 @@ export const TYPE_ASSERTION_RULE_NAME = "typeAssertion";
 export const THEOREM_HEADER_RULE_NAME = "theoremHeader";
 export const PROCEDURE_CALL_RULE_NAME = "procedureCall";
 export const CONJECTURE_BODY_RULE_NAME = "conjectureBody";
+export const SCHEMA_ASSERTION_RULE_NAME = "schemaAssertion";
 export const TYPE_DECLARATION_RULE_NAME = "typeDeclaration";
 export const CONJECTURE_HEADER_RULE_NAME = "conjectureHeader";
 export const DEFINED_ASSERTION_RULE_NAME = "definedAssertion";

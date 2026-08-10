@@ -4,7 +4,7 @@ import { arrayUtilities } from "necessary";
 import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
 
 import { define } from "../elements";
-import { enclose } from "../utilities/context";
+import { enclose, reconcile } from "../utilities/context";
 import { labelsFromJSON, premisesFromJSON, conclusionFromJSON, labelsToLabelsJSON, premisesToPremisesJSON, conclusionToConclusionJSON } from "../utilities/json";
 
 const { reverse } = arrayUtilities,
@@ -224,27 +224,29 @@ export default define(class Rule extends Element {
   }
 
   unifyStepAndFactOrSubproofs(step, factOrSubproofs, context, continuation) {
-    return this.unifyStepWithConclusion(step, context, (statementUnifiesWithConclusion) => {
-      if (!statementUnifiesWithConclusion) {
-        const stepAndFactOrSubproofsUnify = false;
+    return reconcile((context) => {
+      return this.unifyStepWithConclusion(step, context, (statementUnifiesWithConclusion) => {
+        if (!statementUnifiesWithConclusion) {
+          const stepAndFactOrSubproofsUnify = false;
 
-        return continuation(stepAndFactOrSubproofsUnify);
-      }
-
-      return this.unifyFactOrSubproofsWithPremises(factOrSubproofs, context, (factOrSubproofsUnifiesWithPremises) => {
-        let stepAndFactOrSubproofsUnify = false;
-
-        if (factOrSubproofsUnifiesWithPremises) {
-          const inferredSubstitutionsSolved = context.areInferredSubstitutionsSolved();
-
-          if (inferredSubstitutionsSolved) {
-            stepAndFactOrSubproofsUnify = true;
-          }
+          return continuation(stepAndFactOrSubproofsUnify);
         }
 
-        return continuation(stepAndFactOrSubproofsUnify);
+        return this.unifyFactOrSubproofsWithPremises(factOrSubproofs, context, (factOrSubproofsUnifiesWithPremises) => {
+          let stepAndFactOrSubproofsUnify = false;
+
+          if (factOrSubproofsUnifiesWithPremises) {
+            const inferredSubstitutionsSolved = context.areInferredSubstitutionsSolved();
+
+            if (inferredSubstitutionsSolved) {
+              stepAndFactOrSubproofsUnify = true;
+            }
+          }
+
+          return continuation(stepAndFactOrSubproofsUnify);
+        });
       });
-    });
+    }, context)
   }
 
   unifyFactOrSubproofsWithPremise(factOrSubproofs, premise, context, continuation) {

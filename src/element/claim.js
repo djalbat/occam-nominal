@@ -3,7 +3,7 @@
 import { arrayUtilities } from "necessary";
 import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
 
-import { enclose } from "../utilities/context";
+import { enclose, reconcile } from "../utilities/context";
 import { claimStringFromLabelsSignatureSuppositionsAndDeduction } from "../utilities/string";
 import { labelsFromJSON,
          deductionFromJSON,
@@ -92,10 +92,6 @@ export default class Claim extends Element {
   }
 
   verifyEx(context, continuation) {
-    const claimString = this.getString(); ///
-
-    context.trace(`Verifying the '${claimString}' claim...`);
-
     return enclose((context) => {
       const verifyProof = this.verifyProof.bind(this),
             verifyLabels = this.verifyLabels.bind(this),
@@ -108,10 +104,6 @@ export default class Claim extends Element {
         verifyDeduction,
         verifyProof
       ], context, (verifies) => {
-        if (verifies) {
-          context.debug(`...verified the '${claimString}' claim.`);
-        }
-
         return continuation(verifies, context);
       });
     }, context);
@@ -277,35 +269,37 @@ export default class Claim extends Element {
   }
 
   unifyStepAndFactOrSubproofs(step, factorSubproofs, context, continuation) {
-    return this.unifyStepWithDeduction(step, context, (statementUnifiesWithDeduction) => {
-      if (!statementUnifiesWithDeduction) {
-        const stepAndFactOrSubproofsUnify = false;
-
-        return continuation(stepAndFactOrSubproofsUnify);
-      }
-
-      return this.dischargeHypotheses(context, (hypothesesDischarge) => {
-        if (!hypothesesDischarge) {
+    return reconcile((context) => {
+      return this.unifyStepWithDeduction(step, context, (statementUnifiesWithDeduction) => {
+        if (!statementUnifiesWithDeduction) {
           const stepAndFactOrSubproofsUnify = false;
 
           return continuation(stepAndFactOrSubproofsUnify);
         }
 
-        return this.unifyFactOrSubproofsWithSuppositions(factorSubproofs, context, (factorSubproofsUnifiesWithSuppositions) => {
-          let stepAndFactOrSubproofsUnify = false;
+        return this.dischargeHypotheses(context, (hypothesesDischarge) => {
+          if (!hypothesesDischarge) {
+            const stepAndFactOrSubproofsUnify = false;
 
-          if (factorSubproofsUnifiesWithSuppositions) {
-            const inferredSubstitutionsSolved = context.areInferredSubstitutionsSolved();
-
-            if (inferredSubstitutionsSolved) {
-              stepAndFactOrSubproofsUnify = true;
-            }
+            return continuation(stepAndFactOrSubproofsUnify);
           }
 
-          return continuation(stepAndFactOrSubproofsUnify);
+          return this.unifyFactOrSubproofsWithSuppositions(factorSubproofs, context, (factorSubproofsUnifiesWithSuppositions) => {
+            let stepAndFactOrSubproofsUnify = false;
+
+            if (factorSubproofsUnifiesWithSuppositions) {
+              const inferredSubstitutionsSolved = context.areInferredSubstitutionsSolved();
+
+              if (inferredSubstitutionsSolved) {
+                stepAndFactOrSubproofsUnify = true;
+              }
+            }
+
+            return continuation(stepAndFactOrSubproofsUnify);
+          });
         });
       });
-    });
+    }, context);
   }
 
   unifyFactOrSubproofsWithSupposition(factorSubproofs, supposition, context, continuation) {

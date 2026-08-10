@@ -170,11 +170,55 @@ export default define(class Statement extends Element {
     return metavariableNodeMatches;
   }
 
+  isConditional() {
+    let conditional = false;
+
+    const statementNode = this.getStatementNode(),
+          subproofAssertionNode = statementNode.getSubproofAssertionNode();
+
+    if (subproofAssertionNode !== null) {
+      conditional = true;
+    }
+
+    return conditional;
+  }
+
   findStatement(context) {
     const statementNode = this.getStatementNode(),
           statement = context.findStatementByStatementNode(statementNode);
 
     return statement;
+  }
+
+  findDeducedStatement(context) {
+    const subproofAssertion = this.findSubproofAssertion(context),
+          deducedStatement = (subproofAssertion !== null) ?
+                                subproofAssertion.getDeducedStatement() :
+                                  this; ///
+
+    return deducedStatement;
+  }
+
+  findSubproofAssertion(context) {
+    let subproofAssertion = null;
+
+    const statementNode = this.getStatementNode(),
+          subproofAssertionNode = statementNode.getSubproofAssertionNode();
+
+    if (subproofAssertionNode !== null) {
+      subproofAssertion = context.findAssertionByAssertionNode(subproofAssertionNode);
+    }
+
+    return subproofAssertion;
+  }
+
+  findSupposedStatements(context) {
+    const subproofAssertion = this.findSubproofAssertion(context),
+          supposedStatements = (subproofAssertion !== null) ?
+                                 subproofAssertion.getSupposedStatements() :
+                                   [];
+
+    return supposedStatements;
   }
 
   compareParameter(parameter) {

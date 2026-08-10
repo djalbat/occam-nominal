@@ -29,12 +29,6 @@ export default define(class ImplicitAssumption extends Element {
 
   getStatementNode() { return this.statement.getStatementNode(); }
 
-  getReference() {
-    const reference = null;
-
-    return reference;
-  }
-
   isEqualTo(implicitAssumption) {
     const implicitAssumptionNode = implicitAssumption.getNode(),
           implicitAssumptionNodeMatches = this.matchImplicitAssumptionNode(implicitAssumptionNode),
@@ -51,27 +45,6 @@ export default define(class ImplicitAssumption extends Element {
     return implicitAssumptionNodeMatches;
   }
 
-  findSubproofAssertion(context) {
-    let subproofAssertion = null;
-
-    const statementNode = this.getStatementNode(),
-          subproofAssertionNode = statementNode.getSubproofAssertionNode();
-
-    if (subproofAssertionNode !== null) {
-      subproofAssertion = context.findAssertionByAssertionNode(subproofAssertionNode);
-    }
-
-    return subproofAssertion;
-  }
-
-  findAssumption(context) {
-    const implicitAssumptionNode = this.getImplicitAssumptionNode(),
-          assumptionNode = implicitAssumptionNode,  ///
-          assumption = context.findAssumptionByAssumptionNode(assumptionNode);
-
-    return assumption;
-  }
-
   validate(state, context, continuation) {
     let validates;
 
@@ -82,45 +55,29 @@ export default define(class ImplicitAssumption extends Element {
 
     let assumption;
 
-    assumption = this.findAssumption(context);
+    assumption = this;  ///
 
-    if (assumption !== null) {
-      const implicitAssumption = assumption;  ///
+    context = this.getContext();
 
-      context.debug(`The '${implicitAssumptionString}' implicitA asumption is already present.`);
+    attempt((context) => {
+      const validateStatement = this.validateStatement.bind(this);
 
-      validates = continuation(implicitAssumption, context);
-    } else {
-      assumption = this;  ///
+      validates = all([
+        validateStatement
+      ], state, context, (state, context) => {
+        let validates;
 
-      context = this.getContext();
+        this.commit(context);
 
-      attempt((context) => {
-        const validateStatement = this.validateStatement.bind(this);
+        const implicitAssumption = assumption;  ///
 
-        validates = all([
-          validateStatement
-        ], state, context, (state, context) => {
-          let validates;
+        context = specificContext;  ///
 
-          this.commit(context);
+        validates = continuation(implicitAssumption, context);
 
-          const implicitAssumption = assumption;  ///
-
-          context = specificContext;  ///
-
-          validates = continuation(implicitAssumption, context);
-
-          return validates;
-        });
-
-        if (validates) {
-          context = specificContext;  ///
-
-          context.addAssumption(assumption);
-        }
-      }, context);
-    }
+        return validates;
+      });
+    }, context);
 
     context = specificContext;  ///
 

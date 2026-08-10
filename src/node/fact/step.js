@@ -29,6 +29,18 @@ export default class StepNode extends FactNode {
     return referenceNode;
   }
 
+  getSchemaAssertionNode() {
+    let schemaAssertionNode =  null;
+
+    const qualificationNode = this.getQualificationNode();
+
+    if (qualificationNode !== null) {
+      schemaAssertionNode = qualificationNode.getSchemaAssertionNode();
+    }
+
+    return schemaAssertionNode;
+  }
+
   getSignatureAssertionNode() {
     let signatureAssertionNode =  null;
 

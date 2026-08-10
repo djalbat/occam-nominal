@@ -4,23 +4,27 @@ import { arrayUtilities } from "necessary";
 import { breakPointUtilities, continuationUtilities } from "occam-languages";
 
 import Fact from "../fact";
-import elements from "../../elements";
 
 import { all } from "../../utilities/continuation";
 import { define } from "../../elements";
+import { attempt } from "../../utilities/context";
 import { unifySteps } from "../../process/unification";
 import { derive, declare } from "../../utilities/state";
-import { attempt, reconcile } from "../../utilities/context";
 
 const { breakable } = breakPointUtilities,
       { backwardsSome } = arrayUtilities,
       { asynchronousSome } = continuationUtilities;
 
 export default define(class Step extends Fact {
-  constructor(context, string, node, breakPoint, statement, reference, procedureCall, signatureAssertion) {
+  constructor(context, string, node, breakPoint, statement, reference, procedureCall, schemaAssertion, signatureAssertion) {
     super(context, string, node, breakPoint, statement, reference, procedureCall);
 
+    this.schemaAssertion = schemaAssertion;
     this.signatureAssertion = signatureAssertion;
+  }
+
+  getSchemaAssertion() {
+    return this.schemaAssertion;
   }
 
   getSignatureAssertion() {
@@ -55,7 +59,7 @@ export default define(class Step extends Fact {
   }
 
   isQualified() {
-    const qualified = ((this.reference !== null) || (this.signatureAssertion !== null));
+    const qualified = ((this.reference !== null) || (this.schemaAssertion !== null) || (this.signatureAssertion !== null));
 
     return qualified;
   }
@@ -116,7 +120,7 @@ export default define(class Step extends Fact {
       return continuation(verifies, context);
     }
 
-    return this.unify(context, (unifies) => {
+    return this.unify((unifies) => {
       if (unifies) {
         verifies = true;
       }
@@ -142,11 +146,13 @@ export default define(class Step extends Fact {
     attempt((context) => {
       const validateStatement = this.validateStatement.bind(this),
             validateReference = this.validateReference.bind(this),
+            validateSchemaAssertion = this.validateSchemaAssertion.bind(this),
             validateSignatureAssertion = this.validateSignatureAssertion.bind(this);
 
       validates = all([
         validateStatement,
         validateReference,
+        validateSchemaAssertion,
         validateSignatureAssertion
       ], state, context, (state, context) => {
         let validates;
@@ -170,6 +176,35 @@ export default define(class Step extends Fact {
     return validates;
   }
 
+  validateSchemaAssertion(state, context, continuation) {
+    let schemaAssertionValidates;
+
+    if (this.schemaAssertion !== null) {
+      const stepString = this.getString(),  ///
+            schemaAssertionString = this.schemaAssertion.getString();
+
+      context.trace(`Validating the '${stepString}' step's '${schemaAssertionString}' schema assertion...`);
+
+      schemaAssertionValidates = this.schemaAssertion.validate(state, context, (schemaAssertion, contwext) => {
+        let validates;
+
+        this.schemaAssertion = schemaAssertion;
+
+        validates = continuation(state, context);
+
+        return validates;
+      });
+
+      if (schemaAssertionValidates) {
+        context.debug(`...validated the '${stepString}' step's '${schemaAssertionString}' schema assertion.`);
+      }
+    } else {
+      schemaAssertionValidates = continuation(state, context);
+    }
+
+    return schemaAssertionValidates;
+  }
+
   validateSignatureAssertion(state, context, continuation) {
     let signatureAssertionValidates;
 
@@ -179,7 +214,7 @@ export default define(class Step extends Fact {
 
       context.trace(`Validating the '${stepString}' step's '${signatureAssertionString}' signature assertion...`);
 
-      signatureAssertionValidates =this.signatureAssertion.validate(state, context, (signatureAssertion, contwext) => {
+      signatureAssertionValidates = this.signatureAssertion.validate(state, context, (signatureAssertion, contwext) => {
         let validates;
 
         this.signatureAssertion = signatureAssertion;
@@ -199,17 +234,16 @@ export default define(class Step extends Fact {
     return signatureAssertionValidates;
   }
 
-  unify(context, continuation) {
-    const stepString = this.getString(); ///
+  unify(continuation) {
+    const context = this.getContext(),
+          stepString = this.getString(); ///
 
     context.trace(`Unifying the '${stepString}' step...`);
 
     const step = this;  ///
 
     return asynchronousSome(unifySteps, (unifyStep, continuation) => {
-      return reconcile((context) => {
-        return unifyStep(step, context, continuation);
-      }, context);
+      return unifyStep(step, context, continuation);
     }, (unifies) => {
       if (unifies) {
         context.debug(`...unified the '${stepString}' step.`);
