@@ -6,7 +6,6 @@ import { NonTerminalNode } from "occam-grammar-utilities";
 import { TERM_RULE_NAME,
          FRAME_RULE_NAME,
          EQUALITY_RULE_NAME,
-         JUDGEMENT_RULE_NAME,
          METAVARIABLE_RULE_NAME,
          META_ARGUMENT_RULE_NAME,
          TYPE_ASSERTION_RULE_NAME,
@@ -66,13 +65,6 @@ class StatementNode extends NonTerminalNode {
           equalityNode = this.getNodeByRuleName(ruleName);
 
     return equalityNode;
-  }
-
-  getJudgementNode() {
-    const ruleName = JUDGEMENT_RULE_NAME,
-          judgementNode = this.getNodeByRuleName(ruleName);
-
-    return judgementNode;
   }
 
   getTypeAssertionNode() {

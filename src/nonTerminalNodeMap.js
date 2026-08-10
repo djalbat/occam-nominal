@@ -28,7 +28,6 @@ import RuleBodyNode from "./node/body/rule";
 import StatementNode from "./node/statement";
 import ReferenceNode from "./node/reference";
 import DeductionNode from "./node/resolution/deduction";
-import JudgementNode from "./node/judgement";
 import ParameterNode from "./node/parameter";
 import SignatureNode from "./node/signature";
 import AxiomBodyNode from "./node/body/axiom";
@@ -112,7 +111,6 @@ import {
   META_TYPE_RULE_NAME,
   SIGNATURE_RULE_NAME,
   DEDUCTION_RULE_NAME,
-  JUDGEMENT_RULE_NAME,
   PARAMETER_RULE_NAME,
   REFERENCE_RULE_NAME,
   STATEMENT_RULE_NAME,
@@ -199,7 +197,6 @@ const NonTerminalNodeMap = {
   [META_TYPE_RULE_NAME]: MetaTypeNode,
   [SIGNATURE_RULE_NAME]: SignatureNode,
   [REFERENCE_RULE_NAME]: ReferenceNode,
-  [JUDGEMENT_RULE_NAME]: JudgementNode,
   [DEDUCTION_RULE_NAME]: DeductionNode,
   [PARAMETER_RULE_NAME]: ParameterNode,
   [STATEMENT_RULE_NAME]: StatementNode,

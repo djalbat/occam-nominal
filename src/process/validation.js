@@ -293,37 +293,6 @@ function validateStatementAsEquality(statement, state, context, continuation) {
   return statementValidatesAsEquality;
 }
 
-function validateStatementAsJudgement(statement, state, context, continuation) {
-  let statementValidatesAssJudgement = false;
-
-  const { Judgement } = elements,
-        judgement = Judgement.fromStatement(statement, context);
-
-  if (judgement !== null) {
-    const statementString = statement.getString();
-
-    context.trace(`Validating the '${statementString}' statement as a judgement...`);
-
-    const judgementValidates = judgement.validate(state, context, (judgement, context) => {
-      let validates;
-
-      validates = continuation(statement, state, context);
-
-      return validates;
-    });
-
-    if (judgementValidates) {
-      statementValidatesAssJudgement = true;
-    }
-
-    if (statementValidatesAssJudgement) {
-      context.debug(`...validated the '${statementString}' statement as a judgement.`);
-    }
-  }
-
-  return statementValidatesAssJudgement;
-}
-
 function validateStatementAsTypeAssertion(statement, state, context, continuation) {
   let statementValidatesAssTypeAssertion = false;
 
@@ -548,7 +517,6 @@ export const validateStatements = [
   unifyStatementWithCombinators,
   unifyStatementWithBracketedCombinator,
   validateStatementAsEquality,
-  validateStatementAsJudgement,
   validateStatementAsTypeAssertion,
   validateStatementAsDefinedAssertion,
   validateStatementAsPropertyAssertion,

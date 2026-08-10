@@ -380,21 +380,6 @@ export function referenceFromReferenceNode(referenceNode, context) {
   return reference;
 }
 
-export function judgementFromJudgementNode(judgementNode, context) {
-  const { Judgement } = elements,
-        node = judgementNode, ///
-        string = context.nodeAsString(node),
-        breakPoint = null,
-        frame = frameFromJudgementNode(judgementNode, context),
-        goal = goalFromJudgementNode(judgementNode, context);
-
-  context = null;
-
-  const judgement = new Judgement(context, string, node, breakPoint, frame, goal);
-
-  return judgement;
-}
-
 export function parameterFromParameterNode(parameterNode, context) {
   const { Parameter } = elements,
         node = parameterNode, ///
@@ -1188,13 +1173,6 @@ export function nameFromParaneterNode(parameterNode, context) {
   return name;
 }
 
-export function goalFromJudgementNode(judgementNode, context) {
-  const goalNode = judgementNode.getGoalNode(),
-        goal = goalFromGoalNode(goalNode, context);
-
-  return goal;
-}
-
 export function termFromGeneratorNode(generatorNode, context) {
   const termNode = generatorNode.getTermNode(),
         term = termFromTermNode(termNode, context);
@@ -1266,13 +1244,6 @@ export function theoremFromSectionNode(sectionNode, context) {
   }
 
   return theorem;
-}
-
-export function frameFromJudgementNode(judgementNode, context) {
-  const frameNode = judgementNode.getFrameNode(),
-        frame = frameFromFrameNode(frameNode, context);
-
-  return frame;
 }
 
 export function termsFromSignatureNode(signatureNode, context) {
@@ -1531,18 +1502,6 @@ export function statementFromDeductionNode(deductionNode, context) {
   }
 
   return statement;
-}
-
-export function judgementFromStatementNode(statementNode, context) {
-  let judgement = null;
-
-  const judgementNode = statementNode.getJudgementNode();
-
-  if (judgementNode !== null) {
-    judgement = judgementFromJudgementNode(judgementNode, context);
-  }
-
-  return judgement;
 }
 
 export function stepFromStepOrSubproofNode(stepOrSubproofNode, context) {

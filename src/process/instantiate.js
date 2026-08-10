@@ -10,7 +10,6 @@ import { TERM_RULE_NAME,
          VARIABLE_RULE_NAME,
          EQUALITY_RULE_NAME,
          PROPERTY_RULE_NAME,
-         JUDGEMENT_RULE_NAME,
          DEDUCTION_RULE_NAME,
          PARAMETER_RULE_NAME,
          STATEMENT_RULE_NAME,
@@ -49,7 +48,6 @@ const termPlaceholderRule = ruleFromRuleName(TERM_RULE_NAME),
       variablePlaceholderRule = ruleFromRuleName(VARIABLE_RULE_NAME),
       equalityPlaceholderRule = ruleFromRuleName(EQUALITY_RULE_NAME),
       propertyPlaceholderRule = ruleFromRuleName(PROPERTY_RULE_NAME),
-      judgementPlaceholderRule = ruleFromRuleName(JUDGEMENT_RULE_NAME),
       generatorPlaceholderRule = ruleFromRuleName(GENERATOR_RULE_NAME),
       deductionPlaceholderRule = ruleFromRuleName(DEDUCTION_RULE_NAME),
       parameterPlaceholderRule = ruleFromRuleName(PARAMETER_RULE_NAME),
@@ -121,8 +119,6 @@ export function instantiateEquality(string, context) { return instantiate(equali
 export function instantiateProperty(string, context) { return instantiate(propertyPlaceholderRule, string, context); }
 
 export function instantiateGenerator(string, context) { return instantiate(generatorPlaceholderRule, string, context); }
-
-export function instantiateJudgement(string, context) { return instantiate(judgementPlaceholderRule, string, context); }
 
 export function instantiateParameter(string, context) { return instantiate(parameterPlaceholderRule, string, context); }
 

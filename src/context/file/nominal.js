@@ -255,10 +255,6 @@ export default class NominalFileContext extends FileContext {
     return equalities;
   }
 
-  getJudgements(judgements = []) {
-    return judgements;
-  }
-
   getAssertions(assertions = []) {
     return assertions;
   }

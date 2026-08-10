@@ -334,22 +334,6 @@ export function hypothesesFromJSON(json, context) {
   return hypotheses;
 }
 
-export function judgementsFromJSON(json, context) {
-  let { judgements } = json;
-
-  const { Judgement } = elements,
-        judgementsJSON = judgements; ///
-
-  judgements = judgementsJSON.map((judgementJSON) => {
-    const json = judgementJSON,  ///
-          judgement = Judgement.fromJSON(json, context);
-
-    return judgement;
-  });
-
-  return judgements;
-}
-
 export function statementsFromJSON(json, context) {
   let { statements } = json;
 
@@ -833,16 +817,6 @@ export function propertiesToPropertiesJSON(properties) {
   });
 
   return propertiesJSON;
-}
-
-export function judgementsToJudgementsJSON(judgements) {
-  const judgementsJSON = judgements.map((judgement) => {
-    const judgementJSON = judgement.toJSON();
-
-    return judgementJSON;
-  });
-
-  return judgementsJSON;
 }
 
 export function equalitiesToEqualitiesJSON(equalities) {

@@ -185,36 +185,6 @@ function unifyStepAsUnqualifiedEquality(step, context, continuation) {
   return continuation(stepUnifiesAUnqualifiedEquality);
 }
 
-function unifyStepAsUNqualifiedJudgement(step, context, continuation) {
-  let stepUnifiesAsUnqualifiedJudgement = false;
-
-  const qualified = step.isQualified();
-
-  if (qualified) {
-    return continuation(stepUnifiesAsUnqualifiedJudgement);
-  }
-
-  const { Judgement } = elements,
-        statement = step.getStatement(),
-        judgement = Judgement.fromStatement(statement, context);
-
-  if (judgement === null) {
-    return continuation(stepUnifiesAsUnqualifiedJudgement);
-  }
-
-  const stepString = step.getString();
-
-  context.trace(`Unifying the '${stepString}' step as an unqualified judgement...`);
-
-  stepUnifiesAsUnqualifiedJudgement = true;
-
-  if (stepUnifiesAsUnqualifiedJudgement) {
-    context.debug(`...unified the '${stepString}' step as an unqualified judgement.`);
-  }
-
-  return continuation(stepUnifiesAsUnqualifiedJudgement);
-}
-
 function unifyStepAsUnqualifiedTypeAssertion(step, context, continuation) {
   let stepUnifiesAsUnqualifiedTypeAssertion = false;
 
@@ -377,7 +347,6 @@ export const unifySteps = [
   unifyStepWithSignatureAssertion,
   unifyStepAsQualifiedConstraint,
   unifyStepAsUnqualifiedEquality,
-  unifyStepAsUNqualifiedJudgement,
   unifyStepAsUnqualifiedTypeAssertion,
   unifyStepAsUnqualifiedPropertyAssertion,
   unifyStepAsUnqualifiedSignatureAssertion,

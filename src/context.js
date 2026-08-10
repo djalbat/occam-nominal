@@ -69,14 +69,6 @@ export default class Context extends ContextBase {
     return equalities;
   }
 
-  getJudgements(judgements = []) {
-    const context = this.getContext();
-
-    context.getJudgements(judgements);
-
-    return judgements;
-  }
-
   getAssertions(assertions = []) {
     const context = this.getContext();
 
@@ -296,13 +288,6 @@ export default class Context extends ContextBase {
     return equality;
   }
 
-  findJudgementByJudgementNode(judgementNode) {
-    const context = this.getContext(),
-          judgement = context.findJudgementByJudgementNode(judgementNode);
-
-    return judgement;
-  }
-
   findAssertionByAssertionNode(assertionNode) {
     const context = this.getContext(),
           assertion = context.findAssertionByAssertionNode(assertionNode);
@@ -343,13 +328,6 @@ export default class Context extends ContextBase {
           reference = context.findReferenceByMetavariableNode(metavariableNode);
 
     return reference;
-  }
-
-  findJudgementsByMetavariableNode(metavariableNode) {
-    const context = this.getContext(),
-          judgement = context.findJudgementsByMetavariableNode(metavariableNode);
-
-    return judgement;
   }
 
   findMetavariableByMetavariableNode(metavariableNode) {
@@ -469,13 +447,6 @@ export default class Context extends ContextBase {
           equalityPresent = context.isEqualityPresentByEqualityNode(equalityNode);
 
     return equalityPresent;
-  }
-
-  isJudgementPresentByJudgementNode(judgementNode) {
-    const context = this.getContext(),
-          judgementPresent = context.isJudgementPresentByJudgementNode(judgementNode);
-
-    return judgementPresent;
   }
 
   isAssertionPresentByAssertionNode(assertionNode) {
@@ -637,12 +608,6 @@ export default class Context extends ContextBase {
     const context = this.getContext();
 
     context.addEquality(equality);
-  }
-
-  addJudgement(judgement) {
-    const context = this.getContext();
-
-    context.addJudgement(judgement);
   }
 
   addAssertion(assertion) {

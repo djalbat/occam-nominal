@@ -28,7 +28,6 @@ export const META_TYPE_RULE_NAME = "metaType";
 export const SIGNATURE_RULE_NAME = "signature";
 export const PARAMETER_RULE_NAME = "parameter";
 export const DEDUCTION_RULE_NAME = "deduction";
-export const JUDGEMENT_RULE_NAME = "judgement";
 export const REFERENCE_RULE_NAME = "reference";
 export const STATEMENT_RULE_NAME = "statement";
 export const GENERATOR_RULE_NAME = "generator";

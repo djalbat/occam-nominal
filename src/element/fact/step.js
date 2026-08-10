@@ -90,22 +90,6 @@ export default define(class Step extends Fact {
     return metavariableDefined;
   }
 
-  compareJudgements(judgements, context) {
-    let comparesToJudgements;
-
-    const step = this; ///
-
-    comparesToJudgements = backwardsSome(judgements, (judgement) => {
-      const judgementComparesToStatement = judgement.compareStep(step, context);
-
-      if (judgementComparesToStatement) {
-        return true;
-      }
-    });
-
-    return comparesToJudgements;
-  }
-
   compareFactOrSubproofs(factOrSubproof, context) {
     let comparesToFactOrSubproofs;
 

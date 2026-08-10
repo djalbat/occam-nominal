@@ -23,7 +23,6 @@ import Property from "./element/property";
 import Parameter from "./element/parameter";
 import Reference from "./element/reference";
 import Statement from "./element/statement";
-import Judgement from "./element/judgement";
 import Deduction from "./element/resolution/deduction";
 import Signature from "./element/signature";
 import Generator from "./element/generator";
