@@ -3,7 +3,7 @@
 import AssertionNode from "../../node/assertion";
 
 import { MISSING } from "../../constants";
-import { TERM_RULE_NAME, FRAME_RULE_NAME, STATEMENT_RULE_NAME } from "../../ruleNames";
+import { TERM_RULE_NAME, STATEMENT_RULE_NAME } from "../../ruleNames";
 
 export default class ContainedAssertionNode extends AssertionNode {
   isNegated() {
@@ -33,13 +33,6 @@ export default class ContainedAssertionNode extends AssertionNode {
           termNode = this.getNodeByRuleName(ruleName);
 
     return termNode;
-  }
-
-  getFrameNode() {
-    const ruleName = FRAME_RULE_NAME,
-          frameNode = this.getNodeByRuleName(ruleName);
-
-    return frameNode;
   }
 
   getStatementNode() {

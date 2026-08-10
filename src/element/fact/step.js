@@ -185,15 +185,17 @@ export default define(class Step extends Fact {
 
       context.trace(`Validating the '${stepString}' step's '${schemaAssertionString}' schema assertion...`);
 
-      schemaAssertionValidates = this.schemaAssertion.validate(state, context, (schemaAssertion, contwext) => {
-        let validates;
+      derive((state) => {
+        schemaAssertionValidates = this.schemaAssertion.validate(state, context, (schemaAssertion, context) => {
+          let validates;
 
-        this.schemaAssertion = schemaAssertion;
+          this.schemaAssertion = schemaAssertion;
 
-        validates = continuation(state, context);
+          validates = continuation(state, context);
 
-        return validates;
-      });
+          return validates;
+        });
+      }, state);
 
       if (schemaAssertionValidates) {
         context.debug(`...validated the '${stepString}' step's '${schemaAssertionString}' schema assertion.`);
@@ -214,15 +216,17 @@ export default define(class Step extends Fact {
 
       context.trace(`Validating the '${stepString}' step's '${signatureAssertionString}' signature assertion...`);
 
-      signatureAssertionValidates = this.signatureAssertion.validate(state, context, (signatureAssertion, contwext) => {
-        let validates;
+      derive((state) => {
+        signatureAssertionValidates = this.signatureAssertion.validate(state, context, (signatureAssertion, contwext) => {
+          let validates;
 
-        this.signatureAssertion = signatureAssertion;
+          this.signatureAssertion = signatureAssertion;
 
-        validates = continuation(state, context);
+          validates = continuation(state, context);
 
-        return validates;
-      });
+          return validates;
+        });
+      }, state);
 
       if (signatureAssertionValidates) {
         context.debug(`...validated the '${stepString}' step's '${signatureAssertionString}' signature assertion.`);

@@ -51,8 +51,8 @@ export default define(class Assumption extends Element {
 
   matchAssumptionNode(assumptionNode) {
     const node = assumptionNode, ///
-      nodeMatches = this.matchNode(node),
-      assumptionNodeMatches = nodeMatches; ///
+          nodeMatches = this.matchNode(node),
+          assumptionNodeMatches = nodeMatches; ///
 
     return assumptionNodeMatches;
   }

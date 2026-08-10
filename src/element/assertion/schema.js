@@ -1,12 +1,16 @@
 "use strict";
 
+import { continuationUtilities } from "occam-languages";
+
 import Assertion from "../assertion";
 
 import elements from "../../elements";
 
+import { all } from "../../utilities/continuation";
 import { define } from "../../elements";
 import { declare } from "../../utilities/state";
-import { all, some } from "../../utilities/continuation";
+
+const { asynchronousSome } = continuationUtilities;
 
 export default define(class SchemaAssertion extends Assertion {
   constructor(context, string, node, breakPoint, frame, reference) {
@@ -162,25 +166,13 @@ export default define(class SchemaAssertion extends Assertion {
   }
 
   unifyStep(step, context, continuation) {
-    let stepUnifies;
-
     const schemas = context.getSchemas(),
           statement = step.getStatement(),
           schemaAssertion = this; ///
 
-    stepUnifies = some(schemas, (schema, context) => {
-      let success = false;
-
-      schema.unifyStatementAndSchemaAssertion(statement, schemaAssertion, context, (schemaUnifies) => {
-        if (schemaUnifies) {
-          success = true;
-        }
-      });
-
-      return success;
-    }, context, (context) => true);
-
-    return continuation(stepUnifies);
+    return asynchronousSome(schemas, (schema, continuation) => {
+      return schema.unifyStatementAndSchemaAssertion(statement, schemaAssertion, context, continuation);
+    }, continuation);
   }
 
   static name = "SchemaAssertion";

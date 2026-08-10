@@ -763,13 +763,12 @@ export function containedAssertionFromContainedAssertionNode(containedAssertionN
         string = context.nodeAsString(node),
         breakPoint = null,
         term = termFromContainedAssertionNode(containedAssertionNode, context),
-        frame = frameFromContainedAssertionNode(containedAssertionNode, context),
         negated = negatedFromContainedAssertionNode(containedAssertionNode, context),
         statement = statementFromContainedAssertionNode(containedAssertionNode, context);
 
   context = null;
 
-  const containedAssertion = new ContainedAssertion(context, string, node, breakPoint, term, frame, negated, statement);
+  const containedAssertion = new ContainedAssertion(context, string, node, breakPoint, term, negated, statement);
 
   return containedAssertion;
 }
@@ -1809,18 +1808,6 @@ export function parametersFromProcedureCallNode(procedureCallNode, context) {
         parameters = parametersFromParameterNodes(parameterNodes, context);
 
   return parameters;
-}
-
-export function frameFromContainedAssertionNode(containedAssertionNode, context) {
-  let frame = null;
-
-  const frameNode = containedAssertionNode.getFrameNode();
-
-  if (frameNode !== null) {
-    frame = frameFromFrameNode(frameNode, context)
-  }
-
-  return frame;
 }
 
 export function typeFromPropertyDeclarationNode(propertyDeclarationNode, context) {

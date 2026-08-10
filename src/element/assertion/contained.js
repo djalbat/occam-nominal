@@ -19,21 +19,16 @@ import { termFromContainedAssertionNode,
 const { breakPointFromJSON } = breakPointUtilities;
 
 export default define(class ContainedAssertion extends Assertion {
-  constructor(context, string, node, breakPoint, term, frame, negated, statement) {
+  constructor(context, string, node, breakPoint, term, negated, statement) {
     super(context, string, node, breakPoint);
 
     this.term = term;
-    this.frame = frame;
     this.negated = negated;
     this.statement = statement;
   }
 
   getTerm() {
     return this.term;
-  }
-
-  getFrame() {
-    return this.frame;
   }
 
   isNegated() {
@@ -72,12 +67,10 @@ export default define(class ContainedAssertion extends Assertion {
       assertion = this; ///
 
       const validateTerm = this.validateTerm.bind(this),
-            validateFrame = this.validateFrame.bind(this),
             validateStatement = this.validateStatement.bind(this);
 
       validates = all([
         validateTerm,
-        validateFrame,
         validateStatement
       ], state, context, (state, context) => {
         let validates;
@@ -118,28 +111,24 @@ export default define(class ContainedAssertion extends Assertion {
 
     context.trace(`Validating the '${containedAssertionString}' contained assertion's term...`);
 
-    if (this.term !== null) {
-      const termSingular = this.term.isSingular();
+    const termSingular = this.term.isSingular();
 
-      if (termSingular) {
-        termValidates = this.term.validate(state, context, (term, context) => {
-          let validates;
+    if (termSingular) {
+      termValidates = this.term.validate(state, context, (term, context) => {
+        let validates;
 
-          this.term = term;
+        this.term = term;
 
-          validates = continuation(state, context);
+        validates = continuation(state, context);
 
-          return validates;
-        });
-      } else {
-        const termString = this.term.getString() ///
-
-        termValidates = false
-
-        context.debug(`The '${termString}' term is not singular.`);
-      }
+        return validates;
+      });
     } else {
-      termValidates = continuation(state, context);
+      const termString = this.term.getString() ///
+
+      termValidates = false
+
+      context.debug(`The '${termString}' term is not singular.`);
     }
 
     if (termValidates) {
@@ -147,44 +136,6 @@ export default define(class ContainedAssertion extends Assertion {
     }
 
     return termValidates;
-  }
-
-  validateFrame(state, context, continuation) {
-    let frameValidates;
-
-    const containedAssertionString = this.getString();  ///
-
-    context.trace(`Validating the '${containedAssertionString}' contained assertion's frame...`);
-
-    if (this.frame !== null) {
-      const frameSingular = this.frame.isSingular();
-
-      if (frameSingular) {
-        frameValidates = this.frame.validate(state, context, (frame, context) => {
-          let validates;
-
-          this.frame = frame;
-
-          validates = continuation(state, context);
-
-          return validates;
-        });
-      } else {
-        const frameString = this.frame.getString() ///
-
-        frameValidates = false
-
-        context.debug(`The '${frameString}' frame is not singular.`);
-      }
-    } else {
-      frameValidates = continuation(state, context);
-    }
-
-    if (frameValidates) {
-      context.debug(`...validates the '${containedAssertionString}' contained assertion's frame.`);
-    }
-
-    return frameValidates;
   }
 
   validateStatement(state, context, continuation) {
@@ -251,7 +202,7 @@ export default define(class ContainedAssertion extends Assertion {
 
       context.trace(`Validating the '${containedAssertionString}' derived contained assertion...`);
 
-      validatesWhenDerived = validateWhenDerived(this.term, this.frame, this.statement, this.negated, context, (context) => {
+      validatesWhenDerived = validateWhenDerived(this.term, this.statement, this.negated, context, (context) => {
         continuation(state, context);
       });
 
@@ -272,10 +223,9 @@ export default define(class ContainedAssertion extends Assertion {
     context.trace(`Unifying the '${containedAssertionString}' contained assertion independently...`);
 
     const term = termFromTermAndSubstitutions(this.term, context),
-          frame = frameFromFrameAndSubstitutions(this.frame, context),
           statement = statementFromStatementAndSubstitutions(this.statement, context);
 
-    validateWhenDerived(term, frame, statement, this.negated, context, (context) => {
+    validateWhenDerived(term, statement, this.negated, context, (context) => {
       let validatesWhenDerived
 
       unifiesIndependently = true;
@@ -306,13 +256,12 @@ export default define(class ContainedAssertion extends Assertion {
               node = containedAssertionNode,  ///
               breakPoint = breakPointFromJSON(json),
               term = termFromContainedAssertionNode(containedAssertionNode, context),
-              frame = frameFromContainedAssertionNode(containedAssertionNode, context),
               negated = negatedFromContainedAssertionNode(containedAssertionNode, context),
               statement = statementFromContainedAssertionNode(containedAssertionNode, context);
 
         context = null;
 
-        containedAssertion = new ContainedAssertion(context, string, node, breakPoint, term, frame, negated, statement);
+        containedAssertion = new ContainedAssertion(context, string, node, breakPoint, term, negated, statement);
       }, context);
     }
 
@@ -327,33 +276,17 @@ export default define(class ContainedAssertion extends Assertion {
   }
 });
 
-function validateWhenDerived(term, frame, statement, negated, context, continuation) {
+function validateWhenDerived(term, statement, negated, context, continuation) {
   let validatesWhenDerived = false;
 
-  if (statement !== null) {
-    if (term !== null) {
-      const termContained = statement.isTermContained(term, context);
+  const termContained = statement.isTermContained(term, context);
 
-      if (!negated && termContained) {
-        validatesWhenDerived = true;
-      }
+  if (!negated && termContained) {
+    validatesWhenDerived = true;
+  }
 
-      if (negated && !termContained) {
-        validatesWhenDerived = true;
-      }
-    }
-
-    if (frame !== null) {
-      const frameContained = statement.isFrameContained(frame, context);
-
-      if (!negated && frameContained) {
-        validatesWhenDerived = true;
-      }
-
-      if (negated && !frameContained) {
-        validatesWhenDerived = true;
-      }
-    }
+  if (negated && !termContained) {
+    validatesWhenDerived = true;
   }
 
   if (validatesWhenDerived) {

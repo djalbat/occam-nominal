@@ -2,13 +2,12 @@
 
 import { Element, breakPointUtilities } from "occam-languages";
 
+import { all } from "../utilities/continuation";
 import { every } from "../utilities/continuation";
 import { define } from "../elements";
 import { instantiate } from "../utilities/context";
-import { all, exists } from "../utilities/continuation";
 import { instantiateFrame } from "../process/instantiate";
 import { FRAME_META_TYPE_NAME } from "../metaTypeNames";
-import { isDerived, isDeclared } from "../utilities/state";
 import { metavariableFromFrameNode } from "../utilities/element";
 
 const { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
@@ -150,21 +149,9 @@ export default define(class Frame extends Element {
       ], state, context, (state, context) => {
         let validates;
 
-        const validateWhenDeclared = this.validateWhenDeclared.bind(this),
-              validateWhenDerived = this.validateWhenDerived.bind(this);
+        context.addFrame(frame);
 
-        validates = exists([
-          validateWhenDeclared,
-          validateWhenDerived
-        ], state, context, (state, context) => {
-          let validates;
-
-          context.addFrame(frame);
-
-          validates = continuation(frame, context);
-
-          return validates;
-        });
+        validates = continuation(frame, context);
 
         return validates;
       });
@@ -271,52 +258,6 @@ export default define(class Frame extends Element {
     }
 
     return metavariableValidates;
-  }
-
-  validateWhenDeclared(state, context, continuation) {
-    let validatesWhenDeclared = false;
-
-    const declared = isDeclared(state);
-
-    if (declared) {
-      const frameString = this.getString(); ///
-
-      context.trace(`Validating the '${frameString}' declared frame...`);
-
-      const singular = this.isSingular();
-
-      if (singular) {
-        validatesWhenDeclared = continuation(state, context);
-      } else {
-        context.debug(`The '${frameString}' declared frame must be singular.`);
-      }
-
-      if (validatesWhenDeclared) {
-        context.debug(`...validated the '${frameString}' declared frame.`);
-      }
-    }
-
-    return validatesWhenDeclared;
-  }
-
-  validateWhenDerived(state, context, continuation) {
-    let validatesWhenDerived = false;
-
-    const derived = isDerived(state);
-
-    if (derived) {
-      const frameString = this.getString(); ///
-
-      context.trace(`Validating the '${frameString}' derived frame...`);
-
-      validatesWhenDerived = continuation(state, context);
-
-      if (validatesWhenDerived) {
-        context.debug(`...validated the '${frameString}' derived frame.`);
-      }
-    }
-
-    return validatesWhenDerived;
   }
 
   toJSON() {
