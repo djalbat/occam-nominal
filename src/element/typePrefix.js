@@ -39,7 +39,7 @@ export default define(class TypePrefix extends Element {
     return comparesToTypePrefixName;
   }
 
-  async verify(context) {
+  verify(context, continuation) {
     let verifies = false;
 
     const typePrefixString = this.getString();  ///
@@ -72,7 +72,7 @@ export default define(class TypePrefix extends Element {
       context.debug(`...verified the '${typePrefixString}' type prefix.`);
     }
 
-    return verifies;
+    return continuation(verifies, context);
   }
 
   toJSON() {

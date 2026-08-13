@@ -1,8 +1,13 @@
 "use strict";
 
+import { breakPointUtilities, continuationUtilities } from "occam-languages";
+
 import Declaration from "../declaration";
 
 import { define } from "../../elements";
+
+const { breakable } = breakPointUtilities,
+      { asynchronousAll } = continuationUtilities;
 
 export default define(class PropertyDeclaration extends Declaration {
   constructor(context, string, node, breakPoint, type, property) {
@@ -27,39 +32,47 @@ export default define(class PropertyDeclaration extends Declaration {
     return propertyDeclarationNode;
   }
 
-  async verify(context) {
-    let verifies = false;
+  isNonsensical() {
+    const nonsensical = (this.property === null);
 
-    await this.break(context);
+    return nonsensical;
+  }
+
+  verify = breakable(function (context, continuation) {
+    let verifies = false;
 
     const propertyDeclarationString = this.getString();  ///
 
     context.trace(`Verifying the '${propertyDeclarationString}' property declaration...`);
 
-    if (this.property !== null) {
-      const typeVerified = this.verifyType(context);
+    const nonsensical = this.isNonsensical();
 
-      if (typeVerified) {
-        const propertyVerifies = this.verifyProperty(context);
+    if (nonsensical) {
+      context.debug(`Unable to verify the '${propertyDeclarationString}' decudtion because it is nonsense.`);
 
-        if (propertyVerifies) {
-          this.property.setType(this.type);
+      return continuation(verifies);
+    }
 
-          verifies = true;
-        }
+    const verifyType = this.verifyType.bind(this),
+          verifyProperty = this.verifyProperty.bind(this);
+
+    return asynchronousAll([
+      verifyType,
+      verifyProperty
+    ], context, (verifies, context) => {
+      if (verifies) {
+        this.property.setType(this.type);
       }
-    } else {
-      context.debug(`Unable to verify the '${propertyDeclarationString}' property declaration because it is nonsense.`);
-    }
 
-    if (verifies) {
-      context.debug(`...verified the '${propertyDeclarationString}' property declaration.`);
-    }
+      if (verifies) {
+        context.debug(`...verified the '${propertyDeclarationString}' property declaration.`);
+      }
 
-    return verifies;
-  }
+      return continuation(verifies, context);
+    });
+  });
 
-  verifyType(context) {
+  verifyType(context, continuation) {
     let typeVerifies = false;
 
     const propertyDeclarationString = this.getString();  ///
@@ -82,29 +95,23 @@ export default define(class PropertyDeclaration extends Declaration {
       context.debug(`...verified the '${propertyDeclarationString}' property declaration's type.`);
     }
 
-    return typeVerifies;
+    return continuation(typeVerifies, context);
   }
 
-  verifyProperty(context) {
-    let propertyVerifies = false;
-
+  verifyProperty(context, continuation) {
     const includeType = false,
           propertyString = this.property.getString(includeType),
           propertyDeclarationString = this.getString();  ///
 
     context.trace(`Verifying the '${propertyDeclarationString}' property declaration's '${propertyString}' property...`);
 
-    const property = this.property.verify(context);
+    return this.property.verify(context, (propertyVerifies, context) => {
+      if (propertyVerifies) {
+        context.debug(`...verified the '${propertyDeclarationString}' property declaration's '${propertyString}' property.`);
+      }
 
-    if (property !== null) {
-      propertyVerifies = true;
-    }
-
-    if (propertyVerifies) {
-      context.debug(`...verified the '${propertyDeclarationString}' property declaration's '${propertyString}' property.`);
-    }
-
-    return propertyVerifies;
+      return continuation(propertyVerifies, context);
+    });
   }
 
   static name = "PropertyDeclaration";

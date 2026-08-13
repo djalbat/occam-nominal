@@ -3,12 +3,14 @@
 import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
 
 import { define } from "../elements";
+import { exists } from "../utilities/continuation";
 import { desist, declare } from "../utilities/state";
 import { instantiateGenerator } from "../process/instantiate";
 import { termFromGeneratorNode } from "../utilities/element";
 import { unifyTermWithGenerator } from "../process/unify";
+import { validateTermAsGenerator } from "../process/validate";
 import { typeFromJSON, typeToTypeJSON } from "../utilities/json";
-import { serialise, unserialise, instantiate } from "../utilities/context";
+import { attempt, serialise, unserialise, instantiate } from "../utilities/context";
 
 const { asynchronousEvery } = continuationUtilities,
       { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
@@ -94,6 +96,107 @@ export default define(class Generator extends Element {
     }
 
     return continuation(verifies, context);
+  }
+
+  validate(state, context, continuation) {
+    let validates;
+
+    const includeType = false,
+          specificContext = context,  ///
+          generatorString = this.getString(includeType);  ///
+
+    context.trace(`Validating the '${generatorString}' generator...`);
+
+    const generator = this;
+
+    attempt((context) => {
+      const validateTermAsVariable = this.validateTermAsVariable.bind(this),
+            validateTermAsGenerator = this.validateTermAsGenerator.bind(this);
+
+      validates = exists([
+        validateTermAsVariable,
+        validateTermAsGenerator
+      ], state, context, (state, context) => {
+        let validates;
+
+        this.commit(context);
+
+        context = specificContext;  ///
+
+        validates = continuation(generator, context);
+
+        return validates;
+      });
+    }, context);
+
+    context = specificContext;  ///
+
+    if (validates) {
+      context.debug(`...validated the '${generatorString}' generator.`);
+    }
+
+    return validates;
+  }
+
+  validateTermAsVariable(state, context, continuation) {
+    let termValidatesAsVariable = false;
+
+    const hypothetical = this.isHypothetical();
+
+    if (!hypothetical) {
+      const includeType = false,
+            generatorString = this.getString(includeType);  ///
+
+      context.trace(`Validating the '${generatorString}' generator's term as a variable...`);
+
+      debugger
+
+      // termValidatesAsVariable = validateTermAsVariable(this.term, state, context, (term, context) => {
+      //   let termValidatesAsVariable = false;
+      //
+      //   const type = term.getType(),
+      //         baseType = baseTypeFromNothing();
+      //
+      //   if (type === baseType) {
+      //     termValidatesAsVariable = continuation(state, context);
+      //   }
+      //
+      //   return termValidatesAsVariable;
+      // });
+
+      if (termValidatesAsVariable) {
+        context.debug(`...validated the '${generatorString}' generator's term as a variable.`);
+      }
+    }
+
+    return termValidatesAsVariable;
+  }
+
+  validateTermAsGenerator(state, context, continuation) {
+    let termValidatesAsGenerator = false;
+
+    const hypothetical = this.isHypothetical();
+
+    if (!hypothetical) {
+      const includeType = false,
+            generatorString = this.getString(includeType);  ///
+
+      context.trace(`Validating the '${generatorString}' generator's term...`);
+
+      termValidatesAsGenerator = validateTermAsGenerator(this.term, context, (context) => {
+        let validates;
+
+        validates = continuation(state, context);
+
+        return validates;
+      });
+
+      if (termValidatesAsGenerator) {
+        context.debug(`...validated the '${generatorString}' generator's term.`);
+      }
+    }
+
+    return termValidatesAsGenerator;
   }
 
   unifyTerm(term, context, validateForwards) {

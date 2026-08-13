@@ -1,6 +1,6 @@
 "use strict";
 
-import { continuationUtilities } from "occam-languages";
+import { breakPointUtilities, continuationUtilities } from "occam-languages";
 
 import Declaration from "../declaration";
 
@@ -8,7 +8,8 @@ import { define } from "../../elements";
 import { anticipate } from "../../utilities/context";
 import { baseTypeFromNothing } from "../../utilities/type";
 
-const { asynchronousEvery } = continuationUtilities;
+const { breakable } = breakPointUtilities,
+      { asynchronousAll, asynchronousEvery } = continuationUtilities;
 
 export default define(class CotypeDeclaration extends Declaration {
   constructor(context, string, node, breakPoint, type, superTypes, provisional, propertyDeclarations) {
@@ -53,55 +54,47 @@ export default define(class CotypeDeclaration extends Declaration {
     return properties;
   }
 
-  async verify(context) {
-    let verifies = false;
-
-    await this.break(context);
-
+  verify = breakable(function (context, continuation) {
     const cotypeDeclarationString = this.getString();  ///
 
     context.trace(`Verifying the '${cotypeDeclarationString}' cotype declaration...`);
 
-    const typeVerifies = this.verifyType(context);
+    const verifyType = this.verifyType.bind(this),
+          verifySuperTypes = this.verifySuperTypes.bind(this),
+          verifyTypePrefix = this.verifyTypePrefix.bind(this),
+          verifyPropertyDeclaratisons = this.verifyPropertyDeclaratisons.bind(this);
 
-    if (typeVerifies) {
-      const superTypesVerify = this.verifySuperTypes(context);
+    return asynchronousAll([
+      verifyType,
+      verifySuperTypes,
+      verifyTypePrefix,
+      verifyPropertyDeclaratisons
+    ], context, (verifies) => {
+      if (verifies) {
+        const properties = this.getProperties(),
+              typePrefix = context.getTypePrefix(),
+              prefixName = (typePrefix !== null) ?
+                             typePrefix.getPrefixName() :
+                               null;
 
-      if (superTypesVerify) {
-        const typePrefixVerifies = this.verifyTypePrefix(context);
+        this.type.setProvisional(this.provisional);
 
-        if (typePrefixVerifies) {
-          const propertyDeclarationsVerify = await this.verifyPropertyDeclaratisons(context);
+        this.type.setProperties(properties);
 
-          if (propertyDeclarationsVerify) {
-            const properties = this.getProperties(),
-                  typePrefix = context.getTypePrefix(),
-                  prefixName = (typePrefix !== null) ?
-                                 typePrefix.getPrefixName() :
-                                   null;
+        this.type.setPrefixName(prefixName);
 
-            this.type.setProvisional(this.provisional);
-
-            this.type.setProperties(properties);
-
-            this.type.setPrefixName(prefixName);
-
-            context.addType(this.type);
-
-            verifies = true;
-          }
-        }
+        context.addType(this.type);
       }
-    }
 
-    if (verifies) {
-      context.debug(`...verified the '${cotypeDeclarationString}' cotype declaration.`);
-    }
+      if (verifies) {
+        context.debug(`...verified the '${cotypeDeclarationString}' cotype declaration.`);
+      }
 
-    return verifies;
-  }
+      return continuation(verifies, context);
+    });
+  });
 
-  verifyType(context) {
+  verifyType(context, continuation) {
     let typeVerifies = false;
 
     const typeString = this.type.getString(),
@@ -132,77 +125,10 @@ export default define(class CotypeDeclaration extends Declaration {
       context.debug(`...verified the '${cotypeDeclarationString}' cotype declaration's '${typeString}' type`);
     }
 
-    return typeVerifies;
+    return continuation(typeVerifies ,context);
   }
 
-  verifySuperType(superType, superTypes, context) {
-    let superTypeVerifies = false;
-
-    const superTypeString = superType.getString(),
-          cotypeDeclarationString = this.getString(); ///
-
-    context.trace(`Verifying the '${cotypeDeclarationString}' cotype declaration's '${superTypeString}' super-type...`);
-
-    const nominalTypeName = superType.getNominalTypeName(),
-          typeName = nominalTypeName, ///
-          typeComparesToTypeName = this.type.compareTypeName(typeName);
-
-    if (!typeComparesToTypeName) {
-      superType = context.findTypeByNominalTypeName(nominalTypeName);
-
-      if (superType !== null) {
-        superTypes.push(superType);
-
-        superTypeVerifies = true;
-      } else {
-        context.debug(`The '${superTypeString}' super-type is not present.`);
-      }
-    } else {
-      context.debug(`The '${superTypeString}' super-type's name compares to the ${typeName}' type's name.`);
-    }
-
-    if (superTypeVerifies) {
-      context.debug(`...verified the '${cotypeDeclarationString}' cotype declaration's '${superTypeString}' super-type.`);
-    }
-
-    return superTypeVerifies;
-  }
-
-  verifySuperTypes(context) {
-    let superTypesVerify;
-
-    const superTypes = [],
-          cotypeDeclarationString = this.getString(); ///
-
-    context.trace(`Verifying the '${cotypeDeclarationString}' cotype declaration's super-types...`);
-
-    superTypesVerify = this.superTypes.asynchronousEvery((superType) => {
-      const superTypeVerifies = this.verifySuperType(superType, superTypes, context);
-
-      if (superTypeVerifies) {
-        return true;
-      }
-    });
-
-    if (superTypesVerify) {
-      const superTypesLength = superTypes.length;
-
-      if (superTypesLength === 0) {
-        const baseType = baseTypeFromNothing(),
-              superTyupe = baseType;  ///
-
-        superTypes.push(superTyupe);
-      }
-
-      this.type.setSuperTypes(superTypes);
-
-      context.debug(`...verified the '${cotypeDeclarationString}' cotype declaration's super-types.`);
-    }
-
-    return superTypesVerify;
-  }
-
-  verifyTypePrefix(context) {
+  verifyTypePrefix(context, continuation) {
     let typePrefixVerifies = false;
 
     const typeString = this.type.getString(),
@@ -222,32 +148,88 @@ export default define(class CotypeDeclaration extends Declaration {
       context.debug(`...verified the '${cotypeDeclarationString}' cotype declaration's '${typeString}' type's prefix.`);
     }
 
-    return typePrefixVerifies;
+    return continuation(typePrefixVerifies, context);
   }
 
-  async verifyPropertyDeclaratisons(context) {
-    let propertyDeclarationsVerify;
+  verifySuperTypes(context, continuation) {
+    const cotypeDeclarationString = this.getString(); ///
 
+    context.trace(`Verifying the '${cotypeDeclarationString}' cotype declaration's super-types...`);
+
+    const superTypes = []; ///
+
+    return asynchronousEvery(this.superTypes, (superType, context, continuation) => {
+      return this.verifySuperType(superType, superTypes, context, continuation);
+    }, context, (superTypesVerify, context) => {
+      if (superTypesVerify) {
+        const superTypesLength = superTypes.length;
+
+        if (superTypesLength === 0) {
+          const baseType = baseTypeFromNothing(),
+            superTyupe = baseType;  ///
+
+          superTypes.push(superTyupe);
+        }
+
+        this.type.setSuperTypes(superTypes);
+
+        context.debug(`...verified the '${cotypeDeclarationString}' cotype declaration's super-types.`);
+      }
+
+      return continuation(superTypesVerify, context);
+    });
+  }
+
+  verifySuperType(superType, superTypes, context, continuation) {
+    let superTypeVerifies = false;
+
+    const superTypeString = superType.getString(),
+      cotypeDeclarationString = this.getString(); ///
+
+    context.trace(`Verifying the '${cotypeDeclarationString}' cotype declaration's '${superTypeString}' super-type...`);
+
+    const nominalTypeName = superType.getNominalTypeName(),
+      typeName = nominalTypeName, ///
+      typeComparesToTypeName = this.type.compareTypeName(typeName);
+
+    if (!typeComparesToTypeName) {
+      superType = context.findTypeByNominalTypeName(nominalTypeName);
+
+      if (superType !== null) {
+        superTypes.push(superType);
+
+        superTypeVerifies = true;
+      } else {
+        context.debug(`The '${superTypeString}' super-type is not present.`);
+      }
+    } else {
+      context.debug(`The '${superTypeString}' super-type's name compares to the ${typeName}' type's name.`);
+    }
+
+    if (superTypeVerifies) {
+      context.debug(`...verified the '${cotypeDeclarationString}' cotype declaration's '${superTypeString}' super-type.`);
+    }
+
+    return continuation(superTypeVerifies, context);
+  }
+
+  verifyPropertyDeclaratisons(context, continuation) {
     const typeString = this.type.getString(),
           cotypeDeclarationString = this.getString(); ///
 
     context.trace(`Verifying the '${cotypeDeclarationString}' cotype declaration's '${typeString}' type's property declarations...`);
 
-    await anticipate(async (context) => {
-      propertyDeclarationsVerify = await asynchronousEvery(this.propertyDeclarations, async (propertyDeclaration) => {
-        const propertyVerifes = await propertyDeclaration.verify(context);
-
-        if (propertyVerifes) {
-          return true;
+    return anticipate((context) => {
+      return asynchronousEvery(this.propertyDeclarations, (propertyDeclaration, context, continuation) => {
+        return propertyDeclaration.verify(context, continuation);
+      }, context, (propertyDeclarationsVerify, context) => {
+        if (propertyDeclarationsVerify) {
+          context.debug(`...verified the '${cotypeDeclarationString}' cotype declaration's '${typeString}' type's property declarations.`);
         }
+
+        return continuation(propertyDeclarationsVerify, context);
       });
     }, this.type, context);
-
-    if (propertyDeclarationsVerify) {
-      context.debug(`...verified the '${cotypeDeclarationString}' cotype declaration's '${typeString}' type's property declarations.`);
-    }
-
-    return propertyDeclarationsVerify;
   }
 
   static name = "CotypeDeclaration";

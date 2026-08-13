@@ -3,6 +3,8 @@
 import { Element, breakPointUtilities } from "occam-languages";
 
 import { define } from "../elements";
+import { exists } from "../utilities/continuation";
+import { desist, declare } from "../utilities/state";
 import { instantiateProperty } from "../process/instantiate";
 import { termFromPropertyNode } from "../utilities/element";
 import { unifyTermWithProperty } from "../process/unify";
@@ -54,56 +56,96 @@ export default define(class Property extends Element {
     this.type = type;
   }
 
-  async verify(context) {
+  verify(context, continuation) {
     let verifies = false;
 
     const includeType = false,
-          propertyString = this.getString(includeType); ///
+          propertyString = this.getString(includeType);  ///
 
     context.trace(`Verifying the '${propertyString}' property...`);
 
-    await attempt(async (context) => {
-      const termValidates = await this.validateTerm(context);
+    declare((state) => {
+      desist((state) => {
+        const validates = this.validate(state, context, (ocmbinator, context) => true);
 
-      if (termValidates) {
-        verifies = true;
-      }
-
-      if (verifies) {
-        this.commit(context);
-      }
-    }, context);
+        if (validates) {
+          verifies = true;
+        }
+      }, state);
+    });
 
     if (verifies) {
       context.debug(`...verified the '${propertyString}' property.`);
     }
 
-    return verifies;
+    return continuation(verifies, context);
   }
 
-  async validateTerm(context) {
-    let termValidates = false;
+  validate(state, context, continuation) {
+    let validates;
 
     const includeType = false,
-          propertyString = this.getString(includeType); ///
+          specificContext = context,  ///
+          propertyString = this.getString(includeType);  ///
+
+    context.trace(`Validating the '${propertyString}' property...`);
+
+    const property = this;
+
+    attempt((context) => {
+      const validateTermAsProperty = this.validateTermAsProperty.bind(this);
+
+      validates = exists([
+        validateTermAsProperty
+      ], state, context, (state, context) => {
+        let validates;
+
+        this.commit(context);
+
+        context = specificContext;  ///
+
+        validates = continuation(property, context);
+
+        return validates;
+      });
+    }, context);
+
+    context = specificContext;  ///
+
+    if (validates) {
+      context.debug(`...validated the '${propertyString}' property.`);
+    }
+
+    return validates;
+  }
+
+  validateTermAsProperty(state, context, continuation) {
+    let termValidatesAsProperty = false;
+
+    const includeType = false,
+          propertyString = this.getString(includeType);  ///
 
     context.trace(`Validating the '${propertyString}' property's term...`);
 
-    const termValidatesAsProperty = validateTermAsProperty(this.term, context);
+    termValidatesAsProperty = validateTermAsProperty(this.term, context, (context) => {
+      let validates;
+
+      validates = continuation(state, context);
+
+      return validates;
+    });
 
     if (termValidatesAsProperty) {
-      termValidates = true;
-    }
-
-    if (termValidates) {
       context.debug(`...validated the '${propertyString}' property's term.`);
     }
 
-    return termValidates;
+    return termValidatesAsProperty;
   }
 
-  async unifyTerm(term, context, validateForwards) {
+  unifyTerm(term, context, validateForwards) {
     let termUnifies = false;
+
+    debugger
 
     const termString = term.getString(),
           includeType = false,
@@ -124,7 +166,7 @@ export default define(class Property extends Element {
 
       term.setProvisional(provisional);
 
-      const validatesForwards = await validateForwards(term, context);
+      const validatesForwards = validateForwards(term, context);
 
       if (validatesForwards) {
         termUnifies = true;

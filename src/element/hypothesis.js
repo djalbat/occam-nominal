@@ -37,8 +37,6 @@ export default define(class Hypothesis extends Element {
   verify(context) {
     let verifies = false;
 
-    this.break(context);
-
     const hypothesisString = this.getString(); ///
 
     context.trace(`Verifying the '${hypothesisString}' hypothesis...`);

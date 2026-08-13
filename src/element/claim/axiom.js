@@ -101,8 +101,6 @@ export default define(class Axiom extends Claim {
   unifyDeduction(deduction, context) {
     let deductionUnifies;
 
-    this.break(context);
-
     const axiomString = this.getString(), ///
           generalDeduction = this.deduction,  ///
           specificDeduction = deduction,  ///

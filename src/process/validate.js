@@ -54,7 +54,7 @@ class ValidateTermAsPropertyPass extends ContinuationPass {
               typePresent = context.isTypePresentByNominalTypeName(nominalTypeName);
 
         if (typePresent) {
-          success = continuation( ontext);
+          success = continuation(context);
         }
 
         return success;

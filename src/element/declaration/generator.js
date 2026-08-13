@@ -1,8 +1,13 @@
 "use strict";
 
+import { breakPointUtilities, continuationUtilities } from "occam-languages";
+
 import Declaration from "../declaration";
 
 import { define } from "../../elements";
+
+const { breakable } = breakPointUtilities,
+      { asynchronousAll } = continuationUtilities;
 
 export default define(class GeneratorDeclaration extends Declaration {
   constructor(context, string, node, breakPoint, type, provisional, generator) {
@@ -34,38 +39,34 @@ export default define(class GeneratorDeclaration extends Declaration {
 
   setHypotheses(hypotheses) { this.generator.setHypotheses(hypotheses); }
 
-  async verify(context) {
-    let verifies = false;
-
-    await this.break(context);
-
+  verify = breakable(function (context, continuation) {
     const generatorDeclarationString = this.getString();  ///
 
     context.trace(`Verifying the '${generatorDeclarationString}' generator declaration...`);
 
-    const typeVerified = this.verifyType(context);
+    const verifyCotype = this.verifyCotype.bind(this),
+          verifyGenerator = this.verifyGenerator.bind(this);
 
-    if (typeVerified) {
-      const generatorVerifies = this.verifyGenerator(context);
-
-      if (generatorVerifies) {
+    return asynchronousAll([
+      verifyCotype,
+      verifyGenerator
+    ], context, (verifies, context) => {
+      if (verifies) {
         this.generator.setType(this.type);
 
         context.addGenerator(this.generator);
-
-        verifies = true;
       }
-    }
 
-    if (verifies) {
-      context.debug(`...verified the '${generatorDeclarationString}' generator declaration.`);
-    }
+      if (verifies) {
+        context.debug(`...verified the '${generatorDeclarationString}' generator declaration.`);
+      }
 
-    return verifies;
-  }
+      return continuation(verifies, context);
+    });
+  });
 
-  verifyType(context) {
-    let typeVerifies = false;
+  verifyCotype(context, continuation) {
+    let cotypeVerifies = false;
 
     const generatorDeclarationString = this.getString();  ///
 
@@ -85,11 +86,11 @@ export default define(class GeneratorDeclaration extends Declaration {
         if (!typeComparesToProvisional) {
           provisional ?
             context.debug(`The '${typeString}' type is present but not provisional.`) :
-              context.debug(`The '${typeString}' type is present but provisional.`);
+                context.debug(`The '${typeString}' type is present but provisional.`);
         } else {
           this.type = type;
 
-          typeVerifies = true;
+          cotypeVerifies = true;
         }
       } else {
         context.debug(`The '${typeString}' type is not a cotype.`);
@@ -98,29 +99,27 @@ export default define(class GeneratorDeclaration extends Declaration {
       context.debug(`The '${typeString}' type is not present.`);
     }
 
-    if (typeVerifies) {
+    if (cotypeVerifies) {
       context.debug(`...verified the '${generatorDeclarationString}' generator declaration's type.`);
     }
 
-    return typeVerifies;
+    return continuation(cotypeVerifies, context);
   }
 
-  verifyGenerator(context) {
-    let generatorVerifies;
-
+  verifyGenerator(context, continuation) {
     const includeType = false,
           generatorString = this.generator.getString(includeType),
           generatorDeclarationString = this.getString();  ///
 
     context.trace(`Verifying the '${generatorDeclarationString}' generator declaration's '${generatorString}' generator...`);
 
-    generatorVerifies = this.generator.verify(context);
+    return this.generator.verify(context, (generatorVerifies, context) => {
+      if (generatorVerifies) {
+        context.debug(`...verified the '${generatorDeclarationString}' generator declaration's '${generatorString}' generator.`);
+      }
 
-    if (generatorVerifies) {
-      context.debug(`...verified the '${generatorDeclarationString}' generator declaration's '${generatorString}' generator.`);
-    }
-
-    return generatorVerifies;
+      return continuation(generatorVerifies, context);
+    });
   }
 
   static name = "GeneratorDeclaration";
