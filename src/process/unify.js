@@ -570,25 +570,31 @@ export function unifyStatement(generalStatement, specificStatement, generalConte
 }
 
 export function unifyMetavariable(generalMetavariable, specificMetavariable, generalContext, specificContext, continuation) {
-  let metavaraibleUnifies;
+  let metavaraibleUnifies = false;
 
   const generalMetavariableNode = generalMetavariable.getNode(),
-        specificMetavariableNode = specificMetavariable.getNode();
+        specificMetavariableNode = specificMetavariable.getNode(),
+        success = unifyMetavariablePass.run(generalMetavariableNode, specificMetavariableNode, generalContext, specificContext, continuation);
 
-  metavaraibleUnifies = unifyMetavariablePass.run(generalMetavariableNode, specificMetavariableNode, generalContext, specificContext, continuation);
+  if (success) {
+    metavaraibleUnifies = true;
+  }
 
   return metavaraibleUnifies;
 }
 
 export function unifyTermIntrinsically(generalTerm, specificTerm, generalContext, specificContext, continuation) {
-  let termUnifiesIntrinsically;
+  let termUnifiesIntrinsically = false;
 
   const generalTermNode = generalTerm.getNode(),
         specificTermNode = specificTerm.getNode(),
         generalNode = generalTermNode, ///
-        specificNode = specificTermNode; ///
+        specificNode = specificTermNode, ///
+        success = unifyTermInstrinsicallyPass.run(generalNode, specificNode, generalContext, specificContext, continuation);
 
-  termUnifiesIntrinsically = unifyTermInstrinsicallyPass.run(generalNode, specificNode, generalContext, specificContext, continuation);
+  if (success) {
+    termUnifiesIntrinsically = true;
+  }
 
   return termUnifiesIntrinsically;
 }
@@ -603,49 +609,61 @@ export function unifyMetavariableIntrinsically(generalMetavariable, specificMeta
 }
 
 export function unifyTermWithProperty(term, property, generalContext, specificContext, continuation) {
-  let termUnifiesWithProperty;
+  let termUnifiesWithProperty = false;
 
   const termNode = term.getNode(),
         propertyTerm = property.getTerm(),
-        propertyTermNode = propertyTerm.getNode();
+        propertyTermNode = propertyTerm.getNode(),
+        success = unifyTermWithPropertyPass.run(propertyTermNode, termNode, generalContext, specificContext, continuation);
 
-  termUnifiesWithProperty = unifyTermWithPropertyPass.run(propertyTermNode, termNode, generalContext, specificContext, continuation);
+  if (success) {
+    termUnifiesWithProperty = true;
+  }
 
   return termUnifiesWithProperty;
 }
 
 export function unifyTermWithGenerator(term, generator, generalContext, specificContext, continuation) {
-  let termUNifiesWithCombinator;
+  let termUNifiesWithCombinator = false;
 
   const termNode = term.getNode(),
         generatorTerm = generator.getTerm(),
-        generatorTermNode = generatorTerm.getNode();
+        generatorTermNode = generatorTerm.getNode(),
+        success = unifyTermWithGeneratorPass.run(generatorTermNode, termNode, generalContext, specificContext, continuation);
 
-  termUNifiesWithCombinator = unifyTermWithGeneratorPass.run(generatorTermNode, termNode, generalContext, specificContext, continuation);
+  if (success) {
+    termUNifiesWithCombinator = true;
+  }
 
   return termUNifiesWithCombinator;
 }
 
 export function unifyTermWithConstructor(term, constructor, generalContext, specificContext, continuation) {
-  let termUnifiesWithConstructor;
+  let termUnifiesWithConstructor = false;
 
   const termNode = term.getNode(),
         constructorTerm = constructor.getTerm(),
-        constructorTermNode = constructorTerm.getNode();
+        constructorTermNode = constructorTerm.getNode(),
+        success = unifyTermWithConstructorPass.run(constructorTermNode, termNode, generalContext, specificContext, continuation);
 
-  termUnifiesWithConstructor = unifyTermWithConstructorPass.run(constructorTermNode, termNode, generalContext, specificContext, continuation);
+  if (success) {
+    termUnifiesWithConstructor = true;
+  }
 
   return termUnifiesWithConstructor;
 }
 
 export function unifyStatementWithCombinator(statement, combinator, generalContext, specificContext, continuation) {
-  let statementUnifiesWithCombinator;
+  let statementUnifiesWithCombinator = false;
 
   const statementNode = statement.getNode(),
         combinatorStatement = combinator.getStatement(),
-        combinatorStatementNode = combinatorStatement.getNode();
+        combinatorStatementNode = combinatorStatement.getNode(),
+        success = unifyStatementWithCombinatorPass.run(combinatorStatementNode, statementNode, generalContext, specificContext, continuation);
 
-  statementUnifiesWithCombinator = unifyStatementWithCombinatorPass.run(combinatorStatementNode, statementNode, generalContext, specificContext, continuation);
+  if (success) {
+    statementUnifiesWithCombinator = true;
+  }
 
   return statementUnifiesWithCombinator;
 }

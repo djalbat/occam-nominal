@@ -217,6 +217,24 @@ export default class Context extends ContextBase {
     return factOrSubproofs;
   }
 
+  getProperties() {
+    const properties = [],
+          types = this.getTypes();
+
+    types.forEach((type) => {
+      type.getProperties(properties);
+    });
+
+    return properties;
+  }
+
+  getTypes() {
+    const context = this.getContext(),
+          types = context.getTypes();
+
+    return types;
+  }
+
   findMetavariable(metavariable, context) {
     const childContext = context; ///
 

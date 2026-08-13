@@ -64,26 +64,22 @@ export default class Resolution extends Element {
   validateStatement(state, context, continuation) {
     let statementValidates;
 
-    if (this.statement !== null) {
-      const resolutionString = this.getString();  ///
+    const resolutionString = this.getString();  ///
 
-      context.trace(`Validating the '${resolutionString}' resolution's statement...`);
+    context.trace(`Validating the '${resolutionString}' resolution's statement...`);
 
-      statementValidates = this.statement.validate(state, context, (statement, context) => {
-        let validates;
+    statementValidates = this.statement.validate(state, context, (statement, context) => {
+      let validates;
 
-        this.statement = statement;
+      this.statement = statement;
 
-        validates = continuation(state, context);
+      validates = continuation(state, context);
 
-        return validates;
-      });
+      return validates;
+    });
 
-      if (statementValidates) {
-        context.trace(`...validated the '${resolutionString}' resolution's statement.`);
-      }
-    } else {
-      statementValidates = continuation(state, context);
+    if (statementValidates) {
+      context.trace(`...validated the '${resolutionString}' resolution's statement.`);
     }
 
     return statementValidates;

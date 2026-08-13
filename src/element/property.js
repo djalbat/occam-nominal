@@ -142,35 +142,33 @@ export default define(class Property extends Element {
     return termValidatesAsProperty;
   }
 
-  unifyTerm(term, context, validateForwards) {
+  unifyTerm(term, context, continuation) {
     let termUnifies = false;
 
-    debugger
-
     const termString = term.getString(),
-          includeType = false,
+          includeType = true,
           propertyString = this.getString(includeType);  ///
 
     context.trace(`Unifying the '${termString}' term with the '${propertyString}' property...`);
 
     const property = this, ///
-          propertyContext = this.getContext(),  ///
+          propertyContext = property.getContext(),
           generalContext = propertyContext,  ///
           specifiContext = context, ///
-          termUnifiesWithProperty = unifyTermWithProperty(term, property, generalContext, specifiContext);
+          termUnifiesWithProperty = unifyTermWithProperty(term, property, generalContext, specifiContext, (generalContext, specifiContext) => {
+            let termUnifiesWithProperty;
+
+            const context = specifiContext; ///
+
+            term.setType(this.type);
+
+            termUnifiesWithProperty = continuation(term, context);
+
+            return termUnifiesWithProperty;
+          });
 
     if (termUnifiesWithProperty) {
-      const provisional = this.type.isProvisional();
-
-      term.setType(this.type);
-
-      term.setProvisional(provisional);
-
-      const validatesForwards = validateForwards(term, context);
-
-      if (validatesForwards) {
-        termUnifies = true;
-      }
+      termUnifies = true;
     }
 
     if (termUnifies) {

@@ -13,7 +13,7 @@ const termNodeQuery = nodeQuery("/term"),
       typeNodeQuery = nodeQuery("/type"),
       statementNodeQuery = nodeQuery("/statement");
 
-class ValidateTermAsPropertyPass extends ContinuationPass {
+class ValidateTermPass extends ContinuationPass {
   run(termNode, context, continuation) {
     const nonTerminalNode = termNode,  ///
           childNodes = nonTerminalNode.getChildNodes(),
@@ -29,18 +29,21 @@ class ValidateTermAsPropertyPass extends ContinuationPass {
       run: (termNode, context, continuation) => {
         let success = false;
 
-        const term = termFromTermNode(termNode, context),
-              termValidates = term.validate(state, context, (term, context) => {
-                let validates;
+        const term = termFromTermNode(termNode, context);
 
-                validates = continuation(context);
+        declare((state) => {
+          const termValidates = term.validate(state, context, (term, context) => {
+            let validates;
 
-                return validates;
-              });
+            validates = continuation(context);
 
-        if (termValidates) {
-          success = true;
-        }
+            return validates;
+          });
+
+          if (termValidates) {
+            success = true;
+          }
+        });
 
         return success;
       }
@@ -63,107 +66,7 @@ class ValidateTermAsPropertyPass extends ContinuationPass {
   ];
 }
 
-class ValidateTermAsGeneratorPass extends ContinuationPass {
-  run(termNode, context, continuation) {
-    const nonTerminalNode = termNode,  ///
-          childNodes = nonTerminalNode.getChildNodes(),
-          descended = this.descend(childNodes, context, continuation),
-          success = descended;  ///
-
-    return success;
-  }
-
-  static maps = [
-    {
-      nodeQuery: termNodeQuery,
-      run: (termNode, context, continuation) => {
-        let success = false;
-
-        const term = termFromTermNode(termNode, context),
-              termValidates = term.validate(state, context, (term, context) => {
-                let validates;
-
-                validates = continuation(context);
-
-                return validates;
-              });
-
-        if (termValidates) {
-          success = true;
-        }
-
-        return success;
-      }
-    },
-    {
-      nodeQuery: typeNodeQuery,
-      run: (typeNode, context, continuation) => {
-        let success = false;
-
-        const nominalTypeName = typeNode.getNominalTypeName(),
-              typePresent = context.isTypePresentByNominalTypeName(nominalTypeName);
-
-        if (typePresent) {
-          success = continuation(context);
-        }
-
-        return success;
-      }
-    }
-  ];
-}
-
-class ValidateTermAsConstructorPass extends ContinuationPass {
-  run(termNode, context, continuation) {
-    const nonTerminalNode = termNode,  ///
-          childNodes = nonTerminalNode.getChildNodes(),
-          descended = this.descend(childNodes, context, continuation),
-          success = descended;  ///
-
-    return success;
-  }
-
-  static maps = [
-    {
-      nodeQuery: termNodeQuery,
-      run: (termNode, context, continuation) => {
-        let success = false;
-
-        const term = termFromTermNode(termNode, context),
-              termValidates = term.validate(state, context, (term, context) => {
-                let validates;
-
-                validates = continuation(context);
-
-                return validates;
-              });
-
-        if (termValidates) {
-          success = true;
-        }
-
-        return success;
-      }
-    },
-    {
-      nodeQuery: typeNodeQuery,
-      run: (typeNode, context, continuation) => {
-        let success = false;
-
-        const nominalTypeName = typeNode.getNominalTypeName(),
-              typePresent = context.isTypePresentByNominalTypeName(nominalTypeName);
-
-        if (typePresent) {
-          success = continuation(context);
-        }
-
-        return success;
-      }
-    }
-  ];
-}
-
-class ValidateStatementAsCombinatorPass extends ContinuationPass {
+class ValidateStatementPass extends ContinuationPass {
   run(statementNode, context, continuation) {
     const nonTerminalNode = statementNode,  ///
           childNodes = nonTerminalNode.getChildNodes(),
@@ -177,7 +80,7 @@ class ValidateStatementAsCombinatorPass extends ContinuationPass {
     {
       nodeQuery: statementNodeQuery,
       run: (statementNode, context, continuation) => {
-        let success;
+        let success = false;
 
         const statement = statementFromStatementNode(statementNode, context);
 
@@ -185,7 +88,7 @@ class ValidateStatementAsCombinatorPass extends ContinuationPass {
           const statementValidates = statement.validate(state, context, (statement, context) => {
             let validates;
 
-            validates = continuation(success, context);
+            validates = continuation(context);
 
             return validates;
           });
@@ -195,7 +98,7 @@ class ValidateStatementAsCombinatorPass extends ContinuationPass {
           }
         });
 
-        return true;
+        return success;
       }
     },
     {
@@ -203,18 +106,21 @@ class ValidateStatementAsCombinatorPass extends ContinuationPass {
       run: (termNode, context, continuation) => {
         let success = false;
 
-        const term = termFromTermNode(termNode, context),
-              termValidates = term.validate(state, context, (term, context) => {
-                let validates;
+        const term = termFromTermNode(termNode, context);
 
-                validates = continuation(context);
+        declare((state) => {
+          const termValidates = term.validate(state, context, (term, context) => {
+            let validates;
 
-                return validates;
-              });
+            validates = continuation(context);
 
-        if (termValidates) {
-          success = true;
-        }
+            return validates;
+          });
+
+          if (termValidates) {
+            success = true;
+          }
+        });
 
         return success;
       }
@@ -237,39 +143,57 @@ class ValidateStatementAsCombinatorPass extends ContinuationPass {
   ];
 }
 
-const validateTermAsPropertyPass = new ValidateTermAsPropertyPass(),
-      validateTermAsGeneratorPass = new ValidateTermAsGeneratorPass(),
-      validateTermAsConstructorPass = new ValidateTermAsConstructorPass(),
-      validateStatementAsCombinatorPass = new ValidateStatementAsCombinatorPass();
+const validateTermPass = new ValidateTermPass(),
+      validateStatementPass = new ValidateStatementPass();
 
 export function validateTermAsProperty(term, context, continuation) {
+  let termValidatesAsProperty = false;
+
   const termNode = term.getNode(),
-        success = validateTermAsPropertyPass.run(termNode, context, continuation),
-        termValidatesAsProperty = success;  ///
+        success = validateTermPass.run(termNode, context, continuation);
+
+  if (success) {
+    termValidatesAsProperty = true;
+  }
 
   return termValidatesAsProperty;
 }
 
 export function validateTermAsGenerator(term, context, continuation) {
+  let termValidatesAsGenerator = false;
+
   const termNode = term.getNode(),
-        success = validateTermAsGeneratorPass.run(termNode, context, continuation),
-        termValidatesAsGenerator = success; ///
+        success = validateTermPass.run(termNode, context, continuation);
+
+  if (success) {
+    termValidatesAsGenerator = true;
+  }
 
   return termValidatesAsGenerator;
 }
 
 export function validateTermAsConstructor(term, context, continuation) {
+  let termValidatesAsConstructor = false;
+
   const termNode = term.getNode(),
-        success = validateTermAsConstructorPass.run(termNode, context, continuation),
-        termValidatesAsConstructor = success; ///
+        success = validateTermPass.run(termNode, context, continuation);
+
+  if (success) {
+    termValidatesAsConstructor = true;
+  }
 
   return termValidatesAsConstructor;
 }
 
 export function validateStatementAsCombinator(statement, context, continuation) {
+  let statementValidatesAsCombinator = false;
+
   const statementNode = statement.getNode(),
-        success = validateStatementAsCombinatorPass.run(statementNode, context, continuation),
-        statementValidatesAsCombinator = success; ///
+        success = validateStatementPass.run(statementNode, context, continuation);
+
+  if (success) {
+    statementValidatesAsCombinator = true;
+  }
 
   return statementValidatesAsCombinator;
 }

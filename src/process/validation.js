@@ -479,32 +479,6 @@ function validateStatementAsSignatureAssertion(statement, state, context, contin
   return statementValidatesAsSignatureAssertion;
 }
 
-export function unifyTermWithProperties(term, state, context, continuation) {
-  let termUnifiesWithProperties;
-
-  const properties = context.getProperties();
-
-  return some(properties, (property) => {
-    let termUnifiesWithProperty = false;
-
-    return choose((context) => {
-      const termUnifies = property.unifyTerm(term, state, context, continuation);
-
-      if (termUnifies) {
-        termUnifiesWithProperty = true;
-
-        context.commit();
-      }
-    }, context);
-
-    if (termUnifiesWithProperty) {
-      return true;
-    }
-  }, context);
-
-  return termUnifiesWithProperties;
-}
-
 export const validateTerms = [
   validateTermAsVariable,
   unifyTermWithGenerators,
@@ -524,6 +498,41 @@ export const validateStatements = [
   validateStatementAsContainedAssertion,
   validateStatementAsSignatureAssertion
 ];
+
+export function unifyTermWithProperties(term, state, context, continuation) {
+  let termUnifiesWithProperties;
+
+  const termString = term.getString(),
+        properties = context.getProperties();
+
+  context.trace(`Unifying the '${termString}' term with properties...`);
+
+  termUnifiesWithProperties = some(properties, (property, context, continuation) => {
+    let termUnifies;
+
+    choose((context) => {
+      termUnifies = property.unifyTerm(term, context, (term, context) => {
+        let termUnifies;
+
+        termUnifies = continuation(term, context);
+
+        return termUnifies;
+      });
+
+      if (termUnifies) {
+        context.commit();
+      }
+    }, context);
+
+    return termUnifies;
+  }, context, continuation);
+
+  if (termUnifiesWithProperties) {
+    context.debug(`...unified the '${termString}' term with properties.`);
+  }
+
+  return termUnifiesWithProperties;
+}
 
 function validateSubstitution(statement, context, continuation) {
   let substitutionValidates;

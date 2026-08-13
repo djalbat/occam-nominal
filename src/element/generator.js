@@ -1,20 +1,19 @@
 "use strict";
 
-import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
+import { Element, breakPointUtilities } from "occam-languages";
 
 import { define } from "../elements";
-import { exists } from "../utilities/continuation";
+import { every, exists } from "../utilities/continuation";
 import { desist, declare } from "../utilities/state";
 import { baseTypeFromNothing } from "../utilities/type";
 import { instantiateGenerator } from "../process/instantiate";
 import { termFromGeneratorNode } from "../utilities/element";
 import { unifyTermWithGenerator } from "../process/unify";
 import { validateTermAsGenerator } from "../process/validate";
-import { typeFromJSON, typeToTypeJSON } from "../utilities/json";
 import { attempt, serialise, unserialise, instantiate } from "../utilities/context";
+import { typeFromJSON, typeToTypeJSON, hypothesesFromJSON, hypothesesToHypothesesJSON } from "../utilities/json";
 
-const { asynchronousEvery } = continuationUtilities,
-      { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
+const { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Generator extends Element {
   constructor(context, string, node, breakPoint, term, type, hypotheses) {
@@ -250,36 +249,42 @@ export default define(class Generator extends Element {
   dischargeHypothesisGivenTerm(hypothesis, term, context) {
     let hypothesisDischargesGivenTerm;
 
-    this.break(context);
+    debugger
 
-    const termString = term.getString(),
-          hypothesisString = hypothesis.getString(),
-          generatorString = this.getString(); ///
-
-    context.trace(`Discharding the '${generatorString}' generator's '${hypothesisString}' hypothesis given the '${termString}' term...`);
-
-    hypothesisDischargesGivenTerm = hypothesis.dischargeGivenTerm(term, context);
-
-    if (hypothesisDischargesGivenTerm) {
-      context.trace(`...discharges the '${generatorString}' generator's '${hypothesisString}' hypothesis given the '${termString}' term.`);
-    }
+    // const termString = term.getString(),
+    //       hypothesisString = hypothesis.getString(),
+    //       generatorString = this.getString(); ///
+    //
+    // context.trace(`Discharding the '${generatorString}' generator's '${hypothesisString}' hypothesis given the '${termString}' term...`);
+    //
+    // hypothesisDischargesGivenTerm = hypothesis.dischargeGivenTerm(term, context);
+    //
+    // if (hypothesisDischargesGivenTerm) {
+    //   context.trace(`...discharges the '${generatorString}' generator's '${hypothesisString}' hypothesis given the '${termString}' term.`);
+    // }
 
     return hypothesisDischargesGivenTerm;
   }
 
-  dischargeHypothesesGivenTerm(term, context) {
-    let hypothesesDischargesGivenTerm = true;  ///
+  dischargeHypothesesGivenTerm(term, context, continuation) {
+    let hypothesesDischargesGivenTerm;
 
     const hypothetical = this.isHypothetical();
 
-    if (hypothetical) {
-      hypothesesDischargesGivenTerm = asynchronousEvery(this.hypotheses, (hypothesis) => {
-        const hypothesisDischarges = this.dischargeHypothesisGivenTerm(hypothesis, term, context);
+    if(!hypothetical) {
+      hypothesesDischargesGivenTerm = continuation(context);
+    } else {
+      const generatorString = this.getString();
 
-        if (hypothesisDischarges) {
-          return true;
-        }
-      });
+      context.trace(`Discharing the '${generatorString}' generator's hhypotheses...`);
+
+      const dischargeHypothesisGivenTerm = this.dischargeHypothesisGivenTerm.bind(this);
+
+      hypothesesDischargesGivenTerm = every(this.hypotheses, term, context, dischargeHypothesisGivenTerm, continuation);
+
+      if (hypothesesDischargesGivenTerm) {
+        context.debug(`...discharged the '${generatorString}' generator's hhypotheses.`);
+      }
     }
 
     return hypothesesDischargesGivenTerm;
@@ -291,6 +296,7 @@ export default define(class Generator extends Element {
     return serialise((context) => {
       const includeType = false,
             typeJSON = typeToTypeJSON(this.type),
+            hypothesesJSON = hypothesesToHypothesesJSON(this.hypotheses),
             string = this.getString(includeType);
 
       let breakPoint;
@@ -302,11 +308,13 @@ export default define(class Generator extends Element {
       breakPoint = breakPointJSON;  ///
 
       const type = typeJSON,  ///
+            hypotheses = hypothesesJSON,  ///
             json = {
               context,
               string,
               breakPoint,
-              type
+              type,
+              hypotheses
             };
 
       return json;
@@ -325,9 +333,10 @@ export default define(class Generator extends Element {
               node = generatorNode, ///
               breakPoint = breakPointFromJSON(json),
               term = termFromGeneratorNode(generatorNode, context),
-              type = typeFromJSON(json, context);
+              type = typeFromJSON(json, context),
+              hypotheses = hypothesesFromJSON(json, context);
 
-        generator = new Generator(context, string, node, breakPoint, term, type);
+        generator = new Generator(context, string, node, breakPoint, term, type, hypotheses);
       }, json, context);
     }, context);
 

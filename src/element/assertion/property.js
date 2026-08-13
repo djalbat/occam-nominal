@@ -4,13 +4,14 @@ import { breakPointUtilities } from "occam-languages";
 
 import Assertion from "../assertion";
 
+import { all } from "../../utilities/continuation";
 import { define } from "../../elements";
 import { instantiate } from "../../utilities/context";
-import { isDeclared, isTransient } from "../../utilities/state";
+import { isDerived, isTransient } from "../../utilities/state";
+import { unifyTermWithProperties } from "../../process/validation";
 import { instantiatePropertyAssertion } from "../../process/instantiate";
 import { variableAssignmentFromPrepertyAssertion } from "../../process/assign";
 import { propertyAssertionFromStatementNode, subjectTermFromPropertyAssertionNode, propertyTermFromPropertyAssertionNode } from "../../utilities/element";
-import {all, exists} from "../../utilities/continuation";
 
 const { breakPointFromJSON } = breakPointUtilities;
 
@@ -71,23 +72,11 @@ export default define(class PropertyAssertion extends Assertion {
       ], state, context, (state, context) => {
         let validates;
 
-        const validateWhenDeclared = this.validateWhenDeclared.bind(this),
-              validateWhenDerived = this.validateWhenDerived.bind(this);
+        context.addAssertion(assertion);
 
-        validates = exists([
-          validateWhenDeclared,
-          validateWhenDerived
-        ], state, context, (state, context) => {
-          let validates;
+        const propertyAssertion = assertion; ///
 
-          context.addAssertion(assertion);
-
-          const propertyAssertion = assertion; ///
-
-          validates = continuation(propertyAssertion, context);
-
-          return validates;
-        });
+        validates = continuation(propertyAssertion, context);
 
         return validates;
       });
@@ -104,85 +93,65 @@ export default define(class PropertyAssertion extends Assertion {
     return validates;
   }
 
-  validateTerms(context) {
+  validateTerms(state, context, continuation) {
     let termsValidate = false;
 
-    const factString = this.getString(); ///
+    const propertyAssertionString = this.getString(); ///
 
-    context.trace(`Validating the '${factString}' fact's terms...`);
+    context.trace(`Validating the '${propertyAssertionString}' property assertion's terms...`);
 
-    let subjectTerm,
-        propertyTerm;
-
-    propertyTerm = this.propertyTerm.validateAsProperty(context, (propertyTerm, context) => {
-      let validatesForwards = false;
-
-      subjectTerm = this.subjectTerm.validate(state, context, (subjectTerm, context) => {
-        let validatesForwards = false;
+    const subjectTermValidtes = this.subjectTerm.validate(state, context, (subjectTerm, context) => {
+      const propertyTermValidates = this.validatePropertyTerm(state, context, (propertyTerm, context) => {
+        let validates = false;
 
         const subjectTermType = subjectTerm.getType(),
               propertyTermType = propertyTerm.getType(),
               subjectTermTypeEqualToSubTypeOrSuperTypeOfPropertyTermType = subjectTermType.isEqualToSubTypeOrSuperTypeOf(propertyTermType);
 
         if (subjectTermTypeEqualToSubTypeOrSuperTypeOfPropertyTermType) {
-          validatesForwards = true;
+          this.subjectTerm = subjectTerm;
+
+          this.propertyTerm = propertyTerm;
+
+          validates = continuation(state, context);
         }
 
-        return validatesForwards;
+        return validates;
       });
 
-      if (subjectTerm !== null) {
-        validatesForwards = true;
-      }
-
-      return validatesForwards;
+      return propertyTermValidates;
     });
 
-    if (propertyTerm !== null) {
-      this.subjectTerm = subjectTerm;
-
-      this.propertyTerm = propertyTerm;
-
+    if (subjectTermValidtes) {
       termsValidate = true;
     }
 
     if (termsValidate) {
-      context.debug(`...validated the '${factString}' fact's terms.`);
+      context.debug(`...validated the '${propertyAssertionString}' property assertion's terms.`);
     }
 
     return termsValidate;
   }
 
-  validateWhenDeclared(context) {
-    let validateWhenDeclared;
+  validatePropertyTerm(state, context, continuation) {
+    let propertyTermValidates = false;
 
-    const typeAssertionString = this.getString(); ///
+    const includeType = false,
+          propertyString = this.getString(includeType);  ///
 
-    context.trace(`Validating the '${typeAssertionString}' declared property assertion...`);
+    context.trace(`Validating the '${propertyString}' property assertion's property term...`);
 
-    validateWhenDeclared = true;
+    const propertyTermUnifiesWithProperties = unifyTermWithProperties(this.propertyTerm, state, context, continuation)
 
-    if (validateWhenDeclared) {
-      context.debug(`...validated the '${typeAssertionString}' declared property assertion.`);
+    if (propertyTermUnifiesWithProperties) {
+      propertyTermValidates = true;
     }
 
-    return validateWhenDeclared;
-  }
-
-  validateWhenDerived(context) {
-    let validatesWhenDerived;
-
-    const typeAssertionString = this.getString(); ///
-
-    context.trace(`Validating the '${typeAssertionString}' derived property assertion...`);
-
-    validatesWhenDerived = true;
-
-    if (validatesWhenDerived) {
-      context.debug(`...validated the '${typeAssertionString}' derived property assertion.`);
+    if (propertyTermValidates) {
+      context.debug(`...validated the '${propertyString}' property assertion's property term.`);
     }
 
-    return validatesWhenDerived;
+    return propertyTermValidates;
   }
 
   assign(state, context) {

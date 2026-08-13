@@ -254,45 +254,39 @@ export default define(class Constructor extends Element {
     if(!hypothetical) {
       hypothesesDischargesGivenTerm = continuation(context);
     } else {
-      const constructxorString = this.getString();
+      const constructorString = this.getString();
 
-      context.trace(`Discharing the '${constructxorString}' constructor's hhypotheses...`);
+      context.trace(`Discharing the '${constructorString}' constructor's hhypotheses...`);
 
-      hypothesesDischargesGivenTerm = every(this.hypotheses, context, (hypothesis, context, continuation) => {
-        let hypothesisDischargesGivenTerm;
+      const dischargeHypothesisGivenTerm = this.dischargeHypothesisGivenTerm.bind(this);
 
-        hypothesisDischargesGivenTerm = this.dischargeHypothesisGivenTerm(hypothesis, term, context, continuation);
-
-        return hypothesisDischargesGivenTerm;
-      }, continuation);
+      hypothesesDischargesGivenTerm = every(this.hypotheses, term, context, dischargeHypothesisGivenTerm, continuation);
 
       if (hypothesesDischargesGivenTerm) {
-        context.debug(`...discharged the '${constructxorString}' constructor's hhypotheses.`);
+        context.debug(`...discharged the '${constructorString}' constructor's hhypotheses.`);
       }
     }
 
     return hypothesesDischargesGivenTerm;
   }
 
-  dischargeHypothesisGivenTerm(hypothesis, term, context, continuation) {
-    let hypothesisDischargesGivenTerm;
-
-    debugger
-
-    const termString = term.getString(),
-          hypothesisString = hypothesis.getString(),
-          constructorString = this.getString(); ///
-
-    context.trace(`Discharding the '${constructorString}' constructor's '${hypothesisString}' hypothesis given the '${termString}' term...`);
-
-    hypothesisDischargesGivenTerm = hypothesis.dischargeGivenTerm(term, context);
-
-    if (hypothesisDischargesGivenTerm) {
-      context.trace(`...discharges the '${constructorString}' constructor's '${hypothesisString}' hypothesis given the '${termString}' term.`);
-    }
-
-    return hypothesisDischargesGivenTerm;
-  }
+  // dischargeHypothesisGivenTerm(hypothesis, term, context, continuation) {
+  //   let hypothesisDischargesGivenTerm;
+  //
+  //   const termString = term.getString(),
+  //         hypothesisString = hypothesis.getString(),
+  //         constructorString = this.getString(); ///
+  //
+  //   context.trace(`Discharding the '${constructorString}' constructor's '${hypothesisString}' hypothesis given the '${termString}' term...`);
+  //
+  //   hypothesisDischargesGivenTerm = hypothesis.dischargeGivenTerm(term, context);
+  //
+  //   if (hypothesisDischargesGivenTerm) {
+  //     context.trace(`...discharges the '${constructorString}' constructor's '${hypothesisString}' hypothesis given the '${termString}' term.`);
+  //   }
+  //
+  //   return hypothesisDischargesGivenTerm;
+  // }
 
   toJSON() {
     const context = this.getContext();

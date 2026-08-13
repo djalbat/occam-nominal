@@ -200,6 +200,8 @@ export default define(class Hypothesis extends Element {
   dischargeGivenTerm(term, context) {
     let dischargesGivenTerm = false;
 
+    debugger
+
     const termString = term.getString(),
           hypothesisString = this.getString(); ///
 
