@@ -7,7 +7,7 @@ import { choose } from "../utilities/context";
 import { desist, declare } from "../utilities/state";
 import { bracketedConstructorFromNothing, bracketedCombinatorFromNothing } from "../utilities/instance";
 
-function validateTermAsVariable(term, state, context, continuation) {
+export function validateTermAsVariable(term, state, context, continuation) {
   let termValidatesAsVariable = false;
 
   const { Variable } = elements,
@@ -168,7 +168,7 @@ function unifyTermWithBracketedConstructor(term, state, context, continuation) {
   return termUnifiesWithBracketedConstructor;
 }
 
-function validateStatementAsMetavariable(statement, state, context, continuation) {
+export function validateStatementAsMetavariable(statement, state, context, continuation) {
   let statementValidatesAsMetavariable = false;
 
   const { Metavariable } = elements,

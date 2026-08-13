@@ -5,6 +5,7 @@ import { Element, breakPointUtilities } from "occam-languages";
 import { define } from "../elements";
 import { every, exists } from "../utilities/continuation";
 import { declare, desist } from "../utilities/state";
+import { baseTypeFromNothing } from "../utilities/type";
 import { instantiateConstructor } from "../process/instantiate";
 import { termFromConstructorNode } from "../utilities/element";
 import { unifyTermWithConstructor } from "../process/unify";
@@ -148,20 +149,18 @@ export default define(class Constructor extends Element {
 
       context.trace(`Validating the '${constructorString}' constructor's term as a variable...`);
 
-      debugger
+      termValidatesAsVariable = this.term.validateAsVariable(state, context, (term, context) => {
+        let validatesAsVariable = false;
 
-      // termValidatesAsVariable = validateTermAsVariable(this.term, state, context, (term, context) => {
-      //   let termValidatesAsVariable = false;
-      //
-      //   const type = term.getType(),
-      //         baseType = baseTypeFromNothing();
-      //
-      //   if (type === baseType) {
-      //     termValidatesAsVariable = continuation(state, context);
-      //   }
-      //
-      //   return termValidatesAsVariable;
-      // });
+        const type = term.getType(),
+              baseType = baseTypeFromNothing();
+
+        if (type === baseType) {
+          validatesAsVariable = continuation(state, context);
+        }
+
+        return validatesAsVariable;
+      });
 
       if (termValidatesAsVariable) {
         context.debug(`...validated the '${constructorString}' constructor's term as a variable.`);

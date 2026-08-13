@@ -6,10 +6,10 @@ import { Element, breakPointUtilities } from "occam-languages";
 import { define } from "../elements";
 import { exists } from "../utilities/continuation";
 import { instantiate } from "../utilities/context";
-import { validateTerms } from "../process/validation";
 import { instantiateTerm } from "../process/instantiate";
 import { variablesFromTerm } from "../utilities/equivalence";
 import { unifyTermIntrinsically } from "../process/unify";
+import { validateTerms, validateTermAsVariable } from "../process/validation";
 import { typeFromJSON, typeToTypeJSON, provisionalFromJSON, provisionalToProvisionalJSON } from "../utilities/json";
 
 const { filter } = arrayUtilities,
@@ -272,6 +272,30 @@ export default define(class Term extends Element {
     }
 
     return validatesGivenType;
+  }
+
+  validateAsVariable(state, context, continuation) {
+    let validatesAsVariable;
+
+    const termString = this.getString();  ///
+
+    context.trace(`Validating the '${termString}' term as a variable...`);
+
+    const term = this;  ///
+
+    validatesAsVariable = validateTermAsVariable(term, state, context, (term, state, context) => {
+      let validatesAsVariable;
+
+      validatesAsVariable = continuation(term, context);
+
+      return validatesAsVariable;
+    });
+
+    if (validatesAsVariable) {
+      context.debug(`...validated the '${termString}' term as a variable.`);
+    }
+
+    return validatesAsVariable;
   }
 
   // validateAsProperty(context, continuation) {

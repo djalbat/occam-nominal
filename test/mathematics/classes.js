@@ -4,12 +4,13 @@ const { levels } = require("necessary");
 
 const { createSuite } = require("../utilities/test");
 
-const { ERROR_LEVEL } = levels;
+const { TRACE_LEVEL } = levels;
 
-const logLevel = ERROR_LEVEL,
+const logLevel = TRACE_LEVEL,
       projectName = "classes",
       projectsDirectoryPath = "../../Mathematics";
 
-describe(projectName, () => {
+describe.only(projectName, () => {
   createSuite(logLevel, projectName, projectsDirectoryPath);
 });
+

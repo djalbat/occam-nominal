@@ -5,6 +5,7 @@ import { Element, breakPointUtilities, continuationUtilities } from "occam-langu
 import { define } from "../elements";
 import { exists } from "../utilities/continuation";
 import { desist, declare } from "../utilities/state";
+import { baseTypeFromNothing } from "../utilities/type";
 import { instantiateGenerator } from "../process/instantiate";
 import { termFromGeneratorNode } from "../utilities/element";
 import { unifyTermWithGenerator } from "../process/unify";
@@ -149,20 +150,18 @@ export default define(class Generator extends Element {
 
       context.trace(`Validating the '${generatorString}' generator's term as a variable...`);
 
-      debugger
+      termValidatesAsVariable = this.term.validateAsVariable(state, context, (term, context) => {
+          let validatesAsVariable = false;
 
-      // termValidatesAsVariable = validateTermAsVariable(this.term, state, context, (term, context) => {
-      //   let termValidatesAsVariable = false;
-      //
-      //   const type = term.getType(),
-      //         baseType = baseTypeFromNothing();
-      //
-      //   if (type === baseType) {
-      //     termValidatesAsVariable = continuation(state, context);
-      //   }
-      //
-      //   return termValidatesAsVariable;
-      // });
+          const type = term.getType(),
+                baseType = baseTypeFromNothing();
+
+          if (type === baseType) {
+            validatesAsVariable = continuation(state, context);
+          }
+
+          return validatesAsVariable;
+      });
 
       if (termValidatesAsVariable) {
         context.debug(`...validated the '${generatorString}' generator's term as a variable.`);
@@ -199,37 +198,46 @@ export default define(class Generator extends Element {
     return termValidatesAsGenerator;
   }
 
-  unifyTerm(term, context, validateForwards) {
+  unifyTerm(term, context, continuation) {
     let termUnifies = false;
 
     const termString = term.getString(),
-          includeType = false,
+          includeType = true,
           generatorString = this.getString(includeType);  ///
 
     context.trace(`Unifying the '${termString}' term with the '${generatorString}' generator...`);
 
-    const hypothesesDiscardedGivenTerm = this.dischargeHypothesesGivenTerm(term, context);
+    const hypothesesDischargesGivenTerm = this.dischargeHypothesesGivenTerm(term, context, (context) => {
+      let hypothesesDischargesGivenTerm = false;
 
-    if (hypothesesDiscardedGivenTerm) {
       const generator = this, ///
             generatorContext = generator.getContext(),
             generalContext = generatorContext,  ///
             specifiContext = context, ///
-            termUnifiesWithGenerator = unifyTermWithGenerator(term, generator, generalContext, specifiContext);
+            termUnifiesWithGenerator = unifyTermWithGenerator(term, generator, generalContext, specifiContext, (generalContext, specifiContext) => {
+              let termUnifiesWithGenerator;
+
+              const context = specifiContext, ///
+                    provisional = this.type.isProvisional();
+
+              term.setProvisional(provisional);
+
+              term.setType(this.type);
+
+              termUnifiesWithGenerator = continuation(term, context);
+
+              return termUnifiesWithGenerator;
+            });
 
       if (termUnifiesWithGenerator) {
-        const provisional = this.type.isProvisional();
-
-        term.setType(this.type);
-
-        term.setProvisional(provisional);
-
-        const validatesForwards = validateForwards(term, context);
-
-        if (validatesForwards) {
-          termUnifies = true;
-        }
+        hypothesesDischargesGivenTerm = true;
       }
+
+      return hypothesesDischargesGivenTerm;
+    });
+
+    if (hypothesesDischargesGivenTerm) {
+      termUnifies = true;
     }
 
     if (termUnifies) {
