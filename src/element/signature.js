@@ -1,17 +1,15 @@
 "use strict";
 
 import { arrayUtilities } from "necessary";
-import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
+import { Element, breakPointUtilities } from "occam-languages";
 
 import { define } from "../elements";
 import { declare } from "../utilities/state";
 import { all, every } from "../utilities/continuation";
 import { instantiateSignature } from "../process/instantiate";
-import { signatureFromSignatureNode } from "../utilities/element";
-import { ablate, attempt, reconcile, serialise, unserialise, instantiate } from "../utilities/context";
+import { attempt, reconcile, serialise, unserialise, instantiate } from "../utilities/context";
 
 const { match } = arrayUtilities,
-      { asynchronousEvery } = continuationUtilities,
       { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Signature extends Element {
@@ -137,7 +135,7 @@ export default define(class Signature extends Element {
     const terms = [],
           validateTerm = this.validateTerm.bind(this);
 
-    termsValidate = every(this.terms, validateTerm, terms, state, context, (state, context) => {
+    termsValidate = every(this.terms, validateTerm, terms, state, context, (terms, state, context) => {
       let termsValidate;
 
       termsValidate = continuation(state, context);
@@ -167,11 +165,9 @@ export default define(class Signature extends Element {
     termValidates = term.validate(state, context, (term, context) => {
       let validates;
 
-      validates = continuation(terms, state, context);
+      terms.push(term);
 
-      if (validates) {
-        terms.push(term);
-      }
+      validates = continuation(terms, state, context);
 
       return validates;
     });
@@ -268,21 +264,6 @@ export default define(class Signature extends Element {
 
         signature = new Signature(context, string, node, breakPoint, terms);
       }, json, context);
-    }, context);
-
-    return signature;
-  }
-
-  static fromSignatureString(signatureString, context) {
-    let signature;
-
-    ablate((context) => {
-      instantiate((context) => {
-        const string = signatureString,  ///
-              signatureNode = instantiateSignature(string, context);
-
-        signature = signatureFromSignatureNode(signatureNode, context);
-      }, context);
     }, context);
 
     return signature;

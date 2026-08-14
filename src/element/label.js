@@ -249,10 +249,10 @@ export default define(class Label extends Element {
 
     ablate((context) => {
       instantiate((context) => {
-      const string = labelString,  ///
-            labelNode = instantiateLabel(string, context);
+        const string = labelString,  ///
+              labelNode = instantiateLabel(string, context);
 
-      label = labelFromLabelNode(labelNode, context);
+        label = labelFromLabelNode(labelNode, context);
       }, context);
     }, context);
 

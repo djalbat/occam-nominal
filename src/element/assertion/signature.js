@@ -13,15 +13,15 @@ import {all, exists} from "../../utilities/continuation";
 const { breakPointFromJSON } = breakPointUtilities;
 
 export default define(class SignatureAssertion extends Assertion {
-  constructor(context, string, node, breakPoint, signature, reference) {
+  constructor(context, string, node, breakPoint, terms, reference) {
     super(context, string, node, breakPoint);
 
-    this.signature = signature;
+    this.terms = terms;
     this.reference = reference;
   }
 
-  getSignature() {
-    return this.signature;
+  getTerms() {
+    return this.terms;
   }
 
   getReference() {
@@ -55,11 +55,11 @@ export default define(class SignatureAssertion extends Assertion {
     } else {
       assertion = this; ///
 
-      const validateSignature = this.validateSignature.bind(this),
+      const validateTerms = this.validateTerms.bind(this),
             validateReference = this.validateReference.bind(this);
 
       validates = all([
-        validateSignature,
+        validateTerms,
         validateReference
       ], state, context, (state, context) => {
         let validates;
@@ -81,7 +81,9 @@ export default define(class SignatureAssertion extends Assertion {
     return validates;
   }
 
-  validateSignature(context) {
+  validateTerms(context) {
+    debugger
+
     let signatureValidates = false;
 
     const signatureAssertionString = this.getString(); ///
@@ -146,6 +148,8 @@ export default define(class SignatureAssertion extends Assertion {
   }
 
   unifySignature(context) {
+    debugger
+
     let signatureUnifies;
 
     const signatureAssertionString = this.getString();  ///
@@ -166,6 +170,8 @@ export default define(class SignatureAssertion extends Assertion {
   }
 
   async unifyClaim(claim, context) {
+    debugger
+
     let claimUnifies;
 
     const claimString = claim.getString(),
@@ -189,6 +195,8 @@ export default define(class SignatureAssertion extends Assertion {
   }
 
   async unifyStepAndFactOrSubproofs(step, factOrSubproofs, context) {
+    debugger
+
     let stepAndFactOrSubproofsUnify;
 
     await reconcile(async (context) => {

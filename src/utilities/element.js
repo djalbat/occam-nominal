@@ -778,12 +778,12 @@ export function signatureAssertionFromSignatureAssertionNode(signatureAssertionN
         node = signatureAssertionNode,  ///
         string = context.nodeAsString(node),
         breakPoint = null,
-        signature = signatureFromSignatureAssertionNode(signatureAssertionNode, context),
+        terms = termsFromSignatureAssertionNode(signatureAssertionNode, context),
         reference = referenceFromSignatureAssertionNode(signatureAssertionNode, context);
 
   context = null;
 
-  const signatureAssertion = new SignatureAssertion(context, string, node, breakPoint, signature, reference);
+  const signatureAssertion = new SignatureAssertion(context, string, node, breakPoint, terms, reference);
 
   return signatureAssertion;
 }
@@ -1208,10 +1208,7 @@ export function signatureFromClaimNode(claimNode, context) {
   const signatureNode = claimNode.getSignatureNode();
 
   if (signatureNode !== null) {
-    const { Signature } = elements,
-      signatureString = context.nodeAsString(signatureNode);
-
-    signature = Signature.fromSignatureString(signatureString, context);
+    signature = signatureFromSignatureNode(signatureNode, context);
   }
 
   return signature;
@@ -1810,6 +1807,13 @@ export function parametersFromProcedureCallNode(procedureCallNode, context) {
   return parameters;
 }
 
+export function termsFromSignatureAssertionNode(signatureAssertionNode, context) {
+  const termNodes = signatureAssertionNode.getTermNodes(),
+        terms = termsFromTermNodes(termNodes, context);
+
+  return terms;
+}
+
 export function typeFromPropertyDeclarationNode(propertyDeclarationNode, context) {
   const typeNode = propertyDeclarationNode.getTypeNode(),
         type = typeFromTypeNode(typeNode, context);
@@ -2016,15 +2020,6 @@ export function statementFromContainedAssertionNode(containedAssertionNode, cont
         statement = statementFromStatementNode(statementNode, context);
 
   return statement;
-}
-
-export function signatureFromSignatureAssertionNode(signatureAssertionNode, context) {
-  const { Signature } = elements,
-        signatureNode = signatureAssertionNode.getSignatureNode(),
-        signatureString = context.nodeAsString(signatureNode),
-        signature = Signature.fromSignatureString(signatureString, context);
-
-  return signature;
 }
 
 export function referenceFromSignatureAssertionNode(signatureAssertionNode, context) {

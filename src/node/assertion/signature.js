@@ -2,14 +2,14 @@
 
 import AssertionNode from "../../node/assertion";
 
-import { SIGNATURE_RULE_NAME, METAVARIABLE_RULE_NAME } from "../../ruleNames";
+import { TERM_RULE_NAME, METAVARIABLE_RULE_NAME } from "../../ruleNames";
 
 export default class SignatureAssertionNode extends AssertionNode {
-  getSignatureNode() {
-    const ruleName = SIGNATURE_RULE_NAME,
-          signatureNode = this.getNodeByRuleName(ruleName);
+  getTermNodes() {
+    const ruleName = TERM_RULE_NAME,
+          termNodes = this.getNodesByRuleName(ruleName);
 
-    return signatureNode;
+    return termNodes;
   }
 
   getMetavariableNode() {
