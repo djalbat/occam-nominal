@@ -4,10 +4,11 @@ import { arrayUtilities } from "necessary";
 import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
 
 import { define } from "../elements";
+import { declare } from "../utilities/state";
+import { all, every } from "../utilities/continuation";
 import { instantiateSignature } from "../process/instantiate";
 import { signatureFromSignatureNode } from "../utilities/element";
 import { ablate, attempt, reconcile, serialise, unserialise, instantiate } from "../utilities/context";
-import {all} from "../utilities/continuation";
 
 const { match } = arrayUtilities,
       { asynchronousEvery } = continuationUtilities,
@@ -67,37 +68,33 @@ export default define(class Signature extends Element {
     return signature;
   }
 
-  verify(context) {
+  verify(context, continuation) {
     let verifies = false;
 
-    const signatureString = this.getString();  ///
+    const signatureString = this.getString(); ///
 
     context.trace(`Verifying the '${signatureString}' signature...`);
 
-    debugger
+    declare((state) => {
+      const validates = this.validate(state, context, (conclusion, context) => true);
 
-    const termsValidate = this.validateTerms(context);
-
-    if (termsValidate !== null) {
-      verifies = true;
-    }
-
-    if (verifies) {
-      this.commit(context);
-    }
+      if (validates) {
+        verifies = true;
+      }
+    });
 
     if (verifies) {
-      context.debug(`...validated the '${signatureString}' signature.`);
+      context.debug(`...verified the '${signatureString}' signature.`);
     }
 
-    return verifies;
+    return continuation(verifies, context);
   }
 
   validate(state, context, continuation) {
     let validates;
 
     const specificContext = context,  ///
-          signatureString = this.getString(); ///
+          signatureString = this.getString();
 
     context.trace(`Validating the '${signatureString}' signature...`);
 
@@ -130,32 +127,27 @@ export default define(class Signature extends Element {
     return validates;
   }
 
-  validateTerms(context) {
+  validateTerms(state, context, continuation) {
     let termsValidate;
 
     const signatureString = this.getString();  ///
 
     context.trace(`Validating the '${signatureString}' signature's terms...`);
 
-    const terms = [];
+    const terms = [],
+          validateTerm = this.validateTerm.bind(this);
 
-    termsValidate = asynchronousEvery(this.terms, (term) => {
-      term = term.validate(state, context, (term, context) => { ///
-        const validatesForwards = true;
+    termsValidate = every(this.terms, validateTerm, terms, state, context, (state, context) => {
+      let termsValidate;
 
-        return validatesForwards;
-      });
+      termsValidate = continuation(state, context);
 
-      if (term !== null) {
-        terms.push(term);
-
-        return true;
+      if (termsValidate) {
+        this.terms = terms;
       }
-    });
 
-    if (termsValidate) {
-      this.terms = terms;
-    }
+      return termsValidate;
+    });
 
     if (termsValidate){
       context.debug(`...validated the '${signatureString}' signature's terms.`);
@@ -164,8 +156,37 @@ export default define(class Signature extends Element {
     return termsValidate
   }
 
+  validateTerm(term, terms, state, context, continuation) {
+    let termValidates;
+
+    const termString = term.getString(),
+          signatureString = this.getString();  ///
+
+    context.trace(`Validating the '${signatureString}' signature's '${termString}' term...`);
+
+    termValidates = term.validate(state, context, (term, context) => {
+      let validates;
+
+      validates = continuation(terms, state, context);
+
+      if (validates) {
+        terms.push(term);
+      }
+
+      return validates;
+    });
+
+    if (termValidates) {
+      context.debug(`...validated the '${signatureString}' signature's '${termString}' term.`);
+    }
+
+    return termValidates;
+  }
+
   unifySignature(signature, context) {
     let signatureUnifies;
+
+    debugger
 
     const generalSignature = this,  ///
           specificSignature = signature,  ///

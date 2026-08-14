@@ -60,13 +60,12 @@ export default define(class Axiom extends Claim {
       return continuation(signatureVerifies);
     }
 
-    const axiomString = this.getString(); ///
+    const signature = this.getSignature(),
+          axiomString = this.getString(); ///
 
     context.trace(`Verifying the '${axiomString}' axiom's signature...`);
 
-    const signature = this.getSignature();
-
-    signature.verify(context, (signatureVerifies) => {
+    return signature.verify(context, (signatureVerifies) => {
       if (signatureVerifies) {
         context.trace(`...verified the '${axiomString}' axiom's signature.`);
       }
