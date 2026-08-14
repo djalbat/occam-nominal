@@ -417,9 +417,16 @@ export default class Context extends ContextBase {
     return declaredMetavariable;
   }
 
+  isAxiomPresentByReference(reference) {
+    const context = this.getContext(),
+          axiomPresent = context.isAxiomPresentByReference(reference);
+
+    return axiomPresent;
+  }
+
   isTermPresentByTermNode(termNode) {
     const context = this.getContext(),
-          termPresent = context.isTermPresentByTermNode(termNode);
+      termPresent = context.isTermPresentByTermNode(termNode);
 
     return termPresent;
   }

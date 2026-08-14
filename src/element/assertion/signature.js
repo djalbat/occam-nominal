@@ -5,10 +5,10 @@ import { breakPointUtilities } from "occam-languages";
 import Assertion from "../assertion";
 
 import { define } from "../../elements";
+import { all, every } from "../../utilities/continuation";
 import { reconcile, instantiate } from "../../utilities/context";
 import { instantiateSignatureAssertion } from "../../process/instantiate";
-import { signatureFromSignatureAssertionNode, referenceFromSignatureAssertionNode, signatureAssertionFromStatementNode } from "../../utilities/element";
-import {all, exists} from "../../utilities/continuation";
+import { termsFromSignatureAssertionNode, referenceFromSignatureAssertionNode, signatureAssertionFromStatementNode } from "../../utilities/element";
 
 const { breakPointFromJSON } = breakPointUtilities;
 
@@ -81,95 +81,89 @@ export default define(class SignatureAssertion extends Assertion {
     return validates;
   }
 
-  validateTerms(context) {
-    debugger
+  validateTerm(term, terms, state, context, continuation) {
+    let termValidates;
 
-    let signatureValidates = false;
+    const termString = term.getString(),
+          signatureAssertionString = this.getString();  ///
 
-    const signatureAssertionString = this.getString(); ///
+    context.trace(`Validating the '${signatureAssertionString}' signature assertion's '${termString}' term...`);
 
-    context.trace(`Validating the '${signatureAssertionString}' signature assertion's signature...`);
+    termValidates = term.validate(state, context, (term, context) => {
+      let validates;
 
-    const signature = this.signature.validate(state, context);
+      terms.push(term);
 
-    if (signature !== null) {
-      this.signature = signature;
+      validates = continuation(terms, state, context);
 
-      signatureValidates = true;
+      return validates;
+    });
+
+    if (termValidates) {
+      context.debug(`...validated the '${signatureAssertionString}' signature assertion's '${termString}' term.`);
     }
 
-    if (signatureValidates) {
-      context.debug(`...validated the '${signatureAssertionString}' signature assertion's signature.`);
-    }
-
-    return signatureValidates;
+    return termValidates;
   }
 
-  validateReference(context) {
-    let referenceVerifies = false;
+  validateTerms(state, context, continuation) {
+    let termsValidate;
+
+    const signatureAssertionString = this.getString();  ///
+
+    context.trace(`Validating the '${signatureAssertionString}' signature assertion's terms...`);
+
+    const terms = [],
+          validateTerm = this.validateTerm.bind(this);
+
+    termsValidate = every(this.terms, validateTerm, terms, state, context, (terms, state, context) => {
+      let termsValidate;
+
+      termsValidate = continuation(state, context);
+
+      if (termsValidate) {
+        this.terms = terms;
+      }
+
+      return termsValidate;
+    });
+
+    if (termsValidate){
+      context.debug(`...validated the '${signatureAssertionString}' signature assertion's terms.`);
+    }
+
+    return termsValidate
+  }
+
+  validateReference(state, context, continuation) {
+    let referenceValidates;
 
     const signatureAssertionString = this.getString();  ///
 
     context.trace(`Validating the '${signatureAssertionString}' signature assertion's reference...`);
 
-    const reference = this.reference.validate(state, context);
+    referenceValidates = this.reference.validate(state, context, (reference, context) => {
+      let validates = false;
 
-    if (reference !== null) {
-      const axiom = context.findAxiomByReference(reference);
+      const asiomPresent = context.isAxiomPresentByReference(reference);
 
-      if (axiom !== null) {
-        const satisfiable = axiom.isSatisfiable();
+      if (asiomPresent) {
+        this.reference = reference;
 
-        if (satisfiable) {
-          const signatureUnifies = this.unifySignature(context);
-
-          if (signatureUnifies) {
-            this.reference = reference;
-
-            referenceVerifies = true;
-          }
-        } else {
-          const axiomString = axiom.getString();
-
-          context.debug(`The '${axiomString}' axiom is not satisfiable.`);
-        }
-      } else {
-        const referencdString = reference.getString();
-
-        context.debug(`There is no axiom for the '${referencdString}' reference.`);
+        validates = continuation(state, context);
       }
-    }
 
-    if (referenceVerifies) {
+      return validates;
+    });
+
+    if (referenceValidates) {
       context.debug(`...validated the '${signatureAssertionString}' signature assertion's reference.`);
     }
 
-    return referenceVerifies;
+    return referenceValidates;
   }
 
-  unifySignature(context) {
-    debugger
-
-    let signatureUnifies;
-
-    const signatureAssertionString = this.getString();  ///
-
-    context.trace(`Unifying the '${signatureAssertionString}' signature assertion's signature...`);
-
-    return reconcile((context) => {
-      const axiom = context.findAxiomByReference(this.reference);
-
-      signatureUnifies = axiom.unifySignature(this.signature, context);
-    }, context);
-
-    if (signatureUnifies) {
-      context.debug(`...unified the '${signatureAssertionString}' signature assertion's signature.`);
-    }
-
-    return signatureUnifies;
-  }
-
-  async unifyClaim(claim, context) {
+  unifyClaim(claim, context) {
     debugger
 
     let claimUnifies;
@@ -179,12 +173,12 @@ export default define(class SignatureAssertion extends Assertion {
 
     context.trace(`Unifying the '${claimString}' claim with the '${signatureAssertionString}' signature assertion...`);
 
-    await reconcile(async (context) => {
+    reconcile((context) => {
       const axiom = context.findAxiomByReference(this.reference);
 
       axiom.unifySignature(this.signature, context);
 
-      claimUnifies = await axiom.unifyClaim(claim, context);
+      claimUnifies = axiom.unifyClaim(claim, context);
     }, context);
 
     if (claimUnifies) {
@@ -194,20 +188,23 @@ export default define(class SignatureAssertion extends Assertion {
     return claimUnifies;
   }
 
-  async unifyStepAndFactOrSubproofs(step, factOrSubproofs, context) {
-    debugger
+  unifyStepAndFactOrSubproofs(step, factOrSubproofs, context, continuation) {
+    let stepAndFactOrSubproofsUnify = false;
 
-    let stepAndFactOrSubproofsUnify;
+    return reconcile((context) => {
+      const axiom = context.findAxiomByReference(this.reference),
+            signatureAssertion = this;  ///
 
-    await reconcile(async (context) => {
-      const axiom = context.findAxiomByReference(this.reference);
+      return axiom.unifySignatureAssertion(signatureAssertion, context, (signatureAssertionUnifies) => {
+        if (!signatureAssertionUnifies) {
+          return continuation(stepAndFactOrSubproofsUnify);
+        }
 
-      axiom.unifySignature(this.signature, context);
+        debugger
 
-      stepAndFactOrSubproofsUnify = await axiom.unifyStepAndFactOrSubproofs(step, factOrSubproofs, context);
+        // stepAndFactOrSubproofsUnify = axiom.unifyStepAndFactOrSubproofs(step, factOrSubproofs, context);
+      });
     }, context);
-
-    return stepAndFactOrSubproofsUnify;
   }
 
   static name = "SignatureAssertion";
@@ -223,12 +220,12 @@ export default define(class SignatureAssertion extends Assertion {
               definedAssertionNode = instantiateSignatureAssertion(string, context),
               node = definedAssertionNode,  ///
               breakPoint = breakPointFromJSON(json),
-              signature = signatureFromSignatureAssertionNode(definedAssertionNode, context),
+              terms = termsFromSignatureAssertionNode(definedAssertionNode, context),
               reference = referenceFromSignatureAssertionNode(definedAssertionNode, context);
 
         context = null;
 
-        signatureAssertion = new SignatureAssertion(context, string, node, breakPoint, signature, reference);
+        signatureAssertion = new SignatureAssertion(context, string, node, breakPoint, terms, reference);
       }, context);
     }
 

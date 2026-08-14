@@ -74,30 +74,66 @@ export default define(class Axiom extends Claim {
     });
   }
 
-  unifySignature(signature, context) {
-    let signatureUnifies;
+  unifyClaim(claim, context) {
+    debugger
+
+    let claimUnifies = false;
 
     const axiomString = this.getString(), ///
-          signatureString = signature.getString();
+          claimString = claim.getString();
 
-    context.trace(`Unifying the '${signatureString}' signature with the '${axiomString}' axiom...`);
+    context.trace(`Unifying the '${claimString}' claim with the '${axiomString}' axiom...`);
 
-    const specificSignature = signature;  ///
+    const deduction = claim.getDeduction(),
+          deductionUnifies = this.unifyDeduction(deduction, context);
 
-    signature = this.getSignature();
+    if (deductionUnifies) {
+      const hypothesesDischarges = claim.dischargeHypotheses(context);
 
-    const generalSignature = signature; ///
+      if (hypothesesDischarges) {
+        const suppositions = claim.getSuppositions(),
+              suppositionsUnify = this.unifySuppositions(suppositions, context);
 
-    signatureUnifies = generalSignature.unifySignature(specificSignature, context);
-
-    if (signatureUnifies) {
-      context.debug(`...unified the '${signatureString}' signature with the '${axiomString}' axiom.`);
+        if (suppositionsUnify) {
+          claimUnifies = true;
+        }
+      }
     }
 
-    return signatureUnifies;
+    if (claimUnifies) {
+      context.debug(`...unified the '${claimString}' claim with the '${axiomString}' axiom.`);
+    }
+
+    return claimUnifies;
+  }
+
+  unifySignatureAssertion(signatureAssertion, context, continuation) {
+    let signatureAssertionUnifies = false;
+
+    const axiomString = this.getString(), ///
+          signatureAssertionString = signatureAssertion.getString();
+
+    context.trace(`Unifying the '${signatureAssertionString}' signature assertion with the '${axiomString}' axiom...`);
+
+    const terms = signatureAssertion.getTerms(),
+          signature = this.getSignature();
+
+    return signature.unifyTerms(terms, context, (termsUnify) => {
+      if (termsUnify) {
+        signatureAssertionUnifies = true;
+      }
+
+      if (signatureAssertionUnifies) {
+        context.debug(`...unified the '${signatureAssertionString}' signature assertion with the '${axiomString}' axiom.`);
+      }
+
+      return continuation(signatureAssertionUnifies);
+    });
   }
 
   unifyDeduction(deduction, context) {
+    debugger
+
     let deductionUnifies;
 
     const axiomString = this.getString(), ///
@@ -142,6 +178,8 @@ export default define(class Axiom extends Claim {
   }
 
   unifySupposition(supposition, index, context) {
+    debugger
+
     let suppositionUnifies = false;
 
     const specificSupposition = supposition;  ///
@@ -189,6 +227,8 @@ export default define(class Axiom extends Claim {
   }
 
   unifySuppositions(suppositions, context) {
+    debugger
+
     let suppositionsUnify;
 
     const specificSuppositions = suppositions;  ///
@@ -207,37 +247,6 @@ export default define(class Axiom extends Claim {
     });
 
     return suppositionsUnify;
-  }
-
-  unifyClaim(claim, context) {
-    let claimUnifies = false;
-
-    const axiomString = this.getString(), ///
-          claimString = claim.getString();
-
-    context.trace(`Unifying the '${claimString}' claim with the '${axiomString}' axiom...`);
-
-    const deduction = claim.getDeduction(),
-          deductionUnifies = this.unifyDeduction(deduction, context);
-
-    if (deductionUnifies) {
-      const hypothesesDischarges = claim.dischargeHypotheses(context);
-
-      if (hypothesesDischarges) {
-        const suppositions = claim.getSuppositions(),
-              suppositionsUnify = this.unifySuppositions(suppositions, context);
-
-        if (suppositionsUnify) {
-          claimUnifies = true;
-        }
-      }
-    }
-
-    if (claimUnifies) {
-      context.debug(`...unified the '${claimString}' claim with the '${axiomString}' axiom.`);
-    }
-
-    return claimUnifies;
   }
 
   static name = "Axiom";

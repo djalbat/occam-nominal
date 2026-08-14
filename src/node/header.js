@@ -2,7 +2,7 @@
 
 import { NonTerminalNode } from "occam-languages";
 
-import { SIGNATURE_RULE_NAME, PARENTHESISED_LABEL_RULE_NAME, PARENTHESISED_LABELS_RULE_NAME } from "../ruleNames";
+import { PARENTHESISED_LABEL_RULE_NAME, PARENTHESISED_LABELS_RULE_NAME } from "../ruleNames";
 
 export default class HeaderNode extends NonTerminalNode {
   getLabelNodes() {
@@ -30,8 +30,7 @@ export default class HeaderNode extends NonTerminalNode {
   }
 
   getSignatureNode() {
-    const ruleName = SIGNATURE_RULE_NAME,
-          signatureNode = this.getNodeByRuleName(ruleName);
+    const signatureNode = null;
 
     return signatureNode;
   }

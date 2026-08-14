@@ -621,15 +621,22 @@ export default class NominalFileContext extends FileContext {
 
   isLabelPresentByLabelNode(labelNode) {
     const labels = this.getLabels(),
-          labelPresent = labels.some((label) => {
-            const labelNodeMatches = label.matchLabelNode(labelNode);
+      labelPresent = labels.some((label) => {
+        const labelNodeMatches = label.matchLabelNode(labelNode);
 
-            if (labelNodeMatches) {
-              return true;
-            }
-          });
+        if (labelNodeMatches) {
+          return true;
+        }
+      });
 
     return labelPresent;
+  }
+
+  isAxiomPresentByReference(reference) {
+    const axiom = this.findAxiomByReference(reference),
+          axiomPresent = (axiom !== null);
+
+    return axiomPresent;
   }
 
   isTypePresentByTypeName(typeName, includeRelease = true) {

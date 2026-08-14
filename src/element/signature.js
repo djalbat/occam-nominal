@@ -59,13 +59,6 @@ export default define(class Signature extends Element {
     return signatureNodeMatches;
   }
 
-  findSignature(context) {
-    const signatureNode = this.getSignatureNode(),
-          signature = context.findSignatureBySignatureNode(signatureNode);
-
-    return signature;
-  }
-
   verify(context, continuation) {
     let verifies = false;
 
@@ -125,6 +118,31 @@ export default define(class Signature extends Element {
     return validates;
   }
 
+  validateTerm(term, terms, state, context, continuation) {
+    let termValidates;
+
+    const termString = term.getString(),
+          signatureString = this.getString();  ///
+
+    context.trace(`Validating the '${signatureString}' signature's '${termString}' term...`);
+
+    termValidates = term.validate(state, context, (term, context) => {
+      let validates;
+
+      terms.push(term);
+
+      validates = continuation(terms, state, context);
+
+      return validates;
+    });
+
+    if (termValidates) {
+      context.debug(`...validated the '${signatureString}' signature's '${termString}' term.`);
+    }
+
+    return termValidates;
+  }
+
   validateTerms(state, context, continuation) {
     let termsValidate;
 
@@ -154,33 +172,8 @@ export default define(class Signature extends Element {
     return termsValidate
   }
 
-  validateTerm(term, terms, state, context, continuation) {
-    let termValidates;
-
-    const termString = term.getString(),
-          signatureString = this.getString();  ///
-
-    context.trace(`Validating the '${signatureString}' signature's '${termString}' term...`);
-
-    termValidates = term.validate(state, context, (term, context) => {
-      let validates;
-
-      terms.push(term);
-
-      validates = continuation(terms, state, context);
-
-      return validates;
-    });
-
-    if (termValidates) {
-      context.debug(`...validated the '${signatureString}' signature's '${termString}' term.`);
-    }
-
-    return termValidates;
-  }
-
-  unifySignature(signature, context) {
-    let signatureUnifies;
+  unifyTerms(terms, context, continuation) {
+    let termsUnify;
 
     debugger
 
@@ -202,7 +195,7 @@ export default define(class Signature extends Element {
 
     debugger
 
-    signatureUnifies = reconcile((specificContext) => {
+    termsUnify = reconcile((specificContext) => {
       match(generalTerms, specificTerms, (generalTerm, specificTerm) => {
         let termUnifies;
 
@@ -213,16 +206,16 @@ export default define(class Signature extends Element {
         }
       });
 
-      if (signatureUnifies) {
+      if (termsUnify) {
         specificContext.commit(context);
       }
     }, specificContext);
 
-    if (signatureUnifies) {
+    if (termsUnify) {
       context.debug(`...unified the '${specificSignatureString}' signature with the '${generalSignatureString}' signature.`);
     }
 
-    return signatureUnifies;
+    return termsUnify;
   }
 
   toJSON() {
