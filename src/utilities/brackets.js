@@ -5,46 +5,54 @@ import { BRACKETED_TERM_DEPTH, BRACKETED_STATEMENT_DEPTH } from "../constants";
 import { bracketedConstructorFromNothing, bracketedCombinatorFromNothing } from "../utilities/instance";
 
 export function stripBracketsFromTerm(term, context) {
-  const termNode = term.getNode(),
-        bracketedTermChildNode = bracketedTermChildNodeFromTermNode(termNode);
+  let termNode = term.getNode(),
+      bracketedTermChildNode = bracketedTermChildNodeFromTermNode(termNode);
 
-  if (bracketedTermChildNode !== null) {
-    const termNode = bracketedTermChildNode;  ///
+  while (bracketedTermChildNode !== null) {
+    termNode = bracketedTermChildNode;  ///
 
-    term = termFromTermNode(termNode, context);
+    bracketedTermChildNode = bracketedTermChildNodeFromTermNode(termNode);
   }
+
+  term = termFromTermNode(termNode, context);
 
   return term;
 }
 
 export function stripBracketsFromTermNode(termNode) {
-  const bracketedTermChildNode = bracketedTermChildNodeFromTermNode(termNode);
+  let bracketedTermChildNode = bracketedTermChildNodeFromTermNode(termNode);
 
-  if (bracketedTermChildNode !== null) {
+  while (bracketedTermChildNode !== null) {
     termNode = bracketedTermChildNode;  ///
+
+    bracketedTermChildNode = bracketedTermChildNodeFromTermNode(termNode);
   }
 
   return termNode;
 }
 
 export function stripBracketsFromStatement(statement, context) {
-  const statementNode = statement.getNode(),
-        bracketedStatementChildNode = bracketedStatementChildNodeFromStatementNode(statementNode);
+  let statementNode = statement.getNode(),
+    bracketedStatementChildNode = bracketedStatementChildNodeFromStatementNode(statementNode);
 
-  if (bracketedStatementChildNode !== null) {
-    const statementNode = bracketedStatementChildNode;  ///
+  while (bracketedStatementChildNode !== null) {
+    statementNode = bracketedStatementChildNode;  ///
 
-    statement = statementFromStatementNode(statementNode, context);
+    bracketedStatementChildNode = bracketedStatementChildNodeFromStatementNode(statementNode);
   }
+
+  statement = statementFromStatementNode(statementNode, context);
 
   return statement;
 }
 
 export function stripBracketsFromStatementNode(statementNode) {
-  const bracketedStatementChildNode = bracketedStatementChildNodeFromStatementNode(statementNode);
+  let bracketedStatementChildNode = bracketedStatementChildNodeFromStatementNode(statementNode);
 
-  if (bracketedStatementChildNode !== null) {
+  while (bracketedStatementChildNode !== null) {
     statementNode = bracketedStatementChildNode;  ///
+
+    bracketedStatementChildNode = bracketedStatementChildNodeFromStatementNode(statementNode);
   }
 
   return statementNode;

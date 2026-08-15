@@ -5,12 +5,12 @@ import { arrayUtilities } from "necessary";
 
 import { define } from "../elements";
 import { instantiate } from "../utilities/context";
+import { stripBracketsFromTerm } from "../utilities/brackets";
 import { instantiateEquivalence } from "../process/instantiate";
-import { stripBracketsFromTermNode } from "../utilities/brackets";
 import { equivalenceStringFromTerms } from "../utilities/string";
 import { equivalenceFromEquivalenceNode } from "../utilities/element";
 
-const { compress } = arrayUtilities;
+const { first, second, compress } = arrayUtilities;
 
 export default define(class Equivalence extends Element {
   constructor(context, string, node, breakPoint, terms) {
@@ -87,9 +87,9 @@ export default define(class Equivalence extends Element {
 
   isDisjointFrom(equivalence) {
     const disjointFrom = equivalence.everyTerm((term) => {
-      const comparesToTerm = this.compareTerm(term);
+      const termEquates = this.equateTerm(term);
 
-      if (!comparesToTerm) {
+      if (!termEquates) {
         return true;
       }
     });
@@ -113,39 +113,9 @@ export default define(class Equivalence extends Element {
     return implicitlyGrounded;
   }
 
-  matchTermNode(termNode) {
-    termNode = stripBracketsFromTermNode(termNode); ///
-
-    const termNodeMatches = this.someTerm((term) => {
-      const termNodeMatches = term.matchTermNode(termNode);
-
-      if (termNodeMatches) {
-        return true;
-      }
-    });
-
-    return termNodeMatches;
-  }
-
-  matchTermNodes(termNodes) {
-    const termNodesMatch = termNodes.every((termNode) => {
-      const termNodeMatches = this.matchTermNode(termNode);
-
-      if (termNodeMatches) {
-        return true;
-      }
-    });
-
-    return termNodesMatch;
-  }
-
-  someTerm(callback) { return this.terms.some(callback); }
-
-  everyTerm(callback) { return this.terms.every(callback); }
-
-  compareTerm(term) {
+  equateTerm(term) {
     const termA = term, ///
-          comparesToTerm = this.someTerm((term) => {
+          termEquates = this.someTerm((term) => {
             const termB = term, ///
                   termAEqualToTermB = termA.isEqualTo(termB);
 
@@ -154,22 +124,31 @@ export default define(class Equivalence extends Element {
             }
           });
 
-    return comparesToTerm;
+    return termEquates;
   }
 
-  someOtherTerm(term, callback) {
-    const termA = term, ///
-          terms = this.terms.filter((term) => {
-            const termB = term, ///
-                  termAEqualToTermB = termA.isEqualTo(termB);
+  equateTerms(terms) {
+    const termsEquate = terms.every((term) => {
+      const termEquates = this.equateTerm(term);
 
-            if (!termAEqualToTermB) {
-              return true;
-            }
-          }),
-          result = terms.some(callback);
+      if (termEquates) {
+        return true;
+      }
+    });
 
-    return result;
+    return termsEquate;
+  }
+
+  matchTermNode(termNode) {
+    const termNodeMatches = this.terms.some((term) => {
+      const termNodeMatches = term.matchTermNode(termNode);
+
+      if (termNodeMatches) {
+        return true;
+      }
+    });
+
+    return termNodeMatches;
   }
 
   combineTerms(terms) {
@@ -209,14 +188,54 @@ export default define(class Equivalence extends Element {
     return equivalence;
   }
 
+  someOtherTerm(term, callback) {
+    const termA = term, ///
+          terms = this.terms.filter((term) => {
+            const termB = term, ///
+                  termAEqualToTermB = termA.isEqualTo(termB);
+
+            if (!termAEqualToTermB) {
+              return true;
+            }
+          }),
+          result = terms.some(callback);
+
+    return result;
+  }
+
+  someTerm(callback) { return this.terms.some(callback); }
+
+  everyTerm(callback) { return this.terms.every(callback); }
+
   static name = "Equivalence";
 
   static fromEquality(equality, context) {
     let equivalence;
 
+    let terms;
+
+    terms = equality.getTerms();
+
+    terms = terms.map((term) => { ///
+      term = stripBracketsFromTerm(term, context);
+
+      return term;
+    });
+
+    const firstTerm = first(terms),
+          secondTerm = second(terms),
+          firstTermEqualToSecondTerm = firstTerm.isEqualTo(secondTerm);
+
+    if (firstTermEqualToSecondTerm) {
+      const term = firstTerm; ///
+
+      terms = [
+        term
+      ];
+    }
+
     instantiate((context) => {
-      const terms = equality.getTerms(),
-            equivalenceString = equivalenceStringFromTerms(terms),
+      const equivalenceString = equivalenceStringFromTerms(terms),
             string = equivalenceString,  ///
             equivalenceNode = instantiateEquivalence(string, context);
 

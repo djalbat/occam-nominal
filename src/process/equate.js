@@ -4,7 +4,8 @@ import { queryUtilities } from "occam-query";
 
 import ZipPass from "../pass/zip";
 
-import { findEquivalenceByTermNodes } from "../utilities/equivalences";
+import { stripBracketsFromTermNode } from "../utilities/brackets";
+import { findEquivalenceByTermNode } from "../utilities/equivalences";
 
 const { nodeQuery } = queryUtilities;
 
@@ -18,25 +19,48 @@ class EquationalPass extends ZipPass {
       run: (leftTermNode, rightTermNode, context) => {
         let success = false;
 
-        if (!success) {
-          const depth = Infinity,
-                leftTermNodeMatchesRightTermNode = leftTermNode.match(rightTermNode, depth);
-
-          if (leftTermNodeMatchesRightTermNode) {
-            success = true;
-          }
-        }
+        leftTermNode = stripBracketsFromTermNode(leftTermNode); ///
+        rightTermNode = stripBracketsFromTermNode(rightTermNode); ///
 
         if (!success) {
           const equivalences = context.getEquivalences(),
-                termNodes = [
-                  leftTermNode,
-                  rightTermNode
-                ],
-                equivalence = findEquivalenceByTermNodes(equivalences, termNodes);
+                leftEquivalence = findEquivalenceByTermNode(equivalences, leftTermNode),
+                rightEquivalence = findEquivalenceByTermNode(equivalences, rightTermNode);
 
-          if (equivalence !== null) {
-            success = true;
+          if (!success) {
+            if ((leftEquivalence !== null) && (rightEquivalence !== null) && (leftEquivalence === rightEquivalence)) {
+              success = true;
+            }
+          }
+
+          if (!success) {
+            if (leftEquivalence !== null) {
+              success = leftEquivalence.someOtherTerm(leftTerm, (otherTerm) => {
+                const leftTerm = otherTerm, ///
+                      leftTermNode = leftTerm.getNode(),
+                      rightTermNode = rightTerm.getNode(),
+                      descended = descend(leftTermNode, rightTermNode, context);
+
+                if (descended) {
+                  return true;
+                }
+              });
+            }
+          }
+
+          if (!success) {
+            if (rightEquivalence !== null) {
+              success = rightEquivalence.someOtherTerm(rightTerm, (otherTerm) => {
+                const rightTerm = otherTerm, ///
+                      leftTermNode = leftTerm.getNode(),
+                      rightTermNode = rightTerm.getNode(),
+                      descended = descend(leftTermNode, rightTermNode, context);
+
+                if (descended) {
+                  return true;
+                }
+              });
+            }
           }
         }
 
@@ -45,13 +69,7 @@ class EquationalPass extends ZipPass {
                 leftTermNodeMatchesRightTermNode = leftTermNode.match(rightTermNode, depth);
 
           if (leftTermNodeMatchesRightTermNode) {
-            const leftNonTerminalNode = leftTermNode, ///
-                  rightNonTerminalNode = rightTermNode, ///
-                  leftNonTerminalNodeChildNodes = leftNonTerminalNode.getChildNodes(),
-                  rightNonTerminalNodeChildNodes = rightNonTerminalNode.getChildNodes(),
-                  leftChildNodes = leftNonTerminalNodeChildNodes, ///
-                  rightChildNodes = rightNonTerminalNodeChildNodes, ///
-                  descended = equationalPass.descend(leftChildNodes, rightChildNodes, context);
+            const descended = descend(leftTermNode, rightTermNode, context);
 
             if (descended) {
               success = true;
@@ -68,7 +86,12 @@ class EquationalPass extends ZipPass {
 const equationalPass = new EquationalPass();
 
 export function equateTerms(leftTerm, rightTerm, context) {
-  let termsEquate;
+  let termsEquate = false;
+
+  const leftTermString = leftTerm.getString(),
+        rightTermString = rightTerm.getString();
+
+  context.trace(`Equating the '${leftTermString}' and '${rightTermString}' terms...`);
 
   const leftTermNode = leftTerm.getNode(),
         rightTermNode = rightTerm.getNode(),
@@ -76,13 +99,24 @@ export function equateTerms(leftTerm, rightTerm, context) {
         specificNode = rightTermNode, ///
         success = equationalPass.run(generalNode, specificNode, context);
 
-  termsEquate = success; ///
+  if (success) {
+    termsEquate = true;
+  }
+
+  if (termsEquate) {
+    context.debug(`...equated the '${leftTermString}' and '${rightTermString}' terms.`);
+  }
 
   return termsEquate;
 }
 
 export function equateStatements(leftStatement, rightStatement, context) {
-  let statementsEquate;
+  let statementsEquate = false;
+
+  const leftStatementString = leftStatement.getString(),
+        rightStatementString = rightStatement.getString();
+
+  context.trace(`Equating the '${leftStatementString}' and '${rightStatementString}' statements...`);
 
   const leftStatementNode = leftStatement.getNode(),
         rightStatementNode = rightStatement.getNode(),
@@ -90,7 +124,25 @@ export function equateStatements(leftStatement, rightStatement, context) {
         specificNode = rightStatementNode, ///
         success = equationalPass.run(generalNode, specificNode, context);
 
-  statementsEquate = success; ///
+  if (success) {
+    statementsEquate = true;
+  }
+
+  if (statementsEquate) {
+    context.debug(`...equated the '${leftStatementString}' and '${rightStatementString}' statements.`);
+  }
 
   return statementsEquate;
+}
+
+function descend(leftTermNode, rightTermNode, context) {
+  const leftNonTerminalNode = leftTermNode, ///
+        rightNonTerminalNode = rightTermNode, ///
+        leftNonTerminalNodeChildNodes = leftNonTerminalNode.getChildNodes(),
+        rightNonTerminalNodeChildNodes = rightNonTerminalNode.getChildNodes(),
+        leftChildNodes = leftNonTerminalNodeChildNodes, ///
+        rightChildNodes = rightNonTerminalNodeChildNodes, ///
+        descended = equationalPass.descend(leftChildNodes, rightChildNodes, context);
+
+  return descended;
 }

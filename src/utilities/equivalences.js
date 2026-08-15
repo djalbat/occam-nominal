@@ -30,11 +30,11 @@ export function equivalencesFromEquality(equality, context) {
   return equivalences;
 }
 
-export function findEquivalenceByTermNodes(equivalences, termNodes) {
+export function findEquivalenceByTermNode(equivalences, termNode) {
   const equivalence = equivalences.find((equivalence) => {
-    const termNodeMatches = equivalence.matchTermNodes(termNodes);
+    const termEquates = equivalence.matchTermNode(termNode);
 
-    if (termNodeMatches) {
+    if (termEquates) {
       return true;
     }
   }) || null;

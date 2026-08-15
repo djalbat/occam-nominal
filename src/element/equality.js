@@ -78,20 +78,6 @@ export default define(class Equality extends Element {
     return equalTo;
   }
 
-  isReflexive() {
-    let reflexive = false;
-
-    if (!this.negated) {
-      const leftTermEqualToRightTerm = this.leftTerm.isEqualTo(this.rightTerm);
-
-      if (leftTermEqualToRightTerm) {
-        reflexive = true;
-      }
-    }
-
-    return reflexive;
-  }
-
   findEquality(context) {
     const equalityNode = this.getEqualityNode(),
           equality = context.findEqualityByEqualityNode(equalityNode);
@@ -248,13 +234,13 @@ export default define(class Equality extends Element {
       return;
     }
 
-    const equality = this,  ///
-          negated = this.isNegated(),
-          reflexive = this.isReflexive();
+    const negated = this.isNegated();
 
-    if (negated || reflexive) {
+    if (negated) {
       return;
     }
+
+    const equality = this;  ///
 
     const equalityAssignment = equalityAssignmentFromEquality(equality, context);
 
