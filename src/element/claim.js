@@ -230,12 +230,12 @@ export default class Claim extends Element {
 
     context.trace(`Discharding the '${claimString}' claim's '${hypothesisString}' hypothesis...`);
 
-    return hypothesis.discharge(context, (hypothesisDischarges) => {
+    return hypothesis.discharge(context, (hypothesisDischarges, context) => {
       if (hypothesisDischarges) {
         context.trace(`...discharges the '${claimString}' claim's '${hypothesisString}' hypothesis.`);
       }
 
-      return continuation(hypothesisDischarges);
+      return continuation(hypothesisDischarges, context);
     });
   }
 
@@ -282,7 +282,7 @@ export default class Claim extends Element {
         context.debug(`...unified the '${stepString}' step with the '${ruleString}' rule's '${deductionString}' deduction.`);
       }
 
-      return continuation(stepUnifiesWithDeduction);
+      return continuation(stepUnifiesWithDeduction, context);
     });
   }
 
@@ -292,7 +292,7 @@ export default class Claim extends Element {
         if (!statementUnifiesWithDeduction) {
           const stepAndFactOrSubproofsUnify = false;
 
-          return continuation(stepAndFactOrSubproofsUnify);
+          return continuation(stepAndFactOrSubproofsUnify, context);
         }
 
         return this.dischargeHypotheses(context, (hypothesesDischarge) => {

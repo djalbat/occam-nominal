@@ -2,23 +2,40 @@
 
 import elements from "../elements";
 
-function dischargeStatementAsTypeAssertion(statement, context) {
+import { derive } from "../utilities/state";
+
+function dischargeStatementAsTypeAssertion(statement, generalContext, specificContext) {
   let dischargesStatementAsTypeAssertion = false;
 
   const { TypeAssertion } = elements;
 
-  const typeAssertion = TypeAssertion.fromStatement(statement, context);
+  const context = generalContext, ///
+        typeAssertion = TypeAssertion.fromStatement(statement, context);
 
   if (typeAssertion !== null) {
     const statementString = statement.getString();
 
     context.trace(`Discharging the '${statementString}' statement's type assertion...`);
 
-    const discharges = typeAssertion.discharge(context);  ///
+    derive((state) => {
+      const typeAssertionValidates = typeAssertion.validate(state, context, (typeAssertion, context) => {
+        context = specificContext;  ///
 
-    if (discharges !== null) {
-      dischargesStatementAsTypeAssertion = true;
-    }
+        let validates = false;
+
+        const discharges = typeAssertion.discharge(context);  ///
+
+        if (discharges) {
+          validates = true;
+        }
+
+        return validates;
+      });
+
+      if (typeAssertionValidates) {
+        dischargesStatementAsTypeAssertion = true;
+      }
+    });
 
     if (dischargesStatementAsTypeAssertion) {
       context.debug(`...discharged the '${statementString}' statement's type assertion.`);

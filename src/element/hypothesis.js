@@ -1,15 +1,16 @@
 "use strict";
 
-import { Element, breakPointUtilities } from "occam-languages";
+import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
 
 import { all } from "../utilities/continuation";
 import { define } from "../elements";
 import { declare } from "../utilities/state";
 import { instantiateHypothesis } from "../process/instantiate";
-import { attempt, serialise, unserialise, instantiate } from "../utilities/context";
+import {attempt, serialise, unserialise, instantiate, enclose} from "../utilities/context";
 import { statementFromHypothesisNode, procedureCallFromHypothesisNode } from "../utilities/element";
 
-const { breakable, breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
+const { asynchronousAll } = continuationUtilities,
+      { breakable, breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Hypothesis extends Element {
   constructor(context, string, node, breakPoint, statement, procedureCall) {
@@ -68,6 +69,24 @@ export default define(class Hypothesis extends Element {
     }
 
     return continuation(verifies, context);
+  });
+
+  discharge = breakable(function (context, continuation) {
+    const hypothesisString = this.getString(); ///
+
+    context.trace(`Discharging the '${hypothesisString}' hypothesis...`);
+
+    const dischargeStatement = this.dischargeStatement.bind(this);
+
+    return asynchronousAll([
+      dischargeStatement
+    ], context, (discharges) => {
+      if (discharges) {
+        context.debug(`...discharged the '${hypothesisString}' hypothesis.`);
+      }
+
+      return continuation(discharges, context);
+    });
   });
 
   validate(state, context, continuation) {
@@ -165,93 +184,79 @@ export default define(class Hypothesis extends Element {
     return procedureCallValidates;
   }
 
-  discharge(context) {
-    let discharges = false;
+  dischargeStatement(context, continuation) {
+    if (this.statement === null) {
+      const statementDischarges = true;
 
-    const hypothesisString = this.getString(); ///
-
-    context.trace(`Discharging the '${hypothesisString}' hypothesis...`);
-
-    const statementDischarges = this.dischargeStatement(context);
-
-    if (statementDischarges) {
-      discharges = true;
+      return continuation(statementDischarges, context);
     }
 
-    if (discharges) {
-      context.debug(`...discharged the '${hypothesisString}' hypothesis.`);
-    }
+    const hypothesisString = this.getString();
 
-    return discharges;
-  }
+    context.trace(`Discharging the '${hypothesisString}' hypothesis's statement...`);
 
-  dischargeStatement(context) {
-    let statementDischarges = false;
+    const specificContext = context;  ///
 
-    if (this.statement !== null) {
-      const hypothesisString = this.getString();
+    context = this.getContext();
 
-      context.trace(`Discharging the '${hypothesisString}' hypothesis's statement...`);
+    const generalCotnext = context; ///
 
-      const discharges = this.statement.discharge(context);  ///
-
-      if (discharges) {
-        statementDischarges = true;
-      }
+    return this.statement.discharge(generalCotnext, specificContext, (statementDischarges) => {
+      context = specificContext;  ///
 
       if (statementDischarges) {
         context.debug(`...discharged the '${hypothesisString}' hypothesis' statement.`);
       }
-    }
 
-    return statementDischarges;
+      return continuation(statementDischarges, context);
+    });
   }
 
-  dischargeGivenTerm(term, context) {
-    let dischargesGivenTerm = false;
+  // dischargeGivenTerm(term, context) {
+  //   let dischargesGivenTerm = false;
+  //
+  //   debugger
+  //
+  //   const termString = term.getString(),
+  //         hypothesisString = this.getString(); ///
+  //
+  //   context.trace(`Discharging the '${hypothesisString}' hypothesis given the '${termString}' term...`);
+  //
+  //   const procedureCallDischargesGivenTerm = this.dischargeProcedureCallGivenTerm(term, context);
+  //
+  //   if (procedureCallDischargesGivenTerm) {
+  //     dischargesGivenTerm = true;
+  //   }
+  //
+  //   if (dischargesGivenTerm) {
+  //     context.debug(`...discharged the '${hypothesisString}' hypothesis given the '${termString}' term.`);
+  //   }
+  //
+  //   return dischargesGivenTerm;
+  // }
 
-    debugger
-
-    const termString = term.getString(),
-          hypothesisString = this.getString(); ///
-
-    context.trace(`Discharging the '${hypothesisString}' hypothesis given the '${termString}' term...`);
-
-    const procedureCallDischargesGivenTerm = this.dischargeProcedureCallGivenTerm(term, context);
-
-    if (procedureCallDischargesGivenTerm) {
-      dischargesGivenTerm = true;
-    }
-
-    if (dischargesGivenTerm) {
-      context.debug(`...discharged the '${hypothesisString}' hypothesis given the '${termString}' term.`);
-    }
-
-    return dischargesGivenTerm;
-  }
-
-  dischargeProcedureCallGivenTerm(term, context) {
-    let procedureCallDischarges = false;
-
-    if (this.procedureCall !== null) {
-      const termString = term.getString(),
-            hypothesisString = this.getString();
-
-      context.trace(`Discharging the '${hypothesisString}' hypothesis's procedure call given the '${termString}' term...`);
-
-      const discharges = this.procedureCall.dischargeGivenTerm(term, context);  ///
-
-      if (discharges) {
-        procedureCallDischarges = true;
-      }
-
-      if (procedureCallDischarges) {
-        context.debug(`...discharged the '${hypothesisString}' hypothesis' procedure call given the '${termString}' term.`);
-      }
-    }
-
-    return procedureCallDischarges;
-  }
+  // dischargeProcedureCallGivenTerm(term, context) {
+  //   let procedureCallDischarges = false;
+  //
+  //   if (this.procedureCall !== null) {
+  //     const termString = term.getString(),
+  //           hypothesisString = this.getString();
+  //
+  //     context.trace(`Discharging the '${hypothesisString}' hypothesis's procedure call given the '${termString}' term...`);
+  //
+  //     const discharges = this.procedureCall.dischargeGivenTerm(term, context);  ///
+  //
+  //     if (discharges) {
+  //       procedureCallDischarges = true;
+  //     }
+  //
+  //     if (procedureCallDischarges) {
+  //       context.debug(`...discharged the '${hypothesisString}' hypothesis' procedure call given the '${termString}' term.`);
+  //     }
+  //   }
+  //
+  //   return procedureCallDischarges;
+  // }
 
   toJSON() {
     const context = this.getContext();

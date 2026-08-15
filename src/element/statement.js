@@ -277,16 +277,17 @@ export default define(class Statement extends Element {
     return validates;
   }
 
-  discharge(context) {
+  discharge(generalContext, specificContext, continuation) {
     let discharges;
 
-    const statementString = this.getString();  ///
+    const context = specificContext,  ///
+          statementString = this.getString();  ///
 
     context.trace(`Dicharging the '${statementString}' statement...`);
 
     discharges = dischargeStatements.some((dischargeStatement) => {
       const statement = this, ///
-            statementDischarges = dischargeStatement(statement, context);
+            statementDischarges = dischargeStatement(statement, generalContext, specificContext);
 
       if (statementDischarges) {
         return true;
@@ -297,7 +298,7 @@ export default define(class Statement extends Element {
       context.debug(`...discharged the '${statementString}' statement.`);
     }
 
-    return discharges;
+    return continuation(discharges, context);
   }
 
   unifyStatement(statement, generalContext, specificContext, continuation) {

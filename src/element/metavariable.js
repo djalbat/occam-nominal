@@ -357,7 +357,7 @@ export default define(class Metavariable extends Element {
     if (frameMetavariableCompares) {
       frameUnifies = true;
 
-      return continuation(frameUnifies);
+      return continuation(frameUnifies, context);
     }
 
     const metavariable = this,  ///
@@ -375,7 +375,7 @@ export default define(class Metavariable extends Element {
         frameUnifies = true;
       }
 
-      return continuation(frameUnifies);
+      return continuation(frameUnifies, context);
     }
 
     const { FrameSubstitution } = elements,
@@ -403,7 +403,7 @@ export default define(class Metavariable extends Element {
       context.debug(`...unified the '${frameString}' frame with the '${metavariableString}' variable.`);
     }
 
-    return continuation(frameUnifies);
+    return continuation(frameUnifies, context);
   }
 
   unifyStatement(statement, generalContext, specificContext, continuation) {
