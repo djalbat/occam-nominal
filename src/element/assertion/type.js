@@ -219,7 +219,7 @@ export default define(class TypeAssertion extends Assertion {
 
       context.trace(`Validating the '${typeAssertionString}' derived type assertion...`);
 
-      validatesWhenDerived = validateWhenDerived(this.term, this.type, context, (term, context) => {
+      validatesWhenDerived = validateWhenDerived(this.term, this.type, state, context, (term, context) => {
         let validatesWhenDerived;
 
         this.term = term;
@@ -237,7 +237,7 @@ export default define(class TypeAssertion extends Assertion {
     return validatesWhenDerived;
   }
 
-  unifyIndependently(generalContext, specificContext) {
+  unifyIndependently(generalContext, specificContext, continuation) {
     let unifiesIndependently = false;
 
     const context = specificContext, ///
@@ -247,21 +247,23 @@ export default define(class TypeAssertion extends Assertion {
 
     const term = termFromTermAndSubstitutions(this.term, context);
 
-    validateWhenDerived(term, this.type, context, (term, context) => {
-      let validatesWhenDerived;
+    derive((state) => {
+      validateWhenDerived(term, this.type, state, context, (term, context) => {
+        let validatesWhenDerived;
 
-      unifiesIndependently = true;
+        unifiesIndependently = true;
 
-      validatesWhenDerived = true;
+        validatesWhenDerived = true;
 
-      return validatesWhenDerived;
+        return validatesWhenDerived;
+      });
     });
 
     if (unifiesIndependently) {
       context.debug(`...unified the '${typeAssertionString}' type assertion independently.`);
     }
 
-    return unifiesIndependently;
+    return continuation(unifiesIndependently);
   }
 
   assign(state, context) {
@@ -335,35 +337,33 @@ export default define(class TypeAssertion extends Assertion {
   }
 });
 
-function validateWhenDerived(term, type, context, continuation) {
+function validateWhenDerived(term, type, state, context, continuation) {
   let validatesWhenDerived = false;
 
-  derive((state) => {
-    const validate = term.validate(state, context, (term, context) => {
-      let validates = false;
+  const validate = term.validate(state, context, (term, context) => {
+    let validates = false;
 
-      const termType = term.getType(),
-            termTypeEqualToOrSubTypeOfType = termType.isEqualToOrSubTypeOf(type);
+    const termType = term.getType(),
+          termTypeEqualToOrSubTypeOfType = termType.isEqualToOrSubTypeOf(type);
 
-      if (termTypeEqualToOrSubTypeOfType) {
-        const termEstablished = term.isEstablished();
+    if (termTypeEqualToOrSubTypeOfType) {
+      const termEstablished = term.isEstablished();
 
-        if (termEstablished) {
-          validates = true;
-        }
+      if (termEstablished) {
+        validates = true;
       }
-
-      if (validates) {
-        validates = continuation(term, context);
-      }
-
-      return validates;
-    });
-
-    if (validate) {
-      validatesWhenDerived = true;
     }
+
+    if (validates) {
+      validates = continuation(term, context);
+    }
+
+    return validates;
   });
+
+  if (validate) {
+    validatesWhenDerived = true;
+  }
 
   return validatesWhenDerived;
 }

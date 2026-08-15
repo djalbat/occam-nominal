@@ -1,11 +1,12 @@
 "use strict";
 
-import { Element, continuationUtilities } from "occam-languages";
+import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
 
 import { define } from "../elements";
 import { enclose } from "../utilities/context";
 
-const { asynchronousEvery } = continuationUtilities;
+const { breakable } = breakPointUtilities,
+      { asynchronousAll, asynchronousEvery } = continuationUtilities;
 
 export default define(class Section extends Element {
   constructor(context, string, node, breakPoint, hypotheses, declaration, claim) {
@@ -35,60 +36,92 @@ export default define(class Section extends Element {
     return sectionNode;
   }
 
-  async verify(context) {
-    let verifies = false;
-
-    await this.break(context);
-
+  verify = breakable(function (context, continuation) {
     const sectionString = this.getString();  ///
 
     context.trace(`Verifying the '${sectionString}' section...`);
 
-    await enclose(async (context) => {
-      const hypothesesVerify = await this.verifyHypotheses(context);
+    return enclose((context) => {
+      const verifyClaim = this.verifyClaim.bind(this),
+            verifyHypotheses = this.verifyHypotheses.bind(this),
+            verifyDeclaration = this.verifyDeclaration.bind(this);
 
-      if (hypothesesVerify) {
-        context.assignAssignments();
-
-        if (this.declaration !== null) {
-          this.declaration.setHypotheses(this.hypotheses);
-
-          const declarationVerifies = await this.declaration.verify(context);
-
-          if (declarationVerifies) {
-            verifies = true;
-          }
+      return asynchronousAll([
+        verifyHypotheses,
+        verifyDeclaration,
+        verifyClaim
+      ], context, (verifies) => {
+        if (verifies) {
+          context.debug(`...verified the '${sectionString}' section.`);
         }
 
-        if (this.claim !== null) {
-          this.claim.setHypotheses(this.hypotheses);
-
-          const claimVerifies = await this.claim.verify(context);
-
-          if (claimVerifies) {
-            verifies = true;
-          }
-        }
-      }
+        return continuation(verifies, context);
+      });
     }, context);
+  });
 
-    if (verifies) {
-      context.debug(`...verified the '${sectionString}' section.`);
+  verifyClaim(context, continuation) {
+    if (this.claim === null) {
+      const claimVerifies = true; ///
+
+      return continuation(claimVerifies, context);
     }
 
-    return verifies;
+    const sectionString = this.getString();  ///
+
+    context.trace(`Verifying the '${sectionString}' section's claim...`);
+
+    this.claim.setHypotheses(this.hypotheses);
+
+    return this.claim.verify(context, (claimVerifies) => {
+      if (claimVerifies) {
+        context.debug(`...verified the '${sectionString}' section's claim.`);
+      }
+
+      return continuation(claimVerifies, context);
+    });
   }
 
-  async verifyHypotheses(context) {
-    const hypothesesVerify = await asynchronousEvery(this.hypotheses, async (hypothesis) => {
-      const hypothesisVerifies = await hypothesis.verify(context);
+  verifyHypotheses(context, continuation) {
+    const sectionString = this.getString();  ///
 
-      if (hypothesisVerifies) {
-        return true;
+    context.trace(`Verifying the '${sectionString}' section's hypotheses...`);
+
+    return asynchronousEvery(this.hypotheses, (hypothesis, context, continuation) => {
+      return hypothesis.verify(context, continuation);
+    }, context, (hypothesesVerify) => {
+      if (hypothesesVerify) {
+        context.assignAssignments();
       }
-    });
 
-    return hypothesesVerify;
+      if (hypothesesVerify) {
+        context.debug(`...verified the '${sectionString}' section's hypotheses.`);
+      }
+
+      return continuation(hypothesesVerify, context);
+    });
+  }
+
+  verifyDeclaration(context, continuation) {
+    if (this.declaration === null) {
+      const declarationVerifies = true; ///
+
+      return continuation(declarationVerifies, context);
+    }
+
+    const sectionString = this.getString();  ///
+
+    context.trace(`Verifying the '${sectionString}' section's declaration...`);
+
+    this.declaration.setHypotheses(this.hypotheses);
+
+    return this.declaration.verify(context, (declarationVerifies) => {
+      if (declarationVerifies) {
+        context.debug(`...verified the '${sectionString}' section's declaration.`);
+      }
+
+      return continuation(declarationVerifies, context);
+    });
   }
 
   static name = "Section";

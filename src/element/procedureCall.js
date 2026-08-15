@@ -5,7 +5,6 @@ import { Element, breakPointUtilities } from "occam-languages";
 import Value from "../value";
 
 import { define } from "../elements";
-import { isDeclared } from "../utilities/state";
 import { instantiate } from "../utilities/context";
 import { instantiateProcedureCall } from "../process/instantiate";
 import { parametersFromProcedureCallNode, procedureReferenceFromProcedureCallNode } from "../utilities/element";

@@ -230,7 +230,7 @@ export default class Claim extends Element {
 
     context.trace(`Discharding the '${claimString}' claim's '${hypothesisString}' hypothesis...`);
 
-    hypothesis.discharge(context, (hypothesisDischarges) => {
+    return hypothesis.discharge(context, (hypothesisDischarges) => {
       if (hypothesisDischarges) {
         context.trace(`...discharges the '${claimString}' claim's '${hypothesisString}' hypothesis.`);
       }
@@ -241,9 +241,27 @@ export default class Claim extends Element {
 
   dischargeHypotheses(context, continuation) {
     const hypotheses = this.getHypotheses(),
-          dischargeHypothesis = this.dischargeHypothesis.bind(this);
+         hypothesesLength = hypotheses.length;
 
-    return asynchronousEvery(hypotheses, dischargeHypothesis, context, continuation);
+    if (hypothesesLength === 0) {
+      const hypothesesDischarged = true;
+
+      return continuation(hypothesesDischarged, context);
+    }
+
+    const claimString = this.getString(); ///
+
+    context.trace(`Discharging the '${claimString}' claim's hypotheses...`);
+
+    const dischargeHypothesis = this.dischargeHypothesis.bind(this);
+
+    return asynchronousEvery(hypotheses, dischargeHypothesis, context, (hypothesesDischarged) => {
+      if (hypothesesDischarged) {
+        context.trace(`...discharged the '${claimString}' claim's hypotheses.`);
+      }
+
+      return continuation(hypothesesDischarged, context);
+    });
   }
 
   unifyStepWithDeduction(step, context, continuation) {

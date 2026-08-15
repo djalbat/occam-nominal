@@ -76,10 +76,10 @@ export default class Fact extends Element {
     let referenceValidates;
 
     if (this.reference !== null) {
-      const resolutionString = this.getString(),  ///
+      const factString = this.getString(),  ///
             referenceString = this.reference.getString();
 
-      context.trace(`Validating the '${resolutionString}' resolution's '${referenceString}' reference...`);
+      context.trace(`Validating the '${factString}' fact's '${referenceString}' reference...`);
 
       referenceValidates = this.reference.validate(state, context, (reference, context) => {
         let validates;
@@ -92,7 +92,7 @@ export default class Fact extends Element {
       });
 
       if (referenceValidates) {
-        context.debug(`...validated the '${resolutionString}' resolution's '${referenceString}' reference.`);
+        context.debug(`...validated the '${factString}' fact's '${referenceString}' reference.`);
       }
     } else {
       referenceValidates = continuation(state, context);
@@ -105,9 +105,9 @@ export default class Fact extends Element {
     let procedureCallValidates;
 
     if (this.procedureCall !== null) {
-      const resolutionString = this.getString();  ///
+      const factString = this.getString();  ///
 
-      context.trace(`Validating the '${resolutionString}' resolution's procedure call...`);
+      context.trace(`Validating the '${factString}' fact's procedure call...`);
 
       procedureCallValidates = this.procedureCall.validate(state, context, (procedureCall, context) => {
         let validates;
@@ -120,7 +120,7 @@ export default class Fact extends Element {
       });
 
       if (procedureCallValidates) {
-        context.trace(`...validated the '${resolutionString}' resolution's procedure call.`);
+        context.trace(`...validated the '${factString}' fact's procedure call.`);
       }
     } else {
       procedureCallValidates = continuation(state, context);

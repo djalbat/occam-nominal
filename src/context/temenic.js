@@ -143,11 +143,11 @@ class TemenicContext extends Context {
     const context = this, ///
           declaredVariableString = declaredVariable.getString();
 
-    context.trace(`Adding the '${declaredVariableString}' declared variable to the bounded context...`);
+    context.trace(`Adding the '${declaredVariableString}' declared variable to the temeric context...`);
 
     this.declaredVariables.push(declaredVariable);
 
-    context.debug(`...added the '${declaredVariableString}' declared variable to the bounded context.`);
+    context.debug(`...added the '${declaredVariableString}' declared variable to the temeric context.`);
   }
 
   addConstraint(constraint) {
@@ -161,7 +161,7 @@ class TemenicContext extends Context {
           constraintA = constraint, ///
           constraintString = constraint.getString();
 
-    context.trace(`Adding the '${constraintString}' constraint to the bounded context...`);
+    context.trace(`Adding the '${constraintString}' constraint to the temeric context...`);
 
     const constraintB = this.constraints.find((constraint) => {
       const constraintB = constraint, ///
@@ -173,12 +173,12 @@ class TemenicContext extends Context {
     }) || null;
 
     if (constraintB !== null) {
-      context.debug(`The '${constraintString}' constraint has already been added to the bounded context.`);
+      context.debug(`The '${constraintString}' constraint has already been added to the temeric context.`);
     } else {
       this.constraints.push(constraint);
     }
 
-    context.debug(`...added the '${constraintString}' constraint to the bounded context.`);
+    context.debug(`...added the '${constraintString}' constraint to the temeric context.`);
   }
 
   addGenerator(generator) {
@@ -197,11 +197,11 @@ class TemenicContext extends Context {
     const context = this, ///
           factOrSubproofString = factOrSubproof.getString();
 
-    context.trace(`Adding the '${factOrSubproofString}' fact or subproof to the bounded context...`);
+    context.trace(`Adding the '${factOrSubproofString}' fact or subproof to the temeric context...`);
 
     this.factOrSubproofs.push(factOrSubproof);
 
-    context.debug(`...added the '${factOrSubproofString}' fact or subproof to the bounded context.`);
+    context.debug(`...added the '${factOrSubproofString}' fact or subproof to the temeric context.`);
   }
 
   findDeclaredVariableByVariableIdentifier(variableIdentifier) {
