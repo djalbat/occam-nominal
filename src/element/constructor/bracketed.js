@@ -16,10 +16,6 @@ export default define(class BracketedConstructor extends Constructor {
   unifyTerm(term, state, context, continuation) {
     let termUnifiesWithBracketedConstructor;
 
-    const termString = term.getString();
-
-    context.trace(`Unifying the '${termString}' term with the bracketed constructor...`);
-
     termUnifiesWithBracketedConstructor = super.unifyTerm(term, context, (term, context) => {
       let termUnifies = false;
 
@@ -51,10 +47,6 @@ export default define(class BracketedConstructor extends Constructor {
 
       return termUnifies;
     });
-
-    if (termUnifiesWithBracketedConstructor) {
-      context.debug(`...unified the '${termString}' term with the bracketed constructor.`);
-    }
 
     return termUnifiesWithBracketedConstructor;
   }

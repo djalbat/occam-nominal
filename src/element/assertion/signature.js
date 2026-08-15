@@ -145,9 +145,17 @@ export default define(class SignatureAssertion extends Assertion {
     referenceValidates = this.reference.validate(state, context, (reference, context) => {
       let validates = false;
 
-      const asiomPresent = context.isAxiomPresentByReference(reference);
+      const axiom = context.findAxiomByReference(reference);
 
-      if (asiomPresent) {
+      if (axiom !== null) {
+        const axiomSatisfiable = axiom.isSatisfiable();
+
+        if (axiomSatisfiable) {
+          validates = true;
+        }
+      }
+
+      if (validates) {
         this.reference = reference;
 
         validates = continuation(state, context);
@@ -200,9 +208,7 @@ export default define(class SignatureAssertion extends Assertion {
           return continuation(stepAndFactOrSubproofsUnify);
         }
 
-        debugger
-
-        // stepAndFactOrSubproofsUnify = axiom.unifyStepAndFactOrSubproofs(step, factOrSubproofs, context);
+        axiom.unifyStepAndFactOrSubproofs(step, factOrSubproofs, context, continuation);
       });
     }, context);
   }

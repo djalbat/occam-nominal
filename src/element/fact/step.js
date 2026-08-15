@@ -216,7 +216,7 @@ export default define(class Step extends Fact {
 
       context.trace(`Validating the '${stepString}' step's '${signatureAssertionString}' signature assertion...`);
 
-      derive((state) => {
+      declare((state) => {
         signatureAssertionValidates = this.signatureAssertion.validate(state, context, (signatureAssertion, contwext) => {
           let validates;
 

@@ -12,13 +12,11 @@ import { termsFromJSON,
          statementsFromJSON,
          assertionsFromJSON,
          referencesFromJSON,
-         signaturesFromJSON,
          assumptionsFromJSON,
          metavariablesFromJSON,
          substitutionsFromJSON,
          equalitiesToEqualitiesJSON,
          statementsToStatementsJSON,
-         signaturesToSignaturesJSON,
          assertionsToAssertionsJSON,
          referencesToReferencesJSON,
          assumptionsToAssumptionsJSON,
@@ -28,7 +26,7 @@ import { termsFromJSON,
 const { push, extract } = arrayUtilities;
 
 export default class MnemicContext extends Context {
-  constructor(context, terms, frames, equalities, assertions, statements, signatures, references, assumptions, metavariables, substitutions) {
+  constructor(context, terms, frames, equalities, assertions, statements, references, assumptions, metavariables, substitutions) {
     super(context);
 
     this.terms = terms;
@@ -36,7 +34,6 @@ export default class MnemicContext extends Context {
     this.equalities = equalities;
     this.assertions = assertions;
     this.statements = statements;
-    this.signatures = signatures;
     this.references = references;
     this.assumptions = assumptions;
     this.metavariables = metavariables;
@@ -81,16 +78,6 @@ export default class MnemicContext extends Context {
     context.getStatements(statements);
 
     return statements;
-  }
-
-  getSignatures(signatures = []) {
-    const context = this.getContext();
-
-    push(signatures, this.signatures);
-
-    context.getSignatures(signatures);
-
-    return signatures;
   }
 
   getAssertions(assertions = []) {
@@ -271,32 +258,6 @@ export default class MnemicContext extends Context {
     this.statements.push(statement);
 
     context.debug(`...added the '${statementString}' statement to the mnemic context.`);
-  }
-
-  addSignature(signature) {
-    const context = this, ///
-          signatureString = signature.getString();
-
-    context.trace(`Adding the '${signatureString}' signature to the mnemic context...`);
-
-    const signatureA = signature; ///
-
-    extract(this.signatures, (signature) => {
-      const signatureB = signature, ///
-            signatureAEqualToSignatureB = signatureA.isEqualTo(signatureB);
-
-      if (signatureAEqualToSignatureB) {
-        const signatureString = signature.getString();
-
-        context.trace(`Removed the existing '${signatureString}' signature from the mnemic context...`);
-
-        return true;
-      }
-    });
-
-    this.signatures.push(signature);
-
-    context.debug(`...added the '${signatureString}' signature to the mnemic context.`);
   }
 
   addReference(reference) {
@@ -490,19 +451,6 @@ export default class MnemicContext extends Context {
     return statement;
   }
 
-  findSignatureBySignatureNode(signatureNode) {
-    const signatures = this.getSignatures(),
-          signature = signatures.find((signature) => {
-            const signatureNodeMatches = signature.matchSignatureNode(signatureNode);
-
-            if (signatureNodeMatches) {
-              return true;
-            }
-          }) || null;
-
-    return signature;
-  }
-
   findReferenceByReferenceNode(referenceNode) {
     const references = this.getReferences(),
           reference = references.find((reference) => {
@@ -603,13 +551,6 @@ export default class MnemicContext extends Context {
     return statementPresent;
   }
 
-  isSignaturePresentBySignatureNode(signatureNode) {
-    const signature = this.findSignatureBySignatureNode(signatureNode),
-          signaturePresent = (signature !== null);
-
-    return signaturePresent;
-  }
-
   isAssumptionPresentByAssumptionNode(assumptionNode) {
     const assumption = this.findAssumptionByAssumptionNode(assumptionNode),
           assumptionPresent = (assumption !== null);
@@ -647,7 +588,6 @@ export default class MnemicContext extends Context {
     this.frames = framesFromJSON(json, context);
 
     this.assertions = assertionsFromJSON(json, context);
-    this.signatures = signaturesFromJSON(json, context);
     this.substitutions = substitutionsFromJSON(json, context);
   }
 
@@ -663,7 +603,6 @@ export default class MnemicContext extends Context {
         equalities = this.getEqualities(),
         assertions = this.getAssertions(),
         statements = this.getStatements(),
-        signatures = this.getSignatures(),
         references = this.getReferences(),
         assumptions = this.getAssumptions(),
         metavariables = this.getMetavariables(),
@@ -674,7 +613,6 @@ export default class MnemicContext extends Context {
           equalitiesJSON = equalitiesToEqualitiesJSON(equalities),
           assertionsJSON = assertionsToAssertionsJSON(assertions),
           statementsJSON = statementsToStatementsJSON(statements),
-          signaturesJSON = signaturesToSignaturesJSON(signatures),
           referencesJSON = referencesToReferencesJSON(references),
           assumptionsJSON = assumptionsToAssumptionsJSON(assumptions),
           metavariablesJSON = metavariablesToMetavariablesJSON(metavariables),
@@ -685,7 +623,6 @@ export default class MnemicContext extends Context {
     equalities = equalitiesJSON; ///
     assertions = assertionsJSON; ///
     statements = statementsJSON; ///
-    signatures = signaturesJSON; ///
     references = referencesJSON; ///
     assumptions = assumptionsJSON; ///
     metavariables = metavariablesJSON;  //
@@ -697,7 +634,6 @@ export default class MnemicContext extends Context {
       equalities,
       assertions,
       statements,
-      signatures,
       references,
       assumptions,
       metavariables,
@@ -713,12 +649,11 @@ export default class MnemicContext extends Context {
           equalities = null,
           statements = null,
           assertions = null,
-          signatures = null,
           references = null,
           assumptions = null,
           metavariables = null,
           substitutions = null,
-          mnemicContext = new MnemicContext(context, terms, frames, equalities, assertions, statements, signatures, references, assumptions, metavariables, substitutions);
+          mnemicContext = new MnemicContext(context, terms, frames, equalities, assertions, statements, references, assumptions, metavariables, substitutions);
 
     mnemicContext.initialise(json);
 
@@ -731,12 +666,11 @@ export default class MnemicContext extends Context {
           equalities = [],
           statements = [],
           assertions = [],
-          signatures = [],
           references = [],
           assumptions = [],
           metavariables = [],
           substitutions = [],
-          mnemicContext = new MnemicContext(context, terms, frames, equalities, assertions, statements, signatures, references, assumptions, metavariables, substitutions);
+          mnemicContext = new MnemicContext(context, terms, frames, equalities, assertions, statements, references, assumptions, metavariables, substitutions);
 
     return mnemicContext;
   }

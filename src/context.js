@@ -305,13 +305,6 @@ export default class Context extends ContextBase {
     return statement;
   }
 
-  findSignatureBySignatureNode(signatureNode) {
-    const context = this.getContext(),
-          signature = context.findSignatureBySignatureNode(signatureNode);
-
-    return signature;
-  }
-
   findReferenceByReferenceNode(referenceNode) {
     const context = this.getContext(),
           reference = context.findReferenceByReferenceNode(referenceNode);
@@ -417,13 +410,6 @@ export default class Context extends ContextBase {
     return declaredMetavariable;
   }
 
-  isAxiomPresentByReference(reference) {
-    const context = this.getContext(),
-          axiomPresent = context.isAxiomPresentByReference(reference);
-
-    return axiomPresent;
-  }
-
   isTermPresentByTermNode(termNode) {
     const context = this.getContext(),
       termPresent = context.isTermPresentByTermNode(termNode);
@@ -464,13 +450,6 @@ export default class Context extends ContextBase {
           statementPresent = context.isStatementPresentByStatementNode(statementNode);
 
     return statementPresent;
-  }
-
-  isSignaturePresentBySignatureNode(signatureNode) {
-    const context = this.getContext(),
-          signaturePresent = context.isSignaturePresentBySignatureNode(signatureNode);
-
-    return signaturePresent;
   }
 
   isMetavariablePresentByMetavariableNode(metavariableNode) {

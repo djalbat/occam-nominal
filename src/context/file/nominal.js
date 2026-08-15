@@ -632,13 +632,6 @@ export default class NominalFileContext extends FileContext {
     return labelPresent;
   }
 
-  isAxiomPresentByReference(reference) {
-    const axiom = this.findAxiomByReference(reference),
-          axiomPresent = (axiom !== null);
-
-    return axiomPresent;
-  }
-
   isTypePresentByTypeName(typeName, includeRelease = true) {
     const type = this.findTypeByTypeName(typeName, includeRelease),
           typePresent = (type !== null);

@@ -1,15 +1,15 @@
 "use strict";
 
-import { arrayUtilities } from "necessary";
-import { Element, breakPointUtilities } from "occam-languages";
+import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
 
 import { define } from "../elements";
 import { declare } from "../utilities/state";
 import { all, every } from "../utilities/continuation";
+import { termsStringFromTerms } from "../utilities/string";
 import { instantiateSignature } from "../process/instantiate";
 import { attempt, reconcile, serialise, unserialise, instantiate } from "../utilities/context";
 
-const { match } = arrayUtilities,
+const { asynchronousEvery } = continuationUtilities,
       { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Signature extends Element {
@@ -173,49 +173,50 @@ export default define(class Signature extends Element {
   }
 
   unifyTerms(terms, context, continuation) {
-    let termsUnify;
+    let termsUnify = false;
 
-    debugger
+    const quoted = true,
+          termsString = termsStringFromTerms(terms, quoted),
+          signatureString = this.getString();
 
-    const generalSignature = this,  ///
-          specificSignature = signature,  ///
-          generalSignatureString = generalSignature.getString(),
-          specificSignatureString = specificSignature.getString();
+    context.trace(`Unifying the ${termsString} terms with the '${signatureString}' signature...`);
 
-    context.trace(`Unifying the '${specificSignatureString}' signature with the '${generalSignatureString}' signature...`);
+    const generalTerms = this.terms,  ///
+          specificTerms = terms,  //
+          generalTermsLength = generalTerms.length,
+          specificTermsLength = specificTerms.length;
 
-    const generalSignatureTerms = generalSignature.getTerms(),
-          specificSignatureTerms = specificSignature.getTerms(),
-          generalSignatureContext = generalSignature.getContext(),
-          specificSignatureContext = specificSignature.getContext(),
-          generalTerms = generalSignatureTerms,  ///
-          specificTerms = specificSignatureTerms, ///
-          generalContext = generalSignatureContext, ///
-          specificContext = specificSignatureContext;  ///
-
-    debugger
-
-    termsUnify = reconcile((specificContext) => {
-      match(generalTerms, specificTerms, (generalTerm, specificTerm) => {
-        let termUnifies;
-
-        termUnifies = generalTerm.unifyTerm(specificTerm, generalContext, specificContext);
-
-        if (termUnifies) {
-          return true;
-        }
-      });
-
-      if (termsUnify) {
-        specificContext.commit(context);
-      }
-    }, specificContext);
-
-    if (termsUnify) {
-      context.debug(`...unified the '${specificSignatureString}' signature with the '${generalSignatureString}' signature.`);
+    if (generalTermsLength !== specificTermsLength) {
+      return continuation(termsUnify);
     }
 
-    return termsUnify;
+    const specificContext = context; ///
+
+    context = this.getContext();
+
+    const generalContext = context; ///
+
+    let index = -1;
+
+    return reconcile((specificContext) => {
+      return asynchronousEvery(generalTerms, (generalTerm, continuation) => {
+        index++;
+
+        const specificTerm = specificTerms[index];
+
+        generalTerm.unifyTerm(specificTerm, generalContext, specificContext, continuation);
+      }, (termsUnify) => {
+        if (termsUnify) {
+          specificContext.commit();
+        }
+
+        if (termsUnify) {
+          context.debug(`...unified the ${termsString} terms with the '${signatureString}' signature.`);
+        }
+
+        return continuation(termsUnify);
+      });
+    }, specificContext);
   }
 
   toJSON() {

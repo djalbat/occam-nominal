@@ -127,8 +127,6 @@ function unifyStepWithSignatureAssertion(step, context, continuation) {
   context.trace(`Unifying the '${stepString}' step with the '${signatureAssertionString}' signature assertion...`);
 
   return signatureAssertion.unifyStepAndFactOrSubproofs(step, factOrSubproofs, context, (stepAndFactOrSubproofsUnify) => {
-    let stepUnifiesWithSignatureAssertion = false;
-
     if (stepAndFactOrSubproofsUnify) {
       stepUnifiesWithSignatureAssertion = true;
     }

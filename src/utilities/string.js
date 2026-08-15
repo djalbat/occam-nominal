@@ -3,9 +3,15 @@
 import { baseTypeFromNothing } from "../utilities/type";
 import { EMPTY_STRING, PROVISIONAL, PROVISIONALLY } from "../constants";
 
-export function termsStringFromTerms(terms) {
+export function termsStringFromTerms(terms, quoted = false) {
   const termsString = terms.reduce((termsString, term) => {
-    const termString = term.getString();
+    let termString;
+
+    termString = term.getString();
+
+    if (quoted) {
+      termString = `'${termString}'`;
+    }
 
     termsString = (termsString !== null) ?
                    `${termsString}, ${termString}` :
