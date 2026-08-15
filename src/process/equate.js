@@ -35,10 +35,9 @@ class EquationalPass extends ZipPass {
 
           if (!success) {
             if (leftEquivalence !== null) {
-              success = leftEquivalence.someOtherTerm(leftTerm, (otherTerm) => {
+              success = leftEquivalence.someOtherTerm(leftTermNode, (otherTerm) => {
                 const leftTerm = otherTerm, ///
                       leftTermNode = leftTerm.getNode(),
-                      rightTermNode = rightTerm.getNode(),
                       descended = descend(leftTermNode, rightTermNode, context);
 
                 if (descended) {
@@ -50,9 +49,8 @@ class EquationalPass extends ZipPass {
 
           if (!success) {
             if (rightEquivalence !== null) {
-              success = rightEquivalence.someOtherTerm(rightTerm, (otherTerm) => {
+              success = rightEquivalence.someOtherTerm(rightTermNode, (otherTerm) => {
                 const rightTerm = otherTerm, ///
-                      leftTermNode = leftTerm.getNode(),
                       rightTermNode = rightTerm.getNode(),
                       descended = descend(leftTermNode, rightTermNode, context);
 

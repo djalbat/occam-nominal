@@ -188,13 +188,11 @@ export default define(class Equivalence extends Element {
     return equivalence;
   }
 
-  someOtherTerm(term, callback) {
-    const termA = term, ///
-          terms = this.terms.filter((term) => {
-            const termB = term, ///
-                  termAEqualToTermB = termA.isEqualTo(termB);
+  someOtherTerm(termNode, callback) {
+    const terms = this.terms.filter((term) => {
+            const termNodeMatches = term.matchTermNode(termNode);
 
-            if (!termAEqualToTermB) {
+            if (!termNodeMatches) {
               return true;
             }
           }),
