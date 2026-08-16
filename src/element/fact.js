@@ -178,7 +178,7 @@ export default class Fact extends Element {
     if (this.statement === null) {
       const statementUnifies = false;
 
-      return continuation(statementUnifies, context);
+      return continuation(statementUnifies);
     }
 
     const context = specificContext,  ///
@@ -192,7 +192,7 @@ export default class Fact extends Element {
         context.debug(`...unified the '${statementString}' statement with the '${factString}' fact's statement.`);
       }
 
-      return continuation(statementUnifies, context);
+      return continuation(statementUnifies);
     });
   }
 }

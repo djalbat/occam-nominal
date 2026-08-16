@@ -613,9 +613,9 @@ export function unifyMetavariableIntrinsically(generalMetavariable, specificMeta
   return unifyMetavariableIntrisicallyPass.run(generalNode, specificNode, generalContext, specificContext, (success) => {
     if (success) {
       metavaraibleUnifiesIntrinsically = true;
-
-      return continuation(metavaraibleUnifiesIntrinsically);
     }
+
+    return continuation(metavaraibleUnifiesIntrinsically);
   });
 }
 
