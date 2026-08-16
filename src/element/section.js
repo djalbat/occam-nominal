@@ -61,15 +61,27 @@ export default define(class Section extends Element {
   });
 
   verifyClaim(context, continuation) {
-    if (this.claim === null) {
-      const claimVerifies = true; ///
+    let claimVerifies = true; ///
 
+    if (this.claim === null) {
       return continuation(claimVerifies, context);
     }
 
     const sectionString = this.getString();  ///
 
     context.trace(`Verifying the '${sectionString}' section's claim...`);
+
+    const claimSatisfaible = this.claim.isSatisfiable();
+
+    if (claimSatisfaible) {
+      const claimString = this.claim.getString();
+
+      claimVerifies = false;
+
+      context.debug(`The satisfiable '${claimString}' claim in not allowed in the '${sectionString}' section.`);
+
+      return continuation(claimVerifies, context);
+    }
 
     this.claim.setHypotheses(this.hypotheses);
 

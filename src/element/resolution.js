@@ -117,6 +117,21 @@ export default class Resolution extends Element {
     }, specificContext);
   }
 
+  unifyStatement(statement, generalContext, specificContext, continuation) {
+    const context = specificContext,  ///
+          resolutionString = this.getString(), ///
+          statementString = statement.getString();
+
+    context.trace(`Unifying the '${statementString}' statement with the '${resolutionString}' resolution's statement...`);
+
+    return this.statement.unifyStatement(statement, generalContext, specificContext, (statementUnifies) => {
+      if (statementUnifies) {
+        context.debug(`...unified the '${statementString}' statement with the '${resolutionString}' resolution's statement.`);
+      }
+
+      return continuation(statementUnifies);
+    });
+  }
   toJSON() {
     const context = this.getContext();
 

@@ -9,6 +9,7 @@ import { all, every } from "../../utilities/continuation";
 import { reconcile, instantiate } from "../../utilities/context";
 import { instantiateSignatureAssertion } from "../../process/instantiate";
 import { termsFromSignatureAssertionNode, referenceFromSignatureAssertionNode, signatureAssertionFromStatementNode } from "../../utilities/element";
+import continuation from "occam-languages/lib/utilities/continuation";
 
 const { breakPointFromJSON } = breakPointUtilities;
 
@@ -171,29 +172,35 @@ export default define(class SignatureAssertion extends Assertion {
     return referenceValidates;
   }
 
-  unifyClaim(claim, context) {
-    debugger
-
-    let claimUnifies;
-
+  unifyClaim(claim, context, continuation) {
     const claimString = claim.getString(),
           signatureAssertionString = this.getString();
 
     context.trace(`Unifying the '${claimString}' claim with the '${signatureAssertionString}' signature assertion...`);
 
-    reconcile((context) => {
+    return reconcile((context) => {
       const axiom = context.findAxiomByReference(this.reference);
 
-      axiom.unifySignature(this.signature, context);
+      return axiom.unifyTerms(this.terms, context, (termsUnify) => {
+        if (!termsUnify) {
+          const claimUnifies = false;
 
-      claimUnifies = axiom.unifyClaim(claim, context);
+          return continuation(claimUnifies);
+        }
+
+        return axiom.unifyClaim(claim, context, (claimUnifies) => {
+          if (claimUnifies) {
+            context.debug(`...unified the '${claimString}' claim with the '${signatureAssertionString}' signature assertion.`);
+          }
+
+          if (claimUnifies) {
+            context.commit();
+          }
+
+          return continuation(claimUnifies);
+        });
+      });
     }, context);
-
-    if (claimUnifies) {
-      context.trace(`...unified the '${claimString}' claim with the '${signatureAssertionString}' signature assertion...`);
-    }
-
-    return claimUnifies;
   }
 
   unifyStepAndFactOrSubproofs(step, factOrSubproofs, context, continuation) {

@@ -51,22 +51,6 @@ export default define(class Deduction extends Resolution {
     return continuation(verifies);
   });
 
-  unifyStatement(statement, generalContext, specificContext, continuation) {
-    const context = specificContext,  ///
-          deductionString = this.getString(), ///
-          statementString = statement.getString();
-
-    context.trace(`Unifying the '${statementString}' statement with the '${deductionString}' deduction's statement...`);
-
-    return this.statement.unifyStatement(statement, generalContext, specificContext, (statementUnifies) => {
-      if (statementUnifies) {
-        context.debug(`...unified the '${statementString}' statement with the '${deductionString}' deduction's statement.`);
-      }
-
-      return continuation(statementUnifies);
-    });
-  }
-
   static name = "Deduction";
 
   static fromJSON(json, context) {

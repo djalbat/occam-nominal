@@ -9,9 +9,8 @@ import { instantiate } from "../../utilities/context";
 import { all, exists } from "../../utilities/continuation";
 import { isDerived, isDeclared } from "../../utilities/state";
 import { instantiateContainedAssertion } from "../../process/instantiate";
-import { termFromTermAndSubstitutions, frameFromFrameAndSubstitutions, statementFromStatementAndSubstitutions } from "../../utilities/substitutions";
+import { termFromTermAndSubstitutions, statementFromStatementAndSubstitutions } from "../../utilities/substitutions";
 import { termFromContainedAssertionNode,
-         frameFromContainedAssertionNode,
          negatedFromContainedAssertionNode,
          statementFromContainedAssertionNode,
          containedAssertionFromStatementNode } from "../../utilities/element";

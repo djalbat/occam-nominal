@@ -170,6 +170,38 @@ export default define(class Supposition extends Fact {
     }, context);
   }
 
+  unifyFact(fact, context, continuation) {
+    const factString = fact.getString(),
+          suppositionString = this.getString(); ///
+
+    context.trace(`Unifying the '${factString}' fact with the '${suppositionString}' supposition...`);
+
+    const factContext = fact.getContext(),
+          suppositionContext = this.getContext(), ///
+          generalContext = suppositionContext, ///
+          specificContext = factContext;  ///
+
+    return reconcile((specificContext) => {
+      const statement = fact.getStatement();
+
+      return this.unifyStatement(statement, generalContext, specificContext, (statementUnifies) => {
+        let factUnifies = false;
+
+        if (statementUnifies) {
+          factUnifies = true;
+
+          specificContext.commit(context);
+        }
+
+        if (factUnifies) {
+          context.debug(`...unified the '${factString}' fact with the '${suppositionString}' supposition.`);
+        }
+
+        return continuation(factUnifies);
+      });
+    }, specificContext);
+  }
+
   unifySubproof(subproof, context, continuation) {
     const suppositionString = this.getString(), ///
           subproofString = subproof.getString();
@@ -201,38 +233,6 @@ export default define(class Supposition extends Fact {
         return continuation(subproofUnifies);
       });
     }, context);
-  }
-
-  unifyFact(fact, context, continuation) {
-    const factString = fact.getString(),
-          suppositionString = this.getString(); ///
-
-    context.trace(`Unifying the '${factString}' fact with the '${suppositionString}' supposition...`);
-
-    const factContext = fact.getContext(),
-          suppositionContext = this.getContext(), ///
-          generalContext = suppositionContext, ///
-          specificContext = factContext;  ///
-
-    return reconcile((specificContext) => {
-      const statement = fact.getStatement();
-
-      return this.unifyStatement(statement, generalContext, specificContext, (statementUnifies) => {
-        let factUnifies = false;
-
-        if (statementUnifies) {
-          factUnifies = true;
-
-          specificContext.commit(context);
-        }
-
-        if (factUnifies) {
-          context.debug(`...unified the '${factString}' fact with the '${suppositionString}' supposition.`);
-        }
-
-        return continuation(factUnifies);
-      });
-    }, specificContext);
   }
 
   unifyFactOrSubproof(factOrSubproof, context, continuation) {

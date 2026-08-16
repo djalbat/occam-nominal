@@ -181,9 +181,9 @@ export default class Fact extends Element {
       return continuation(statementUnifies, context);
     }
 
-    const context = specificContext, ///
-          statementString = statement.getString(),
-          factString = this.getString();  ///
+    const context = specificContext,  ///
+          factString = this.getString(), ///
+          statementString = statement.getString();
 
     context.trace(`Unifying the '${statementString}' statement with the '${factString}' fact's statement...`);
 
