@@ -77,17 +77,19 @@ export default define(class MetavariableDeclaration extends Declaration {
     const metavariableName = this.metavariable.getName(),
           declaredMetavariablePresent = context.isDeclaredMetavariablePresentByMetavariableName(metavariableName);
 
-    if (!declaredMetavariablePresent) {
-      metavariableVerifies = this.metavariable.verify(context);
-    } else {
+    if (declaredMetavariablePresent) {
       context.debug(`The '${metavariableName}' declared metavariable is already present.`);
+
+      return continuation(metavariableVerifies, context);
     }
 
-    if (metavariableVerifies) {
-      context.debug(`...verified the '${metavariableDeclarationString}' metavariable declaration's metavariable.`);
-    }
+    this.metavariable.verify(context, (metavariableVerifies) => {
+      if (metavariableVerifies) {
+        context.debug(`...verified the '${metavariableDeclarationString}' metavariable declaration's metavariable.`);
+      }
 
-    return continuation(metavariableVerifies, context);
+      return continuation(metavariableVerifies, context);
+    });
   }
 
   static name = "MetavariableDeclaration";

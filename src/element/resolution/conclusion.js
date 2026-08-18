@@ -19,6 +19,13 @@ export default define(class Conclusion extends Resolution {
     return conclusionNode;
   }
 
+  isMalformed() {
+    const conclusionNode = this.getConclusionNode(),
+          malformed = conclusionNode.isMalformed();
+
+    return malformed;
+  }
+
   verify = breakable(function (context, continuation) {
     let verifies = false;
 
@@ -26,10 +33,10 @@ export default define(class Conclusion extends Resolution {
 
     context.trace(`Verifying the '${conclusionString}' conclusion...`);
 
-    const nonsensical = this.isNonsensical();
+    const malformed = this.isMalformed();
 
-    if (nonsensical) {
-      context.debug(`Unable to verify the '${conclusionString}' conclusion because it is nonsense.`);
+    if (malformed) {
+      context.debug(`Unable to verify the '${conclusionString}' conclusion because it is malformed.`);
 
       return continuation(verifies);
     }

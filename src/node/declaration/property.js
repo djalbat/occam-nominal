@@ -2,9 +2,27 @@
 
 import DeclarationNode from "../../node/declaration";
 
-import { TYPE_RULE_NAME, PROPERTY_RULE_NAME } from "../../ruleNames";
+import { TYPE_RULE_NAME, STUFF_RULE_NAME, PROPERTY_RULE_NAME } from "../../ruleNames";
 
 export default class PropertyDeclarationNode extends DeclarationNode {
+  isMalformed() {
+    let malformed = false;
+
+    if (!malformed) {
+      const stuffNode = this.getStuffNode();
+
+      malformed = (stuffNode !== null);
+    }
+
+    if (!malformed) {
+      const propertyNode = this.getPropertyNode();
+
+      malformed = propertyNode.isMalformed();
+    }
+
+    return malformed;
+  }
+
   getPropertyName() {
     const propertyNode = this.getPropertyNode(),
           propertyName = propertyNode.getPropertyName();
@@ -29,6 +47,13 @@ export default class PropertyDeclarationNode extends DeclarationNode {
           typeNode = this.getNodeByRuleName(ruleName);
 
     return typeNode;
+  }
+
+  getStuffNode() {
+    const ruleName = STUFF_RULE_NAME,
+          stuffNode = this.getNodeByRuleName(ruleName);
+
+    return stuffNode;
   }
 
   getPropertyNode() {

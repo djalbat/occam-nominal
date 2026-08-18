@@ -2,9 +2,16 @@
 
 import { NonTerminalNode } from "occam-languages";
 
-import { TERM_RULE_NAME, TYPE_RULE_NAME, STATEMENT_RULE_NAME } from "../ruleNames";
+import { TERM_RULE_NAME, TYPE_RULE_NAME, STUFF_RULE_NAME, STATEMENT_RULE_NAME } from "../ruleNames";
 
 export default class MetavariableNode extends NonTerminalNode {
+  isMalformed() {
+    const stuffNode = this.getStuffNode(),
+          malformed = (stuffNode !== null);
+
+    return malformed;
+  }
+
   getSiblingSubstitutionNode() {
     let siblingSubstitutionNode = null;
 
@@ -63,6 +70,13 @@ export default class MetavariableNode extends NonTerminalNode {
           typeNode = this.getNodeByRuleName(ruleName);
 
     return typeNode;
+  }
+
+  getStuffNode() {
+    const ruleName = STUFF_RULE_NAME,
+          stuffNode = this.getNodeByRuleName(ruleName);
+
+    return stuffNode;
   }
 
   static fromRuleNameChildNodesOpacityAndPrecedence(ruleName, childNodes, opacity, precedence) { return NonTerminalNode.fromRuleNameChildNodesOpacityAndPrecedence(MetavariableNode, ruleName, childNodes, opacity, precedence); }

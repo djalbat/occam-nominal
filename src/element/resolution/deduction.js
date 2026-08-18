@@ -19,6 +19,13 @@ export default define(class Deduction extends Resolution {
     return deductionNode;
   }
 
+  isMalformed() {
+    const deductionNode = this.getDeductionNode(),
+          malformed = deductionNode.isMalformed();
+
+    return malformed;
+  }
+
   verify = breakable(function (context, continuation) {
     let verifies = false;
 
@@ -26,10 +33,10 @@ export default define(class Deduction extends Resolution {
 
     context.trace(`Verifying the '${decudtionString}' decudtion...`);
 
-    const nonsensical = this.isNonsensical();
+    const malformed = this.isMalformed();
 
-    if (nonsensical) {
-      context.debug(`Unable to verify the '${decudtionString}' decudtion because it is nonsense.`);
+    if (malformed) {
+      context.debug(`Unable to verify the '${decudtionString}' decudtion because it is malformed.`);
 
       return continuation(verifies);
     }

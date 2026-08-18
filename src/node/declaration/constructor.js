@@ -3,9 +3,27 @@
 import DeclarationNode from "../../node/declaration";
 
 import { PROVISIONALLY } from "../../constants";
-import { CONSTRUCTOR_RULE_NAME, TYPE_RULE_NAME } from "../../ruleNames";
+import { TYPE_RULE_NAME, STUFF_RULE_NAME, CONSTRUCTOR_RULE_NAME } from "../../ruleNames";
 
 export default class ConstructorDeclarationNode extends DeclarationNode {
+  isMalformed() {
+    let malformed = false;
+
+    if (!malformed) {
+      const stuffNode = this.getStuffNode();
+
+      malformed = (stuffNode !== null);
+    }
+
+    if (!malformed) {
+      const constructorNode = this.getConstructorNode();
+
+      malformed = constructorNode.isMalformed();
+    }
+
+    return malformed;
+  }
+
   isProvisional() {
     let provisional = false;
 
@@ -33,6 +51,13 @@ export default class ConstructorDeclarationNode extends DeclarationNode {
           typeNode = this.getNodeByRuleName(ruleName);
 
     return typeNode;
+  }
+
+  getStuffNode() {
+    const ruleName = STUFF_RULE_NAME,
+          stuffNode = this.getNodeByRuleName(ruleName);
+
+    return stuffNode;
   }
 
   getConstructorNode() {

@@ -35,10 +35,11 @@ export default define(class Hypothesis extends Element {
     return hypothesisNode;
   }
 
-  isNonsensical() {
-    const nonsensical = ((this.statement === null) && (this.procedureCall === null));
+  isMalformed() {
+    const hypothesisNode = this.getHypothesisNode(),
+          malformed = hypothesisNode.isMalformed();
 
-    return nonsensical;
+    return malformed;
   }
 
   verify = breakable(function (context, continuation) {
@@ -48,10 +49,10 @@ export default define(class Hypothesis extends Element {
 
     context.trace(`Verifying the '${hypothesisString}' hypothesis...`);
 
-    const nonsensical = this.isNonsensical();
+    const malformed = this.isMalformed();
 
-    if (nonsensical) {
-      context.debug(`Unable to verify the '${hypothesisString}' hypothesis because it is nonsense.`);
+    if (malformed) {
+      context.debug(`Unable to verify the '${hypothesisString}' hypothesis because it is malformed.`);
 
       return continuation(verifies, context);
     }

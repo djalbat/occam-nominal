@@ -73,6 +73,13 @@ export default define(class Constructor extends Element {
     this.type = type;
   }
 
+  isMalformed() {
+    const constructorNode = this.getConstructorNode(),
+      malformed = constructorNode.isMalformed();
+
+    return malformed;
+  }
+
   verify(context, continuation) {
     let verifies = false;
 
@@ -80,6 +87,14 @@ export default define(class Constructor extends Element {
           constructorString = this.getString(includeType);  ///
 
     context.trace(`Verifying the '${constructorString}' constructor...`);
+
+    const malformed = this.isMalformed();
+
+    if (malformed) {
+      context.debug(`Unable to verify the '${constructorString}' constructor because it is malformed.`);
+
+      return continuation(verifies, context);
+    }
 
     declare((state) => {
       desist((state) => {

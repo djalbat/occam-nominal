@@ -37,12 +37,29 @@ export default define(class ConstructorDeclaration extends Declaration {
     return constructorDeclarationNode;
   }
 
+  isMalformed() {
+    const constructorDeclarationNode = this.getConstructorDeclarationNode(),
+          malformed = constructorDeclarationNode.isMalformed();
+
+    return malformed;
+  }
+
   setHypotheses(hypotheses) { this.constructor.setHypotheses(hypotheses); }
 
   verify = breakable(function (context, continuation) {
     const constructorDeclarationString = this.getString();  ///
 
     context.trace(`Verifying the '${constructorDeclarationString}' constructor declaration...`);
+
+    const malformed = this.isMalformed();
+
+    if (malformed) {
+      const verifies = false;
+
+      context.debug(`Unable to verify the '${constructorDeclarationString}' constructor declaration because it is malformed.`);
+
+      return continuation(verifies, context);
+    }
 
     const verifyType = this.verifyType.bind(this),
           verifyConstructor = this.verifyConstructor.bind(this);

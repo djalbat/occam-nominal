@@ -25,13 +25,6 @@ export default class Fact extends Element {
     return this.procedureCall;
   }
 
-  getFactNode() {
-    const node = this.getNode(),
-          factNode = node;  ///
-
-    return factNode;
-  }
-
   isFact() {
     const fact = true;
 

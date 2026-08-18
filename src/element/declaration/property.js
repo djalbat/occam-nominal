@@ -32,10 +32,11 @@ export default define(class PropertyDeclaration extends Declaration {
     return propertyDeclarationNode;
   }
 
-  isNonsensical() {
-    const nonsensical = (this.property === null);
+  isMalformed() {
+    const propertyDeclarationNode = this.getPropertyDeclarationNode(),
+          malformed = propertyDeclarationNode.isMalformed();
 
-    return nonsensical;
+    return malformed;
   }
 
   verify = breakable(function (context, continuation) {
@@ -45,10 +46,10 @@ export default define(class PropertyDeclaration extends Declaration {
 
     context.trace(`Verifying the '${propertyDeclarationString}' property declaration...`);
 
-    const nonsensical = this.isNonsensical();
+    const malformed = this.isMalformed();
 
-    if (nonsensical) {
-      context.debug(`Unable to verify the '${propertyDeclarationString}' decudtion because it is nonsense.`);
+    if (malformed) {
+      context.debug(`Unable to verify the '${propertyDeclarationString}' property delcaration because it is malformed.`);
 
       return continuation(verifies);
     }

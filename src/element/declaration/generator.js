@@ -37,12 +37,29 @@ export default define(class GeneratorDeclaration extends Declaration {
     return generatorDeclarationNode;
   }
 
+  isMalformed() {
+    const generatorDeclarationNode = this.getGeneratorDeclarationNode(),
+          malformed = generatorDeclarationNode.isMalformed()
+
+    return malformed;
+  }
+
   setHypotheses(hypotheses) { this.generator.setHypotheses(hypotheses); }
 
   verify = breakable(function (context, continuation) {
     const generatorDeclarationString = this.getString();  ///
 
     context.trace(`Verifying the '${generatorDeclarationString}' generator declaration...`);
+
+    const malformed = this.isMalformed();
+
+    if (malformed) {
+      const verifies = false;
+
+      context.debug(`Unable to verify the '${generatorDeclarationString}' generator declaration because it is malformed.`);
+
+      return continuation(verifies, context);
+    }
 
     const verifyCotype = this.verifyCotype.bind(this),
           verifyGenerator = this.verifyGenerator.bind(this);

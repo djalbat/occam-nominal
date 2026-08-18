@@ -73,6 +73,13 @@ export default define(class Generator extends Element {
     this.type = type;
   }
 
+  isMalformed() {
+    const geneartoarNode = this.getGeneratorNode(),
+          malformed = geneartoarNode.isMalformed();
+
+    return malformed;
+  }
+
   verify(context, continuation) {
     let verifies = false;
 
@@ -80,6 +87,16 @@ export default define(class Generator extends Element {
           generatorString = this.getString(includeType);  ///
 
     context.trace(`Verifying the '${generatorString}' generator...`);
+
+    const malformed = this.isMalformed();
+
+    if (malformed) {
+      const verifies = false;
+
+      context.debug(`Unable to verify the '${generatorString}' generator because it is malformed.`);
+
+      return continuation(verifies, context);
+    }
 
     declare((state) => {
       desist((state) => {

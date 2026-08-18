@@ -31,12 +31,27 @@ export default define(class Combinator extends Element {
     return combinatorNode;
   }
 
+  isMalformed() {
+    const combinatoryNode = this.getCombinatoryNode(),
+          malformed = combinatoryNode.isMalformed();
+
+    return malformed;
+  }
+
   verify(context, continuation) {
     let verifies = false;
 
     const combinatorString = this.getString();  ///
 
     context.trace(`Verifying the '${combinatorString}' combinator...`);
+
+    const malformed = this.isMalformed();
+
+    if (malformed) {
+      context.debug(`Unable to verify the '${combinatorString}' combinator because it is malformed.`);
+
+      return continuation(verifies, context);
+    }
 
     declare((state) => {
       desist((state) => {

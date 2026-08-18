@@ -71,10 +71,11 @@ export default define(class Step extends Fact {
     return unqualified;
   }
 
-  isNonsensical() {
-    const nonsensical = (this.statement === null);
+  isMalformed() {
+    const stepNode = this.getStepNode(),
+          malformed = stepNode.isMalformed();
 
-    return nonsensical;
+    return malformed;
   }
 
   compareFactOrSubproofs(factOrSubproof, context) {
@@ -100,10 +101,10 @@ export default define(class Step extends Fact {
 
     context.trace(`Verifying the '${stepString}' step...`);
 
-    const nonsensical = this.isNonsensical();
+    const malformed = this.isMalformed();
 
-    if (nonsensical) {
-      context.debug(`Unable to verify the '${stepString}' step because it is nonsense.`);
+    if (malformed) {
+      context.debug(`Unable to verify the '${stepString}' step because it is malformed.`);
 
       return continuation(verifies, context);
     }

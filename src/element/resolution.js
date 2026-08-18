@@ -18,12 +18,6 @@ export default class Resolution extends Element {
     return this.statement;
   }
 
-  isNonsensical() {
-    const nonsensical = (this.statement === null);
-
-    return nonsensical;
-  }
-
   validate(state, context, continuation) {
     let validates;
 

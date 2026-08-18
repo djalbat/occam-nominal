@@ -46,12 +46,11 @@ export default define(class Premise extends Fact {
     return subproofAssertion;
   }
 
-  isNonsensical() {
-    const statement = this.getStatement(),
-          procedureCall = this.getProcedureCall(),
-          nonsensical = ((statement === null) && (procedureCall === null));
+  isMalformed() {
+    const premiseNode = this.getPremiseNode(),
+          malformed = premiseNode.isMalformed();
 
-    return nonsensical;
+    return malformed;
   }
 
   verify = breakable(function (context, continuation) {
@@ -61,10 +60,10 @@ export default define(class Premise extends Fact {
 
     context.trace(`Verifying the '${premiseString}' premise...`);
 
-    const nonsensical = this.isNonsensical();
+    const malformed = this.isMalformed();
 
-    if (nonsensical) {
-      context.debug(`Unable to verify the '${premiseString}' premise because it is nonsense.`);
+    if (malformed) {
+      context.debug(`Unable to verify the '${premiseString}' premise because it is malformed.`);
 
       return continuation(verifies, context);
     }

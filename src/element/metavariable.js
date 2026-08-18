@@ -1,6 +1,6 @@
 "use strict";
 
-import { Element, breakPointUtilities } from "occam-languages";
+import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
 
 import elements from "../elements";
 
@@ -13,7 +13,8 @@ import { metaTypeFromJSON, metaTypeToMetaTypeJSON } from "../utilities/json";
 import { unifyMetavariable, unifyMetavariableIntrinsically } from "../process/unify";
 import { nameFromMetavariableNode, termFromMetavariableNode, typeFromMetavariableNode, metavariableFromStatementNode } from "../utilities/element";
 
-const { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
+const { asynchronousAll } = continuationUtilities,
+      { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Metavariable extends Element {
   constructor(context, string, node, breakPoint, name, term, type, metaType) {
@@ -57,6 +58,13 @@ export default define(class Metavariable extends Element {
           metavariableName = metavariableNode.getMetavariableName();
 
     return metavariableName;
+  }
+
+  isMalformed() {
+    const metavariableNode = this.getMetavariableNode(),
+          malformed = metavariableNode.isMalformed();
+
+    return malformed;
   }
 
   isDeclared() {
@@ -105,46 +113,53 @@ export default define(class Metavariable extends Element {
     return comparesToMetavariableName;
   }
 
-  verify(context) {
+  verify(context, continuation) {
     let verifies = false;
 
     const metavariableString = this.getString();  ///
 
     context.trace(`Verifying the '${metavariableString}' metavariable...`);
 
-    const termVerifies = this.verifyTerm(context);
+    const malformed = this.isMalformed();
 
-    if (termVerifies) {
-      const typeVerifies = this.verifyType(context);
+    if (malformed) {
+      context.debug(`Unable to verify the '${metavariableString}' metavariable because it is malformed.`);
 
-      if (typeVerifies) {
-        verifies = true;
+      return continuation(verifies);
+    }
+
+    const verifyTerm = this.verifyTerm.bind(this),
+          verifyType = this.verifyType.bind(this);
+
+    return asynchronousAll([
+      verifyTerm,
+      verifyType
+    ],  context, (verifies) => {
+      if (verifies) {
+        context.debug(`...verified the '${metavariableString}' metavariable.`);
       }
-    }
 
-    if (verifies) {
-      context.debug(`...verified the '${metavariableString}' metavariable.`);
-    }
-
-    return verifies;
+      return continuation(verifies);
+    });
   }
 
-  verifyTerm(context) {
+  verifyTerm(context, continuation) {
     let termVerifies = true;  ///
 
     if (this.term !== null) {
-      const termString = this.term.getString(),
-            metavariableString = this.getString();
+      const metavariableString = this.getString();
+
+      context.trace(`Verifying the '${metavariableString}' metavariable's term...`);
 
       termVerifies = false;
 
-      context.trace(`A '${termString}' term is present in the '${metavariableString}' metavariable.`);
+      context.debug(`...verified the '${metavariableString}' metavariable's term.`);
     }
 
-    return termVerifies;
+    return continuation(termVerifies, context);
   }
 
-  verifyType(context) {
+  verifyType(context, continuation) {
     let typeVerifies = true;  ///
 
     if (this.type !== null) {
@@ -166,7 +181,7 @@ export default define(class Metavariable extends Element {
       }
     }
 
-    return typeVerifies;
+    return continuation(typeVerifies, context);
   }
 
   validate(strict, state, context, continuation) {

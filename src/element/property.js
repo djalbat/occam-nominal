@@ -56,6 +56,13 @@ export default define(class Property extends Element {
     this.type = type;
   }
 
+  isMalformed() {
+    const propertyNode = this.getPropertyNode(),
+          malformed = propertyNode.isMalformed();
+
+    return malformed;
+  }
+
   verify(context, continuation) {
     let verifies = false;
 
@@ -63,6 +70,16 @@ export default define(class Property extends Element {
           propertyString = this.getString(includeType);  ///
 
     context.trace(`Verifying the '${propertyString}' property...`);
+
+    const malformed = this.isMalformed();
+
+    if (malformed) {
+      const verifies = false;
+
+      context.debug(`Unable to verify the '${propertyString}' property because it is malformed.`);
+
+      return continuation(verifies, context);
+    }
 
     declare((state) => {
       desist((state) => {

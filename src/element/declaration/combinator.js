@@ -27,6 +27,13 @@ export default define(class CombinatorDeclaration extends Declaration {
     return combinatorDeclarationNode;
   }
 
+  isMalformned() {
+    const combinatorDeclarationNode = this.getCombinatorDeclarationNode(),
+          malformed = combinatorDeclarationNode.isMalformed();
+
+    return malformed;
+  }
+
   verify = breakable(function (context, continuation) {
     const combinatorDeclarationString = this.getString();  ///
 
