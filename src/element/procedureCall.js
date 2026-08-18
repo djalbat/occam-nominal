@@ -126,7 +126,7 @@ export default define(class ProcedureCall extends Element {
     }
   }
 
-  dischargeGivenTerm(term, context) {
+  dischargeGivenTerm(term, context, continuation) {
     let dischargedGivenTerm = false;
 
     const termString = term.getString(),

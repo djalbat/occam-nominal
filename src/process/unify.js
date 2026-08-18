@@ -650,7 +650,7 @@ export function unifyTermWithGenerator(term, generator, generalContext, specific
 }
 
 export function unifyTermWithConstructor(term, constructor, generalContext, specificContext, continuation) {
-  let termUnifiesWithConstructor = false;
+  let termUnifiesWithCConstructor = false;
 
   const termNode = term.getNode(),
         constructorTerm = constructor.getTerm(),
@@ -658,10 +658,10 @@ export function unifyTermWithConstructor(term, constructor, generalContext, spec
         success = unifyTermWithConstructorPass.run(constructorTermNode, termNode, generalContext, specificContext, continuation);
 
   if (success) {
-    termUnifiesWithConstructor = true;
+    termUnifiesWithCConstructor = true;
   }
 
-  return termUnifiesWithConstructor;
+  return termUnifiesWithCConstructor;
 }
 
 export function unifyStatementWithCombinator(statement, combinator, generalContext, specificContext, continuation) {

@@ -140,8 +140,7 @@ export default define(class Combinator extends Element {
     context.trace(`Unifying the '${statementString}' statement with the '${combinatorString}' combinator...`);
 
     const combinator = this, ///
-          combinatorContext = combinator.getContext(),
-          generalContext = combinatorContext, ///
+          generalContext = this.getContext(), ///
           specifiContext = context,
           statementUnifiesWithCombinator = unifyStatementWithCombinator(statement, combinator, generalContext, specifiContext, (generalContext, specifiContext) => {
             let statementUnifiesWithCombinator;

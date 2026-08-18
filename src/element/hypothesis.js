@@ -213,51 +213,57 @@ export default define(class Hypothesis extends Element {
     });
   }
 
-  // dischargeGivenTerm(term, context) {
-  //   let dischargesGivenTerm = false;
-  //
-  //   debugger
-  //
-  //   const termString = term.getString(),
-  //         hypothesisString = this.getString(); ///
-  //
-  //   context.trace(`Discharging the '${hypothesisString}' hypothesis given the '${termString}' term...`);
-  //
-  //   const procedureCallDischargesGivenTerm = this.dischargeProcedureCallGivenTerm(term, context);
-  //
-  //   if (procedureCallDischargesGivenTerm) {
-  //     dischargesGivenTerm = true;
-  //   }
-  //
-  //   if (dischargesGivenTerm) {
-  //     context.debug(`...discharged the '${hypothesisString}' hypothesis given the '${termString}' term.`);
-  //   }
-  //
-  //   return dischargesGivenTerm;
-  // }
+  dischargeGivenTerm(term, context, continuation) {
+    let dischargesGivenTerm;
 
-  // dischargeProcedureCallGivenTerm(term, context) {
-  //   let procedureCallDischarges = false;
-  //
-  //   if (this.procedureCall !== null) {
-  //     const termString = term.getString(),
-  //           hypothesisString = this.getString();
-  //
-  //     context.trace(`Discharging the '${hypothesisString}' hypothesis' procedure call given the '${termString}' term...`);
-  //
-  //     const discharges = this.procedureCall.dischargeGivenTerm(term, context);  ///
-  //
-  //     if (discharges) {
-  //       procedureCallDischarges = true;
-  //     }
-  //
-  //     if (procedureCallDischarges) {
-  //       context.debug(`...discharged the '${hypothesisString}' hypothesis' procedure call given the '${termString}' term.`);
-  //     }
-  //   }
-  //
-  //   return procedureCallDischarges;
-  // }
+    const termString = term.getString(),
+          hypothesisString = this.getString(); ///
+
+    context.trace(`Discharging the '${hypothesisString}' hypothesis given the '${termString}' term...`);
+
+    const procedureCallDischargesGivenTerm = this.dischargeProcedureCallGivenTerm(term, context, continuation);
+
+    if (procedureCallDischargesGivenTerm) {
+      dischargesGivenTerm = true;
+    }
+
+    if (dischargesGivenTerm) {
+      context.debug(`...discharged the '${hypothesisString}' hypothesis given the '${termString}' term.`);
+    }
+
+    return dischargesGivenTerm;
+  }
+
+  dischargeProcedureCallGivenTerm(term, context, continuation) {
+    let procedureCallDischargesGivenTerm = false;
+
+    if (this.procedureCall !== null) {
+      const termString = term.getString(),
+            hypothesisString = this.getString();
+
+      context.trace(`Discharging the '${hypothesisString}' hypothesis' procedure call given the '${termString}' term...`);
+
+      let success = false;
+
+      this.procedureCall.dischargeGivenTerm(term, context, (dischargesGivenTerm) => {
+        if (dischargesGivenTerm) {
+          success = true;
+        }
+      });
+
+      if (success) {
+        procedureCallDischargesGivenTerm = continuation(term, context);
+      }
+
+      if (procedureCallDischargesGivenTerm) {
+        context.debug(`...discharged the '${hypothesisString}' hypothesis' procedure call given the '${termString}' term.`);
+      }
+    } else {
+      procedureCallDischargesGivenTerm = continuation(term, context);
+    }
+
+    return procedureCallDischargesGivenTerm;
+  }
 
   toJSON() {
     const context = this.getContext();

@@ -3,8 +3,8 @@
 import { Element, breakPointUtilities } from "occam-languages";
 
 import { define } from "../elements";
-import { every, exists } from "../utilities/continuation";
 import { declare, desist } from "../utilities/state";
+import { all, exists, every } from "../utilities/continuation";
 import { baseTypeFromNothing } from "../utilities/type";
 import { instantiateConstructor } from "../process/instantiate";
 import { termFromConstructorNode } from "../utilities/element";
@@ -213,7 +213,41 @@ export default define(class Constructor extends Element {
   }
 
   unifyTerm(term, context, continuation) {
-    let termUnifies = false;
+    let termUnifies;
+
+    const termString = term.getString();
+
+    context.trace(`Unifying the '${termString}' term...`);
+
+    const unifyTermWithConstructor = this.unifyTermWithConstructor.bind(this),
+          dischargeHypothesesGivenTerm = this.dischargeHypothesesGivenTerm.bind(this);
+
+    termUnifies = all([
+      dischargeHypothesesGivenTerm,
+      unifyTermWithConstructor
+    ], term, context, (term, context) => {
+      let validates;
+
+      const provisional = this.type.isProvisional();
+
+      term.setProvisional(provisional);
+
+      term.setType(this.type);
+
+      validates = continuation(term, context);
+
+      return validates;
+    });
+
+    if (termUnifies) {
+      context.debug(`...unified the '${termString}' term.`);
+    }
+
+    return termUnifies;
+  }
+
+  unifyTermWithConstructor(term, context, continuation) {
+    let termUnifiesWithCConstructor;
 
     const termString = term.getString(),
           includeType = true,
@@ -221,44 +255,25 @@ export default define(class Constructor extends Element {
 
     context.trace(`Unifying the '${termString}' term with the '${constructorString}' constructor...`);
 
-    const hypothesesDischargesGivenTerm = this.dischargeHypothesesGivenTerm(term, context, (context) => {
-      let hypothesesDischargesGivenTerm = false;
+    const constructor = this, ///
+          generalContext = this.getContext(),  ///
+          specifiContext = context; ///
 
-      const constructor = this, ///
-            constructorContext = constructor.getContext(),
-            generalContext = constructorContext,  ///
-            specifiContext = context, ///
-            termUnifiesWithConstructor = unifyTermWithConstructor(term, constructor, generalContext, specifiContext, (generalContext, specifiContext) => {
-              let termUnifiesWithConstructor;
+    termUnifiesWithCConstructor = unifyTermWithConstructor(term, constructor, generalContext, specifiContext, (generalContext, specifiContext) => {
+      let termUnifiesWithConstructor;
 
-              const context = specifiContext, ///
-                    provisional = this.type.isProvisional();
+      const context = specifiContext; ///
 
-              term.setProvisional(provisional);
+      termUnifiesWithConstructor = continuation(term, context);
 
-              term.setType(this.type);
-
-              termUnifiesWithConstructor = continuation(term, context);
-
-              return termUnifiesWithConstructor;
-            });
-
-      if (termUnifiesWithConstructor) {
-        hypothesesDischargesGivenTerm = true;
-      }
-
-      return hypothesesDischargesGivenTerm;
+      return termUnifiesWithConstructor;
     });
 
-    if (hypothesesDischargesGivenTerm) {
-      termUnifies = true;
-    }
-
-    if (termUnifies) {
+    if (termUnifiesWithCConstructor) {
       context.debug(`...unified the '${termString}' term with the '${constructorString}' constructor.`);
     }
 
-    return termUnifies;
+    return termUnifiesWithCConstructor;
   }
 
   dischargeHypothesesGivenTerm(term, context, continuation) {
@@ -266,42 +281,42 @@ export default define(class Constructor extends Element {
 
     const hypothetical = this.isHypothetical();
 
-    if(!hypothetical) {
-      hypothesesDischargesGivenTerm = continuation(context);
-    } else {
+    if(hypothetical) {
       const constructorString = this.getString();
 
       context.trace(`Discharing the '${constructorString}' constructor's hhypotheses...`);
 
       const dischargeHypothesisGivenTerm = this.dischargeHypothesisGivenTerm.bind(this);
 
-      hypothesesDischargesGivenTerm = every(this.hypotheses, term, context, dischargeHypothesisGivenTerm, continuation);
+      hypothesesDischargesGivenTerm = every(this.hypotheses, dischargeHypothesisGivenTerm, term, context, continuation);
 
       if (hypothesesDischargesGivenTerm) {
         context.debug(`...discharged the '${constructorString}' constructor's hhypotheses.`);
       }
+    } else {
+      hypothesesDischargesGivenTerm = continuation(term, context);
     }
 
     return hypothesesDischargesGivenTerm;
   }
 
-  // dischargeHypothesisGivenTerm(hypothesis, term, context, continuation) {
-  //   let hypothesisDischargesGivenTerm;
-  //
-  //   const termString = term.getString(),
-  //         hypothesisString = hypothesis.getString(),
-  //         constructorString = this.getString(); ///
-  //
-  //   context.trace(`Discharding the '${constructorString}' constructor's '${hypothesisString}' hypothesis given the '${termString}' term...`);
-  //
-  //   hypothesisDischargesGivenTerm = hypothesis.dischargeGivenTerm(term, context);
-  //
-  //   if (hypothesisDischargesGivenTerm) {
-  //     context.trace(`...discharges the '${constructorString}' constructor's '${hypothesisString}' hypothesis given the '${termString}' term.`);
-  //   }
-  //
-  //   return hypothesisDischargesGivenTerm;
-  // }
+  dischargeHypothesisGivenTerm(hypothesis, term, context, continuation) {
+    let hypothesisDischargesGivenTerm;
+
+    const termString = term.getString(),
+          hypothesisString = hypothesis.getString(),
+          constructorString = this.getString(); ///
+
+    context.trace(`Discharding the '${constructorString}' constructor's '${hypothesisString}' hypothesis given the '${termString}' term...`);
+
+    hypothesisDischargesGivenTerm = hypothesis.dischargeGivenTerm(term, context, continuation);
+
+    if (hypothesisDischargesGivenTerm) {
+      context.trace(`...discharges the '${constructorString}' constructor's '${hypothesisString}' hypothesis given the '${termString}' term.`);
+    }
+
+    return hypothesisDischargesGivenTerm;
+  }
 
   toJSON() {
     const context = this.getContext();

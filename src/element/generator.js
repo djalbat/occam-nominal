@@ -3,8 +3,8 @@
 import { Element, breakPointUtilities } from "occam-languages";
 
 import { define } from "../elements";
-import { every, exists } from "../utilities/continuation";
 import { desist, declare } from "../utilities/state";
+import { all, exists, every} from "../utilities/continuation";
 import { baseTypeFromNothing } from "../utilities/type";
 import { instantiateGenerator } from "../process/instantiate";
 import { termFromGeneratorNode } from "../utilities/element";
@@ -160,23 +160,23 @@ export default define(class Generator extends Element {
 
     const hypothetical = this.isHypothetical();
 
-    if (!hypothetical) {
+    if (hypothetical) {
       const includeType = false,
             generatorString = this.getString(includeType);  ///
 
       context.trace(`Validating the '${generatorString}' generator's term as a variable...`);
 
       termValidatesAsVariable = this.term.validateAsVariable(state, context, (term, context) => {
-          let validatesAsVariable = false;
+        let validatesAsVariable = false;
 
-          const type = term.getType(),
-                baseType = baseTypeFromNothing();
+        const type = term.getType(),
+              baseType = baseTypeFromNothing();
 
-          if (type === baseType) {
-            validatesAsVariable = continuation(state, context);
-          }
+        if (type === baseType) {
+          validatesAsVariable = continuation(state, context);
+        }
 
-          return validatesAsVariable;
+        return validatesAsVariable;
       });
 
       if (termValidatesAsVariable) {
@@ -194,7 +194,7 @@ export default define(class Generator extends Element {
 
     if (!hypothetical) {
       const includeType = false,
-            generatorString = this.getString(includeType);  ///
+           generatorString = this.getString(includeType);  ///
 
       context.trace(`Validating the '${generatorString}' generator's term...`);
 
@@ -215,7 +215,41 @@ export default define(class Generator extends Element {
   }
 
   unifyTerm(term, context, continuation) {
-    let termUnifies = false;
+    let termUnifies;
+
+    const termString = term.getString();
+
+    context.trace(`Unifying the '${termString}' term...`);
+
+    const unifyTermWithGenerator = this.unifyTermWithGenerator.bind(this),
+          dischargeHypothesesGivenTerm = this.dischargeHypothesesGivenTerm.bind(this);
+
+    termUnifies = all([
+      dischargeHypothesesGivenTerm,
+      unifyTermWithGenerator
+    ], term, context, (term, context) => {
+      let validates;
+
+      const provisional = this.type.isProvisional();
+
+      term.setProvisional(provisional);
+
+      term.setType(this.type);
+
+      validates = continuation(term, context);
+
+      return validates;
+    });
+
+    if (termUnifies) {
+      context.debug(`...unified the '${termString}' term.`);
+    }
+
+    return termUnifies;
+  }
+
+  unifyTermWithGenerator(term, context, continuation) {
+    let termUnifiesWithCGenerator;
 
     const termString = term.getString(),
           includeType = true,
@@ -223,64 +257,25 @@ export default define(class Generator extends Element {
 
     context.trace(`Unifying the '${termString}' term with the '${generatorString}' generator...`);
 
-    const hypothesesDischargesGivenTerm = this.dischargeHypothesesGivenTerm(term, context, (context) => {
-      let hypothesesDischargesGivenTerm = false;
+    const generator = this, ///
+          generalContext = this.getContext(),  ///
+          specifiContext = context; ///
 
-      const generator = this, ///
-            generatorContext = generator.getContext(),
-            generalContext = generatorContext,  ///
-            specifiContext = context, ///
-            termUnifiesWithGenerator = unifyTermWithGenerator(term, generator, generalContext, specifiContext, (generalContext, specifiContext) => {
-              let termUnifiesWithGenerator;
+    termUnifiesWithCGenerator = unifyTermWithGenerator(term, generator, generalContext, specifiContext, (generalContext, specifiContext) => {
+      let termUnifiesWithGenerator;
 
-              const context = specifiContext, ///
-                    provisional = this.type.isProvisional();
+      const context = specifiContext; ///
 
-              term.setProvisional(provisional);
+      termUnifiesWithGenerator = continuation(term, context);
 
-              term.setType(this.type);
-
-              termUnifiesWithGenerator = continuation(term, context);
-
-              return termUnifiesWithGenerator;
-            });
-
-      if (termUnifiesWithGenerator) {
-        hypothesesDischargesGivenTerm = true;
-      }
-
-      return hypothesesDischargesGivenTerm;
+      return termUnifiesWithGenerator;
     });
 
-    if (hypothesesDischargesGivenTerm) {
-      termUnifies = true;
-    }
-
-    if (termUnifies) {
+    if (termUnifiesWithCGenerator) {
       context.debug(`...unified the '${termString}' term with the '${generatorString}' generator.`);
     }
 
-    return termUnifies;
-  }
-
-  dischargeHypothesisGivenTerm(hypothesis, term, context) {
-    let hypothesisDischargesGivenTerm;
-
-    debugger
-
-    // const termString = term.getString(),
-    //       hypothesisString = hypothesis.getString(),
-    //       generatorString = this.getString(); ///
-    //
-    // context.trace(`Discharding the '${generatorString}' generator's '${hypothesisString}' hypothesis given the '${termString}' term...`);
-    //
-    // hypothesisDischargesGivenTerm = hypothesis.dischargeGivenTerm(term, context);
-    //
-    // if (hypothesisDischargesGivenTerm) {
-    //   context.trace(`...discharges the '${generatorString}' generator's '${hypothesisString}' hypothesis given the '${termString}' term.`);
-    // }
-
-    return hypothesisDischargesGivenTerm;
+    return termUnifiesWithCGenerator;
   }
 
   dischargeHypothesesGivenTerm(term, context, continuation) {
@@ -288,23 +283,41 @@ export default define(class Generator extends Element {
 
     const hypothetical = this.isHypothetical();
 
-    if(!hypothetical) {
-      hypothesesDischargesGivenTerm = continuation(context);
-    } else {
+    if(hypothetical) {
       const generatorString = this.getString();
 
       context.trace(`Discharing the '${generatorString}' generator's hhypotheses...`);
 
       const dischargeHypothesisGivenTerm = this.dischargeHypothesisGivenTerm.bind(this);
 
-      hypothesesDischargesGivenTerm = every(this.hypotheses, term, context, dischargeHypothesisGivenTerm, continuation);
+      hypothesesDischargesGivenTerm = every(this.hypotheses, dischargeHypothesisGivenTerm, term, context, continuation);
 
       if (hypothesesDischargesGivenTerm) {
         context.debug(`...discharged the '${generatorString}' generator's hhypotheses.`);
       }
+    } else {
+      hypothesesDischargesGivenTerm = continuation(term, context);
     }
 
     return hypothesesDischargesGivenTerm;
+  }
+
+  dischargeHypothesisGivenTerm(hypothesis, term, context, continuation) {
+    let hypothesisDischargesGivenTerm;
+
+    const termString = term.getString(),
+          hypothesisString = hypothesis.getString(),
+          generatorString = this.getString(); ///
+
+    context.trace(`Discharding the '${generatorString}' generator's '${hypothesisString}' hypothesis given the '${termString}' term...`);
+
+    hypothesisDischargesGivenTerm = hypothesis.dischargeGivenTerm(term, context, continuation);
+
+    if (hypothesisDischargesGivenTerm) {
+      context.trace(`...discharges the '${generatorString}' generator's '${hypothesisString}' hypothesis given the '${termString}' term.`);
+    }
+
+    return hypothesisDischargesGivenTerm;
   }
 
   toJSON() {
