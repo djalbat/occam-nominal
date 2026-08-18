@@ -38,88 +38,81 @@ export default class Fact extends Element {
   }
 
   validateStatement(state, context, continuation) {
-    let statementValidates;
+    let statementValidates = true;  ///
 
-    if (this.statement !== null) {
-      const factString = this.getString();  ///
-
-      context.trace(`Validating the '${factString}' fact's statement...`);
-
-      statementValidates = this.statement.validate(state, context, (statement, context) => {
-        let validates;
-
-        this.statement = statement;
-
-        validates = continuation(state, context);
-
-        return validates;
-      });
-
-      if (statementValidates) {
-        context.trace(`...validated the '${factString}' fact's statement.`);
-      }
-    } else {
-      statementValidates = continuation(state, context);
+    if (this.statement === null) {
+      return continuation(statementValidates, state, context);
     }
 
-    return statementValidates;
+    const factString = this.getString();  ///
+
+    context.trace(`Validating the '${factString}' fact's statement...`);
+
+    return this.statement.validate(state, context, (statement, context) => {
+      if (statement === null) {
+        statementValidates = false;
+      }
+
+      if (statementValidates) {
+        this.statement = statement;
+
+        context.trace(`...validated the '${factString}' fact's statement.`);
+      }
+
+      return continuation(statementValidates, state, context);
+    });
   }
 
   validateReference(state, context, continuation) {
-    let referenceValidates;
+    let referenceValidates = true;  ///
 
-    if (this.reference !== null) {
-      const factString = this.getString(),  ///
-            referenceString = this.reference.getString();
-
-      context.trace(`Validating the '${factString}' fact's '${referenceString}' reference...`);
-
-      referenceValidates = this.reference.validate(state, context, (reference, context) => {
-        let validates;
-
-        this.reference = reference;
-
-        validates = continuation(state, context);
-
-        return validates;
-      });
-
-      if (referenceValidates) {
-        context.debug(`...validated the '${factString}' fact's '${referenceString}' reference.`);
-      }
-    } else {
-      referenceValidates = continuation(state, context);
+    if (this.reference === null) {
+      return continuation(referenceValidates, state, context);
     }
 
-    return referenceValidates;
+    const factString = this.getString();  ///
+
+    context.trace(`Validating the '${factString}' fact's reference...`);
+
+    return this.reference.validate(state, context, (reference, context) => {
+      if (reference === null) {
+        referenceValidates = false;
+      }
+
+      if (referenceValidates) {
+        this.reference = reference;
+
+        context.trace(`...validated the '${factString}' fact's reference.`);
+      }
+
+      return continuation(referenceValidates, state, context);
+    });
   }
 
   validateProcedureCall(state, context, continuation) {
-    let procedureCallValidates;
+    let procedureCallValidates = true;  ///
 
-    if (this.procedureCall !== null) {
-      const factString = this.getString();  ///
-
-      context.trace(`Validating the '${factString}' fact's procedure call...`);
-
-      procedureCallValidates = this.procedureCall.validate(state, context, (procedureCall, context) => {
-        let validates;
-
-        this.procedureCall = procedureCall;
-
-        validates = continuation(state, context);
-
-        return validates;
-      });
-
-      if (procedureCallValidates) {
-        context.trace(`...validated the '${factString}' fact's procedure call.`);
-      }
-    } else {
-      procedureCallValidates = continuation(state, context);
+    if (this.procedureCall === null) {
+      return continuation(procedureCallValidates, state, context);
     }
 
-    return procedureCallValidates;
+    const factString = this.getString();  ///
+
+    context.trace(`Validating the '${factString}' fact's procedure call...`);
+
+    return this.procedureCall.validate(state, context, (procedureCall, context) => {
+      if (procedureCall === null) {
+        procedureCallValidates = false;
+      }
+
+      if (procedureCallValidates) {
+        this.procedureCall = procedureCall;
+
+        context.trace(`...validated the '${factString}' fact's procedure call.`);
+      }
+
+      return continuation(procedureCallValidates, state, context);
+    });
   }
 
   compareStep(step, context) {

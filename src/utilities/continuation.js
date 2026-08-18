@@ -1,151 +1,186 @@
 "use strict";
 
-export function one(array, callback, ...initialArguments) {
-  let success = false;
-
+export function synchronousOne(array, callback, ...initialArguments) {
   const continuation = initialArguments.pop(),
-        length = array.length;
-
-  let count = 0;
-
-  for (let index = 0; index < length; index++) {
-    const element = array[index];
-
-    success = callback(element, ...initialArguments, continuation);
-
-    if (success) {
-      count++;
-
-      if (count > 1) {
-        break;
-      }
-    }
-  }
-
-  success = (count === 1);
-
-  return success;
-}
-
-export function some(array, callback, ...initialArguments) {
-  let success = false;
-
-  const continuation = initialArguments.pop(),
-        length = array.length;
-
-  for (let index = 0; index < length; index++) {
-    const element = array[index];
-
-    success = callback(element, ...initialArguments, continuation);
-
-    if (success) {
-      break;
-    }
-  }
-
-  return success;
-}
-
-export function each(array, callback, ...initialArguments) {
-  const length = array.length;
-
-  if (length === 0) {
-    const success = false;
-
-    return success;
-  }
-
-  const continuation = initialArguments.pop(),
-        callbackArguments = initialArguments, ///
-        index = 0;
-
-  function next(index, ...callbackArguments) {
-    let success;
-
-    if (index === length) {
-      success = continuation(...callbackArguments);
-    } else {
-      const element = array[index];
-
-      success = callback(element, ...callbackArguments, (...callbackArguments) => {
-        return next(index + 1, ...callbackArguments);
-      });
-    }
-
-    return success;
-  }
-
-  return next(index, ...callbackArguments);
-}
-
-export function every(array, callback, ...initialArguments) {
-  const continuation = initialArguments.pop(),
-        callbackArguments = initialArguments, ///
         length = array.length,
         index = 0;
 
-  function next(index, ...callbackArguments) {
-    let success;
-
+  function next(index, ...nextArguments) {
     if (index === length) {
-      success =  continuation(...callbackArguments);
-    } else {
-      const element = array[index];
+      const success = (count === 1),
+            finalArguemnts = success ?
+                               nextArguments : ///
+                                 initialArguments; ///
 
-      success = callback(element, ...callbackArguments, (...callbackArguments) => {
-        return next(index + 1, ...callbackArguments);
-      });
+      return continuation(success, ...finalArguemnts);
     }
 
-    return success;
+    const element = array[index];
+
+    return callback(element, ...initialArguments, (success, ...callbackArguments) => {
+      if (success) {
+        count++;
+
+        if (count === 2) {
+          const success = false,
+                finalArguments = initialArguments;  ///
+
+          return continuation(success, ...finalArguments);
+        }
+
+        return next(index + 1, ...callbackArguments);
+      }
+
+      return next(index + 1, ...nextArguments);
+    });
   }
 
-  return next(index, ...callbackArguments);
+  let count = 0;
+
+  return next(index, ...initialArguments);
 }
 
-export function match(arrayA, arrayB, callback, ...initialArguments) {
-  const arrayALength = arrayA.length,
+export function synchronousSome(array, callback, ...initialArguments) {
+  const continuation = initialArguments.pop(),
+        length = array.length,
+        index = 0;
+
+  function next(index) {
+    if (index === length) {
+      const success = false,
+            finalArguments = initialArguments; ///
+
+      return continuation(success, ...finalArguments);
+    }
+
+    const element = array[index];
+
+    return callback(element, ...initialArguments, (success, ...callbackArguments) => {
+      if (success) {
+        const finalArguments = callbackArguments; //
+
+        return continuation(success, ...finalArguments);
+      }
+
+      return next(index + 1);
+    });
+  }
+
+  return next(index);
+}
+
+export function synchronousEach(array, callback, ...initialArguments) {
+  const continuation = initialArguments.pop(),
+        length = array.length,
+        index = 0;
+
+  function next(index, ...nextArguments) {
+    if (index === length) {
+      const success = (count !== 0),
+            finalArguments = success ?
+                                nextArguments : ///
+                                  initialArguments; ///
+
+      return continuation(success, ...finalArguments);
+    }
+
+    const element = array[index];
+
+    return callback(element, ...nextArguments, (success, ...callbackArguments) => {
+      if (!success) {
+        const finalArguments = initialArguments;  ///
+
+        return continuation(success, ...finalArguments);
+      }
+
+      count++;
+
+      return next(index + 1, ...callbackArguments);
+    });
+  }
+
+  let count = 0;
+
+  return next(index, ...initialArguments);
+}
+
+export function synchronousEvery(array, callback, ...initialArguments) {
+  const continuation = initialArguments.pop(),
+        length = array.length,
+        index = 0;
+
+  function next(index, ...nextArguments) {
+    if (index === length) {
+      const success = true,
+            finalArguments = nextArguments; ///
+
+      return continuation(success, ...finalArguments);
+    }
+
+    const element = array[index];
+
+    return callback(element, ...nextArguments, (success, ...callbackArguments) => {
+      if (!success) {
+        const finalArguments = initialArguments;  ///
+
+        return continuation(success, ...finalArguments);
+      }
+
+      return next(index + 1, ...callbackArguments);
+    });
+  }
+
+  return next(index, ...initialArguments);
+}
+
+export function synchronousMatch(arrayA, arrayB, callback, ...initialArguments) {
+  const continuation = initialArguments.pop(),
+        arrayALength = arrayA.length,
         arrayBLength = arrayB.length;
 
   if (arrayALength !== arrayBLength) {
-    const success = false;
+    const success = false,
+          finalArguments = initialArguments;  ///
 
-    return success;
+    return continuation(success, ...finalArguments);
   }
 
-  const continuation = initialArguments.pop(),
-        callbackArguments = initialArguments, ///
-        length = arrayALength,  ///
+  const length = arrayALength,  ///
         index = 0;
 
-  function next(index, ...callbackArguments) {
-    let success;
-
+  function next(index, ...nextArguments) {
     if (index === length) {
-      success = continuation(...callbackArguments);
-    } else {
-      const elementA = arrayA[index],
-            elementB = arrayB[index];
+      const success = true,
+            finalArguments = nextArguments; ///
 
-      success = callback(elementA, elementB, ...callbackArguments, (...callbackArguments) => {
-        return next(index + 1, ...callbackArguments);
-      });
+      return continuation(success, ...finalArguments);
     }
 
-    return success;
+    const elementA = arrayA[index],
+          elementB = arrayB[index];
+
+    return callback(elementA, elementB, ...nextArguments, (success, ...callbackArguments) => {
+      if (!success) {
+        const finalArguments = initialArguments;  ///
+
+        return continuation(success, ...finalArguments);
+      }
+
+      return next(index + 1, ...callbackArguments);
+    });
   }
 
-  return next(index, ...callbackArguments);
+  return next(index, ...initialArguments);
 }
 
-export function all(callbacks, ...initialArguments) {
-  return every(callbacks, (callback, ...callbackArguments) => {
+export function synchronousAll(callbacks, ...initialArguments) {
+  return synchronousEvery(callbacks, (callback, ...callbackArguments) => {
     return callback(...callbackArguments);
   }, ...initialArguments);
 }
 
-export function exists(callbacks, ...initialArguments) {
-  return some(callbacks, (callback, ...callbackArguments) => {
+export function synchronousExists(callbacks, ...initialArguments) {
+  return synchronousSome(callbacks, (callback, ...callbackArguments) => {
     return callback(...callbackArguments);
   }, ...initialArguments);
 }

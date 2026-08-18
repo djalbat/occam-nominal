@@ -3,9 +3,9 @@
 import { Element, breakPointUtilities } from "occam-languages";
 
 import { define } from "../elements";
-import { exists } from "../utilities/continuation";
 import { instantiate } from "../utilities/context";
 import { unifyStatement } from "../process/unify";
+import { synchronousExists } from "../utilities/continuation";
 import { validateStatements } from "../process/validation";
 import { dischargeStatements } from "../process/discharge";
 import { instantiateStatement } from "../process/instantiate";
@@ -242,39 +242,35 @@ export default define(class Statement extends Element {
   }
 
   validate(state, context, continuation) {
-    let validates;
+    let statement;
 
     const statementString = this.getString();  ///
 
     context.trace(`Validating the '${statementString}' statement...`);
-
-    let statement;
 
     statement = this.findStatement(context);
 
     if (statement !== null) {
       context.debug(`The '${statementString}' statement is already present.`);
 
-      validates = continuation(statement, context);
-    } else {
-      statement = this; ///
+      return continuation(statement, context);
+    }
 
-      validates = exists(validateStatements, statement, state, context, (statement, state, context) => {
-        let validates;
+    statement = this; ///
 
+    return synchronousExists(validateStatements, statement, state, context, (validates, statement, state, context) => {
+      if (!validates) {
+        statement = null;
+      }
+
+      if (validates) {
         context.addStatement(statement);
 
-        validates = continuation(statement, context);
+        context.debug(`...validated the '${statementString}' statement.`);
+      }
 
-        return validates;
-      });
-    }
-
-    if (validates) {
-      context.debug(`...validated the '${statementString}' statement.`);
-    }
-
-    return validates;
+      return continuation(statement, context);
+    });
   }
 
   discharge(generalContext, specificContext, continuation) {

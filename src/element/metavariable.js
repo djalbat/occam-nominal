@@ -4,9 +4,9 @@ import { Element, breakPointUtilities, continuationUtilities } from "occam-langu
 
 import elements from "../elements";
 
-import { all } from "../utilities/continuation";
 import { define } from "../elements";
 import { instantiate } from "../utilities/context";
+import { synchronousAll } from "../utilities/continuation";
 import { declare, desist } from "../utilities/state";
 import { instantiateMetavariable } from "../process/instantiate";
 import { metaTypeFromJSON, metaTypeToMetaTypeJSON } from "../utilities/json";
@@ -195,51 +195,47 @@ export default define(class Metavariable extends Element {
       strict = false;
     }
 
-    let validates;
+    let metavariable;
 
     const metavariableString = this.getString(); ///
 
     context.trace(`Validating the '${metavariableString}' metavariable...`);
-
-    let metavariable;
 
     metavariable = this.findMetavariable(context);
 
     if (metavariable !== null) {
       context.debug(`...the '${metavariableString}' metavariable is already present.`);
 
-      validates = continuation(metavariable, context);
-    } else {
-      metavariable = this;  ///
+      return continuation(metavariable, context);
+    }
 
-      const validateName = this.validateName.bind(this),
-            validateType = this.validateType.bind(this),
-            validateTerm = this.validateTerm.bind(this);
+    metavariable = this;  ///
 
-      validates = all([
-        validateName,
-        validateType,
-        validateTerm
-      ], strict, state, context, (strict, state, context) => {
-        let validates;
+    const validateName = this.validateName.bind(this),
+          validateType = this.validateType.bind(this),
+          validateTerm = this.validateTerm.bind(this);
 
+    return synchronousAll([
+      validateName,
+      validateType,
+      validateTerm
+    ], strict, state, context, (validates, strict, state, context) => {
+      if (!validates) {
+        metavariable = null;
+      }
+
+      if (validates) {
         context.addMetavariable(metavariable);
 
-        validates = continuation(metavariable, context);
+        context.debug(`...validated the '${metavariableString}' metavariable.`);
+      }
 
-        return validates;
-      });
-    }
-
-    if (validates) {
-      context.debug(`...validated the '${metavariableString}' metavariable.`);
-    }
-
-    return validates;
+      return continuation(metavariable, context);
+    });
   }
 
   validateName(strict, state, context, continuation) {
-    let nameValidates = true; ///
+    let nameValidates;
 
     const metavariableString = this.getString();  ///
 
@@ -247,6 +243,8 @@ export default define(class Metavariable extends Element {
 
     const metavariableName = this.getMetavariableName(),  ///
           declaredMetavariable = context.findDeclaredMetavariableByMetavariableName(metavariableName);
+
+    nameValidates = true; ///
 
     if (declaredMetavariable !== null) {
       const metaType = declaredMetavariable.getMetaType(),
@@ -262,100 +260,94 @@ export default define(class Metavariable extends Element {
     }
 
     if (nameValidates) {
-      nameValidates = continuation(strict, state, context);
-    }
-
-    if (nameValidates) {
       context.debug(`...validated the '${metavariableString}' metavariable's name.`);
     }
 
-    return nameValidates;
+    return continuation(nameValidates, strict, state, context);
   }
 
   validateType(strict, state, context, continuation) {
-    let typeValidates;
+    let typeValidates = true; ///
 
-    if (this.type !== null) {
-      const metavariableString = this.getString();  ///
-
-      context.trace(`Validating  the '${metavariableString}' metavariable's type...`);
-
-      typeValidates = false;
-
-      const typeName = this.type.getName(),
-            typePresenet = context.isTypePresentByTypeName(typeName);
-
-      if (typePresenet) {
-        typeValidates = continuation(strict, state, context);
-      }
-
-      if (typeValidates) {
-        context.trace(`...validated  the '${metavariableString}' metavariable's type.`);
-      }
-    } else {
-      typeValidates = continuation(strict, state, context);
+    if (this.type === null) {
+      return continuation(typeValidates, strict, state, context);
     }
 
-    return typeValidates;
+    const metavariableString = this.getString();  ///
+
+    context.trace(`Validating  the '${metavariableString}' metavariable's type...`);
+
+    const typeName = this.type.getName(),
+          typePresenet = context.isTypePresentByTypeName(typeName);
+
+    if (!typePresenet) {
+      typeValidates = false;
+    }
+
+    if (typeValidates) {
+      context.trace(`...validated  the '${metavariableString}' metavariable's type.`);
+    }
+
+    return continuation(typeValidates, strict, state, context);
   }
 
   validateTerm(strict, state, context, continuation) {
-    let termValidates;
+    let termValidates = true; ///
 
-    if (this.term !== null) {
-      const metavariableString = this.getString();  ///
+    if (this.term === null) {
+      return continuation(termValidates, strict, state, context);
+    }
 
-      context.trace(`Validating the '${metavariableString}' metavariable's term...`);
+    const metavariableString = this.getString();  ///
 
-      const metavariableName = this.getMetavariableName(),
-            declaredMetavariable = context.findDeclaredMetavariableByMetavariableName(metavariableName);
+    context.trace(`Validating the '${metavariableString}' metavariable's term...`);
 
-      if (declaredMetavariable === null) {
-        if (strict) {
-          termValidates = continuation(strict, state, context);
-        } else {
-          termValidates = this.term.validate(state, context, (term, context) => {
-            let validates;
+    const metavariableName = this.getMetavariableName(),
+          declaredMetavariable = context.findDeclaredMetavariableByMetavariableName(metavariableName);
 
-            this.term = term;
+    if (declaredMetavariable === null) {
+      if (strict) {
+        termValidates = false;
 
-            validates = continuation(strict, state, context);
+        return continuation(termValidates, strict, state, context);
+      }
 
-            return validates;
-          });
-        }
-      } else {
-        const type = declaredMetavariable.getType();
-
-        if (type === null) {
-          termValidates = continuation(strict, state, context);
-        } else {
+      return this.term.validate(state, context, (term, context) => {
+        if (term === null) {
           termValidates = false;
-
-          const termValidatesGivenType = this.term.validateGivenType(type, state, context, (term, context) => {
-            let validatesGivenType;
-
-            this.term = term;
-
-            validatesGivenType = continuation(strict, state, context);
-
-            return validatesGivenType;
-          });
-
-          if (termValidatesGivenType) {
-            termValidates = true;
-          }
         }
+
+        if (termValidates) {
+          this.term = term;
+
+          context.debug(`...validated the '${metavariableString}' metavariable's term.`);
+        }
+
+        return continuation(termValidates, strict, state, context);
+      });
+    }
+
+    const type = declaredMetavariable.getType();
+
+    if (type === null) {
+      termValidates = false;
+
+      return continuation(termValidates, strict, state, context);
+    }
+
+    return this.term.validateGivenType(type, state, context, (term, context) => {
+      if (term === null) {
+        termValidates = false;
       }
 
       if (termValidates) {
+        this.term = term;
+
         context.debug(`...validated the '${metavariableString}' metavariable's term.`);
       }
-    } else {
-      termValidates = continuation(strict, state, context);
-    }
 
-    return termValidates;
+      return continuation(termValidates, strict, state, context);
+    });
   }
 
   unifyFrame(frame, generalContext, specificContext, continuation) {

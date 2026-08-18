@@ -4,9 +4,9 @@ import { breakPointUtilities } from "occam-languages";
 
 import Fact from "../fact";
 
-import { all } from "../../utilities/continuation";
 import { define } from "../../elements";
 import { declare } from "../../utilities/state";
+import { synchronousAll } from "../../utilities/continuation";
 import { instantiateSupposition } from "../../process/instantiate";
 import { attempt, reconcile, serialise, unserialise, instantiate } from "../../utilities/context";
 import { referenceFromSuppositionNode, procedureCallFromSuppositionNode } from "../../utilities/element";
@@ -68,58 +68,51 @@ export default define(class Supposition extends Fact {
       return continuation(verifies, context);
     }
 
-    declare((state) => {
-      const validates = this.validate(state, context, (suppostion, context) => true); ///
+    return declare((state) => {
+      return this.validate(state, context, (supposition, _ ) => {
+        if (supposition !== null) {
+          verifies = true;
+        }
 
-      if (validates) {
-        verifies = true;
-      }
+        if (verifies) {
+          context.debug(`...verified the '${suppositionString}' supposition.`);
+        }
+
+        return continuation(verifies, context);
+      });
     });
-
-    if (verifies) {
-      context.debug(`...verified the '${suppositionString}' supposition.`);
-    }
-
-    return continuation(verifies, context);
   });
 
   validate(state, context, continuation) {
-    let validates;
+    let supposition;
 
-    const specificContext = context,  ///
-          suppositionString = this.getString(); ///
+    const suppositionString = this.getString(); ///
 
     context.trace(`Validating the '${suppositionString}' supposition...`);
 
-    const supposition = this;  ///
+    supposition = this;  ///
 
-    attempt((context) => {
+    return attempt((context) => {
       const validateStatement = this.validateStatement.bind(this),
             validateProcedureCall = this.validateProcedureCall.bind(this);
 
-      validates = all([
+      return synchronousAll([
         validateStatement,
         validateProcedureCall
-      ], state, context, (state, context) => {
-        let validates;
+      ], state, context, (validates, state, context) => {
+        if (!validates) {
+          supposition = null;
+        }
 
-        this.commit(context);
+        if (validates) {
+          this.commit(context);
 
-        context = specificContext;  ///
+          context.debug(`...validated the '${suppositionString}' supposition.`);
+        }
 
-        validates = continuation(supposition, context);
-
-        return validates;
+        return continuation(supposition, context);
       });
     }, context);
-
-    context = specificContext;  ///
-
-    if (validates) {
-      context.debug(`...validated the '${suppositionString}' supposition.`);
-    }
-
-    return validates;
   }
 
   unifyIndependently(context, continuation) {

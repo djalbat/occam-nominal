@@ -2,9 +2,9 @@
 
 import { Element, breakPointUtilities } from "occam-languages";
 
-import { all } from "../utilities/continuation";
 import { define } from "../elements";
 import { declare } from "../utilities/state";
+import { synchronousAll } from "../utilities/continuation";
 import { instantiateLabel } from "../process/instantiate";
 import { labelFromLabelNode, metavariableFromLabelNode } from "../utilities/element";
 import { join, ablate, attempt, reconcile, serialise, unserialise, instantiate} from "../utilities/context";
@@ -62,86 +62,77 @@ export default define(class Label extends Element {
     const labelNode = this.getLabelNode(),
           labelPresent = context.isLabelPresentByLabelNode(labelNode);
 
-    if (!labelPresent) {
-      declare((state) => {
-        const validates = this.validate(state, context, (label, context) => true);  ///
+    if (labelPresent) {
+      context.debug(`The '${labelString}' label is already present.`);
 
-        if (validates) {
+      return continuation(verifies);
+    }
+
+    return declare((state) => {
+      return this.validate(state, context, (label, context) => {
+        if (label !== null) {
           verifies = true;
         }
+
+        if (verifies) {
+          context.debug(`...verified the '${labelString}' label.`);
+        }
+
+        return continuation(verifies);
       });
-    } else {
-      context.debug(`The '${labelString}' label is already present.`);
-    }
-
-    if (verifies) {
-      context.debug(`...verified the '${labelString}' label.`);
-    }
-
-    return continuation(verifies);
+    });
   }
 
   validate(state, context, continuation) {
-    let validates;
+    let label = this; ///
 
-    const labelString = this.getString(),  ///
-          specificContext = context;  ///
+    const labelString = this.getString(); ////
 
     context.trace(`Validating the '${labelString}' label...`);
 
-    const label = this; ///
-
     context = this.getContext();
 
-    attempt((context) => {
+    return attempt((context) => {
       const validateMetavariable = this.validateMetavariable.bind(this);
 
-      validates = all([
+      return synchronousAll([
         validateMetavariable
-      ], state, context, (state, context) => {
-        let validates;
+      ], state, context, (validates, state, context) => {
+        if (!validates) {
+          label = null;
+        }
 
-        this.commit(context);
+        if (validates) {
+          this.commit(context);
 
-        context = specificContext;  ///
+          context.debug(`...validated the '${labelString}' label.`);
+        }
 
-        validates = continuation(label, context);
-
-        return validates;
+        return continuation(label, context);
       });
     }, context);
-
-    context = specificContext;  ///
-
-    if (validates) {
-      context.debug(`...validated the '${labelString}' label.`);
-    }
-
-    return validates;
   }
 
   validateMetavariable(state, context, continuation) {
-    let metavariableValidates;
+    let metavariableValidates = false;
 
     const labelString = this.getString(); ///
 
     context.trace(`Validating the '${labelString}' label's metavariable...`);
 
-    metavariableValidates = this.metavariable.validate(state, context, (metavariable, context) => {
-      let validates;
+    return this.metavariable.validate(state, context, (metavariable, context) => {
+      if (metavariable !== null) {
+        metavariableValidates = true;
+      }
 
-      this.metavariable = metavariable;
+      if (metavariableValidates) {
+        this.metavariable = metavariable;
 
-      validates = continuation(state, context);
+        context.debug(`...validated the '${labelString}' label's metavariable.'`);
+      }
 
-      return validates;
+      return continuation(metavariableValidates, state, context);
     });
-
-    if (metavariableValidates) {
-      context.debug(`...validated the '${labelString}' label's metavariable.'`);
-    }
-
-    return metavariableValidates;
   }
 
   unifyReference(reference, context, continuation) {
