@@ -69,7 +69,7 @@ export default define(class Supposition extends Fact {
     }
 
     declare((state) => {
-      const validates = this.validate(state, context, (conclusion, context) => true);
+      const validates = this.validate(state, context, (suppostion, context) => true); ///
 
       if (validates) {
         verifies = true;

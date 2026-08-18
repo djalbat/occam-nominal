@@ -98,7 +98,7 @@ export default define(class Constructor extends Element {
 
     declare((state) => {
       desist((state) => {
-        const validates = this.validate(state, context, (constructor, context) => true);
+        const validates = this.validate(state, context, (constructor, context) => true);  ///
 
         if (validates) {
           verifies = true;
@@ -158,7 +158,7 @@ export default define(class Constructor extends Element {
 
     const hypothetical = this.isHypothetical();
 
-    if (!hypothetical) {
+    if (hypothetical) {
       const includeType = false,
             constructorString = this.getString(includeType);  ///
 

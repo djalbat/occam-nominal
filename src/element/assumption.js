@@ -166,7 +166,7 @@ export default define(class Assumption extends Element {
         });
 
         return success;
-      }, context, (context) => true);
+      }, context, (context) => true); ///
 
       if (validatesWhenDerived) {
         validatesWhenDerived = continuation(state, context);

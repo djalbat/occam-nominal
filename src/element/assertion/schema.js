@@ -52,7 +52,7 @@ export default define(class SchemaAssertion extends Assertion {
               implicitAssumption = ImplicitAssumption.fromStatement(statement, context);
 
         declare((state) => {
-          implicitAssumption.validate(state, context, (implicitAssumption, context) => true)
+          implicitAssumption.validate(state, context, (implicitAssumption, context) => true)  ///
         });
 
         implicitAssumptions.push(implicitAssumption);

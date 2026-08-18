@@ -83,7 +83,7 @@ export default define(class Property extends Element {
 
     declare((state) => {
       desist((state) => {
-        const validates = this.validate(state, context, (ocmbinator, context) => true);
+        const validates = this.validate(state, context, (ocmbinator, context) => true); ///
 
         if (validates) {
           verifies = true;

@@ -43,7 +43,7 @@ export default define(class Deduction extends Resolution {
 
     declare((state) => {
       desist((state) => {
-        const validates = this.validate(state, context, (conclusion, context) => true);
+        const validates = this.validate(state, context, (deduction, context) => true);  ///
 
         if (validates) {
           verifies = true;

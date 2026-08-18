@@ -43,7 +43,7 @@ export default define(class Conclusion extends Resolution {
 
     declare((state) => {
       desist((state) => {
-        const validates = this.validate(state, context, (conclusion, context) => true);
+        const validates = this.validate(state, context, (conclusion, context) => true); ///
 
         if (validates) {
           verifies = true;

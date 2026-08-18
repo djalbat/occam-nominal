@@ -58,7 +58,7 @@ export default define(class Hypothesis extends Element {
     }
 
     declare((state) => {
-      const validates = this.validate(state, context, (conclusion, context) => true);
+      const validates = this.validate(state, context, (hypothesis, context) => true); ///
 
       if (validates) {
         verifies = true;
@@ -135,7 +135,7 @@ export default define(class Hypothesis extends Element {
     if (this.statement !== null) {
       const hypothesisString = this.getString();  ///
 
-      context.trace(`Validating the '${hypothesisString}' hypothesis's statement...`);
+      context.trace(`Validating the '${hypothesisString}' hypothesis' statement...`);
 
       statementValidates = this.statement.validate(state, context, (statement, context) => {
         let validates;
@@ -148,7 +148,7 @@ export default define(class Hypothesis extends Element {
       });
 
       if (statementValidates) {
-        context.trace(`...validated the '${hypothesisString}' hypothesis's statement.`);
+        context.trace(`...validated the '${hypothesisString}' hypothesis' statement.`);
       }
     } else {
       statementValidates = continuation(state, context);
@@ -161,9 +161,9 @@ export default define(class Hypothesis extends Element {
     let procedureCallValidates;
 
     if (this.procedureCall !== null) {
-      const resolutionString = this.getString();  ///
+      const hypothesisString = this.getString();  ///
 
-      context.trace(`Validating the '${resolutionString}' resolution's procedure call...`);
+      context.trace(`Validating the '${hypothesisString}' hypothesis' procedure call...`);
 
       procedureCallValidates = this.procedureCall.validate(state, context, (procedureCall, context) => {
         let validates;
@@ -176,7 +176,7 @@ export default define(class Hypothesis extends Element {
       });
 
       if (procedureCallValidates) {
-        context.trace(`...validated the '${resolutionString}' resolution's procedure call.`);
+        context.trace(`...validated the '${hypothesisString}' hypothesis' procedure call.`);
       }
     } else {
       procedureCallValidates = continuation(state, context);
@@ -194,7 +194,7 @@ export default define(class Hypothesis extends Element {
 
     const hypothesisString = this.getString();
 
-    context.trace(`Discharging the '${hypothesisString}' hypothesis's statement...`);
+    context.trace(`Discharging the '${hypothesisString}' hypothesis' statement...`);
 
     const specificContext = context;  ///
 
@@ -243,7 +243,7 @@ export default define(class Hypothesis extends Element {
   //     const termString = term.getString(),
   //           hypothesisString = this.getString();
   //
-  //     context.trace(`Discharging the '${hypothesisString}' hypothesis's procedure call given the '${termString}' term...`);
+  //     context.trace(`Discharging the '${hypothesisString}' hypothesis' procedure call given the '${termString}' term...`);
   //
   //     const discharges = this.procedureCall.dischargeGivenTerm(term, context);  ///
   //

@@ -64,7 +64,7 @@ export default define(class Label extends Element {
 
     if (!labelPresent) {
       declare((state) => {
-        const validates = this.validate(state, context, (label, context) => true);
+        const validates = this.validate(state, context, (label, context) => true);  ///
 
         if (validates) {
           verifies = true;

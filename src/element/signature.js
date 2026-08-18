@@ -67,7 +67,7 @@ export default define(class Signature extends Element {
     context.trace(`Verifying the '${signatureString}' signature...`);
 
     declare((state) => {
-      const validates = this.validate(state, context, (conclusion, context) => true);
+      const validates = this.validate(state, context, (signature, context) => true);  ///
 
       if (validates) {
         verifies = true;

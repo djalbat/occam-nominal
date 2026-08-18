@@ -298,54 +298,6 @@ export default define(class Term extends Element {
     return validatesAsVariable;
   }
 
-  // validateAsProperty(context, continuation) {
-  //   let term;
-  //
-  //   const termString = this.getString();  ///
-  //
-  //   context.trace(`Validating the '${termString}' term as a property...`);
-  //
-  //   debugger
-  //
-  //   let validatesAsProperty = false;
-  //
-  //   const term = this.findTerm(context);
-  //
-  //   if (term !== null) {
-  //     term = term; ///
-  //
-  //     const validatesForward = continuation(term, context);
-  //
-  //     if (validatesForward) {
-  //       validatesAsProperty = true;
-  //
-  //       context.debug(`...the '${termString}' term is already valid.`);
-  //     } else {
-  //       term = null;
-  //     }
-  //   } else {
-  //     term = this;  ///
-  //
-  //     const termUnifiesWithProperties = unifyTermWithProperties(term, context, continuation);
-  //
-  //     if (termUnifiesWithProperties) {
-  //       validatesAsProperty = true;
-  //     } else {
-  //       term = null;
-  //     }
-  //
-  //     if (validatesAsProperty) {
-  //       context.addTerm(term);
-  //     }
-  //   }
-  //
-  //   if (validatesAsProperty) {
-  //     context.debug(`...validated the '${termString}' term as a property.`);
-  //   }
-  //
-  //   return term;
-  // }
-
   unifyTerm(term, generalContext, specificContext, continuation) {
     let termUnifies = false;
 

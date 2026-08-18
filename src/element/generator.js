@@ -100,7 +100,7 @@ export default define(class Generator extends Element {
 
     declare((state) => {
       desist((state) => {
-        const validates = this.validate(state, context, (generator, context) => true);
+        const validates = this.validate(state, context, (generator, context) => true);  ///
 
         if (validates) {
           verifies = true;

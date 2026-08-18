@@ -114,7 +114,7 @@ export default define(class Step extends Fact {
     const declared = this.idDeclared();
 
     (declared ? declare : derive)((state) => {
-      validates = this.validate(state, context, (step, context) => true);
+      validates = this.validate(state, context, (step, context) => true); ///
     });
 
     if (!validates) {
