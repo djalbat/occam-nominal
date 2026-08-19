@@ -1,6 +1,6 @@
 "use strict";
 
-import { breakPointUtilities } from "occam-languages";
+import { breakPointUtilities, continuationUtilities } from "occam-languages";
 
 import Fact from "../fact";
 
@@ -10,7 +10,8 @@ import { instantiateSupposition } from "../../process/instantiate";
 import { attempt, reconcile, serialise, unserialise, instantiate } from "../../utilities/context";
 import { referenceFromSuppositionNode, procedureCallFromSuppositionNode } from "../../utilities/element";
 
-const { breakable, breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
+const { all } = continuationUtilities,
+      { breakable, breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Supposition extends Fact {
   getSuppositionNode() {
@@ -95,7 +96,7 @@ export default define(class Supposition extends Fact {
       const validateStatement = this.validateStatement.bind(this),
             validateProcedureCall = this.validateProcedureCall.bind(this);
 
-      return synchronousAll([
+      return all([
         validateStatement,
         validateProcedureCall
       ], state, context, (validates, state, context) => {

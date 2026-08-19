@@ -1,6 +1,6 @@
 "use strict";
 
-import { breakPointUtilities } from "occam-languages";
+import { breakPointUtilities, continuationUtilities } from "occam-languages";
 
 import Assertion from "../assertion";
 
@@ -13,7 +13,8 @@ import { variableAssignmentFromTypeAssertion } from "../../process/assign";
 import { derive, isDerived, isDeclared, isTransient} from "../../utilities/state";
 import { termFromTypeAssertionNode, typeAssertionFromStatementNode } from "../../utilities/element";
 
-const { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
+const { all, exists } = continuationUtilities,
+      { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class TypeAssertion extends Assertion {
   constructor(context, string, node, breakPoint, term, type) {
@@ -69,13 +70,11 @@ export default define(class TypeAssertion extends Assertion {
   }
 
   validate(state, context, continuation) {
-    let validates;
+    let assertion;
 
     const typeAssertionString = this.getString();  ///
 
     context.trace(`Validating the '${typeAssertionString}' type assertion...`);
-
-    let assertion;
 
     assertion = this.findAssertion(context);
 
@@ -84,41 +83,39 @@ export default define(class TypeAssertion extends Assertion {
 
       context.debug(`The '${typeAssertionString}' type assertion is already present.`);
 
-      validates = continuation(typeAssertion, context);
-    } else {
-      assertion = this;
+      return continuation(typeAssertion, context);
+    }
 
-      const validateType = this.validateType.bind(this);
+    assertion = this;
 
-      validates = all([
-        validateType
+    const validateType = this.validateType.bind(this);
+
+    all([
+      validateType
+    ], state, context, (validates, state, context) => {
+      const validateWhenDeclared = this.validateWhenDeclared.bind(this),
+            validateWhenDerived = this.validateWhenDerived.bind(this);
+
+      validates = exists([
+        validateWhenDeclared,
+        validateWhenDerived
       ], state, context, (state, context) => {
         let validates;
 
-        const validateWhenDeclared = this.validateWhenDeclared.bind(this),
-              validateWhenDerived = this.validateWhenDerived.bind(this);
+        context.addAssertion(assertion);
 
-        validates = exists([
-          validateWhenDeclared,
-          validateWhenDerived
-        ], state, context, (state, context) => {
-          let validates;
+        const typeAssertion = assertion; ///
 
-          context.addAssertion(assertion);
-
-          const typeAssertion = assertion; ///
-
-          validates = continuation(typeAssertion, context);
-
-          return validates;
-        });
+        validates = continuation(typeAssertion, context);
 
         return validates;
       });
 
-      if (validates) {
-        this.assign(state, context);
-      }
+      return validates;
+    });
+
+    if (validates) {
+      this.assign(state, context);
     }
 
     if (validates) {
@@ -149,14 +146,10 @@ export default define(class TypeAssertion extends Assertion {
     }
 
     if (typeValidates) {
-      typeValidates = continuation(state, context);
-    }
-
-    if (typeValidates) {
       context.debug(`...validated the '${typeAssertionString}' type assertion's type.`);
     }
 
-    return typeValidates;
+    return continuation(typeValidates, state, context)
   }
 
   validateWhenDeclared(state, context, continuation) {

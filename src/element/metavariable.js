@@ -214,7 +214,7 @@ export default define(class Metavariable extends Element {
           validateType = this.validateType.bind(this),
           validateTerm = this.validateTerm.bind(this);
 
-    return synchronousAll([
+    return all([
       validateName,
       validateType,
       validateTerm

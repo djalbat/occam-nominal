@@ -1,8 +1,7 @@
 "use strict";
 
 import { queryUtilities } from "occam-query";
-
-import ContinuationPass from "../pass/continuation";
+import { ContinuationPass } from "occam-languages";
 
 import { declare } from "../utilities/state";
 import { termFromTermNode, statementFromStatementNode } from "../utilities/element";
@@ -14,130 +13,94 @@ const termNodeQuery = nodeQuery("/term"),
       statementNodeQuery = nodeQuery("/statement");
 
 class ValidateTermPass extends ContinuationPass {
-  run(termNode, context, continuation) {
-    const nonTerminalNode = termNode,  ///
-          childNodes = nonTerminalNode.getChildNodes(),
-          descended = this.descend(childNodes, context, continuation),
-          success = descended;  ///
-
-    return success;
-  }
-
   static maps = [
     {
       nodeQuery: termNodeQuery,
       run: (termNode, context, continuation) => {
-        let success = false;
-
         const term = termFromTermNode(termNode, context);
 
-        declare((state) => {
-          const termValidates = term.validate(state, context, (term, context) => {
-            let validates;
+        return declare((state) => {
+          return term.validate(state, context, (term, context) => {
+            let success = false;
 
-            validates = continuation(context);
+            if (term !== null) {
+              success = true;
+            }
 
-            return validates;
+            return continuation(success, context);
           });
-
-          if (termValidates) {
-            success = true;
-          }
         });
-
-        return success;
       }
     },
     {
       nodeQuery: typeNodeQuery,
       run: (typeNode, context, continuation) => {
-        let success = false;
-
         const nominalTypeName = typeNode.getNominalTypeName(),
               typePresent = context.isTypePresentByNominalTypeName(nominalTypeName);
 
+        let success = false;
+
         if (typePresent) {
-          success = continuation(context);
+          success = true;
         }
 
-        return success;
+        return continuation(success, context);
       }
     }
   ];
 }
 
 class ValidateStatementPass extends ContinuationPass {
-  run(statementNode, context, continuation) {
-    const nonTerminalNode = statementNode,  ///
-          childNodes = nonTerminalNode.getChildNodes(),
-          descended = this.descend(childNodes, context, continuation),
-          success = descended;  ///
-
-    return success;
-  }
-
   static maps = [
     {
       nodeQuery: statementNodeQuery,
       run: (statementNode, context, continuation) => {
-        let success = false;
-
         const statement = statementFromStatementNode(statementNode, context);
 
-        declare((state) => {
-          const statementValidates = statement.validate(state, context, (statement, context) => {
-            let validates;
+        return declare((state) => {
+          return statement.validate(state, context, (statement, context) => {
+            let success = false;
 
-            validates = continuation(context);
+            if (statement !== null) {
+              success = true;
+            }
 
-            return validates;
+            return continuation(success, context);
           });
-
-          if (statementValidates) {
-            success = true;
-          }
         });
-
-        return success;
       }
     },
     {
       nodeQuery: termNodeQuery,
       run: (termNode, context, continuation) => {
-        let success = false;
-
         const term = termFromTermNode(termNode, context);
 
-        declare((state) => {
-          const termValidates = term.validate(state, context, (term, context) => {
-            let validates;
+        return declare((state) => {
+          return term.validate(state, context, (term, context) => {
+            let success = false;
 
-            validates = continuation(context);
+            if (term !== null) {
+              success = true;
+            }
 
-            return validates;
+            return continuation(success, context);
           });
-
-          if (termValidates) {
-            success = true;
-          }
         });
-
-        return success;
       }
     },
     {
       nodeQuery: typeNodeQuery,
       run: (typeNode, context, continuation) => {
-        let success = false;
-
         const nominalTypeName = typeNode.getNominalTypeName(),
               typePresent = context.isTypePresentByNominalTypeName(nominalTypeName);
 
+        let success = false;
+
         if (typePresent) {
-          success = continuation(context);
+          success = true
         }
 
-        return success;
+        return continuation(success, context);
       }
     }
   ];
@@ -147,53 +110,61 @@ const validateTermPass = new ValidateTermPass(),
       validateStatementPass = new ValidateStatementPass();
 
 export function validateTermAsProperty(term, context, continuation) {
-  let termValidatesAsProperty = false;
-
   const termNode = term.getNode(),
-        success = validateTermPass.run(termNode, context, continuation);
+        termChildNodes = termNode.getChildNodes();  ///
 
-  if (success) {
-    termValidatesAsProperty = true;
-  }
+  return validateTermPass.descend(termChildNodes, context, continuation, (descended) => {
+    let termValidatesAsProperty = false;
 
-  return termValidatesAsProperty;
+    if (descended) {
+      termValidatesAsProperty = true;
+    }
+
+    return continuation(termValidatesAsProperty, context);
+  });
 }
 
 export function validateTermAsGenerator(term, context, continuation) {
-  let termValidatesAsGenerator = false;
-
   const termNode = term.getNode(),
-        success = validateTermPass.run(termNode, context, continuation);
+        termChildNodes = termNode.getChildNodes();  ///
 
-  if (success) {
-    termValidatesAsGenerator = true;
-  }
+  return validateTermPass.descend(termChildNodes, context, continuation, (descended) => {
+    let termValidatesAsGenerator = false;
 
-  return termValidatesAsGenerator;
+    if (descended) {
+      termValidatesAsGenerator = true;
+    }
+
+    return continuation(termValidatesAsGenerator, context);
+  });
 }
 
 export function validateTermAsConstructor(term, context, continuation) {
-  let termValidatesAsConstructor = false;
-
   const termNode = term.getNode(),
-        success = validateTermPass.run(termNode, context, continuation);
+        termChildNodes = termNode.getChildNodes();  ///
 
-  if (success) {
-    termValidatesAsConstructor = true;
-  }
+  return validateTermPass.descend(termChildNodes, context, continuation, (descended) => {
+    let termValidatesAsConstructor = false;
 
-  return termValidatesAsConstructor;
+    if (descended) {
+      termValidatesAsConstructor = true;
+    }
+
+    return continuation(termValidatesAsConstructor, context);
+  });
 }
 
 export function validateStatementAsCombinator(statement, context, continuation) {
-  let statementValidatesAsCombinator = false;
-
   const statementNode = statement.getNode(),
-        success = validateStatementPass.run(statementNode, context, continuation);
+        statementChildNodes = statementNode.getChildNodes();  ///
 
-  if (success) {
-    statementValidatesAsCombinator = true;
-  }
+  return validateStatementPass.descend(statementChildNodes, context, (descended) => {
+    let statementValidatesAsCombinator = false;
 
-  return statementValidatesAsCombinator;
+    if (descended) {
+      statementValidatesAsCombinator = true;
+    }
+
+    return continuation(statementValidatesAsCombinator, context);
+  });
 }

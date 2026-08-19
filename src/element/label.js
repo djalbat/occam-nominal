@@ -1,6 +1,6 @@
 "use strict";
 
-import { Element, breakPointUtilities } from "occam-languages";
+import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
 
 import { define } from "../elements";
 import { declare } from "../utilities/state";
@@ -8,7 +8,8 @@ import { instantiateLabel } from "../process/instantiate";
 import { labelFromLabelNode, metavariableFromLabelNode } from "../utilities/element";
 import { join, ablate, attempt, reconcile, serialise, unserialise, instantiate} from "../utilities/context";
 
-const { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
+const { all } = continuationUtilities,
+      { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Label extends Element {
   constructor(context, string, node, breakPoint, metavariable) {
@@ -94,7 +95,7 @@ export default define(class Label extends Element {
     return attempt((context) => {
       const validateMetavariable = this.validateMetavariable.bind(this);
 
-      return synchronousAll([
+      return all([
         validateMetavariable
       ], state, context, (validates, state, context) => {
         if (!validates) {

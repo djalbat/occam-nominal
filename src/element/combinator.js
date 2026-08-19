@@ -131,8 +131,6 @@ export default define(class Combinator extends Element {
   }
 
   unifyStatement(statement, context, continuation) {
-    let statementUnifies = false;
-
     const statementString = statement.getString(),
           combinatorString = this.getString();  ///
 
@@ -140,26 +138,17 @@ export default define(class Combinator extends Element {
 
     const combinator = this, ///
           generalContext = this.getContext(), ///
-          specifiContext = context,
-          statementUnifiesWithCombinator = unifyStatementWithCombinator(statement, combinator, generalContext, specifiContext, (generalContext, specifiContext) => {
-            let statementUnifiesWithCombinator;
+          specifiContext = context; ///
 
-            const context = specifiContext; ///
+    return unifyStatementWithCombinator(statement, combinator, generalContext, specifiContext, (statementUnifiesWithCombinator, _, specificContext) => {
+      if (statementUnifiesWithCombinator) {
+        context = specificContext; ///
 
-            statementUnifiesWithCombinator = continuation(statement, context);
+        context.debug(`...unified the '${statementString}' statement with the '${combinatorString}' combinator.`);
+      }
 
-            return statementUnifiesWithCombinator;
-          });
-
-    if (statementUnifiesWithCombinator) {
-      statementUnifies = true;
-    }
-
-    if (statementUnifies) {
-      context.debug(`...unified the '${statementString}' statement with the '${combinatorString}' combinator.`);
-    }
-
-    return statementUnifies;
+      return continuation(statementUnifiesWithCombinator, context);
+    });
   }
 
   toJSON() {
