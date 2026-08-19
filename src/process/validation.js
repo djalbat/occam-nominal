@@ -2,7 +2,6 @@
 
 import elements from "../elements";
 
-import { some } from "../utilities/continuation";
 import { choose } from "../utilities/context";
 import { desist, declare } from "../utilities/state";
 import { bracketedConstructorFromNothing, bracketedCombinatorFromNothing } from "../utilities/instance";

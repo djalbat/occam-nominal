@@ -8,8 +8,8 @@ import { enclose, reconcile } from "../utilities/context";
 import { labelsFromJSON, premisesFromJSON, conclusionFromJSON, labelsToLabelsJSON, premisesToPremisesJSON, conclusionToConclusionJSON } from "../utilities/json";
 
 const { reverse } = arrayUtilities,
-      { breakable, breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities,
-      { asynchronousAll, asynchronousEvery, asynchronousExtract, asynchronousForwardsEvery, asynchronousBackwardsEvery } = continuationUtilities;
+      { all, every, extract, forwardsEvery, backwardsEvery } = continuationUtilities,
+      { breakable, breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Rule extends Element {
   constructor(context, string, node, breakPoint, proof, labels, premises, conclusion) {
@@ -67,7 +67,7 @@ export default define(class Rule extends Element {
             verifyPremises = this.verifyPremises.bind(this),
             verifyConclusion = this.verifyConclusion.bind(this);
 
-      return asynchronousAll([
+      return all([
         verifyLabels,
         verifyPremises,
         verifyConclusion,
@@ -93,7 +93,7 @@ export default define(class Rule extends Element {
 
     const verifyLabel = this.verifyLabel.bind(this);
 
-    return asynchronousEvery(this.labels, verifyLabel, context, (labelsVerify) => {
+    return every(this.labels, verifyLabel, context, (labelsVerify) => {
       if (labelsVerify) {
         context.debug(`...verified the '${ruleString}' rule's labels.`);
       }
@@ -192,7 +192,7 @@ export default define(class Rule extends Element {
 
     const verifyPremise = this.verifyPremise.bind(this);
 
-    return asynchronousForwardsEvery(this.premises, verifyPremise, context, (premisesVerify) => {
+    return forwardsEvery(this.premises, verifyPremise, context, (premisesVerify) => {
       if (premisesVerify) {
         context.debug(`...verified the '${ruleString}' rule's premises.`);
       }
@@ -250,7 +250,7 @@ export default define(class Rule extends Element {
   }
 
   unifyFactOrSubproofsWithPremise(factOrSubproofs, premise, context, continuation) {
-    return asynchronousExtract(factOrSubproofs, (factOrSubproof, continuation) => {
+    return extract(factOrSubproofs, (factOrSubproof, continuation) => {
       return premise.unifyFactOrSubproof(factOrSubproof, context, continuation);
     }, (factOrSubproof = null) => {
       if (factOrSubproof !== null) {
@@ -268,7 +268,7 @@ export default define(class Rule extends Element {
   unifyFactOrSubproofsWithPremises(factOrSubproofs, context, continuation) {
     factOrSubproofs = reverse(factOrSubproofs); ///
 
-    return asynchronousBackwardsEvery(this.premises, (premise, continuation) => {
+    return backwardsEvery(this.premises, (premise, continuation) => {
       return this.unifyFactOrSubproofsWithPremise(factOrSubproofs, premise, context, continuation);
     }, continuation);
   }

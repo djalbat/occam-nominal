@@ -6,8 +6,8 @@ import Declaration from "../declaration";
 
 import { define } from "../../elements";
 
-const { breakable } = breakPointUtilities,
-      { asynchronousAll } = continuationUtilities;
+const { all } = continuationUtilities,
+      { breakable } = breakPointUtilities;
 
 export default define(class GeneratorDeclaration extends Declaration {
   constructor(context, string, node, breakPoint, type, provisional, generator) {
@@ -64,7 +64,7 @@ export default define(class GeneratorDeclaration extends Declaration {
     const verifyCotype = this.verifyCotype.bind(this),
           verifyGenerator = this.verifyGenerator.bind(this);
 
-    return asynchronousAll([
+    return all([
       verifyCotype,
       verifyGenerator
     ], context, (verifies, context) => {

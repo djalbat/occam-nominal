@@ -6,14 +6,13 @@ import elements from "../elements";
 
 import { define } from "../elements";
 import { instantiate } from "../utilities/context";
-import { synchronousAll } from "../utilities/continuation";
 import { declare, desist } from "../utilities/state";
 import { instantiateMetavariable } from "../process/instantiate";
 import { metaTypeFromJSON, metaTypeToMetaTypeJSON } from "../utilities/json";
 import { unifyMetavariable, unifyMetavariableIntrinsically } from "../process/unify";
 import { nameFromMetavariableNode, termFromMetavariableNode, typeFromMetavariableNode, metavariableFromStatementNode } from "../utilities/element";
 
-const { asynchronousAll } = continuationUtilities,
+const { all } = continuationUtilities,
       { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Metavariable extends Element {
@@ -131,7 +130,7 @@ export default define(class Metavariable extends Element {
     const verifyTerm = this.verifyTerm.bind(this),
           verifyType = this.verifyType.bind(this);
 
-    return asynchronousAll([
+    return all([
       verifyTerm,
       verifyType
     ],  context, (verifies) => {

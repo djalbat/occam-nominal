@@ -9,7 +9,7 @@ import { join, reconcile } from "../../utilities/context";
 import { termsStringFromTerms } from "../../utilities/string";
 
 const { breakable } = breakPointUtilities,
-      { asynchronousBackwardsEvery } = continuationUtilities;
+      { backwardsEvery } = continuationUtilities;
 
 export default define(class Axiom extends Claim {
   getAxiomNode() {
@@ -224,7 +224,7 @@ export default define(class Axiom extends Claim {
 
     let index = specificSuppositionsLength;
 
-    return asynchronousBackwardsEvery(generalSuppositions, (generalSupposition, continuation) => {
+    return backwardsEvery(generalSuppositions, (generalSupposition, continuation) => {
       index--;
 
       const specificSupposition = specificSuppositions[index];

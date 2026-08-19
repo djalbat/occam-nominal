@@ -5,7 +5,6 @@ import { Element, breakPointUtilities } from "occam-languages";
 import { define } from "../elements";
 import { equateTerms } from "../process/equate";
 import { instantiate } from "../utilities/context";
-import { all, exists } from "../utilities/continuation";
 import { instantiateEquality } from "../process/instantiate";
 import { equalityFromStatementNode } from "../utilities/element";
 import { isDerived, isDeclared, isTransient } from "../utilities/state";

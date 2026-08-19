@@ -6,8 +6,8 @@ import Declaration from "../declaration";
 
 import { define } from "../../elements";
 
-const { breakable } = breakPointUtilities,
-      { asynchronousAll } = continuationUtilities;
+const { all } = continuationUtilities,
+      { breakable } = breakPointUtilities;
 
 export default define(class ConstructorDeclaration extends Declaration {
   constructor(context, string, node, breakPoint, type, provisional, constructor) {
@@ -64,7 +64,7 @@ export default define(class ConstructorDeclaration extends Declaration {
     const verifyType = this.verifyType.bind(this),
           verifyConstructor = this.verifyConstructor.bind(this);
 
-    return asynchronousAll([
+    return all([
       verifyType,
       verifyConstructor
     ], context, (verifies, context) => {

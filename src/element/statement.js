@@ -5,7 +5,6 @@ import { Element, breakPointUtilities } from "occam-languages";
 import { define } from "../elements";
 import { instantiate } from "../utilities/context";
 import { unifyStatement } from "../process/unify";
-import { synchronousExists } from "../utilities/continuation";
 import { validateStatements } from "../process/validation";
 import { dischargeStatements } from "../process/discharge";
 import { instantiateStatement } from "../process/instantiate";

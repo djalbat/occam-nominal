@@ -2,7 +2,6 @@
 
 import { Element, breakPointUtilities } from "occam-languages";
 
-import { all } from "../utilities/continuation";
 import { attempt, reconcile, serialise } from "../utilities/context";
 
 const { breakPointToBreakPointJSON } = breakPointUtilities;

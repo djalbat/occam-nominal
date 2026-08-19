@@ -6,7 +6,6 @@ import Assertion from "../assertion";
 
 import { define } from "../../elements";
 import { instantiate } from "../../utilities/context";
-import { all, exists } from "../../utilities/continuation";
 import { isDerived, isDeclared } from "../../utilities/state";
 import { instantiateDefinedAssertion } from "../../process/instantiate";
 import { termFromTermAndSubstitutions } from "../../utilities/substitutions";

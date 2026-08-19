@@ -3,7 +3,6 @@
 import { Element, breakPointUtilities } from "occam-languages";
 
 import { define } from "../elements";
-import { exists } from "../utilities/continuation";
 import { desist, declare } from "../utilities/state";
 import { instantiateProperty } from "../process/instantiate";
 import { termFromPropertyNode } from "../utilities/element";

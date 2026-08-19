@@ -4,7 +4,6 @@ import { breakPointUtilities, continuationUtilities } from "occam-languages";
 
 import Substitution from "../substitution";
 
-import { all } from "../../utilities/continuation";
 import { define } from "../../elements";
 import { stripBracketsFromTerm } from "../../utilities/brackets";
 import { instantiateTermSubstitution } from "../../process/instantiate";
@@ -21,7 +20,7 @@ import {
   participate
 } from "../../utilities/context";
 
-const { asynchronousAll } = continuationUtilities,
+const { all } = continuationUtilities,
       { breakPointFromJSON } = breakPointUtilities;
 
 export default define(class TermSubstitution extends Substitution {
@@ -210,7 +209,7 @@ export default define(class TermSubstitution extends Substitution {
             unifyTargetTerm = this.unifyTargetTerm.bind(this),
             unifyReplacementTerm = this.unifyReplacementTerm.bind(this);
 
-      return asynchronousAll([
+      return all([
         unifyReplacementTerm,
         unifyTargetTerm
       ], substitution, context, (simpleSubstitutionUnifies) => {

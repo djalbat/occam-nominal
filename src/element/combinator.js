@@ -2,7 +2,6 @@
 
 import { Element, breakPointUtilities } from "occam-languages";
 
-import { all } from "../utilities/continuation";
 import { define } from "../elements";
 import { desist, declare } from "../utilities/state";
 import { instantiateCombinator } from "../process/instantiate";

@@ -4,7 +4,6 @@ import { Element, breakPointUtilities } from "occam-languages";
 
 import { define } from "../elements";
 import { declare, desist } from "../utilities/state";
-import { all, exists, every } from "../utilities/continuation";
 import { baseTypeFromNothing } from "../utilities/type";
 import { instantiateConstructor } from "../process/instantiate";
 import { termFromConstructorNode } from "../utilities/element";

@@ -6,8 +6,8 @@ import Declaration from "../declaration";
 
 import { define } from "../../elements";
 
-const { breakable } = breakPointUtilities,
-      { asynchronousAll } = continuationUtilities;
+const { all } = continuationUtilities,
+      { breakable } = breakPointUtilities;
 
 export default define(class MetavariableDeclaration extends Declaration {
   constructor(context, string, node, breakPoint, metaType, metavariable) {
@@ -33,7 +33,7 @@ export default define(class MetavariableDeclaration extends Declaration {
     const verifyMetaType = this.verifyMetaType.bind(this),
           verifyMetavariable = this.verifyMetavariable.bind(this);
 
-    return asynchronousAll([
+    return all([
       verifyMetaType,
       verifyMetavariable
     ],  context, (verifies) => {

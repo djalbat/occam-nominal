@@ -4,12 +4,11 @@ import { Element, breakPointUtilities, continuationUtilities } from "occam-langu
 
 import { define } from "../elements";
 import { declare } from "../utilities/state";
-import { all, every } from "../utilities/continuation";
 import { termsStringFromTerms } from "../utilities/string";
 import { instantiateSignature } from "../process/instantiate";
 import { attempt, reconcile, serialise, unserialise, instantiate } from "../utilities/context";
 
-const { asynchronousEvery } = continuationUtilities,
+const { every } = continuationUtilities,
       { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Signature extends Element {
@@ -199,7 +198,7 @@ export default define(class Signature extends Element {
     let index = -1;
 
     return reconcile((specificContext) => {
-      return asynchronousEvery(generalTerms, (generalTerm, continuation) => {
+      return every(generalTerms, (generalTerm, continuation) => {
         index++;
 
         const specificTerm = specificTerms[index];

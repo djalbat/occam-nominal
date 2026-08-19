@@ -6,15 +6,14 @@ import { breakPointUtilities, continuationUtilities } from "occam-languages";
 import Assertion from "../assertion";
 
 import { define } from "../../elements";
-import { all, every, exists } from "../../utilities/continuation";
 import { join, reconcile, instantiate } from "../../utilities/context";
 import { instantiateSubproofAssertion } from "../../process/instantiate";
 import { declare, isDerived, isDeclared } from "../../utilities/state";
 import { subproofAssertionFromStatementNode } from "../../utilities/element";
 
 const { last, front } = arrayUtilities,
-      { breakPointFromJSON } = breakPointUtilities,
-      { asynchronousBackwardsEvery } = continuationUtilities;
+      { backwardsEvery } = continuationUtilities,
+      { breakPointFromJSON } = breakPointUtilities;
 
 export default define(class SubproofAssertion extends Assertion {
   constructor(context, string, node, breakPoint, statements) {
@@ -296,7 +295,7 @@ export default define(class SubproofAssertion extends Assertion {
 
     let index = suppositionsLength; ///
 
-    return asynchronousBackwardsEvery(suppositions, (supposition, continuation) => {
+    return backwardsEvery(suppositions, (supposition, continuation) => {
       index--;
 
       const supposedStatement = supposedStatements[index];

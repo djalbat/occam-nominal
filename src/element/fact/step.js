@@ -5,15 +5,14 @@ import { breakPointUtilities, continuationUtilities } from "occam-languages";
 
 import Fact from "../fact";
 
-import { all } from "../../utilities/continuation";
 import { define } from "../../elements";
 import { attempt } from "../../utilities/context";
 import { unifySteps } from "../../process/unification";
 import { derive, declare } from "../../utilities/state";
 
-const { breakable } = breakPointUtilities,
-      { backwardsSome } = arrayUtilities,
-      { asynchronousSome } = continuationUtilities;
+const { some } = continuationUtilities,
+      { breakable } = breakPointUtilities,
+      { backwardsSome } = arrayUtilities;
 
 export default define(class Step extends Fact {
   constructor(context, string, node, breakPoint, statement, reference, procedureCall, schemaAssertion, signatureAssertion) {
@@ -247,7 +246,7 @@ export default define(class Step extends Fact {
 
     const step = this;  ///
 
-    return asynchronousSome(unifySteps, (unifyStep, continuation) => {
+    return some(unifySteps, (unifyStep, continuation) => {
       return unifyStep(step, context, continuation);
     }, (unifies) => {
       if (unifies) {

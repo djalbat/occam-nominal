@@ -6,11 +6,10 @@ import Assertion from "../assertion";
 
 import elements from "../../elements";
 
-import { all } from "../../utilities/continuation";
 import { define } from "../../elements";
 import { declare } from "../../utilities/state";
 
-const { asynchronousSome } = continuationUtilities;
+const { some } = continuationUtilities;
 
 export default define(class SchemaAssertion extends Assertion {
   constructor(context, string, node, breakPoint, frame, reference) {
@@ -170,7 +169,7 @@ export default define(class SchemaAssertion extends Assertion {
           statement = step.getStatement(),
           schemaAssertion = this; ///
 
-    return asynchronousSome(schemas, (schema, continuation) => {
+    return some(schemas, (schema, continuation) => {
       return schema.unifyStatementAndSchemaAssertion(statement, schemaAssertion, context, continuation);
     }, continuation);
   }

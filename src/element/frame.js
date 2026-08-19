@@ -2,8 +2,6 @@
 
 import { Element, breakPointUtilities } from "occam-languages";
 
-import { all } from "../utilities/continuation";
-import { every } from "../utilities/continuation";
 import { define } from "../elements";
 import { instantiate } from "../utilities/context";
 import { instantiateFrame } from "../process/instantiate";

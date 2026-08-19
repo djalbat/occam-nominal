@@ -4,7 +4,6 @@ import { breakPointUtilities } from "occam-languages";
 
 import Substitution from "../substitution";
 
-import { all } from "../../utilities/continuation";
 import { define } from "../../elements";
 import { instantiateReferenceSubstitution } from "../../process/instantiate";
 import { referenceSubstitutionFromReferenceSubstitutionNode } from "../../utilities/element";

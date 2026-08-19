@@ -2,7 +2,6 @@
 
 import { Element } from "occam-languages";
 
-import { all } from "../../utilities/continuation";
 import { define } from "../../elements";
 import { ablate, attempt, instantiate } from "../../utilities/context";
 import { instantiateImplicitAssumption } from "../../process/instantiate";

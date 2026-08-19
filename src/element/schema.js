@@ -14,8 +14,8 @@ import { labelFromJSON,
          constraintsToConstraintsJSON,
          suppositionsToSuppositionsJSON } from "../utilities/json";
 
-const { breakable, breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities,
-      { asynchronousAll, asynchronousFilter, asynchronousForwardsEvery, asynchronousBackwardsEvery } = continuationUtilities;
+const { all, filter, forwardsEvery, backwardsEvery } = continuationUtilities,
+      { breakable, breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Schema extends Element {
   constructor(context, string, node, breakPoint, label, suppositions, deduction, proof, constraints) {
@@ -76,7 +76,7 @@ export default define(class Schema extends Element {
             verifyDeduction = this.verifyDeduction.bind(this),
             verifySuppositions = this.verifySuppositions.bind(this);
 
-      return asynchronousAll([
+      return all([
         verifyLabel,
         verifySuppositions,
         verifyDeduction,
@@ -162,7 +162,7 @@ export default define(class Schema extends Element {
 
     const verifySupposition = this.verifySupposition.bind(this);
 
-    return asynchronousForwardsEvery(this.suppositions, verifySupposition, context, (suppositionsVerify) => {
+    return forwardsEvery(this.suppositions, verifySupposition, context, (suppositionsVerify) => {
       if (suppositionsVerify) {
         context.debug(`...verified the '${schemaString}' schema's suppositions.`);
       }
@@ -210,7 +210,7 @@ export default define(class Schema extends Element {
   }
 
   unifyAssumptions(assumptions, constraints, context, continuation) {
-    asynchronousFilter(constraints, (constraint, continuation) => {
+    filter(constraints, (constraint, continuation) => {
       constraint.unifyAssumptions(assumptions, context, (assumptionsUnify) => {
         let passed = false;
 
@@ -297,7 +297,7 @@ export default define(class Schema extends Element {
 
     let index = supposedStatementsLength;
 
-    asynchronousBackwardsEvery(supposedStatements, (supposedStatement, continuation) => {
+    backwardsEvery(supposedStatements, (supposedStatement, continuation) => {
       index--;
 
       const supposition = this.suppositions[index];
@@ -307,7 +307,7 @@ export default define(class Schema extends Element {
   }
 
   unifyImplicitAssumptions(implicitAssumptions, constraints, context, continuation) {
-    asynchronousFilter(constraints, (constraint, continuation) => {
+    filter(constraints, (constraint, continuation) => {
       constraint.unifyImplicitAssumptions(implicitAssumptions, context, (implicitAssumptionsUnify) => {
         let passed = false;
 

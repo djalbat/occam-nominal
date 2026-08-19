@@ -2,8 +2,6 @@
 
 import { passUtilities } from "occam-languages";
 
-import { match } from "../utilities/continuation";
-
 const { nonTerminalNodeQuery, areChildNodesCongruent } = passUtilities;
 
 export default class ContinuationZipPass {

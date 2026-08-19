@@ -2,7 +2,6 @@
 
 import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
 
-import { all } from "../utilities/continuation";
 import { define } from "../elements";
 import { unifyStatement } from "../process/unify";
 import { instantiateConstraint } from "../process/instantiate";
@@ -11,7 +10,7 @@ import { constraintFromConstraintNode } from "../utilities/element";
 import { constraintStringFromReferenceAndStatement } from "../utilities/string";
 import { join, ablate, attempt, reconcile, serialise, unserialise, instantiate } from "../utilities/context";
 
-const { asynchronousSome } = continuationUtilities,
+const { some } = continuationUtilities,
       { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Constraint extends Element {
@@ -255,7 +254,7 @@ export default define(class Constraint extends Element {
 
     context.trace(`Unifying the assumptions with the '${constraintString}' constraint...`);
 
-    asynchronousSome(assumptions, (assumption, continuation) => {
+    some(assumptions, (assumption, continuation) => {
       this.unifyAssumption(assumption, context, continuation);
     }, (assumptionsUnify) => {
       if (assumptionsUnify) {
@@ -305,7 +304,7 @@ export default define(class Constraint extends Element {
 
     context.trace(`Unifying the implicit assumptions with the '${constraintString}' constraint...`);
 
-    asynchronousSome(implicitAssumptions, (implicitAssumption, continuation) => {
+    some(implicitAssumptions, (implicitAssumption, continuation) => {
       this.unifyImplicitAssumption(implicitAssumption, context, continuation);
     }, (implicitAssumptionsUnify) => {
       if (implicitAssumptionsUnify) {

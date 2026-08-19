@@ -4,7 +4,6 @@ import { Element, breakPointUtilities } from "occam-languages";
 
 import { define } from "../elements";
 import { declare } from "../utilities/state";
-import { synchronousAll } from "../utilities/continuation";
 import { instantiateLabel } from "../process/instantiate";
 import { labelFromLabelNode, metavariableFromLabelNode } from "../utilities/element";
 import { join, ablate, attempt, reconcile, serialise, unserialise, instantiate} from "../utilities/context";

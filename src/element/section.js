@@ -6,7 +6,7 @@ import { define } from "../elements";
 import { enclose } from "../utilities/context";
 
 const { breakable } = breakPointUtilities,
-      { asynchronousAll, asynchronousEvery } = continuationUtilities;
+      { all, every } = continuationUtilities;
 
 export default define(class Section extends Element {
   constructor(context, string, node, breakPoint, hypotheses, declaration, claim) {
@@ -46,7 +46,7 @@ export default define(class Section extends Element {
             verifyHypotheses = this.verifyHypotheses.bind(this),
             verifyDeclaration = this.verifyDeclaration.bind(this);
 
-      return asynchronousAll([
+      return all([
         verifyHypotheses,
         verifyDeclaration,
         verifyClaim
@@ -99,7 +99,7 @@ export default define(class Section extends Element {
 
     context.trace(`Verifying the '${sectionString}' section's hypotheses...`);
 
-    return asynchronousEvery(this.hypotheses, (hypothesis, context, continuation) => {
+    return every(this.hypotheses, (hypothesis, context, continuation) => {
       return hypothesis.verify(context, continuation);
     }, context, (hypothesesVerify) => {
       if (hypothesesVerify) {

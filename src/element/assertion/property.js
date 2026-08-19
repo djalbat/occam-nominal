@@ -4,7 +4,6 @@ import { breakPointUtilities } from "occam-languages";
 
 import Assertion from "../assertion";
 
-import { all } from "../../utilities/continuation";
 import { define } from "../../elements";
 import { instantiate } from "../../utilities/context";
 import { isDerived, isTransient } from "../../utilities/state";

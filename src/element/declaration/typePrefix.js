@@ -6,8 +6,8 @@ import Declaration from "../declaration";
 
 import { define } from "../../elements";
 
-const { breakable } = breakPointUtilities,
-      { asynchronousAll } = continuationUtilities;
+const { all } = continuationUtilities,
+      { breakable } = breakPointUtilities;
 
 export default define(class TypePrefixDeclaration extends Declaration {
   constructor(context, string, node, breakPoint, typePrefix) {
@@ -34,7 +34,7 @@ export default define(class TypePrefixDeclaration extends Declaration {
 
     const verifyTypePrefix = this.verifyTypePrefix.bind(this);
 
-    return asynchronousAll([
+    return all([
       verifyTypePrefix
     ], context, (verifies, context) => {
       if (verifies) {

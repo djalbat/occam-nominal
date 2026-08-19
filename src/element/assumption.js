@@ -5,11 +5,10 @@ import { Element, breakPointUtilities, continuationUtilities } from "occam-langu
 import { define } from "../elements";
 import { instantiate } from "../utilities/context";
 import { join, reconcile } from "../utilities/context";
-import { all, some, exists } from "../utilities/continuation";
 import { isDerived, isDeclared } from "../utilities/state";
 import { instantiateAssumption } from "../process/instantiate";
 
-const { asynchronousBackwardsEvery } = continuationUtilities,
+const { backwardsEvery } = continuationUtilities,
       { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Assumption extends Element {
@@ -364,7 +363,7 @@ export default define(class Assumption extends Element {
 
     let index = suppositionsLength; ///
 
-    return asynchronousBackwardsEvery(suppositions, (supposition, continuation) => {
+    return backwardsEvery(suppositions, (supposition, continuation) => {
       index--;
 
       const supposedStatement = supposedStatements[index];

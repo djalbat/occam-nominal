@@ -4,14 +4,13 @@ import { breakPointUtilities, continuationUtilities } from "occam-languages";
 
 import Substitution from "../substitution";
 
-import { all } from "../../utilities/continuation";
 import { define } from "../../elements";
 import { instantiateFrameSubstitution } from "../../process/instantiate";
 import { frameSubstitutionFromFrameSubstitutionNode } from "../../utilities/element";
 import { frameSubstitutionStringFromFrameAndMetavariable } from "../../utilities/string";
 import { join, ablates, manifest, attempts, reconcile, participate, instantiate, unserialises } from "../../utilities/context";
 
-const { asynchronousAll } = continuationUtilities,
+const { all } = continuationUtilities,
       { breakPointFromJSON } = breakPointUtilities;
 
 export default define(class FrameSubstitution extends Substitution {
@@ -198,7 +197,7 @@ export default define(class FrameSubstitution extends Substitution {
             unifyTargetFrame = this.unifyTargetFrame.bind(this),
             unifyReplacementFrame = this.unifyReplacementFrame.bind(this);
 
-      return asynchronousAll([
+      return all([
         unifyReplacementFrame,
         unifyTargetFrame
       ], substitution, context, (simpleSubstitutionUnifies) => {

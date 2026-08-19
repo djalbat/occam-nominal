@@ -6,7 +6,7 @@ import { Element, continuationUtilities } from "occam-languages";
 import { define } from "../elements";
 
 const { last } = arrayUtilities,
-      { asynchronousEvery } = continuationUtilities;
+      { every } = continuationUtilities;
 
 export default define(class SubDerivation extends Element {
   constructor(context, string, node, breakPoint, factOrSubproofs) {
@@ -35,7 +35,7 @@ export default define(class SubDerivation extends Element {
   }
 
   verify(context, continuation) {
-    return asynchronousEvery(this.factOrSubproofs, (factOrSubproof, context, continuation) => {
+    return every(this.factOrSubproofs, (factOrSubproof, context, continuation) => {
       factOrSubproof.verify(context, (factOrSubproofVerifies) => {
         if (factOrSubproofVerifies) {
           context.assignAssignments();

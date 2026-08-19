@@ -4,7 +4,6 @@ import { Element, breakPointUtilities } from "occam-languages";
 
 import { define } from "../elements";
 import { desist, declare } from "../utilities/state";
-import { all, exists, every} from "../utilities/continuation";
 import { baseTypeFromNothing } from "../utilities/type";
 import { instantiateGenerator } from "../process/instantiate";
 import { termFromGeneratorNode } from "../utilities/element";

@@ -2,8 +2,6 @@
 
 import { passUtilities } from "occam-languages";
 
-import { every } from "../utilities/continuation";
-
 const { nonTerminalNodeQuery } = passUtilities;
 
 export default class ContinuationPass {

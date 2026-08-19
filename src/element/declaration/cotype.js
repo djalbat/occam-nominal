@@ -9,7 +9,7 @@ import { anticipate } from "../../utilities/context";
 import { baseTypeFromNothing } from "../../utilities/type";
 
 const { breakable } = breakPointUtilities,
-      { asynchronousAll, asynchronousEvery } = continuationUtilities;
+      { all, every } = continuationUtilities;
 
 export default define(class CotypeDeclaration extends Declaration {
   constructor(context, string, node, breakPoint, type, superTypes, provisional, propertyDeclarations) {
@@ -64,7 +64,7 @@ export default define(class CotypeDeclaration extends Declaration {
           verifyTypePrefix = this.verifyTypePrefix.bind(this),
           verifyPropertyDeclaratisons = this.verifyPropertyDeclaratisons.bind(this);
 
-    return asynchronousAll([
+    return all([
       verifyType,
       verifySuperTypes,
       verifyTypePrefix,
@@ -158,7 +158,7 @@ export default define(class CotypeDeclaration extends Declaration {
 
     const superTypes = []; ///
 
-    return asynchronousEvery(this.superTypes, (superType, context, continuation) => {
+    return every(this.superTypes, (superType, context, continuation) => {
       return this.verifySuperType(superType, superTypes, context, continuation);
     }, context, (superTypesVerify, context) => {
       if (superTypesVerify) {
@@ -220,7 +220,7 @@ export default define(class CotypeDeclaration extends Declaration {
     context.trace(`Verifying the '${cotypeDeclarationString}' cotype declaration's '${typeString}' type's property declarations...`);
 
     return anticipate((context) => {
-      return asynchronousEvery(this.propertyDeclarations, (propertyDeclaration, context, continuation) => {
+      return every(this.propertyDeclarations, (propertyDeclaration, context, continuation) => {
         return propertyDeclaration.verify(context, continuation);
       }, context, (propertyDeclarationsVerify, context) => {
         if (propertyDeclarationsVerify) {

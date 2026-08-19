@@ -4,7 +4,6 @@ import { breakPointUtilities } from "occam-languages";
 
 import Fact from "../fact";
 
-import { all } from "../../utilities/continuation";
 import { define } from "../../elements";
 import { declare } from "../../utilities/state";
 import { instantiatePremise } from "../../process/instantiate";

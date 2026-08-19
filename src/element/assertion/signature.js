@@ -5,11 +5,9 @@ import { breakPointUtilities } from "occam-languages";
 import Assertion from "../assertion";
 
 import { define } from "../../elements";
-import { all, every } from "../../utilities/continuation";
 import { reconcile, instantiate } from "../../utilities/context";
 import { instantiateSignatureAssertion } from "../../process/instantiate";
 import { termsFromSignatureAssertionNode, referenceFromSignatureAssertionNode, signatureAssertionFromStatementNode } from "../../utilities/element";
-import continuation from "occam-languages/lib/utilities/continuation";
 
 const { breakPointFromJSON } = breakPointUtilities;
 

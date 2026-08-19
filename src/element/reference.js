@@ -2,7 +2,6 @@
 
 import { Element, breakPointUtilities } from "occam-languages";
 
-import { all } from "../utilities/continuation";
 import { define } from "../elements";
 import { instantiateReference } from "../process/instantiate";
 import { REFERENCE_META_TYPE_NAME } from "../metaTypeNames";

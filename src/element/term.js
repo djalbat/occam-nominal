@@ -4,7 +4,6 @@ import { arrayUtilities } from "necessary";
 import { Element, breakPointUtilities } from "occam-languages";
 
 import { define } from "../elements";
-import { exists } from "../utilities/continuation";
 import { instantiate } from "../utilities/context";
 import { instantiateTerm } from "../process/instantiate";
 import { variablesFromTerm } from "../utilities/equivalence";
