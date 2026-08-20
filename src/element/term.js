@@ -1,7 +1,7 @@
 "use strict";
 
 import { arrayUtilities } from "necessary";
-import { Element, breakPointUtilities } from "occam-languages";
+import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
 
 import { define } from "../elements";
 import { instantiate } from "../utilities/context";
@@ -12,6 +12,7 @@ import { validateTerms, validateTermAsVariable } from "../process/validation";
 import { typeFromJSON, typeToTypeJSON, provisionalFromJSON, provisionalToProvisionalJSON } from "../utilities/json";
 
 const { filter } = arrayUtilities,
+      { exists } = continuationUtilities,
       { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Term extends Element {
@@ -181,39 +182,35 @@ export default define(class Term extends Element {
   }
 
   validate(state, context, continuation) {
-    let validates;
+    let term;
 
     const termString = this.getString();  ///
 
     context.trace(`Validating the '${termString}' term...`);
-
-    let term;
 
     term = this.findTerm(context);
 
     if (term !== null) {
       context.debug(`...the '${termString}' term is already present.`);
 
-      validates = continuation(term, context);
-    } else {
-      term = this;  ///
+      return continuation(term, context);
+    }
 
-      validates = exists(validateTerms, term, state, context, (term, state, context) => {
-        let validates;
+    term = this;  ///
 
+    return exists(validateTerms, term, state, context, (validates, term, state, context) => {
+      if (!validates) {
+        term = null;
+      }
+
+      if (validates) {
         context.addTerm(term);
 
-        validates = continuation(term, context);
+        context.debug(`...validated the '${termString}' term.`);
+      }
 
-        return validates;
-      });
-    }
-
-    if (validates) {
-      context.debug(`...validated the '${termString}' term.`);
-    }
-
-    return validates;
+      return continuation(term, context);
+    });
   }
 
   validateGivenType(strict, type, state, context, continuation) {

@@ -102,13 +102,13 @@ export default define(class Variable extends Element {
 
     this.provisional = provisional;
 
-    validates = continuation(variable, context);
+    validates = true;
 
     if (validates) {
       context.debug(`...validated the '${variableString}' variable.`);
     }
 
-    return validates;
+    return continuation(variable, context);
   }
 
   unifyTerm(term, generalContext, specificContext, continuation) {
