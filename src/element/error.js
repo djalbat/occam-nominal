@@ -12,14 +12,12 @@ export default define(class Error extends Element {
     return errorNode;
   }
 
-  verify(context, continuation) {
-    let verifies = false;
-
+  verify(context, back, forward) {
     const errorString = this.getString();  ///
 
     context.warning(`The '${errorString}' error cannot be verified.`);
 
-    return continuation(verifies, context);
+    return back(context);
   }
 
   static name = "Error";

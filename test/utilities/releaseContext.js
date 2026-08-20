@@ -9,7 +9,7 @@ const { loadProject } = occamFileSystemUtilities,
       { readFile, isEntryFile } = necessaryFileSystemUtilities,
       { releaseContextFromJSON, releaseContextFromProject } = releaseContextUtilities;
 
-async function releaseContextFromDependency(dependency, context) {
+function releaseContextFromDependency(dependency, context, fail, succeed) {
   let releaseContext;
 
   const { projectsDirectoryPath } = context,
@@ -31,7 +31,7 @@ async function releaseContextFromDependency(dependency, context) {
     releaseContext = releaseContextFromProject(project, context);
   }
 
-  return releaseContext;
+  return succeed(releaseContext);
 }
 
 module.exports = {

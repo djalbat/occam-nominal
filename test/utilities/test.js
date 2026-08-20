@@ -13,8 +13,8 @@ function createSuite(logLevel, projectName, projectsDirectoryPath) {
   let releaseContext = null;
 
   const log = Log.fromLogLevel(logLevel),
-        callback = (breakPoint, context, continuation) => {
-          continuation(breakPoint);
+        callback = (breakPoint, context, back, forward) => {
+          forward(breakPoint);
         },
         releaseContexts = [];
 
@@ -31,11 +31,20 @@ function createSuite(logLevel, projectName, projectsDirectoryPath) {
     }
   });
 
-  it("create", async () => {
-    const dependencyName = projectName,  ///
-          releaseContextsCreated = await createReleaseContexts(dependencyName, context);
+  it("create", (done) => {
+    const dependencyName = projectName;  ///
 
-    assert.isTrue(releaseContextsCreated);
+    createReleaseContexts(dependencyName, context, fail, succeed);
+
+    function fail(exception) {
+      throw exception;
+    }
+
+    function succeed(releaseContextsCreated) {
+      assert.isTrue(releaseContextsCreated);
+
+      done();
+    }
   });
 
   it("initialise", () => {
@@ -43,8 +52,14 @@ function createSuite(logLevel, projectName, projectsDirectoryPath) {
   });
 
   it("verifies", (done) => {
-    verifyReleaseContexts(context, (releaseContextsVerify) => {
-      assert.isTrue(releaseContextsVerify);
+    verifyReleaseContexts(context, fail, succeed);
+
+    function fail(exception) {
+      throw exception;
+    }
+
+    function succeed() {
+      assert.isTrue(true);
 
       releaseContexts.reverse();
 
@@ -53,7 +68,7 @@ function createSuite(logLevel, projectName, projectsDirectoryPath) {
       releaseContext = firstReleaseContext; ///
 
       done();
-    });
+    }
   });
 
   let json,

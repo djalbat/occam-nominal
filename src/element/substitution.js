@@ -48,8 +48,10 @@ class Element {
     this.breakPoint = breakPoint;
   }
 
-  async break(context) {
-    this.breakPoint = await context.break(this.node, this.breakPoint);
+  break(context) {
+    debugger
+
+    this.breakPoint = context.break(this.node, this.breakPoint);
   }
 
   matchNode(node) { return this.node.match(node); }

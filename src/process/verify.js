@@ -43,130 +43,130 @@ class TopLevelPass extends ContinuationPass {
   static maps = [
     {
       nodeQuery: errorNodeQuery,
-      run: (errorNode, context, continuation) => {
+      run: (errorNode, context, back, forward) => {
         const error = errorFromErrorNode(errorNode, context);
 
-        return error.verify(context, continuation);
+        return error.verify(context, back, forward);
       }
     },
     {
       nodeQuery: ruleNodeQuery,
-      run: (ruleNode, context, continuation) => {
+      run: (ruleNode, context, back, forward) => {
         const rule = ruleFromRuleNode(ruleNode, context);
 
-        return rule.verify(context, continuation);
+        return rule.verify(context, back, forward);
       }
     },
     {
       nodeQuery: axiomNodeQuery,
-      run: (axiomNode, context, continuation) => {
+      run: (axiomNode, context, back, forward) => {
         const axiom = axiomFromAxiomNode(axiomNode, context);
 
-        return axiom.verify(context, continuation);
+        return axiom.verify(context, back, forward);
       }
     },
     {
       nodeQuery: lemmaNodeQuery,
-      run: (lemmaNode, context, continuation) => {
+      run: (lemmaNode, context, back, forward) => {
         const lemma = lemmaFromLemmaNode(lemmaNode, context);
 
-        return lemma.verify(context, continuation);
+        return lemma.verify(context, back, forward);
       }
     },
     {
       nodeQuery: schemaNodeQuery,
-      run: (schemaNode, context, continuation) => {
+      run: (schemaNode, context, back, forward) => {
         const schema = schemaFromSchemaNode(schemaNode, context);
 
-        return schema.verify(context, continuation);
+        return schema.verify(context, back, forward);
       }
     },
     {
       nodeQuery: sectionNodeQuery,
-      run: (sectionNode, context, continuation) => {
+      run: (sectionNode, context, back, forward) => {
         const section = sectionFromSectionNode(sectionNode, context);
 
-        return section.verify(context, continuation);
+        return section.verify(context, back, forward);
       }
     },
     {
       nodeQuery: theoremNodeQuery,
-      run: (theoremNode, context, continuation) => {
+      run: (theoremNode, context, back, forward) => {
         const theorem = theoremFromTheoremNode(theoremNode, context);
 
-        return theorem.verify(context, continuation);
+        return theorem.verify(context, back, forward);
       }
     },
     {
       nodeQuery: conjectureNodeQuery,
-      run: (conjectureNode, context, continuation) => {
+      run: (conjectureNode, context, back, forward) => {
         const conjecture = conjectureFromConjectureNode(conjectureNode, context);
 
-        return conjecture.verify(context, continuation);
+        return conjecture.verify(context, back, forward);
       }
     },
     {
       nodeQuery: typeDeclarationNodeQuery,
-      run: (typeDeclarationNode, context, continuation) => {
+      run: (typeDeclarationNode, context, back, forward) => {
         const typeDeclaration = typeDeclarationFromTypeDeclarationNode(typeDeclarationNode, context);
 
-        return typeDeclaration.verify(context, continuation);
+        return typeDeclaration.verify(context, back, forward);
       }
     },
     {
       nodeQuery: cotypeDeclarationNodeQuery,
-      run: (cotypeDeclarationNode, context, continuation) => {
+      run: (cotypeDeclarationNode, context, back, forward) => {
         const cotypeDeclaration = cotypeDeclarationFromCotypeDeclarationNode(cotypeDeclarationNode, context);
 
-        return cotypeDeclaration.verify(context, continuation);
+        return cotypeDeclaration.verify(context, back, forward);
       }
     },
     {
       nodeQuery: variableDeclarationNodeQuery,
-      run: (variableDeclarationNode, context, continuation) => {
+      run: (variableDeclarationNode, context, back, forward) => {
         const variableDeclaration = variableDeclarationFromVariableDeclarationNode(variableDeclarationNode, context);
 
-        return variableDeclaration.verify(context, continuation);
+        return variableDeclaration.verify(context, back, forward);
       }
     },
     {
       nodeQuery: generatorDeclarationNodeQuery,
-      run: (generatorDeclarationNode, context, continuation) => {
+      run: (generatorDeclarationNode, context, back, forward) => {
         const generatorDeclaration = generatorDeclarationFromGeneratorDeclarationNode(generatorDeclarationNode, context);
 
-        return generatorDeclaration.verify(context, continuation);
+        return generatorDeclaration.verify(context, back, forward);
       }
     },
     {
       nodeQuery: typePrefixDeclarationNodeQuery,
-      run: (typePrefixDeclarationNode, context, continuation) => {
+      run: (typePrefixDeclarationNode, context, back, forward) => {
         const typePrefixDeclaration = typePrefixDeclarationFromTypePrefixDeclarationNode(typePrefixDeclarationNode, context);
 
-        return typePrefixDeclaration.verify(context, continuation);
+        return typePrefixDeclaration.verify(context, back, forward);
       }
     },
     {
       nodeQuery: combinatorDeclarationNodeQuery,
-      run: (combinatorDeclarationNode, context, continuation) => {
+      run: (combinatorDeclarationNode, context, back, forward) => {
         const combinatorDeclaration = combinatorDeclarationFromCombinatorDeclarationNode(combinatorDeclarationNode, context);
 
-        return combinatorDeclaration.verify(context, continuation);
+        return combinatorDeclaration.verify(context, back, forward);
       }
     },
     {
       nodeQuery: constructorDeclarationNodeQuery,
-      run: (constructorDeclarationNode, context, continuation) => {
+      run: (constructorDeclarationNode, context, back, forward) => {
         const constructorDeclaration = constructorDeclarationFromConstructorDeclarationNode(constructorDeclarationNode, context);
 
-        return constructorDeclaration.verify(context, continuation);
+        return constructorDeclaration.verify(context, back, forward);
       }
     },
     {
       nodeQuery: metavariableDeclarationNodeQuery,
-      run: (metavariableDeclarationNode, context, continuation) => {
+      run: (metavariableDeclarationNode, context, back, forward) => {
         const metavariableDeclaration = metavariableDeclarationFromMetavariableDeclarationNode(metavariableDeclarationNode, context);
 
-        return metavariableDeclaration.verify(context, continuation);
+        return metavariableDeclaration.verify(context, back, forward);
       }
     }
   ];
@@ -174,8 +174,8 @@ class TopLevelPass extends ContinuationPass {
 
 const topLevelPass = new TopLevelPass();
 
-export function verifyFile(fileNode, context, continuation) {
+export function verifyFile(fileNode, context, back, forward) {
   const node = fileNode; ///
 
-  return topLevelPass.run(node, context, continuation);
+  return topLevelPass.run(node, context, back, forward);
 }
