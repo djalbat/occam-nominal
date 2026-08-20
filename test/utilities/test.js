@@ -54,8 +54,10 @@ function createSuite(logLevel, projectName, projectsDirectoryPath) {
   it("verifies", (done) => {
     verifyReleaseContexts(context, fail, succeed);
 
-    function fail(exception) {
-      throw exception;
+    function fail() {
+      assert.isTrue(false);
+
+      done();
     }
 
     function succeed() {
