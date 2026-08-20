@@ -17,7 +17,7 @@ export default define(class Error extends Element {
 
     context.warning(`The '${errorString}' error cannot be verified.`);
 
-    return back(context);
+    return back();
   }
 
   static name = "Error";
