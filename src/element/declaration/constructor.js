@@ -46,7 +46,7 @@ export default define(class ConstructorDeclaration extends Declaration {
 
   setHypotheses(hypotheses) { this.constructor.setHypotheses(hypotheses); }
 
-  verify = breakable(function (context, continuation) {
+  verify = breakable(function (context, back, forward) {
     const constructorDeclarationString = this.getString();  ///
 
     context.trace(`Verifying the '${constructorDeclarationString}' constructor declaration...`);
@@ -54,11 +54,9 @@ export default define(class ConstructorDeclaration extends Declaration {
     const malformed = this.isMalformed();
 
     if (malformed) {
-      const verifies = false;
-
       context.debug(`Unable to verify the '${constructorDeclarationString}' constructor declaration because it is malformed.`);
 
-      return continuation(verifies, context);
+      return back(context);
     }
 
     const verifyType = this.verifyType.bind(this),
@@ -67,22 +65,18 @@ export default define(class ConstructorDeclaration extends Declaration {
     return all([
       verifyType,
       verifyConstructor
-    ], context, (verifies, context) => {
-      if (verifies) {
-        this.constructor.setType(this.type);
+    ], context, back, (context) => {
+      this.constructor.setType(this.type);
 
-        context.addConstructor(this.constructor);
-      }
+      context.addConstructor(this.constructor);
 
-      if (verifies) {
-        context.debug(`...verified the '${constructorDeclarationString}' constructor declaration.`);
-      }
+      context.debug(`...verified the '${constructorDeclarationString}' constructor declaration.`);
 
-      return continuation(verifies, context);
+      return forward(context);
     });
   });
 
-  verifyType(context, continuation) {
+  verifyType(context, back, forward) {
     let typeVerifies = false;
 
     const constructorDeclarationString = this.getString();  ///
@@ -116,26 +110,26 @@ export default define(class ConstructorDeclaration extends Declaration {
       context.debug(`The '${typeString}' type is not present.`);
     }
 
-    if (typeVerifies) {
-      context.debug(`...verified the '${constructorDeclarationString}' constructor declaration's type.`);
+    if (!typeVerifies) {
+      return back();
     }
 
-    return continuation(typeVerifies, context);
+    context.debug(`...verified the '${constructorDeclarationString}' constructor declaration's type.`);
+
+    return forward(context);
   }
 
-  verifyConstructor(context, continuation) {
+  verifyConstructor(context, back, forward) {
     const includeType = false,
           constructorString = this.constructor.getString(includeType),
           constructorDeclarationString = this.getString();  ///
 
     context.trace(`Verifying the '${constructorDeclarationString}' constructor declaration's '${constructorString}' constructor...`);
 
-    return this.constructor.verify(context, (constructorVerifies, context) => {
-      if (constructorVerifies) {
-        context.debug(`...verified the '${constructorDeclarationString}' constructor declaration's '${constructorString}' constructor.`);
-      }
+    return this.constructor.verify(context, back, (context) => {
+      context.debug(`...verified the '${constructorDeclarationString}' constructor declaration's '${constructorString}' constructor.`);
 
-      return continuation(constructorVerifies, context);
+      return forward(context);
     });
   }
 

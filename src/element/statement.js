@@ -241,7 +241,7 @@ export default define(class Statement extends Element {
     return comparesToParamter;
   }
 
-  validate(state, context, continuation) {
+  validate(state, context, back, forward) {
     let statement;
 
     const statementString = this.getString();  ///
@@ -253,27 +253,21 @@ export default define(class Statement extends Element {
     if (statement !== null) {
       context.debug(`The '${statementString}' statement is already present.`);
 
-      return continuation(statement, context);
+      return forward(statement, context);
     }
 
     statement = this; ///
 
-    return exists(validateStatements, statement, state, context, (validates, statement, state, context) => {
-      if (!validates) {
-        statement = null;
-      }
+    return exists(validateStatements, statement, state, context, back, (statement, state, context) => {
+      context.addStatement(statement);
 
-      if (validates) {
-        context.addStatement(statement);
+      context.debug(`...validated the '${statementString}' statement.`);
 
-        context.debug(`...validated the '${statementString}' statement.`);
-      }
-
-      return continuation(statement, context);
+      return forward(statement, context);
     });
   }
 
-  discharge(generalContext, specificContext, continuation) {
+  discharge(generalContext, specificContext, back, forward) {
     let discharges;
 
     const context = specificContext,  ///
@@ -297,7 +291,7 @@ export default define(class Statement extends Element {
     return continuation(discharges, context);
   }
 
-  unifyStatement(statement, generalContext, specificContext, continuation) {
+  unifyStatement(statement, generalContext, specificContext, back, forward) {
     const context = specificContext,  ///
           generalStatement = this,  ///
           specificStatement = statement, ///
@@ -315,7 +309,7 @@ export default define(class Statement extends Element {
     });
   }
 
-  unifyIndependently(generalContext, specificContext, continuation) {
+  unifyIndependently(generalContext, specificContext, back, forward) {
     const context = specificContext,  ///
           statementString = this.getString();  ///
 

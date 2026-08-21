@@ -89,29 +89,23 @@ export default define(class Variable extends Element {
     return comparesToVariableIdentifier;
   }
 
-  validate(state, type, provisional, context, continuation) {
-    let validates;
-
+  validate(type, provisional, state, context, back, forward) {
     const variableString = this.getString(); ///
 
     context.trace(`Validating the '${variableString}' variable...`);
-
-    const variable = this;  ///
 
     this.type = type;
 
     this.provisional = provisional;
 
-    validates = true;
+    const variable = this;  ///
 
-    if (validates) {
-      context.debug(`...validated the '${variableString}' variable.`);
-    }
+    context.debug(`...validated the '${variableString}' variable.`);
 
-    return continuation(variable, context);
+    return forward(variable, context, back);
   }
 
-  unifyTerm(term, generalContext, specificContext, continuation) {
+  unifyTerm(term, generalContext, specificContext, back, forward) {
     let termUnifies = false;
 
     const context = specificContext,  ///

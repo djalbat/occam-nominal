@@ -12,23 +12,15 @@ export default define(class BracketedCombinator extends Combinator {
     return bracketedCombinatorNode;
   }
 
-  unifyStatement(statement, context, continuation) {
-    let statementUnifiesWithBracketedCombinator = false;
-
+  unifyStatement(statement, context, back, forarsd) {
     const statementString = statement.getString();
 
     context.trace(`Unifying the '${statementString}' statement with the bracketed combinator...`);
 
-    return super.unifyStatement(statement, context, (statementUnifies, context) => {
-      if (statementUnifies) {
-        statementUnifiesWithBracketedCombinator = true;
-      }
+    return super.unifyStatement(statement, context, back, (context) => {
+      context.debug(`...unified the '${statementString}' statement with the bracketed combinator.`);
 
-      if (statementUnifiesWithBracketedCombinator) {
-        context.debug(`...unified the '${statementString}' statement with the bracketed combinator.`);
-      }
-
-      return continuation(statementUnifiesWithBracketedCombinator, context);
+      return forarsd(context);
     });
   }
 

@@ -101,6 +101,12 @@ export default define(class Type extends Element {
     this.provisional = provisional;
   }
 
+  setSuperType(superType) {
+    this.superTypes = [
+      superType
+    ];
+  }
+
   isBaseType() {
     let baseType = false;
 

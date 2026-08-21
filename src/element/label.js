@@ -51,9 +51,7 @@ export default define(class Label extends Element {
 
   compareMetavariable(metavariable) { return this.metavariable.compareMetavariable(metavariable); }
 
-  verify(continuation) {
-    let verifies = false;
-
+  verify(back, forward) {
     const context = this.getContext(),
           labelString = this.getString(); ///
 
@@ -65,27 +63,19 @@ export default define(class Label extends Element {
     if (labelPresent) {
       context.debug(`The '${labelString}' label is already present.`);
 
-      return continuation(verifies);
+      return back();
     }
 
     return declare((state) => {
-      return this.validate(state, context, (label, context) => {
-        if (label !== null) {
-          verifies = true;
-        }
+      return this.validate(state, context, back, (label, context) => {
+        context.debug(`...verified the '${labelString}' label.`);
 
-        if (verifies) {
-          context.debug(`...verified the '${labelString}' label.`);
-        }
-
-        return continuation(verifies);
+        return forward();
       });
     });
   }
 
-  validate(state, context, continuation) {
-    let label = this; ///
-
+  validate(state, context, back, forward) {
     const labelString = this.getString(); ////
 
     context.trace(`Validating the '${labelString}' label...`);
@@ -97,45 +87,33 @@ export default define(class Label extends Element {
 
       return all([
         validateMetavariable
-      ], state, context, (validates, state, context) => {
-        if (!validates) {
-          label = null;
-        }
+      ], state, context, back, (state, context) => {
+        const label = this; ///
 
-        if (validates) {
-          this.commit(context);
+        this.commit(context);
 
-          context.debug(`...validated the '${labelString}' label.`);
-        }
+        context.debug(`...validated the '${labelString}' label.`);
 
-        return continuation(label, context);
+        return forward(label, context);
       });
     }, context);
   }
 
-  validateMetavariable(state, context, continuation) {
-    let metavariableValidates = false;
-
+  validateMetavariable(state, context, back, forward) {
     const labelString = this.getString(); ///
 
     context.trace(`Validating the '${labelString}' label's metavariable...`);
 
-    return this.metavariable.validate(state, context, (metavariable, context) => {
-      if (metavariable !== null) {
-        metavariableValidates = true;
-      }
+    return this.metavariable.validate(state, context, back, (metavariable, context) => {
+      this.metavariable = metavariable;
 
-      if (metavariableValidates) {
-        this.metavariable = metavariable;
+      context.debug(`...validated the '${labelString}' label's metavariable.'`);
 
-        context.debug(`...validated the '${labelString}' label's metavariable.'`);
-      }
-
-      return continuation(metavariableValidates, state, context);
+      return forward(state, context);
     });
   }
 
-  unifyReference(reference, context, continuation) {
+  unifyReference(reference, context, back, forward) {
     const labelString = this.getString(), ///
           referenceString = reference.getString();
 
@@ -150,26 +128,18 @@ export default define(class Label extends Element {
       return reconcile((specificContext) => {
         const metavariable = reference.getMetavariable();
 
-        return this.unifyMetavariable(metavariable, generalContext, specificContext, (metavariableUnifies) => {
-          let referenceUnifies = false;
+        return this.unifyMetavariable(metavariable, generalContext, specificContext, back, () => {
+          specificContext.commit(context);
 
-          if (metavariableUnifies) {
-            specificContext.commit(context);
+          context.debug(`...unified the '${referenceString}' reference with the '${labelString}' label.`);
 
-            referenceUnifies = true;
-          }
-
-          if (referenceUnifies) {
-            context.debug(`...unified the '${referenceString}' reference with the '${labelString}' label.`);
-          }
-
-          return continuation(referenceUnifies);
+          return forward(context);
         });
       }, specificContext);
     }, specificContext, context);
   }
 
-  unifyMetavariable(metavariable, generalContext, specificContext, continuation) {
+  unifyMetavariable(metavariable, generalContext, specificContext, back, forward) {
     const context = specificContext,  ///
           labelString = this.getString(), ///
           metavariableString = metavariable.getString();

@@ -181,7 +181,7 @@ export default define(class Term extends Element {
     return term;
   }
 
-  validate(state, context, continuation) {
+  validate(state, context, back, forward) {
     let term;
 
     const termString = this.getString();  ///
@@ -193,29 +193,25 @@ export default define(class Term extends Element {
     if (term !== null) {
       context.debug(`...the '${termString}' term is already present.`);
 
-      return continuation(term, context);
+      return forward(term, context);
     }
 
     term = this;  ///
 
-    return exists(validateTerms, term, state, context, (validates, term, state, context) => {
-      if (!validates) {
-        term = null;
-      }
+    return exists(validateTerms, term, state, context, back, (term, state, context, back) => {
+      context.addTerm(term);
 
-      if (validates) {
-        context.addTerm(term);
+      context.debug(`...validated the '${termString}' term.`);
 
-        context.debug(`...validated the '${termString}' term.`);
-      }
-
-      return continuation(term, context);
+      return forward(term, context, back);
     });
   }
 
-  validateGivenType(strict, type, state, context, continuation) {
-    if (continuation === undefined) {
-      continuation = context; ///
+  validateGivenType(strict, type, state, context, back, forward) {
+    if (forward === undefined) {
+      forward = back; ///
+
+      back = context; ///
 
       context = state; ///
 
@@ -226,14 +222,12 @@ export default define(class Term extends Element {
       strict = true;
     }
 
-    let validatesGivenType = false;
-
     const typeString = type.getString(),
           termString = this.getString();  ///
 
     context.trace(`Validating the '${termString}' term given the '${typeString}' type...`);
 
-    const validates = this.validate(state, context, (term, context) => {
+    return this.validate(state, context, back, (term, context) => {
       let validatesGivenType = false;
 
       const termType = term.getType(),
@@ -252,49 +246,31 @@ export default define(class Term extends Element {
         }
       }
 
-      if (validatesGivenType) {
-        validatesGivenType = continuation(term, context);
+      if (!validatesGivenType) {
+        return back();
       }
 
-      return validatesGivenType;
-    });
-
-    if (validates) {
-      validatesGivenType = true;
-    }
-
-    if (validatesGivenType) {
       context.debug(`...validated the '${termString}' term given the '${typeString}' type.`);
-    }
 
-    return validatesGivenType;
+      return forward(term, context);
+    });
   }
 
-  validateAsVariable(state, context, continuation) {
-    let validatesAsVariable;
-
+  validateAsVariable(state, context, back, forward) {
     const termString = this.getString();  ///
 
     context.trace(`Validating the '${termString}' term as a variable...`);
 
     const term = this;  ///
 
-    validatesAsVariable = validateTermAsVariable(term, state, context, (term, state, context) => {
-      let validatesAsVariable;
-
-      validatesAsVariable = continuation(term, context);
-
-      return validatesAsVariable;
-    });
-
-    if (validatesAsVariable) {
+    return validateTermAsVariable(term, state, context, back, (term, state, context) => {
       context.debug(`...validated the '${termString}' term as a variable.`);
-    }
 
-    return validatesAsVariable;
+      return forward(term, state, context);
+    });
   }
 
-  unifyTerm(term, generalContext, specificContext, continuation) {
+  unifyTerm(term, generalContext, specificContext, back, forward) {
     let termUnifies = false;
 
     const context = specificContext,  ///

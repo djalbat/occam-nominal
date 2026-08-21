@@ -53,9 +53,7 @@ export default define(class Supposition extends Fact {
     return malformed;
   }
 
-  verify = breakable(function (context, continuation) {
-    let verifies = false;
-
+  verify = breakable(function (context, back, forward) {
     const suppositionString = this.getString(); ///
 
     context.trace(`Verifying the '${suppositionString}' supposition...`);
@@ -65,32 +63,22 @@ export default define(class Supposition extends Fact {
     if (malformed) {
       context.debug(`Unable to verify the '${suppositionString}' supposition because it is malformed.`);
 
-      return continuation(verifies, context);
+      return back();
     }
 
     return declare((state) => {
-      return this.validate(state, context, (supposition, _ ) => {
-        if (supposition !== null) {
-          verifies = true;
-        }
+      return this.validate(state, context, back, (supposition, _ ) => {
+        context.debug(`...verified the '${suppositionString}' supposition.`);
 
-        if (verifies) {
-          context.debug(`...verified the '${suppositionString}' supposition.`);
-        }
-
-        return continuation(verifies, context);
+        return forward(context);
       });
     });
   });
 
-  validate(state, context, continuation) {
-    let supposition;
-
+  validate(state, context, back, forward) {
     const suppositionString = this.getString(); ///
 
     context.trace(`Validating the '${suppositionString}' supposition...`);
-
-    supposition = this;  ///
 
     return attempt((context) => {
       const validateStatement = this.validateStatement.bind(this),
@@ -99,23 +87,19 @@ export default define(class Supposition extends Fact {
       return all([
         validateStatement,
         validateProcedureCall
-      ], state, context, (validates, state, context) => {
-        if (!validates) {
-          supposition = null;
-        }
+      ], state, context, back, (state, context) => {
+        const supposition = this; ///
 
-        if (validates) {
-          this.commit(context);
+        this.commit(context);
 
-          context.debug(`...validated the '${suppositionString}' supposition.`);
-        }
+        context.debug(`...validated the '${suppositionString}' supposition.`);
 
-        return continuation(supposition, context);
+        return forward(supposition, context);
       });
     }, context);
   }
 
-  unifyIndependently(context, continuation) {
+  unifyIndependently(context, back, forward) {
     const suppositionString = this.getString(); ///
 
     context.trace(`Unifying the '${suppositionString}' supposition independently...`);
@@ -162,7 +146,7 @@ export default define(class Supposition extends Fact {
     }, context);
   }
 
-  unifyFact(fact, context, continuation) {
+  unifyFact(fact, context, back, forward) {
     const factString = fact.getString(),
           suppositionString = this.getString(); ///
 
@@ -194,7 +178,7 @@ export default define(class Supposition extends Fact {
     }, specificContext);
   }
 
-  unifySubproof(subproof, context, continuation) {
+  unifySubproof(subproof, context, back, forward) {
     const suppositionString = this.getString(), ///
           subproofString = subproof.getString();
 
@@ -227,7 +211,7 @@ export default define(class Supposition extends Fact {
     }, context);
   }
 
-  unifyFactOrSubproof(factOrSubproof, context, continuation) {
+  unifyFactOrSubproof(factOrSubproof, context, back, forward) {
     const factOrSubproofFact = factOrSubproof.isFact();
 
     if (factOrSubproofFact) {

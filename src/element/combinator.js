@@ -37,7 +37,7 @@ export default define(class Combinator extends Element {
     return malformed;
   }
 
-  verify(context, continuation) {
+  verify(context, back, forward) {
     let verifies = false;
 
     const combinatorString = this.getString();  ///
@@ -69,7 +69,7 @@ export default define(class Combinator extends Element {
     return continuation(verifies, context);
   }
 
-  validate(state, context, continuation) {
+  validate(state, context, back, forward) {
     let validates;
 
     const specificContext = context,  ///
@@ -108,7 +108,7 @@ export default define(class Combinator extends Element {
     return validates;
   }
 
-  validateStatementAsCombinator(state, context, continuation) {
+  validateStatementAsCombinator(state, context, back, forward) {
     let statementValidatesAsCombinator;
 
     const combinatorString = this.getString();
@@ -130,7 +130,7 @@ export default define(class Combinator extends Element {
     return statementValidatesAsCombinator;
   }
 
-  unifyStatement(statement, context, continuation) {
+  unifyStatement(statement, context, back, forward) {
     const statementString = statement.getString(),
           combinatorString = this.getString();  ///
 
@@ -140,14 +140,12 @@ export default define(class Combinator extends Element {
           generalContext = this.getContext(), ///
           specifiContext = context; ///
 
-    return unifyStatementWithCombinator(statement, combinator, generalContext, specifiContext, (statementUnifiesWithCombinator, _, specificContext) => {
-      if (statementUnifiesWithCombinator) {
-        context = specificContext; ///
+    return unifyStatementWithCombinator(statement, combinator, generalContext, specifiContext, back, ( _ , specificContext) => {
+      context = specificContext; ///
 
-        context.debug(`...unified the '${statementString}' statement with the '${combinatorString}' combinator.`);
-      }
+      context.debug(`...unified the '${statementString}' statement with the '${combinatorString}' combinator.`);
 
-      return continuation(statementUnifiesWithCombinator, context);
+      return forward(context);
     });
   }
 

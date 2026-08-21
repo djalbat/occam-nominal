@@ -37,81 +37,57 @@ export default class Fact extends Element {
     return step;
   }
 
-  validateStatement(state, context, continuation) {
-    let statementValidates = true;  ///
-
+  validateStatement(state, context, back, forward) {
     if (this.statement === null) {
-      return continuation(statementValidates, state, context);
+      return forward(state, context);
     }
 
     const factString = this.getString();  ///
 
     context.trace(`Validating the '${factString}' fact's statement...`);
 
-    return this.statement.validate(state, context, (statement, context) => {
-      if (statement === null) {
-        statementValidates = false;
-      }
+    return this.statement.validate(state, context, back, (statement, context) => {
+      this.statement = statement;
 
-      if (statementValidates) {
-        this.statement = statement;
+      context.trace(`...validated the '${factString}' fact's statement.`);
 
-        context.trace(`...validated the '${factString}' fact's statement.`);
-      }
-
-      return continuation(statementValidates, state, context);
+      return forward(state, context);
     });
   }
 
-  validateReference(state, context, continuation) {
-    let referenceValidates = true;  ///
-
+  validateReference(state, context, back, forward) {
     if (this.reference === null) {
-      return continuation(referenceValidates, state, context);
+      return forward(state, context);
     }
 
     const factString = this.getString();  ///
 
     context.trace(`Validating the '${factString}' fact's reference...`);
 
-    return this.reference.validate(state, context, (reference, context) => {
-      if (reference === null) {
-        referenceValidates = false;
-      }
+    return this.reference.validate(state, context, back, (reference, context) => {
+      this.reference = reference;
 
-      if (referenceValidates) {
-        this.reference = reference;
+      context.trace(`...validated the '${factString}' fact's reference.`);
 
-        context.trace(`...validated the '${factString}' fact's reference.`);
-      }
-
-      return continuation(referenceValidates, state, context);
+      return forward(state, context);
     });
   }
 
-  validateProcedureCall(state, context, continuation) {
-    let procedureCallValidates = true;  ///
-
+  validateProcedureCall(state, context, back, forward) {
     if (this.procedureCall === null) {
-      return continuation(procedureCallValidates, state, context);
+      return forward(state, context);
     }
 
     const factString = this.getString();  ///
 
     context.trace(`Validating the '${factString}' fact's procedure call...`);
 
-    return this.procedureCall.validate(state, context, (procedureCall, context) => {
-      if (procedureCall === null) {
-        procedureCallValidates = false;
-      }
+    return this.procedureCall.validate(state, context, back, (procedureCall, context) => {
+      this.procedureCall = procedureCall;
 
-      if (procedureCallValidates) {
-        this.procedureCall = procedureCall;
+      context.trace(`...validated the '${factString}' fact's procedure call.`);
 
-        context.trace(`...validated the '${factString}' fact's procedure call.`);
-      }
-
-      return continuation(procedureCallValidates, state, context);
+      return forward(state, context);
     });
   }
 
@@ -160,7 +136,7 @@ export default class Fact extends Element {
     return comparesToStatement;
   }
 
-  unifyStatement(statement, generalContext, specificContext, continuation) {
+  unifyStatement(statement, generalContext, specificContext, back, forward) {
     if (this.statement === null) {
       const statementUnifies = false;
 
