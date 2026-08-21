@@ -37,7 +37,7 @@ export default define(class VariableDeclaration extends Declaration {
     return variableDeclarationNode;
   }
 
-  verify = breakable(function (context, continuation) {
+  verify = breakable(function (context, back, forward) {
     const variableDeclarationString = this.getString(); ///
 
     context.trace(`Verifying the '${variableDeclarationString}' variable declaration...`);
@@ -48,22 +48,18 @@ export default define(class VariableDeclaration extends Declaration {
     return all([
       verifyType,
       verifyVariable
-    ],  context, (verifies) => {
-      if (verifies) {
-        const declaredVariable = this.variable;
+    ],  context, back, () => {
+      const declaredVariable = this.variable;
 
-        context.addDeclaredVariable(declaredVariable);
-      }
+      context.addDeclaredVariable(declaredVariable);
 
-      if (verifies) {
-        context.debug(`...verified the '${variableDeclarationString}' variable declaration.`);
-      }
+      context.debug(`...verified the '${variableDeclarationString}' variable declaration.`);
 
-      return continuation(verifies, context);
+      return forward(context);
     });
   });
 
-  verifyType(context, continuation) {
+  verifyType(context, back, forward) {
     let typeVerifies = false;
 
     const variableDeclarationString = this.getString(); ///
@@ -96,14 +92,16 @@ export default define(class VariableDeclaration extends Declaration {
       }
     }
 
-    if (typeVerifies) {
-      context.debug(`...verified the '${variableDeclarationString}' variable declaration's type.`);
+    if (!typeVerifies) {
+      return back();
     }
 
-    return continuation(typeVerifies, context);
+    context.debug(`...verified the '${variableDeclarationString}' variable declaration's type.`);
+
+    return forward(context);
   }
 
-  verifyVariable(context, continuation) {
+  verifyVariable(context, back, forward) {
     let  variableVerifies = false;
 
     const variableString = this.variable.getString(),
@@ -120,11 +118,13 @@ export default define(class VariableDeclaration extends Declaration {
       variableVerifies = true;
     }
 
-    if (variableVerifies) {
-      context.debug(`...verified the '${variableDeclarationString}' variable declaration's '${variableString}' variable.`);
+    if (!variableVerifies) {
+      return back();
     }
 
-    return continuation(variableVerifies, context);
+    context.debug(`...verified the '${variableDeclarationString}' variable declaration's '${variableString}' variable.`);
+
+    return forward(context);
   }
 
   static name = "VariableDeclaration";

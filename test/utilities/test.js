@@ -1,13 +1,11 @@
 "use strict";
 
-const { arrayUtilities } =require("necessary"),
-      { Log, ReleaseContext, verificationUtilities } =require("occam-languages");
+const { Log, ReleaseContext, verificationUtilities } =require("occam-languages");
 
 const { FileContextFromFilePath } = require("../utilities/fileContext"),
       { releaseContextFromDependency } = require("../utilities/releaseContext");
 
-const { first } = arrayUtilities,
-      { createReleaseContexts, verifyReleaseContexts, initialiseReleaseContexts } = verificationUtilities;
+const { createReleaseContexts, verifyReleaseContexts, initialiseReleaseContexts } = verificationUtilities;
 
 function createSuite(logLevel, projectName, projectsDirectoryPath) {
   let releaseContext = null;
@@ -52,22 +50,14 @@ function createSuite(logLevel, projectName, projectsDirectoryPath) {
   });
 
   it("verifies", (done) => {
-    return verifyReleaseContexts(context, fail, succeed);
+    return verifyReleaseContexts(context, back, forward);
 
-    function fail() {
-      assert.isTrue(false);
-
-      done();
+    function back(exception) {
+      throw exception;
     }
 
-    function succeed() {
+    function forward() {
       assert.isTrue(true);
-
-      releaseContexts.reverse();
-
-      const firstReleaseContext = first(releaseContexts);
-
-      releaseContext = firstReleaseContext; ///
 
       done();
     }
