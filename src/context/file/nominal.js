@@ -707,12 +707,12 @@ export default class NominalFileContext extends FileContext {
     ///
   }
 
-  verifyFile(back, forward) {
+  verifyFile(forward, back) {
     const node = this.getNode(),
           context = this, ///
           fileNode = node;  ///
 
-    return verifyFile(fileNode, context, back, forward);
+    return verifyFile(fileNode, context, forward, back);
   }
 
   initialise() {

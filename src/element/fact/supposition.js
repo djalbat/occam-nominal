@@ -53,7 +53,7 @@ export default define(class Supposition extends Fact {
     return malformed;
   }
 
-  verify = breakable(function (context, back, forward) {
+  verify = breakable(function (context, forward, back) {
     const suppositionString = this.getString(); ///
 
     context.trace(`Verifying the '${suppositionString}' supposition...`);
@@ -67,15 +67,15 @@ export default define(class Supposition extends Fact {
     }
 
     return declare((state) => {
-      return this.validate(state, context, back, (supposition, _ ) => {
+      return this.validate(state, context, (supposition, _ , back) => {
         context.debug(`...verified the '${suppositionString}' supposition.`);
 
-        return forward(context);
-      });
+        return forward(context, back);
+      }, back);
     });
   });
 
-  validate(state, context, back, forward) {
+  validate(state, context, forward, back) {
     const suppositionString = this.getString(); ///
 
     context.trace(`Validating the '${suppositionString}' supposition...`);
@@ -87,19 +87,19 @@ export default define(class Supposition extends Fact {
       return all([
         validateStatement,
         validateProcedureCall
-      ], state, context, back, (state, context) => {
+      ], state, context, (state, context, back) => {
         const supposition = this; ///
 
         this.commit(context);
 
         context.debug(`...validated the '${suppositionString}' supposition.`);
 
-        return forward(supposition, context);
-      });
+        return forward(supposition, context, back);
+      }, back);
     }, context);
   }
 
-  unifyIndependently(context, back, forward) {
+  unifyIndependently(context, forward, back) {
     const suppositionString = this.getString(); ///
 
     context.trace(`Unifying the '${suppositionString}' supposition independently...`);
@@ -146,7 +146,7 @@ export default define(class Supposition extends Fact {
     }, context);
   }
 
-  unifyFact(fact, context, back, forward) {
+  unifyFact(fact, context, forward, back) {
     const factString = fact.getString(),
           suppositionString = this.getString(); ///
 
@@ -178,7 +178,7 @@ export default define(class Supposition extends Fact {
     }, specificContext);
   }
 
-  unifySubproof(subproof, context, back, forward) {
+  unifySubproof(subproof, context, forward, back) {
     const suppositionString = this.getString(), ///
           subproofString = subproof.getString();
 
@@ -211,7 +211,7 @@ export default define(class Supposition extends Fact {
     }, context);
   }
 
-  unifyFactOrSubproof(factOrSubproof, context, back, forward) {
+  unifyFactOrSubproof(factOrSubproof, context, forward, back) {
     const factOrSubproofFact = factOrSubproof.isFact();
 
     if (factOrSubproofFact) {

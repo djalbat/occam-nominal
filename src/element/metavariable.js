@@ -112,7 +112,7 @@ export default define(class Metavariable extends Element {
     return comparesToMetavariableName;
   }
 
-  verify(context, back, forward) {
+  verify(context, forward, back) {
     let verifies = false;
 
     const metavariableString = this.getString();  ///
@@ -142,7 +142,7 @@ export default define(class Metavariable extends Element {
     });
   }
 
-  verifyTerm(context, back, forward) {
+  verifyTerm(context, forward, back) {
     let termVerifies = true;  ///
 
     if (this.term !== null) {
@@ -158,7 +158,7 @@ export default define(class Metavariable extends Element {
     return continuation(termVerifies, context);
   }
 
-  verifyType(context, back, forward) {
+  verifyType(context, forward, back) {
     let typeVerifies = true;  ///
 
     if (this.type !== null) {
@@ -183,11 +183,11 @@ export default define(class Metavariable extends Element {
     return continuation(typeVerifies, context);
   }
 
-  validate(strict, state, context, back, forward) {
-    if (forward === undefined) {
-      forward = back; ///
+  validate(strict, state, context, forward, back) {
+    if (back === undefined) {
+      back = forward; ///
 
-      back = context; ///
+      forward = context; ///
 
       context = state;  ///
 
@@ -205,7 +205,7 @@ export default define(class Metavariable extends Element {
     if (metavariable !== null) {
       context.debug(`...the '${metavariableString}' metavariable is already present.`);
 
-      return forward(metavariable, context);
+      return forward(metavariable, context, back);
     }
 
     const validateName = this.validateName.bind(this),
@@ -216,18 +216,18 @@ export default define(class Metavariable extends Element {
       validateName,
       validateType,
       validateTerm
-    ], strict, state, context, back, (strict, state, context) => {
+    ], strict, state, context, (strict, state, context, back) => {
       const metavariable = this;  ///
 
       context.addMetavariable(metavariable);
 
       context.debug(`...validated the '${metavariableString}' metavariable.`);
 
-      return forward(metavariable, context);
-    });
+      return forward(metavariable, context, back);
+    }, back);
   }
 
-  validateName(strict, state, context, back, forward) {
+  validateName(strict, state, context, forward, back) {
     const metavariableString = this.getString();  ///
 
     context.trace(`Validating the '${metavariableString}' metavariable's name...`);
@@ -256,12 +256,12 @@ export default define(class Metavariable extends Element {
 
     context.debug(`...validated the '${metavariableString}' metavariable's name.`);
 
-    return forward(strict, state, context);
+    return forward(strict, state, context, back);
   }
 
-  validateType(strict, state, context, back, forward) {
+  validateType(strict, state, context, forward, back) {
     if (this.type === null) {
-      return forward(strict, state, context);
+      return forward(strict, state, context, back);
     }
 
     const metavariableString = this.getString();  ///
@@ -283,12 +283,12 @@ export default define(class Metavariable extends Element {
 
     context.trace(`...validated  the '${metavariableString}' metavariable's type.`);
 
-    return forward(strict, state, context);
+    return forward(strict, state, context, back);
   }
 
-  validateTerm(strict, state, context, back, forward) {
+  validateTerm(strict, state, context, forward, back) {
     if (this.term === null) {
-      return forward(strict, state, context);
+      return forward(strict, state, context, back);
     }
 
     const metavariableString = this.getString();  ///
@@ -303,13 +303,13 @@ export default define(class Metavariable extends Element {
         return back();
       }
 
-      return this.term.validate(state, context, back, (term, context) => {
+      return this.term.validate(state, context, (term, context, back) => {
         this.term = term;
 
         context.debug(`...validated the '${metavariableString}' metavariable's term.`);
 
-        return forward(strict, state, context);
-      });
+        return forward(strict, state, context, back);
+      }, back);
     }
 
     const type = declaredMetavariable.getType();
@@ -318,16 +318,16 @@ export default define(class Metavariable extends Element {
       return back();
     }
 
-    return this.term.validateGivenType(type, state, context, back, (term, context) => {
+    return this.term.validateGivenType(type, state, context, (term, context, back) => {
       this.term = term;
 
       context.debug(`...validated the '${metavariableString}' metavariable's term.`);
 
-      return forward(strict, state, context);
-    });
+      return forward(strict, state, context, back);
+    }, back);
   }
 
-  unifyFrame(frame, generalContext, specificContext, back, forward) {
+  unifyFrame(frame, generalContext, specificContext, forward, back) {
     let frameUnifies = false;
 
     const context = specificContext,  ///
@@ -390,7 +390,7 @@ export default define(class Metavariable extends Element {
     return continuation(frameUnifies, context);
   }
 
-  unifyStatement(statement, generalContext, specificContext, back, forward) {
+  unifyStatement(statement, generalContext, specificContext, forward, back) {
     let statementUnifies = false;
 
     const context = specificContext,  ///
@@ -467,7 +467,7 @@ export default define(class Metavariable extends Element {
     return continuation(statementUnifies);
   }
 
-  unifyReference(reference, generalContext, specificContext, back, forward) {
+  unifyReference(reference, generalContext, specificContext, forward, back) {
     let referenceUnifies = false;
 
     const context = specificContext,  ///
@@ -530,7 +530,7 @@ export default define(class Metavariable extends Element {
     return continuation(referenceUnifies);
   }
 
-  unifyMetavariable(metavariable, context, back, forward) {
+  unifyMetavariable(metavariable, context, forward, back) {
     let metavariableUnifies;
 
     debugger
@@ -553,7 +553,7 @@ export default define(class Metavariable extends Element {
     return metavariableUnifies;
   }
 
-  unifyMetavariableIntrinsically(metavariable, generalContext, specificContext, back, forward) {
+  unifyMetavariableIntrinsically(metavariable, generalContext, specificContext, forward, back) {
     const context = specificContext,  ///
           generalMetavariable = this, ///
           specificMetavariable = metavariable,

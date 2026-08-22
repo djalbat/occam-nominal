@@ -26,29 +26,29 @@ export default define(class Axiom extends Claim {
     return satisfiable;
   }
 
-  verify = breakable(function (context, back, forward) {
+  verify = breakable(function (context, forward, back) {
     const axiomString = this.getString(); ///
 
     context.trace(`Verifying the '${axiomString}' axiom...`);
 
-    this.verifySignature(context, back, () => {
-      return this.verifyEx(context, back, () => {
+    this.verifySignature(context, (context, back) => {
+      return this.verifyEx(context, (context, back) => {
         const axiom = this; ///
 
         context.addAxiom(axiom);
 
         context.debug(`...verified the '${axiomString}' axiom.`);
 
-        return forward(context);
-      });
-    });
+        return forward(context, back);
+      }, back);
+    }, back);
   });
 
-  verifySignature(context, back, forward) {
+  verifySignature(context, forward, back) {
     const satisfiable = this.isSatisfiable();
 
     if (!satisfiable) {
-      return forward(context);
+      return forward(context, back);
     }
 
     const signature = this.getSignature(),
@@ -56,14 +56,14 @@ export default define(class Axiom extends Claim {
 
     context.trace(`Verifying the '${axiomString}' axiom's signature...`);
 
-    return signature.verify(context, back, () => {
+    return signature.verify(context, (back) => {
       context.trace(`...verified the '${axiomString}' axiom's signature.`);
 
-      return forward(context);
-    });
+      return forward(context, back);
+    }, back);
   }
 
-  unifyTerms(terms, context, back, forward) {
+  unifyTerms(terms, context, forward, back) {
     const quoted = true,
           termsString = termsStringFromTerms(terms, quoted),
           axiomString = this.getString(); ///
@@ -81,7 +81,7 @@ export default define(class Axiom extends Claim {
     });
   }
 
-  unifyClaim(claim, context, back, forward) {
+  unifyClaim(claim, context, forward, back) {
     let claimUnifies = false;
 
     const axiomString = this.getString(), ///
@@ -118,7 +118,7 @@ export default define(class Axiom extends Claim {
     }, context);
   }
 
-  unifyDeduction(deduction, context, back, forward) {
+  unifyDeduction(deduction, context, forward, back) {
     let deductionUnifies = false;
 
     const generalDeduction = this.getDeduction(), ///
@@ -158,7 +158,7 @@ export default define(class Axiom extends Claim {
     }, specificContext, context);
   }
 
-  unifySupposition(specificSupposition, generalSupposition, context, back, forward) {
+  unifySupposition(specificSupposition, generalSupposition, context, forward, back) {
     let suppositionUnifies = false;
 
     const generalSuppositionString = generalSupposition.getString(),
@@ -195,7 +195,7 @@ export default define(class Axiom extends Claim {
     }, specificContext, context);
   }
 
-  unifySuppositions(suppositions, context, back, forward) {
+  unifySuppositions(suppositions, context, forward, back) {
     let suppositionsUnify = false;
 
     const specificSuppositions = suppositions,  ///
@@ -221,7 +221,7 @@ export default define(class Axiom extends Claim {
     }, continuation);
   }
 
-  unifySignatureAssertion(signatureAssertion, context, back, forward) {
+  unifySignatureAssertion(signatureAssertion, context, forward, back) {
     let signatureAssertionUnifies = false;
 
     const axiomString = this.getString(), ///

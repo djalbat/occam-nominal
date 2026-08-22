@@ -37,58 +37,58 @@ export default class Fact extends Element {
     return step;
   }
 
-  validateStatement(state, context, back, forward) {
+  validateStatement(state, context, forward, back) {
     if (this.statement === null) {
-      return forward(state, context);
+      return forward(state, context, back);
     }
 
     const factString = this.getString();  ///
 
     context.trace(`Validating the '${factString}' fact's statement...`);
 
-    return this.statement.validate(state, context, back, (statement, context) => {
+    return this.statement.validate(state, context, (statement, context, back) => {
       this.statement = statement;
 
       context.trace(`...validated the '${factString}' fact's statement.`);
 
-      return forward(state, context);
-    });
+      return forward(state, context, back);
+    }, back);
   }
 
-  validateReference(state, context, back, forward) {
+  validateReference(state, context, forward, back) {
     if (this.reference === null) {
-      return forward(state, context);
+      return forward(state, context, back);
     }
 
     const factString = this.getString();  ///
 
     context.trace(`Validating the '${factString}' fact's reference...`);
 
-    return this.reference.validate(state, context, back, (reference, context) => {
+    return this.reference.validate(state, context, (reference, context, back) => {
       this.reference = reference;
 
       context.trace(`...validated the '${factString}' fact's reference.`);
 
-      return forward(state, context);
-    });
+      return forward(state, context, back);
+    }, back);
   }
 
-  validateProcedureCall(state, context, back, forward) {
+  validateProcedureCall(state, context, forward, back) {
     if (this.procedureCall === null) {
-      return forward(state, context);
+      return forward(state, context, back);
     }
 
     const factString = this.getString();  ///
 
     context.trace(`Validating the '${factString}' fact's procedure call...`);
 
-    return this.procedureCall.validate(state, context, back, (procedureCall, context) => {
+    return this.procedureCall.validate(state, context, (procedureCall, context, back) => {
       this.procedureCall = procedureCall;
 
       context.trace(`...validated the '${factString}' fact's procedure call.`);
 
-      return forward(state, context);
-    });
+      return forward(state, context, back);
+    }, back);
   }
 
   compareStep(step, context) {
@@ -136,7 +136,7 @@ export default class Fact extends Element {
     return comparesToStatement;
   }
 
-  unifyStatement(statement, generalContext, specificContext, back, forward) {
+  unifyStatement(statement, generalContext, specificContext, forward, back) {
     if (this.statement === null) {
       const statementUnifies = false;
 

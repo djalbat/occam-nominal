@@ -181,7 +181,7 @@ export default define(class Term extends Element {
     return term;
   }
 
-  validate(state, context, back, forward) {
+  validate(state, context, forward, back) {
     let term;
 
     const termString = this.getString();  ///
@@ -193,25 +193,25 @@ export default define(class Term extends Element {
     if (term !== null) {
       context.debug(`...the '${termString}' term is already present.`);
 
-      return forward(term, context);
+      return forward(term, context, back);
     }
 
     term = this;  ///
 
-    return exists(validateTerms, term, state, context, back, (term, state, context, back) => {
+    return exists(validateTerms, term, state, context, (term, state, context, back) => {
       context.addTerm(term);
 
       context.debug(`...validated the '${termString}' term.`);
 
       return forward(term, context, back);
-    });
+    }, back);
   }
 
-  validateGivenType(strict, type, state, context, back, forward) {
-    if (forward === undefined) {
-      forward = back; ///
+  validateGivenType(strict, type, state, context, forward, back) {
+    if (back === undefined) {
+      back = forward; ///
 
-      back = context; ///
+      forward = context; ///
 
       context = state; ///
 
@@ -227,7 +227,7 @@ export default define(class Term extends Element {
 
     context.trace(`Validating the '${termString}' term given the '${typeString}' type...`);
 
-    return this.validate(state, context, back, (term, context) => {
+    return this.validate(state, context, (term, context, back) => {
       let validatesGivenType = false;
 
       const termType = term.getType(),
@@ -252,25 +252,25 @@ export default define(class Term extends Element {
 
       context.debug(`...validated the '${termString}' term given the '${typeString}' type.`);
 
-      return forward(term, context);
-    });
+      return forward(term, context, back);
+    }, back);
   }
 
-  validateAsVariable(state, context, back, forward) {
+  validateAsVariable(state, context, forward, back) {
     const termString = this.getString();  ///
 
     context.trace(`Validating the '${termString}' term as a variable...`);
 
     const term = this;  ///
 
-    return validateTermAsVariable(term, state, context, back, (term, state, context) => {
+    return validateTermAsVariable(term, state, context, (term, state, context) => {
       context.debug(`...validated the '${termString}' term as a variable.`);
 
       return forward(term, state, context);
-    });
+    }, back);
   }
 
-  unifyTerm(term, generalContext, specificContext, back, forward) {
+  unifyTerm(term, generalContext, specificContext, forward, back) {
     let termUnifies = false;
 
     const context = specificContext,  ///

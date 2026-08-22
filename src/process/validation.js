@@ -10,7 +10,7 @@ import { bracketedConstructorFromNothing, bracketedCombinatorFromNothing } from 
 
 const { some } = continuationUtilities;
 
-export function validateTermAsVariable(term, state, context, back, forward) {
+export function validateTermAsVariable(term, state, context, forward, back) {
   const { Variable } = elements,
         variable = Variable.fromTerm(term, context);
 
@@ -26,23 +26,23 @@ export function validateTermAsVariable(term, state, context, back, forward) {
     return back();
   }
 
-  return some(declaredVariables, (declaredVariable, state, context, back, forward) => {
+  return some(declaredVariables, (declaredVariable, state, context, forward, back) => {
     const type = declaredVariable.getType(),
           provisional = declaredVariable.isProvisional();
 
     return choose((context) => {
-      return variable.validate(state, type, provisional, context, back, (variable, context, back) => {
+      return variable.validate(type, provisional, state, context, (variable, context, back) => {
         term.setType(type);
 
         term.setProvisional(provisional);
 
         return forward(term, state, context, back);
-      });
+      }, back);
     }, context);
-  }, state, context, back, forward);
+  }, state, context, forward, back);
 }
 
-function unifyTermWithGenerators(term, state, context, back, forward) {
+function unifyTermWithGenerators(term, state, context, forward, back) {
   const generators = context.getGenerators(),
         generatorsLength = generators.length;
 
@@ -54,18 +54,18 @@ function unifyTermWithGenerators(term, state, context, back, forward) {
 
   context.trace(`Unifying the '${termString}' term with generators...`);
 
-  return some(generators, back, (generator, context, back, forward) => {
+  return some(generators, (generator, context, forward, back) => {
     return choose((context) => {
-      return generator.unifyTerm(term, context, back, forward);
+      return generator.unifyTerm(term, context, forward, back);
     }, context);
-  }, context, (state, context) => {
+  }, context, (state, context, back) => {
     context.debug(`...unified the '${termString}' term with generators.`);
 
-    return forward(term, state, context);
-  });
+    return forward(term, state, context, back);
+  }, back);
 }
 
-function unifyTermWithConstructors(term, state, context, back, forward) {
+function unifyTermWithConstructors(term, state, context, forward, back) {
   const constructors = context.getConstructors(),
         constructorsLength = constructors.length;
 
@@ -77,24 +77,24 @@ function unifyTermWithConstructors(term, state, context, back, forward) {
 
   context.trace(`Unifying the '${termString}' term with constructors...`);
 
-  return some(constructors, back, (constructor, context, back, forward) => {
+  return some(constructors, (constructor, context, forward, back) => {
     return choose((context) => {
-      return constructor.unifyTerm(term, context, back, forward);
+      return constructor.unifyTerm(term, context, forward, back);
     }, context);
-  }, context, (state, context) => {
+  }, context, (state, context, back) => {
     context.debug(`...unified the '${termString}' term with generators.`);
 
-    return forward(term, state, context);
-  });
+    return forward(term, state, context, back);
+  }, back);
 }
 
-function unifyTermWithBracketedConstructor(term, state, context, back, forward) {
+function unifyTermWithBracketedConstructor(term, state, context, forward, back) {
   const bracketedConstructor = bracketedConstructorFromNothing();
 
-  return bracketedConstructor.unifyTerm(term, state, context, back, forward);
+  return bracketedConstructor.unifyTerm(term, state, context, forward, back);
 }
 
-export function validateStatementAsMetavariable(statement, state, context, back, forward) {
+export function validateStatementAsMetavariable(statement, state, context, forward, back) {
   const { Metavariable } = elements,
         metavariable = Metavariable.fromStatement(statement, context);
 
@@ -108,16 +108,16 @@ export function validateStatementAsMetavariable(statement, state, context, back,
 
   const strict = true;  ///
 
-  return metavariable.validate(strict, state, context, back, (metavariable, context) => {
-    return validateSubstitution(statement, context, back, (context) => {
+  return metavariable.validate(strict, state, context, (metavariable, context) => {
+    return validateSubstitution(statement, context, (context, back) => {
       context.debug(`...validated the '${statementString}' statement as a metavariable.`);
 
-      return forward(statement, state, context);
-    });
-  });
+      return forward(statement, state, context, back);
+    }, back);
+  }, back);
 }
 
-function unifyStatementWithCombinators(statement, state, context, back, forward) {
+function unifyStatementWithCombinators(statement, state, context, forward, back) {
   const combinators = context.getCombinators(),
         combinatorsLength = combinators.length;
 
@@ -129,24 +129,22 @@ function unifyStatementWithCombinators(statement, state, context, back, forward)
 
   context.trace(`Unifying the '${statementString}' statement with combinators...`);
 
-  return some(combinators, (combinator, context, back, forward) => {
-    return combinator.unifyStatement(statement, context, back, forward);
-  }, back, () => {
+  return some(combinators, (combinator, context, forward, back) => {
+    return combinator.unifyStatement(statement, context, forward, back);
+  }, (back) => {
     context.debug(`...unified the '${statementString}' statement with combinators.`);
 
-    return forward(statement, state, context);
-  });
+    return forward(statement, state, context, back);
+  }, back);
 }
 
-function unifyStatementWithBracketedCombinator(statement, state, context, back, forward) {
+function unifyStatementWithBracketedCombinator(statement, state, context, forward, back) {
   const bracketedCombinator = bracketedCombinatorFromNothing();
 
-  return bracketedCombinator.unifyStatement(statement, context, back, (context) => {
-    return forward(statement, state, context);
-  });
+  return bracketedCombinator.unifyStatement(statement, state, context, forward, back);
 }
 
-function validateStatementAsEquality(statement, state, context, back, forward) {
+function validateStatementAsEquality(statement, state, context, forward, back) {
   const { Equality } = elements,
         equality = Equality.fromStatement(statement, context);
 
@@ -158,14 +156,14 @@ function validateStatementAsEquality(statement, state, context, back, forward) {
 
   context.trace(`Validating the '${statementString}' statement as an equality...`);
 
-  return equality.validate(state, context, back, (equality, context) => {
+  return equality.validate(state, context, (equality, context, back) => {
     context.debug(`...validated the '${statementString}' statement as an equality.`);
 
-    return forward(statement, state, context);
-  });
+    return forward(statement, state, context, back);
+  }, back);
 }
 
-function validateStatementAsTypeAssertion(statement, state, context, back, forward) {
+function validateStatementAsTypeAssertion(statement, state, context, forward, back) {
   const { TypeAssertion } = elements,
         typeAssertion = TypeAssertion.fromStatement(statement, context);
 
@@ -177,14 +175,14 @@ function validateStatementAsTypeAssertion(statement, state, context, back, forwa
 
   context.trace(`Validating the '${statementString}' statement as a type assertion...`);
 
-  return typeAssertion.validate(state, context, back, (typeAssertion, context) => {
+  return typeAssertion.validate(state, context, (typeAssertion, context, back) => {
     context.debug(`...validated the '${statementString}' statement as a type assertion.`);
 
-    return forward(statement, state, context);
-  });
+    return forward(statement, state, context, back);
+  }, back);
 }
 
-function validateStatementAsDefinedAssertion(statement, state, context, back, forward) {
+function validateStatementAsDefinedAssertion(statement, state, context, forward, back) {
   const { DefinedAssertion } = elements,
         definedAssertion = DefinedAssertion.fromStatement(statement, context);
 
@@ -196,14 +194,14 @@ function validateStatementAsDefinedAssertion(statement, state, context, back, fo
 
   context.trace(`Validating the '${statementString}' statement as a defined assertion...`);
 
-  return definedAssertion.validate(state, context, back, (definedAssertion, context) => {
+  return definedAssertion.validate(state, context, (definedAssertion, context, back) => {
     context.debug(`...validated the '${statementString}' statement as a defined assertion.`);
 
-    return forward(statement, state, context);
-  });
+    return forward(statement, state, context, back);
+  }, back);
 }
 
-function validateStatementAsPropertyAssertion(statement, state, context, back, forward) {
+function validateStatementAsPropertyAssertion(statement, state, context, forward, back) {
   const { PropertyAssertion } = elements,
         propertyAssertion = PropertyAssertion.fromStatement(statement, context);
 
@@ -215,14 +213,14 @@ function validateStatementAsPropertyAssertion(statement, state, context, back, f
 
   context.trace(`Validating the '${statementString}' statement as a property assertion...`);
 
-  return propertyAssertion.validate(state, context, back, (propertyAssertion, context) => {
+  return propertyAssertion.validate(state, context, (propertyAssertion, context, back) => {
     context.debug(`...validated the '${statementString}' statement as a property assertion.`);
 
-    return forward(statement, state, context);
-  });
+    return forward(statement, state, context, back);
+  }, back);
 }
 
-function validateStatementAsSubproofAssertion(statement, state, context, back, forward) {
+function validateStatementAsSubproofAssertion(statement, state, context, forward, back) {
   const { SubproofAssertion } = elements,
         subproofAssertion = SubproofAssertion.fromStatement(statement, context);
 
@@ -234,14 +232,14 @@ function validateStatementAsSubproofAssertion(statement, state, context, back, f
 
   context.trace(`Validating the '${statementString}' statement as a subproof assertion...`);
 
-  return subproofAssertion.validate(state, context, back, (subproofAssertion, context) => {
+  return subproofAssertion.validate(state, context, (subproofAssertion, context, back) => {
     context.debug(`...validated the '${statementString}' statement as a subproof assertion.`);
 
-    return forward(statement, state, context);
-  });
+    return forward(statement, state, context, back);
+  }, back);
 }
 
-function validateStatementAsContainedAssertion(statement, state, context, back, forward) {
+function validateStatementAsContainedAssertion(statement, state, context, forward, back) {
   const { ContainedAssertion } = elements,
         containedAssertion = ContainedAssertion.fromStatement(statement, context);
 
@@ -253,14 +251,14 @@ function validateStatementAsContainedAssertion(statement, state, context, back, 
 
   context.trace(`Validating the '${statementString}' statement as a contained assertion...`);
 
-  return containedAssertion.validate(state, context, back, (containedAssertion, context) => {
+  return containedAssertion.validate(state, context, (containedAssertion, context, back) => {
     context.debug(`...validated the '${statementString}' statement as a contained assertion.`);
 
-    return forward(statement, state, context);
-  });
+    return forward(statement, state, context, back);
+  }, back);
 }
 
-function validateStatementAsSignatureAssertion(statement, state, context, back, forward) {
+function validateStatementAsSignatureAssertion(statement, state, context, forward, back) {
   const { SignatureAssertion } = elements,
         signatureAssertion = SignatureAssertion.fromStatement(statement, context);
 
@@ -272,11 +270,11 @@ function validateStatementAsSignatureAssertion(statement, state, context, back, 
 
   context.trace(`Validating the '${statementString}' statement as a signature assertion...`);
 
-  return signatureAssertion.validate(state, context, back, (signatureAssertion, context) => {
+  return signatureAssertion.validate(state, context, (signatureAssertion, context, back) => {
     context.debug(`...validated the '${statementString}' statement as a signature assertion.`);
 
-    return forward(statement, state, context);
-  });
+    return forward(statement, state, context, back);
+  }, back);
 }
 
 export const validateTerms = [
@@ -299,35 +297,35 @@ export const validateStatements = [
   validateStatementAsSignatureAssertion
 ];
 
-export function unifyTermWithProperties(term, state, context, back, forward) {
+export function unifyTermWithProperties(term, state, context, forward, back) {
   const termString = term.getString(),
         properties = context.getProperties();
 
   context.trace(`Unifying the '${termString}' term with properties...`);
 
-  return some(properties, back, (property, context, back, forward) => {
+  return some(properties, (property, context, forward, back) => {
     return choose((context) => {
-      return property.unifyTerm(term, state, context, back, forward);
+      return property.unifyTerm(term, state, context, forward, back);
     }, context);
-  }, context, () => {
+  }, context, (back) => {
     context.debug(`...unified the '${termString}' term with properties.`);
 
-    return forward(term, state, context);
-  });
+    return forward(term, state, context, back);
+  }, back);
 }
 
-function validateSubstitution(statement, context, back, forward) {
+function validateSubstitution(statement, context, forward, back) {
   const substitution = statement.getSubstitution();
 
   if (substitution === null) {
-    return forward()
+    return forward(back);
   }
 
   return declare((state) => {
     return desist((state) => {
-      return substitution.validate(state, context, back, (substitution, context) => {
-        return forward(context);
-      });
+      return substitution.validate(state, context, (substitution, context, back) => {
+        return forward(context, back);
+      }, back);
     }, state);
   });
 }

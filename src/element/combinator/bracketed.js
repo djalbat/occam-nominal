@@ -12,16 +12,10 @@ export default define(class BracketedCombinator extends Combinator {
     return bracketedCombinatorNode;
   }
 
-  unifyStatement(statement, context, back, forarsd) {
-    const statementString = statement.getString();
-
-    context.trace(`Unifying the '${statementString}' statement with the bracketed combinator...`);
-
-    return super.unifyStatement(statement, context, back, (context) => {
-      context.debug(`...unified the '${statementString}' statement with the bracketed combinator.`);
-
-      return forarsd(context);
-    });
+  unifyStatement(statement, state, context, forward, back) {
+    return super.unifyStatement(statement, context, (statemenht, context, back) => {
+      return forward(statement, state, context, back);
+    }, back);
   }
 
   static name = "BracketedCombinator";

@@ -594,6 +594,8 @@ export default class MnemicContext extends Context {
   commit() {
     const context = this;
 
+    context.debug(`Committed the mnemic context.`);
+
     return context;
   }
 

@@ -241,7 +241,7 @@ export default define(class Statement extends Element {
     return comparesToParamter;
   }
 
-  validate(state, context, back, forward) {
+  validate(state, context, forward, back) {
     let statement;
 
     const statementString = this.getString();  ///
@@ -253,21 +253,21 @@ export default define(class Statement extends Element {
     if (statement !== null) {
       context.debug(`The '${statementString}' statement is already present.`);
 
-      return forward(statement, context);
+      return forward(statement, context, back);
     }
 
     statement = this; ///
 
-    return exists(validateStatements, statement, state, context, back, (statement, state, context) => {
+    return exists(validateStatements, statement, state, context, (statement, state, context, back) => {
       context.addStatement(statement);
 
       context.debug(`...validated the '${statementString}' statement.`);
 
-      return forward(statement, context);
-    });
+      return forward(statement, context, back);
+    }, back);
   }
 
-  discharge(generalContext, specificContext, back, forward) {
+  discharge(generalContext, specificContext, forward, back) {
     let discharges;
 
     const context = specificContext,  ///
@@ -291,7 +291,7 @@ export default define(class Statement extends Element {
     return continuation(discharges, context);
   }
 
-  unifyStatement(statement, generalContext, specificContext, back, forward) {
+  unifyStatement(statement, generalContext, specificContext, forward, back) {
     const context = specificContext,  ///
           generalStatement = this,  ///
           specificStatement = statement, ///
@@ -309,7 +309,7 @@ export default define(class Statement extends Element {
     });
   }
 
-  unifyIndependently(generalContext, specificContext, back, forward) {
+  unifyIndependently(generalContext, specificContext, forward, back) {
     const context = specificContext,  ///
           statementString = this.getString();  ///
 

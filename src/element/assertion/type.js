@@ -69,7 +69,7 @@ export default define(class TypeAssertion extends Assertion {
     return discharges;
   }
 
-  validate(state, context, back, forward) {
+  validate(state, context, forward, back) {
     let assertion;
 
     const typeAssertionString = this.getString();  ///
@@ -83,21 +83,21 @@ export default define(class TypeAssertion extends Assertion {
 
       context.debug(`The '${typeAssertionString}' type assertion is already present.`);
 
-      return forward(typeAssertion, context);
+      return forward(typeAssertion, context, back);
     }
 
     const validateType = this.validateType.bind(this);
 
     return all([
       validateType
-    ], state, context, back, (state, context) => {
+    ], state, context, (state, context, back) => {
       const validateWhenDeclared = this.validateWhenDeclared.bind(this),
             validateWhenDerived = this.validateWhenDerived.bind(this);
 
       return exists([
         validateWhenDeclared,
         validateWhenDerived
-      ], state, context, back, (state, context) => {
+      ], state, context, (state, context, back) => {
         assertion = this; ///
 
         context.addAssertion(assertion);
@@ -106,12 +106,12 @@ export default define(class TypeAssertion extends Assertion {
 
         context.debug(`...validated the '${typeAssertionString}' type assertion.`);
 
-        return forward(typeAssertion, context);
-      });
-    });
+        return forward(typeAssertion, context, back);
+      }, back);
+    }, back);
   }
 
-  validateType(state, context, back, forward) {
+  validateType(state, context, forward, back) {
     const typeAssertionString = this.getString();  ///
 
     context.trace(`Validating the '${typeAssertionString}' type assertion's type...`);
@@ -131,10 +131,10 @@ export default define(class TypeAssertion extends Assertion {
 
     context.debug(`...validated the '${typeAssertionString}' type assertion's type.`);
 
-    return forward(state, context)
+    return forward(state, context, back)
   }
 
-  validateWhenDeclared(state, context, back, forward) {
+  validateWhenDeclared(state, context, forward, back) {
     const declared = isDeclared(state);
 
     if (!declared) {
@@ -145,7 +145,7 @@ export default define(class TypeAssertion extends Assertion {
 
     context.trace(`Validating the '${typeAssertionString}' declared type assertion...`);
 
-    return this.term.validate(state, context, back, (term, context, back) => {
+    return this.term.validate(state, context, (term, context, back) => {
       let validatesWhenDeclared = false;
 
       if (term !== null) {
@@ -174,11 +174,11 @@ export default define(class TypeAssertion extends Assertion {
 
       context.debug(`...validated the '${typeAssertionString}' declared type assertion.`);
 
-      return forward(state, context);
-    });
+      return forward(state, context, back);
+    }, back);
   }
 
-  validateWhenDerived(state, context, back, forward) {
+  validateWhenDerived(state, context, forward, back) {
     const derived = isDerived(state);
 
     if (!derived) {
@@ -189,16 +189,16 @@ export default define(class TypeAssertion extends Assertion {
 
     context.trace(`Validating the '${typeAssertionString}' derived type assertion...`);
 
-    return validateWhenDerived(this.term, this.type, state, context, back, (term, context) => {
+    return validateWhenDerived(this.term, this.type, state, context, (term, context, back) => {
       this.term = term;
 
       context.debug(`...validated the '${typeAssertionString}' derived type assertion.`);
 
-      return forward(state, context);
-    });
+      return forward(state, context, back);
+    }, back);
   }
 
-  unifyIndependently(generalContext, specificContext, back, forward) {
+  unifyIndependently(generalContext, specificContext, forward, back) {
     let unifiesIndependently = false;
 
     const context = specificContext, ///
@@ -298,8 +298,8 @@ export default define(class TypeAssertion extends Assertion {
   }
 });
 
-function validateWhenDerived(term, type, state, context, back, forward) {
-  return term.validate(state, context, back, (term, context) => {
+function validateWhenDerived(term, type, state, context, forward, back) {
+  return term.validate(state, context, (term, context, back) => {
     let validatesWhenDerived = false;
 
     if (term !== null) {
@@ -319,6 +319,6 @@ function validateWhenDerived(term, type, state, context, back, forward) {
       return back();
     }
 
-    return forward(term, context);
-  });
+    return forward(term, context, back);
+  }, back);
 }

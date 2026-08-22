@@ -46,7 +46,7 @@ export default define(class ConstructorDeclaration extends Declaration {
 
   setHypotheses(hypotheses) { this.constructor.setHypotheses(hypotheses); }
 
-  verify = breakable(function (context, back, forward) {
+  verify = breakable(function (context, forward, back) {
     const constructorDeclarationString = this.getString();  ///
 
     context.trace(`Verifying the '${constructorDeclarationString}' constructor declaration...`);
@@ -65,18 +65,18 @@ export default define(class ConstructorDeclaration extends Declaration {
     return all([
       verifyType,
       verifyConstructor
-    ], context, back, (context) => {
+    ], context, (context, back) => {
       this.constructor.setType(this.type);
 
       context.addConstructor(this.constructor);
 
       context.debug(`...verified the '${constructorDeclarationString}' constructor declaration.`);
 
-      return forward(context);
-    });
+      return forward(context, back);
+    }, back);
   });
 
-  verifyType(context, back, forward) {
+  verifyType(context, forward, back) {
     let typeVerifies = false;
 
     const constructorDeclarationString = this.getString();  ///
@@ -116,21 +116,21 @@ export default define(class ConstructorDeclaration extends Declaration {
 
     context.debug(`...verified the '${constructorDeclarationString}' constructor declaration's type.`);
 
-    return forward(context);
+    return forward(context, back);
   }
 
-  verifyConstructor(context, back, forward) {
+  verifyConstructor(context, forward, back) {
     const includeType = false,
           constructorString = this.constructor.getString(includeType),
           constructorDeclarationString = this.getString();  ///
 
     context.trace(`Verifying the '${constructorDeclarationString}' constructor declaration's '${constructorString}' constructor...`);
 
-    return this.constructor.verify(context, back, (context) => {
+    return this.constructor.verify(context, (context, back) => {
       context.debug(`...verified the '${constructorDeclarationString}' constructor declaration's '${constructorString}' constructor.`);
 
-      return forward(context);
-    });
+      return forward(context, back);
+    }, back);
   }
 
   static name = "ConstructorDeclaration";

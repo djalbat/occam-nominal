@@ -37,7 +37,7 @@ export default define(class Combinator extends Element {
     return malformed;
   }
 
-  verify(context, back, forward) {
+  verify(context, forward, back) {
     let verifies = false;
 
     const combinatorString = this.getString();  ///
@@ -69,7 +69,7 @@ export default define(class Combinator extends Element {
     return continuation(verifies, context);
   }
 
-  validate(state, context, back, forward) {
+  validate(state, context, forward, back) {
     let validates;
 
     const specificContext = context,  ///
@@ -108,7 +108,7 @@ export default define(class Combinator extends Element {
     return validates;
   }
 
-  validateStatementAsCombinator(state, context, back, forward) {
+  validateStatementAsCombinator(state, context, forward, back) {
     let statementValidatesAsCombinator;
 
     const combinatorString = this.getString();
@@ -130,7 +130,7 @@ export default define(class Combinator extends Element {
     return statementValidatesAsCombinator;
   }
 
-  unifyStatement(statement, context, back, forward) {
+  unifyStatement(statement, context, forward, back) {
     const statementString = statement.getString(),
           combinatorString = this.getString();  ///
 
@@ -140,13 +140,13 @@ export default define(class Combinator extends Element {
           generalContext = this.getContext(), ///
           specifiContext = context; ///
 
-    return unifyStatementWithCombinator(statement, combinator, generalContext, specifiContext, back, ( _ , specificContext) => {
+    return unifyStatementWithCombinator(statement, combinator, generalContext, specifiContext, ( _ , specificContext, back) => {
       context = specificContext; ///
 
       context.debug(`...unified the '${statementString}' statement with the '${combinatorString}' combinator.`);
 
-      return forward(context);
-    });
+      return forward(statement, context, back);
+    }, back);
   }
 
   toJSON() {

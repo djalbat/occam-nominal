@@ -51,7 +51,7 @@ export default define(class Label extends Element {
 
   compareMetavariable(metavariable) { return this.metavariable.compareMetavariable(metavariable); }
 
-  verify(back, forward) {
+  verify(forward, back) {
     const context = this.getContext(),
           labelString = this.getString(); ///
 
@@ -67,15 +67,15 @@ export default define(class Label extends Element {
     }
 
     return declare((state) => {
-      return this.validate(state, context, back, (label, context) => {
+      return this.validate(state, context, (label, context, back) => {
         context.debug(`...verified the '${labelString}' label.`);
 
-        return forward();
-      });
+        return forward(back);
+      }, back);
     });
   }
 
-  validate(state, context, back, forward) {
+  validate(state, context, forward, back) {
     const labelString = this.getString(); ////
 
     context.trace(`Validating the '${labelString}' label...`);
@@ -87,33 +87,33 @@ export default define(class Label extends Element {
 
       return all([
         validateMetavariable
-      ], state, context, back, (state, context) => {
+      ], state, context, (state, context, back) => {
         const label = this; ///
 
         this.commit(context);
 
         context.debug(`...validated the '${labelString}' label.`);
 
-        return forward(label, context);
-      });
+        return forward(label, context, back);
+      }, back);
     }, context);
   }
 
-  validateMetavariable(state, context, back, forward) {
+  validateMetavariable(state, context, forward, back) {
     const labelString = this.getString(); ///
 
     context.trace(`Validating the '${labelString}' label's metavariable...`);
 
-    return this.metavariable.validate(state, context, back, (metavariable, context) => {
+    return this.metavariable.validate(state, context, (metavariable, context, back) => {
       this.metavariable = metavariable;
 
       context.debug(`...validated the '${labelString}' label's metavariable.'`);
 
-      return forward(state, context);
-    });
+      return forward(state, context, back);
+    }, back);
   }
 
-  unifyReference(reference, context, back, forward) {
+  unifyReference(reference, context, forward, back) {
     const labelString = this.getString(), ///
           referenceString = reference.getString();
 
@@ -128,18 +128,18 @@ export default define(class Label extends Element {
       return reconcile((specificContext) => {
         const metavariable = reference.getMetavariable();
 
-        return this.unifyMetavariable(metavariable, generalContext, specificContext, back, () => {
+        return this.unifyMetavariable(metavariable, generalContext, specificContext, (back) => {
           specificContext.commit(context);
 
           context.debug(`...unified the '${referenceString}' reference with the '${labelString}' label.`);
 
-          return forward(context);
-        });
+          return forward(context, back);
+        }, back);
       }, specificContext);
     }, specificContext, context);
   }
 
-  unifyMetavariable(metavariable, generalContext, specificContext, back, forward) {
+  unifyMetavariable(metavariable, generalContext, specificContext, forward, back) {
     const context = specificContext,  ///
           labelString = this.getString(), ///
           metavariableString = metavariable.getString();

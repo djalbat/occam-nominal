@@ -91,7 +91,7 @@ export default class Claim extends Element {
     return metavariableNodeMatches;
   }
 
-  verifyEx(context, back, forward) {
+  verifyEx(context, forward, back) {
     return enclose((context) => {
       const verifyProof = this.verifyProof.bind(this),
             verifyLabels = this.verifyLabels.bind(this),
@@ -103,38 +103,38 @@ export default class Claim extends Element {
         verifySuppositions,
         verifyDeduction,
         verifyProof
-      ], context, back, forward);
+      ], context, forward, back);
     }, context);
   }
 
-  verifyLabels(context, back, forward) {
+  verifyLabels(context, forward, back) {
     const claimString = this.getString();  ///
 
     context.trace(`Verifying the '${claimString}' claim's labels...`);
 
     const verifyLabel = this.verifyLabel.bind(this);
 
-    return every(this.labels, verifyLabel, context, back, (context) => {
+    return every(this.labels, verifyLabel, context, (context, back) => {
       context.debug(`...verified the '${claimString}' claim's labels.`);
 
-      return forward(context);
-    });
+      return forward(context, back);
+    }, back);
   }
 
-  verifyLabel(label, context, back, forward) {
+  verifyLabel(label, context, forward, back) {
     const labelString = label.getString(),
           claimString = this.getString(); ///
 
     context.trace(`Verifying the '${claimString}' claim's '${labelString}' label...`);
 
-    return label.verify(back, () => {
+    return label.verify((back) => {
       context.debug(`...verified the '${claimString}' claim's '${labelString}' label.`);
 
-      return forward(context);
-    });
+      return forward(context, back);
+    }, back);
   }
 
-  verifyProof(context, back, forward) {
+  verifyProof(context, forward, back) {
     if (this.proof === null) {
       const proofVerifies = true; ///
 
@@ -156,7 +156,7 @@ export default class Claim extends Element {
     });
   }
 
-  verifyDeduction(context, back, forward) {
+  verifyDeduction(context, forward, back) {
     const claimString = this.getString(), ///
           deductionString = this.deduction.getString();
 
@@ -171,13 +171,13 @@ export default class Claim extends Element {
     });
   }
 
-  verifySupposition(supposition, context, back, forward) {
+  verifySupposition(supposition, context, forward, back) {
     const claimString = this.getString(), ///
           suppositionString = supposition.getString();
 
     context.trace(`Verifying the '${claimString}' claim's '${suppositionString}' supposition...`);
 
-    return supposition.verify(context, back, () => {
+    return supposition.verify(context, (context, back) => {
       const factOrSubproof = supposition;  ////
 
       context.assignAssignments();
@@ -186,15 +186,15 @@ export default class Claim extends Element {
 
       context.debug(`...verified the '${claimString}' claim's '${suppositionString}' supposition.`);
 
-      return forward(context);
-    });
+      return forward(context, back);
+    }, back);
   }
 
-  verifySuppositions(context, back, forward) {
+  verifySuppositions(context, forward, back) {
     const suppositionsLength = this.suppositions.length;
 
     if (suppositionsLength === 0) {
-      return forward(context);
+      return forward(context, back);
     }
 
     const claimString = this.getString();  ///
@@ -203,14 +203,14 @@ export default class Claim extends Element {
 
     const verifySupposition = this.verifySupposition.bind(this);
 
-    return forwardsEvery(this.suppositions, verifySupposition, context, back, () => {
+    return forwardsEvery(this.suppositions, verifySupposition, context, (context, back) => {
       context.debug(`...verified the '${claimString}' claim's suppositions.`);
 
-      return forward(context);
-    });
+      return forward(context, back);
+    }, back);
   }
 
-  dischargeHypothesis(hypothesis, context, back, forward) {
+  dischargeHypothesis(hypothesis, context, forward, back) {
     const claimString = this.getString(), ///
           hypothesisString = hypothesis.getString();
 
@@ -225,7 +225,7 @@ export default class Claim extends Element {
     });
   }
 
-  dischargeHypotheses(context, back, forward) {
+  dischargeHypotheses(context, forward, back) {
     const hypotheses = this.getHypotheses(),
          hypothesesLength = hypotheses.length;
 
@@ -250,7 +250,7 @@ export default class Claim extends Element {
     });
   }
 
-  unifyStepWithDeduction(step, context, back, forward) {
+  unifyStepWithDeduction(step, context, forward, back) {
     const ruleString = this.getString(),
           stepString = step.getString(),
           deductionString = this.deduction.getString();
@@ -272,7 +272,7 @@ export default class Claim extends Element {
     });
   }
 
-  unifyStepAndFactOrSubproofs(step, factorSubproofs, context, back, forward) {
+  unifyStepAndFactOrSubproofs(step, factorSubproofs, context, forward, back) {
     return reconcile((context) => {
       return this.unifyStepWithDeduction(step, context, (statementUnifiesWithDeduction) => {
         if (!statementUnifiesWithDeduction) {
@@ -306,7 +306,7 @@ export default class Claim extends Element {
     }, context);
   }
 
-  unifyFactOrSubproofsWithSupposition(factorSubproofs, supposition, context, back, forward) {
+  unifyFactOrSubproofsWithSupposition(factorSubproofs, supposition, context, forward, back) {
     return extract(factorSubproofs, (factOrSubproof, continuation) => {
       return supposition.unifyFactOrSubproof(factOrSubproof, context, continuation);
     }, (factOrSubproof = null) => {
@@ -322,7 +322,7 @@ export default class Claim extends Element {
     });
   }
 
-  unifyFactOrSubproofsWithSuppositions(factorSubproofs, context, back, forward) {
+  unifyFactOrSubproofsWithSuppositions(factorSubproofs, context, forward, back) {
     factorSubproofs = reverse(factorSubproofs); ///
 
     return backwardsEvery(this.suppositions, (supposition, continuation) => {

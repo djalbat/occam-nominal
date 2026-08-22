@@ -12,7 +12,7 @@ export default define(class Error extends Element {
     return errorNode;
   }
 
-  verify(context, back, forward) {
+  verify(context, forward, back) {
     const errorString = this.getString();  ///
 
     context.warning(`The '${errorString}' error cannot be verified.`);
