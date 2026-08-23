@@ -63,14 +63,13 @@ export default define(class ImplicitAssumption extends Element {
 
       validates = all([
         validateStatement
-      ], state, context, (state, context) => {
+      ], state, context, (state, _ ) => {
         let validates;
 
         this.commit(context);
 
-        const implicitAssumption = assumption;  ///
-
-        context = specificContext;  ///
+        const context = specificContext,  ///
+              implicitAssumption = assumption;  ///
 
         validates = continuation(implicitAssumption, context);
 

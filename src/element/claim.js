@@ -136,9 +136,7 @@ export default class Claim extends Element {
 
   verifyProof(context, forward, back) {
     if (this.proof === null) {
-      const proofVerifies = true; ///
-
-      return continuation(proofVerifies, context);
+      return forward(context, back);
     }
 
     const claimString = this.getString();  ///
@@ -162,13 +160,11 @@ export default class Claim extends Element {
 
     context.trace(`Verifying the '${claimString}' claim's '${deductionString}' deduction...`);
 
-    return this.deduction.verify(context, (deductionVerifies) => {
-      if (deductionVerifies) {
-        context.debug(`...verified the '${claimString}' claim's '${deductionString}' deduction.`);
-      }
+    return this.deduction.verify(context, (context, back) => {
+      context.debug(`...verified the '${claimString}' claim's '${deductionString}' deduction.`);
 
-      return continuation(deductionVerifies, context);
-    });
+      return forward(context, back);
+    }, back);
   }
 
   verifySupposition(supposition, context, forward, back) {

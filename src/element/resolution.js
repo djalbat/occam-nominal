@@ -1,10 +1,11 @@
 "use strict";
 
-import { Element, breakPointUtilities } from "occam-languages";
+import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
 
 import { attempt, reconcile, serialise } from "../utilities/context";
 
-const { breakPointToBreakPointJSON } = breakPointUtilities;
+const { all } = continuationUtilities,
+      { breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default class Resolution extends Element {
   constructor(context, string, node, breakPoint, statement) {
@@ -17,68 +18,43 @@ export default class Resolution extends Element {
     return this.statement;
   }
 
-  validate(state, context, continuation) {
-    let validates;
-
-    const specificContext = context,  ///
-          resolutionString = this.getString(); ///
+  validate(state, context, forward, back) {
+    const resolutionString = this.getString(); ///
 
     context.trace(`Validating the '${resolutionString}' resolution...`);
 
-    const resolution = this;  ///
-
-    attempt((context) => {
+    return attempt((context) => {
       const validateStatement = this.validateStatement.bind(this);
 
-      validates = all([
+      return all([
         validateStatement
-      ], state, context, (state, context) => {
-        let validates;
+      ], state, context, (state, context, back) => {
+        const resolution = this; ///
 
         this.commit(context);
 
-        context = specificContext;  ///
+        context.debug(`...validated the '${resolutionString}' resolution.`);
 
-        validates = continuation(resolution, context);
-
-        return validates;
-      });
+        return forward(resolution, context, back);
+      }, back);
     }, context);
-
-    context = specificContext;  ///
-
-    if (validates) {
-      context.debug(`...validated the '${resolutionString}' resolution.`);
-    }
-
-    return validates;
   }
 
-  validateStatement(state, context, continuation) {
-    let statementValidates;
+  validateStatement(state, context, forward, back) {
+    const reolutinoString = this.getString();  ///
 
-    const resolutionString = this.getString();  ///
+    context.trace(`Validating the '${reolutinoString}' reolutino's statement...`);
 
-    context.trace(`Validating the '${resolutionString}' resolution's statement...`);
-
-    statementValidates = this.statement.validate(state, context, (statement, context) => {
-      let validates;
-
+    return this.statement.validate(state, context, (statement, context, back) => {
       this.statement = statement;
 
-      validates = continuation(state, context);
+      context.trace(`...validated the '${reolutinoString}' reolutino's statement.`);
 
-      return validates;
-    });
-
-    if (statementValidates) {
-      context.trace(`...validated the '${resolutionString}' resolution's statement.`);
-    }
-
-    return statementValidates;
+      return forward(state, context, back);
+    }, back);
   }
 
-  unifyStep(step, context, continuation) {
+  unifyStep(step, context, forward, back) {
     const stepString = step.getString(),
           resolutionString = this.getString();  ///
 
@@ -110,7 +86,7 @@ export default class Resolution extends Element {
     }, specificContext);
   }
 
-  unifyStatement(statement, generalContext, specificContext, continuation) {
+  unifyStatement(statement, generalContext, specificContext, forward, back) {
     const context = specificContext,  ///
           resolutionString = this.getString(), ///
           statementString = statement.getString();

@@ -87,6 +87,8 @@ export default define(class Combinator extends Element {
       ], state, context, (state, context) => {
         let validates;
 
+        this.commit(context);
+
         context = specificContext;  ///
 
         validates = continuation(combinator, context);
@@ -141,7 +143,7 @@ export default define(class Combinator extends Element {
           specifiContext = context; ///
 
     return unifyStatementWithCombinator(statement, combinator, generalContext, specifiContext, ( _ , specificContext, back) => {
-      context = specificContext; ///
+      const context = specificContext; ///
 
       context.debug(`...unified the '${statementString}' statement with the '${combinatorString}' combinator.`);
 

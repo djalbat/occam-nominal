@@ -82,7 +82,7 @@ function unifyTermWithConstructors(term, state, context, forward, back) {
       return constructor.unifyTerm(term, context, forward, back);
     }, context);
   }, context, (state, context, back) => {
-    context.debug(`...unified the '${termString}' term with generators.`);
+    context.debug(`...unified the '${termString}' term with constructors.`);
 
     return forward(term, state, context, back);
   }, back);

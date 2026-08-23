@@ -88,12 +88,11 @@ export default define(class SchemaAssertion extends Assertion {
       validates = all([
         validateFrame,
         validateReference
-      ], state, context, (state, context) => {
+      ], state, context, (state, _ ) => {
         let validates;
 
-        context = specificContext;  ///
-
-        const schameAssertion = assertion;  ///
+        const context = specificContext,  ///
+              schameAssertion = assertion;  ///
 
         validates = continuation(schameAssertion, context);
 

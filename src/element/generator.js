@@ -132,7 +132,7 @@ export default define(class Generator extends Element {
       validates = exists([
         validateTermAsVariable,
         validateTermAsGenerator
-      ], state, context, (state, context) => {
+      ], state, context, (state, _ ) => {
         let validates;
 
         this.commit(context);

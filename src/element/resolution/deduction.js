@@ -26,36 +26,28 @@ export default define(class Deduction extends Resolution {
     return malformed;
   }
 
-  verify = breakable(function (context, continuation) {
-    let verifies = false;
+  verify = breakable(function (context, forward, back) {
+    const deductionString = this.getString();  ///
 
-    const decudtionString = this.getString();  ///
-
-    context.trace(`Verifying the '${decudtionString}' decudtion...`);
+    context.trace(`Verifying the '${deductionString}' decudtion...`);
 
     const malformed = this.isMalformed();
 
     if (malformed) {
-      context.debug(`Unable to verify the '${decudtionString}' decudtion because it is malformed.`);
+      context.debug(`Unable to verify the '${deductionString}' decudtion because it is malformed.`);
 
-      return continuation(verifies);
+      return back();
     }
 
     declare((state) => {
       desist((state) => {
-        const validates = this.validate(state, context, (deduction, context) => true);  ///
+        return this.validate(state, context, (deduction, _ , back) => {
+          context.debug(`...verified the '${deductionString}' deduction.`);
 
-        if (validates) {
-          verifies = true;
-        }
+          return forward(context, back);
+        }, back);
       }, state);
     });
-
-    if (verifies) {
-      context.debug(`...verified the '${decudtionString}' decudtion.`);
-    }
-
-    return continuation(verifies);
   });
 
   static name = "Deduction";

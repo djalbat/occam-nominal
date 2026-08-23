@@ -8,48 +8,33 @@ import { termFromTermNode } from "../../utilities/element";
 export default define(class BracketedConstructor extends Constructor {
   getBracketedConstructorNode() {
     const node = this.getNode(),
-          bracketedConstructorNode = node;  ///
+      bracketedConstructorNode = node;  ///
 
     return bracketedConstructorNode;
   }
 
-  unifyTerm(term, state, context, continuation) {
-    let termUnifiesWithBracketedConstructor;
-
-    termUnifiesWithBracketedConstructor = super.unifyTerm(term, context, (term, context) => {
-      let termUnifies = false;
-
+  unifyTerm(term, state, context, forward, back) {
+    return super.unifyTerm(term, context, (term, context, back) => {
       const termNode = term.getNode(),
             singularTermNode = termNode.getSingularTermNode();
 
-      if (singularTermNode !== null) {
-        const bracketlessTermNode = singularTermNode, ///
-              bracketlessTerm = termFromTermNode(bracketlessTermNode, context),
-              bracketlessTermValidates = bracketlessTerm.validate(state, context, (bracketlessTerm, context) => {
-                let validates;
-
-                const type = bracketlessTerm.getType(),
-                      provisional = bracketlessTerm.isProvisional();
-
-                term.setType(type);
-
-                term.setProvisional(provisional);
-
-                validates = continuation(term, context);
-
-                return validates;
-              });
-
-        if (bracketlessTermValidates) {
-          termUnifies = true;
-        }
+      if (singularTermNode === null) {
+        return back();
       }
 
-      return termUnifies;
-    });
+      const bracketlessTermNode = singularTermNode, ///
+            bracketlessTerm = termFromTermNode(bracketlessTermNode, context);
 
-    return termUnifiesWithBracketedConstructor;
+      return bracketlessTerm.validate(state, context, (bracketlessTerm, context, back) => {
+        const type = bracketlessTerm.getType(),
+              provisional = bracketlessTerm.isProvisional();
+
+        term.setType(type);
+
+        term.setProvisional(provisional);
+
+        return forward(term, state, context, back);
+      }, back);
+    }, back);
   }
-
-  static name = "BracketedConstructor";
 });

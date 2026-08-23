@@ -1,6 +1,6 @@
 "use strict";
 
-import { Element, breakPointUtilities } from "occam-languages";
+import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
 
 import { define } from "../elements";
 import { declare, desist } from "../utilities/state";
@@ -12,7 +12,8 @@ import { validateTermAsConstructor } from "../process/validate";
 import { attempt, serialise, unserialise, instantiate } from "../utilities/context";
 import { typeFromJSON, typeToTypeJSON, hypothesesFromJSON, hypothesesToHypothesesJSON } from "../utilities/json";
 
-const { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
+const { all, exists } = continuationUtilities,
+      { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Constructor extends Element {
   constructor(context, string, node, breakPoint, term, type, hypotheses) {
@@ -79,9 +80,7 @@ export default define(class Constructor extends Element {
     return malformed;
   }
 
-  verify(context, continuation) {
-    let verifies = false;
-
+  verify(context, forward, back) {
     const includeType = false,
           constructorString = this.getString(includeType);  ///
 
@@ -92,28 +91,22 @@ export default define(class Constructor extends Element {
     if (malformed) {
       context.debug(`Unable to verify the '${constructorString}' constructor because it is malformed.`);
 
-      return continuation(verifies, context);
+      return back(context);
     }
 
-    declare((state) => {
-      desist((state) => {
-        const validates = this.validate(state, context, (constructor, context) => true);  ///
+    return declare((state) => {
+      return desist((state) => {
+        return this.validate(state, context, (constructor, _ , back) => {
+          context.debug(`...verified the '${constructorString}' constructor.`);
 
-        if (validates) {
-          verifies = true;
-        }
+          return forward(context, back);
+        }, back);
       }, state);
     });
-
-    if (verifies) {
-      context.debug(`...verified the '${constructorString}' constructor.`);
-    }
-
-    return continuation(verifies, context);
   }
 
-  validate(state, context, continuation) {
-    let validates;
+  validate(state, context, forward, back) {
+    let constructor;
 
     const includeType = false,
           specificContext = context,  ///
@@ -121,99 +114,73 @@ export default define(class Constructor extends Element {
 
     context.trace(`Validating the '${constructorString}' constructor...`);
 
-    const constructor = this;
+    constructor = this;
 
-    attempt((context) => {
+    return attempt((context) => {
       const validateTermAsVariable = this.validateTermAsVariable.bind(this),
             validateTermAsConstructor = this.validateTermAsConstructor.bind(this);
 
-      validates = exists([
+      return exists([
         validateTermAsVariable,
         validateTermAsConstructor
-      ], state, context, (state, context) => {
-        let validates;
-
+      ], state, context, (state, context, back) => {
         this.commit(context);
 
         context = specificContext;  ///
 
-        validates = continuation(constructor, context);
+        context.debug(`...validated the '${constructorString}' constructor.`);
 
-        return validates;
-      });
+        return forward(constructor, context, back);
+      }, back);
     }, context);
-
-    context = specificContext;  ///
-
-    if (validates) {
-      context.debug(`...validated the '${constructorString}' constructor.`);
-    }
-
-    return validates;
   }
 
-  validateTermAsVariable(state, context, continuation) {
-    let termValidatesAsVariable = false;
-
-    const hypothetical = this.isHypothetical();
-
-    if (hypothetical) {
-      const includeType = false,
-            constructorString = this.getString(includeType);  ///
-
-      context.trace(`Validating the '${constructorString}' constructor's term as a variable...`);
-
-      termValidatesAsVariable = this.term.validateAsVariable(state, context, (term, context) => {
-        let validatesAsVariable = false;
-
-        const type = term.getType(),
-              baseType = baseTypeFromNothing();
-
-        if (type === baseType) {
-          validatesAsVariable = continuation(state, context);
-        }
-
-        return validatesAsVariable;
-      });
-
-      if (termValidatesAsVariable) {
-        context.debug(`...validated the '${constructorString}' constructor's term as a variable.`);
-      }
-    }
-
-    return termValidatesAsVariable;
-  }
-
-  validateTermAsConstructor(state, context, continuation) {
-    let termValidatesAsConstructor = false;
-
+  validateTermAsVariable(state, context, forward, back) {
     const hypothetical = this.isHypothetical();
 
     if (!hypothetical) {
-      const includeType = false,
-            constructorString = this.getString(includeType);  ///
-
-      context.trace(`Validating the '${constructorString}' constructor's term...`);
-
-      termValidatesAsConstructor = validateTermAsConstructor(this.term, context, (context) => {
-        let validates;
-
-        validates = continuation(state, context);
-
-        return validates;
-      });
-
-      if (termValidatesAsConstructor) {
-        context.debug(`...validated the '${constructorString}' constructor's term.`);
-      }
+      return back();
     }
 
-    return termValidatesAsConstructor;
+    const includeType = false,
+          constructorString = this.getString(includeType);  ///
+
+    context.trace(`Validating the '${constructorString}' constructor's term as a variable...`);
+
+    return this.term.validateAsVariable(state, context, (term, context, back) => {
+      const type = term.getType(),
+            baseType = baseTypeFromNothing();
+
+      if (type !== baseType) {
+        return back();
+      }
+
+      context.debug(`...validated the '${constructorString}' constructor's term as a variable.`);
+
+      return forward(context, back);
+    }, back);
   }
 
-  unifyTerm(term, context, continuation) {
-    let termUnifies;
+  validateTermAsConstructor(state, context, forward, back) {
+    const hypothetical = this.isHypothetical();
 
+    if (hypothetical) {
+      return back();
+    }
+
+    const includeType = false,
+          constructorString = this.getString(includeType);  ///
+
+    context.trace(`Validating the '${constructorString}' constructor's term...`);
+
+    return validateTermAsConstructor(this.term, context, (context, back) => {
+      context.debug(`...validated the '${constructorString}' constructor's term.`);
+
+      return forward(state, context, back);
+    }, back);
+  }
+
+  unifyTerm(term, context, forward, back) {
     const termString = term.getString();
 
     context.trace(`Unifying the '${termString}' term...`);
@@ -221,33 +188,23 @@ export default define(class Constructor extends Element {
     const unifyTermWithConstructor = this.unifyTermWithConstructor.bind(this),
           dischargeHypothesesGivenTerm = this.dischargeHypothesesGivenTerm.bind(this);
 
-    termUnifies = all([
+    return all([
       dischargeHypothesesGivenTerm,
       unifyTermWithConstructor
-    ], term, context, (term, context) => {
-      let validates;
-
+    ], term, context, (term, context, back) => {
       const provisional = this.type.isProvisional();
 
       term.setProvisional(provisional);
 
       term.setType(this.type);
 
-      validates = continuation(term, context);
-
-      return validates;
-    });
-
-    if (termUnifies) {
       context.debug(`...unified the '${termString}' term.`);
-    }
 
-    return termUnifies;
+      return forward(term, context, back);
+    }, back);
   }
 
-  unifyTermWithConstructor(term, context, continuation) {
-    let termUnifiesWithCConstructor;
-
+  unifyTermWithConstructor(term, context, forward, back) {
     const termString = term.getString(),
           includeType = true,
           constructorString = this.getString(includeType);  ///
@@ -258,48 +215,40 @@ export default define(class Constructor extends Element {
           generalContext = this.getContext(),  ///
           specifiContext = context; ///
 
-    termUnifiesWithCConstructor = unifyTermWithConstructor(term, constructor, generalContext, specifiContext, (generalContext, specifiContext) => {
-      let termUnifiesWithConstructor;
-
+    return unifyTermWithConstructor(term, constructor, generalContext, specifiContext, ( _ , specifiContext, back) => {
       const context = specifiContext; ///
 
-      termUnifiesWithConstructor = continuation(term, context);
-
-      return termUnifiesWithConstructor;
-    });
-
-    if (termUnifiesWithCConstructor) {
       context.debug(`...unified the '${termString}' term with the '${constructorString}' constructor.`);
-    }
 
-    return termUnifiesWithCConstructor;
+      return forward(term, context, back);
+    }, back);
   }
 
-  dischargeHypothesesGivenTerm(term, context, continuation) {
+  dischargeHypothesesGivenTerm(term, context, forward, back) {
     let hypothesesDischargesGivenTerm;
 
     const hypothetical = this.isHypothetical();
 
-    if(hypothetical) {
-      const constructorString = this.getString();
+    if(!hypothetical) {
+      return forward(term, context, back);
+    }
 
-      context.trace(`Discharing the '${constructorString}' constructor's hhypotheses...`);
+    const constructorString = this.getString();
 
-      const dischargeHypothesisGivenTerm = this.dischargeHypothesisGivenTerm.bind(this);
+    context.trace(`Discharing the '${constructorString}' constructor's hhypotheses...`);
 
-      hypothesesDischargesGivenTerm = every(this.hypotheses, dischargeHypothesisGivenTerm, term, context, continuation);
+    const dischargeHypothesisGivenTerm = this.dischargeHypothesisGivenTerm.bind(this);
 
-      if (hypothesesDischargesGivenTerm) {
-        context.debug(`...discharged the '${constructorString}' constructor's hhypotheses.`);
-      }
-    } else {
-      hypothesesDischargesGivenTerm = continuation(term, context);
+    hypothesesDischargesGivenTerm = every(this.hypotheses, dischargeHypothesisGivenTerm, term, context, forward, back);
+
+    if (hypothesesDischargesGivenTerm) {
+      context.debug(`...discharged the '${constructorString}' constructor's hhypotheses.`);
     }
 
     return hypothesesDischargesGivenTerm;
   }
 
-  dischargeHypothesisGivenTerm(hypothesis, term, context, continuation) {
+  dischargeHypothesisGivenTerm(hypothesis, term, context, forward, back) {
     let hypothesisDischargesGivenTerm;
 
     const termString = term.getString(),
@@ -308,7 +257,7 @@ export default define(class Constructor extends Element {
 
     context.trace(`Discharding the '${constructorString}' constructor's '${hypothesisString}' hypothesis given the '${termString}' term...`);
 
-    hypothesisDischargesGivenTerm = hypothesis.dischargeGivenTerm(term, context, continuation);
+    hypothesisDischargesGivenTerm = hypothesis.dischargeGivenTerm(term, context, forward, back);
 
     if (hypothesisDischargesGivenTerm) {
       context.trace(`...discharges the '${constructorString}' constructor's '${hypothesisString}' hypothesis given the '${termString}' term.`);
