@@ -10,7 +10,7 @@ import { instantiateSupposition } from "../../process/instantiate";
 import { attempt, reconcile, serialise, unserialise, instantiate } from "../../utilities/context";
 import { referenceFromSuppositionNode, procedureCallFromSuppositionNode } from "../../utilities/element";
 
-const { all } = continuationUtilities,
+const { cut, all } = continuationUtilities,
       { breakable, breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Supposition extends Fact {
@@ -67,11 +67,11 @@ export default define(class Supposition extends Fact {
     }
 
     return declare((state) => {
-      return this.validate(state, context, (supposition, _ , back) => {
+      return this.validate(state, context, cut((supposition, _ , back) => {
         context.debug(`...verified the '${suppositionString}' supposition.`);
 
         return forward(context, back);
-      }, back);
+      }, back), back);
     });
   });
 

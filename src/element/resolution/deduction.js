@@ -1,6 +1,6 @@
 "use strict";
 
-import { breakPointUtilities } from "occam-languages";
+import { breakPointUtilities, continuationUtilities } from "occam-languages";
 
 import Resolution from "../resolution";
 
@@ -9,7 +9,8 @@ import { desist, declare } from "../../utilities/state";
 import { instantiateDeduction } from "../../process/instantiate";
 import { unserialise, instantiate } from "../../utilities/context";
 
-const { breakable, breakPointFromJSON } = breakPointUtilities;
+const { cut } = continuationUtilities,
+      { breakable, breakPointFromJSON } = breakPointUtilities;
 
 export default define(class Deduction extends Resolution {
   getDeductionNode() {
@@ -41,11 +42,11 @@ export default define(class Deduction extends Resolution {
 
     declare((state) => {
       desist((state) => {
-        return this.validate(state, context, (deduction, _ , back) => {
+        return this.validate(state, context, cut((deduction, _ , back) => {
           context.debug(`...verified the '${deductionString}' deduction.`);
 
           return forward(context, back);
-        }, back);
+        }, back), back);
       }, state);
     });
   });

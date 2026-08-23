@@ -12,7 +12,7 @@ import { validateTermAsConstructor } from "../process/validate";
 import { attempt, serialise, unserialise, instantiate } from "../utilities/context";
 import { typeFromJSON, typeToTypeJSON, hypothesesFromJSON, hypothesesToHypothesesJSON } from "../utilities/json";
 
-const { all, exists } = continuationUtilities,
+const { cut, all, exists } = continuationUtilities,
       { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Constructor extends Element {
@@ -96,11 +96,11 @@ export default define(class Constructor extends Element {
 
     return declare((state) => {
       return desist((state) => {
-        return this.validate(state, context, (constructor, _ , back) => {
+        return this.validate(state, context, cut((constructor, _ , back) => {
           context.debug(`...verified the '${constructorString}' constructor.`);
 
           return forward(context, back);
-        }, back);
+        }, back), back);
       }, state);
     });
   }

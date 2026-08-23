@@ -8,7 +8,7 @@ import { instantiateLabel } from "../process/instantiate";
 import { labelFromLabelNode, metavariableFromLabelNode } from "../utilities/element";
 import { join, ablate, attempt, reconcile, serialise, unserialise, instantiate} from "../utilities/context";
 
-const { all } = continuationUtilities,
+const { cut, all } = continuationUtilities,
       { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Label extends Element {
@@ -67,11 +67,11 @@ export default define(class Label extends Element {
     }
 
     return declare((state) => {
-      return this.validate(state, context, (label, context, back) => {
+      return this.validate(state, context, cut((label, context, back) => {
         context.debug(`...verified the '${labelString}' label.`);
 
         return forward(back);
-      }, back);
+      }, back), back);
     });
   }
 

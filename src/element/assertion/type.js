@@ -100,6 +100,8 @@ export default define(class TypeAssertion extends Assertion {
       ], state, context, (state, context, back) => {
         assertion = this; ///
 
+        this.assign(state, context);
+
         context.addAssertion(assertion);
 
         const typeAssertion = assertion; ///
