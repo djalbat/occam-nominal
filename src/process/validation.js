@@ -131,7 +131,7 @@ function unifyStatementWithCombinators(statement, state, context, forward, back)
 
   return some(combinators, (combinator, context, forward, back) => {
     return combinator.unifyStatement(statement, context, forward, back);
-  }, (back) => {
+  }, context, (context, back) => {
     context.debug(`...unified the '${statementString}' statement with combinators.`);
 
     return forward(statement, state, context, back);

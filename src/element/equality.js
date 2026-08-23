@@ -114,7 +114,7 @@ export default define(class Equality extends Element {
       ], state, context, (state, context, back) => {
         equality = this; ///
 
-        this.assign(context, back);
+        this.assign(state, context);
 
         context.addEquality(equality);
 

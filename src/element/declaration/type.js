@@ -57,7 +57,7 @@ export default define(class TypeDeclaration extends Declaration {
       verifyType,
       verifySuperTypes,
       verifyTypePrefix
-    ], context, (back) => {
+    ], context, (context, back) => {
       const properties = this.getProperties(),
             typePrefix = context.getTypePrefix(),
             prefixName = (typePrefix !== null) ?
