@@ -91,21 +91,21 @@ export function validateTermAsProperty(term, context, forward, back) {
   const termNode = term.getNode(),
         termChildNodes = termNode.getChildNodes();  ///
 
-  return validateTermPass.descend(termChildNodes, context, forward, back, forward, back);
+  return validateTermPass.descend(termChildNodes, context, forward, back);
 }
 
 export function validateTermAsGenerator(term, context, forward, back) {
   const termNode = term.getNode(),
         termChildNodes = termNode.getChildNodes();  ///
 
-  return validateTermPass.descend(termChildNodes, context, forward, back, forward, back);
+  return validateTermPass.descend(termChildNodes, context, forward, back);
 }
 
 export function validateTermAsConstructor(term, context, forward, back) {
   const termNode = term.getNode(),
         termChildNodes = termNode.getChildNodes();  ///
 
-  return validateTermPass.descend(termChildNodes, context, forward, back, forward, back);
+  return validateTermPass.descend(termChildNodes, context, forward, back);
 }
 
 export function validateStatementAsCombinator(statement, context, forward, back) {
