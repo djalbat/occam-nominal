@@ -97,7 +97,7 @@ export default define(class Equality extends Element {
     if (equality !== null) {
       context.debug(`The '${equalityString}' equality is already present.`);
 
-      return forward(equality, context);
+      return forward(equality, context, back);
     }
 
     const validateTerms = this.validateTerms.bind(this);

@@ -125,7 +125,7 @@ export default define(class Generator extends Element {
 
     const generator = this;
 
-    attempt((context) => {
+    return attempt((context) => {
       const validateTermAsVariable = this.validateTermAsVariable.bind(this),
             validateTermAsGenerator = this.validateTermAsGenerator.bind(this);
 
@@ -165,7 +165,7 @@ export default define(class Generator extends Element {
 
       context.trace(`Validating the '${generatorString}' generator's term as a variable...`);
 
-      termValidatesAsVariable = this.term.validateAsVariable(state, context, (term, context) => {
+      termValidatesAsVariable = this.term.validateAsVariable(state, context, (term, context, back) => {
         let validatesAsVariable = false;
 
         const type = term.getType(),

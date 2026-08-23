@@ -82,7 +82,7 @@ export default define(class Constraint extends Element {
 
       context = this.getContext();
 
-      attempt((context) => {
+      return attempt((context) => {
         const validateStatement = this.validateStatement.bind(this),
               validateReference = this.validateReference.bind(this);
 

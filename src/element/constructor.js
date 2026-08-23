@@ -12,7 +12,7 @@ import { validateTermAsConstructor } from "../process/validate";
 import { attempt, serialise, unserialise, instantiate } from "../utilities/context";
 import { typeFromJSON, typeToTypeJSON, hypothesesFromJSON, hypothesesToHypothesesJSON } from "../utilities/json";
 
-const { cut, all, exists } = continuationUtilities,
+const { cut, all, every, exists } = continuationUtilities,
       { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Constructor extends Element {
@@ -91,7 +91,7 @@ export default define(class Constructor extends Element {
     if (malformed) {
       context.debug(`Unable to verify the '${constructorString}' constructor because it is malformed.`);
 
-      return back(context);
+      return back();
     }
 
     return declare((state) => {
@@ -136,28 +136,33 @@ export default define(class Constructor extends Element {
   }
 
   validateTermAsVariable(state, context, forward, back) {
+    const includeType = false,
+          constructorString = this.getString(includeType);  ///
+
+    context.trace(`Validating the '${constructorString}' constructor's term as a variable...`);
+
     const hypothetical = this.isHypothetical();
 
     if (!hypothetical) {
       return back();
     }
 
-    const includeType = false,
-          constructorString = this.getString(includeType);  ///
-
-    context.trace(`Validating the '${constructorString}' constructor's term as a variable...`);
-
     return this.term.validateAsVariable(state, context, (term, context, back) => {
       const type = term.getType(),
             baseType = baseTypeFromNothing();
 
       if (type !== baseType) {
+        const typeString = type.getString(),
+              baseTypeString = baseType.getString();
+
+        context.debug(`The '${typeString}' type of the '${constructorString}' constructor's term is not the '${baseTypeString}' base type.`);
+
         return back();
       }
 
       context.debug(`...validated the '${constructorString}' constructor's term as a variable.`);
 
-      return forward(context, back);
+      return forward(state, context, back);
     }, back);
   }
 
@@ -225,27 +230,24 @@ export default define(class Constructor extends Element {
   }
 
   dischargeHypothesesGivenTerm(term, context, forward, back) {
-    let hypothesesDischargesGivenTerm;
-
     const hypothetical = this.isHypothetical();
 
     if(!hypothetical) {
       return forward(term, context, back);
     }
 
-    const constructorString = this.getString();
+    const termString = term.getString(),
+          constructorString = this.getString();
 
-    context.trace(`Discharing the '${constructorString}' constructor's hhypotheses...`);
+    context.trace(`Discharing the '${constructorString}' constructor's hhypotheses given the '${termString}' term...`);
 
-    const dischargeHypothesisGivenTerm = this.dischargeHypothesisGivenTerm.bind(this);
+    return every(this.hypotheses, (hypothesis, term, context, back) => {
+      return this.dischargeHypothesisGivenTerm(hypothesis, term, context, forward, back);
+    }, term, context, (term, context, back) => {
+      context.debug(`...discharged the '${constructorString}' constructor's hhypotheses given the '${termString}' term.`);
 
-    hypothesesDischargesGivenTerm = every(this.hypotheses, dischargeHypothesisGivenTerm, term, context, forward, back);
-
-    if (hypothesesDischargesGivenTerm) {
-      context.debug(`...discharged the '${constructorString}' constructor's hhypotheses.`);
-    }
-
-    return hypothesesDischargesGivenTerm;
+      return forward(context, back);
+    }, back);
   }
 
   dischargeHypothesisGivenTerm(hypothesis, term, context, forward, back) {

@@ -58,7 +58,7 @@ export default define(class ImplicitAssumption extends Element {
 
     context = this.getContext();
 
-    attempt((context) => {
+    return attempt((context) => {
       const validateStatement = this.validateStatement.bind(this);
 
       validates = all([

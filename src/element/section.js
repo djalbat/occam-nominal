@@ -36,7 +36,7 @@ export default define(class Section extends Element {
     return sectionNode;
   }
 
-  verify = breakable(function (context, continuation) {
+  verify = breakable(function (context, forward, back) {
     const sectionString = this.getString();  ///
 
     context.trace(`Verifying the '${sectionString}' section...`);
@@ -50,21 +50,17 @@ export default define(class Section extends Element {
         verifyHypotheses,
         verifyDeclaration,
         verifyClaim
-      ], context, (verifies) => {
-        if (verifies) {
-          context.debug(`...verified the '${sectionString}' section.`);
-        }
+      ], context, (context, back) => {
+        context.debug(`...verified the '${sectionString}' section.`);
 
-        return continuation(verifies, context);
-      });
+        return forward(context, back);
+      }, back);
     }, context);
   });
 
-  verifyClaim(context, continuation) {
-    let claimVerifies = true; ///
-
+  verifyClaim(context, forward, back) {
     if (this.claim === null) {
-      return continuation(claimVerifies, context);
+      return forward(context, back);
     }
 
     const sectionString = this.getString();  ///
@@ -76,49 +72,39 @@ export default define(class Section extends Element {
     if (claimSatisfaible) {
       const claimString = this.claim.getString();
 
-      claimVerifies = false;
-
       context.debug(`The satisfiable '${claimString}' claim in not allowed in the '${sectionString}' section.`);
 
-      return continuation(claimVerifies, context);
+      return back();
     }
 
     this.claim.setHypotheses(this.hypotheses);
 
-    return this.claim.verify(context, (claimVerifies) => {
-      if (claimVerifies) {
-        context.debug(`...verified the '${sectionString}' section's claim.`);
-      }
+    return this.claim.verify(context, (context, back) => {
+      context.debug(`...verified the '${sectionString}' section's claim.`);
 
-      return continuation(claimVerifies, context);
-    });
+      return forward(context, back);
+    }, back);
   }
 
-  verifyHypotheses(context, continuation) {
+  verifyHypotheses(context, forward, back) {
     const sectionString = this.getString();  ///
 
     context.trace(`Verifying the '${sectionString}' section's hypotheses...`);
 
-    return every(this.hypotheses, (hypothesis, context, continuation) => {
-      return hypothesis.verify(context, continuation);
-    }, context, (hypothesesVerify) => {
-      if (hypothesesVerify) {
-        context.assignAssignments();
-      }
+    return every(this.hypotheses, (hypothesis, context, forward, back) => {
+      return hypothesis.verify(context, forward, back);
+    }, context, (context, back) => {
+      context.assignAssignments();
 
-      if (hypothesesVerify) {
-        context.debug(`...verified the '${sectionString}' section's hypotheses.`);
-      }
+      context.debug(`...verified the '${sectionString}' section's hypotheses.`);
 
-      return continuation(hypothesesVerify, context);
-    });
+      return forward(context, back);
+    }, back);
   }
 
-  verifyDeclaration(context, continuation) {
+  verifyDeclaration(context, forward, back) {
     if (this.declaration === null) {
-      const declarationVerifies = true; ///
-
-      return continuation(declarationVerifies, context);
+      return forward(context, back);
     }
 
     const sectionString = this.getString();  ///
@@ -127,13 +113,11 @@ export default define(class Section extends Element {
 
     this.declaration.setHypotheses(this.hypotheses);
 
-    return this.declaration.verify(context, (declarationVerifies) => {
-      if (declarationVerifies) {
-        context.debug(`...verified the '${sectionString}' section's declaration.`);
-      }
+    return this.declaration.verify(context, (context, back) => {
+      context.debug(`...verified the '${sectionString}' section's declaration.`);
 
-      return continuation(declarationVerifies, context);
-    });
+      return forward(context, back);
+    }, back);
   }
 
   static name = "Section";

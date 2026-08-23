@@ -266,7 +266,7 @@ export default define(class Term extends Element {
     return validateTermAsVariable(term, state, context, (term, state, context) => {
       context.debug(`...validated the '${termString}' term as a variable.`);
 
-      return forward(term, state, context);
+      return forward(term, context, back);
     }, back);
   }
 

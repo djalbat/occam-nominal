@@ -108,7 +108,7 @@ export function validateStatementAsMetavariable(statement, state, context, forwa
 
   const strict = true;  ///
 
-  return metavariable.validate(strict, state, context, (metavariable, context) => {
+  return metavariable.validate(strict, state, context, (metavariable, context, back) => {
     return validateSubstitution(statement, context, (context, back) => {
       context.debug(`...validated the '${statementString}' statement as a metavariable.`);
 
@@ -318,7 +318,7 @@ function validateSubstitution(statement, context, forward, back) {
   const substitution = statement.getSubstitution();
 
   if (substitution === null) {
-    return forward(back);
+    return forward(context, back);
   }
 
   return declare((state) => {

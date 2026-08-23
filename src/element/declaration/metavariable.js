@@ -25,7 +25,7 @@ export default define(class MetavariableDeclaration extends Declaration {
     return this.metavariable;
   }
 
-  verify = breakable(function (context, continuation) {
+  verify = breakable(function (context, forward, back) {
     const metavariableDeclarationString = this.getString(); ///
 
     context.trace(`Verifying the '${metavariableDeclarationString}' metavariable declaration...`);
@@ -36,40 +36,30 @@ export default define(class MetavariableDeclaration extends Declaration {
     return all([
       verifyMetaType,
       verifyMetavariable
-    ],  context, (verifies) => {
-      if (verifies) {
-        const declaredMetavariable = this.metavariable;
+    ],  context, (context, back) => {
+      const declaredMetavariable = this.metavariable;
 
-        context.addDeclaredMetavariable(declaredMetavariable);
-      }
+      context.addDeclaredMetavariable(declaredMetavariable);
 
-      if (verifies) {
-        context.debug(`...verified the '${metavariableDeclarationString}' metavariable declaration.`);
-      }
+      context.debug(`...verified the '${metavariableDeclarationString}' metavariable declaration.`);
 
-      return continuation(verifies, context);
-    });
+      return forward(context, back);
+    }, back);
   });
 
-  verifyMetaType(context, continuation) {
-    let metaTypeVerifies = true;
-
+  verifyMetaType(context, forward, back) {
     const metaTypeDeclarationString = this.getString(); ///
 
     context.trace(`Verifying the '${metaTypeDeclarationString}' metavariable declaration's metaType...`);
 
     this.metavariable.setMetaType(this.metaType);
 
-    if (metaTypeVerifies) {
-      context.debug(`...verified the '${metaTypeDeclarationString}' metavariable declaration's metaType.`);
-    }
+    context.debug(`...verified the '${metaTypeDeclarationString}' metavariable declaration's metaType.`);
 
-    return continuation(metaTypeVerifies, context);
+    return forward(context, back);
   }
 
-  verifyMetavariable(context, continuation) {
-    let metavariableVerifies = false;
-
+  verifyMetavariable(context, forward, back) {
     const metavariableDeclarationString = this.getString(); ///
 
     context.trace(`Verifying the '${metavariableDeclarationString}' metavariable declaration's metavariable...`);
@@ -80,16 +70,14 @@ export default define(class MetavariableDeclaration extends Declaration {
     if (declaredMetavariablePresent) {
       context.debug(`The '${metavariableName}' declared metavariable is already present.`);
 
-      return continuation(metavariableVerifies, context);
+      return back();
     }
 
-    this.metavariable.verify(context, (metavariableVerifies) => {
-      if (metavariableVerifies) {
-        context.debug(`...verified the '${metavariableDeclarationString}' metavariable declaration's metavariable.`);
-      }
+    return this.metavariable.verify(context, (context, back) => {
+      context.debug(`...verified the '${metavariableDeclarationString}' metavariable declaration's metavariable.`);
 
-      return continuation(metavariableVerifies, context);
-    });
+      return forward(context, back);
+    }, back);
   }
 
   static name = "MetavariableDeclaration";

@@ -197,9 +197,9 @@ export default class Claim extends Element {
 
     context.trace(`Verifying the '${claimString}' claim's suppositions...`);
 
-    const verifySupposition = this.verifySupposition.bind(this);
-
-    return forwardsEvery(this.suppositions, verifySupposition, context, (context, back) => {
+    return forwardsEvery(this.suppositions, (supposition, context, forward, back) => {
+      return this.verifySupposition(supposition, context, forward, back);
+    }, context, (context, back) => {
       context.debug(`...verified the '${claimString}' claim's suppositions.`);
 
       return forward(context, back);

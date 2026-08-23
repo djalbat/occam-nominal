@@ -8,7 +8,7 @@ import { instantiateHypothesis } from "../process/instantiate";
 import { attempt, serialise, unserialise, instantiate } from "../utilities/context";
 import { statementFromHypothesisNode, procedureCallFromHypothesisNode } from "../utilities/element";
 
-const { all } = continuationUtilities,
+const { cut, all } = continuationUtilities,
       { breakable, breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Hypothesis extends Element {
@@ -41,9 +41,7 @@ export default define(class Hypothesis extends Element {
     return malformed;
   }
 
-  verify = breakable(function (context, continuation) {
-    let verifies = false;
-
+  verify = breakable(function (context, forward, back) {
     const hypothesisString = this.getString(); ///
 
     context.trace(`Verifying the '${hypothesisString}' hypothesis...`);
@@ -53,25 +51,19 @@ export default define(class Hypothesis extends Element {
     if (malformed) {
       context.debug(`Unable to verify the '${hypothesisString}' hypothesis because it is malformed.`);
 
-      return continuation(verifies, context);
+      return back();
     }
 
     declare((state) => {
-      const validates = this.validate(state, context, (hypothesis, context) => true); ///
+      return this.validate(state, context, cut((hypothesis, _ , back) => {
+        context.debug(`...verified the '${hypothesisString}' hypothesis.`);
 
-      if (validates) {
-        verifies = true;
-      }
+        return forward(context, back);
+      }, back), back);
     });
-
-    if (verifies) {
-      context.debug(`...verified the '${hypothesisString}' hypothesis.`);
-    }
-
-    return continuation(verifies, context);
   });
 
-  discharge = breakable(function (context, continuation) {
+  discharge = breakable(function (context, forward, back) {
     const hypothesisString = this.getString(); ///
 
     context.trace(`Discharging the '${hypothesisString}' hypothesis...`);
@@ -89,102 +81,65 @@ export default define(class Hypothesis extends Element {
     });
   });
 
-  validate(state, context, continuation) {
-    let validates;
+  validate(state, context, forward, back) {
+    let hypothesis;
 
-    const hypothesisString = this.getString(),
-          specificContext = context; ///
+    const hypothesisString = this.getString();
 
     context.trace(`Validating the '${hypothesisString}' hypothesis...`);
 
-    const hypothesis = this;  ///
+    hypothesis = this;  ///
 
-    attempt((context) => {
+    return attempt((context) => {
       const validateStatement = this.validateStatement.bind(this),
             validateProcedureCall = this.validateProcedureCall.bind(this);
 
-      validates = all([
+      return all([
         validateStatement,
         validateProcedureCall
-      ], state, context, (state, context) => {
-        let validates;
-
+      ], state, context, (state, context, back) => {
         this.commit(context);
 
-        context = specificContext;  ///
+        context.debug(`...validated the '${hypothesisString}' hypothesis.`);
 
-        validates = continuation(hypothesis, context);
-
-        return validates;
-      });
+        return forward(hypothesis, context, back);
+      }, back);
     }, context);
-
-    context = specificContext;  ///
-
-    if (validates) {
-      context.debug(`...validated the '${hypothesisString}' hypothesis.`);
-    }
-
-    return validates;
   }
 
-  validateStatement(state, context, continuation) {
-    let statementValidates;
-
-    if (this.statement !== null) {
-      const hypothesisString = this.getString();  ///
-
-      context.trace(`Validating the '${hypothesisString}' hypothesis' statement...`);
-
-      statementValidates = this.statement.validate(state, context, (statement, context) => {
-        let validates;
-
-        this.statement = statement;
-
-        validates = continuation(state, context);
-
-        return validates;
-      });
-
-      if (statementValidates) {
-        context.trace(`...validated the '${hypothesisString}' hypothesis' statement.`);
-      }
-    } else {
-      statementValidates = continuation(state, context);
+  validateStatement(state, context, forward, back) {
+    if (this.statement === null) {
+      return forward(state, context, back);
     }
 
-    return statementValidates;
+    const hypothesisString = this.getString();  ///
+
+    context.trace(`Validating the '${hypothesisString}' hypothesis' statement...`);
+
+    return this.statement.validate(state, context, (statement, context, back) => {
+      context.trace(`...validated the '${hypothesisString}' hypothesis' statement.`);
+
+      return forward(state, context, back);
+    }, back);
   }
 
-  validateProcedureCall(state, context, continuation) {
-    let procedureCallValidates;
-
-    if (this.procedureCall !== null) {
-      const hypothesisString = this.getString();  ///
-
-      context.trace(`Validating the '${hypothesisString}' hypothesis' procedure call...`);
-
-      procedureCallValidates = this.procedureCall.validate(state, context, (procedureCall, context) => {
-        let validates;
-
-        this.procedureCall = procedureCall;
-
-        validates = continuation(state, context);
-
-        return validates;
-      });
-
-      if (procedureCallValidates) {
-        context.trace(`...validated the '${hypothesisString}' hypothesis' procedure call.`);
-      }
-    } else {
-      procedureCallValidates = continuation(state, context);
+  validateProcedureCall(state, context, forward, back) {
+    if (this.procedureCall === null) {
+      return forward(state, context, back);
     }
 
-    return procedureCallValidates;
+    const hypothesisString = this.getString();  ///
+
+    context.trace(`Validating the '${hypothesisString}' hypothesis' procedure call...`);
+
+    return this.procedureCall.validate(state, context, (procedureCall, context, back) => {
+      context.trace(`...validated the '${hypothesisString}' hypothesis' procedure call.`);
+
+      return forward(state, context, back);
+    }, back);
   }
 
-  dischargeStatement(context, continuation) {
+  dischargeStatement(context, forward, back) {
     if (this.statement === null) {
       const statementDischarges = true;
 
@@ -212,15 +167,17 @@ export default define(class Hypothesis extends Element {
     });
   }
 
-  dischargeGivenTerm(term, context, continuation) {
+  dischargeGivenTerm(term, context, forward, back) {
     let dischargesGivenTerm;
+
+    debugger
 
     const termString = term.getString(),
           hypothesisString = this.getString(); ///
 
     context.trace(`Discharging the '${hypothesisString}' hypothesis given the '${termString}' term...`);
 
-    const procedureCallDischargesGivenTerm = this.dischargeProcedureCallGivenTerm(term, context, continuation);
+    const procedureCallDischargesGivenTerm = this.dischargeProcedureCallGivenTerm(term, context, forward, back);
 
     if (procedureCallDischargesGivenTerm) {
       dischargesGivenTerm = true;
@@ -233,8 +190,10 @@ export default define(class Hypothesis extends Element {
     return dischargesGivenTerm;
   }
 
-  dischargeProcedureCallGivenTerm(term, context, continuation) {
+  dischargeProcedureCallGivenTerm(term, context, forward, back) {
     let procedureCallDischargesGivenTerm = false;
+
+    debugger
 
     if (this.procedureCall !== null) {
       const termString = term.getString(),

@@ -108,7 +108,7 @@ export default define(class Property extends Element {
 
     const property = this;
 
-    attempt((context) => {
+    return attempt((context) => {
       const validateTermAsProperty = this.validateTermAsProperty.bind(this);
 
       validates = exists([

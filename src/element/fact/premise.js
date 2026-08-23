@@ -92,7 +92,7 @@ export default define(class Premise extends Fact {
 
     const premise = this;  ///
 
-    attempt((context) => {
+    return attempt((context) => {
       const validateStatement = this.validateStatement.bind(this),
             validateProcedureCall = this.validateProcedureCall.bind(this);
 

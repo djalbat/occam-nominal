@@ -102,7 +102,7 @@ export default define(class Reference extends Element {
 
       context = this.getContext();
 
-      attempt((context) => {
+      return attempt((context) => {
         const validateMetavariable = this.validateMetavariable.bind(this);
 
         validates = all([

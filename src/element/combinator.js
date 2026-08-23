@@ -79,7 +79,7 @@ export default define(class Combinator extends Element {
 
     const combinator = this;
 
-    attempt((context) => {
+    return attempt((context) => {
       const validateStatementAsCombinator = this.validateStatementAsCombinator.bind(this);
 
       validates = all([

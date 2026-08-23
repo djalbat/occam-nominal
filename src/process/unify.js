@@ -372,7 +372,7 @@ class UnifyStatementWithCombinatorPass extends ContinuationZipPass {
           return term.validateGivenType(strict, type, state, context, (term, context, back) => {
             const specificContext = context;  ///
 
-            return back(generalContext, specificContext, back);
+            return forward(generalContext, specificContext, back);
           }, back);
         });
       }

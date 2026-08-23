@@ -90,7 +90,7 @@ export default define(class Signature extends Element {
 
     const signature = this;  ///
 
-    attempt((context) => {
+    return attempt((context) => {
       const validateTerms = this.validateTerms.bind(this);
 
       validates = all([

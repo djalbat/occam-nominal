@@ -113,8 +113,6 @@ export default define(class Metavariable extends Element {
   }
 
   verify(context, forward, back) {
-    let verifies = false;
-
     const metavariableString = this.getString();  ///
 
     context.trace(`Verifying the '${metavariableString}' metavariable...`);
@@ -124,7 +122,7 @@ export default define(class Metavariable extends Element {
     if (malformed) {
       context.debug(`Unable to verify the '${metavariableString}' metavariable because it is malformed.`);
 
-      return continuation(verifies);
+      return back();
     }
 
     const verifyTerm = this.verifyTerm.bind(this),
@@ -133,54 +131,50 @@ export default define(class Metavariable extends Element {
     return all([
       verifyTerm,
       verifyType
-    ],  context, (verifies) => {
-      if (verifies) {
-        context.debug(`...verified the '${metavariableString}' metavariable.`);
-      }
+    ],  context, (context, back) => {
+      context.debug(`...verified the '${metavariableString}' metavariable.`);
 
-      return continuation(verifies);
-    });
+      return forward(context, back);
+    }, back);
   }
 
   verifyTerm(context, forward, back) {
-    let termVerifies = true;  ///
+    const metavariableString = this.getString();
+
+    context.trace(`Verifying the '${metavariableString}' metavariable's term...`);
 
     if (this.term !== null) {
-      const metavariableString = this.getString();
+      context.debug(`The '${metavariableString}' metavariable can only have a type and not a term.`);
 
-      context.trace(`Verifying the '${metavariableString}' metavariable's term...`);
-
-      termVerifies = false;
-
-      context.debug(`...verified the '${metavariableString}' metavariable's term.`);
+      return back();
     }
 
-    return continuation(termVerifies, context);
+    context.debug(`...verified the '${metavariableString}' metavariable's term.`);
+
+    return forward(context, back);
   }
 
   verifyType(context, forward, back) {
-    let typeVerifies = true;  ///
-
-    if (this.type !== null) {
-      const metavariableString = this.getString();  ///
-
-      context.trace(`Verifying the '${metavariableString}' metavariable's type...`);
-
-      const typeName = this.type.getName(),
-            type = context.findTypeByTypeName(typeName);
-
-      if (type !== null) {
-        this.type = type;
-
-        typeVerifies = true;
-      }
-
-      if (typeVerifies) {
-        context.debug(`...verifieds the '${metavariableString}' metavariable's type.`);
-      }
+    if (this.type === null) {
+      return forward(context, back);
     }
 
-    return continuation(typeVerifies, context);
+    const metavariableString = this.getString();  ///
+
+    context.trace(`Verifying the '${metavariableString}' metavariable's type...`);
+
+    const typeName = this.type.getName(),
+          type = context.findTypeByTypeName(typeName);
+
+    if (type === null) {
+      return back();
+    }
+
+    this.type = type;
+
+    context.debug(`...verifieds the '${metavariableString}' metavariable's type.`);
+
+    return forward(context, back);
   }
 
   validate(strict, state, context, forward, back) {
@@ -196,11 +190,13 @@ export default define(class Metavariable extends Element {
       strict = false;
     }
 
+    let metavariable;
+
     const metavariableString = this.getString(); ///
 
     context.trace(`Validating the '${metavariableString}' metavariable...`);
 
-    const metavariable = this.findMetavariable(context);
+    metavariable = this.findMetavariable(context);
 
     if (metavariable !== null) {
       context.debug(`...the '${metavariableString}' metavariable is already present.`);
@@ -217,7 +213,7 @@ export default define(class Metavariable extends Element {
       validateType,
       validateTerm
     ], strict, state, context, (strict, state, context, back) => {
-      const metavariable = this;  ///
+      metavariable = this;  ///
 
       context.addMetavariable(metavariable);
 

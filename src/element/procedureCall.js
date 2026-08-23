@@ -55,9 +55,7 @@ export default define(class ProcedureCall extends Element {
     return values;
   }
 
-  validate(state, context, continuation) {
-    let validates = false;
-
+  validate(state, context, forward, back) {
     const procedureCallString = this.getString(); ///
 
     context.trace(`Validating the '${procedureCallString}' procedure call...`);
@@ -65,28 +63,28 @@ export default define(class ProcedureCall extends Element {
     const procedureName = this.getProcedureName(),
           procedure = context.findProcedureByProcedureName(procedureName);
 
-    if (procedure !== null) {
-      const procedureBoolean = procedure.isBoolean();
-
-      if (procedureBoolean) {
-        const procedureCall = this; ///
-
-        validates = continuation(procedureCall, context);
-      } else {
-        context.debug(`The '${procedureCallString}' procedure is not boolean.`);
-      }
-    } else {
+    if (procedure === null) {
       context.debug(`The '${procedureCallString}' procedure is not present.`);
+
+      return back();
     }
 
-    if (validates) {
-      context.debug(`...validated the '${procedureCallString}' procedure call.`);
+    const procedureBoolean = procedure.isBoolean();
+
+    if (!procedureBoolean) {
+      context.debug(`The '${procedureCallString}' procedure is not boolean.`);
+
+      return back();
     }
 
-    return validates;
+    const procedureCall = this; ///
+
+    context.debug(`...validated the '${procedureCallString}' procedure call.`);
+
+    return forward(procedureCall, context, back);
   }
 
-  unifyIndependently(context, continuation) {
+  unifyIndependently(context, forward, back) {
     const procedureCallString = this.getString(); ///
 
     context.trace(`Unifying the '${procedureCallString}' procedure call independently...`);
@@ -126,7 +124,7 @@ export default define(class ProcedureCall extends Element {
     }
   }
 
-  dischargeGivenTerm(term, context, continuation) {
+  dischargeGivenTerm(term, context, forward, back) {
     let dischargedGivenTerm = false;
 
     const termString = term.getString(),

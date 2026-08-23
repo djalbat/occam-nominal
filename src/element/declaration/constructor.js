@@ -56,7 +56,7 @@ export default define(class ConstructorDeclaration extends Declaration {
     if (malformed) {
       context.debug(`Unable to verify the '${constructorDeclarationString}' constructor declaration because it is malformed.`);
 
-      return back(context);
+      return back();
     }
 
     const verifyType = this.verifyType.bind(this),

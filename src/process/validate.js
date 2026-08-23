@@ -10,33 +10,40 @@ const { nodeQuery } = queryUtilities;
 
 const termNodeQuery = nodeQuery("/term"),
       typeNodeQuery = nodeQuery("/type"),
-      statementNodeQuery = nodeQuery("/statement");
+      variableNodeQuery = nodeQuery("/variable"),
+      statementNodeQuery = nodeQuery("/statement"),
+      metavariableNodeQuery = nodeQuery("/metavariable");
 
 class ValidateTermPass extends ContinuationPass {
   static maps = [
+    {
+      nodeQuery: variableNodeQuery,
+      run: (variableNode, context, forward, back) => {
+        return back();
+      }
+    },
     {
       nodeQuery: termNodeQuery,
       run: (termNode, context, forward, back) => {
         const term = termFromTermNode(termNode, context);
 
         return declare((state) => {
-          return term.validate(state, context, (term, context, bcak) => {
+          return term.validate(state, context, (term, context, back) => {
             return forward(context, back);
           }, back);
         });
       }
     },
     {
-      nodeQuery: typeNodeQuery,
-      run: (typeNode, context, forward, back) => {
-        const nominalTypeName = typeNode.getNominalTypeName(),
-              typePresent = context.isTypePresentByNominalTypeName(nominalTypeName);
+      nodeQuery: termNodeQuery,
+      run: (termNode, context, forward, back) => {
+        const term = termFromTermNode(termNode, context);
 
-        if (!typePresent) {
-          return back();
-        }
-
-        return forward(context, back);
+        return declare((state) => {
+          return term.validate(state, context, (term, context, back) => {
+            return forward(context, back);
+          }, back);
+        });
       }
     }
   ];
@@ -44,6 +51,12 @@ class ValidateTermPass extends ContinuationPass {
 
 class ValidateStatementPass extends ContinuationPass {
   static maps = [
+    {
+      nodeQuery: metavariableNodeQuery,
+      run: (metavariableNode, context, forward, back) => {
+        return back();
+      }
+    },
     {
       nodeQuery: statementNodeQuery,
       run: (statementNode, context, forward, back) => {
@@ -64,7 +77,7 @@ class ValidateStatementPass extends ContinuationPass {
         return declare((state) => {
           return term.validate(state, context, (term, context, back) => {
             return forward(context, back);
-          });
+          }, back);
         });
       }
     },
