@@ -170,11 +170,11 @@ export default define(class Property extends Element {
     const property = this, ///
           propertyContext = property.getContext(),
           generalContext = propertyContext,  ///
-          specifiContext = context, ///
-          termUnifiesWithProperty = unifyTermWithProperty(term, property, generalContext, specifiContext, (generalContext, specifiContext) => {
+          specificContext = context, ///
+          termUnifiesWithProperty = unifyTermWithProperty(term, property, generalContext, specificContext, (generalContext, specificContext) => {
             let termUnifiesWithProperty;
 
-            const context = specifiContext; ///
+            const context = specificContext; ///
 
             term.setType(this.type);
 

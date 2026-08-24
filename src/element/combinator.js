@@ -140,9 +140,9 @@ export default define(class Combinator extends Element {
 
     const combinator = this, ///
           generalContext = this.getContext(), ///
-          specifiContext = context; ///
+          specificContext = context; ///
 
-    return unifyStatementWithCombinator(statement, combinator, generalContext, specifiContext, ( _ , specificContext, back) => {
+    return unifyStatementWithCombinator(statement, combinator, generalContext, specificContext, ( _ , specificContext, back) => {
       const context = specificContext; ///
 
       context.debug(`...unified the '${statementString}' statement with the '${combinatorString}' combinator.`);

@@ -1,6 +1,6 @@
 "use strict";
 
-import { Element, breakPointUtilities } from "occam-languages";
+import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
 
 import Value from "../value";
 
@@ -9,7 +9,8 @@ import { instantiate } from "../utilities/context";
 import { instantiateProcedureCall } from "../process/instantiate";
 import { parametersFromProcedureCallNode, procedureReferenceFromProcedureCallNode } from "../utilities/element";
 
-const { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
+const { cut } = continuationUtilities,
+      { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class ProcedureCall extends Element {
   constructor(context, string, node, breakPoint, parameters, procedureReference) {
@@ -85,6 +86,8 @@ export default define(class ProcedureCall extends Element {
   }
 
   unifyIndependently(context, forward, back) {
+    debugger
+
     const procedureCallString = this.getString(); ///
 
     context.trace(`Unifying the '${procedureCallString}' procedure call independently...`);
@@ -93,64 +96,8 @@ export default define(class ProcedureCall extends Element {
           procedure = context.findProcedureByProcedureName(procedureName),
           values = this.findValues(context);
 
-    try {
-      return procedure.callNominally(values, (term) => {
-        let unifiesIndependently = false;
-
-        if (term !== null) {
-          const boolean = term.isBoolean();
-
-          if (!boolean) {
-            context.info(`The '${procedureCallString}' procedure call did not return a boolean.`);
-          } else {
-            const primitiveValue = term.getPrimitiveValue();
-
-            if (primitiveValue) {
-              unifiesIndependently = true;
-            }
-          }
-        }
-
-        if (unifiesIndependently) {
-          context.debug(`...unified the '${procedureCallString}' procedure call independently.`);
-        }
-
-        return continuation(unifiesIndependently);
-      });
-    } catch (exception) {
-      const message = exception.getMessage();
-
-      context.info(message);
-    }
-  }
-
-  dischargeGivenTerm(term, context, forward, back) {
-    let dischargedGivenTerm = false;
-
-    const termString = term.getString(),
-          procedureCallString = this.getString(); ///
-
-    context.trace(`Discharging the '${procedureCallString}' procedure call given the '${termString}' term...`);
-
-    const unary = this.isUnary();
-
-    if (!unary) {
-      const procedureName = this.getProcedureName(),
-            procedure = context.findProcedureByProcedureName(procedureName),
-            value = Value.fromTerm(term, context),
-            values = [
-              value
-            ];
-
-      term = null;
-
-      try {
-        term = procedure.callNominally(values);
-      } catch (exception) {
-        const message = exception.getMessage();
-
-        context.info(message);
-      }
+    return procedure.callNominally(values, (term) => {
+      let unifiesIndependently = false;
 
       if (term !== null) {
         const boolean = term.isBoolean();
@@ -161,19 +108,59 @@ export default define(class ProcedureCall extends Element {
           const primitiveValue = term.getPrimitiveValue();
 
           if (primitiveValue) {
-            dischargedGivenTerm = true;
+            unifiesIndependently = true;
           }
         }
       }
-    } else {
+
+      if (unifiesIndependently) {
+        context.debug(`...unified the '${procedureCallString}' procedure call independently.`);
+      }
+
+      return continuation(unifiesIndependently);
+    });
+  }
+
+  dischargeGivenTerm(term, context, forward, back) {
+    const termString = term.getString(),
+          procedureCallString = this.getString(); ///
+
+    context.trace(`Discharging the '${procedureCallString}' procedure call given the '${termString}' term...`);
+
+    const unary = this.isUnary();
+
+    if (!unary) {
       context.debug(`The '${procedureCallString}' procedure call is not unary.`);
+
+      return back();
     }
 
-    if (dischargedGivenTerm) {
+    const procedureName = this.getProcedureName(),
+          procedure = context.findProcedureByProcedureName(procedureName),
+          value = Value.fromTerm(term, context),
+          values = [
+            value
+          ];
+
+    return procedure.callNominally(values, cut((value, back) => {
+      const boolean = value.isBoolean();
+
+      if (!boolean) {
+        context.info(`The '${procedureCallString}' procedure call did not return a boolean.`);
+
+        return back();
+      }
+
+      const primitiveValue = value.getPrimitiveValue();
+
+      if (!primitiveValue) {
+        return back();
+      }
+
       context.debug(`...discharged the '${procedureCallString}' procedure call given the '${termString}' term.`);
-    }
 
-    return dischargedGivenTerm;
+      return forward(back);
+    }, back), back);
   }
 
   toJSON() {

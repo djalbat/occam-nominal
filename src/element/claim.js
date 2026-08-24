@@ -210,7 +210,7 @@ export default class Claim extends Element {
     const claimString = this.getString(), ///
           hypothesisString = hypothesis.getString();
 
-    context.trace(`Discharding the '${claimString}' claim's '${hypothesisString}' hypothesis...`);
+    context.trace(`Discharging the '${claimString}' claim's '${hypothesisString}' hypothesis...`);
 
     return hypothesis.discharge(context, (hypothesisDischarges, context) => {
       if (hypothesisDischarges) {

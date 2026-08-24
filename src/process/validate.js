@@ -35,15 +35,16 @@ class ValidateTermPass extends ContinuationPass {
       }
     },
     {
-      nodeQuery: termNodeQuery,
-      run: (termNode, context, forward, back) => {
-        const term = termFromTermNode(termNode, context);
+      nodeQuery: typeNodeQuery,
+      run: (typeNode, context, forward, back) => {
+        const nominalTypeName = typeNode.getNominalTypeName(),
+              typePresent = context.isTypePresentByNominalTypeName(nominalTypeName);
 
-        return declare((state) => {
-          return term.validate(state, context, (term, context, back) => {
-            return forward(context, back);
-          }, back);
-        });
+        if (!typePresent) {
+          return back();
+        }
+
+        return forward(context, back);
       }
     }
   ];

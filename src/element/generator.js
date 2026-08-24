@@ -258,12 +258,12 @@ export default define(class Generator extends Element {
 
     const generator = this, ///
           generalContext = this.getContext(),  ///
-          specifiContext = context; ///
+          specificContext = context; ///
 
-    termUnifiesWithCGenerator = unifyTermWithGenerator(term, generator, generalContext, specifiContext, (generalContext, specifiContext) => {
+    termUnifiesWithCGenerator = unifyTermWithGenerator(term, generator, generalContext, specificContext, (generalContext, specificContext) => {
       let termUnifiesWithGenerator;
 
-      const context = specifiContext; ///
+      const context = specificContext; ///
 
       termUnifiesWithGenerator = continuation(term, context);
 
@@ -285,14 +285,14 @@ export default define(class Generator extends Element {
     if(hypothetical) {
       const generatorString = this.getString();
 
-      context.trace(`Discharing the '${generatorString}' generator's hhypotheses...`);
+      context.trace(`Discharging the '${generatorString}' generator's hypotheses...`);
 
       const dischargeHypothesisGivenTerm = this.dischargeHypothesisGivenTerm.bind(this);
 
       hypothesesDischargesGivenTerm = every(this.hypotheses, dischargeHypothesisGivenTerm, term, context, continuation);
 
       if (hypothesesDischargesGivenTerm) {
-        context.debug(`...discharged the '${generatorString}' generator's hhypotheses.`);
+        context.debug(`...discharged the '${generatorString}' generator's hypotheses.`);
       }
     } else {
       hypothesesDischargesGivenTerm = continuation(term, context);
@@ -308,7 +308,7 @@ export default define(class Generator extends Element {
           hypothesisString = hypothesis.getString(),
           generatorString = this.getString(); ///
 
-    context.trace(`Discharding the '${generatorString}' generator's '${hypothesisString}' hypothesis given the '${termString}' term...`);
+    context.trace(`Discharging the '${generatorString}' generator's '${hypothesisString}' hypothesis given the '${termString}' term...`);
 
     hypothesisDischargesGivenTerm = hypothesis.dischargeGivenTerm(term, context, continuation);
 

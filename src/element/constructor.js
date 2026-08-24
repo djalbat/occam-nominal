@@ -139,13 +139,13 @@ export default define(class Constructor extends Element {
     const includeType = false,
           constructorString = this.getString(includeType);  ///
 
-    context.trace(`Validating the '${constructorString}' constructor's term as a variable...`);
-
     const hypothetical = this.isHypothetical();
 
     if (!hypothetical) {
       return back();
     }
+
+    context.trace(`Validating the '${constructorString}' constructor's term as a variable...`);
 
     return this.term.validateAsVariable(state, context, (term, context, back) => {
       const type = term.getType(),
@@ -167,14 +167,14 @@ export default define(class Constructor extends Element {
   }
 
   validateTermAsConstructor(state, context, forward, back) {
+    const includeType = false,
+          constructorString = this.getString(includeType);  ///
+
     const hypothetical = this.isHypothetical();
 
     if (hypothetical) {
       return back();
     }
-
-    const includeType = false,
-          constructorString = this.getString(includeType);  ///
 
     context.trace(`Validating the '${constructorString}' constructor's term...`);
 
@@ -214,14 +214,20 @@ export default define(class Constructor extends Element {
           includeType = true,
           constructorString = this.getString(includeType);  ///
 
+    const hypothetical = this.isHypothetical();
+
+    if (hypothetical) {
+      return forward(term, context, back);
+    }
+
     context.trace(`Unifying the '${termString}' term with the '${constructorString}' constructor...`);
 
     const constructor = this, ///
           generalContext = this.getContext(),  ///
-          specifiContext = context; ///
+          specificContext = context; ///
 
-    return unifyTermWithConstructor(term, constructor, generalContext, specifiContext, ( _ , specifiContext, back) => {
-      const context = specifiContext; ///
+    return unifyTermWithConstructor(term, constructor, generalContext, specificContext, ( _ , specificContext, back) => {
+      const context = specificContext; ///
 
       context.debug(`...unified the '${termString}' term with the '${constructorString}' constructor.`);
 
@@ -239,33 +245,29 @@ export default define(class Constructor extends Element {
     const termString = term.getString(),
           constructorString = this.getString();
 
-    context.trace(`Discharing the '${constructorString}' constructor's hhypotheses given the '${termString}' term...`);
+    context.trace(`Discharging the '${constructorString}' constructor's hypotheses given the '${termString}' term...`);
 
-    return every(this.hypotheses, (hypothesis, term, context, back) => {
+    return every(this.hypotheses, (hypothesis, term, context, forward, back) => {
       return this.dischargeHypothesisGivenTerm(hypothesis, term, context, forward, back);
     }, term, context, (term, context, back) => {
-      context.debug(`...discharged the '${constructorString}' constructor's hhypotheses given the '${termString}' term.`);
+      context.debug(`...discharged the '${constructorString}' constructor's hypotheses given the '${termString}' term.`);
 
-      return forward(context, back);
+      return forward(term, context, back);
     }, back);
   }
 
   dischargeHypothesisGivenTerm(hypothesis, term, context, forward, back) {
-    let hypothesisDischargesGivenTerm;
-
     const termString = term.getString(),
           hypothesisString = hypothesis.getString(),
           constructorString = this.getString(); ///
 
-    context.trace(`Discharding the '${constructorString}' constructor's '${hypothesisString}' hypothesis given the '${termString}' term...`);
+    context.trace(`Discharging the '${constructorString}' constructor's '${hypothesisString}' hypothesis given the '${termString}' term...`);
 
-    hypothesisDischargesGivenTerm = hypothesis.dischargeGivenTerm(term, context, forward, back);
-
-    if (hypothesisDischargesGivenTerm) {
+    hypothesis.dischargeGivenTerm(term, context, (context, back) => {
       context.trace(`...discharges the '${constructorString}' constructor's '${hypothesisString}' hypothesis given the '${termString}' term.`);
-    }
 
-    return hypothesisDischargesGivenTerm;
+      return forward(term, context, back);
+    }, back);
   }
 
   toJSON() {

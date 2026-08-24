@@ -168,59 +168,33 @@ export default define(class Hypothesis extends Element {
   }
 
   dischargeGivenTerm(term, context, forward, back) {
-    let dischargesGivenTerm;
-
-    debugger
-
     const termString = term.getString(),
           hypothesisString = this.getString(); ///
 
     context.trace(`Discharging the '${hypothesisString}' hypothesis given the '${termString}' term...`);
 
-    const procedureCallDischargesGivenTerm = this.dischargeProcedureCallGivenTerm(term, context, forward, back);
-
-    if (procedureCallDischargesGivenTerm) {
-      dischargesGivenTerm = true;
-    }
-
-    if (dischargesGivenTerm) {
+    this.dischargeProcedureCallGivenTerm(term, context, (context, back) => {
       context.debug(`...discharged the '${hypothesisString}' hypothesis given the '${termString}' term.`);
-    }
 
-    return dischargesGivenTerm;
+      return forward(context, back);
+    }, back);
   }
 
   dischargeProcedureCallGivenTerm(term, context, forward, back) {
-    let procedureCallDischargesGivenTerm = false;
-
-    debugger
-
-    if (this.procedureCall !== null) {
-      const termString = term.getString(),
-            hypothesisString = this.getString();
-
-      context.trace(`Discharging the '${hypothesisString}' hypothesis' procedure call given the '${termString}' term...`);
-
-      let success = false;
-
-      this.procedureCall.dischargeGivenTerm(term, context, (dischargesGivenTerm) => {
-        if (dischargesGivenTerm) {
-          success = true;
-        }
-      });
-
-      if (success) {
-        procedureCallDischargesGivenTerm = continuation(term, context);
-      }
-
-      if (procedureCallDischargesGivenTerm) {
-        context.debug(`...discharged the '${hypothesisString}' hypothesis' procedure call given the '${termString}' term.`);
-      }
-    } else {
-      procedureCallDischargesGivenTerm = continuation(term, context);
+    if (this.procedureCall === null) {
+      return back();
     }
 
-    return procedureCallDischargesGivenTerm;
+    const termString = term.getString(),
+          hypothesisString = this.getString();
+
+    context.trace(`Discharging the '${hypothesisString}' hypothesis' procedure call given the '${termString}' term...`);
+
+    this.procedureCall.dischargeGivenTerm(term, context, (back) => {
+      context.debug(`...discharged the '${hypothesisString}' hypothesis' procedure call given the '${termString}' term.`);
+
+      return forward(context, back);
+    }, back);
   }
 
   toJSON() {
