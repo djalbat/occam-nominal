@@ -30,12 +30,12 @@ export default define(class Deduction extends Resolution {
   verify = breakable(function (context, forward, back) {
     const deductionString = this.getString();  ///
 
-    context.trace(`Verifying the '${deductionString}' decudtion...`);
+    context.trace(`Verifying the '${deductionString}' deduction...`);
 
     const malformed = this.isMalformed();
 
     if (malformed) {
-      context.debug(`Unable to verify the '${deductionString}' decudtion because it is malformed.`);
+      context.debug(`Unable to verify the '${deductionString}' deduction because it is malformed.`);
 
       return back();
     }

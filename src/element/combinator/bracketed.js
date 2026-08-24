@@ -13,9 +13,7 @@ export default define(class BracketedCombinator extends Combinator {
   }
 
   unifyStatement(statement, state, context, forward, back) {
-    return super.unifyStatement(statement, context, (statemenht, context, back) => {
-      return forward(statement, state, context, back);
-    }, back);
+    return super.unifyStatement(statement, context, forward, back);
   }
 
   static name = "BracketedCombinator";

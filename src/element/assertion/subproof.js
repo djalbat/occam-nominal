@@ -6,14 +6,14 @@ import { breakPointUtilities, continuationUtilities } from "occam-languages";
 import Assertion from "../assertion";
 
 import { define } from "../../elements";
+import { declare } from "../../utilities/state";
 import { join, reconcile, instantiate } from "../../utilities/context";
 import { instantiateSubproofAssertion } from "../../process/instantiate";
-import { declare, isDerived, isDeclared } from "../../utilities/state";
 import { subproofAssertionFromStatementNode } from "../../utilities/element";
 
 const { last, front } = arrayUtilities,
-      { backwardsEvery } = continuationUtilities,
-      { breakPointFromJSON } = breakPointUtilities;
+      { breakPointFromJSON } = breakPointUtilities,
+      { all, every, backwardsEvery } = continuationUtilities;
 
 export default define(class SubproofAssertion extends Assertion {
   constructor(context, string, node, breakPoint, statements) {
@@ -47,14 +47,12 @@ export default define(class SubproofAssertion extends Assertion {
     return subproofAssertionNode;
   }
 
-  validate(state, context, continuation) {
-    let validates;
+  validate(state, context, forward, back) {
+    let assertion;
 
     const subproofAssertionString = this.getString();  ///
 
     context.trace(`Validating the '${subproofAssertionString}' subproof assertion...`);
-
-    let assertion;
 
     assertion = this.findAssertion(context);
 
@@ -63,125 +61,45 @@ export default define(class SubproofAssertion extends Assertion {
 
       context.debug(`The '${subproofAssertionString}' subproof assertion is already present.`);
 
-      validates = continuation(subproofAssertion, context);
-    } else {
-      assertion = this; ///
-
-      const validateStatements = this.validateStatements.bind(this);
-
-      validates = all([
-        validateStatements
-      ], state, context, (state, context) => {
-        let validates;
-
-        const validateWhenDeclared = this.validateWhenDeclared.bind(this),
-              validateWhenDerived = this.validateWhenDerived.bind(this);
-
-        validates = exists([
-          validateWhenDeclared,
-          validateWhenDerived
-        ], state, context, (state, context) => {
-          let validates;
-
-          context.addAssertion(assertion);
-
-          const subproofAssertion = assertion; ///
-
-          validates = continuation(subproofAssertion, context);
-
-          return validates;
-        });
-
-        return validates;
-      });
+      return forward (subproofAssertion, context);
     }
 
-    if (validates) {
+    assertion = this; ///
+
+    const validateStatements = this.validateStatements.bind(this);
+
+    return all([
+      validateStatements
+    ], state, context, (state, context, back) => {
+      context.addAssertion(assertion);
+
+      const subproofAssertion = assertion; ///
+
       context.debug(`...validated the '${subproofAssertionString}' subproof assertion.`);
-    }
 
-    return validates;
+      return forward(subproofAssertion, context, back);
+    }, back);
   }
 
-  validateStatements(state, context, continuation) {
-    let statementsValidate;
-
+  validateStatements(state, context, forward, back) {
     const subproofAssertionString = this.getString();  ///
 
     context.trace(`Validating the '${subproofAssertionString}' subproof assertion's statements...`);
 
-    statementsValidate = every(this.statements, (statement, context, continuation) => {
-      let statementValidates;
-
-      declare((state) => {
-        statementValidates = statement.validate(state, context, (statement, context) => {
-          let validates;
-
-          validates = continuation(context);
-
-          return validates;
-        });
+    return every(this.statements, (statement, context, forward, back) => {
+      return declare((state) => {
+        return statement.validate(state, context, (statement, context, back) => {
+          return forward(context, back);
+        }, back);
       });
-
-      return statementValidates;
-    }, context, (context) => {
-      let validates;
-
-      validates = continuation(state, context);
-
-      return validates;
-    });
-
-    if (statementsValidate) {
+    }, context, (context, back) => {
       context.debug(`...validated the '${subproofAssertionString}' subproof assertion's statements.`);
-    }
 
-    return statementsValidate;
+      return forward(state, context, back);
+    }, back);
   }
 
-  validateWhenDeclared(state, context, continuation) {
-    let validatesWhenDeclared = false;
-
-    const declared = isDeclared(state);
-
-    if (declared) {
-      const subproofAssertionString = this.getString(); ///
-
-      context.trace(`Validating the '${subproofAssertionString}' declared subproof assertion...`);
-
-      validatesWhenDeclared = continuation(state, context);
-
-      if (validatesWhenDeclared) {
-        context.debug(`...validated the '${subproofAssertionString}' declared subproof assertion.`);
-      }
-    }
-
-    return validatesWhenDeclared;
-  }
-
-  validateWhenDerived(state, context, continuation) {
-    let validatesWhenDerived = false;
-
-    const derived = isDerived(state);
-
-    if (derived) {
-      const subproofAssertionString = this.getString(); ///
-
-      context.trace(`Validating the '${subproofAssertionString}' derived subproof assertion...`);
-
-      validatesWhenDerived = true;
-
-      validatesWhenDerived = continuation(state, context);
-
-      if (validatesWhenDerived) {
-        context.debug(`...validated the '${subproofAssertionString}' derived subproof assertion.`);
-      }
-    }
-
-    return validatesWhenDerived;
-  }
-
-  unifySubproof(subproof, generalContext, specificContext, continuation) {
+  unifySubproof(subproof, generalContext, specificContext, forward, back) {
     const context = specificContext,  ///
           subproofString = subproof.getString(),
           subproofAssertionString = this.getString(); ///
@@ -213,7 +131,7 @@ export default define(class SubproofAssertion extends Assertion {
     });
   }
 
-  unifyLastStep(lastStep, generalContext, specificContext, continuation) {
+  unifyLastStep(lastStep, generalContext, specificContext, forward, back) {
     const context = specificContext,  ///
           lastStepString = lastStep.getString(),
           deducedStatement = this.getDeducedStatement(),
@@ -248,7 +166,7 @@ export default define(class SubproofAssertion extends Assertion {
     }, specificContext, context);
  }
 
-  unifySupposition(supposition, supposedStatement, generalContext, specificContext, continuation) {
+  unifySupposition(supposition, supposedStatement, generalContext, specificContext, forward, back) {
     const context = specificContext,  ///
           suppositionString = supposition.getString(),
           supposedStatementString = supposedStatement.getString();
@@ -282,7 +200,7 @@ export default define(class SubproofAssertion extends Assertion {
     }, specificContext, context);
   }
 
-  unifySuppositions(suppositions, generalContext, specificContext, continuation) {
+  unifySuppositions(suppositions, generalContext, specificContext, forward, back) {
     const supposedStatements = this.getSupposedStatements(),
           suppositionsLength = suppositions.length,
           supposedStatementsLength = supposedStatements.length;
@@ -295,13 +213,13 @@ export default define(class SubproofAssertion extends Assertion {
 
     let index = suppositionsLength; ///
 
-    return backwardsEvery(suppositions, (supposition, continuation) => {
+    return backwardsEvery(suppositions, (supposition, forward, back) => {
       index--;
 
       const supposedStatement = supposedStatements[index];
 
-      return this.unifySupposition(supposition, supposedStatement, generalContext, specificContext, continuation);
-    }, continuation);
+      return this.unifySupposition(supposition, supposedStatement, generalContext, specificContext, forward, back);
+    }, forward, back);
   }
 
   static name = "SubproofAssertion";

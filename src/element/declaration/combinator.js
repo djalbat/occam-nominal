@@ -34,7 +34,7 @@ export default define(class CombinatorDeclaration extends Declaration {
     return malformed;
   }
 
-  verify = breakable(function (context, continuation) {
+  verify = breakable(function (context, forward, back) {
     const combinatorDeclarationString = this.getString();  ///
 
     context.trace(`Verifying the '${combinatorDeclarationString}' combinator declaration...`);
@@ -43,31 +43,25 @@ export default define(class CombinatorDeclaration extends Declaration {
 
     return all([
       verifyCombinator
-    ], context, (verifies, context) => {
-      if (verifies) {
-        context.addCombinator(this.combinator);
-      }
+    ], context, (context, back) => {
+      context.addCombinator(this.combinator);
 
-      if (verifies) {
-        context.debug(`...verified the '${combinatorDeclarationString}' combinator declaration.`);
-      }
+      context.debug(`...verified the '${combinatorDeclarationString}' combinator declaration.`);
 
-      return continuation(verifies, context);
-    });
+      return forward(context, back);
+    }, back);
   });
 
-  verifyCombinator(context, continuation) {
+  verifyCombinator(context, forward, back) {
     const combinatorDeclarationString = this.getString();  ///
 
     context.trace(`Verifying the '${combinatorDeclarationString}' combinator declaration's combinator...`);
 
-    return this.combinator.verify(context, (combinatorVerifies) => {
-      if (combinatorVerifies) {
-        context.debug(`...verified the '${combinatorDeclarationString}' combinator declaration's combinator.`);
-      }
+    return this.combinator.verify(context, (context, back) => {
+      context.debug(`...verified the '${combinatorDeclarationString}' combinator declaration's combinator.`);
 
-      return continuation(combinatorVerifies, context);
-    });
+      return forward(context, back);
+    }, back);
   }
 
   static name = "CombinatorDeclaration";

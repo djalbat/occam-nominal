@@ -8,7 +8,7 @@ import { termFromTermNode } from "../../utilities/element";
 export default define(class BracketedConstructor extends Constructor {
   getBracketedConstructorNode() {
     const node = this.getNode(),
-      bracketedConstructorNode = node;  ///
+          bracketedConstructorNode = node;  ///
 
     return bracketedConstructorNode;
   }
@@ -25,7 +25,7 @@ export default define(class BracketedConstructor extends Constructor {
       const bracketlessTermNode = singularTermNode, ///
             bracketlessTerm = termFromTermNode(bracketlessTermNode, context);
 
-      return bracketlessTerm.validate(state, context, (bracketlessTerm, context, back) => {
+      return bracketlessTerm.validate(state, context, (bracketlessTerm, state, context, back) => {
         const type = bracketlessTerm.getType(),
               provisional = bracketlessTerm.isProvisional();
 
@@ -33,7 +33,7 @@ export default define(class BracketedConstructor extends Constructor {
 
         term.setProvisional(provisional);
 
-        return forward(term, state, context, back);
+        return forward(term, context, back);
       }, back);
     }, back);
   }

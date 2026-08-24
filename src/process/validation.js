@@ -56,7 +56,9 @@ function unifyTermWithGenerators(term, state, context, forward, back) {
 
   return some(generators, (generator, context, forward, back) => {
     return choose((context) => {
-      return generator.unifyTerm(term, context, forward, back);
+      return generator.unifyTerm(term, context, (term, context, back) => {
+        return forward(term, state, context, back);
+      }, back);
     }, context);
   }, context, (state, context, back) => {
     context.debug(`...unified the '${termString}' term with generators.`);
@@ -81,7 +83,7 @@ function unifyTermWithConstructors(term, state, context, forward, back) {
     return choose((context) => {
       return constructor.unifyTerm(term, context, forward, back);
     }, context);
-  }, context, (state, context, back) => {
+  }, context, (term, context, back) => {
     context.debug(`...unified the '${termString}' term with constructors.`);
 
     return forward(term, state, context, back);
@@ -91,7 +93,9 @@ function unifyTermWithConstructors(term, state, context, forward, back) {
 function unifyTermWithBracketedConstructor(term, state, context, forward, back) {
   const bracketedConstructor = bracketedConstructorFromNothing();
 
-  return bracketedConstructor.unifyTerm(term, state, context, forward, back);
+  return bracketedConstructor.unifyTerm(term, state, context, (term, context, back) => {
+    return forward(term, state, context, back);
+  }, back);
 }
 
 export function validateStatementAsMetavariable(statement, state, context, forward, back) {
@@ -131,7 +135,7 @@ function unifyStatementWithCombinators(statement, state, context, forward, back)
 
   return some(combinators, (combinator, context, forward, back) => {
     return combinator.unifyStatement(statement, context, forward, back);
-  }, context, (context, back) => {
+  }, context, (statement, context, back) => {
     context.debug(`...unified the '${statementString}' statement with combinators.`);
 
     return forward(statement, state, context, back);
@@ -141,7 +145,9 @@ function unifyStatementWithCombinators(statement, state, context, forward, back)
 function unifyStatementWithBracketedCombinator(statement, state, context, forward, back) {
   const bracketedCombinator = bracketedCombinatorFromNothing();
 
-  return bracketedCombinator.unifyStatement(statement, state, context, forward, back);
+  return bracketedCombinator.unifyStatement(statement, state, context, (statement, context, back) => {
+    return forward(statement, state, context, back);
+  }, back);
 }
 
 function validateStatementAsEquality(statement, state, context, forward, back) {

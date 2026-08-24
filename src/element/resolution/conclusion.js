@@ -1,6 +1,6 @@
 "use strict";
 
-import { breakPointUtilities } from "occam-languages";
+import { breakPointUtilities, continuationUtilities } from "occam-languages";
 
 import Resolution from "../resolution";
 
@@ -9,7 +9,8 @@ import { declare, desist } from "../../utilities/state";
 import { instantiateConclusion } from "../../process/instantiate";
 import { unserialise, instantiate } from "../../utilities/context";
 
-const { breakable, breakPointFromJSON } = breakPointUtilities;
+const { cut } = continuationUtilities,
+      { breakable, breakPointFromJSON } = breakPointUtilities;
 
 export default define(class Conclusion extends Resolution {
   getConclusionNode() {
@@ -26,9 +27,7 @@ export default define(class Conclusion extends Resolution {
     return malformed;
   }
 
-  verify = breakable(function (context, continuation) {
-    let verifies = false;
-
+  verify = breakable(function (context, forward, back) {
     const conclusionString = this.getString();  ///
 
     context.trace(`Verifying the '${conclusionString}' conclusion...`);
@@ -38,24 +37,18 @@ export default define(class Conclusion extends Resolution {
     if (malformed) {
       context.debug(`Unable to verify the '${conclusionString}' conclusion because it is malformed.`);
 
-      return continuation(verifies);
+      return back();
     }
 
     declare((state) => {
       desist((state) => {
-        const validates = this.validate(state, context, (conclusion, context) => true); ///
+        return this.validate(state, context, cut((conclusion, _ , back) => {
+          context.debug(`...verified the '${conclusionString}' conclusion.`);
 
-        if (validates) {
-          verifies = true;
-        }
+          return forward(context, back);
+        }, back), back);
       }, state);
     });
-
-    if (verifies) {
-      context.debug(`...verified the '${conclusionString}' conclusion.`);
-    }
-
-    return continuation(verifies);
   });
 
   static name = "Conclusion";

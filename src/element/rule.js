@@ -56,7 +56,7 @@ export default define(class Rule extends Element {
     return metavariableNodeMatches;
   }
 
-  verify = breakable(function (context, continuation) {
+  verify = breakable(function (context, forward, back) {
     const ruleString = this.getString(); ///
 
     context.trace(`Verifying the '${ruleString}' rule...`);
@@ -72,56 +72,48 @@ export default define(class Rule extends Element {
         verifyPremises,
         verifyConclusion,
         verifyProof
-      ], context, (verifies) => {
-        if (verifies) {
-          const rule = this;  ///
+      ], context, (context, back) => {
+        const rule = this; ///
 
-          context.addRule(rule);
+        context.addRule(rule);
 
-          context.debug(`...verified the '${ruleString}' rule.`);
-        }
+        context.debug(`...verified the '${ruleString}' rule.`);
 
-        return continuation(verifies, context);
-      });
+        return forward(context, back);
+      }, back);
     }, context);
   });
 
-  verifyLabels(context, continuation) {
+  verifyLabels(context, forward, back) {
     const ruleString = this.getString();  ///
 
     context.trace(`Verifying the '${ruleString}' rule's labels...`);
 
     const verifyLabel = this.verifyLabel.bind(this);
 
-    return every(this.labels, verifyLabel, context, (labelsVerify) => {
-      if (labelsVerify) {
-        context.debug(`...verified the '${ruleString}' rule's labels.`);
-      }
+    return every(this.labels, verifyLabel, context, (context, back) => {
+      context.debug(`...verified the '${ruleString}' rule's labels.`);
 
-      return continuation(labelsVerify, context);
-    });
+      return forward(context, back);
+    }, back);
   }
 
-  verifyLabel(label, context, continuation) {
+  verifyLabel(label, context, forward, back) {
     const labelString = label.getString(),
           ruleString = this.getString(); ///
 
     context.trace(`Verifying the '${ruleString}' rule's '${labelString}' label...`);
 
-    return label.verify((labelVerifies) => {
-      if (labelVerifies) {
-        context.debug(`...verified the '${ruleString}' rule's '${labelString}' label.`);
-      }
+    return label.verify((back) => {
+      context.debug(`...verified the '${ruleString}' rule's '${labelString}' label.`);
 
-      return continuation(labelVerifies, context);
-    });
+      return forward(context, back);
+    }, back);
   }
 
-  verifyProof(context, continuation) {
+  verifyProof(context, forward, back) {
     if (this.proof === null) {
-      const proofVerifies = true; ///
-
-      return continuation(proofVerifies, context);
+      return forward(context, back);
     }
 
     const ruleString = this.getString();  ///
@@ -139,66 +131,56 @@ export default define(class Rule extends Element {
     });
   }
 
-  verifyConclusion(context, continuation) {
+  verifyConclusion(context, forward, back) {
     const ruleString = this.getString(), ///
           conclusionString = this.conclusion.getString();
 
     context.trace(`Verifying the '${ruleString}' rule's '${conclusionString}' conclusion...`);
 
-    return this.conclusion.verify(context, (conclusionVerifies) => {
-      if (conclusionVerifies) {
-        context.debug(`...verified the '${ruleString}' rule's '${conclusionString}' conclusion.`);
-      }
+    return this.conclusion.verify(context, (context, back) => {
+      context.debug(`...verified the '${ruleString}' rule's '${conclusionString}' conclusion.`);
 
-      return continuation(conclusionVerifies, context);
-    });
+      return forward(context, back);
+    }, back);
   }
 
-  verifyPremise(premise, context, continuation) {
+  verifyPremise(premise, context, forward, back) {
     const ruleString = this.getString(), ///
           premiseString = premise.getString();
 
     context.trace(`Verifying the '${ruleString}' rule's '${premiseString}' premise...`);
 
-    return premise.verify(context, (premiseVerifies) => {
-      if (premiseVerifies) {
-        const factOrSubproof = premise;  ////
+    return premise.verify(context, (context, back) => {
+      const factOrSubproof = premise;  ////
 
-        context.assignAssignments();
+      context.assignAssignments();
 
-        context.addFactOrSubproof(factOrSubproof);
-      }
+      context.addFactOrSubproof(factOrSubproof);
 
-      if (premiseVerifies) {
-        context.debug(`...verified the '${ruleString}' rule's '${premiseString}' premise.`);
-      }
+      context.debug(`...verified the '${ruleString}' rule's '${premiseString}' premise.`);
 
-      return continuation(premiseVerifies, context);
-    });
+      return forward(context, back);
+    }, back);
   }
 
-  verifyPremises(context, continuation) {
+  verifyPremises(context, forward, back) {
     const premisesLength = this.premises.length;
 
     if (premisesLength === 0) {
-      const premisesVerify = true;  ///
-
-      return continuation(premisesVerify, context);
+      return forward(context, back);
     }
 
     const ruleString = this.getString();  ///
 
     context.trace(`Verifying the '${ruleString}' rule's premises...`);
 
-    const verifyPremise = this.verifyPremise.bind(this);
+    return forwardsEvery(this.premises, (premise, context, forward, back) => {
+      return this.verifyPremise(premise, context, forward, back);
+    }, context, (context, back) => {
+      context.debug(`...verified the '${ruleString}' rule's premises.`);
 
-    return forwardsEvery(this.premises, verifyPremise, context, (premisesVerify) => {
-      if (premisesVerify) {
-        context.debug(`...verified the '${ruleString}' rule's premises.`);
-      }
-
-      return continuation(premisesVerify, context);
-    });
+      return forward(context, back);
+    }, back);
   }
 
   unifyStepWithConclusion(step, context, continuation) {
