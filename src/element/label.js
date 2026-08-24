@@ -67,7 +67,7 @@ export default define(class Label extends Element {
     }
 
     return declare((state) => {
-      return this.validate(state, context, cut((label, context, back) => {
+      return this.validate(state, context, cut((label, _ , back) => {
         context.debug(`...verified the '${labelString}' label.`);
 
         return forward(back);

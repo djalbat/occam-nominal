@@ -122,13 +122,11 @@ export default define(class Rule extends Element {
 
     const statement = this.conclusion.getStatement();
 
-    return this.proof.verify(statement, context, (proofVerifies) => {
-      if (proofVerifies) {
-        context.debug(`...verified the '${ruleString}' rule's proof.`);
-      }
+    return this.proof.verify(statement, context, (context, back) => {
+      context.debug(`...verified the '${ruleString}' rule's proof.`);
 
-      return continuation(proofVerifies, context);
-    });
+      return forward(context, back);
+    }, back);
   }
 
   verifyConclusion(context, forward, back) {

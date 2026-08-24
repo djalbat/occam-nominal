@@ -10,9 +10,9 @@ import { attempt } from "../../utilities/context";
 import { unifySteps } from "../../process/unification";
 import { derive, declare } from "../../utilities/state";
 
-const { some } = continuationUtilities,
-      { breakable } = breakPointUtilities,
-      { backwardsSome } = arrayUtilities;
+const { breakable } = breakPointUtilities,
+      { backwardsSome } = arrayUtilities,
+      { cut, all, some } = continuationUtilities;
 
 export default define(class Step extends Fact {
   constructor(context, string, node, breakPoint, statement, reference, procedureCall, schemaAssertion, signatureAssertion) {
@@ -93,9 +93,7 @@ export default define(class Step extends Fact {
     return comparesToFactOrSubproofs;
   }
 
-  verify = breakable(function (context, continuation) {
-    let verifies = false;
-
+  verify = breakable(function (context, forward, back) {
     const stepString = this.getString(); ///
 
     context.trace(`Verifying the '${stepString}' step...`);
@@ -105,43 +103,27 @@ export default define(class Step extends Fact {
     if (malformed) {
       context.debug(`Unable to verify the '${stepString}' step because it is malformed.`);
 
-      return continuation(verifies, context);
+      return back();
     }
-
-    let validates;
 
     const declared = this.idDeclared();
 
     (declared ? declare : derive)((state) => {
-      validates = this.validate(state, context, (step, context) => true); ///
-    });
+      return this.validate(state, context, cut((premise, _ , back) => {
+        return this.unify((context) => {
+          context.debug(`...verified the '${stepString}' step.`);
 
-    if (!validates) {
-      return continuation(verifies, context);
-    }
-
-    return this.unify((unifies) => {
-      if (unifies) {
-        verifies = true;
-      }
-
-      if (verifies) {
-        context.debug(`...verified the '${stepString}' step.`);
-      }
-
-      return continuation(verifies, context);
+          return forward(context, back);
+        }, back);
+      }, back), back);
     });
   });
 
-  validate(state, context, continuation) {
-    let validates;
-
+  validate(state, context, forward, back) {
     const stepString = this.getString(),  ///
           specificContext = context;  ///
 
     context.trace(`Validating the '${stepString}' step...`);
-
-    const step = this;  ///
 
     return attempt((context) => {
       const validateStatement = this.validateStatement.bind(this),
@@ -149,96 +131,68 @@ export default define(class Step extends Fact {
             validateSchemaAssertion = this.validateSchemaAssertion.bind(this),
             validateSignatureAssertion = this.validateSignatureAssertion.bind(this);
 
-      validates = all([
+      return all([
         validateStatement,
         validateReference,
         validateSchemaAssertion,
         validateSignatureAssertion
-      ], state, context, (state, context) => {
-        let validates;
-
+      ], state, context, (state, context, back) => {
         this.commit(context);
+
+        const step = this;  ///
 
         context = specificContext;  ///
 
-        validates = continuation(step, context);
+        context.debug(`...validated the '${stepString}' step.`);
 
-        return validates;
-      });
+        return forward(step, context, back);
+      }, back);
     }, context);
-
-    context = specificContext;  ///
-
-    if (validates) {
-      context.debug(`...validated the '${stepString}' step.`);
-    }
-
-    return validates;
   }
 
-  validateSchemaAssertion(state, context, continuation) {
-    let schemaAssertionValidates;
+  validateSchemaAssertion(state, context, forward, back) {
+    if (this.schemaAssertion === null) {
+      return forward(state, context, back);
+    }
 
-    if (this.schemaAssertion !== null) {
-      const stepString = this.getString(),  ///
-            schemaAssertionString = this.schemaAssertion.getString();
+    const stepString = this.getString(),  ///
+          schemaAssertionString = this.schemaAssertion.getString();
 
-      context.trace(`Validating the '${stepString}' step's '${schemaAssertionString}' schema assertion...`);
+    context.trace(`Validating the '${stepString}' step's '${schemaAssertionString}' schema assertion...`);
 
-      derive((state) => {
-        schemaAssertionValidates = this.schemaAssertion.validate(state, context, (schemaAssertion, context) => {
-          let validates;
+    return derive((state) => {
+      return this.schemaAssertion.validate(state, context, (schemaAssertion, context, back) => {
+        this.schemaAssertion = schemaAssertion;
 
-          this.schemaAssertion = schemaAssertion;
-
-          validates = continuation(state, context);
-
-          return validates;
-        });
-      }, state);
-
-      if (schemaAssertionValidates) {
         context.debug(`...validated the '${stepString}' step's '${schemaAssertionString}' schema assertion.`);
-      }
-    } else {
-      schemaAssertionValidates = continuation(state, context);
-    }
 
-    return schemaAssertionValidates;
+        return forward(state, context, back);
+      }, back);
+    }, state);
   }
 
-  validateSignatureAssertion(state, context, continuation) {
-    let signatureAssertionValidates;
+  validateSignatureAssertion(state, context, forward, back) {
+    if (this.signatureAssertion === null) {
+      return forward(state, context, back);
+    }
 
-    if (this.signatureAssertion !== null) {
-      const stepString = this.getString(),  ///
-            signatureAssertionString = this.signatureAssertion.getString();
+    const stepString = this.getString(),  ///
+          signatureAssertionString = this.signatureAssertion.getString();
 
-      context.trace(`Validating the '${stepString}' step's '${signatureAssertionString}' signature assertion...`);
+    context.trace(`Validating the '${stepString}' step's '${signatureAssertionString}' signature assertion...`);
 
-      declare((state) => {
-        signatureAssertionValidates = this.signatureAssertion.validate(state, context, (signatureAssertion, contwext) => {
-          let validates;
-
-          this.signatureAssertion = signatureAssertion;
-
-          validates = continuation(state, context);
-
-          return validates;
-        });
-      }, state);
-
-      if (signatureAssertionValidates) {
+    return declare((state) => {
+      return this.signatureAssertion.validate(state, context, (signatureAssertion, contwext, back) => {
         context.debug(`...validated the '${stepString}' step's '${signatureAssertionString}' signature assertion.`);
-      }
-    } else {
-      signatureAssertionValidates = continuation(state, context);
-    }
 
-    return signatureAssertionValidates;
+        this.signatureAssertion = signatureAssertion;
+
+        return forward(context, back);
+      }, back);
+    }, state);
   }
 
-  unify(continuation) {
+  unify(forward, back) {
     const context = this.getContext(),
           stepString = this.getString(); ///
 
@@ -246,15 +200,13 @@ export default define(class Step extends Fact {
 
     const step = this;  ///
 
-    return some(unifySteps, (unifyStep, continuation) => {
-      return unifyStep(step, context, continuation);
-    }, (unifies) => {
-      if (unifies) {
-        context.debug(`...unified the '${stepString}' step.`);
-      }
+    return some(unifySteps, (unifyStep, forward, back) => {
+      return unifyStep(step, context, forward, back);
+    }, (context, back) => {
+      context.debug(`...unified the '${stepString}' step.`);
 
-      return continuation(unifies);
-    });
+      return forward(context, back);
+    }, back);
   }
 
   static name = "Step";

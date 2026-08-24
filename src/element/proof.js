@@ -33,27 +33,25 @@ export default define(class Proof extends Element {
     return statement;
   }
 
-  verify(statement, context, continuation) {
+  verify(statement, context, forward, back) {
     return enclose((context) => {
-      return this.derivation.verify(context, (derivationVerifies) => {
-        let verifies = false;
+      return this.derivation.verify(context, ( _, back) => {
+        const lastStep = context.getLastStep();
 
-        if (derivationVerifies) {
-          const lastStep = context.getLastStep();
-
-          if (lastStep !== null) {
-            const proof = this, ///
-                  proofStatement = proof.getStatement(),
-                  proofStatementEqualToStatement = proofStatement.isEqualTo(statement);
-
-            if (proofStatementEqualToStatement) {
-              verifies = true;
-            }
-          }
+        if (lastStep === null) {
+          return back();
         }
 
-        return continuation(verifies);
-      });
+        const proof = this, ///
+              proofStatement = proof.getStatement(),
+              proofStatementEqualToStatement = proofStatement.isEqualTo(statement);
+
+        if (!proofStatementEqualToStatement) {
+          return back();
+        }
+
+        return forward(context, back);
+      }, back);
     }, context);
   }
 

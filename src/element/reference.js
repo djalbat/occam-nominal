@@ -1,14 +1,16 @@
 "use strict";
 
-import { Element, breakPointUtilities } from "occam-languages";
+import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
 
 import { define } from "../elements";
 import { instantiateReference } from "../process/instantiate";
 import { REFERENCE_META_TYPE_NAME } from "../metaTypeNames";
 import { referenceFromReferenceNode, metavariableFromReferenceNode } from "../utilities/element";
 import { join, ablate, attempt, reconcile, serialise, unserialise, instantiate } from "../utilities/context";
+import reference from "./substitution/reference";
 
-const { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
+const { all } = continuationUtilities,
+      { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Reference extends Element {
   constructor(context, string, node, breakPoint, metavariable) {
@@ -81,69 +83,51 @@ export default define(class Reference extends Element {
     return comparesToParamter;
   }
 
-  validate(state, context, continuation) {
-    let validates = false;
+  validate(state, context, forward, back) {
+    let reference;
 
     const specificContext = context,  ///
           referenceString = this.getString(); ///
 
     context.trace(`Validating the '${referenceString}' reference...`);
 
-    let reference;
-
     reference = this.findReference(context);
 
     if (reference !== null) {
       context.debug(`...the '${referenceString}' reference is already present.`);
 
-      validates = continuation(reference, context);
-    } else {
-      reference = this; ///
-
-      context = this.getContext();
-
-      return attempt((context) => {
-        const validateMetavariable = this.validateMetavariable.bind(this);
-
-        validates = all([
-          validateMetavariable
-        ], state, context, (state, context) => {
-          let validates;
-
-          this.commit(context);
-
-          context = specificContext;  ///
-
-          validates = continuation(reference, context);
-
-          return validates;
-        });
-
-        if (validates) {
-          context = specificContext;  ///
-
-          context.addReference(reference);
-        }
-      }, context);
+      return forward(reference, context, back);
     }
 
-    context = specificContext;  ///
+    reference = this; ///
 
-    if (validates) {
-      context.debug(`...validated the '${referenceString}' reference.`);
-    }
+    context = this.getContext();
 
-    return validates;
+    return attempt((context) => {
+      const validateMetavariable = this.validateMetavariable.bind(this);
+
+      return all([
+        validateMetavariable
+      ], state, context, (context, back) => {
+        this.commit(context);
+
+        context = specificContext;  ///
+
+        context.addReference(reference);
+
+        context.debug(`...validated the '${referenceString}' reference.`);
+
+        return forward(reference, context, back);
+      }, back);
+    }, context);
   }
 
-  validateMetavariable(state, context, continuation) {
-    let metavariableValidates;
-
+  validateMetavariable(state, context, forward, back) {
     const referenceString = this.getString(); ///
 
     context.trace(`Validating the '${referenceString}' reference's metavariable...'`);
 
-    metavariableValidates = this.metavariable.validate(state, context, (metavariable, context) => {
+    return this.metavariable.validate(state, context, (metavariable, context, back) => {
       let validates = false;
 
       const metaType = metavariable.getMetaType();
@@ -166,23 +150,19 @@ export default define(class Reference extends Element {
         }
       }
 
-      if (validates) {
-        this.metavariable = metavariable;
-
-        validates = continuation(state, context);
+      if (!validates) {
+        return back();
       }
 
-      return validates;
-    });
+      this.metavariable = metavariable;
 
-    if (metavariableValidates) {
       context.debug(`...validated the '${referenceString}' reference's metavariable.'`);
-    }
 
-    return metavariableValidates;
+      return forward(context, back);
+    }, back);
   }
 
-  unifyLabel(label, context, continuation) {
+  unifyLabel(label, context, forward, back) {
     const labelString = label.getString(),
           referenceString = this.getString(); ///
 
@@ -214,7 +194,7 @@ export default define(class Reference extends Element {
     }, specificContext, context);
   }
 
-  unifyMetavariable(metavariable, generalContext, specificContext, continuation) {
+  unifyMetavariable(metavariable, generalContext, specificContext, forward, back) {
     const context = specificContext,  ///
           referenceString = this.getString(), ///
           metavariableString = metavariable.getString();
