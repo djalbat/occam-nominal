@@ -4,19 +4,17 @@ import elements from "../elements";
 
 import { declare } from "../utilities/state";
 
-function unifyStepWithRule(step, context, continuation) {
-  let stepUnifiesWithRule = false;
-
+function unifyStepWithRule(step, context, forward, back) {
   const reference = step.getReference();
 
   if (reference === null) {
-    return continuation(stepUnifiesWithRule);
+    return back();
   }
 
   const rule = context.findRuleByReference(reference);
 
   if (rule === null) {
-    return continuation(stepUnifiesWithRule);
+    return back();
   }
 
   const stepString = step.getString(),
@@ -25,40 +23,30 @@ function unifyStepWithRule(step, context, continuation) {
 
   context.trace(`Unifying the '${stepString}' step with the '${ruleString}' rule...`);
 
-  return rule.unifyStepAndFactOrSubproofs(step, factOrSubproofs, context, (stepAndFactOrSubproofsUnify) => {
-    let stepUnifiesWithRule = false;
+  return rule.unifyStepAndFactOrSubproofs(step, factOrSubproofs, context, (context, back) => {
+    context.debug(`...unified the '${stepString}' step with the '${ruleString}' rule.`);
 
-    if (stepAndFactOrSubproofsUnify) {
-      stepUnifiesWithRule = true;
-    }
-
-    if (stepUnifiesWithRule) {
-      context.debug(`...unified the '${stepString}' step with the '${ruleString}' rule.`);
-    }
-
-    return continuation(stepUnifiesWithRule);
-  });
+    return forward(context, back);
+  }, back);
 }
 
-function unifyStepWithClaim(step, context, continuation) {
-  let stepUnifiesWithClaim = false;
-
+function unifyStepWithClaim(step, context, forward, back) {
   const reference = step.getReference();
 
   if (reference === null) {
-    return continuation(stepUnifiesWithClaim);
+    return back();
   }
 
   const claim = context.findClaimByReference(reference);
 
   if (claim === null) {
-    return continuation(stepUnifiesWithClaim);
+    return back();
   }
 
   const satisfiable = claim.isSatisfiable();
 
   if (satisfiable) {
-    return continuation(stepUnifiesWithClaim);
+    return back();
   }
 
   const stepString = step.getString(),
@@ -67,28 +55,18 @@ function unifyStepWithClaim(step, context, continuation) {
 
   context.trace(`Unifying the '${stepString}' step with the '${claimString}' claim...`);
 
-  return claim.unifyStepAndFactOrSubproofs(step, factOrSubproofs, context, (stepAndFactOrSubproofsUnify) => {
-    let stepUnifiesWithClaim = false;
+  return claim.unifyStepAndFactOrSubproofs(step, factOrSubproofs, context, (context, back) => {
+    context.debug(`...unified the '${stepString}' step with the '${claimString}' claim.`);
 
-    if (stepAndFactOrSubproofsUnify) {
-      stepUnifiesWithClaim = true;
-    }
-
-    if (stepUnifiesWithClaim) {
-      context.debug(`...unified the '${stepString}' step with the '${claimString}' claim.`);
-    }
-
-    return continuation(stepUnifiesWithClaim);
-  });
+    return forward(context, back);
+  }, back);
 }
 
-function unifyStepWithSchemaAssertion(step, context, continuation) {
-  let stepUnifiesWithSchemaAssertion = false;
-
+function unifyStepWithSchemaAssertion(step, context, forward, back) {
   const schemaAssertion = step.getSchemaAssertion();
 
   if (schemaAssertion === null) {
-    return continuation(stepUnifiesWithSchemaAssertion);
+    return back();
   }
 
   const stepString = step.getString(),
@@ -96,28 +74,18 @@ function unifyStepWithSchemaAssertion(step, context, continuation) {
 
   context.trace(`Unifying the '${stepString}' step with the '${schemaAssertionString}' schema assertion...`);
 
-  return schemaAssertion.unifyStep(step, context, (stepUnifies) => {
-    let stepUnifiesWithSchemaAssertion = false;
+  return schemaAssertion.unifyStep(step, context, (context, back) => {
+    context.debug(`...unified the '${stepString}' step with the '${schemaAssertionString}' schema assertion.`);
 
-    if (stepUnifies) {
-      stepUnifiesWithSchemaAssertion = true;
-    }
-
-    if (stepUnifiesWithSchemaAssertion) {
-      context.debug(`...unified the '${stepString}' step with the '${schemaAssertionString}' schema assertion.`);
-    }
-
-    return continuation(stepUnifiesWithSchemaAssertion);
-  });
+    return forward(context, back);
+  }, back);
 }
 
-function unifyStepWithSignatureAssertion(step, context, continuation) {
-  let stepUnifiesWithSignatureAssertion = false;
-
+function unifyStepWithSignatureAssertion(step, context, forward, back) {
   const signatureAssertion = step.getSignatureAssertion();
 
   if (signatureAssertion === null) {
-    return continuation(stepUnifiesWithSignatureAssertion);
+    return back();
   }
 
   const stepString = step.getString(),
@@ -126,32 +94,24 @@ function unifyStepWithSignatureAssertion(step, context, continuation) {
 
   context.trace(`Unifying the '${stepString}' step with the '${signatureAssertionString}' signature assertion...`);
 
-  return signatureAssertion.unifyStepAndFactOrSubproofs(step, factOrSubproofs, context, (stepAndFactOrSubproofsUnify) => {
-    if (stepAndFactOrSubproofsUnify) {
-      stepUnifiesWithSignatureAssertion = true;
-    }
+  return signatureAssertion.unifyStepAndFactOrSubproofs(step, factOrSubproofs, context, (context, back) => {
+    context.debug(`...unified the '${stepString}' step with the '${signatureAssertionString}' signature assertion.`);
 
-    if (stepUnifiesWithSignatureAssertion) {
-      context.debug(`...unified the '${stepString}' step with the '${signatureAssertionString}' signature assertion.`);
-    }
-
-    return continuation(stepUnifiesWithSignatureAssertion);
-  });
+    return forward(context, back);
+  }, back);
 }
 
-function unifyStepAsQualifiedConstraint(step, context, continuation) {
-  let stepUnifiesAsQualifiedConstraint = false;
-
+function unifyStepAsQualifiedConstraint(step, context, forward, back) {
   const metaLevel = context.isMetaLevel();
 
   if (!metaLevel) {
-    return continuation(stepUnifiesAsQualifiedConstraint);
+    return back();
   }
 
   const reference = step.getReference();
 
   if (reference === null) {
-    return continuation(stepUnifiesAsQualifiedConstraint);
+    return back();
   }
 
   const { Constraint } = elements,
@@ -161,32 +121,20 @@ function unifyStepAsQualifiedConstraint(step, context, continuation) {
 
   context.trace(`Unifying the '${stepString}' step as a constraint with the '${referenceString}' reference...`);
 
-  declare((state) => {
-    constraint.validate(state, context, (constraint, context) => {
-      let validates;
+  return declare((state) => {
+    return constraint.validate(state, context, (constraint, context) => {
+      context.debug(`...unified the '${stepString}' step as a constraint with the '${referenceString}' reference.`);
 
-      stepUnifiesAsQualifiedConstraint = true;
-
-      validates = true;
-
-      return validates;
-    });
+      return forward(context, back);
+    }, back);
   });
-
-  if (stepUnifiesAsQualifiedConstraint) {
-    context.debug(`...unified the '${stepString}' step as a constraint with the '${referenceString}' reference.`);
-  }
-
-  return continuation(stepUnifiesAsQualifiedConstraint);
 }
 
-function unifyStepAsUnqualifiedEquality(step, context, continuation) {
-  let stepUnifiesAUnqualifiedEquality = false;
-
+function unifyStepAsUnqualifiedEquality(step, context, forward, back) {
   const qualified = step.isQualified();
 
   if (qualified) {
-    return continuation(stepUnifiesAUnqualifiedEquality);
+    return back();
   }
 
   const { Equality } = elements,
@@ -194,29 +142,17 @@ function unifyStepAsUnqualifiedEquality(step, context, continuation) {
         equality = Equality.fromStatement(statement, context);
 
   if (equality === null) {
-    return continuation(stepUnifiesAUnqualifiedEquality);
+    return back();
   }
 
-  const stepString = step.getString();
-
-  context.trace(`Unifying the '${stepString}' step as an unqualified equality...`);
-
-  stepUnifiesAUnqualifiedEquality = true;
-
-  if (stepUnifiesAUnqualifiedEquality) {
-    context.debug(`...unified the '${stepString}' step as an unqualified equality.`);
-  }
-
-  return continuation(stepUnifiesAUnqualifiedEquality);
+  return forward(context, back);
 }
 
-function unifyStepAsUnqualifiedTypeAssertion(step, context, continuation) {
-  let stepUnifiesAsUnqualifiedTypeAssertion = false;
-
+function unifyStepAsUnqualifiedTypeAssertion(step, context, forward, back) {
   const qualified = step.isQualified();
 
   if (qualified) {
-    return continuation(stepUnifiesAsUnqualifiedTypeAssertion);
+    return back();
   }
 
   const { TypeAssertion } = elements,
@@ -224,29 +160,17 @@ function unifyStepAsUnqualifiedTypeAssertion(step, context, continuation) {
         typeAssertion = TypeAssertion.fromStatement(statement, context);
 
   if (typeAssertion === null) {
-    return continuation(stepUnifiesAsUnqualifiedTypeAssertion);
+    return back();
   }
 
-  const stepString = step.getString();
-
-  context.trace(`Unifying the '${stepString}' step as an unqualified type assertion...`);
-
-  stepUnifiesAsUnqualifiedTypeAssertion = true;
-
-  if (stepUnifiesAsUnqualifiedTypeAssertion) {
-    context.debug(`...unified the '${stepString}' step as an unqualified type assertion.`);
-  }
-
-  return continuation(stepUnifiesAsUnqualifiedTypeAssertion);
+  return forward(context, back);
 }
 
-function unifyStepAsUnqualifiedPropertyAssertion(step, context, continuation) {
-  let stepUnifiesAsUnqualifiedPropertyAssertion = false;
-
+function unifyStepAsUnqualifiedPropertyAssertion(step, context, forward, back) {
   const qualified = step.isQualified();
 
   if (qualified) {
-    return continuation(stepUnifiesAsUnqualifiedPropertyAssertion);
+    return back();
   }
 
   const { PropertyAssertion } = elements,
@@ -254,29 +178,17 @@ function unifyStepAsUnqualifiedPropertyAssertion(step, context, continuation) {
         propertyAssertion = PropertyAssertion.fromStatement(statement, context);
 
   if (propertyAssertion === null) {
-    return continuation(stepUnifiesAsUnqualifiedPropertyAssertion);
+    return back();
   }
 
-  const stepString = step.getString();
-
-  context.trace(`Unifying the '${stepString}' step as an unqualified property assertion...`);
-
-  stepUnifiesAsUnqualifiedPropertyAssertion = true;
-
-  if (stepUnifiesAsUnqualifiedPropertyAssertion) {
-    context.debug(`...unified the '${stepString}' step as an unqualified property assertion.`);
-  }
-
-  return continuation(stepUnifiesAsUnqualifiedPropertyAssertion);
+  return forward(context, back);
 }
 
-function unifyStepAsUnqualifiedSignatureAssertion(step, context, continuation) {
-  let stepUnifiesAsUnqualifiedSignatureAssertion = false;
-
+function unifyStepAsUnqualifiedSignatureAssertion(step, context, forward, back) {
   const qualified = step.isQualified();
 
   if (qualified) {
-    return continuation(stepUnifiesAsUnqualifiedSignatureAssertion);
+    return back();
   }
 
   const { SignatureAssertion } = elements,
@@ -284,42 +196,30 @@ function unifyStepAsUnqualifiedSignatureAssertion(step, context, continuation) {
         signatureAssertion = SignatureAssertion.fromStatement(statement, context);
 
   if (signatureAssertion === null) {
-    return continuation(stepUnifiesAsUnqualifiedSignatureAssertion);
+    return back();
   }
 
-  const stepString = step.getString();
-
-  context.trace(`Unifying the '${stepString}' step as a signature assertion...`);
-
-  stepUnifiesAsUnqualifiedSignatureAssertion = true;
-
-  if (stepUnifiesAsUnqualifiedSignatureAssertion) {
-    context.debug(`...unified the '${stepString}' step as a signature assertion.`);
-  }
-
-  return continuation(stepUnifiesAsUnqualifiedSignatureAssertion);
+  return forward(context, back);
 }
 
-function unifyStepAsQualifiedSignatureAssertion(step, context, continuation) {
-  let stepUnifiesAsQualifiedSignatureAssertion = false;
-
+function unifyStepAsQualifiedSignatureAssertion(step, context, forward, back) {
   const reference = step.getReference();
 
   if (reference === null) {
-    return continuation(stepUnifiesAsQualifiedSignatureAssertion);
+    return back();
   }
 
   const claim = context.findClaimByReference(reference);
 
   if (claim === null) {
-    return continuation(stepUnifiesAsQualifiedSignatureAssertion);
+    return back();
   }
 
   const statementNode = step.getStatementNode(),
         signatureAssertionNode = statementNode.getSignatureAssertionNode();
 
   if (signatureAssertionNode === null) {
-    return continuation(stepUnifiesAsQualifiedSignatureAssertion);
+    return back();
   }
 
   const stepString = step.getString(),
@@ -328,28 +228,18 @@ function unifyStepAsQualifiedSignatureAssertion(step, context, continuation) {
 
   context.trace(`Unifying the '${stepString}' step as a signature assertion with the '${referenceString}' reference...`);
 
-  return signatureAssertion.unifyClaim(claim, context, (claimUnifies) => {
-    let stepUnifiesAsQualifiedSignatureAssertion = false;
+  return signatureAssertion.unifyClaim(claim, context, (contezt, back) => {
+    context.debug(`...unified the '${stepString}' step as a signature assertion with the '${referenceString}' reference.`);
 
-    if (claimUnifies) {
-      stepUnifiesAsQualifiedSignatureAssertion = true;
-    }
-
-    if (stepUnifiesAsQualifiedSignatureAssertion) {
-      context.debug(`...unified the '${stepString}' step as a signature assertion with the '${referenceString}' reference.`);
-    }
-
-    return continuation(stepUnifiesAsQualifiedSignatureAssertion);
-  });
+    return forward(context, back);
+  }, back);
 }
 
-function compareStepToFactOrSubproofs(step, context, continuation) {
-  let stepComparesToFactOrSubproofs = false;
-
+function compareStepToFactOrSubproofs(step, context, forward, back) {
   const qualified = step.isQualified();
 
   if (qualified) {
-    return continuation(stepComparesToFactOrSubproofs);
+    return back();
   }
 
   const stepString = step.getString(),
@@ -357,13 +247,15 @@ function compareStepToFactOrSubproofs(step, context, continuation) {
 
   context.trace(`Comparing the '${stepString}' step to facts or subproofs...`);
 
-  stepComparesToFactOrSubproofs = step.compareFactOrSubproofs(factOrSubproofs, context);
+  const stepComparesToFactOrSubproofs = step.compareFactOrSubproofs(factOrSubproofs, context);
 
-  if (stepComparesToFactOrSubproofs) {
-    context.debug(`...compared the '${stepString}' step to facts or subproofs.`);
+  if (!stepComparesToFactOrSubproofs) {
+    return back();
   }
 
-  return continuation(stepComparesToFactOrSubproofs);
+  context.debug(`...compared the '${stepString}' step to facts or subproofs.`);
+
+  return forward(context, back);
 }
 
 export const unifySteps = [

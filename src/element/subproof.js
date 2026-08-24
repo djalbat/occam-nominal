@@ -89,7 +89,7 @@ export default define(class Subproof extends Element {
     return comparesToStatement;
   }
 
-  verify = breakable(function(context, continuation) {
+  verify = breakable(function(context, forward, back) {
     const subproofString = this.getString();
 
     context.trace(`Verifying the '${subproofString}' subprpoof...`);
@@ -111,7 +111,7 @@ export default define(class Subproof extends Element {
     }, context);
   });
 
-  verifySupposition(supposition, context, continuation) {
+  verifySupposition(supposition, context, forward, back) {
     const subproofString = this.getString(),
           suppositionString = supposition.getString();
 
@@ -134,7 +134,7 @@ export default define(class Subproof extends Element {
     });
   }
 
-  verifySuppositions(context, continuation) {
+  verifySuppositions(context, forward, back) {
     const suppositionsLength = this.suppositions.length;
 
     if (suppositionsLength === 0) {
@@ -158,7 +158,7 @@ export default define(class Subproof extends Element {
     });
   }
 
-  verifySubDerivation(context, continuation) {
+  verifySubDerivation(context, forward, back) {
     const subproofString = this.getString();  ///
 
     context.trace(`Verifying the '${subproofString}' subroof's proof...`);
