@@ -101,13 +101,11 @@ export default define(class Subproof extends Element {
       return all([
         verifySuppositions,
         verifySubDerivation
-      ], context, (verifies) => {
-        if (verifies) {
-          context.debug(`...verified the '${subproofString}' subproof.`);
-        }
+      ], context, ( _ , back) => {
+        context.debug(`...verified the '${subproofString}' subproof.`);
 
-        return continuation(verifies);
-      });
+        return forward(context, back);
+      }, back);
     }, context);
   });
 
@@ -117,21 +115,17 @@ export default define(class Subproof extends Element {
 
     context.trace(`Verifying the '${subproofString}' subprpoof's '${suppositionString}' supposition...`);
 
-    return supposition.verify(context, (suppositionVerifies) => {
-      if (suppositionVerifies) {
-        const factOrSubproof = supposition;  ////
+    return supposition.verify(context, (context, back) => {
+      const factOrSubproof = supposition;  ////
 
-        context.assignAssignments();
+      context.assignAssignments();
 
-        context.addFactOrSubproof(factOrSubproof);
-      }
+      context.addFactOrSubproof(factOrSubproof);
 
-      if (suppositionVerifies) {
-        context.debug(`...verified the '${subproofString}' subprpoof's '${suppositionString}' supposition.`);
-      }
+      context.debug(`...verified the '${subproofString}' subprpoof's '${suppositionString}' supposition.`);
 
-      return continuation(suppositionVerifies, context);
-    });
+      return forward(context, back);
+    }, back);
   }
 
   verifySuppositions(context, forward, back) {
@@ -147,29 +141,25 @@ export default define(class Subproof extends Element {
 
     context.trace(`Verifying the '${subproofString}' subproof's suppositions...`);
 
-    const verifySupposition = this.verifySupposition.bind(this);
+    return every(this.suppositions, (supposition, contezt, forward, back) => {
+      return this.verifySupposition(supposition, contezt, forward, back);
+    }, context, (context, back) => {
+      context.debug(`...verified the '${subproofString}' subproof's suppositions.`);
 
-    return every(this.suppositions, verifySupposition, context, (suppositionsVerify) => {
-      if (suppositionsVerify) {
-        context.debug(`...verified the '${subproofString}' subproof's suppositions.`);
-      }
-
-      return continuation(suppositionsVerify, context);
-    });
+      return forward(context, back);
+    }, back);
   }
 
   verifySubDerivation(context, forward, back) {
     const subproofString = this.getString();  ///
 
-    context.trace(`Verifying the '${subproofString}' subroof's proof...`);
+    context.trace(`Verifying the '${subproofString}' subroof's sub-derivation...`);
 
-    return this.subDerivation.verify(context, (subDerivationVerifies) => {
-      if (subDerivationVerifies) {
-        context.debug(`...verified the '${subproofString}' subroof's sub-derivation.`);
-      }
+    return this.subDerivation.verify(context, (context, back) => {
+      context.debug(`...verified the '${subproofString}' subroof's sub-derivation.`);
 
-      return continuation(subDerivationVerifies, context);
-    });
+      return forward(context, back);
+    }, back);
   }
 
   static name = "Subproof";

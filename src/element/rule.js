@@ -72,7 +72,7 @@ export default define(class Rule extends Element {
         verifyPremises,
         verifyConclusion,
         verifyProof
-      ], context, (context, back) => {
+      ], context, ( _ , back) => {
         const rule = this; ///
 
         context.addRule(rule);
@@ -181,76 +181,52 @@ export default define(class Rule extends Element {
     }, back);
   }
 
-  unifyStepWithConclusion(step, context, continuation) {
+  unifyStepWithConclusion(step, context, forward, back) {
     const ruleString = this.getString(),
           stepString = step.getString(),
           conclusionString = this.conclusion.getString();
 
     context.trace(`Unifying the '${stepString}' step with the '${ruleString}' rule's '${conclusionString}' conclusion...`);
 
-    return this.conclusion.unifyStep(step, context, (stepUnifies) => {
-      let stepUnifiesWithConclusion = false;
+    return this.conclusion.unifyStep(step, context, (context, back) => {
+      context.debug(`...unified the '${stepString}' step with the '${ruleString}' rule's '${conclusionString}' conclusion.`);
 
-      if (stepUnifies) {
-        stepUnifiesWithConclusion = true;
-      }
-
-      if (stepUnifiesWithConclusion) {
-        context.debug(`...unified the '${stepString}' step with the '${ruleString}' rule's '${conclusionString}' conclusion.`);
-      }
-
-      return continuation(stepUnifiesWithConclusion, context);
-    });
+      return forward(context, back);
+    }, back);
   }
 
-  unifyStepAndFactOrSubproofs(step, factOrSubproofs, context, continuation) {
+  unifyStepAndFactOrSubproofs(step, factOrSubproofs, context, forward, back) {
     return reconcile((context) => {
-      return this.unifyStepWithConclusion(step, context, (statementUnifiesWithConclusion) => {
-        if (!statementUnifiesWithConclusion) {
-          const stepAndFactOrSubproofsUnify = false;
+      return this.unifyStepWithConclusion(step, context, (context, back) => {
+        return this.unifyFactOrSubproofsWithPremises(factOrSubproofs, context, ( _ , back) => {
+          const inferredSubstitutionsSolved = context.areInferredSubstitutionsSolved();
 
-          return continuation(stepAndFactOrSubproofsUnify);
-        }
-
-        return this.unifyFactOrSubproofsWithPremises(factOrSubproofs, context, (factOrSubproofsUnifiesWithPremises) => {
-          let stepAndFactOrSubproofsUnify = false;
-
-          if (factOrSubproofsUnifiesWithPremises) {
-            const inferredSubstitutionsSolved = context.areInferredSubstitutionsSolved();
-
-            if (inferredSubstitutionsSolved) {
-              stepAndFactOrSubproofsUnify = true;
-            }
+          if (inferredSubstitutionsSolved) {
+            return back();
           }
 
-          return continuation(stepAndFactOrSubproofsUnify);
-        });
-      });
+          return forward(context, back);
+        }, back);
+      }, back);
     }, context)
   }
 
-  unifyFactOrSubproofsWithPremise(factOrSubproofs, premise, context, continuation) {
-    return extract(factOrSubproofs, (factOrSubproof, continuation) => {
-      return premise.unifyFactOrSubproof(factOrSubproof, context, continuation);
-    }, (factOrSubproof = null) => {
-      if (factOrSubproof !== null) {
-        const factOrSubproofsUnifiesWithPremise = true;
-
-        return context.solveInferredSubstitutions(() => {
-          return continuation(factOrSubproofsUnifiesWithPremise);
-        });
-      }
-
-      return premise.unifyIndependently(context, continuation);
+  unifyFactOrSubproofsWithPremise(factOrSubproofs, premise, context, forward, back) {
+    return extract(factOrSubproofs, (factOrSubproof, forward, back) => {
+      return premise.unifyFactOrSubproof(factOrSubproof, context, forward, back);
+    }, (context, back) => {
+      return context.solveInferredSubstitutions(forward, back);
+    }, () => {
+      return premise.unifyIndependently(context, forward, back);
     });
   }
 
-  unifyFactOrSubproofsWithPremises(factOrSubproofs, context, continuation) {
+  unifyFactOrSubproofsWithPremises(factOrSubproofs, context, forward, back) {
     factOrSubproofs = reverse(factOrSubproofs); ///
 
-    return backwardsEvery(this.premises, (premise, continuation) => {
-      return this.unifyFactOrSubproofsWithPremise(factOrSubproofs, premise, context, continuation);
-    }, continuation);
+    return backwardsEvery(this.premises, (premise, forward, back) => {
+      return this.unifyFactOrSubproofsWithPremise(factOrSubproofs, premise, context, forward, back);
+    }, forward, back);
   }
 
   toJSON() {

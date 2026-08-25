@@ -99,7 +99,7 @@ export default define(class Premise extends Fact {
     }, context);
   }
 
-  unifyIndependently(context, continuation) {
+  unifyIndependently(context, forward, back) {
     const premiseString = this.getString(); ///
 
     context.trace(`Unifying the '${premiseString}' premise independently...`);
@@ -146,7 +146,7 @@ export default define(class Premise extends Fact {
     }, context);
   }
 
-  unifySubproof(subproof, context, continuation) {
+  unifySubproof(subproof, context, forward, back) {
     const premiseString = this.getString(), ///
           subproofString = subproof.getString();
 
@@ -179,7 +179,7 @@ export default define(class Premise extends Fact {
     }, context);
   }
 
-  unifyFact(fact, context, continuation) {
+  unifyFact(fact, context, forward, back) {
     const factString = fact.getString(),
           premiseString = this.getString(); ///
 
@@ -193,36 +193,28 @@ export default define(class Premise extends Fact {
     return reconcile((specificContext) => {
       const statement = fact.getStatement();
 
-      return this.unifyStatement(statement, generalContext, specificContext, (statementUnifies) => {
-        let factUnifies = false;
+      return this.unifyStatement(statement, generalContext, specificContext, (generalContext, specificContext, back) => {
+        specificContext.commit(context);
 
-        if (statementUnifies) {
-          factUnifies = true;
+        context.debug(`...unified the '${factString}' fact with the '${premiseString}' premise.`);
 
-          specificContext.commit(context);
-        }
-
-        if (factUnifies) {
-          context.debug(`...unified the '${factString}' fact with the '${premiseString}' premise.`);
-        }
-
-        return continuation(factUnifies);
-      });
+        return forward(context, back);
+      }, back);
     }, specificContext);
   }
 
-  unifyFactOrSubproof(factOrSubproof, context, continuation) {
+  unifyFactOrSubproof(factOrSubproof, context, forward, back) {
     const factOrSubproofFact = factOrSubproof.isFact();
 
     if (factOrSubproofFact) {
       const fact = factOrSubproof;  ///
 
-      return this.unifyFact(fact, context, continuation);
+      return this.unifyFact(fact, context, forward, back);
     }
 
     const subproof = factOrSubproof;  ///
 
-    return this.unifySubproof(subproof, context, continuation);
+    return this.unifySubproof(subproof, context, forward, back);
   }
 
   toJSON() {

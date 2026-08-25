@@ -387,8 +387,6 @@ export default define(class Metavariable extends Element {
   }
 
   unifyStatement(statement, generalContext, specificContext, forward, back) {
-    let statementUnifies = false;
-
     const context = specificContext,  ///
           statementString = statement.getString(),
           metavariableString = this.getString();
@@ -398,9 +396,7 @@ export default define(class Metavariable extends Element {
     const statementMetavariableCompares = this.compareStatementMetavariable(statement, generalContext, specificContext);
 
     if (statementMetavariableCompares) {
-      statementUnifies = true;
-
-      return continuation(statementUnifies);
+      return forward(generalContext, specificContext, back);
     }
 
     const metavariable = this,  ///
@@ -419,10 +415,10 @@ export default define(class Metavariable extends Element {
 
         context.trace(`The '${inferredSubstitutionString}' inferred substitution is already present.`);
 
-        statementUnifies = true;
+        return forward(generalContext, specificContext, back);
       }
 
-      return continuation(statementUnifies);
+      return back();
     }
 
     const { StatementSubstitution } = elements;
@@ -438,29 +434,19 @@ export default define(class Metavariable extends Element {
       statementSubstitution = StatementSubstitution.fromStatementAndMetavariable(statement, metavariable, generalContext, specificContext);
     }
 
-    declare((state) => {
-      desist((state) => {
-        statementSubstitution.validate(state, context, (statementSubstitution, context) => {
-          let validates;
-
+    return declare((state) => {
+      return desist((state) => {
+        return statementSubstitution.validate(state, context, (statementSubstitution, _ , back) => {
           const inferredSubstitution = statementSubstitution;  ///
 
           context.addInferredSubstitution(inferredSubstitution);
 
-          validates = true;
+          context.debug(`...unified the '${statementString}' statement with the '${metavariableString}' metavariable.`);
 
-          return validates;
-        });
+          return forward(generalContext, specificContext, back);
+        }, back);
       }, state);
     });
-
-    statementUnifies = true;
-
-    if (statementUnifies) {
-      context.debug(`...unified the '${statementString}' statement with the '${metavariableString}' metavariable.`);
-    }
-
-    return continuation(statementUnifies);
   }
 
   unifyReference(reference, generalContext, specificContext, forward, back) {

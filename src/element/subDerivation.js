@@ -34,18 +34,16 @@ export default define(class SubDerivation extends Element {
     return lastStep;
   }
 
-  verify(context, continuation) {
-    return every(this.factOrSubproofs, (factOrSubproof, context, continuation) => {
-      factOrSubproof.verify(context, (factOrSubproofVerifies) => {
-        if (factOrSubproofVerifies) {
-          context.assignAssignments();
+  verify(context, forward, back) {
+    return every(this.factOrSubproofs, (factOrSubproof, context, forward, back) => {
+      return factOrSubproof.verify(context, ( _ , back) => {
+        context.assignAssignments();
 
-          context.addFactOrSubproof(factOrSubproof);
-        }
+        context.addFactOrSubproof(factOrSubproof);
 
-        return continuation(factOrSubproofVerifies, context);
-      });
-    }, context, continuation);
+        return forward(context, back);
+      }, back);
+    }, context, forward, back);
   }
 
   static name = "SubDerivation";

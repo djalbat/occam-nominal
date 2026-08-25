@@ -38,7 +38,7 @@ class UnifyStatementPass extends ContinuationZipPass {
 
         const statement = context.findStatementByStatementNode(statementNode);
 
-        return metavariable.unifyStatement(statement, generalContext, specificContext, (back) => {
+        return metavariable.unifyStatement(statement, generalContext, specificContext, (generalContext, specificContext, back) => {
           return forward(generalContext, specificContext, back);
         }, back);
       }

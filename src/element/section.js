@@ -50,7 +50,7 @@ export default define(class Section extends Element {
         verifyHypotheses,
         verifyDeclaration,
         verifyClaim
-      ], context, (context, back) => {
+      ], context, ( _ , back) => {
         context.debug(`...verified the '${sectionString}' section.`);
 
         return forward(context, back);

@@ -68,21 +68,13 @@ export default class Resolution extends Element {
     return reconcile((specificContext) => {
       const statement = step.getStatement();
 
-      return this.statement.unifyStatement(statement, generalContext, specificContext, (statementUnifies) => {
-        let stepUnifies = false;
+      return this.statement.unifyStatement(statement, generalContext, specificContext, (generalContext, specificContext, back) => {
+        specificContext.commit(context);
 
-        if (statementUnifies) {
-          specificContext.commit(context);
+        context.debug(`...unified the '${stepString}' step with the '${resolutionString}' resolution.`);
 
-          stepUnifies = true;
-        }
-
-        if (stepUnifies) {
-          context.debug(`...unified the '${stepString}' step with the '${resolutionString}' resolution.`);
-        }
-
-        return continuation(stepUnifies);
-      });
+        return forward(context, back);
+      }, back);
     }, specificContext);
   }
 

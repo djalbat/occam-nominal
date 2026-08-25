@@ -35,7 +35,7 @@ export default define(class Proof extends Element {
 
   verify(statement, context, forward, back) {
     return enclose((context) => {
-      return this.derivation.verify(context, ( _, back) => {
+      return this.derivation.verify(context, ( _ , back) => {
         const lastStep = context.getLastStep();
 
         if (lastStep === null) {

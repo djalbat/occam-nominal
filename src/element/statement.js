@@ -300,13 +300,11 @@ export default define(class Statement extends Element {
 
     context.trace(`Unifying the '${specificStatementString}' statement with the '${generalStatementString}' statement...`);
 
-    return unifyStatement(generalStatement, specificStatement, generalContext, specificContext, (statementUnifies) => {
-      if (statementUnifies) {
-        context.debug(`...unified the '${specificStatementString}' statement with the '${generalStatementString}' statement.`);
-      }
+    return unifyStatement(generalStatement, specificStatement, generalContext, specificContext, (generalContext, specificContext, back) => {
+      context.debug(`...unified the '${specificStatementString}' statement with the '${generalStatementString}' statement.`);
 
-      return continuation(statementUnifies);
-    });
+      return forward(generalContext, specificContext, back);
+    }, back);
   }
 
   unifyIndependently(generalContext, specificContext, forward, back) {

@@ -138,9 +138,7 @@ export default class Fact extends Element {
 
   unifyStatement(statement, generalContext, specificContext, forward, back) {
     if (this.statement === null) {
-      const statementUnifies = false;
-
-      return continuation(statementUnifies);
+      return back();
     }
 
     const context = specificContext,  ///
@@ -149,12 +147,10 @@ export default class Fact extends Element {
 
     context.trace(`Unifying the '${statementString}' statement with the '${factString}' fact's statement...`);
 
-    return this.statement.unifyStatement(statement, generalContext, specificContext, (statementUnifies) => {
-      if (statementUnifies) {
-        context.debug(`...unified the '${statementString}' statement with the '${factString}' fact's statement.`);
-      }
+    return this.statement.unifyStatement(statement, generalContext, specificContext, (generalContext, specificContext, back) => {
+      context.debug(`...unified the '${statementString}' statement with the '${factString}' fact's statement.`);
 
-      return continuation(statementUnifies);
-    });
+      return forward(generalContext, specificContext, back);
+    }, back);
   }
 }

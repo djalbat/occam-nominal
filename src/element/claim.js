@@ -103,7 +103,9 @@ export default class Claim extends Element {
         verifySuppositions,
         verifyDeduction,
         verifyProof
-      ], context, forward, back);
+      ], context, () => {
+        debugger
+      }, back);
     }, context);
   }
 

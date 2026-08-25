@@ -110,7 +110,7 @@ export default define(class Step extends Fact {
 
     (declared ? declare : derive)((state) => {
       return this.validate(state, context, cut((premise, _ , back) => {
-        return this.unify((context) => {
+        return this.unify((context, back) => {
           context.debug(`...verified the '${stepString}' step.`);
 
           return forward(context, back);
