@@ -302,28 +302,34 @@ export default class Claim extends Element {
     }, context);
   }
 
-  unifyFactOrSubproofsWithSupposition(factorSubproofs, supposition, context, forward, back) {
-    return extract(factorSubproofs,
+  unifyFactOrSubproofsWithSupposition(factOrSubproofs, supposition, context, forward, back) {
+    return extract(factOrSubproofs,
       (factOrSubproof, forward, back) => {
         return supposition.unifyFactOrSubproof(factOrSubproof, context, forward, back);
-      }, (factOrSubproof, back) => {
-        return context.solveInferredSubstitutions(forward, back);
+      }, (factOrSubproofs, factOrSubproof, context, back) => {
+        return context.solveInferredSubstitutions((back) => {
+          return forward(factOrSubproofs, context, back);
+        }, back);
       }, (exception) => {
-        if (exception) {
+        if(exception) {
           return back(exception);
         }
 
-        return supposition.unifyIndependently(context, forward, back);
+        return supposition.unifyIndependently(context, (context, back) => {
+          return forward(factOrSubproofs, context, back);
+        }, back);
       }
     );
   }
 
-  unifyFactOrSubproofsWithSuppositions(factorSubproofs, context, forward, back) {
-    factorSubproofs = reverse(factorSubproofs); ///
+  unifyFactOrSubproofsWithSuppositions(factOrSubproofs, context, forward, back) {
+    factOrSubproofs = reverse(factOrSubproofs); ///
 
-    return backwardsEvery(this.suppositions, (supposition, continuation) => {
-      return this.unifyFactOrSubproofsWithSupposition(factorSubproofs, supposition, context, continuation);
-    }, continuation);
+    return backwardsEvery(this.suppositions, (supposition, factOrSubproofs, context, forward, back) => {
+      return this.unifyFactOrSubproofsWithSupposition(factOrSubproofs, supposition, context, forward, back);
+    }, factOrSubproofs, context, (factOrSubproofs, context, back) => {
+      return forward(context, back);
+    }, back);
   }
 
   toJSON() {

@@ -200,7 +200,7 @@ export default define(class Rule extends Element {
 
     return reconcile((context) => {
       return this.unifyStepWithConclusion(step, context, (context, back) => {
-        return this.unifyFactOrSubproofsWithPremises(factOrSubproofs, context, (back) => {
+        return this.unifyFactOrSubproofsWithPremises(factOrSubproofs, context, (context, back) => {
           const inferredSubstitutionsSolved = context.areInferredSubstitutionsSolved();
 
           if (!inferredSubstitutionsSolved) {
@@ -219,14 +219,18 @@ export default define(class Rule extends Element {
     return extract(factOrSubproofs,
       (factOrSubproof, forward, back) => {
         return premise.unifyFactOrSubproof(factOrSubproof, context, forward, back);
-      }, (factOrSubproof, back) => {
-        return context.solveInferredSubstitutions(forward, back);
+      }, (factOrSubproofs, factOrSubproof, context, back) => {
+        return context.solveInferredSubstitutions((back) => {
+          return forward(factOrSubproofs, context, back);
+        }, back);
       }, (exception) => {
         if(exception) {
           return back(exception);
         }
 
-        return premise.unifyIndependently(context, forward, back);
+        return premise.unifyIndependently(context, (context, back) => {
+          return forward(factOrSubproofs, context, back);
+        }, back);
       }
     );
   }
@@ -234,9 +238,11 @@ export default define(class Rule extends Element {
   unifyFactOrSubproofsWithPremises(factOrSubproofs, context, forward, back) {
     factOrSubproofs = reverse(factOrSubproofs); ///
 
-    return backwardsEvery(this.premises, (premise, forward, back) => {
+    return backwardsEvery(this.premises, (premise, factOrSubproofs, context, forward, back) => {
       return this.unifyFactOrSubproofsWithPremise(factOrSubproofs, premise, context, forward, back);
-    }, forward, back);
+    }, factOrSubproofs, context, (factOrSubproofs, context, back) => {
+      return forward(context, back);
+    }, back);
   }
 
   toJSON() {

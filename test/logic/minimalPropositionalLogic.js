@@ -10,6 +10,6 @@ const logLevel = TRACE_LEVEL,
       projectName = "minimal-propositional-logic",
       projectsDirectoryPath = "../../Logic";
 
-describe.only(projectName, () => {
+describe(projectName, () => {
   createSuite(logLevel, projectName, projectsDirectoryPath);
 });

@@ -1,6 +1,6 @@
 "use strict";
 
-import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
+import { Element, breakPointUtilities } from "occam-languages";
 
 import Value from "../value";
 
@@ -9,8 +9,7 @@ import { instantiate } from "../utilities/context";
 import { instantiateProcedureCall } from "../process/instantiate";
 import { parametersFromProcedureCallNode, procedureReferenceFromProcedureCallNode } from "../utilities/element";
 
-const { cut } = continuationUtilities,
-      { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
+const { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class ProcedureCall extends Element {
   constructor(context, string, node, breakPoint, parameters, procedureReference) {
@@ -142,7 +141,7 @@ export default define(class ProcedureCall extends Element {
             value
           ];
 
-    return procedure.callNominally(values, cut((value, back) => {
+    return procedure.callNominally(values, (value, back) => {
       const boolean = value.isBoolean();
 
       if (!boolean) {
@@ -160,7 +159,7 @@ export default define(class ProcedureCall extends Element {
       context.debug(`...discharged the '${procedureCallString}' procedure call given the '${termString}' term.`);
 
       return forward(back);
-    }, back), back);
+    }, back);
   }
 
   toJSON() {
