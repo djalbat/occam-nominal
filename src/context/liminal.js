@@ -93,25 +93,25 @@ export default class LiminalContext extends Context {
     });
   }
 
-  solveInferredSubstitutions(continuation) {
+  solveInferredSubstitutions(forward, back) {
     const context = this, ///
           inferredSubstitutions = this.getInferredSubstitutions(),
           metavariableNodes = metavariableNodesFromInferredSubstitutions(inferredSubstitutions);
 
-    return forEach(metavariableNodes, (metavariableNode, continuation) => {
+    return forEach(metavariableNodes, (metavariableNode, forward, back) => {
       const complexInferredSubstitutions = this.findComplexInferredSubstitutionsByMetavariableNode(metavariableNode);
 
-      return forEach(complexInferredSubstitutions, (complexInferredSubstitution, continuation) => {
+      return forEach(complexInferredSubstitutions, (complexInferredSubstitution, forward, back) => {
         const inferredSubstitution = complexInferredSubstitution, ///
               solved = inferredSubstitution.isSolved();
 
         if (solved) {
-          return continuation();
+          return forward(context, back);
         }
 
-        return inferredSubstitution.solve(context, continuation);
-      }, continuation);
-    }, continuation);
+        return inferredSubstitution.solve(context, forward, back);
+      }, forward, back);
+    }, forward, back);
   }
 
   areInferredSubstitutionsSolved() {

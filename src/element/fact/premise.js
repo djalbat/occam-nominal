@@ -155,9 +155,7 @@ export default define(class Premise extends Fact {
     const subproofAssertion = this.findSubproofAssertion();
 
     if (subproofAssertion === null) {
-      const subproofUnifies = false;
-
-      return continuation(subproofUnifies);
+      return back();
     }
 
     const premiseContext = this.getContext(), ///
@@ -165,17 +163,13 @@ export default define(class Premise extends Fact {
           specificContext = context;  ///
 
     return reconcile((context) => {
-      return subproofAssertion.unifySubproof(subproof, generalContext, specificContext, (subproofUnifies) => {
-        if (subproofUnifies) {
-          context.commit();
-        }
+      return subproofAssertion.unifySubproof(subproof, generalContext, specificContext, (generalContext, specificContext, back) => {
+        specificContext.commit(context);
 
-        if (subproofUnifies) {
-          context.debug(`...unified the '${subproofString}' subproof with the '${premiseString}' premise.`);
-        }
+        context.debug(`...unified the '${subproofString}' subproof with the '${premiseString}' premise.`);
 
-        return continuation(subproofUnifies);
-      });
+        return forward(context, back);
+      }, back);
     }, context);
   }
 
@@ -204,6 +198,10 @@ export default define(class Premise extends Fact {
   }
 
   unifyFactOrSubproof(factOrSubproof, context, forward, back) {
+    if (factOrSubproof === undefined) {
+      debugger
+    }
+
     const factOrSubproofFact = factOrSubproof.isFact();
 
     if (factOrSubproofFact) {

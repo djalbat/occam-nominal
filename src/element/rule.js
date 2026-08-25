@@ -196,14 +196,18 @@ export default define(class Rule extends Element {
   }
 
   unifyStepAndFactOrSubproofs(step, factOrSubproofs, context, forward, back) {
+    const specificContext = context;  ///
+
     return reconcile((context) => {
       return this.unifyStepWithConclusion(step, context, (context, back) => {
-        return this.unifyFactOrSubproofsWithPremises(factOrSubproofs, context, ( _ , back) => {
+        return this.unifyFactOrSubproofsWithPremises(factOrSubproofs, context, (back) => {
           const inferredSubstitutionsSolved = context.areInferredSubstitutionsSolved();
 
-          if (inferredSubstitutionsSolved) {
+          if (!inferredSubstitutionsSolved) {
             return back();
           }
+
+          context = specificContext;  ///
 
           return forward(context, back);
         }, back);
@@ -212,13 +216,19 @@ export default define(class Rule extends Element {
   }
 
   unifyFactOrSubproofsWithPremise(factOrSubproofs, premise, context, forward, back) {
-    return extract(factOrSubproofs, (factOrSubproof, forward, back) => {
-      return premise.unifyFactOrSubproof(factOrSubproof, context, forward, back);
-    }, (context, back) => {
-      return context.solveInferredSubstitutions(forward, back);
-    }, () => {
-      return premise.unifyIndependently(context, forward, back);
-    });
+    return extract(factOrSubproofs,
+      (factOrSubproof, forward, back) => {
+        return premise.unifyFactOrSubproof(factOrSubproof, context, forward, back);
+      }, (factOrSubproof, back) => {
+        return context.solveInferredSubstitutions(forward, back);
+      }, (exception) => {
+        if(exception) {
+          return back(exception);
+        }
+
+        return premise.unifyIndependently(context, forward, back);
+      }
+    );
   }
 
   unifyFactOrSubproofsWithPremises(factOrSubproofs, context, forward, back) {

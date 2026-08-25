@@ -103,9 +103,7 @@ export default class Claim extends Element {
         verifySuppositions,
         verifyDeduction,
         verifyProof
-      ], context, () => {
-        debugger
-      }, back);
+      ], context, forward, back);
     }, context);
   }
 
@@ -305,19 +303,19 @@ export default class Claim extends Element {
   }
 
   unifyFactOrSubproofsWithSupposition(factorSubproofs, supposition, context, forward, back) {
-    return extract(factorSubproofs, (factOrSubproof, continuation) => {
-      return supposition.unifyFactOrSubproof(factOrSubproof, context, continuation);
-    }, (factOrSubproof = null) => {
-      if (factOrSubproof !== null) {
-        const factorSubproofsUnifiesWithSupposition = true;
+    return extract(factorSubproofs,
+      (factOrSubproof, forward, back) => {
+        return supposition.unifyFactOrSubproof(factOrSubproof, context, forward, back);
+      }, (factOrSubproof, back) => {
+        return context.solveInferredSubstitutions(forward, back);
+      }, (exception) => {
+        if (exception) {
+          return back(exception);
+        }
 
-        return context.solveInferredSubstitutions(() => {
-          return continuation(factorSubproofsUnifiesWithSupposition);
-        });
+        return supposition.unifyIndependently(context, forward, back);
       }
-
-      return supposition.unifyIndependently(context, continuation);
-    });
+    );
   }
 
   unifyFactOrSubproofsWithSuppositions(factorSubproofs, context, forward, back) {
