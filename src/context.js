@@ -663,4 +663,11 @@ export default class Context extends ContextBase {
 
     context.addFactOrSubproof(factOrSubproof);
   }
+
+  getRules() {
+    const context = this.getContext(),
+          rules = context.getRules();
+
+    return rules;
+  }
 }
