@@ -4,7 +4,7 @@ import { Element, breakPointUtilities, continuationUtilities } from "occam-langu
 
 import { attempt, reconcile, serialise } from "../utilities/context";
 
-const { all } = continuationUtilities,
+const { all, cut } = continuationUtilities,
       { breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default class Resolution extends Element {
@@ -55,6 +55,8 @@ export default class Resolution extends Element {
   }
 
   unifyStep(step, context, forward, back) {
+    forward = cut(forward, back); ///
+
     const stepString = step.getString(),
           resolutionString = this.getString();  ///
 
@@ -93,6 +95,7 @@ export default class Resolution extends Element {
       return continuation(statementUnifies);
     });
   }
+
   toJSON() {
     const context = this.getContext();
 

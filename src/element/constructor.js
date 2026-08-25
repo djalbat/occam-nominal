@@ -81,6 +81,8 @@ export default define(class Constructor extends Element {
   }
 
   verify(context, forward, back) {
+    forward = cut(forward, back); ///
+
     const includeType = false,
           constructorString = this.getString(includeType);  ///
 
@@ -96,11 +98,11 @@ export default define(class Constructor extends Element {
 
     return declare((state) => {
       return desist((state) => {
-        return this.validate(state, context, cut((constructor, _ , back) => {
+        return this.validate(state, context, (constructor, _ , back) => {
           context.debug(`...verified the '${constructorString}' constructor.`);
 
           return forward(context, back);
-        }, back), back);
+        }, back);
       }, state);
     });
   }

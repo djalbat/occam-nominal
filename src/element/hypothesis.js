@@ -42,6 +42,8 @@ export default define(class Hypothesis extends Element {
   }
 
   verify = breakable(function (context, forward, back) {
+    forward = cut(forward, back); ///
+
     const hypothesisString = this.getString(); ///
 
     context.trace(`Verifying the '${hypothesisString}' hypothesis...`);
@@ -55,11 +57,11 @@ export default define(class Hypothesis extends Element {
     }
 
     declare((state) => {
-      return this.validate(state, context, cut((hypothesis, _ , back) => {
+      return this.validate(state, context, (hypothesis, _ , back) => {
         context.debug(`...verified the '${hypothesisString}' hypothesis.`);
 
         return forward(context, back);
-      }, back), back);
+      }, back);
     });
   });
 

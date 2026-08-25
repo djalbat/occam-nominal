@@ -39,6 +39,8 @@ export default define(class Combinator extends Element {
   }
 
   verify(context, forward, back) {
+    forward = cut(forward, back); ///
+
     const includeType = false,
           cbmbinatorString = this.getString(includeType);  ///
 
@@ -54,11 +56,11 @@ export default define(class Combinator extends Element {
 
     return declare((state) => {
       return desist((state) => {
-        return this.validate(state, context, cut((cbmbinator, _ , back) => {
+        return this.validate(state, context, (cbmbinator, _ , back) => {
           context.debug(`...verified the '${cbmbinatorString}' cbmbinator.`);
 
           return forward(context, back);
-        }, back), back);
+        }, back);
       }, state);
     });
   }

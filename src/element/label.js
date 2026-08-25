@@ -52,6 +52,8 @@ export default define(class Label extends Element {
   compareMetavariable(metavariable) { return this.metavariable.compareMetavariable(metavariable); }
 
   verify(forward, back) {
+    forward = cut(forward, back); ///
+
     const context = this.getContext(),
           labelString = this.getString(); ///
 
@@ -67,11 +69,11 @@ export default define(class Label extends Element {
     }
 
     return declare((state) => {
-      return this.validate(state, context, cut((label, _ , back) => {
+      return this.validate(state, context, (label, _ , back) => {
         context.debug(`...verified the '${labelString}' label.`);
 
         return forward(back);
-      }, back), back);
+      }, back);
     });
   }
 

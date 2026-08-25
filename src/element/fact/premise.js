@@ -54,6 +54,8 @@ export default define(class Premise extends Fact {
   }
 
   verify = breakable(function (context, forward, back) {
+    forward = cut(forward, back); ///
+
     const premiseString = this.getString(); ///
 
     context.trace(`Verifying the '${premiseString}' premise...`);
@@ -67,11 +69,11 @@ export default define(class Premise extends Fact {
     }
 
     return declare((state) => {
-      return this.validate(state, context, cut((premise, _ , back) => {
+      return this.validate(state, context, (premise, _ , back) => {
         context.debug(`...verified the '${premiseString}' premise.`);
 
         return forward(context, back);
-      }, back), back);
+      }, back);
     });
   });
 
@@ -100,6 +102,8 @@ export default define(class Premise extends Fact {
   }
 
   unifyIndependently(context, forward, back) {
+    forward = cut(forward, back); ///
+
     const premiseString = this.getString(); ///
 
     context.trace(`Unifying the '${premiseString}' premise independently...`);
@@ -198,9 +202,7 @@ export default define(class Premise extends Fact {
   }
 
   unifyFactOrSubproof(factOrSubproof, context, forward, back) {
-    if (factOrSubproof === undefined) {
-      debugger
-    }
+    forward = cut(forward, back); ///
 
     const factOrSubproofFact = factOrSubproof.isFact();
 

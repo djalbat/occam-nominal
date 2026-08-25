@@ -79,7 +79,9 @@ export default define(class Generator extends Element {
     return malformed;
   }
 
-  verify(context, continuation) {
+  verify(context, forward, back) {
+    forward = cut(forward, back); ///
+
     let verifies = false;
 
     const includeType = false,
@@ -114,7 +116,7 @@ export default define(class Generator extends Element {
     return continuation(verifies, context);
   }
 
-  validate(state, context, continuation) {
+  validate(state, context, forward, back) {
     let validates;
 
     const includeType = false,
@@ -154,7 +156,7 @@ export default define(class Generator extends Element {
     return validates;
   }
 
-  validateTermAsVariable(state, context, continuation) {
+  validateTermAsVariable(state, context, forward, back) {
     let termValidatesAsVariable = false;
 
     const hypothetical = this.isHypothetical();
@@ -186,7 +188,7 @@ export default define(class Generator extends Element {
     return termValidatesAsVariable;
   }
 
-  validateTermAsGenerator(state, context, continuation) {
+  validateTermAsGenerator(state, context, forward, back) {
     let termValidatesAsGenerator = false;
 
     const hypothetical = this.isHypothetical();
@@ -213,7 +215,7 @@ export default define(class Generator extends Element {
     return termValidatesAsGenerator;
   }
 
-  unifyTerm(term, context, continuation) {
+  unifyTerm(term, context, forward, back) {
     let termUnifies;
 
     const termString = term.getString();
@@ -247,7 +249,7 @@ export default define(class Generator extends Element {
     return termUnifies;
   }
 
-  unifyTermWithGenerator(term, context, continuation) {
+  unifyTermWithGenerator(term, context, forward, back) {
     let termUnifiesWithCGenerator;
 
     const termString = term.getString(),
@@ -277,7 +279,7 @@ export default define(class Generator extends Element {
     return termUnifiesWithCGenerator;
   }
 
-  dischargeHypothesesGivenTerm(term, context, continuation) {
+  dischargeHypothesesGivenTerm(term, context, forward, back) {
     let hypothesesDischargesGivenTerm;
 
     const hypothetical = this.isHypothetical();
@@ -289,7 +291,7 @@ export default define(class Generator extends Element {
 
       const dischargeHypothesisGivenTerm = this.dischargeHypothesisGivenTerm.bind(this);
 
-      hypothesesDischargesGivenTerm = every(this.hypotheses, dischargeHypothesisGivenTerm, term, context, continuation);
+      hypothesesDischargesGivenTerm = every(this.hypotheses, dischargeHypothesisGivenTerm, term, context, forward, back);
 
       if (hypothesesDischargesGivenTerm) {
         context.debug(`...discharged the '${generatorString}' generator's hypotheses.`);
@@ -301,7 +303,7 @@ export default define(class Generator extends Element {
     return hypothesesDischargesGivenTerm;
   }
 
-  dischargeHypothesisGivenTerm(hypothesis, term, context, continuation) {
+  dischargeHypothesisGivenTerm(hypothesis, term, context, forward, back) {
     let hypothesisDischargesGivenTerm;
 
     const termString = term.getString(),
@@ -310,7 +312,7 @@ export default define(class Generator extends Element {
 
     context.trace(`Discharging the '${generatorString}' generator's '${hypothesisString}' hypothesis given the '${termString}' term...`);
 
-    hypothesisDischargesGivenTerm = hypothesis.dischargeGivenTerm(term, context, continuation);
+    hypothesisDischargesGivenTerm = hypothesis.dischargeGivenTerm(term, context, forward, back);
 
     if (hypothesisDischargesGivenTerm) {
       context.trace(`...discharges the '${generatorString}' generator's '${hypothesisString}' hypothesis given the '${termString}' term.`);

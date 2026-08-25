@@ -94,6 +94,8 @@ export default define(class Step extends Fact {
   }
 
   verify = breakable(function (context, forward, back) {
+    forward = cut(forward, back); ///
+
     const stepString = this.getString(); ///
 
     context.trace(`Verifying the '${stepString}' step...`);
@@ -109,13 +111,13 @@ export default define(class Step extends Fact {
     const declared = this.idDeclared();
 
     (declared ? declare : derive)((state) => {
-      return this.validate(state, context, cut((premise, _ , back) => {
+      return this.validate(state, context, (premise, _ , back) => {
         return this.unify(( _ , back) => {
           context.debug(`...verified the '${stepString}' step.`);
 
           return forward(context, back);
         }, back);
-      }, back), back);
+      }, back);
     });
   });
 

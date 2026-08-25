@@ -28,6 +28,8 @@ export default define(class Conclusion extends Resolution {
   }
 
   verify = breakable(function (context, forward, back) {
+    forward = cut(forward, back); ///
+
     const conclusionString = this.getString();  ///
 
     context.trace(`Verifying the '${conclusionString}' conclusion...`);
@@ -42,11 +44,11 @@ export default define(class Conclusion extends Resolution {
 
     declare((state) => {
       desist((state) => {
-        return this.validate(state, context, cut((conclusion, _ , back) => {
+        return this.validate(state, context, (conclusion, _ , back) => {
           context.debug(`...verified the '${conclusionString}' conclusion.`);
 
           return forward(context, back);
-        }, back), back);
+        }, back);
       }, state);
     });
   });

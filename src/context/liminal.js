@@ -8,7 +8,7 @@ import elements from "../elements";
 
 import { metavariableNodesFromInferredSubstitutions } from "../utilities/substitutions";
 
-const { forEach } = continuationUtilities,
+const { cut, forEach } = continuationUtilities,
       { push, find, first } = arrayUtilities;
 
 export default class LiminalContext extends Context {
@@ -94,6 +94,8 @@ export default class LiminalContext extends Context {
   }
 
   solveInferredSubstitutions(forward, back) {
+    forward = cut(forward, back); ///
+
     const context = this, ///
           inferredSubstitutions = this.getInferredSubstitutions(),
           metavariableNodes = metavariableNodesFromInferredSubstitutions(inferredSubstitutions);

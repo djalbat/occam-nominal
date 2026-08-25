@@ -54,6 +54,8 @@ export default define(class Supposition extends Fact {
   }
 
   verify = breakable(function (context, forward, back) {
+    forward = cut(forward, back); ///
+
     const suppositionString = this.getString(); ///
 
     context.trace(`Verifying the '${suppositionString}' supposition...`);
@@ -67,11 +69,11 @@ export default define(class Supposition extends Fact {
     }
 
     return declare((state) => {
-      return this.validate(state, context, cut((supposition, _ , back) => {
+      return this.validate(state, context, (supposition, _ , back) => {
         context.debug(`...verified the '${suppositionString}' supposition.`);
 
         return forward(context, back);
-      }, back), back);
+      }, back);
     });
   });
 
@@ -100,6 +102,8 @@ export default define(class Supposition extends Fact {
   }
 
   unifyIndependently(context, forward, back) {
+    forward = cut(forward, back); ///
+
     const suppositionString = this.getString(); ///
 
     context.trace(`Unifying the '${suppositionString}' supposition independently...`);
@@ -212,17 +216,19 @@ export default define(class Supposition extends Fact {
   }
 
   unifyFactOrSubproof(factOrSubproof, context, forward, back) {
+    forward = cut(forward, back); ///
+
     const factOrSubproofFact = factOrSubproof.isFact();
 
     if (factOrSubproofFact) {
       const fact = factOrSubproof;  ///
 
-      return this.unifyFact(fact, context, continuation);
+      return this.unifyFact(fact, context, forward, back);
     }
 
     const subproof = factOrSubproof;  ///
 
-    return this.unifySubproof(subproof, context, continuation);
+    return this.unifySubproof(subproof, context, forward, back);
   }
 
   toJSON() {
