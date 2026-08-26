@@ -36,10 +36,10 @@ export default define(class Derivation extends Element {
 
   verify(context, forward, back) {
     return every(this.factOrSubproofs, (factOrSubproof, context, forward, back) => {
-      return factOrSubproof.verify(context, (context, back) => {
-        context.assignAssignments();
-
+      return factOrSubproof.verify(context, (_, back) => {
         context.addFactOrSubproof(factOrSubproof);
+
+        context.assignAssignments();
 
         return forward(context, back);
       }, back);

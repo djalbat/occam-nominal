@@ -179,14 +179,6 @@ export default define(class Schema extends Element {
 
     return supposition.verify(context, (suppositionVerifies) => {
       if (suppositionVerifies) {
-        const factOrSubproof = supposition;  ////
-
-        context.assignAssignments();
-
-        context.addFactOrSubproof(factOrSubproof);
-      }
-
-      if (suppositionVerifies) {
         context.debug(`...verified the '${schemaString}' schema's '${suppositionString}' supposition.`);
       }
 

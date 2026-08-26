@@ -69,7 +69,7 @@ export default define(class Premise extends Fact {
     }
 
     return declare((state) => {
-      return this.validate(state, context, (premise, _ , back) => {
+      return this.validate(state, context, (premise, _, back) => {
         context.debug(`...verified the '${premiseString}' premise.`);
 
         return forward(context, back);

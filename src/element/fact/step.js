@@ -111,7 +111,7 @@ export default define(class Step extends Fact {
     const declared = this.idDeclared();
 
     (declared ? declare : derive)((state) => {
-      return this.validate(state, context, (premise, _ , back) => {
+      return this.validate(state, context, (premise, _, back) => {
         return this.unify(( _ , back) => {
           context.debug(`...verified the '${stepString}' step.`);
 

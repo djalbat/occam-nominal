@@ -646,28 +646,15 @@ export default class Context extends ContextBase {
     context.addInferredSubstitution(inferredSubstitution);
   }
 
-  addConstraint(constraint) {
-    const context = this.getContext();
-
-    context.addConstraint(constraint);
-  }
-
   addDeclaredMetavariable(declaredMetavariable) {
     const context = this.getContext();
 
     context.addDeclaredMetavariable(declaredMetavariable);
   }
 
-  addFactOrSubproof(factOrSubproof) {
+  addConstraint(constraint) {
     const context = this.getContext();
 
-    context.addFactOrSubproof(factOrSubproof);
-  }
-
-  getRules() {
-    const context = this.getContext(),
-          rules = context.getRules();
-
-    return rules;
+    context.addConstraint(constraint);
   }
 }

@@ -101,7 +101,7 @@ export default define(class Subproof extends Element {
       return all([
         verifySuppositions,
         verifySubDerivation
-      ], context, ( _ , back) => {
+      ], context, (context , back) => {
         context.debug(`...verified the '${subproofString}' subproof.`);
 
         return forward(context, back);
@@ -116,12 +116,6 @@ export default define(class Subproof extends Element {
     context.trace(`Verifying the '${subproofString}' subprpoof's '${suppositionString}' supposition...`);
 
     return supposition.verify(context, (context, back) => {
-      const factOrSubproof = supposition;  ////
-
-      context.assignAssignments();
-
-      context.addFactOrSubproof(factOrSubproof);
-
       context.debug(`...verified the '${subproofString}' subprpoof's '${suppositionString}' supposition.`);
 
       return forward(context, back);
@@ -142,7 +136,15 @@ export default define(class Subproof extends Element {
     context.trace(`Verifying the '${subproofString}' subproof's suppositions...`);
 
     return every(this.suppositions, (supposition, contezt, forward, back) => {
-      return this.verifySupposition(supposition, contezt, forward, back);
+      return this.verifySupposition(supposition, contezt, ( _ , back) => {
+        const factOrSubproof = supposition; ///
+
+        context.addFactOrSubproof(factOrSubproof);
+
+        context.assignAssignments();
+
+        return forward(context, back);
+      }, back);
     }, context, (context, back) => {
       context.debug(`...verified the '${subproofString}' subproof's suppositions.`);
 

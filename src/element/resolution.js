@@ -41,14 +41,14 @@ export default class Resolution extends Element {
   }
 
   validateStatement(state, context, forward, back) {
-    const reolutinoString = this.getString();  ///
+    const resolutionString = this.getString();  ///
 
-    context.trace(`Validating the '${reolutinoString}' reolutino's statement...`);
+    context.trace(`Validating the '${resolutionString}' resolution's statement...`);
 
     return this.statement.validate(state, context, (statement, context, back) => {
       this.statement = statement;
 
-      context.trace(`...validated the '${reolutinoString}' reolutino's statement.`);
+      context.trace(`...validated the '${resolutionString}' resolution's statement.`);
 
       return forward(state, context, back);
     }, back);

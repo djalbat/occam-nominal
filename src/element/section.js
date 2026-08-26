@@ -94,8 +94,6 @@ export default define(class Section extends Element {
     return every(this.hypotheses, (hypothesis, context, forward, back) => {
       return hypothesis.verify(context, forward, back);
     }, context, (context, back) => {
-      context.assignAssignments();
-
       context.debug(`...verified the '${sectionString}' section's hypotheses.`);
 
       return forward(context, back);

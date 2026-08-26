@@ -129,19 +129,6 @@ export default define(class Rule extends Element {
     }, back);
   }
 
-  verifyConclusion(context, forward, back) {
-    const ruleString = this.getString(), ///
-          conclusionString = this.conclusion.getString();
-
-    context.trace(`Verifying the '${ruleString}' rule's '${conclusionString}' conclusion...`);
-
-    return this.conclusion.verify(context, (context, back) => {
-      context.debug(`...verified the '${ruleString}' rule's '${conclusionString}' conclusion.`);
-
-      return forward(context, back);
-    }, back);
-  }
-
   verifyPremise(premise, context, forward, back) {
     const ruleString = this.getString(), ///
           premiseString = premise.getString();
@@ -149,12 +136,6 @@ export default define(class Rule extends Element {
     context.trace(`Verifying the '${ruleString}' rule's '${premiseString}' premise...`);
 
     return premise.verify(context, (context, back) => {
-      const factOrSubproof = premise;  ////
-
-      context.assignAssignments();
-
-      context.addFactOrSubproof(factOrSubproof);
-
       context.debug(`...verified the '${ruleString}' rule's '${premiseString}' premise.`);
 
       return forward(context, back);
@@ -173,9 +154,30 @@ export default define(class Rule extends Element {
     context.trace(`Verifying the '${ruleString}' rule's premises...`);
 
     return forwardsEvery(this.premises, (premise, context, forward, back) => {
-      return this.verifyPremise(premise, context, forward, back);
+      return this.verifyPremise(premise, context, ( _ , back) => {
+        const factOrSubproof = premise; ///
+
+        context.addFactOrSubproof(factOrSubproof);
+
+        context.assignAssignments();
+
+        return forward(context, back);
+      }, back);
     }, context, (context, back) => {
       context.debug(`...verified the '${ruleString}' rule's premises.`);
+
+      return forward(context, back);
+    }, back);
+  }
+
+  verifyConclusion(context, forward, back) {
+    const ruleString = this.getString(), ///
+          conclusionString = this.conclusion.getString();
+
+    context.trace(`Verifying the '${ruleString}' rule's '${conclusionString}' conclusion...`);
+
+    return this.conclusion.verify(context, (context, back) => {
+      context.debug(`...verified the '${ruleString}' rule's '${conclusionString}' conclusion.`);
 
       return forward(context, back);
     }, back);
