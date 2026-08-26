@@ -106,8 +106,6 @@ export default define(class Variable extends Element {
   }
 
   unifyTerm(term, generalContext, specificContext, forward, back) {
-    let termUnifies = false;
-
     const context = specificContext,  ///
           termString = term.getString(),
           variableString = this.getString();
@@ -117,9 +115,7 @@ export default define(class Variable extends Element {
     const termVariableCompares = this.compareTermVariable(term, generalContext, specificContext);
 
     if (termVariableCompares) {
-      termUnifies = true;
-
-      return continuation(termUnifies);
+      return forward(generalContext, specificContext, back);
     }
 
     const variable = this,  ///
@@ -134,38 +130,28 @@ export default define(class Variable extends Element {
 
         context.trace(`The '${inferredSubstitutionString}' inferred substitution is already present.`);
 
-        termUnifies = true;
+        return forward(generalContext, specificContext, back);
       }
 
-      return continuation(termUnifies);
+      return back();
     }
 
     const { TermSubstitution } = elements,
           termSubstitution = TermSubstitution.fromTermAndVariable(term, variable, generalContext, specificContext);
 
-    declare((state) => {
-      desist((state) => {
-        termSubstitution.validate(state, context, (termSubstitution, context) => {
-          let validates;
-
+    return declare((state) => {
+      return desist((state) => {
+        return termSubstitution.validate(state, context, (termSubstitution, context) => {
           const inferredSubstitution = termSubstitution;  ///
 
           context.addInferredSubstitution(inferredSubstitution);
 
-          validates = true;
+          context.debug(`...unified the '${termString}' term with the '${variableString}' variable.`);
 
-          return validates;
-        });
+          return forward(generalContext, specificContext, back);
+        }, back);
       }, state);
     });
-
-    termUnifies = true;
-
-    if (termUnifies) {
-      context.debug(`...unified the '${termString}' term with the '${variableString}' variable.`);
-    }
-
-    return continuation(termUnifies);
   }
 
   compareTermVariable(term, generalContext, specificContext) {

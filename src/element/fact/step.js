@@ -111,7 +111,7 @@ export default define(class Step extends Fact {
     const declared = this.idDeclared();
 
     (declared ? declare : derive)((state) => {
-      return this.validate(state, context, (premise, _, back) => {
+      return this.validate(state, context, (step, _ , back) => {
         return this.unify(( _ , back) => {
           context.debug(`...verified the '${stepString}' step.`);
 
@@ -122,8 +122,9 @@ export default define(class Step extends Fact {
   });
 
   validate(state, context, forward, back) {
-    const stepString = this.getString(),  ///
-          specificContext = context;  ///
+    forward = cut(forward, back); ///
+
+    const stepString = this.getString();
 
     context.trace(`Validating the '${stepString}' step...`);
 
@@ -139,11 +140,9 @@ export default define(class Step extends Fact {
         validateSchemaAssertion,
         validateSignatureAssertion
       ], state, context, (state, context, back) => {
-        this.commit(context);
-
         const step = this;  ///
 
-        context = specificContext;  ///
+        this.commit(context);
 
         context.debug(`...validated the '${stepString}' step.`);
 

@@ -227,7 +227,7 @@ export default define(class TermSubstitution extends Substitution {
 
     return join((specificContext) => {
       return reconcile((specificContext) => {
-        return variable.unifyTerm(term, generalContext, specificContext, (termUnifies) => {
+        return variable.unifyTerm(term, generalContext, specificContext, (generalContext, specificContext, back) => {
           let replacementTermUnifies = false;
 
           if (termUnifies) {
@@ -276,7 +276,7 @@ export default define(class TermSubstitution extends Substitution {
 
     return join((specificContext) => {
       return reconcile((specificContext) => {
-        return variable.unifyTerm(term, generalContext, specificContext, (termUnifies) => {
+        return variable.unifyTerm(term, generalContext, specificContext, (generalContext, specificContext, back) => {
           let targetTermUnifies = false;
 
           if (termUnifies) {

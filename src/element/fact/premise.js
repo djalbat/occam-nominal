@@ -209,7 +209,9 @@ export default define(class Premise extends Fact {
     if (factOrSubproofFact) {
       const fact = factOrSubproof;  ///
 
-      return this.unifyFact(fact, context, forward, back);
+      return this.unifyFact(fact, context, forward, (exception) => {
+        return back(exception);
+      });
     }
 
     const subproof = factOrSubproof;  ///

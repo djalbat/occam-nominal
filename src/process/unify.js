@@ -84,7 +84,7 @@ class UnifyStatementPass extends ContinuationZipPass {
 
         const term = context.findTermByTermNode(termNode);
 
-        return variable.unifyTerm(term, generalContext, specificContext, (back) => {
+        return variable.unifyTerm(term, generalContext, specificContext, (generalContext, specificContext, back) => {
           return forward(generalContext, specificContext, back);
         }, back);
       }
@@ -145,7 +145,7 @@ class UnifyTermIntrinsicallyPass extends ContinuationZipPass {
 
         const term = context.findTermByTermNode(termNode);
 
-        return variable.unifyTerm(term, generalContext, specificContext, (back) => {
+        return variable.unifyTerm(term, generalContext, specificContext, (generalContext, specificContext, back) => {
           return forward(generalContext, specificContext, back);
         }, back);
       }
@@ -174,7 +174,7 @@ class UnifyMetavariableIntrisicallyPass extends ContinuationZipPass {
 
         const term = context.findTermByTermNode(termNode);
 
-        return variable.unifyTerm(term, generalContext, specificContext, (back) => {
+        return variable.unifyTerm(term, generalContext, specificContext, (generalContext, specificContext, back) => {
           return forward(generalContext, specificContext, back);
         }, back);
       }

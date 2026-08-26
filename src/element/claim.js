@@ -145,13 +145,11 @@ export default class Claim extends Element {
 
     const statement = this.deduction.getStatement();
 
-    return this.proof.verify(statement, context, (proofVerifies) => {
-      if (proofVerifies) {
-        context.debug(`...verified the '${claimString}' claim's proof.`);
-      }
+    return this.proof.verify(statement, context, (context, back) => {
+      context.debug(`...verified the '${claimString}' claim's proof.`);
 
-      return continuation(proofVerifies, context);
-    });
+      return forward(context, back);
+    }, back);
   }
 
   verifyDeduction(context, forward, back) {
@@ -209,6 +207,8 @@ export default class Claim extends Element {
   }
 
   dischargeHypothesis(hypothesis, context, forward, back) {
+    debugger
+
     const claimString = this.getString(), ///
           hypothesisString = hypothesis.getString();
 
@@ -224,6 +224,8 @@ export default class Claim extends Element {
   }
 
   dischargeHypotheses(context, forward, back) {
+    debugger
+
     const hypotheses = this.getHypotheses(),
          hypothesesLength = hypotheses.length;
 
@@ -249,59 +251,37 @@ export default class Claim extends Element {
   }
 
   unifyStepWithDeduction(step, context, forward, back) {
-    const ruleString = this.getString(),
-          stepString = step.getString(),
+    const stepString = step.getString(),
+          claimString = this.getString(),
           deductionString = this.deduction.getString();
 
-    context.trace(`Unifying the '${stepString}' step with the '${ruleString}' rule's '${deductionString}' deduction...`);
+    context.trace(`Unifying the '${stepString}' step with the '${claimString}' claim's '${deductionString}' deduction...`);
 
-    return this.deduction.unifyStep(step, context, (stepUnifies) => {
-      let stepUnifiesWithDeduction = false;
+    return this.deduction.unifyStep(step, context, (context, back) => {
+      context.debug(`...unified the '${stepString}' step with the '${claimString}' claim's '${deductionString}' deduction.`);
 
-      if (stepUnifies) {
-        stepUnifiesWithDeduction = true;
-      }
-
-      if (stepUnifiesWithDeduction) {
-        context.debug(`...unified the '${stepString}' step with the '${ruleString}' rule's '${deductionString}' deduction.`);
-      }
-
-      return continuation(stepUnifiesWithDeduction, context);
-    });
+      return forward(context, back);
+    }, back);
   }
 
-  unifyStepAndFactOrSubproofs(step, factorSubproofs, context, forward, back) {
+  unifyStepAndFactOrSubproofs(step, factOrSubproofs, context, forward, back) {
+    const specificContext = context;  ///
+
     return reconcile((context) => {
-      return this.unifyStepWithDeduction(step, context, (statementUnifiesWithDeduction) => {
-        if (!statementUnifiesWithDeduction) {
-          const stepAndFactOrSubproofsUnify = false;
+      return this.unifyStepWithDeduction(step, context, (context, back) => {
+        return this.unifyFactOrSubproofsWithSuppositions(factOrSubproofs, context, (context, back) => {
+          const inferredSubstitutionsSolved = context.areInferredSubstitutionsSolved();
 
-          return continuation(stepAndFactOrSubproofsUnify, context);
-        }
-
-        return this.dischargeHypotheses(context, (hypothesesDischarge) => {
-          if (!hypothesesDischarge) {
-            const stepAndFactOrSubproofsUnify = false;
-
-            return continuation(stepAndFactOrSubproofsUnify);
+          if (!inferredSubstitutionsSolved) {
+            return back();
           }
 
-          return this.unifyFactOrSubproofsWithSuppositions(factorSubproofs, context, (factorSubproofsUnifiesWithSuppositions) => {
-            let stepAndFactOrSubproofsUnify = false;
+          context = specificContext;  ///
 
-            if (factorSubproofsUnifiesWithSuppositions) {
-              const inferredSubstitutionsSolved = context.areInferredSubstitutionsSolved();
-
-              if (inferredSubstitutionsSolved) {
-                stepAndFactOrSubproofsUnify = true;
-              }
-            }
-
-            return continuation(stepAndFactOrSubproofsUnify);
-          });
-        });
-      });
-    }, context);
+          return forward(context, back);
+        }, back);
+      }, back);
+    }, context)
   }
 
   unifyFactOrSubproofsWithSupposition(factOrSubproofs, supposition, context, forward, back) {

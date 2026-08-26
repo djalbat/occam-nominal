@@ -129,7 +129,7 @@ export default define(class Schema extends Element {
       }
 
       return continuation(proofVerifies, context);
-    });
+    }, back);
   }
 
   verifyDeduction(context, continuation) {
