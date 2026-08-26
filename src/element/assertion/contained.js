@@ -13,6 +13,7 @@ import { termFromContainedAssertionNode,
          negatedFromContainedAssertionNode,
          statementFromContainedAssertionNode,
          containedAssertionFromStatementNode } from "../../utilities/element";
+import state from "easy/lib/mixins/state";
 
 const { all, exists } = continuationUtilities,
       { breakPointFromJSON } = breakPointUtilities;
@@ -164,7 +165,7 @@ export default define(class ContainedAssertion extends Assertion {
 
     context.trace(`Validating the '${containedAssertionString}' derived contained assertion...`);
 
-    return validateWhenDerived(this.term, this.statement, this.negated, context, (context, bcak) => {
+    return validateWhenDerived(this.term, this.statement, this.negated, context, (context, back) => {
       context.debug(`...validated the '${containedAssertionString}' derived contained assertion.`);
 
       return forward(state, context, back);
@@ -172,10 +173,6 @@ export default define(class ContainedAssertion extends Assertion {
   }
 
   unifyIndependently(generalContext, specificContext, forward, back) {
-    debugger
-
-    let unifiesIndependently = false;
-
     const context = specificContext,  ///
           containedAssertionString = this.getString(); ///
 
@@ -184,21 +181,11 @@ export default define(class ContainedAssertion extends Assertion {
     const term = termFromTermAndSubstitutions(this.term, context),
           statement = statementFromStatementAndSubstitutions(this.statement, context);
 
-    validateWhenDerived(term, statement, this.negated, context, (context) => {
-      let validatesWhenDerived
-
-      unifiesIndependently = true;
-
-      validatesWhenDerived = true;
-
-      return validatesWhenDerived;
-    });
-
-    if (unifiesIndependently) {
+    return validateWhenDerived(term, statement, this.negated, context, (context, back) => {
       context.debug(`...unified the '${containedAssertionString}' contained assertion independently.`);
-    }
 
-    return continuation(unifiesIndependently);
+      return forward(generalContext, specificContext, back);
+    }, back);
   }
 
   static name = "ContainedAssertion";

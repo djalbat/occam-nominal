@@ -186,14 +186,14 @@ export default define(class FrameSubstitution extends Substitution {
     return replacementFrameValidates;
   }
 
-  unifySimpleSubstitution(simpleSuubstitution, context, continuation) {
+  unifySimpleSubstitution(simpleSubstitution, context, continuation) {
     const substitutionString = this.getString(),  ///
-          simpleSubstitutionString = simpleSuubstitution.getString();
+          simpleSubstitutionString = simpleSubstitution.getString();
 
     context.trace(`Unifying the '${simpleSubstitutionString}' simple substitution with the '${substitutionString}' substitution...`);
 
     return reconcile((context) => {
-      const substitution = simpleSuubstitution, ///
+      const substitution = simpleSubstitution, ///
             unifyTargetFrame = this.unifyTargetFrame.bind(this),
             unifyReplacementFrame = this.unifyReplacementFrame.bind(this);
 

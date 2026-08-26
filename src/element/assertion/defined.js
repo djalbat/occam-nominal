@@ -11,6 +11,7 @@ import { instantiateDefinedAssertion } from "../../process/instantiate";
 import { termFromTermAndSubstitutions } from "../../utilities/substitutions";
 import { separateGroundedTermsAndDefinedVariables } from "../../utilities/equivalences";
 import { termFromJDefinedAssertionNode, negatedFromJDefinedAssertionNode, definedAssertionFromStatementNode } from "../../utilities/element";
+import state from "easy/lib/mixins/state";
 
 const { all, exists } = continuationUtilities,
       { breakPointFromJSON } = breakPointUtilities;
@@ -139,10 +140,6 @@ export default define(class DefinedAssertion extends Assertion {
   }
 
   unifyIndependently(generalContext, specificContext, forward, back) {
-    debugger
-
-    let unifiesIndependently = false;
-
     const context = specificContext, ///
           definedAssertionString = this.getString(); ///
 
@@ -150,21 +147,11 @@ export default define(class DefinedAssertion extends Assertion {
 
     const term = termFromTermAndSubstitutions(this.term, context);
 
-    validateWhenDerived(term, this.negated, context, (context) => {
-      let validatesWhenDerived;
-
-      unifiesIndependently = true;
-
-      validatesWhenDerived = true;
-
-      return validatesWhenDerived;
-    });
-
-    if (unifiesIndependently) {
+    return validateWhenDerived(term, this.negated, context, (context, back) => {
       context.debug(`...unified the '${definedAssertionString}' defined assertion independently.`);
-    }
 
-    return continuation(unifiesIndependently);
+      return forward(generalContext, specificContext, back);
+    }, back);
   }
 
   static name = "DefinedAssertion";

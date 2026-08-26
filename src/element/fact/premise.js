@@ -109,68 +109,14 @@ export default define(class Premise extends Fact {
     context.trace(`Unifying the '${premiseString}' premise independently...`);
 
     return reconcile((context) => {
-      const statement = this.getStatement(),
-            procedureCall = this.getProcedureCall();
+      const unifyStatementIndependently = this.unifyStatementIndependently.bind(this),
+            unifyProcedureCallIndependently = this.unifyProcedureCallIndependently.bind(this);
 
-      if (statement !== null) {
-        const premiseContext = this.getContext(), ///
-              generalContext = premiseContext,  ///
-              specificContext = context;  ///
-
-        return statement.unifyIndependently(generalContext, specificContext, (statementUnifiesIndependently) => {
-          let unifiesIndependently = false;
-
-          if (statementUnifiesIndependently) {
-            unifiesIndependently = true;
-          }
-
-          if (unifiesIndependently) {
-            context.debug(`...unified the '${premiseString}' premise independently.`);
-          }
-
-          return continuation(unifiesIndependently);
-        });
-      }
-
-      if (procedureCall !== null) {
-        return procedureCall.unifyIndependently(context, (procedureCallUnifiedIndependently) => {
-          let unifiesIndependently = false;
-
-          if (procedureCallUnifiedIndependently) {
-            unifiesIndependently = true;
-          }
-
-          if (unifiesIndependently) {
-            context.debug(`...unified the '${premiseString}' premise independently.`);
-          }
-
-          return continuation(unifiesIndependently);
-        });
-      }
-    }, context);
-  }
-
-  unifySubproof(subproof, context, forward, back) {
-    const premiseString = this.getString(), ///
-          subproofString = subproof.getString();
-
-    context.trace(`Unifying the '${subproofString}' subproof with the '${premiseString}' premise...`);
-
-    const subproofAssertion = this.findSubproofAssertion();
-
-    if (subproofAssertion === null) {
-      return back();
-    }
-
-    const premiseContext = this.getContext(), ///
-          generalContext = premiseContext, ///
-          specificContext = context;  ///
-
-    return reconcile((context) => {
-      return subproofAssertion.unifySubproof(subproof, generalContext, specificContext, (generalContext, specificContext, back) => {
-        specificContext.commit(context);
-
-        context.debug(`...unified the '${subproofString}' subproof with the '${premiseString}' premise.`);
+      return all([
+        unifyStatementIndependently,
+        unifyProcedureCallIndependently
+      ], context, ( _ , back) => {
+        context.debug(`...unified the '${premiseString}' premise independently.`);
 
         return forward(context, back);
       }, back);
@@ -201,6 +147,33 @@ export default define(class Premise extends Fact {
     }, specificContext);
   }
 
+  unifySubproof(subproof, context, forward, back) {
+    const premiseString = this.getString(), ///
+          subproofString = subproof.getString();
+
+    context.trace(`Unifying the '${subproofString}' subproof with the '${premiseString}' premise...`);
+
+    const subproofAssertion = this.findSubproofAssertion();
+
+    if (subproofAssertion === null) {
+      return back();
+    }
+
+    const premiseContext = this.getContext(), ///
+          generalContext = premiseContext, ///
+          specificContext = context;  ///
+
+    return reconcile((context) => {
+      return subproofAssertion.unifySubproof(subproof, generalContext, specificContext, (generalContext, specificContext, back) => {
+        specificContext.commit(context);
+
+        context.debug(`...unified the '${subproofString}' subproof with the '${premiseString}' premise.`);
+
+        return forward(context, back);
+      }, back);
+    }, context);
+  }
+
   unifyFactOrSubproof(factOrSubproof, context, forward, back) {
     forward = cut(forward, back); ///
 
@@ -209,9 +182,7 @@ export default define(class Premise extends Fact {
     if (factOrSubproofFact) {
       const fact = factOrSubproof;  ///
 
-      return this.unifyFact(fact, context, forward, (exception) => {
-        return back(exception);
-      });
+      return this.unifyFact(fact, context, forward, back);
     }
 
     const subproof = factOrSubproof;  ///

@@ -640,12 +640,6 @@ export default class Context extends ContextBase {
     context.addDeclaredVariable(declaredVariable);
   }
 
-  addInferredSubstitution(inferredSubstitution) {
-    const context = this.getContext();
-
-    context.addInferredSubstitution(inferredSubstitution);
-  }
-
   addDeclaredMetavariable(declaredMetavariable) {
     const context = this.getContext();
 

@@ -10,7 +10,7 @@ import { dischargeStatements } from "../process/discharge";
 import { instantiateStatement } from "../process/instantiate";
 import { substitutionFromStatementNode } from "../utilities/element";
 
-const { exists } = continuationUtilities,
+const { all, exists } = continuationUtilities,
       { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Statement extends Element {
@@ -62,6 +62,27 @@ export default define(class Statement extends Element {
     }
 
     return metavariableName;
+  }
+
+  getTypeAssertionNode() {
+    const statementNode = this.getStatementNode(),
+          typeAssertionNode = statementNode.getTypeAssertionNode();
+
+    return typeAssertionNode;
+  }
+
+  getDefinedAssertionNode() {
+    const statementNode = this.getStatementNode(),
+          definedAssertionNode = statementNode.getDefinedAssertionNode();
+
+    return definedAssertionNode;
+  }
+
+  getContainedAssertionNode () {
+    const statementNode = this.getStatementNode(),
+          containedAssertionNode = statementNode.getContainedAssertionNode();
+
+    return containedAssertionNode;
   }
 
   isEqualTo(statement) {
@@ -317,71 +338,97 @@ export default define(class Statement extends Element {
 
     context.trace(`Unifying the '${statementString}' statement independently...`);
 
-    const statementNode = this.getStatementNode(),
-          typeAssertionNode = statementNode.getTypeAssertionNode(),
-          definedAssertionNode = statementNode.getDefinedAssertionNode(),
-          containedAssertionNode = statementNode.getContainedAssertionNode();
+    const unifyTypeAssertionIndependently = this.unifyTypeAssertionIndependently.bind(this),
+          unifyDefinedAssertionIndependently = this.unifyDefinedAssertionIndependently.bind(this),
+          unifyContainedAssertionIndependently = this.unifyContainedAssertionIndependently.bind(this);
 
-    if (typeAssertionNode !== null) {
-      const context = generalContext, ///
-            typeAssertion = context.findAssertionByAssertionNode(typeAssertionNode);
+    return all([
+      unifyTypeAssertionIndependently,
+      unifyDefinedAssertionIndependently,
+      unifyContainedAssertionIndependently
+    ], generalContext, specificContext, (generalContext, specificContext, back) => {
+      context.debug(`...unified the '${statementString}' statement independently.`);
 
-      return typeAssertion.unifyIndependently(generalContext, specificContext, (typeAssertionUnifiesIndependently) => {
-        let unifiesIndependently = false;
+      return forward(generalContext, specificContext, back);
+    }, back);
+  }
 
-        if (typeAssertionUnifiesIndependently) {
-          unifiesIndependently = true;
-        }
+  unifyTypeAssertionIndependently(generalContext, specificContext, forward, back) {
+    let context;
 
-        if (unifiesIndependently) {
-          context.debug(`...unified the '${statementString}' statement independently.`);
-        }
+    context = specificContext;  ///
 
-        return continuation(unifiesIndependently);
-      });
+    const typeAssertionNode = this.getTypeAssertionNode();
+
+    if (typeAssertionNode === null) {
+      return forward(generalContext, specificContext, back);
     }
 
-    if (definedAssertionNode !== null) {
-      const context = generalContext, ///
-            definedAssertion = context.findAssertionByAssertionNode(definedAssertionNode);
+    const statementString = this.getString();  ///
 
-      return definedAssertion.unifyIndependently(generalContext, specificContext, (definedAssertionUnifiesIndependently) => {
-        let unifiesIndependently = false;
+    context.trace(`Unifying the '${statementString}' statement's type assertion independently...`);
 
-        if (definedAssertionUnifiesIndependently) {
-          unifiesIndependently = true;
-        }
+    context = generalContext; ///
 
-        if (unifiesIndependently) {
-          context.debug(`...unified the '${statementString}' statement independently.`);
-        }
+    const typeAssertion = context.findAssertionByAssertionNode(typeAssertionNode);
 
-        return continuation(unifiesIndependently);
-      });
+    return typeAssertion.unifyIndependently(generalContext, specificContext, (generalContext, specificContext, back) => {
+      context.trace(`...unified the '${statementString}' statement's type assertion independently.`);
+
+      return forward(generalContext, specificContext, back);
+    }, back);
+  }
+
+  unifyDefinedAssertionIndependently(generalContext, specificContext, forward, back) {
+    let context;
+
+    context = specificContext;  ///
+
+    const definedAssertionNode = this.getDefinedAssertionNode();
+
+    if (definedAssertionNode === null) {
+      return forward(generalContext, specificContext, back);
     }
 
-    if (containedAssertionNode !== null) {
-      const context = generalContext, ///
-            containedAssertion = context.findAssertionByAssertionNode(containedAssertionNode);
+    const statementString = this.getString();  ///
 
-      return containedAssertion.unifyIndependently(generalContext, specificContext, (containedAssertionUnifiesIndependently) => {
-        let unifiesIndependently = false;
+    context.trace(`Unifying the '${statementString}' statement's defined assertion independently...`);
 
-        if (containedAssertionUnifiesIndependently) {
-          unifiesIndependently = true;
-        }
+    context = generalContext; ///
 
-        if (unifiesIndependently) {
-          context.debug(`...unified the '${statementString}' statement independently.`);
-        }
+    const definedAssertion = context.findAssertionByAssertionNode(definedAssertionNode);
 
-        return continuation(unifiesIndependently);
-      });
+    return definedAssertion.unifyIndependently(generalContext, specificContext, (generalContext, specificContext, back) => {
+      context.debug(`...unified the '${statementString}' statement's defined assertion independently.`);
+
+      return forward(generalContext, specificContext, back);
+    }, back);
+  }
+
+  unifyContainedAssertionIndependently(generalContext, specificContext, forward, back) {
+    let context;
+
+    context = specificContext;  ///
+
+    const containedAssertionNode = this.getContainedAssertionNode();
+
+    if (containedAssertionNode === null) {
+      return forward(generalContext, specificContext, back);
     }
 
-    const unifiesIndependently = false;
+    const statementString = this.getString();  ///
 
-    return continuation(unifiesIndependently);
+    context.trace(`Unifying the '${statementString}' statement's contained assertion independently...`);
+
+    context = generalContext; ///
+
+    const containedAssertion = context.findAssertionByAssertionNode(containedAssertionNode);
+
+    return containedAssertion.unifyIndependently(generalContext, specificContext, (generalContext, specificContext, back) => {
+      context.debug(`...unified the '${statementString}' statement's contained assertion independently.`);
+
+      return forward(generalContext, specificContext, back);
+    }, back);
   }
 
   toJSON() {

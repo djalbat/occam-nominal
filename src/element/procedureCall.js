@@ -84,10 +84,9 @@ export default define(class ProcedureCall extends Element {
     return forward(procedureCall, context, back);
   }
 
-  unifyIndependently(context, forward, back) {
-    debugger
-
-    const procedureCallString = this.getString(); ///
+  unifyIndependently(generalContext, specificContext, forward, back) {
+    const context = specificContext,
+          procedureCallString = this.getString(); ///
 
     context.trace(`Unifying the '${procedureCallString}' procedure call independently...`);
 
@@ -95,29 +94,25 @@ export default define(class ProcedureCall extends Element {
           procedure = context.findProcedureByProcedureName(procedureName),
           values = this.findValues(context);
 
-    return procedure.callNominally(values, (term) => {
-      let unifiesIndependently = false;
+    return procedure.callNominally(values, (value, back) => {
+      const boolean = value.isBoolean();
 
-      if (term !== null) {
-        const boolean = term.isBoolean();
+      if (!boolean) {
+        context.info(`The '${procedureCallString}' procedure call did not return a boolean.`);
 
-        if (!boolean) {
-          context.info(`The '${procedureCallString}' procedure call did not return a boolean.`);
-        } else {
-          const primitiveValue = term.getPrimitiveValue();
-
-          if (primitiveValue) {
-            unifiesIndependently = true;
-          }
-        }
+        return back();
       }
 
-      if (unifiesIndependently) {
-        context.debug(`...unified the '${procedureCallString}' procedure call independently.`);
+      const primitiveValue = value.getPrimitiveValue();
+
+      if (!primitiveValue) {
+        return back();
       }
 
-      return continuation(unifiesIndependently);
-    });
+      context.trace(`...unified the '${procedureCallString}' procedure call independently.`);
+
+      return forward(generalContext, specificContext, back);
+    }, back);
   }
 
   dischargeGivenTerm(term, context, forward, back) {

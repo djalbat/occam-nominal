@@ -10,6 +10,7 @@ import { instantiateStatementSubstitution } from "../../process/instantiate";
 import { statementSubstitutionFromStatementSubstitutionNode } from "../../utilities/element";
 import { ablates, manifest, attempts, reconcile, participate, instantiate, unserialises } from "../../utilities/context";
 import { statementSubstitutionStringFromStatementAndMetavariable, statementSubstitutionStringFromStatementMetavariableAndSubstitution } from "../../utilities/string";
+import state from "easy/lib/mixins/state";
 
 const { all } = continuationUtilities,
       { breakPointFromJSON } = breakPointUtilities;
@@ -179,21 +180,13 @@ export default define(class StatementSubstitution extends Substitution {
           specificStatement = specificSubstitutionTargetStatement; ///
 
     return reconcile((specificContext) => {
-      return generalStatement.unifyStatement(specificStatement, generalContext, specificContext, (statementUnifies) => {
-        let targetStatemnentUnifies = false;
+      return generalStatement.unifyStatement(specificStatement, generalContext, specificContext, (generalContext, _, back) => {
+        specificContext.commit(context);
 
-        if (statementUnifies) {
-          specificContext.commit(context);
+        context.trace(`...unified the '${specificSubstitutionString}' substitution's target statement with the '${generalSubstitutionString}' substitution's target statement.`);
 
-          targetStatemnentUnifies = true;
-        }
-
-        if (targetStatemnentUnifies) {
-          context.trace(`...unified the '${specificSubstitutionString}' substitution's target statement with the '${generalSubstitutionString}' substitution's target statement.`);
-        }
-
-        return continuation(targetStatemnentUnifies);
-      });
+        return forward(context, back);
+      }, back);
     }, specificContext);
   }
 
@@ -215,12 +208,17 @@ export default define(class StatementSubstitution extends Substitution {
           specificStatement = specificSubstitutionReplacementStatement; ///
 
     return reconcile((specificContext) => {
-      return generalStatement.unifyStatement(specificStatement, generalContext, specificContext, (statementUnifies) => {
-        const singularNonTrivialInferredSubstitution = specificContext.getSingularNonTrivialInferredSubstitution(),
-              substitution = singularNonTrivialInferredSubstitution; ///
+      return generalStatement.unifyStatement(specificStatement, generalContext, specificContext, (generalContext, specificContext, back) => {
+        const singularNonTrivialInferredSubstitution = specificContext.getSingularNonTrivialInferredSubstitution();
 
-        return continuation(substitution);
-      });
+        if (singularNonTrivialInferredSubstitution === null) {
+          return back();
+        }
+
+        const substitution = singularNonTrivialInferredSubstitution; ///
+
+        return forward(substitution, context, back);
+      }, back);
     }, specificContext);
   }
 
@@ -231,65 +229,54 @@ export default define(class StatementSubstitution extends Substitution {
 
     context.trace(`Unifying the '${complexSubstitutionString}' complex substitution with the '${simpleSubstitutionString}' simple substitution...`);
 
-    return this.unifyReplacementStatement(complexSubstitution, context, (substitution) => {
-      let complexSubstitutionUnifies = false;
+    return this.unifyReplacementStatement(complexSubstitution, context, (substitution, context, back) => {
+      context.debug(`...unified the '${complexSubstitutionString}' complex substitution with the '${simpleSubstitutionString}' simple substitution.`);
 
-      if (substitution !== null) {
-        complexSubstitutionUnifies = true;
-      }
-
-      if (complexSubstitutionUnifies) {
-        context.debug(`...unified the '${complexSubstitutionString}' complex substitution with the '${simpleSubstitutionString}' simple substitution.`);
-      }
-
-      return continuation(complexSubstitutionUnifies, substitution);
-    });
+      return forward(substitution, context, back);
+    }, back);
   }
 
   solve(context, forward, back) {
     const metavariableNode = this.getMetavariableNode(),
-          simpleInferredSubstitution = context.findSimpleInferredSubstitutionByMetavariableNode(metavariableNode);
-
-    if (simpleInferredSubstitution === null) {
-      return continuation();
-    }
-
-    const simpleSubstitution = simpleInferredSubstitution, ///
+          simpleInferredSubstitution = context.findSimpleInferredSubstitutionByMetavariableNode(metavariableNode),
+          simpleSubstitution = simpleInferredSubstitution, ///
           complexSubstitution = this, ///
           complexSubstitutionString = complexSubstitution.getString();
 
-    context.trace(`Resolving the ${complexSubstitutionString}' complex substitution...`);
+    if (simpleSubstitution === null) {
+      context.trace(`Cannot solve the '${complexSubstitutionString}' complex substitution because there is no corresponding simple substitution.`);
 
-    return simpleSubstitution.unifyComplexSubstitution(complexSubstitution, context, (complexSubstitutionUnifies, substitution) => {
-      if (!complexSubstitutionUnifies) {
-        return continuation();
-      }
+      return forward(context, back);
+    }
 
+    context.trace(`Solving the '${complexSubstitutionString}' complex substitution...`);
+
+    return simpleSubstitution.unifyComplexSubstitution(complexSubstitution, context, (substitution, context, back) => {
       const simpleSubstitution = substitution; ///
 
       substitution = this.targetStatement.getSubstitution();
 
-      return substitution.unifySimpleSubstitution(simpleSubstitution, context, (simpleSubstitutionUnifies, substitution) => {
-        let complexSubstitutionResvoles = false;
+      return substitution.unifySimpleSubstitution(simpleSubstitution, context, (substitution, context, back) => {
+        const inferredSubstitution = substitution; ///
 
-        if (complexSubstitutionUnifies) {
-          if (substitution !== null) {
-            const inferredSubstitution = substitution; ///
+        context.addInferredSubstitution(inferredSubstitution);
 
-            context.addInferredSubstitution(inferredSubstitution);
-          }
+        this.solved = true;
 
-          complexSubstitutionResvoles = true;
+        context.debug(`...solved the '${complexSubstitutionString}' complex substitution.`);
 
-          this.solved = true;
-        }
+        return forward(context, back);
+      }, back);
+    }, (exception) => {
+      if (exception) {
+        return back(exception);
+      }
 
-        if (complexSubstitutionResvoles) {
-          context.debug(`...solved the '${complexSubstitutionString}' complex substitution.`);
-        }
+      const simpleSubstitutionString = simpleSubstitution.getString();
 
-        return continuation();
-      });
+      context.debug(`Unifying the '${complexSubstitutionString}' complex substitution with the '${simpleSubstitutionString}' simple substitution did not yield a sole substitution.`);
+
+      return forward(context, back);
     });
   }
 

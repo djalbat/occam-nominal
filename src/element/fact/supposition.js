@@ -109,44 +109,17 @@ export default define(class Supposition extends Fact {
     context.trace(`Unifying the '${suppositionString}' supposition independently...`);
 
     return reconcile((context) => {
-      const statement = this.getStatement(),
-            procedureCall = this.getProcedureCall();
+      const unifyStatementIndependently = this.unifyStatementIndependently.bind(this),
+            unifyProcedureCallIndependently = this.unifyProcedureCallIndependently.bind(this);
 
-      if (statement !== null) {
-        const suppositionContext = this.getContext(), ///
-              generalContext = suppositionContext,  ///
-              specificContext = context;  ///
+      return all([
+        unifyStatementIndependently,
+        unifyProcedureCallIndependently
+      ], context, ( _ , back) => {
+        context.debug(`...unified the '${suppositionString}' supposition independently.`);
 
-        return statement.unifyIndependently(generalContext, specificContext, (statementUnifiesIndependently) => {
-          let unifiesIndependently = false;
-
-          if (statementUnifiesIndependently) {
-            unifiesIndependently = true;
-          }
-
-          if (unifiesIndependently) {
-            context.debug(`...unified the '${suppositionString}' supposition independently.`);
-          }
-
-          return continuation(unifiesIndependently);
-        });
-      }
-
-      if (procedureCall !== null) {
-        return procedureCall.unifyIndependently(context, (procedureCallUnifiedIndependently) => {
-          let unifiesIndependently = false;
-
-          if (procedureCallUnifiedIndependently) {
-            unifiesIndependently = true;
-          }
-
-          if (unifiesIndependently) {
-            context.debug(`...unified the '${suppositionString}' supposition independently.`);
-          }
-
-          return continuation(unifiesIndependently);
-        });
-      }
+        return forward(context, back);
+      }, back);
     }, context);
   }
 
@@ -164,21 +137,13 @@ export default define(class Supposition extends Fact {
     return reconcile((specificContext) => {
       const statement = fact.getStatement();
 
-      return this.unifyStatement(statement, generalContext, specificContext, (statementUnifies) => {
-        let factUnifies = false;
+      return this.unifyStatement(statement, generalContext, specificContext, (generalContext, specificContext, back) => {
+        specificContext.commit(context);
 
-        if (statementUnifies) {
-          factUnifies = true;
+        context.debug(`...unified the '${factString}' fact with the '${suppositionString}' supposition.`);
 
-          specificContext.commit(context);
-        }
-
-        if (factUnifies) {
-          context.debug(`...unified the '${factString}' fact with the '${suppositionString}' supposition.`);
-        }
-
-        return continuation(factUnifies);
-      });
+        return forward(context, back);
+      }, back);
     }, specificContext);
   }
 
@@ -191,27 +156,21 @@ export default define(class Supposition extends Fact {
     const subproofAssertion = this.findSubproofAssertion();
 
     if (subproofAssertion === null) {
-      const subproofUnifies = false;
-
-      return continuation(subproofUnifies);
+      return back();
     }
 
     const suppositionContext = this.getContext(), ///
-          generalContext = suppositionContext, ///
-          specificContext = context; ///
+      generalContext = suppositionContext, ///
+      specificContext = context;  ///
 
     return reconcile((context) => {
-      return subproofAssertion.unifySubproof(subproof, generalContext, specificContext, (subproofUnifies) => {
-        if (subproofUnifies) {
-          context.commit();
-        }
+      return subproofAssertion.unifySubproof(subproof, generalContext, specificContext, (generalContext, specificContext, back) => {
+        specificContext.commit(context);
 
-        if (subproofUnifies) {
-          context.debug(`...unified the '${subproofString}' subproof with the '${suppositionString}' supposition.`);
-        }
+        context.debug(`...unified the '${subproofString}' subproof with the '${suppositionString}' supposition.`);
 
-        return continuation(subproofUnifies);
-      });
+        return forward(context, back);
+      }, back);
     }, context);
   }
 
