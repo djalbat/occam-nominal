@@ -16,22 +16,20 @@ export default define(class Conjecture extends Claim {
     return conjectureNode;
   }
 
-  verify = breakable(function (context, continuation) {
-    const conjectureString = this.getString();  ///
+  verify = breakable(function (context, forward, back) {
+    const conjecttureString = this.getString(); ///
 
-    context.trace(`Verifying the '${conjectureString}' conjecture...`);
+    context.trace(`Verifying the '${conjecttureString}' conjectture...`);
 
-    return this.verifyEx(context, (verifies) => {
-      if (verifies) {
-        const conjecture = this;  ///
+    return this.verifyEx(context, (context, back) => {
+      const conjectture = this; ///
 
-        context.addConjecture(conjecture);
+      context.addConjecture(conjectture);
 
-        context.debug(`...verified the '${conjectureString}' conjecture.`);
-      }
+      context.debug(`...verified the '${conjecttureString}' conjectture.`);
 
-      return continuation(verifies, context);
-    });
+      return forward(context, back);
+    }, back);
   });
 
   static name = "Conjecture";

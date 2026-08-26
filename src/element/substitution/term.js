@@ -87,14 +87,12 @@ export default define(class TermSubstitution extends Substitution {
     return comparedToTerm;
   }
 
-  validate(state, context, continuation) {
-    let validates;
+  validate(state, context, forward, back) {
+    let substitution;
 
     const termSubstitutionString = this.getString();  ///
 
     context.trace(`Validating the '${termSubstitutionString}' term substitution...`);
-
-    let substitution;
 
     substitution = this.findSubstitution(context);
 
@@ -103,102 +101,76 @@ export default define(class TermSubstitution extends Substitution {
 
       context.debug(`...the '${termSubstitutionString}' term substitution is already presenet.`);
 
-      validates = continuation(termSubstitution, context);
-    } else {
-      substitution = this;  ///
-
-      const generalContext = this.getGeneralContext(),
-            specificContext = this.getSpecificContext();
-
-      attempts((generalContext, specificContext) => {
-        const validateTargetTerm = this.validateTargetTerm.bind(this),
-              validateReplacementTerm = this.validateReplacementTerm.bind(this);
-
-        validates = all([
-          validateTargetTerm,
-          validateReplacementTerm
-        ], state, context, generalContext, specificContext, (state, context, generalContext, specificContext) => {
-          let validates;
-
-          this.commit(generalContext, specificContext);
-
-          const termSubstitution = substitution;  ///
-
-          validates = continuation(termSubstitution, context);
-
-          return validates;
-        });
-
-        if (validates) {
-          context.addSubstitution(substitution);
-        }
-      }, generalContext, specificContext);
+      return forward(termSubstitution, context, back);
     }
 
-    if (validates) {
-      context.debug(`...validated the '${termSubstitutionString}' term substitution.`);
-    }
+    substitution = this;  ///
 
-    return validates;
+    const generalContext = this.getGeneralContext(),
+          specificContext = this.getSpecificContext();
+
+    return attempts((generalContext, specificContext) => {
+      const validateTargetTerm = this.validateTargetTerm.bind(this),
+            validateReplacementTerm = this.validateReplacementTerm.bind(this);
+
+      return all([
+        validateTargetTerm,
+        validateReplacementTerm
+      ], state, context, generalContext, specificContext, (state, context, generalContext, specificContext) => {
+        const termSubstitution = substitution;  ///
+
+        this.commit(generalContext, specificContext);
+
+        context.addSubstitution(substitution);
+
+        context.debug(`...validated the '${termSubstitutionString}' term substitution.`);
+
+        return forward(termSubstitution, context, back);
+      }, back);
+    }, generalContext, specificContext);
   }
 
-  validateTargetTerm(state, context, generalContext, specificContext, continuation) {
-    let targetTermValidates;
-
+  validateTargetTerm(state, context, generalContext, specificContext, forward, back) {
     const termSubstitutionString = this.getString();  ///
 
     context.trace(`Validating the '${termSubstitutionString}' term substitution's target term...`);
 
     const targetTermSingular = this.targetTerm.isSingular();
 
-    if (targetTermSingular) {
-      targetTermValidates = this.targetTerm.validate(state, generalContext, (targetTerm, generalContext) => {
-        let validates;
-
-        validates = continuation(state, context, generalContext, specificContext);
-
-        return validates;
-      });
-    } else {
+    if (!targetTermSingular) {
       const targetTermString = this.targetTerm.getString();
 
-      targetTermValidates = false;
-
       context.debug(`The '${targetTermString}' target term is not singular.`);
+
+      return back();
     }
 
-    if (targetTermValidates) {
+    return this.targetTerm.validate(state, generalContext, (targetTerm, generalContext) => {
+      this.targetTerm = targetTerm;;
+
       context.trace(`...validated the '${termSubstitutionString}' term substitution's target term.`);
-    }
 
-    return targetTermValidates;
+      return forward(state, context, generalContext, specificContext, back);
+    }, back);
   }
 
-  validateReplacementTerm(state, context, generalContext, specificContext, continuation) {
-    let replacementTermValidates;
-
+  validateReplacementTerm(state, context, generalContext, specificContext, forward, back) {
     const termSubstitutionString = this.getString();  ///
 
     context.trace(`Validating the '${termSubstitutionString}' term substitution's replacement term...`);
 
-    participate((specificContext) => {
-      replacementTermValidates = this.replacementTerm.validate(state, specificContext, (replacementTerm, specificContext) => {
-        let validates;
+    return participate((specificContext) => {
+      return this.replacementTerm.validate(state, specificContext, (replacementTerm, specificContext) => {
+        this.replacementTerm = replacementTerm;
 
-        validates = continuation(state, context, generalContext, specificContext);
+        context.debug(`...validated the '${termSubstitutionString}' term substitution's replacement term.`);
 
-        return validates;
-      });
+        return forward(state, context, generalContext, specificContext, back);
+      }, back);
     }, specificContext, context);
-
-    if (replacementTermValidates) {
-      context.debug(`...validated the '${termSubstitutionString}' term substitution's replacement term.`);
-    }
-
-    return replacementTermValidates;
   }
 
-  unifySimpleSubstitution(simpleSuubstitution, context, continuation) {
+  unifySimpleSubstitution(simpleSuubstitution, context, forward, back) {
     const substitutionString = this.getString(),  ///
           simpleSubstitutionString = simpleSuubstitution.getString();
 
@@ -225,7 +197,7 @@ export default define(class TermSubstitution extends Substitution {
     }, context);
   }
 
-  unifyReplacementTerm(substitution, context, continuation) {
+  unifyReplacementTerm(substitution, context, forward, back) {
     const generalSubstitution = this, ///
           specificSubstitution = substitution,
           generalSubstitutionString = generalSubstitution.getString(),
@@ -274,7 +246,7 @@ export default define(class TermSubstitution extends Substitution {
     }, specificContext, context);
   }
 
-  unifyTargetTerm(substitution, context, continuation) {
+  unifyTargetTerm(substitution, context, forward, back) {
     const generalSubstitution = this, ///
           specificSubstitution = substitution,
           generalSubstitutionString = generalSubstitution.getString(),

@@ -330,6 +330,8 @@ function validateSubstitution(statement, context, forward, back) {
   return declare((state) => {
     return desist((state) => {
       return substitution.validate(state, context, (substitution, context, back) => {
+        statement.setSubstitution(substitution);
+
         return forward(context, back);
       }, back);
     }, state);

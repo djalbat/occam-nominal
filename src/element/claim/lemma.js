@@ -16,26 +16,22 @@ export default define(class Lemma extends Claim {
     return lemmaNode;
   }
 
-  verify = breakable(function (context, continuation) {
+  verify = breakable(function (context, forward, back) {
     const lemmaString = this.getString(); ///
 
     (lemmaString === null) ?
       context.trace(`Verifying a lemma...`) :
         context.trace(`Verifying the '${lemmaString}' lemma...`);
 
-    return this.verifyEx(context, (verifies) => {
-      if (verifies) {
-        const lemma = this; ///
+    return this.verifyEx(context, (context, back) => {
+      const lemma = this; ///
 
-        context.addLemma(lemma);
+      context.addLemma(lemma);
 
-        (lemmaString === null) ?
-          context.debug(`...verified a lemma.`) :
-            context.debug(`...verified the '${lemmaString}' lemma.`);
-      }
+      context.debug(`...verified the '${lemmaString}' lemma.`);
 
-      return continuation(verifies, context);
-    });
+      return forward(context, back);
+    }, back);
   });
 
   static name = "Lemma";

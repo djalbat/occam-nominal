@@ -24,6 +24,10 @@ export default define(class Statement extends Element {
     return this.substitution;
   }
 
+  setSubstitution(substitution) {
+    this.substitution = substitution;
+  }
+
   getStatementNode() {
     const node = this.getNode(),
           statementNode = node; ///

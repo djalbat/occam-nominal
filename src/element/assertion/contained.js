@@ -104,7 +104,7 @@ export default define(class ContainedAssertion extends Assertion {
       return back();
     }
 
-    this.term.validate(state, context, (term, context, back) => {
+    return this.term.validate(state, context, (term, context, back) => {
       this.term  = term;
 
       context.debug(`...validates the '${containedAssertionString}' contained assertion's term.`);
@@ -128,7 +128,7 @@ export default define(class ContainedAssertion extends Assertion {
       return back();
     }
 
-    this.statement.validate(state, context, (statement, context, back) => {
+    return this.statement.validate(state, context, (statement, context, back) => {
       this.statement = statement;
 
       context.debug(`...validates the '${containedAssertionString}' contained assertion's statement.`);

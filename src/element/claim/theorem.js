@@ -16,22 +16,20 @@ export default define(class Theorem extends Claim {
     return theoremNode;
   }
 
-  verify = breakable(function (context, continuation) {
-    const theoremString = this.getString();  ///
+  verify = breakable(function (context, forward, back) {
+    const theoremString = this.getString(); ///
 
     context.trace(`Verifying the '${theoremString}' theorem...`);
 
-    return this.verifyEx(context, (verifies) => {
-      if (verifies) {
-        const theorem = this; ///
+    return this.verifyEx(context, (context, back) => {
+      const theorem = this; ///
 
-        context.addTheorem(theorem);
+      context.addTheorem(theorem);
 
-        context.debug(`...verified the '${theoremString}' theorem.`);
-      }
+      context.debug(`...verified the '${theoremString}' theorem.`);
 
-      return continuation(verifies, context);
-    });
+      return forward(context, back);
+    }, back);
   });
 
   static name = "Theorem";
