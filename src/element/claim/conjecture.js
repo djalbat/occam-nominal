@@ -29,7 +29,15 @@ export default define(class Conjecture extends Claim {
       context.debug(`...verified the '${conjecttureString}' conjectture.`);
 
       return forward(context, back);
-    }, back);
+    }, (exception) => {
+      if (exception) {
+        return back(exception);
+      }
+
+      context.trace(`Unable to verify the '${conjecttureString}' conjectture.`);
+
+      return back();
+    });
   });
 
   static name = "Conjecture";

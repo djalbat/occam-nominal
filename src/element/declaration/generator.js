@@ -46,7 +46,7 @@ export default define(class GeneratorDeclaration extends Declaration {
 
   setHypotheses(hypotheses) { this.generator.setHypotheses(hypotheses); }
 
-  verify = breakable(function (context, continuation) {
+  verify = breakable(function (context, forward, back) {
     const generatorDeclarationString = this.getString();  ///
 
     context.trace(`Verifying the '${generatorDeclarationString}' generator declaration...`);
@@ -56,7 +56,7 @@ export default define(class GeneratorDeclaration extends Declaration {
     if (malformed) {
       const verifies = false;
 
-      context.debug(`Unable to verify the '${generatorDeclarationString}' generator declaration because it is malformed.`);
+      context.trace(`Unable to verify the '${generatorDeclarationString}' generator declaration because it is malformed.`);
 
       return continuation(verifies, context);
     }
@@ -67,18 +67,22 @@ export default define(class GeneratorDeclaration extends Declaration {
     return all([
       verifyCotype,
       verifyGenerator
-    ], context, (verifies, context) => {
-      if (verifies) {
-        this.generator.setType(this.type);
+    ], context, (context, back) => {
+      this.generator.setType(this.type);
 
-        context.addGenerator(this.generator);
+      context.addGenerator(this.generator);
+
+      context.debug(`...verified the '${generatorDeclarationString}' generator declaration.`);
+
+      return forward(context, back);
+    }, (exception) => {
+      if (exception) {
+        return back(exception);
       }
 
-      if (verifies) {
-        context.debug(`...verified the '${generatorDeclarationString}' generator declaration.`);
-      }
+      context.trace(`Unable to verify the '${generatorDeclarationString}' generator declaration.`);
 
-      return continuation(verifies, context);
+      return back();
     });
   });
 

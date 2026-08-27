@@ -41,7 +41,15 @@ export default define(class Axiom extends Claim {
 
         return forward(context, back);
       }, back);
-    }, back);
+    }, (exception) => {
+      if (exception) {
+        return back(exception);
+      }
+
+      context.trace(`Unable to verify the '${axiomString}' axiom.`);
+
+      return back();
+    });
   });
 
   verifySignature(context, forward, back) {

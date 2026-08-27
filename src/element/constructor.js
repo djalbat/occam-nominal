@@ -91,7 +91,7 @@ export default define(class Constructor extends Element {
     const malformed = this.isMalformed();
 
     if (malformed) {
-      context.debug(`Unable to verify the '${constructorString}' constructor because it is malformed.`);
+      context.trace(`Unable to verify the '${constructorString}' constructor because it is malformed.`);
 
       return back();
     }

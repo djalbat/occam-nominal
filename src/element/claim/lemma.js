@@ -19,9 +19,7 @@ export default define(class Lemma extends Claim {
   verify = breakable(function (context, forward, back) {
     const lemmaString = this.getString(); ///
 
-    (lemmaString === null) ?
-      context.trace(`Verifying a lemma...`) :
-        context.trace(`Verifying the '${lemmaString}' lemma...`);
+    context.trace(`Verifying the '${lemmaString}' lemma...`);
 
     return this.verifyEx(context, (context, back) => {
       const lemma = this; ///
@@ -31,7 +29,15 @@ export default define(class Lemma extends Claim {
       context.debug(`...verified the '${lemmaString}' lemma.`);
 
       return forward(context, back);
-    }, back);
+    }, (exception) => {
+      if (exception) {
+        return back(exception);
+      }
+
+      context.trace(`Unable to verify the '${lemmaString}' lemma..`);
+
+      return back();
+    });
   });
 
   static name = "Lemma";

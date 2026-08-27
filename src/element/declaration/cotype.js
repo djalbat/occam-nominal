@@ -54,7 +54,7 @@ export default define(class CotypeDeclaration extends Declaration {
     return properties;
   }
 
-  verify = breakable(function (context, continuation) {
+  verify = breakable(function (context, forward, back) {
     const cotypeDeclarationString = this.getString();  ///
 
     context.trace(`Verifying the '${cotypeDeclarationString}' cotype declaration...`);
@@ -69,28 +69,32 @@ export default define(class CotypeDeclaration extends Declaration {
       verifySuperTypes,
       verifyTypePrefix,
       verifyPropertyDeclaratisons
-    ], context, (verifies) => {
-      if (verifies) {
-        const properties = this.getProperties(),
-              typePrefix = context.getTypePrefix(),
-              prefixName = (typePrefix !== null) ?
-                             typePrefix.getPrefixName() :
-                               null;
+    ], context, (context, back) => {
+      const properties = this.getProperties(),
+            typePrefix = context.getTypePrefix(),
+            prefixName = (typePrefix !== null) ?
+                           typePrefix.getPrefixName() :
+                             null;
 
-        this.type.setProvisional(this.provisional);
+      this.type.setProvisional(this.provisional);
 
-        this.type.setProperties(properties);
+      this.type.setProperties(properties);
 
-        this.type.setPrefixName(prefixName);
+      this.type.setPrefixName(prefixName);
 
-        context.addType(this.type);
+      context.addType(this.type);
+
+      context.debug(`...verified the '${cotypeDeclarationString}' cotype declaration.`);
+
+      return forward(context, back);
+    }, (exception) => {
+      if (exception) {
+        return back(exception);
       }
 
-      if (verifies) {
-        context.debug(`...verified the '${cotypeDeclarationString}' cotype declaration.`);
-      }
+      context.trace(`Unable to verify the '${cotypeDeclarationString}' cotype declaration.`);
 
-      return continuation(verifies, context);
+      return back();
     });
   });
 

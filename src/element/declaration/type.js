@@ -75,7 +75,15 @@ export default define(class TypeDeclaration extends Declaration {
       context.debug(`...verified the '${typeDeclarationString}' type declaration.`);
 
       return forward(context, back);
-    }, back);
+    }, (exception) => {
+      if (exception) {
+        return back(exception);
+      }
+
+      context.trace(`Unable to verify the '${typeDeclarationString}' type declaration.`);
+
+      return back();
+    });
   });
 
   verifyType(context, forward, back) {

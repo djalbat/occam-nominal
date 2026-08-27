@@ -65,7 +65,7 @@ export default define(class Schema extends Element {
 
   matchMetavariableNode(metavariableNode) { return this.label.matchMetavariableNode(metavariableNode); }
 
-  verify = breakable(function (context, continuation) {
+  verify = breakable(function (context, forward, back) {
     const schemaString = this.getString(); ///
 
     context.trace(`Verifying the '${schemaString}' schema...`);
@@ -91,6 +91,14 @@ export default define(class Schema extends Element {
         }
 
         return continuation(verifies, context);
+      }, (excpetion) => {
+        if (excpetion) {
+          return back();
+        }
+
+        context.trace(`Unable to verify the '${schemaString}' schema.`);
+
+        return back();
       });
     }, this.constraints, context);
   });

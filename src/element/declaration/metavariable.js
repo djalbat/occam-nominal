@@ -44,7 +44,15 @@ export default define(class MetavariableDeclaration extends Declaration {
       context.debug(`...verified the '${metavariableDeclarationString}' metavariable declaration.`);
 
       return forward(context, back);
-    }, back);
+    }, (exception) => {
+      if (exception) {
+        return back(exception);
+      }
+
+      context.trace(`Unable to verify the '${metavariableDeclarationString}' metavariable declaration.`);
+
+      return back();
+    });
   });
 
   verifyMetaType(context, forward, back) {

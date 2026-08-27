@@ -120,7 +120,7 @@ export default define(class Metavariable extends Element {
     const malformed = this.isMalformed();
 
     if (malformed) {
-      context.debug(`Unable to verify the '${metavariableString}' metavariable because it is malformed.`);
+      context.trace(`Unable to verify the '${metavariableString}' metavariable because it is malformed.`);
 
       return back();
     }

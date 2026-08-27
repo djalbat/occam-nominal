@@ -49,7 +49,15 @@ export default define(class CombinatorDeclaration extends Declaration {
       context.debug(`...verified the '${combinatorDeclarationString}' combinator declaration.`);
 
       return forward(context, back);
-    }, back);
+    }, (exception) => {
+      if (exception) {
+        return back(exception);
+      }
+
+      context.trace(`Unable to verify the '${combinatorDeclarationString}' combinator declaration.`);
+
+      return back();
+    });
   });
 
   verifyCombinator(context, forward, back) {

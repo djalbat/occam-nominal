@@ -51,7 +51,7 @@ export default define(class Hypothesis extends Element {
     const malformed = this.isMalformed();
 
     if (malformed) {
-      context.debug(`Unable to verify the '${hypothesisString}' hypothesis because it is malformed.`);
+      context.trace(`Unable to verify the '${hypothesisString}' hypothesis because it is malformed.`);
 
       return back();
     }
@@ -61,7 +61,15 @@ export default define(class Hypothesis extends Element {
         context.debug(`...verified the '${hypothesisString}' hypothesis.`);
 
         return forward(context, back);
-      }, back);
+      }, (exception) => {
+        if (exception) {
+          return back(exception);
+        }
+
+        context.trace(`Unable to verify the '${hypothesisString}' hypothesis.`);
+
+        return back();
+      });
     });
   });
 

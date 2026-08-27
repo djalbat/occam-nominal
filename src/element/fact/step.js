@@ -103,7 +103,7 @@ export default define(class Step extends Fact {
     const malformed = this.isMalformed();
 
     if (malformed) {
-      context.debug(`Unable to verify the '${stepString}' step because it is malformed.`);
+      context.trace(`Unable to verify the '${stepString}' step because it is malformed.`);
 
       return back();
     }
@@ -117,7 +117,15 @@ export default define(class Step extends Fact {
 
           return forward(context, back);
         }, back);
-      }, back);
+      }, (exception) => {
+        if (exception) {
+          return back(exception);
+        }
+
+        context.trace(`Unable to verify the '${stepString}' step.`);
+
+        return back();
+      });
     });
   });
 

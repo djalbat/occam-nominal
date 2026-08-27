@@ -39,7 +39,7 @@ export default define(class PropertyDeclaration extends Declaration {
     return malformed;
   }
 
-  verify = breakable(function (context, continuation) {
+  verify = breakable(function (context, forward, back) {
     let verifies = false;
 
     const propertyDeclarationString = this.getString();  ///
@@ -49,7 +49,7 @@ export default define(class PropertyDeclaration extends Declaration {
     const malformed = this.isMalformed();
 
     if (malformed) {
-      context.debug(`Unable to verify the '${propertyDeclarationString}' property delcaration because it is malformed.`);
+      context.trace(`Unable to verify the '${propertyDeclarationString}' property delcaration because it is malformed.`);
 
       return continuation(verifies);
     }
@@ -60,16 +60,20 @@ export default define(class PropertyDeclaration extends Declaration {
     return all([
       verifyType,
       verifyProperty
-    ], context, (verifies, context) => {
-      if (verifies) {
-        this.property.setType(this.type);
+    ], context, (context, back) => {
+      this.property.setType(this.type);
+
+      context.debug(`...verified the '${propertyDeclarationString}' property declaration.`);
+
+      return forward(context, back);
+    }, (exception) => {
+      if (exception) {
+        return back(exception);
       }
 
-      if (verifies) {
-        context.debug(`...verified the '${propertyDeclarationString}' property declaration.`);
-      }
+      context.trace(`Unable to verify the '${propertyDeclarationString}' property declaration.`);
 
-      return continuation(verifies, context);
+      return back();
     });
   });
 

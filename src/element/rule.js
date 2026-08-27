@@ -80,7 +80,15 @@ export default define(class Rule extends Element {
         context.debug(`...verified the '${ruleString}' rule.`);
 
         return forward(context, back);
-      }, back);
+      }, (exception) => {
+        if (exception) {
+          return back(exception);
+        }
+
+        context.trace(`Unable to verify the '${ruleString}' rule.`);
+
+        return back();
+      });
     }, context);
   });
 
@@ -222,7 +230,7 @@ export default define(class Rule extends Element {
       (factOrSubproof, forward, back) => {
         return premise.unifyFactOrSubproof(factOrSubproof, context, forward, back);
       }, (factOrSubproofs, factOrSubproof, context, back) => {
-        return context.solveInferredSubstitutions((back) => {
+        return context.solveInferredSubstitutions((context, back) => {
           return forward(factOrSubproofs, context, back);
         }, back);
       }, (exception) => {

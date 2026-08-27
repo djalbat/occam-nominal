@@ -75,7 +75,7 @@ export default define(class Property extends Element {
     if (malformed) {
       const verifies = false;
 
-      context.debug(`Unable to verify the '${propertyString}' property because it is malformed.`);
+      context.trace(`Unable to verify the '${propertyString}' property because it is malformed.`);
 
       return continuation(verifies, context);
     }

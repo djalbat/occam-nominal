@@ -27,7 +27,7 @@ export default define(class TypePrefixDeclaration extends Declaration {
     return typePrefixDeclarationNode;
   }
 
-  verify = breakable(function (context, continuation) {
+  verify = breakable(function (context, forward, back) {
     const typePrefixDeclarationString = this.getString();  ///
 
     context.trace(`Verifying the '${typePrefixDeclarationString}' type prefix declaration...`);
@@ -36,16 +36,20 @@ export default define(class TypePrefixDeclaration extends Declaration {
 
     return all([
       verifyTypePrefix
-    ], context, (verifies, context) => {
-      if (verifies) {
-        context.addTypePrefix(this.typePrefix);
+    ], context, (context, back) => {
+      context.addTypePrefix(this.typePrefix);
+
+      context.debug(`...verified the '${typePrefixDeclarationString}' type prefix declaration.`);
+
+      return forward(context, back);
+    }, (exception) => {
+      if (exception) {
+        return back(exception);
       }
 
-      if (verifies) {
-        context.debug(`...verified the '${typePrefixDeclarationString}' type prefix declaration.`);
-      }
+      context.trace(`Unable to verify the '${typePrefixDeclarationString}' type prefix declaration.`);
 
-      return continuation(verifies, context);
+      return back();
     });
   });
 

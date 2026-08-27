@@ -49,7 +49,7 @@ export default define(class Combinator extends Element {
     const malformed = this.isMalformed();
 
     if (malformed) {
-      context.debug(`Unable to verify the '${cbmbinatorString}' cbmbinator because it is malformed.`);
+      context.trace(`Unable to verify the '${cbmbinatorString}' cbmbinator because it is malformed.`);
 
       return back();
     }

@@ -105,7 +105,15 @@ export default define(class Subproof extends Element {
         context.debug(`...verified the '${subproofString}' subproof.`);
 
         return forward(context, back);
-      }, back);
+      }, (exception) => {
+        if (exception) {
+          return back(exception);
+        }
+
+        context.trace(`Unable to verify the '${subproofString}' subprpoof.`);
+
+        return back();
+      });
     }, context);
   });
 

@@ -37,7 +37,7 @@ export default define(class Conclusion extends Resolution {
     const malformed = this.isMalformed();
 
     if (malformed) {
-      context.debug(`Unable to verify the '${conclusionString}' conclusion because it is malformed.`);
+      context.trace(`Unable to verify the '${conclusionString}' conclusion because it is malformed.`);
 
       return back();
     }
@@ -48,7 +48,15 @@ export default define(class Conclusion extends Resolution {
           context.debug(`...verified the '${conclusionString}' conclusion.`);
 
           return forward(context, back);
-        }, back);
+        }, (exception) => {
+          if (exception) {
+            return back(exception);
+          }
+
+          context.trace(`Unable to verify the '${conclusionString}' conclusion.`);
+
+          return back();
+        });
       }, state);
     });
   });

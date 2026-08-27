@@ -29,7 +29,15 @@ export default define(class Theorem extends Claim {
       context.debug(`...verified the '${theoremString}' theorem.`);
 
       return forward(context, back);
-    }, back);
+    }, (exception) => {
+      if (exception) {
+        return back(exception);
+      }
+
+      context.trace(`Verifying the '${theoremString}' theorem...`);
+
+      return back();
+    });
   });
 
   static name = "Theorem";

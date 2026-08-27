@@ -54,7 +54,15 @@ export default define(class Section extends Element {
         context.debug(`...verified the '${sectionString}' section.`);
 
         return forward(context, back);
-      }, back);
+      }, (exception) => {
+        if (exception) {
+          return back(exception);
+        }
+
+        context.trace(`Unable to verify the '${sectionString}' section.`);
+
+        return back();
+      });
     }, context);
   });
 

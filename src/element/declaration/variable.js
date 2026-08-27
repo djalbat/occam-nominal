@@ -56,7 +56,15 @@ export default define(class VariableDeclaration extends Declaration {
       context.debug(`...verified the '${variableDeclarationString}' variable declaration.`);
 
       return forward(context, back);
-    }, back);
+    }, (exception) => {
+      if (exception) {
+        return back(exception);
+      }
+
+      context.trace(`Unable to verify the '${variableDeclarationString}' variable declaration.`);
+
+      return back();
+    });
   });
 
   verifyType(context, forward, back) {

@@ -63,7 +63,7 @@ export default define(class Supposition extends Fact {
     const malformed = this.isMalformed();
 
     if (malformed) {
-      context.debug(`Unable to verify the '${suppositionString}' supposition because it is malformed.`);
+      context.trace(`Unable to verify the '${suppositionString}' supposition because it is malformed.`);
 
       return back();
     }
@@ -73,7 +73,15 @@ export default define(class Supposition extends Fact {
         context.debug(`...verified the '${suppositionString}' supposition.`);
 
         return forward(context, back);
-      }, back);
+      }, (exception) => {
+        if (exception) {
+          return back(exception);
+        }
+
+        context.trace(`Unable to verify the '${suppositionString}' supposition.`);
+
+        return back();
+      });
     });
   });
 

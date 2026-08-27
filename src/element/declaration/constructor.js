@@ -54,7 +54,7 @@ export default define(class ConstructorDeclaration extends Declaration {
     const malformed = this.isMalformed();
 
     if (malformed) {
-      context.debug(`Unable to verify the '${constructorDeclarationString}' constructor declaration because it is malformed.`);
+      context.trace(`Unable to verify the '${constructorDeclarationString}' constructor declaration because it is malformed.`);
 
       return back();
     }
@@ -73,7 +73,15 @@ export default define(class ConstructorDeclaration extends Declaration {
       context.debug(`...verified the '${constructorDeclarationString}' constructor declaration.`);
 
       return forward(context, back);
-    }, back);
+    }, (exception) => {
+      if (exception) {
+        return back(exception);
+      }
+
+      context.trace(`Unable to verify the '${constructorDeclarationString}' constructor declaration.`);
+
+      return back();
+    });
   });
 
   verifyType(context, forward, back) {
