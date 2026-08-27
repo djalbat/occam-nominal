@@ -3,7 +3,7 @@
 import { arrayUtilities } from "necessary";
 import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
 
-import { enclose, reconcile } from "../utilities/context";
+import { reconcile } from "../utilities/context";
 import { claimStringFromLabelsSignatureSuppositionsAndDeduction } from "../utilities/string";
 import { labelsFromJSON,
          deductionFromJSON,
@@ -17,7 +17,7 @@ import { labelsFromJSON,
          suppositionsToSuppositionsJSON } from "../utilities/json";
 
 const { reverse } = arrayUtilities,
-      { all, every, extract, forwardsEvery, backwardsEvery } = continuationUtilities,
+      { every, extract, forwardsEvery, backwardsEvery } = continuationUtilities,
       { breakable, breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default class Claim extends Element {
@@ -89,22 +89,6 @@ export default class Claim extends Element {
     });
 
     return metavariableNodeMatches;
-  }
-
-  verifyEx(context, forward, back) {
-    return enclose((context) => {
-      const verifyProof = this.verifyProof.bind(this),
-            verifyLabels = this.verifyLabels.bind(this),
-            verifyDeduction = this.verifyDeduction.bind(this),
-            verifySuppositions = this.verifySuppositions.bind(this);
-
-      return all([
-        verifyLabels,
-        verifySuppositions,
-        verifyDeduction,
-        verifyProof
-      ], context, forward, back);
-    }, context);
   }
 
   unifyStepAndFactOrSubproofs = breakable(function (step, factOrSubproofs, context, forward, back) {

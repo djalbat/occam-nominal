@@ -5,8 +5,9 @@ import { breakPointUtilities, continuationUtilities } from "occam-languages";
 import Claim from "../claim";
 
 import { define } from "../../elements";
+import { enclose } from "../../utilities/context";
 
-const { cut } = continuationUtilities,
+const { cut, all } = continuationUtilities,
       { breakable } = breakPointUtilities;
 
 export default define(class Conjecture extends Claim {
@@ -20,27 +21,42 @@ export default define(class Conjecture extends Claim {
   verify = breakable(function (context, forward, back) {
     forward = cut(forward, back); ///
 
-    const conjecttureString = this.getString(); ///
+    const conjectureString = this.getString(), ///
+          speicifcContext = context;  ///
 
-    context.trace(`Verifying the '${conjecttureString}' conjectture...`);
+    context.trace(`Verifying the '${conjectureString}' conjecture...`);
 
-    return this.verifyEx(context, (context, back) => {
-      const conjectture = this; ///
+    return enclose((context) => {
+      const verifyProof = this.verifyProof.bind(this),
+            verifyLabels = this.verifyLabels.bind(this),
+            verifyDeduction = this.verifyDeduction.bind(this),
+            verifySuppositions = this.verifySuppositions.bind(this);
 
-      context.addConjecture(conjectture);
+      return all([
+        verifyLabels,
+        verifySuppositions,
+        verifyDeduction,
+        verifyProof
+      ], context, ( _ , back) => {
+        const conjecture = this; ///
 
-      context.debug(`...verified the '${conjecttureString}' conjectture.`);
+        context = speicifcContext;  ///
 
-      return forward(context, back);
-    }, (exception) => {
-      if (exception) {
-        return back(exception);
-      }
+        context.addConjecture(conjecture);
 
-      context.trace(`Unable to verify the '${conjecttureString}' conjectture.`);
+        context.debug(`...verified the '${conjectureString}' conjecture.`);
 
-      return back();
-    });
+        return forward(context, back);
+      }, (exception) => {
+        if (exception) {
+          return back(exception);
+        }
+
+        context.trace(`Unable to verify the '${conjectureString}' conjecture.`);
+
+        return back();
+      });
+    }, context);
   });
 
   static name = "Conjecture";

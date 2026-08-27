@@ -5,8 +5,9 @@ import { breakPointUtilities, continuationUtilities } from "occam-languages";
 import Claim from "../claim";
 
 import { define } from "../../elements";
+import { enclose } from "../../utilities/context";
 
-const { cut } = continuationUtilities,
+const { cut, all } = continuationUtilities,
       { breakable } = breakPointUtilities;
 
 export default define(class Theorem extends Claim {
@@ -20,27 +21,42 @@ export default define(class Theorem extends Claim {
   verify = breakable(function (context, forward, back) {
     forward = cut(forward, back); ///
 
-    const theoremString = this.getString(); ///
+    const theoremString = this.getString(), ///
+          speicifcContext = context;  ///
 
     context.trace(`Verifying the '${theoremString}' theorem...`);
 
-    return this.verifyEx(context, (context, back) => {
-      const theorem = this; ///
+    return enclose((context) => {
+      const verifyProof = this.verifyProof.bind(this),
+            verifyLabels = this.verifyLabels.bind(this),
+            verifyDeduction = this.verifyDeduction.bind(this),
+            verifySuppositions = this.verifySuppositions.bind(this);
 
-      context.addTheorem(theorem);
+      return all([
+        verifyLabels,
+        verifySuppositions,
+        verifyDeduction,
+        verifyProof
+      ], context, ( _ , back) => {
+        const theorem = this; ///
 
-      context.debug(`...verified the '${theoremString}' theorem.`);
+        context = speicifcContext;  ///
 
-      return forward(context, back);
-    }, (exception) => {
-      if (exception) {
-        return back(exception);
-      }
+        context.addTheorem(theorem);
 
-      context.trace(`Verifying the '${theoremString}' theorem...`);
+        context.debug(`...verified the '${theoremString}' theorem.`);
 
-      return back();
-    });
+        return forward(context, back);
+      }, (exception) => {
+        if (exception) {
+          return back(exception);
+        }
+
+        context.trace(`Unable to verify the '${theoremString}' theorem.`);
+
+        return back();
+      });
+    }, context);
   });
 
   static name = "Theorem";

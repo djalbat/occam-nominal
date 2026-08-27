@@ -5,11 +5,11 @@ import { breakPointUtilities, continuationUtilities } from "occam-languages";
 import Claim from "../claim";
 
 import { define } from "../../elements";
-import { join, reconcile } from "../../utilities/context";
 import { termsStringFromTerms } from "../../utilities/string";
+import { join, enclose, reconcile } from "../../utilities/context";
 
 const { breakable } = breakPointUtilities,
-      { cut, backwardsEvery } = continuationUtilities;
+      { cut, all, backwardsEvery } = continuationUtilities;
 
 export default define(class Axiom extends Claim {
   getAxiomNode() {
@@ -29,29 +29,44 @@ export default define(class Axiom extends Claim {
   verify = breakable(function (context, forward, back) {
     forward = cut(forward, back); ///
 
-    const axiomString = this.getString(); ///
+    const axiomString = this.getString(), ///
+          speicifcContext = context;  ///
 
     context.trace(`Verifying the '${axiomString}' axiom...`);
 
-    this.verifySignature(context, (context, back) => {
-      return this.verifyEx(context, (context, back) => {
+    return enclose((context) => {
+      const verifyProof = this.verifyProof.bind(this),
+            verifyLabels = this.verifyLabels.bind(this),
+            verifySignature = this.verifySignature.bind(this),
+            verifyDeduction = this.verifyDeduction.bind(this),
+            verifySuppositions = this.verifySuppositions.bind(this);
+
+      return all([
+        verifyLabels,
+        verifySignature,
+        verifySuppositions,
+        verifyDeduction,
+        verifyProof
+      ], context, ( _ , back) => {
         const axiom = this; ///
+
+        context = speicifcContext;  ///
 
         context.addAxiom(axiom);
 
         context.debug(`...verified the '${axiomString}' axiom.`);
 
         return forward(context, back);
-      }, back);
-    }, (exception) => {
-      if (exception) {
-        return back(exception);
-      }
+      }, (exception) => {
+        if (exception) {
+          return back(exception);
+        }
 
-      context.trace(`Unable to verify the '${axiomString}' axiom.`);
+        context.trace(`Unable to verify the '${axiomString}' axiom.`);
 
-      return back();
-    });
+        return back();
+      });
+    }, context);
   });
 
   verifySignature(context, forward, back) {

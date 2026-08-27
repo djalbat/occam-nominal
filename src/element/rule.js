@@ -59,7 +59,8 @@ export default define(class Rule extends Element {
   verify = breakable(function (context, forward, back) {
     forward = cut(forward, back); ///
 
-    const ruleString = this.getString(); ///
+    const ruleString = this.getString(), ///
+          speicifcContext = context; ///
 
     context.trace(`Verifying the '${ruleString}' rule...`);
 
@@ -76,6 +77,8 @@ export default define(class Rule extends Element {
         verifyProof
       ], context, ( _ , back) => {
         const rule = this; ///
+
+        context = speicifcContext;  ///
 
         context.addRule(rule);
 
