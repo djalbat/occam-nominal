@@ -1,12 +1,13 @@
 "use strict";
 
-import { breakPointUtilities } from "occam-languages";
+import { breakPointUtilities, continuationUtilities } from "occam-languages";
 
 import Claim from "../claim";
 
 import { define } from "../../elements";
 
-const { breakable } = breakPointUtilities;
+const { cut } = continuationUtilities,
+      { breakable } = breakPointUtilities;
 
 export default define(class Conjecture extends Claim {
   getConjectureNode() {
@@ -17,6 +18,8 @@ export default define(class Conjecture extends Claim {
   }
 
   verify = breakable(function (context, forward, back) {
+    forward = cut(forward, back); ///
+
     const conjecttureString = this.getString(); ///
 
     context.trace(`Verifying the '${conjecttureString}' conjectture...`);

@@ -8,7 +8,7 @@ import { enclose, reconcile } from "../utilities/context";
 import { labelsFromJSON, premisesFromJSON, conclusionFromJSON, labelsToLabelsJSON, premisesToPremisesJSON, conclusionToConclusionJSON } from "../utilities/json";
 
 const { reverse } = arrayUtilities,
-      { all, every, extract, forwardsEvery, backwardsEvery } = continuationUtilities,
+      { cut, all, every, extract, forwardsEvery, backwardsEvery } = continuationUtilities,
       { breakable, breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Rule extends Element {
@@ -57,6 +57,8 @@ export default define(class Rule extends Element {
   }
 
   verify = breakable(function (context, forward, back) {
+    forward = cut(forward, back); ///
+
     const ruleString = this.getString(); ///
 
     context.trace(`Verifying the '${ruleString}' rule...`);

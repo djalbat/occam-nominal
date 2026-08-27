@@ -6,7 +6,7 @@ import Declaration from "../declaration";
 
 import { define } from "../../elements";
 
-const { all } = continuationUtilities,
+const { cut, all } = continuationUtilities,
       { breakable } = breakPointUtilities;
 
 export default define(class MetavariableDeclaration extends Declaration {
@@ -26,6 +26,8 @@ export default define(class MetavariableDeclaration extends Declaration {
   }
 
   verify = breakable(function (context, forward, back) {
+    forward = cut(forward, back); ///
+
     const metavariableDeclarationString = this.getString(); ///
 
     context.trace(`Verifying the '${metavariableDeclarationString}' metavariable declaration...`);

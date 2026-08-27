@@ -80,8 +80,6 @@ export default define(class Generator extends Element {
   }
 
   verify(context, forward, back) {
-    forward = cut(forward, back); ///
-
     let verifies = false;
 
     const includeType = false,

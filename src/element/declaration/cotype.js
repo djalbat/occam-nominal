@@ -9,7 +9,7 @@ import { anticipate } from "../../utilities/context";
 import { baseTypeFromNothing } from "../../utilities/type";
 
 const { breakable } = breakPointUtilities,
-      { all, every } = continuationUtilities;
+      { cut, all, every } = continuationUtilities;
 
 export default define(class CotypeDeclaration extends Declaration {
   constructor(context, string, node, breakPoint, type, superTypes, provisional, propertyDeclarations) {
@@ -55,6 +55,8 @@ export default define(class CotypeDeclaration extends Declaration {
   }
 
   verify = breakable(function (context, forward, back) {
+    forward = cut(forward, back); ///
+
     const cotypeDeclarationString = this.getString();  ///
 
     context.trace(`Verifying the '${cotypeDeclarationString}' cotype declaration...`);

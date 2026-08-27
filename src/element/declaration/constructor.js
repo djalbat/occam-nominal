@@ -6,7 +6,7 @@ import Declaration from "../declaration";
 
 import { define } from "../../elements";
 
-const { all } = continuationUtilities,
+const { cut, all } = continuationUtilities,
       { breakable } = breakPointUtilities;
 
 export default define(class ConstructorDeclaration extends Declaration {
@@ -47,6 +47,8 @@ export default define(class ConstructorDeclaration extends Declaration {
   setHypotheses(hypotheses) { this.constructor.setHypotheses(hypotheses); }
 
   verify = breakable(function (context, forward, back) {
+    forward = cut(forward, back); ///
+
     const constructorDeclarationString = this.getString();  ///
 
     context.trace(`Verifying the '${constructorDeclarationString}' constructor declaration...`);

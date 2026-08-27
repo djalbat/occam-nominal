@@ -6,7 +6,7 @@ import Declaration from "../declaration";
 
 import { define } from "../../elements";
 
-const { all } = continuationUtilities,
+const { cut, all } = continuationUtilities,
       { breakable } = breakPointUtilities;
 
 export default define(class GeneratorDeclaration extends Declaration {
@@ -47,6 +47,8 @@ export default define(class GeneratorDeclaration extends Declaration {
   setHypotheses(hypotheses) { this.generator.setHypotheses(hypotheses); }
 
   verify = breakable(function (context, forward, back) {
+    forward = cut(forward, back); ///
+
     const generatorDeclarationString = this.getString();  ///
 
     context.trace(`Verifying the '${generatorDeclarationString}' generator declaration...`);

@@ -81,8 +81,6 @@ export default define(class Constructor extends Element {
   }
 
   verify(context, forward, back) {
-    forward = cut(forward, back); ///
-
     const includeType = false,
           constructorString = this.getString(includeType);  ///
 

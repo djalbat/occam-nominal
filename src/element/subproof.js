@@ -6,7 +6,7 @@ import { define } from "../elements";
 import { enclose } from "../utilities/context";
 
 const { breakable } = breakPointUtilities,
-      { all, every } = continuationUtilities;
+      { cut, all, every } = continuationUtilities;
 
 export default define(class Subproof extends Element {
   constructor(context, string, node, breakPoint, suppositions, subDerivation) {
@@ -90,6 +90,8 @@ export default define(class Subproof extends Element {
   }
 
   verify = breakable(function(context, forward, back) {
+    forward = cut(forward, back); ///
+
     const subproofString = this.getString();
 
     context.trace(`Verifying the '${subproofString}' subprpoof...`);

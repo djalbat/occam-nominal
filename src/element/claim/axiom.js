@@ -9,7 +9,7 @@ import { join, reconcile } from "../../utilities/context";
 import { termsStringFromTerms } from "../../utilities/string";
 
 const { breakable } = breakPointUtilities,
-      { backwardsEvery } = continuationUtilities;
+      { cut, backwardsEvery } = continuationUtilities;
 
 export default define(class Axiom extends Claim {
   getAxiomNode() {
@@ -27,6 +27,8 @@ export default define(class Axiom extends Claim {
   }
 
   verify = breakable(function (context, forward, back) {
+    forward = cut(forward, back); ///
+
     const axiomString = this.getString(); ///
 
     context.trace(`Verifying the '${axiomString}' axiom...`);

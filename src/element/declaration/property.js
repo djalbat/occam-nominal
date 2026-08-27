@@ -6,7 +6,7 @@ import Declaration from "../declaration";
 
 import { define } from "../../elements";
 
-const { all } = continuationUtilities,
+const { cut, all } = continuationUtilities,
       { breakable } = breakPointUtilities;
 
 export default define(class PropertyDeclaration extends Declaration {
@@ -40,6 +40,8 @@ export default define(class PropertyDeclaration extends Declaration {
   }
 
   verify = breakable(function (context, forward, back) {
+    forward = cut(forward, back); ///
+
     let verifies = false;
 
     const propertyDeclarationString = this.getString();  ///

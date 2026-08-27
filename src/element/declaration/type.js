@@ -8,7 +8,7 @@ import { define } from "../../elements";
 import { baseTypeFromNothing } from "../../utilities/type";
 
 const { breakable } = breakPointUtilities,
-      { all, every } = continuationUtilities;
+      { cut, all, every } = continuationUtilities;
 
 export default define(class TypeDeclaration extends Declaration {
   constructor(context, string, node, breakPoint, type, superTypes, provisional) {
@@ -45,6 +45,8 @@ export default define(class TypeDeclaration extends Declaration {
   }
 
   verify = breakable(function (context, forward, back) {
+    forward = cut(forward, back); ///
+
     const typeDeclarationString = this.getString();  ///
 
     context.trace(`Verifying the '${typeDeclarationString}' type declaration...`);

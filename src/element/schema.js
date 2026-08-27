@@ -14,7 +14,7 @@ import { labelFromJSON,
          constraintsToConstraintsJSON,
          suppositionsToSuppositionsJSON } from "../utilities/json";
 
-const { all, filter, forwardsEvery, backwardsEvery } = continuationUtilities,
+const { cut, all, filter, forwardsEvery, backwardsEvery } = continuationUtilities,
       { breakable, breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Schema extends Element {
@@ -66,6 +66,8 @@ export default define(class Schema extends Element {
   matchMetavariableNode(metavariableNode) { return this.label.matchMetavariableNode(metavariableNode); }
 
   verify = breakable(function (context, forward, back) {
+    forward = cut(forward, back); ///
+
     const schemaString = this.getString(); ///
 
     context.trace(`Verifying the '${schemaString}' schema...`);

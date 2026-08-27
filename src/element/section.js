@@ -6,7 +6,7 @@ import { define } from "../elements";
 import { enclose } from "../utilities/context";
 
 const { breakable } = breakPointUtilities,
-      { all, every } = continuationUtilities;
+      { cut, all, every } = continuationUtilities;
 
 export default define(class Section extends Element {
   constructor(context, string, node, breakPoint, hypotheses, declaration, claim) {
@@ -37,6 +37,8 @@ export default define(class Section extends Element {
   }
 
   verify = breakable(function (context, forward, back) {
+    forward = cut(forward, back); ///
+
     const sectionString = this.getString();  ///
 
     context.trace(`Verifying the '${sectionString}' section...`);

@@ -10,7 +10,7 @@ import { unifyStatementWithCombinator } from "../process/unify";
 import { validateStatementAsCombinator } from "../process/validate";
 import { attempt, serialise, unserialise, instantiate } from "../utilities/context";
 
-const { cut, exists } = continuationUtilities,
+const { exists } = continuationUtilities,
       { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Combinator extends Element {
@@ -39,8 +39,6 @@ export default define(class Combinator extends Element {
   }
 
   verify(context, forward, back) {
-    forward = cut(forward, back); ///
-
     const includeType = false,
           cbmbinatorString = this.getString(includeType);  ///
 
