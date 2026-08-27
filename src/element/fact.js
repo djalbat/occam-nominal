@@ -37,6 +37,12 @@ export default class Fact extends Element {
     return step;
   }
 
+  isBubproof() {
+    const subproof = false;
+
+    return subproof;
+  }
+
   validateStatement(state, context, forward, back) {
     if (this.statement === null) {
       return forward(state, context, back);

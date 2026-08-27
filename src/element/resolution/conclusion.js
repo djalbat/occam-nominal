@@ -7,7 +7,7 @@ import Resolution from "../resolution";
 import { define } from "../../elements";
 import { declare, desist } from "../../utilities/state";
 import { instantiateConclusion } from "../../process/instantiate";
-import { unserialise, instantiate } from "../../utilities/context";
+import { reconcile, unserialise, instantiate } from "../../utilities/context";
 
 const { cut } = continuationUtilities,
       { breakable, breakPointFromJSON } = breakPointUtilities;
@@ -59,6 +59,40 @@ export default define(class Conclusion extends Resolution {
         });
       }, state);
     });
+  });
+
+  unifyStep = breakable(function (step, context, forward, back) {
+    forward = cut(forward, back); ///
+
+    const stepString = step.getString(),
+          conclusionString = this.getString();  ///
+
+    context.trace(`Unifying the '${stepString}' step with the '${conclusionString}' conclusion...`);
+
+    const stepContext = step.getContext(),
+          conclusionContext = this.getContext(),  ///
+          generalContext = conclusionContext, ///
+          specificContext = stepContext;  ///
+
+    return reconcile((specificContext) => {
+      const statement = step.getStatement();
+
+      return this.statement.unifyStatement(statement, generalContext, specificContext, (generalContext, specificContext, back) => {
+        specificContext.commit(context);
+
+        context.debug(`...unified the '${stepString}' step with the '${conclusionString}' conclusion.`);
+
+        return forward(context, back);
+      }, (exception) => {
+        if (exception) {
+          return back(exception);
+        }
+
+        context.trace(`Unable to unify the '${stepString}' step with the '${conclusionString}' conclusion.`);
+
+        return back();
+      });
+    }, specificContext);
   });
 
   static name = "Conclusion";

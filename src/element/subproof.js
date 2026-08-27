@@ -55,6 +55,12 @@ export default define(class Subproof extends Element {
     return fact;
   }
 
+  isBubproof() {
+    const subproof = true;
+
+    return subproof;
+  }
+
   compareStep(step, context) {
     let comparesToStep;
 

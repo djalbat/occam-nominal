@@ -2,9 +2,9 @@
 
 import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
 
-import { attempt, reconcile, serialise } from "../utilities/context";
+import { attempt, serialise } from "../utilities/context";
 
-const { all, cut } = continuationUtilities,
+const { all } = continuationUtilities,
       { breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default class Resolution extends Element {
@@ -52,32 +52,6 @@ export default class Resolution extends Element {
 
       return forward(state, context, back);
     }, back);
-  }
-
-  unifyStep(step, context, forward, back) {
-    forward = cut(forward, back); ///
-
-    const stepString = step.getString(),
-          resolutionString = this.getString();  ///
-
-    context.trace(`Unifying the '${stepString}' step with the '${resolutionString}' resolution...`);
-
-    const stepContext = step.getContext(),
-          resolutionContext = this.getContext(),  ///
-          generalContext = resolutionContext, ///
-          specificContext = stepContext;  ///
-
-    return reconcile((specificContext) => {
-      const statement = step.getStatement();
-
-      return this.statement.unifyStatement(statement, generalContext, specificContext, (generalContext, specificContext, back) => {
-        specificContext.commit(context);
-
-        context.debug(`...unified the '${stepString}' step with the '${resolutionString}' resolution.`);
-
-        return forward(context, back);
-      }, back);
-    }, specificContext);
   }
 
   unifyStatement(statement, generalContext, specificContext, forward, back) {

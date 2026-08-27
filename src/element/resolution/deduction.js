@@ -7,7 +7,7 @@ import Resolution from "../resolution";
 import { define } from "../../elements";
 import { desist, declare } from "../../utilities/state";
 import { instantiateDeduction } from "../../process/instantiate";
-import { unserialise, instantiate } from "../../utilities/context";
+import { reconcile, unserialise, instantiate } from "../../utilities/context";
 
 const { cut } = continuationUtilities,
       { breakable, breakPointFromJSON } = breakPointUtilities;
@@ -59,6 +59,40 @@ export default define(class Deduction extends Resolution {
         });
       }, state);
     });
+  });
+
+  unifyStep = breakable(function (step, context, forward, back) {
+    forward = cut(forward, back); ///
+
+    const stepString = step.getString(),
+          deductionString = this.getString();  ///
+
+    context.trace(`Unifying the '${stepString}' step with the '${deductionString}' deduction...`);
+
+    const stepContext = step.getContext(),
+          deductionContext = this.getContext(),  ///
+          generalContext = deductionContext, ///
+          specificContext = stepContext;  ///
+
+    return reconcile((specificContext) => {
+      const statement = step.getStatement();
+
+      return this.statement.unifyStatement(statement, generalContext, specificContext, (generalContext, specificContext, back) => {
+        specificContext.commit(context);
+
+        context.debug(`...unified the '${stepString}' step with the '${deductionString}' deduction.`);
+
+        return forward(context, back);
+      }, (exception) => {
+        if (exception) {
+          return back(exception);
+        }
+
+        context.trace(`Unable to unify the '${stepString}' step with the '${deductionString}' deduction.`);
+
+        return back();
+      });
+    }, specificContext);
   });
 
   static name = "Deduction";
