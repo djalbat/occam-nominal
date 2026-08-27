@@ -92,27 +92,25 @@ export default define(class Premise extends Fact {
 
     context.trace(`Unifying the '${premiseString}' premise independently...`);
 
-    return reconcile((context) => {
-      const unifyStatementIndependently = this.unifyStatementIndependently.bind(this),
-            unifyProcedureCallIndependently = this.unifyProcedureCallIndependently.bind(this);
+    const unifyStatementIndependently = this.unifyStatementIndependently.bind(this),
+          unifyProcedureCallIndependently = this.unifyProcedureCallIndependently.bind(this);
 
-      return all([
-        unifyStatementIndependently,
-        unifyProcedureCallIndependently
-      ], context, ( _ , back) => {
-        context.debug(`...unified the '${premiseString}' premise independently.`);
+    return all([
+      unifyStatementIndependently,
+      unifyProcedureCallIndependently
+    ], context, (context, back) => {
+      context.debug(`...unified the '${premiseString}' premise independently.`);
 
-        return forward(context, back);
-      }, (exception) => {
-        if (exception) {
-          return back(exception);
-        }
+      return forward(context, back);
+    }, (exception) => {
+      if (exception) {
+        return back(exception);
+      }
 
-        context.trace(`Unable to Unify the '${premiseString}' premise independently.`);
+      context.trace(`Unable to Unify the '${premiseString}' premise independently.`);
 
-        return back();
-      });
-    }, context);
+      return back();
+    });
   });
 
   unifyFactOrSubproof = breakable(function (factOrSubproof, context, forward, back) {
@@ -130,6 +128,8 @@ export default define(class Premise extends Fact {
       unifyFact,
       unifySubproof
     ], factOrSubproof, context, (factOrSubproof, context, back) => {
+      context.debug(`...unified the '${factOrSubproofString}' fact or subproof with the '${premiseString}' premise.`);
+
       return forward(context, back);
     }, (exception) => {
       if (exception) {
@@ -169,11 +169,11 @@ export default define(class Premise extends Fact {
   unifyFact(factOrSubproof, context, forward, back) {
     const factOrSubproofFact = factOrSubproof.isFact();
 
-    if (factOrSubproofFact) {
+    if (!factOrSubproofFact) {
       return forward(factOrSubproof, context, back);
     }
 
-    const fact = factOrSubproof,
+    const fact = factOrSubproof,  ///
           factString = fact.getString(),
           premiseString = this.getString(); ///
 
@@ -192,7 +192,7 @@ export default define(class Premise extends Fact {
 
         context.debug(`...unified the '${factString}' fact with the '${premiseString}' premise.`);
 
-        return forward(context, back);
+        return forward(factOrSubproof, context, back);
       }, back);
     }, specificContext);
   }
@@ -200,7 +200,7 @@ export default define(class Premise extends Fact {
   unifySubproof(factOrSubproof, context, forward, back) {
     const factOrSubproofSubproof = factOrSubproof.isBubproof();
 
-    if (factOrSubproofSubproof) {
+    if (!factOrSubproofSubproof) {
       return forward(factOrSubproof, context, back);
     }
 
@@ -226,7 +226,7 @@ export default define(class Premise extends Fact {
 
         context.debug(`...unified the '${subproofString}' subproof with the '${premiseString}' premise.`);
 
-        return forward(context, back);
+        return forward(factOrSubproof, context, back);
       }, back);
     }, context);
   }

@@ -183,22 +183,16 @@ export default define(class TermSubstitution extends Substitution {
             unifyReplacementTerm = this.unifyReplacementTerm.bind(this);
 
       return all([
-        unifyReplacementTerm,
-        unifyTargetTerm
+        unifyTargetTerm,
+        unifyReplacementTerm
       ], substitution, context, (substitution, context, back) => {
-        const soleInferredSubstitution = context.getSoleInferredSubstitution();
-
-        if (soleInferredSubstitution === null) {
-          return back();
-        }
-
-        substitution = soleInferredSubstitution; ///
+        context.commit();
 
         context = specificCopntxt;  ///
 
         context.debug(`...unified the '${simpleSubstitutionString}' simple substitution with the '${substitutionString}' substitution.`);
 
-        return forward(substitution, context, back);
+        return forward(context, back);
       }, back);
     }, context);
   }

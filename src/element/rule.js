@@ -94,6 +94,28 @@ export default define(class Rule extends Element {
     }, context);
   });
 
+  unifyStepAndFactOrSubproofs = breakable(function (step, factOrSubproofs, context, forward, back) {
+    const specificContext = context;  ///
+
+    return reconcile((context) => {
+      return this.unifyStepWithConclusion(step, context, (context, back) => {
+        return this.unifyFactOrSubproofsWithPremises(factOrSubproofs, context, (context, back) => {
+          const complexSubstitutionsUnsolved = context.areComplexSubstitutionsUnsolved();
+
+          if (complexSubstitutionsUnsolved) {
+            context.debug(`Unable to unify the step and fact or subproofs because thre are unsolved complex substitutions.`);
+
+            return back();
+          }
+
+          context = specificContext;  ///
+
+          return forward(context, back);
+        }, back);
+      }, back);
+    }, context)
+  });
+
   verifyLabels(context, forward, back) {
     const ruleString = this.getString();  ///
 
@@ -207,32 +229,12 @@ export default define(class Rule extends Element {
     }, back);
   }
 
-  unifyStepAndFactOrSubproofs(step, factOrSubproofs, context, forward, back) {
-    const specificContext = context;  ///
-
-    return reconcile((context) => {
-      return this.unifyStepWithConclusion(step, context, (context, back) => {
-        return this.unifyFactOrSubproofsWithPremises(factOrSubproofs, context, (context, back) => {
-          const inferredSubstitutionsSolved = context.areInferredSubstitutionsSolved();
-
-          if (!inferredSubstitutionsSolved) {
-            return back();
-          }
-
-          context = specificContext;  ///
-
-          return forward(context, back);
-        }, back);
-      }, back);
-    }, context)
-  }
-
   unifyFactOrSubproofsWithPremise(factOrSubproofs, premise, context, forward, back) {
     return extract(factOrSubproofs,
       (factOrSubproof, forward, back) => {
         return premise.unifyFactOrSubproof(factOrSubproof, context, forward, back);
       }, (factOrSubproofs, factOrSubproof, context, back) => {
-        return context.solveInferredSubstitutions((context, back) => {
+        return context.solveInferredSubstitutions((back) => {
           return forward(factOrSubproofs, context, back);
         }, back);
       }, (exception) => {

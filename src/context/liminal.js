@@ -96,8 +96,7 @@ export default class LiminalContext extends Context {
   solveInferredSubstitutions(forward, back) {
     forward = cut(forward, back); ///
 
-    const context = this, ///
-          inferredSubstitutions = this.getInferredSubstitutions(),
+    const inferredSubstitutions = this.getInferredSubstitutions(),
           metavariableNodes = metavariableNodesFromInferredSubstitutions(inferredSubstitutions);
 
     return forEach(metavariableNodes, (metavariableNode, forward, back) => {
@@ -108,18 +107,29 @@ export default class LiminalContext extends Context {
               solved = inferredSubstitution.isSolved();
 
         if (solved) {
-          return forward(context, back);
+          return forward(back);
         }
 
-        return inferredSubstitution.solve(context, forward, back);
+        const context = this; ///
+
+        return inferredSubstitution.solve(context, (context, back) => {
+          return forward(back);
+        }, back);
       }, forward, back);
     }, forward, back);
+  }
+
+  areComplexSubstitutionsUnsolved() {
+    const inferredSubstitutionsSolved = this.areInferredSubstitutionsSolved(),
+          complexSubstitutionsUnsolved = !inferredSubstitutionsSolved;
+
+    return complexSubstitutionsUnsolved;
   }
 
   areInferredSubstitutionsSolved() {
     const inferredSubstitutions = this.getInferredSubstitutions(),
           metavariableNodes = metavariableNodesFromInferredSubstitutions(inferredSubstitutions),
-          solved = metavariableNodes.every((metavariableNode) => {
+          inferredSubstitutionsSolved = metavariableNodes.every((metavariableNode) => {
             const complexInferredSubstitutions = this.findComplexInferredSubstitutionsByMetavariableNode(metavariableNode),
                   complexInferredSubstitutionsSolved = complexInferredSubstitutions.every((complexInferredSubstitution) => {
                     const complexInferredSubstitutionSolved = complexInferredSubstitution.isSolved();
@@ -134,7 +144,7 @@ export default class LiminalContext extends Context {
             }
           });
 
-    return solved;
+    return inferredSubstitutionsSolved;
   }
 
   isEmpty() {

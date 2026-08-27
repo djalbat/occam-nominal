@@ -249,21 +249,19 @@ export default define(class StatementSubstitution extends Substitution {
       return forward(context, back);
     }
 
-    context.trace(`Solving the '${complexSubstitutionString}' complex substitution...`);
+    const simpleSubstitutionString = simpleSubstitution.getString();
+
+    context.trace(`Solving the '${complexSubstitutionString}' complex substitution given the '${simpleSubstitutionString}' simple substitution...`);
 
     return simpleSubstitution.unifyComplexSubstitution(complexSubstitution, context, (substitution, context, back) => {
       const simpleSubstitution = substitution; ///
 
       substitution = this.targetStatement.getSubstitution();
 
-      return substitution.unifySimpleSubstitution(simpleSubstitution, context, (substitution, context, back) => {
-        const inferredSubstitution = substitution; ///
-
-        context.addInferredSubstitution(inferredSubstitution);
-
+      return substitution.unifySimpleSubstitution(simpleSubstitution, context, (context, back) => {
         this.solved = true;
 
-        context.debug(`...solved the '${complexSubstitutionString}' complex substitution.`);
+        context.debug(`...solved the '${complexSubstitutionString}' complex substitution given the '${simpleSubstitutionString}' simple substitution.`);
 
         return forward(context, back);
       }, back);
@@ -272,11 +270,9 @@ export default define(class StatementSubstitution extends Substitution {
         return back(exception);
       }
 
-      const simpleSubstitutionString = simpleSubstitution.getString();
+      context.trace(`Unable to solve the '${complexSubstitutionString}' complex substitution given the '${simpleSubstitutionString}' simple substitution.`);
 
-      context.debug(`Unifying the '${complexSubstitutionString}' complex substitution with the '${simpleSubstitutionString}' simple substitution did not yield a sole substitution.`);
-
-      return forward(context, back);
+      return back();
     });
   }
 

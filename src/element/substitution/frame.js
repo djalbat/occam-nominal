@@ -8,7 +8,7 @@ import { define } from "../../elements";
 import { instantiateFrameSubstitution } from "../../process/instantiate";
 import { frameSubstitutionFromFrameSubstitutionNode } from "../../utilities/element";
 import { frameSubstitutionStringFromFrameAndMetavariable } from "../../utilities/string";
-import { join, ablates, manifest, attempts, reconcile, participate, instantiate, unserialises } from "../../utilities/context";
+import { ablates, manifest, attempts, participate, instantiate, unserialises } from "../../utilities/context";
 
 const { all } = continuationUtilities,
       { breakPointFromJSON } = breakPointUtilities;
@@ -186,131 +186,6 @@ export default define(class FrameSubstitution extends Substitution {
     return replacementFrameValidates;
   }
 
-  unifySimpleSubstitution(simpleSubstitution, context, continuation) {
-    const substitutionString = this.getString(),  ///
-          simpleSubstitutionString = simpleSubstitution.getString();
-
-    context.trace(`Unifying the '${simpleSubstitutionString}' simple substitution with the '${substitutionString}' substitution...`);
-
-    return reconcile((context) => {
-      const substitution = simpleSubstitution, ///
-            unifyTargetFrame = this.unifyTargetFrame.bind(this),
-            unifyReplacementFrame = this.unifyReplacementFrame.bind(this);
-
-      return all([
-        unifyReplacementFrame,
-        unifyTargetFrame
-      ], substitution, context, (simpleSubstitutionUnifies) => {
-        const solInferredSubstitution = context.getSoleInferredSubstitution(),
-              substitution = solInferredSubstitution; ///
-
-        if (simpleSubstitutionUnifies) {
-          context.debug(`...unified the '${simpleSubstitutionString}' simple substitution with the '${substitutionString}' substitution.`);
-        }
-
-        return continuation(simpleSubstitutionUnifies, substitution);
-      });
-    }, context);
-  }
-
-  unifyReplacementFrame(substitution, context, continuation) {
-    const generalSubstitution = this, ///
-          specificSubstitution = substitution,
-          generalSubstitutionString = generalSubstitution.getString(),
-          specificSubstitutionString = specificSubstitution.getString();
-
-    context.trace(`Unifying the '${specificSubstitutionString}' substitution's replacement frame with the '${generalSubstitutionString}' substitution's replacement frame...`);
-
-    const generalSubstitutionSpecificContext = generalSubstitution.getSpecificContext(),
-          specificSubstitutionSpecificContext = specificSubstitution.getSpecificContext(),
-          generalSubstitutionReplacementFrame = generalSubstitution.getReplacementFrame(),
-          specificSubstitutionReplacementFrame = specificSubstitution.getReplacementFrame(),
-          generalContext = generalSubstitutionSpecificContext,  ///
-          specificContext = specificSubstitutionSpecificContext,  ///
-          generalFrame = generalSubstitutionReplacementFrame, ///
-          specificFrame = specificSubstitutionReplacementFrame; ///
-
-    const frameNode = generalFrame.getFrameNode(),
-          metavariable = metavariableFromFrameNode(frameNode, generalContext);
-
-    if (metavariable === null) {
-      const replacementFrameUnifies = false;
-
-      return continuation(replacementFrameUnifies);
-    }
-
-    const frame = specificFrame;  ///
-
-    return join((specificContext) => {
-      return reconcile((specificContext) => {
-        return metavariable.unifyFrame(frame, generalContext, specificContext, (frameUnifies) => {
-          let replacementFrameUnifies = false;
-
-          if (frameUnifies) {
-            specificContext.commit(context);
-
-            replacementFrameUnifies = true;
-          }
-
-          if (replacementFrameUnifies) {
-            context.trace(`...unified the '${specificSubstitutionString}' substitution's replacement frame with the '${generalSubstitutionString}' substitution's replacement frame.`);
-          }
-
-          return continuation(replacementFrameUnifies, substitution, context);
-        });
-      }, specificContext);
-    }, specificContext, context);
-  }
-
-  unifyTargetFrame(substitution, context, continuation) {
-    const generalSubstitution = this, ///
-          specificSubstitution = substitution,
-          generalSubstitutionString = generalSubstitution.getString(),
-          specificSubstitutionString = specificSubstitution.getString();
-
-    context.trace(`Unifying the '${specificSubstitutionString}' substitution's target frame with the '${generalSubstitutionString}' substitution's target frame...`);
-
-    const generalSubstitutionGeneralContext = generalSubstitution.getGeneralContext(),
-          specificSubstitutionGeneralContext = specificSubstitution.getGeneralContext(),
-          generalSubstitutionTargetFrame = generalSubstitution.getTargetFrame(),
-          specificSubstitutionTargetFrame = specificSubstitution.getTargetFrame(),
-          generalContext = generalSubstitutionGeneralContext,  ///
-          specificContext = specificSubstitutionGeneralContext,  ///
-          generalFrame = generalSubstitutionTargetFrame, ///
-          specificFrame = specificSubstitutionTargetFrame; ///
-
-    const frameNode = generalFrame.getFrameNode(),
-          metavariable = metavariableFromFrameNode(frameNode, generalContext);
-
-    if (metavariable === null) {
-      const targetFrameUnifies = false;
-
-      return continuation(targetFrameUnifies);
-    }
-
-    const frame = specificFrame;  ///
-
-    return join((specificContext) => {
-      return reconcile((specificContext) => {
-        return metavariable.unifyFrame(frame, generalContext, specificContext, (frameUnifies) => {
-          let targetFrameUnifies = false;
-
-          if (frameUnifies) {
-            specificContext.commit(context);
-
-            targetFrameUnifies = true;
-          }
-
-          if (targetFrameUnifies) {
-            context.trace(`...unified the '${specificSubstitutionString}' substitution's target frame with the '${generalSubstitutionString}' substitution's target frame.`);
-          }
-
-          return continuation(targetFrameUnifies, substitution, context);
-        });
-      }, specificContext);
-    }, specificContext, context);
-  }
-
   static name = "FrameSubstitution";
 
   static fromJSON(json, context) {
@@ -386,18 +261,6 @@ export default define(class FrameSubstitution extends Substitution {
     return frameSubstitution;
   }
 });
-
-function metavariableFromFrameNode(frameNode, generalContext) {
-  let metavariable = null;
-
-  const metavariableNode = frameNode.getMetavariableNode();
-
-  if (metavariableNode !== null) {
-    metavariable = generalContext.findMetavariableByMetavariableNode(metavariableNode);
-  }
-
-  return metavariable;
-}
 
 function targetFrameFromFrameSubstitutionNode(frameSubstitutionNode, generalContext) {
   const targetFrameNode = frameSubstitutionNode.getTargetFrameNode(),

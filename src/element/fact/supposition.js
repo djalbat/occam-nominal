@@ -92,19 +92,17 @@ export default define(class Supposition extends Fact {
 
     context.trace(`Unifying the '${suppositionString}' supposition independently...`);
 
-    return reconcile((context) => {
-      const unifyStatementIndependently = this.unifyStatementIndependently.bind(this),
-            unifyProcedureCallIndependently = this.unifyProcedureCallIndependently.bind(this);
+    const unifyStatementIndependently = this.unifyStatementIndependently.bind(this),
+          unifyProcedureCallIndependently = this.unifyProcedureCallIndependently.bind(this);
 
-      return all([
-        unifyStatementIndependently,
-        unifyProcedureCallIndependently
-      ], context, ( _ , back) => {
-        context.debug(`...unified the '${suppositionString}' supposition independently.`);
+    return all([
+      unifyStatementIndependently,
+      unifyProcedureCallIndependently
+    ], context, (context , back) => {
+      context.debug(`...unified the '${suppositionString}' supposition independently.`);
 
-        return forward(context, back);
-      }, back);
-    }, context);
+      return forward(context, back);
+    }, back);
   });
 
   unifyFactOrSubproof = breakable(function (factOrSubproof, context, forward, back) {
@@ -122,6 +120,8 @@ export default define(class Supposition extends Fact {
       unifyFact,
       unifySubproof
     ], factOrSubproof, context, (factOrSubproof, context, back) => {
+      context.debug(`Unified the '${factOrSubproofString}' fact or subproof with the '${suppositionString}' supposition.`);
+
       return forward(context, back);
     }, (exception) => {
       if (exception) {
@@ -161,11 +161,11 @@ export default define(class Supposition extends Fact {
   unifyFact(factOrSubproof, context, forward, back) {
     const factOrSubproofFact = factOrSubproof.isFact();
 
-    if (factOrSubproofFact) {
+    if (!factOrSubproofFact) {
       return forward(factOrSubproof, context, back);
     }
 
-    const fact = factOrSubproof,
+    const fact = factOrSubproof,  ///
           factString = fact.getString(),
           suppositionString = this.getString(); ///
 
@@ -184,7 +184,7 @@ export default define(class Supposition extends Fact {
 
         context.debug(`...unified the '${factString}' fact with the '${suppositionString}' supposition.`);
 
-        return forward(context, back);
+        return forward(factOrSubproof, context, back);
       }, back);
     }, specificContext);
   }
@@ -192,7 +192,7 @@ export default define(class Supposition extends Fact {
   unifySubproof(factOrSubproof, context, forward, back) {
     const factOrSubproofSubproof = factOrSubproof.isBubproof();
 
-    if (factOrSubproofSubproof) {
+    if (!factOrSubproofSubproof) {
       return forward(factOrSubproof, context, back);
     }
 
@@ -218,7 +218,7 @@ export default define(class Supposition extends Fact {
 
         context.debug(`...unified the '${subproofString}' subproof with the '${suppositionString}' supposition.`);
 
-        return forward(context, back);
+        return forward(factOrSubproof, context, back);
       }, back);
     }, context);
   }

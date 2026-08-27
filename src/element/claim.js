@@ -17,8 +17,8 @@ import { labelsFromJSON,
          suppositionsToSuppositionsJSON } from "../utilities/json";
 
 const { reverse } = arrayUtilities,
-      { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities,
-      { all, every, extract, forwardsEvery, backwardsEvery } = continuationUtilities;
+      { all, every, extract, forwardsEvery, backwardsEvery } = continuationUtilities,
+      { breakable, breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default class Claim extends Element {
   constructor(context, string, node, breakPoint, labels, suppositions, deduction, proof, signature, hypotheses) {
@@ -106,6 +106,28 @@ export default class Claim extends Element {
       ], context, forward, back);
     }, context);
   }
+
+  unifyStepAndFactOrSubproofs = breakable(function (step, factOrSubproofs, context, forward, back) {
+    const specificContext = context;  ///
+
+    return reconcile((context) => {
+      return this.unifyStepWithDeduction(step, context, (context, back) => {
+        return this.unifyFactOrSubproofsWithSuppositions(factOrSubproofs, context, (context, back) => {
+          const complexSubstitutionsUnsolved = context.areComplexSubstitutionsUnsolved();
+
+          if (complexSubstitutionsUnsolved) {
+            context.debug(`Unable to unify the step and fact or subproofs because thre are unsolved complex substitutions.`);
+
+            return back();
+          }
+
+          context = specificContext;  ///
+
+          return forward(context, back);
+        }, back);
+      }, back);
+    }, context);
+  });
 
   verifyLabels(context, forward, back) {
     const claimString = this.getString();  ///
@@ -262,26 +284,6 @@ export default class Claim extends Element {
 
       return forward(context, back);
     }, back);
-  }
-
-  unifyStepAndFactOrSubproofs(step, factOrSubproofs, context, forward, back) {
-    const specificContext = context;  ///
-
-    return reconcile((context) => {
-      return this.unifyStepWithDeduction(step, context, (context, back) => {
-        return this.unifyFactOrSubproofsWithSuppositions(factOrSubproofs, context, (context, back) => {
-          const inferredSubstitutionsSolved = context.areInferredSubstitutionsSolved();
-
-          if (!inferredSubstitutionsSolved) {
-            return back();
-          }
-
-          context = specificContext;  ///
-
-          return forward(context, back);
-        }, back);
-      }, back);
-    }, context)
   }
 
   unifyFactOrSubproofsWithSupposition(factOrSubproofs, supposition, context, forward, back) {
