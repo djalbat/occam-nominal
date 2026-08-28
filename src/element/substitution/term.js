@@ -9,18 +9,9 @@ import { stripBracketsFromTerm } from "../../utilities/brackets";
 import { instantiateTermSubstitution } from "../../process/instantiate";
 import { termSubstitutionFromTermSubstitutionNode } from "../../utilities/element";
 import { termSubstitutionStringFromTermAndVariable } from "../../utilities/string";
-import {
-  join,
-  ablates,
-  manifest,
-  attempts,
-  reconcile,
-  instantiate,
-  unserialises,
-  participate
-} from "../../utilities/context";
+import { join, ablates, manifest, attempts, reconcile, participate, instantiate, unserialises } from "../../utilities/context";
 
-const { all } = continuationUtilities,
+const { all, isolate } = continuationUtilities,
       { breakPointFromJSON } = breakPointUtilities;
 
 export default define(class TermSubstitution extends Substitution {
@@ -104,30 +95,34 @@ export default define(class TermSubstitution extends Substitution {
       return forward(termSubstitution, context, back);
     }
 
-    substitution = this;  ///
+    return isolate((state, context, forward, back) => {
+      substitution = this;  ///
 
-    const generalContext = this.getGeneralContext(),
-          specificContext = this.getSpecificContext();
+      const generalContext = this.getGeneralContext(),
+            specificContext = this.getSpecificContext();
 
-    return attempts((generalContext, specificContext) => {
-      const validateTargetTerm = this.validateTargetTerm.bind(this),
-            validateReplacementTerm = this.validateReplacementTerm.bind(this);
+      return attempts((generalContext, specificContext) => {
+        const validateTargetTerm = this.validateTargetTerm.bind(this),
+              validateReplacementTerm = this.validateReplacementTerm.bind(this);
 
-      return all([
-        validateTargetTerm,
-        validateReplacementTerm
-      ], state, context, generalContext, specificContext, (state, context, generalContext, specificContext) => {
-        const termSubstitution = substitution;  ///
+        return all([
+          validateTargetTerm,
+          validateReplacementTerm
+        ], state, context, generalContext, specificContext, (state, context, generalContext, specificContext) => {
+          this.commit(generalContext, specificContext);
 
-        this.commit(generalContext, specificContext);
+          return forward(back);
+        }, back);
+      }, generalContext, specificContext);
+    }, state, context, (state, context, back) => {
+      const termSubstitution = substitution;  ///
 
-        context.addSubstitution(substitution);
+      context.addSubstitution(substitution);
 
-        context.debug(`...validated the '${termSubstitutionString}' term substitution.`);
+      context.debug(`...validated the '${termSubstitutionString}' term substitution.`);
 
-        return forward(termSubstitution, context, back);
-      }, back);
-    }, generalContext, specificContext);
+      return forward(termSubstitution, context, back);
+    }, back);
   }
 
   validateTargetTerm(state, context, generalContext, specificContext, forward, back) {

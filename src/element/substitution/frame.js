@@ -10,7 +10,7 @@ import { frameSubstitutionFromFrameSubstitutionNode } from "../../utilities/elem
 import { frameSubstitutionStringFromFrameAndMetavariable } from "../../utilities/string";
 import { ablates, manifest, attempts, participate, instantiate, unserialises } from "../../utilities/context";
 
-const { all } = continuationUtilities,
+const { all, isolate } = continuationUtilities,
       { breakPointFromJSON } = breakPointUtilities;
 
 export default define(class FrameSubstitution extends Substitution {
@@ -75,14 +75,12 @@ export default define(class FrameSubstitution extends Substitution {
     return comparedToFrame;
   }
 
-  validate(state, context, continuation) {
-    let validates;
+  validate(state, context, forward, back) {
+    let substitution;
 
     const frameSubstitutionString = this.getString();  ///
 
     context.trace(`Validating the '${frameSubstitutionString}' frame substitution...`);
-
-    let substitution;
 
     substitution = this.findSubstitution(context);
 
@@ -91,43 +89,37 @@ export default define(class FrameSubstitution extends Substitution {
 
       context.debug(`...the '${frameSubstitutionString}' frame substitution is already presenet.`);
 
-      validates = continuation(frameSubstitution, context);
-    } else {
+      return forward(frameSubstitution, context, back);
+    }
+
+    return isolate((state, context, forward, back) => {
       substitution = this;  ///
 
       const generalContext = this.getGeneralContext(),
             specificContext = this.getSpecificContext();
 
-      attempts((generalContext, specificContext) => {
+      return attempts((generalContext, specificContext) => {
         const validateTargetFrame = this.validateTargetFrame.bind(this),
               validateReplacementFrame = this.validateReplacementFrame.bind(this);
 
-        validates = all([
+        return all([
           validateTargetFrame,
           validateReplacementFrame
         ], state, context, generalContext, specificContext, (state, context, generalContext, specificContext) => {
-          let validates;
-
           this.commit(generalContext, specificContext);
 
-          const frameSubstitution = substitution; ///
-
-          validates = continuation(frameSubstitution, context);
-
-          return validates;
-        });
-
-        if (validates) {
-          context.addSubstitution(substitution);
-        }
+          return forward(back);
+        }, back);
       }, generalContext, specificContext);
-    }
+    }, state, context, (state, context, back) => {
+      const frameSubstitution = substitution;  ///
 
-    if (validates) {
+      context.addSubstitution(substitution);
+
       context.debug(`...validated the '${frameSubstitutionString}' frame substitution.`);
-    }
 
-    return validates;
+      return forward(frameSubstitution, context, back);
+    }, back);
   }
 
   validateTargetFrame(state, context, generalContext, specificContext, continuation) {

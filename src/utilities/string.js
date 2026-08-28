@@ -292,14 +292,6 @@ export function statementSubstitutionStringFromStatementAndMetavariable(statemen
   return statementSubstitutionString;
 }
 
-export function referenceSubstitutionStringFromReferenceAndMetavariable(reference, metavariable) {
-  const referenceString = reference.getString(),
-        metavariableString = metavariable.getString(),
-        referenceSubstitutionString = `[${referenceString} for ${metavariableString}]`;
-
-  return referenceSubstitutionString;
-}
-
 export function statementSubstitutionStringFromStatementMetavariableAndSubstitution(statement, metavariable, substitution) {
   const statementString = statement.getString(),
         metavariableString = metavariable.getString(),

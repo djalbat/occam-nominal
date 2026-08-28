@@ -82,7 +82,6 @@ export const VARIABLE_DECLARATION_RULE_NAME = "variableDeclaration";
 export const GENERATOR_DECLARATION_RULE_NAME = "generatorDeclaration";
 export const COMBINATOR_DECLARATION_RULE_NAME = "combinatorDeclaration";
 export const STATEMENT_SUBSTITUTION_RULE_NAME = "statementSubstitution";
-export const REFERENCE_SUBSTITUTION_RULE_NAME = "referenceSubstitution";
 export const TYPE_PREFIX_DECLARATION_RULE_NAME = "typePrefixDeclaration";
 export const CONSTRUCTOR_DECLARATION_RULE_NAME = "constructorDeclaration";
 export const METAVARIABLE_DECLARATION_RULE_NAME = "metavariableDeclaration";

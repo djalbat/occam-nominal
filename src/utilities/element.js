@@ -923,23 +923,6 @@ export function combinatorDeclarationFromCombinatorDeclarationNode(combinatorDec
   return combinatorDeclaration;
 }
 
-export function referenceSubstitutionFromReferenceSubstitutionNode(referenceSubstitutionNode, generalContext, specificContext) {
-  const { ReferenceSubstitution } = elements,
-        node = referenceSubstitutionNode,  ///
-        context = specificContext,  ///
-        string = context.nodeAsString(node),
-        contexts = [
-          generalContext,
-          specificContext
-        ],
-        breakPoint = null,
-        targetReference = targetReferenceFromReferenceSubstitutionNode(referenceSubstitutionNode, generalContext),
-        replacementReference = replacementReferenceFromReferenceSubstitutionNode(referenceSubstitutionNode, specificContext),
-        referenceSubstitution = new ReferenceSubstitution(contexts, string, node, breakPoint, targetReference, replacementReference);
-
-  return referenceSubstitution;
-}
-
 export function statementSubstitutionFromStatementSubstitutionNode(statementSubstitutionNode, generalContext, specificContext) {
   const { StatementSubstitution } = elements,
         node = statementSubstitutionNode,  ///
@@ -2194,16 +2177,6 @@ export function metavariableFromMetavariableDeclarationNode(metavariableDeclarat
   return metavariable;
 }
 
-export function targetReferenceFromReferenceSubstitutionNode(referenceSubstitutionNode, generalContext) {
-  const { Reference } = elements,
-        context = generalContext, ///
-        targetReferenceNode = referenceSubstitutionNode.getTargetReferenceNode(),
-        targetReferenceString = context.nodeAsString(targetReferenceNode),
-        targetReference = Reference.fromReferenceString(targetReferenceString, context);
-
-  return targetReference;
-}
-
 export function targetStatementFromStatementSubstitutionNode(statementSubstitutionNode, generalContext) {
   const context = generalContext, ///
         targetStatementNode = statementSubstitutionNode.getTargetStatementNode(),
@@ -2217,16 +2190,6 @@ export function propertyDeclarationsFromCotypeDeclarationNode(cotypeDeclarationN
         propertyDeclarations = propertyDeclarationsFromPropertyDeclarationNodes(propertyDeclarationnNodes, context);
 
   return propertyDeclarations;
-}
-
-export function replacementReferenceFromReferenceSubstitutionNode(referenceSubstitutionNode, specificContext) {
-  const { Reference } = elements,
-        context = specificContext, ///
-        replacementReferenceNode = referenceSubstitutionNode.getReplacementReferenceNode(),
-        replacementReferenceString = context.nodeAsString(replacementReferenceNode),
-        replacementReference = Reference.fromReferenceString(replacementReferenceString, context);
-
-  return replacementReference;
 }
 
 export function replacementStatementFromStatementSubstitutionNode(statementSubstitutionNode, specificContext) {

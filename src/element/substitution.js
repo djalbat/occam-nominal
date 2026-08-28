@@ -163,12 +163,6 @@ export default class Substitution extends Element {
     return replacementStatement;
   }
 
-  getReplacementReference() {
-    const replacementReference = null;
-
-    return replacementReference;
-  }
-
   matchVariableNode(variableNode) {
     const variableNodeMatches = false;
 

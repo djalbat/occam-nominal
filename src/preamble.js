@@ -59,7 +59,6 @@ import BracketedCombinator from "./element/combinator/bracketed";
 import BracketedConstructor from "./element/constructor/bracketed";
 import GeneratorDeclaration from "./element/declaration/generator";
 import StatementSubstitution from "./element/substitution/statement";
-import ReferenceSubstitution from "./element/substitution/reference";
 import CombinatorDeclaration from "./element/declaration/combinator";
 import TypePrefixDeclaration from "./element/declaration/typePrefix";
 import ConstructorDeclaration from "./element/declaration/constructor";

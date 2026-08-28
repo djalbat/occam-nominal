@@ -8,7 +8,7 @@ import { termsStringFromTerms } from "../utilities/string";
 import { instantiateSignature } from "../process/instantiate";
 import { attempt, reconcile, serialise, unserialise, instantiate } from "../utilities/context";
 
-const { every } = continuationUtilities,
+const { all, every, isolate } = continuationUtilities,
       { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Signature extends Element {
@@ -80,36 +80,32 @@ export default define(class Signature extends Element {
     return continuation(verifies, context);
   }
 
-  validate(state, context, continuation) {
-    let validates;
-
-    const signatureString = this.getString();
+  validate(state, context, forward, back) {
+    const signatureString = this.getString(); ////
 
     context.trace(`Validating the '${signatureString}' signature...`);
 
-    const signature = this;  ///
+    return isolate((state, context, forward, back) => {
+      context = this.getContext();
 
-    return attempt((context) => {
-      const validateTerms = this.validateTerms.bind(this);
+      return attempt((context) => {
+        const validateTerms = this.validateTerms.bind(this);
 
-      validates = all([
-        validateTerms
-      ], state, context, (state, context) => {
-        let validates;
+        return all([
+          validateTerms
+        ], state, context, (state, context, back) => {
+          this.commit(context);
 
-        this.commit(context);
+          return forward(back);
+        }, back);
+      }, context);
+    }, state, context, (state, context, back) => {
+      const signature = this; ///
 
-        validates = continuation(signature, context);
-
-        return validates;
-      });
-    }, context);
-
-    if (validates) {
       context.debug(`...validated the '${signatureString}' signature.`);
-    }
 
-    return validates;
+      return forward(signature, context, back);
+    }, back);
   }
 
   validateTerm(term, terms, state, context, continuation) {

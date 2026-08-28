@@ -10,7 +10,7 @@ import { instantiateSupposition } from "../../process/instantiate";
 import { attempt, reconcile, serialise, unserialise, instantiate } from "../../utilities/context";
 import { referenceFromSuppositionNode, procedureCallFromSuppositionNode } from "../../utilities/element";
 
-const { cut, all } = continuationUtilities,
+const { cut, all, isolate } = continuationUtilities,
       { breakable, breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Supposition extends Fact {
@@ -135,27 +135,29 @@ export default define(class Supposition extends Fact {
   });
 
   validate(state, context, forward, back) {
-    const suppositionString = this.getString(); ///
+    const suppositionsString = this.getString(); ///
 
-    context.trace(`Validating the '${suppositionString}' supposition...`);
+    context.trace(`Validating the '${suppositionsString}' suppositions...`);
 
-    return attempt((context) => {
-      const validateStatement = this.validateStatement.bind(this),
-            validateProcedureCall = this.validateProcedureCall.bind(this);
+    return isolate((state, context, forward, back) => {
+      return attempt((context) => {
+        const validateStatement = this.validateStatement.bind(this),
+          validateProcedureCall = this.validateProcedureCall.bind(this);
 
-      return all([
-        validateStatement,
-        validateProcedureCall
-      ], state, context, (state, context, back) => {
-        const supposition = this; ///
+        return all([
+          validateStatement,
+          validateProcedureCall
+        ], state, context, (state, context, back) => {
+          this.commit(context);
 
-        this.commit(context);
+          return forward(back);
+        }, back);
+      }, context);
+    }, state, context, (state, context, back) => {
+      context.debug(`...validated the '${suppositionsString}' suppositions.`);
 
-        context.debug(`...validated the '${suppositionString}' supposition.`);
-
-        return forward(supposition, context, back);
-      }, back);
-    }, context);
+      return forward(state, context, back);
+    }, back);
   }
 
   unifyFact(factOrSubproof, context, forward, back) {

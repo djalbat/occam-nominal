@@ -5,11 +5,11 @@ import { breakPointUtilities, continuationUtilities } from "occam-languages";
 import Resolution from "../resolution";
 
 import { define } from "../../elements";
-import { declare, desist } from "../../utilities/state";
+import { desist, declare } from "../../utilities/state";
 import { instantiateConclusion } from "../../process/instantiate";
-import { reconcile, unserialise, instantiate } from "../../utilities/context";
+import { attempt, reconcile, unserialise, instantiate } from "../../utilities/context";
 
-const { cut } = continuationUtilities,
+const { cut, all, isolate } = continuationUtilities,
       { breakable, breakPointFromJSON } = breakPointUtilities;
 
 export default define(class Conclusion extends Resolution {
@@ -97,6 +97,30 @@ export default define(class Conclusion extends Resolution {
       });
     }, specificContext);
   });
+
+  validate(state, context, forward, back) {
+    const conclusionString = this.getString(); ///
+
+    context.trace(`Validating the '${conclusionString}' conclusion...`);
+
+    return isolate((state, context, forward, back) => {
+      return attempt((context) => {
+        const validateStatement = this.validateStatement.bind(this);
+
+        return all([
+          validateStatement
+        ], state, context, (state, context, back) => {
+          this.commit(context);
+
+          return forward(back);
+        }, back);
+      }, context);
+    }, state, context, (state, context, back) => {
+      context.debug(`...validated the '${conclusionString}' conclusion.`);
+
+      return forward(state, context, back);
+    }, back);
+  }
 
   static name = "Conclusion";
 

@@ -79,7 +79,6 @@ import PropertyDeclarationNode from "./node/declaration/property";
 import VariableDeclarationNode from "./node/declaration/variable";
 import GeneratorDeclarationNode from "./node/declaration/generator";
 import CombinatorDeclarationNode from "./node/declaration/combinator";
-import ReferenceSubstitutionNode from "./node/substitution/reference";
 import StatementSubstitutionNode from "./node/substitution/statement";
 import TypePrefixDeclarationNode from "./node/declaration/typePrefix";
 import DonstructorDeclarationNode from "./node/declaration/constructor";
@@ -165,7 +164,6 @@ import {
   VARIABLE_DECLARATION_RULE_NAME,
   GENERATOR_DECLARATION_RULE_NAME,
   COMBINATOR_DECLARATION_RULE_NAME,
-  REFERENCE_SUBSTITUTION_RULE_NAME,
   STATEMENT_SUBSTITUTION_RULE_NAME,
   CONSTRUCTOR_DECLARATION_RULE_NAME,
   TYPE_PREFIX_DECLARATION_RULE_NAME,
@@ -252,7 +250,6 @@ const NonTerminalNodeMap = {
   [GENERATOR_DECLARATION_RULE_NAME]: GeneratorDeclarationNode,
   [COMBINATOR_DECLARATION_RULE_NAME]: CombinatorDeclarationNode,
   [STATEMENT_SUBSTITUTION_RULE_NAME]: StatementSubstitutionNode,
-  [REFERENCE_SUBSTITUTION_RULE_NAME]: ReferenceSubstitutionNode,
   [TYPE_PREFIX_DECLARATION_RULE_NAME]: TypePrefixDeclarationNode,
   [CONSTRUCTOR_DECLARATION_RULE_NAME]: DonstructorDeclarationNode,
   [METAVARIABLE_DECLARATION_RULE_NAME]: MetavariableDeclarationNode

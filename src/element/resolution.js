@@ -1,11 +1,10 @@
 "use strict";
 
-import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
+import { Element, breakPointUtilities } from "occam-languages";
 
-import { attempt, serialise } from "../utilities/context";
+import { serialise } from "../utilities/context";
 
-const { all } = continuationUtilities,
-      { breakPointToBreakPointJSON } = breakPointUtilities;
+const { breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default class Resolution extends Element {
   constructor(context, string, node, breakPoint, statement) {
@@ -16,28 +15,6 @@ export default class Resolution extends Element {
 
   getStatement() {
     return this.statement;
-  }
-
-  validate(state, context, forward, back) {
-    const resolutionString = this.getString(); ///
-
-    context.trace(`Validating the '${resolutionString}' resolution...`);
-
-    return attempt((context) => {
-      const validateStatement = this.validateStatement.bind(this);
-
-      return all([
-        validateStatement
-      ], state, context, (state, context, back) => {
-        const resolution = this; ///
-
-        this.commit(context);
-
-        context.debug(`...validated the '${resolutionString}' resolution.`);
-
-        return forward(resolution, context, back);
-      }, back);
-    }, context);
   }
 
   validateStatement(state, context, forward, back) {

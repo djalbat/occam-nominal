@@ -35,8 +35,7 @@ import { TERM_RULE_NAME,
          CONTAINED_ASSERTION_RULE_NAME,
          SIGNATURE_ASSERTION_RULE_NAME,
          IMPLICIT_ASSUMPTION_RULE_NAME,
-         STATEMENT_SUBSTITUTION_RULE_NAME,
-         REFERENCE_SUBSTITUTION_RULE_NAME } from "../ruleNames";
+         STATEMENT_SUBSTITUTION_RULE_NAME } from "../ruleNames";
 
 const { instantiate, ruleFromRuleName } = bnfUtilities;
 
@@ -73,8 +72,7 @@ const termPlaceholderRule = ruleFromRuleName(TERM_RULE_NAME),
       containedAssertionPlaceholderRule = ruleFromRuleName(CONTAINED_ASSERTION_RULE_NAME),
       signatureAssertionPlaceholderRule = ruleFromRuleName(SIGNATURE_ASSERTION_RULE_NAME),
       implicitAssumptionPlaceholderRule = ruleFromRuleName(IMPLICIT_ASSUMPTION_RULE_NAME),
-      statementSubstitutionPlaceholderRule = ruleFromRuleName(STATEMENT_SUBSTITUTION_RULE_NAME),
-      referenceSubstitutionPlaceholderRule = ruleFromRuleName(REFERENCE_SUBSTITUTION_RULE_NAME);
+      statementSubstitutionPlaceholderRule = ruleFromRuleName(STATEMENT_SUBSTITUTION_RULE_NAME);
 
 export function instantiatePremise(string, context) {
   string = `${string}
@@ -163,5 +161,3 @@ export function instantiateSignatureAssertion(string, context) { return instanti
 export function instantiateImplicitAssumption(string, context) { return instantiate(implicitAssumptionPlaceholderRule, string, context); }
 
 export function instantiateStatementSubstitution(string, context) { return instantiate(statementSubstitutionPlaceholderRule, string, context); }
-
-export function instantiateReferenceSubstitution(string, context) { return instantiate(referenceSubstitutionPlaceholderRule, string, context); }

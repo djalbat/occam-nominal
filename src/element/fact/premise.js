@@ -10,7 +10,7 @@ import { instantiatePremise } from "../../process/instantiate";
 import { referenceFromPremiseNode, procedureCallFromPremiseNode } from "../../utilities/element";
 import { attempt, reconcile, serialise, unserialise, instantiate } from "../../utilities/context";
 
-const { cut, all } = continuationUtilities,
+const { cut, all, isolate } = continuationUtilities,
       { breakable, breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Premise extends Fact {
@@ -150,23 +150,25 @@ export default define(class Premise extends Fact {
 
     context.trace(`Validating the '${premiseString}' premise...`);
 
-    return attempt((context) => {
-      const validateStatement = this.validateStatement.bind(this),
-            validateProcedureCall = this.validateProcedureCall.bind(this);
+    return isolate((state, context, forward, back) => {
+      return attempt((context) => {
+        const validateStatement = this.validateStatement.bind(this),
+              validateProcedureCall = this.validateProcedureCall.bind(this);
 
-      return all([
-        validateStatement,
-        validateProcedureCall
-      ], state, context, (state, context, back) => {
-        const premise = this; ///
+        return all([
+          validateStatement,
+          validateProcedureCall
+        ], state, context, (state, context, back) => {
+          this.commit(context);
 
-        this.commit(context);
+          return forward(back);
+        }, back);
+      }, context);
+    }, state, context, (state, context, back) => {
+      context.debug(`...validated the '${premiseString}' premise.`);
 
-        context.debug(`...validated the '${premiseString}' premise.`);
-
-        return forward(premise, context, back);
-      }, back);
-    }, context);
+      return forward(state, context, back);
+    }, back);
   }
 
   unifyFact(factOrSubproof, context, forward, back) {

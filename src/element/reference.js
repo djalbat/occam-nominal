@@ -55,13 +55,6 @@ export default define(class Reference extends Element {
 
   matchMetavariableNode(metavariableNode) { return this.metavariable.matchMetavariableNode(metavariableNode); }
 
-  findReference(context) {
-    const referenceNode = this.getReferenceNode(),
-          reference = context.findReferenceByReferenceNode(referenceNode);
-
-    return reference;
-  }
-
   compareParameter(parameter) {
     let comparesToParamter = false;
 
@@ -83,23 +76,11 @@ export default define(class Reference extends Element {
   }
 
   validate(state, context, forward, back) {
-    let reference;
-
-    const referenceString = this.getString(); ///
+    const referenceString = this.getString(); ////
 
     context.trace(`Validating the '${referenceString}' reference...`);
 
-    reference = this.findReference(context);
-
-    if (reference !== null) {
-      context.debug(`...the '${referenceString}' reference is already present.`);
-
-      return forward(reference, context, back);
-    }
-
     return isolate((state, context, forward, back) => {
-      reference = this; ///
-
       context = this.getContext();
 
       return attempt((context) => {
@@ -110,11 +91,11 @@ export default define(class Reference extends Element {
         ], state, context, (state, context, back) => {
           this.commit(context);
 
-          return forward( back);
+          return forward(back);
         }, back);
       }, context);
     }, state, context, (state, context, back) => {
-      context.addReference(reference);
+      const reference = this; ///
 
       context.debug(`...validated the '${referenceString}' reference.`);
 

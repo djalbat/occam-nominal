@@ -12,7 +12,7 @@ import { ablates, manifest, attempts, reconcile, participate, instantiate, unser
 import { statementSubstitutionStringFromStatementAndMetavariable, statementSubstitutionStringFromStatementMetavariableAndSubstitution } from "../../utilities/string";
 import state from "easy/lib/mixins/state";
 
-const { all } = continuationUtilities,
+const { all, isolate } = continuationUtilities,
       { breakPointFromJSON } = breakPointUtilities;
 
 export default define(class StatementSubstitution extends Substitution {
@@ -93,33 +93,37 @@ export default define(class StatementSubstitution extends Substitution {
 
       context.debug(`...the '${statementSubstitutionString}' statement substitution is already presenet.`);
 
-      return forward(statementSubstitution, context);
+      return forward(statementSubstitution, context, back);
     }
 
-    substitution = this;  ///
+    return isolate((state, context, forward, back) => {
+      substitution = this;  ///
 
-    const generalContext = this.getGeneralContext(),
-          specificContext = this.getSpecificContext();
+      const generalContext = this.getGeneralContext(),
+            specificContext = this.getSpecificContext();
 
-    return attempts((generalContext, specificContext) => {
-      const validateTargetStatement = this.validateTargetStatement.bind(this),
-            validateReplacementStatement = this.validateReplacementStatement.bind(this);
+      return attempts((generalContext, specificContext) => {
+        const validateTargetStatement = this.validateTargetStatement.bind(this),
+              validateReplacementStatement = this.validateReplacementStatement.bind(this);
 
-      return all([
-        validateTargetStatement,
-        validateReplacementStatement
-      ], state, context, generalContext, specificContext, (state, context, generalContext, specificContext, back) => {
-        this.commit(generalContext, specificContext);
+        return all([
+          validateTargetStatement,
+          validateReplacementStatement
+        ], state, context, generalContext, specificContext, (state, context, generalContext, specificContext) => {
+          this.commit(generalContext, specificContext);
 
-        context.addSubstitution(substitution);
+          return forward(back);
+        }, back);
+      }, generalContext, specificContext);
+    }, state, context, (state, context, back) => {
+      const statementSubstitution = substitution;  ///
 
-        const statementSubstitution = substitution;  ///
+      context.addSubstitution(substitution);
 
-        context.debug(`...validated the '${statementSubstitutionString}' statement substitution.`);
+      context.debug(`...validated the '${statementSubstitutionString}' statement substitution.`);
 
-        return forward(statementSubstitution, context, back);
-      }, back);
-    }, generalContext, specificContext);
+      return forward(statementSubstitution, context, back);
+    }, back);
   }
 
   validateTargetStatement(state, context, generalContext, specificContext, forward, back) {

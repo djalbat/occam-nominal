@@ -124,7 +124,7 @@ export function termsFromJSON(json, context) {
   let { terms } = json;
 
   const { Term } = elements,
-        termsJSON = terms; ///
+    termsJSON = terms; ///
 
   terms = termsJSON.map((termJSON) => {
     const json = termJSON,  ///
@@ -134,6 +134,22 @@ export function termsFromJSON(json, context) {
   });
 
   return terms;
+}
+
+export function linksFromJSON(json, context) {
+  let { links = [] } = json;
+
+  const { Link } = elements,
+        linksJSON = links; ///
+
+  links = linksJSON.map((linkJSON) => {
+    const json = linkJSON,  ///
+          link = Link.fromJSON(json, context);
+
+    return link;
+  });
+
+  return links;
 }
 
 export function rulesFromJSON(json, context) {
@@ -353,22 +369,6 @@ export function assertionsFromJSON(json, context) {
   });
 
   return assertions;
-}
-
-export function referencesFromJSON(json, context) {
-  let { references } = json;
-
-  const { Reference } = elements,
-    referencesJSON = references; ///
-
-  references = referencesJSON.map((referenceJSON) => {
-    const json = referenceJSON,  ///
-      reference = Reference.fromJSON(json, context);
-
-    return reference;
-  });
-
-  return references;
 }
 
 export function signaturesFromJSON(json, context) {
@@ -657,11 +657,8 @@ export function mnemicContextToMnemicContextJSON(mnemicContext) {
 }
 
 export function substitutionFromSubstitutionJSON(json, context) {
-  const { TermSubstitution, FrameSubstitution, StatementSubstitution, ReferenceSubstitution } = elements,
-        substitution = TermSubstitution.fromJSON(json, context)
-                    || FrameSubstitution.fromJSON(json, context)
-                    || StatementSubstitution.fromJSON(json, context)
-                    || ReferenceSubstitution.fromJSON(json, context);
+  const { TermSubstitution, FrameSubstitution, StatementSubstitution } = elements,
+        substitution = TermSubstitution.fromJSON(json, context) || FrameSubstitution.fromJSON(json, context) || StatementSubstitution.fromJSON(json, context);
 
   return substitution;
 }
@@ -684,6 +681,16 @@ export function termsToTermsJSON(terms) {
   });
 
   return termsJSON;
+}
+
+export function linksToLinksJSON(links) {
+  const linksJSON = links.map((link) => {
+    const linkJSON = link.toJSON();
+
+    return linkJSON;
+  });
+
+  return linksJSON;
 }
 
 export function rulesToRulesJSON(rules) {
@@ -831,16 +838,6 @@ export function assertionsToAssertionsJSON(assertions) {
   });
 
   return assertionsJSON;
-}
-
-export function referencesToReferencesJSON(references) {
-  const referencesJSON = references.map((reference) => {
-    const referenceJSON = reference.toJSON();
-
-    return referenceJSON;
-  });
-
-  return referencesJSON;
 }
 
 export function generatorsToGeneratorsJSON(generators) {

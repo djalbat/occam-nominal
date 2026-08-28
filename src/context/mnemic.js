@@ -5,20 +5,20 @@ import { arrayUtilities } from "necessary";
 import Context from "../context";
 
 import { termsFromJSON,
+         linksFromJSON,
          framesFromJSON,
          termsToTermsJSON,
+         linksToLinksJSON,
          framesToFramesJSON,
          equalitiesFromJSON,
          statementsFromJSON,
          assertionsFromJSON,
-         referencesFromJSON,
          assumptionsFromJSON,
          metavariablesFromJSON,
          substitutionsFromJSON,
          equalitiesToEqualitiesJSON,
          statementsToStatementsJSON,
          assertionsToAssertionsJSON,
-         referencesToReferencesJSON,
          assumptionsToAssumptionsJSON,
          metavariablesToMetavariablesJSON,
          substitutionsToSubstitutionsJSON } from "../utilities/json";
@@ -26,15 +26,15 @@ import { termsFromJSON,
 const { push, extract } = arrayUtilities;
 
 export default class MnemicContext extends Context {
-  constructor(context, terms, frames, equalities, assertions, statements, references, assumptions, metavariables, substitutions) {
+  constructor(context, terms, links, frames, equalities, assertions, statements, assumptions, metavariables, substitutions) {
     super(context);
 
     this.terms = terms;
+    this.links = links;
     this.frames = frames;
     this.equalities = equalities;
     this.assertions = assertions;
     this.statements = statements;
-    this.references = references;
     this.assumptions = assumptions;
     this.metavariables = metavariables;
     this.substitutions = substitutions;
@@ -48,6 +48,16 @@ export default class MnemicContext extends Context {
     context.getTerms(terms);
 
     return terms;
+  }
+
+  getLinks(links = []) {
+    const context = this.getContext();
+
+    push(links, this.links);
+
+    context.getLinks(links);
+
+    return links;
   }
 
   getFrames(frames = []) {
@@ -88,16 +98,6 @@ export default class MnemicContext extends Context {
     context.getAssertions(assertions);
 
     return assertions;
-  }
-
-  getReferences(references = []) {
-    const context = this.getContext();
-
-    push(references, this.references);
-
-    context.getReferences(references);
-
-    return references;
   }
 
   getAssumptions(assumptions = []) {
@@ -154,6 +154,32 @@ export default class MnemicContext extends Context {
     this.terms.push(term);
 
     context.debug(`...added the '${termString}' term to the mnemic context.`);
+  }
+
+  addLink(link) {
+    const context = this, ///
+          linkString = link.getString();
+
+    context.trace(`Adding the '${linkString}' link to the mnemic context...`);
+
+    const linkA = link; ///
+
+    extract(this.links, (link) => {
+      const linkB = link, ///
+            linkAEqualToLinkB = linkA.isEqualTo(linkB);
+
+      if (linkAEqualToLinkB) {
+        const linkString = link.getString();
+
+        context.trace(`Removed the existing '${linkString}' link from the mnemic context...`);
+
+        return true;
+      }
+    });
+
+    this.links.push(link);
+
+    context.debug(`...added the '${linkString}' link to the mnemic context.`);
   }
 
   addFrame(frame) {
@@ -260,32 +286,6 @@ export default class MnemicContext extends Context {
     context.debug(`...added the '${statementString}' statement to the mnemic context.`);
   }
 
-  addReference(reference) {
-    const context = this, ///
-          referenceString = reference.getString();
-
-    context.trace(`Adding the '${referenceString}' reference to the mnemic context...`);
-
-    const referenceA = reference; ///
-
-    extract(this.references, (reference) => {
-      const referenceB = reference, ///
-            referenceAEqualToReferenceB = referenceA.isEqualTo(referenceB);
-
-      if (referenceAEqualToReferenceB) {
-        const referenceString = reference.getString();
-
-        context.trace(`Removed the existing '${referenceString}' reference from the mnemic context...`);
-
-        return true;
-      }
-    });
-
-    this.references.push(reference);
-
-    context.debug(`...added the '${referenceString}' reference to the mnemic context.`);
-  }
-
   addAssumption(assumption) {
     const context = this, ///
           assumptionString = assumption.getString();
@@ -374,6 +374,12 @@ export default class MnemicContext extends Context {
     });
   }
 
+  addLinks(links) {
+    links.forEach((link) => {
+      this.addLink(link);
+    });
+  }
+
   addAssertions(assertions) {
     assertions.forEach((assertion) => {
       this.addAssertion(assertion);
@@ -397,6 +403,19 @@ export default class MnemicContext extends Context {
           }) || null;
 
     return term;
+  }
+
+  findLinkByLinkNode(linkNode) {
+    const links = this.getLinks(),
+          link = links.find((link) => {
+            const linkNodeMatches = link.matchLinkNode(linkNode);
+
+            if (linkNodeMatches) {
+              return true;
+            }
+          }) || null;
+
+    return link;
   }
 
   findFrameByFrameNode(frameNode) {
@@ -451,19 +470,6 @@ export default class MnemicContext extends Context {
     return statement;
   }
 
-  findReferenceByReferenceNode(referenceNode) {
-    const references = this.getReferences(),
-          reference = references.find((reference) => {
-            const referenceMatcheReferenceNode = reference.matchReferenceNode(referenceNode);
-
-            if (referenceMatcheReferenceNode) {
-              return true;
-            }
-          }) || null;
-
-    return reference;
-  }
-
   findAssumptionByAssumptionNode(assumptionNode) {
     const assumptions = this.getAssumptions(),
           assumption = assumptions.find((assumption) => {
@@ -475,19 +481,6 @@ export default class MnemicContext extends Context {
           }) || null;
 
     return assumption;
-  }
-
-  findReferenceByMetavariableNode(metavariableNode) {
-    const references = this.getReferences(),
-          reference = references.find((reference) => {
-            const referenceMatcheMetavariableNode = reference.matchMetavariableNode(metavariableNode);
-
-            if (referenceMatcheMetavariableNode) {
-              return true;
-            }
-          }) || null;
-
-    return reference;
   }
 
   findMetavariableByMetavariableNode(metavariableNode) {
@@ -521,6 +514,13 @@ export default class MnemicContext extends Context {
       termPresent = (term !== null);
 
     return termPresent;
+  }
+
+  isLinkPresentByLinkNode(linkNode) {
+    const link = this.findLinkByLinkNode(linkNode),
+          linkPresent = (link !== null);
+
+    return linkPresent;
   }
 
   isFramePresentByFrameNode(frameNode) {
@@ -558,13 +558,6 @@ export default class MnemicContext extends Context {
     return assumptionPresent;
   }
 
-  isReferencePresentByMetavariableNode(metavariableNode) {
-    const reference = this.findReferenceByMetavariableNode(metavariableNode),
-          referencePresent = (reference !== null);
-
-    return referencePresent;
-  }
-
   isMetavariablePresentByMetavariableNode(metavariableNode) {
     const metavariablen = this.findMetavariableByMetavariableNode(metavariableNode),
           metavariablenPresent = (metavariablen !== null);
@@ -580,11 +573,11 @@ export default class MnemicContext extends Context {
     this.metavariables = metavariablesFromJSON(json, context);
 
     this.statements = statementsFromJSON(json, context);
-    this.references = referencesFromJSON(json, context);
 
     this.equalities = equalitiesFromJSON(json, context);
     this.assumptions = assumptionsFromJSON(json, context);
 
+    this.links = linksFromJSON(json, context);
     this.frames = framesFromJSON(json, context);
 
     this.assertions = assertionsFromJSON(json, context);
@@ -601,42 +594,42 @@ export default class MnemicContext extends Context {
 
   toJSON() {
     let terms = this.getTerms(),
+        links = this.getLinks(),
         frames = this.getFrames(),
         equalities = this.getEqualities(),
         assertions = this.getAssertions(),
         statements = this.getStatements(),
-        references = this.getReferences(),
         assumptions = this.getAssumptions(),
         metavariables = this.getMetavariables(),
         substitutions = this.getSubstitutions();
 
     const termsJSON = termsToTermsJSON(terms),
+          linksJSON = linksToLinksJSON(links),
           framesJSON = framesToFramesJSON(frames),
           equalitiesJSON = equalitiesToEqualitiesJSON(equalities),
           assertionsJSON = assertionsToAssertionsJSON(assertions),
           statementsJSON = statementsToStatementsJSON(statements),
-          referencesJSON = referencesToReferencesJSON(references),
           assumptionsJSON = assumptionsToAssumptionsJSON(assumptions),
           metavariablesJSON = metavariablesToMetavariablesJSON(metavariables),
           substitutionsJSON = substitutionsToSubstitutionsJSON(substitutions);
 
     terms = termsJSON; ///
+    links = linksJSON; ///
     frames = framesJSON; ///
     equalities = equalitiesJSON; ///
     assertions = assertionsJSON; ///
     statements = statementsJSON; ///
-    references = referencesJSON; ///
     assumptions = assumptionsJSON; ///
     metavariables = metavariablesJSON;  //
     substitutions = substitutionsJSON; ///
 
     const json = {
       terms,
+      links,
       frames,
       equalities,
       assertions,
       statements,
-      references,
       assumptions,
       metavariables,
       substitutions
@@ -647,15 +640,15 @@ export default class MnemicContext extends Context {
 
   static fromJSON(json, context) {
     const terms = null,
+          links = null,
           frames = null,
           equalities = null,
           statements = null,
           assertions = null,
-          references = null,
           assumptions = null,
           metavariables = null,
           substitutions = null,
-          mnemicContext = new MnemicContext(context, terms, frames, equalities, assertions, statements, references, assumptions, metavariables, substitutions);
+          mnemicContext = new MnemicContext(context, terms, links, frames, equalities, assertions, statements, assumptions, metavariables, substitutions);
 
     mnemicContext.initialise(json);
 
@@ -664,15 +657,15 @@ export default class MnemicContext extends Context {
 
   static fromNothing(context) {
     const terms = [],
+          links = [],
           frames = [],
           equalities = [],
           statements = [],
           assertions = [],
-          references = [],
           assumptions = [],
           metavariables = [],
           substitutions = [],
-          mnemicContext = new MnemicContext(context, terms, frames, equalities, assertions, statements, references, assumptions, metavariables, substitutions);
+          mnemicContext = new MnemicContext(context, terms, links, frames, equalities, assertions, statements, assumptions, metavariables, substitutions);
 
     return mnemicContext;
   }

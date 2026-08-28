@@ -7,10 +7,11 @@ import Context from "../context";
 const { push, extract } = arrayUtilities;
 
 export default class CladicContext extends Context {
-  constructor(context, terms, assertions, metavariables) {
+  constructor(context, terms, links, assertions, metavariables) {
     super(context);
 
     this.terms = terms;
+    this.links = links;
     this.assertions = assertions;
     this.metavariables = metavariables;
   }
@@ -23,6 +24,16 @@ export default class CladicContext extends Context {
     context.getTerms(terms);
 
     return terms;
+  }
+
+  getLinks(links = []) {
+    const context = this.getContext();
+
+    push(links, this.links);
+
+    context.getLinks(links);
+
+    return links;
   }
 
   getAssertions(assertions = []) {
@@ -55,7 +66,7 @@ export default class CladicContext extends Context {
 
     extract(this.terms, (term) => {
       const termB = term, ///
-            termAEqualToTermB = termA.isEqualTo(termB);
+        termAEqualToTermB = termA.isEqualTo(termB);
 
       if (termAEqualToTermB) {
         const termString = term.getString();
@@ -69,6 +80,32 @@ export default class CladicContext extends Context {
     this.terms.push(term);
 
     context.debug(`...added the '${termString}' term to the cladic context.`);
+  }
+
+  addLink(link) {
+    const context = this, ///
+          linkString = link.getString();
+
+    context.trace(`Adding the '${linkString}' link to the cladic context...`);
+
+    const linkA = link; ///
+
+    extract(this.links, (link) => {
+      const linkB = link, ///
+            linkAEqualToLinkB = linkA.isEqualTo(linkB);
+
+      if (linkAEqualToLinkB) {
+        const linkString = link.getString();
+
+        context.trace(`Removed the existing '${linkString}' link from the cladic context...`);
+
+        return true;
+      }
+    });
+
+    this.links.push(link);
+
+    context.debug(`...added the '${linkString}' link to the cladic context.`);
   }
 
   addAssertion(assertion) {
@@ -129,6 +166,12 @@ export default class CladicContext extends Context {
     });
   }
 
+  addLinks(links) {
+    links.forEach((link) => {
+      this.addLink(link);
+    });
+  }
+
   addAssertions(assertions) {
     assertions.forEach((assertion) => {
       this.addAssertion(assertion);
@@ -143,15 +186,28 @@ export default class CladicContext extends Context {
 
   findTermByTermNode(termNode) {
     const terms = this.getTerms(),
-          term = terms.find((term) => {
-            const termNodeMatches = term.matchTermNode(termNode);
+      term = terms.find((term) => {
+        const termNodeMatches = term.matchTermNode(termNode);
 
-            if (termNodeMatches) {
+        if (termNodeMatches) {
+          return true;
+        }
+      }) || null;
+
+    return term;
+  }
+
+  findLinkByLinkNode(linkNode) {
+    const links = this.getLinks(),
+          link = links.find((link) => {
+            const linkNodeMatches = link.matchLinkNode(linkNode);
+
+            if (linkNodeMatches) {
               return true;
             }
           }) || null;
 
-    return term;
+    return link;
   }
 
   findAssertionByAssertionNode(assertionNode) {
@@ -187,6 +243,13 @@ export default class CladicContext extends Context {
     return termPresent;
   }
 
+  isLinkPresentByLinkNode(linkNode) {
+    const link = this.findLinkByLinkNode(linkNode),
+          linkPresent = (link !== null);
+
+    return linkPresent;
+  }
+
   isAssertionPresentByAssertionNode(assertionNode) {
     const assertion = this.findAssertionByAssertionNode(assertionNode),
           assertionPresent = (assertion !== null);
@@ -206,6 +269,8 @@ export default class CladicContext extends Context {
 
     context.addTerms(this.terms);
 
+    context.addLinks(this.links);
+
     context.addAssertions(this.assertions);
 
     context.addMetavariables(this.metavariables);
@@ -213,9 +278,10 @@ export default class CladicContext extends Context {
 
   static fromNothing(context) {
     const terms = [],
+          links = [],
           assertions = [],
           metavariables = [],
-          cladicContext = new CladicContext(context, terms, assertions ,metavariables);
+          cladicContext = new CladicContext(context, links, terms, assertions ,metavariables);
 
     return cladicContext;
   }

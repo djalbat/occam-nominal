@@ -449,69 +449,6 @@ export default define(class Metavariable extends Element {
     });
   }
 
-  unifyReference(reference, generalContext, specificContext, forward, back) {
-    let referenceUnifies = false;
-
-    const context = specificContext,  ///
-          referenceString = reference.getString(),
-          metavariableString = this.getString();
-
-    context.trace(`Unifying the '${referenceString}' reference with the '${metavariableString}' metavariable...`);
-
-    const referenceMetavariableCompares = this.compareReferenceMetavariable(reference, generalContext, specificContext);
-
-    if (referenceMetavariableCompares) {
-      referenceUnifies = true;
-
-      return continuation(referenceUnifies);
-    }
-
-    const metavariable = this,  ///
-          metavariableNode = metavariable.getNode(),
-          inferredSubstitution = context.findInferredSubstitutionByMetavariableNode(metavariableNode);
-
-    if (inferredSubstitution !== null) {
-      const inferredSubstitutionComparesToTerm = inferredSubstitution.compareTerm(reference, context);
-
-      if (inferredSubstitutionComparesToTerm) {
-        const inferredSubstitutionString = inferredSubstitution.getString();
-
-        context.trace(`The '${inferredSubstitutionString}' inferred substitution is already present.`);
-
-        referenceUnifies = true;
-      }
-
-      return continuation(referenceUnifies);
-    }
-
-    const { ReferenceSubstitution } = elements,
-          referenceSubstitution = ReferenceSubstitution.fromReferenceAndMetavariable(reference, metavariable, generalContext, specificContext);
-
-    declare((state) => {
-      desist((state) => {
-        referenceSubstitution.validate(state, context, (referenceSubstitution, context) => {
-          let validates;
-
-          const inferredSubstitution = referenceSubstitution;  ///
-
-          context.addInferredSubstitution(inferredSubstitution);
-
-          validates = true;
-
-          return validates;
-        });
-      }, state);
-    });
-
-    referenceUnifies = true;
-
-    if (referenceUnifies) {
-      context.debug(`...unified the '${referenceString}' reference with the '${metavariableString}' variable.`);
-    }
-
-    return continuation(referenceUnifies);
-  }
-
   unifyMetavariable(metavariable, context, forward, back) {
     let metavariableUnifies;
 
