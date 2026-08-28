@@ -12,7 +12,7 @@ import { validateTermAsConstructor } from "../process/validate";
 import { attempt, serialise, unserialise, instantiate } from "../utilities/context";
 import { typeFromJSON, typeToTypeJSON, hypothesesFromJSON, hypothesesToHypothesesJSON } from "../utilities/json";
 
-const { cut, all, every, exists } = continuationUtilities,
+const { all, every, exists, isolate } = continuationUtilities,
       { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Constructor extends Element {
@@ -106,30 +106,32 @@ export default define(class Constructor extends Element {
   }
 
   validate(state, context, forward, back) {
-    let constructor;
-
     const includeType = false,
           constructorString = this.getString(includeType);  ///
 
     context.trace(`Validating the '${constructorString}' constructor...`);
 
-    constructor = this;
+    return isolate((state, context, forward, back) => {
+      return attempt((context) => {
+        const validateTermAsVariable = this.validateTermAsVariable.bind(this),
+              validateTermAsConstructor = this.validateTermAsConstructor.bind(this);
 
-    return attempt((context) => {
-      const validateTermAsVariable = this.validateTermAsVariable.bind(this),
-            validateTermAsConstructor = this.validateTermAsConstructor.bind(this);
+        return exists([
+          validateTermAsVariable,
+          validateTermAsConstructor
+        ], state, context, (state, context, back) => {
+          this.commit(context);
 
-      return exists([
-        validateTermAsVariable,
-        validateTermAsConstructor
-      ], state, context, (state, context, back) => {
-        this.commit(context);
+          return forward(back);
+        }, back);
+      }, context);
+    }, state, context, (state, context, back) => {
+      const constructor = this; ///
 
-        context.debug(`...validated the '${constructorString}' constructor.`);
+      context.debug(`...validated the '${constructorString}' constructor.`);
 
-        return forward(constructor, context, back);
-      }, back);
-    }, context);
+      return forward(constructor, context, back);
+    }, back);
   }
 
   validateTermAsVariable(state, context, forward, back) {

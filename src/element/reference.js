@@ -9,7 +9,7 @@ import { referenceFromReferenceNode, metavariableFromReferenceNode } from "../ut
 import { join, ablate, attempt, reconcile, serialise, unserialise, instantiate } from "../utilities/context";
 import reference from "./substitution/reference";
 
-const { all } = continuationUtilities,
+const { all, isolate } = continuationUtilities,
       { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Reference extends Element {
@@ -98,25 +98,29 @@ export default define(class Reference extends Element {
       return forward(reference, context, back);
     }
 
-    reference = this; ///
+    return isolate((state, context, forward, back) => {
+      reference = this; ///
 
-    context = this.getContext();
+      context = this.getContext();
 
-    return attempt((context) => {
-      const validateMetavariable = this.validateMetavariable.bind(this);
+      return attempt((context) => {
+        const validateMetavariable = this.validateMetavariable.bind(this);
 
-      return all([
-        validateMetavariable
-      ], state, context, (context, back) => {
-        this.commit(context);
+        return all([
+          validateMetavariable
+        ], state, context, (state, context, back) => {
+          this.commit(context);
 
-        context.addReference(reference);
+          return forward( back);
+        }, back);
+      }, context);
+    }, state, context, (state, context, back) => {
+      context.addReference(reference);
 
-        context.debug(`...validated the '${referenceString}' reference.`);
+      context.debug(`...validated the '${referenceString}' reference.`);
 
-        return forward(reference, context, back);
-      }, back);
-    }, context);
+      return forward(reference, context, back);
+    }, back);
   }
 
   validateMetavariable(state, context, forward, back) {

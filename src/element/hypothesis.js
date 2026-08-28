@@ -8,7 +8,7 @@ import { instantiateHypothesis } from "../process/instantiate";
 import { attempt, serialise, unserialise, instantiate } from "../utilities/context";
 import { statementFromHypothesisNode, procedureCallFromHypothesisNode } from "../utilities/element";
 
-const { cut, all } = continuationUtilities,
+const { cut, all, isolate } = continuationUtilities,
       { breakable, breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Hypothesis extends Element {
@@ -95,29 +95,31 @@ export default define(class Hypothesis extends Element {
   });
 
   validate(state, context, forward, back) {
-    let hypothesis;
-
     const hypothesisString = this.getString();
 
     context.trace(`Validating the '${hypothesisString}' hypothesis...`);
 
-    hypothesis = this;  ///
+    return isolate((state, context, forward, back) => {
+      return attempt((context) => {
+        const validateStatement = this.validateStatement.bind(this),
+              validateProcedureCall = this.validateProcedureCall.bind(this);
 
-    return attempt((context) => {
-      const validateStatement = this.validateStatement.bind(this),
-            validateProcedureCall = this.validateProcedureCall.bind(this);
+        return all([
+          validateStatement,
+          validateProcedureCall
+        ], state, context, (state, context, back) => {
+          this.commit(context);
 
-      return all([
-        validateStatement,
-        validateProcedureCall
-      ], state, context, (state, context, back) => {
-        this.commit(context);
+          return forward(back);
+        }, back);
+      }, context);
+    }, state, context, (state, context, back) => {
+      const hypothesis = this;  ///
 
-        context.debug(`...validated the '${hypothesisString}' hypothesis.`);
+      context.debug(`...validated the '${hypothesisString}' hypothesis.`);
 
-        return forward(hypothesis, context, back);
-      }, back);
-    }, context);
+      return forward(hypothesis, context, back);
+    }, back);
   }
 
   validateStatement(state, context, forward, back) {

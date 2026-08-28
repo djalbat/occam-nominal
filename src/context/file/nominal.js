@@ -1,7 +1,7 @@
 "use strict";
 
-import { FileContext, nominalUtilities } from "occam-languages";
 import { arrayUtilities } from "necessary";
+import { FileContext, nominalUtilities, continuationUtilities } from "occam-languages";
 
 import NominalLexer from "../../nominal/lexer";
 import NominalParser from "../../nominal/parser";
@@ -35,6 +35,7 @@ import { typesFromJSON,
          declaredMetavariablesToDeclaredMetavariablesJSON } from "../../utilities/json";
 
 const { push } = arrayUtilities,
+      { isolate } = continuationUtilities,
       { nominalLexerFromCombinedCustomGrammar, nominalParserFromCombinedCustomGrammar } = nominalUtilities;
 
 export default class NominalFileContext extends FileContext {
@@ -708,13 +709,13 @@ export default class NominalFileContext extends FileContext {
   }
 
   verifyFile(forward, back) {
-    const node = this.getNode(),
-          context = this, ///
-          fileNode = node;  ///
+    return isolate((forward, back) => {
+      const node = this.getNode(),
+            context = this, ///
+            fileNode = node;  ///
 
-    return verifyFile(fileNode, context, ( _ , back) => {
-      return forward(back);
-    }, back);
+      return verifyFile(fileNode, context, forward, back);
+    }, forward, back);
   }
 
   initialise() {

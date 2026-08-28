@@ -1,6 +1,6 @@
 "use strict";
 
-import { Element, breakPointUtilities } from "occam-languages";
+import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
 
 import { define } from "../elements";
 import { desist, declare } from "../utilities/state";
@@ -12,7 +12,8 @@ import { validateTermAsGenerator } from "../process/validate";
 import { attempt, serialise, unserialise, instantiate } from "../utilities/context";
 import { typeFromJSON, typeToTypeJSON, hypothesesFromJSON, hypothesesToHypothesesJSON } from "../utilities/json";
 
-const { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
+const { isolate } = continuationUtilities,
+      { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Generator extends Element {
   constructor(context, string, node, breakPoint, term, type, hypotheses) {
@@ -115,38 +116,32 @@ export default define(class Generator extends Element {
   }
 
   validate(state, context, forward, back) {
-    let validates;
-
     const includeType = false,
           generatorString = this.getString(includeType);  ///
 
     context.trace(`Validating the '${generatorString}' generator...`);
 
-    const generator = this;
+    return isolate((state, context, forward, back) => {
+      return attempt((context) => {
+        const validateTermAsVariable = this.validateTermAsVariable.bind(this),
+              validateTermAsGenerator = this.validateTermAsGenerator.bind(this);
 
-    return attempt((context) => {
-      const validateTermAsVariable = this.validateTermAsVariable.bind(this),
-            validateTermAsGenerator = this.validateTermAsGenerator.bind(this);
+        return exists([
+          validateTermAsVariable,
+          validateTermAsGenerator
+        ], state, context, (state, context, back) => {
+          this.commit(context);
 
-      validates = exists([
-        validateTermAsVariable,
-        validateTermAsGenerator
-      ], state, context, (state, _ ) => {
-        let validates;
+          return forward(back);
+        }, back);
+      }, context);
+    }, state, context, (state, context, back) => {
+      const generator = this; ///
 
-        this.commit(context);
-
-        validates = continuation(generator, context);
-
-        return validates;
-      });
-    }, context);
-
-    if (validates) {
       context.debug(`...validated the '${generatorString}' generator.`);
-    }
 
-    return validates;
+      return forward(generator, context, back);
+    }, back);
   }
 
   validateTermAsVariable(state, context, forward, back) {

@@ -1,12 +1,14 @@
 "use strict";
 
-import { Element } from "occam-languages";
+import { Element, continuationUtilities } from "occam-languages";
 
 import { define } from "../../elements";
 import { ablate, attempt, instantiate } from "../../utilities/context";
 import { instantiateImplicitAssumption } from "../../process/instantiate";
 import { implicitAssumptionStringFromStatement } from "../../utilities/string";
 import { implicitAssumptionFromImplicitAssumptionNode } from "../../utilities/element";
+
+const { all, isolate } = continuationUtilities;
 
 export default define(class ImplicitAssumption extends Element {
   constructor(context, string, node, breakPoint, statement) {
@@ -44,45 +46,35 @@ export default define(class ImplicitAssumption extends Element {
     return implicitAssumptionNodeMatches;
   }
 
-  validate(state, context, continuation) {
-    let validates;
-
+  validate(state, context, forward, back) {
     const implicitAssumptionString = this.getString();  ///
 
     context.trace(`Validating the '${implicitAssumptionString}' implicit assumption...`);
 
-    let assumption;
+    return isolate((state, context, forward, back) => {
+      context = this.getContext();
 
-    assumption = this;  ///
+      return attempt((context) => {
+        const validateStatement = this.validateStatement.bind(this);
 
-    context = this.getContext();
+        return all([
+          validateStatement
+        ], state, context, (state, context, back) => {
+          this.commit(context);
 
-    return attempt((context) => {
-      const validateStatement = this.validateStatement.bind(this);
+          return forward(back);
+        }, back);
+      }, context);
+    }, state, context, (state, context, back) => {
+      const implicitAssumption = this;  ///
 
-      validates = all([
-        validateStatement
-      ], state, context, (state, _ ) => {
-        let validates;
-
-        this.commit(context);
-
-        const implicitAssumption = assumption;  ///
-
-        validates = continuation(implicitAssumption, context);
-
-        return validates;
-      });
-    }, context);
-
-    if (validates) {
       context.debug(`...validated the '${implicitAssumptionString}' implicit assumption.`);
-    }
 
-    return validates;
+      return forward(implicitAssumption, context, back);
+    }, back);
   }
 
-  validateStatement(state, context, continuation) {
+  validateStatement(state, context, forward, back) {
     let statementValidates;
 
     const implicitAssumptionString = this.getString();  ///

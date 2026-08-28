@@ -15,8 +15,8 @@ import { termFromContainedAssertionNode,
          containedAssertionFromStatementNode } from "../../utilities/element";
 import state from "easy/lib/mixins/state";
 
-const { all, exists } = continuationUtilities,
-      { breakPointFromJSON } = breakPointUtilities;
+const { breakPointFromJSON } = breakPointUtilities,
+      { all, exists, isolate } = continuationUtilities;
 
 export default define(class ContainedAssertion extends Assertion {
   constructor(context, string, node, breakPoint, term, negated, statement) {

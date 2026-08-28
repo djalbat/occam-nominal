@@ -10,7 +10,7 @@ import { unifyStatementWithCombinator } from "../process/unify";
 import { validateStatementAsCombinator } from "../process/validate";
 import { attempt, serialise, unserialise, instantiate } from "../utilities/context";
 
-const { exists } = continuationUtilities,
+const { exists, isolate } = continuationUtilities,
       { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Combinator extends Element {
@@ -64,28 +64,30 @@ export default define(class Combinator extends Element {
   }
 
   validate(state, context, forward, back) {
-    let combinator;
-
     const includeType = false,
           combinatorString = this.getString(includeType);  ///
 
     context.trace(`Validating the '${combinatorString}' combinator...`);
 
-    combinator = this;
+    return isolate((state, context, forward, back) => {
+      return attempt((context) => {
+        const validateStatementAsCombinator = this.validateStatementAsCombinator.bind(this);
 
-    return attempt((context) => {
-      const validateStatementAsCombinator = this.validateStatementAsCombinator.bind(this);
+        return exists([
+          validateStatementAsCombinator
+        ], state, context, (state, context, back) => {
+          this.commit(context);
 
-      return exists([
-        validateStatementAsCombinator
-      ], state, context, (state, context, back) => {
-        this.commit(context);
+          return forward(back);
+        }, back);
+      }, context);
+    }, state, context, (state, context, back) => {
+      const combinator = this;  ///
 
-        context.debug(`...validated the '${combinatorString}' combinator.`);
+      context.debug(`...validated the '${combinatorString}' combinator.`);
 
-        return forward(combinator, context, back);
-      }, back);
-    }, context);
+      return forward(combinator, context, back);
+    }, back);
   }
 
   validateStatementAsCombinator(state, context, forward, back) {

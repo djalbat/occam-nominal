@@ -8,7 +8,7 @@ import { instantiateLabel } from "../process/instantiate";
 import { labelFromLabelNode, metavariableFromLabelNode } from "../utilities/element";
 import { join, ablate, attempt, reconcile, serialise, unserialise, instantiate} from "../utilities/context";
 
-const { cut, all } = continuationUtilities,
+const { cut, all, isolate } = continuationUtilities,
       { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Label extends Element {
@@ -82,23 +82,27 @@ export default define(class Label extends Element {
 
     context.trace(`Validating the '${labelString}' label...`);
 
-    context = this.getContext();
+    return isolate((state, context, forward, back) => {
+      context = this.getContext();
 
-    return attempt((context) => {
-      const validateMetavariable = this.validateMetavariable.bind(this);
+      return attempt((context) => {
+        const validateMetavariable = this.validateMetavariable.bind(this);
 
-      return all([
-        validateMetavariable
-      ], state, context, (state, context, back) => {
-        const label = this; ///
+        return all([
+          validateMetavariable
+        ], state, context, (state, context, back) => {
+          this.commit(context);
 
-        this.commit(context);
+          return forward(back);
+        }, back);
+      }, context);
+    }, state, context, (state, context, back) => {
+      const label = this; ///
 
-        context.debug(`...validated the '${labelString}' label.`);
+      context.debug(`...validated the '${labelString}' label.`);
 
-        return forward(label, context, back);
-      }, back);
-    }, context);
+      return forward(label, context, back);
+    }, back);
   }
 
   validateMetavariable(state, context, forward, back) {

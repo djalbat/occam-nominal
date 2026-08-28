@@ -10,7 +10,7 @@ import { constraintFromConstraintNode } from "../utilities/element";
 import { constraintStringFromReferenceAndStatement } from "../utilities/string";
 import { join, ablate, attempt, reconcile, serialise, unserialise, instantiate } from "../utilities/context";
 
-const { all, some } = continuationUtilities,
+const { all, some, isolate } = continuationUtilities,
       { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Constraint extends Element {
@@ -76,26 +76,31 @@ export default define(class Constraint extends Element {
       return forward(constraint, context, back);
     }
 
-    constraint = this;  ///
+    return isolate((state, context, forward, back) => {
+      constraint = this;  ///
 
-    context = this.getContext();
+      context = this.getContext();
 
-    return attempt((context) => {
-      const validateStatement = this.validateStatement.bind(this),
-            validateReference = this.validateReference.bind(this);
+      return attempt((context) => {
+        const validateStatement = this.validateStatement.bind(this),
+              validateReference = this.validateReference.bind(this);
 
-      return all([
-        validateStatement,
-        validateReference
-      ], state, context, (state, context, back) => {
-        this.commit(context);
+        return all([
+          validateStatement,
+          validateReference
+        ], state, context, (state, context, back) => {
+          this.commit(context);
 
-        context.debug(`...validated the '${constraintString}' constraint.`);
+          return forward(back);
+        }, back);
+      }, context);
+    }, state, context, (state, context, back) => {
+      context.addConstraint(constraint);
 
-        context.addConstraint(constraint);
-        return validates;
-      }, back);
-    }, context);
+      context.debug(`...validated the '${constraintString}' constraint.`);
+
+      return forward(constraint, context, back);
+    }, back);
   }
 
   validateReference(state, context, forward, back) {
