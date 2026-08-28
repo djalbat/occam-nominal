@@ -12,7 +12,7 @@ import { derive, declare } from "../../utilities/state";
 
 const { breakable } = breakPointUtilities,
       { backwardsSome } = arrayUtilities,
-      { cut, all, some } = continuationUtilities;
+      { cut, all, some, isolate } = continuationUtilities;
 
 export default define(class Step extends Fact {
   constructor(context, string, node, breakPoint, statement, reference, procedureCall, schemaAssertion, signatureAssertion) {
