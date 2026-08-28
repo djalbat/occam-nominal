@@ -96,7 +96,8 @@ export default define(class Step extends Fact {
   verify = breakable(function (context, forward, back) {
     forward = cut(forward, back); ///
 
-    const stepString = this.getString(); ///
+    const stepString = this.getString(), ///
+          specificContext = context;  ///
 
     context.trace(`Verifying the '${stepString}' step...`);
 
@@ -111,12 +112,18 @@ export default define(class Step extends Fact {
     const declared = this.idDeclared();
 
     (declared ? declare : derive)((state) => {
-      return this.validate(state, context, (step, _ , back) => {
-        return this.unify(( _ , back) => {
-          context.debug(`...verified the '${stepString}' step.`);
+      const unify = this.unify.bind(this),
+            validate = this.validate.bind(this);
 
-          return forward(context, back);
-        }, back);
+      return all([
+        validate,
+        unify
+      ], state, context, ( _ , back) => {
+        context = specificContext;  ///
+
+        context.debug(`...verified the '${stepString}' step.`);
+
+        return forward(context, back);
       }, (exception) => {
         if (exception) {
           return back(exception);
@@ -129,34 +136,54 @@ export default define(class Step extends Fact {
     });
   });
 
-  validate(state, context, forward, back) {
-    forward = cut(forward, back); ///
+  unify(state, context, forward, back) {
+    const stepString = this.getString();  ///
 
-    const stepString = this.getString();
+    context.trace(`Unifying the '${stepString}' step...`);
+
+    return isolate((state, context, forward, back) => {
+      const step = this;  ///
+
+      context = this.getContext();  ///
+
+      return some(unifySteps, (unifyStep, forward, back) => {
+        return unifyStep(step, context, forward, back);
+      }, forward, back);
+    }, state, context, (state, context, back) => {
+      context.debug(`...unified the '${stepString}' step.`);
+
+      return forward(state, context, back);
+    }, back);
+  }
+
+  validate(state, context, forward, back) {
+    const stepString = this.getString(); ///
 
     context.trace(`Validating the '${stepString}' step...`);
 
-    return attempt((context) => {
-      const validateStatement = this.validateStatement.bind(this),
-            validateReference = this.validateReference.bind(this),
-            validateSchemaAssertion = this.validateSchemaAssertion.bind(this),
-            validateSignatureAssertion = this.validateSignatureAssertion.bind(this);
+    return isolate((state, context, forward, back) => {
+      return attempt((context) => {
+        const validateStatement = this.validateStatement.bind(this),
+              validateReference = this.validateReference.bind(this),
+              validateSchemaAssertion = this.validateSchemaAssertion.bind(this),
+              validateSignatureAssertion = this.validateSignatureAssertion.bind(this);
 
-      return all([
-        validateStatement,
-        validateReference,
-        validateSchemaAssertion,
-        validateSignatureAssertion
-      ], state, context, (state, context, back) => {
-        const step = this;  ///
+        return all([
+          validateStatement,
+          validateReference,
+          validateSchemaAssertion,
+          validateSignatureAssertion
+        ], state, context, (state, context, back) => {
+          this.commit(context);
 
-        this.commit(context);
+          return forward(back);
+        }, back);
+      }, context);
+    }, state, context, (state, context, back) => {
+      context.debug(`...validated the '${stepString}' step.`);
 
-        context.debug(`...validated the '${stepString}' step.`);
-
-        return forward(step, context, back);
-      }, back);
-    }, context);
+      return forward(state, context, back);
+    }, back);
   }
 
   validateSchemaAssertion(state, context, forward, back) {
@@ -199,23 +226,6 @@ export default define(class Step extends Fact {
         return forward(context, back);
       }, back);
     }, state);
-  }
-
-  unify(forward, back) {
-    const context = this.getContext(),
-          stepString = this.getString(); ///
-
-    context.trace(`Unifying the '${stepString}' step...`);
-
-    const step = this;  ///
-
-    return some(unifySteps, (unifyStep, forward, back) => {
-      return unifyStep(step, context, forward, back);
-    }, (context, back) => {
-      context.debug(`...unified the '${stepString}' step.`);
-
-      return forward(context, back);
-    }, back);
   }
 
   static name = "Step";

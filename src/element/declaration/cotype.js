@@ -57,7 +57,8 @@ export default define(class CotypeDeclaration extends Declaration {
   verify = breakable(function (context, forward, back) {
     forward = cut(forward, back); ///
 
-    const cotypeDeclarationString = this.getString();  ///
+    const specificContext = context,  ///
+          cotypeDeclarationString = this.getString();  ///
 
     context.trace(`Verifying the '${cotypeDeclarationString}' cotype declaration...`);
 
@@ -71,12 +72,14 @@ export default define(class CotypeDeclaration extends Declaration {
       verifySuperTypes,
       verifyTypePrefix,
       verifyPropertyDeclaratisons
-    ], context, (context, back) => {
+    ], context, ( _ , back) => {
       const properties = this.getProperties(),
             typePrefix = context.getTypePrefix(),
             prefixName = (typePrefix !== null) ?
                            typePrefix.getPrefixName() :
                              null;
+
+      context = specificContext;  ///
 
       this.type.setProvisional(this.provisional);
 

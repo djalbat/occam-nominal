@@ -39,7 +39,8 @@ export default define(class Section extends Element {
   verify = breakable(function (context, forward, back) {
     forward = cut(forward, back); ///
 
-    const sectionString = this.getString();  ///
+    const sectionString = this.getString(),  ///
+          specificContext = context;  ///
 
     context.trace(`Verifying the '${sectionString}' section...`);
 
@@ -53,6 +54,8 @@ export default define(class Section extends Element {
         verifyDeclaration,
         verifyClaim
       ], context, ( _ , back) => {
+        context = specificContext;  ///
+
         context.debug(`...verified the '${sectionString}' section.`);
 
         return forward(context, back);

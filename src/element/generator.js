@@ -118,7 +118,6 @@ export default define(class Generator extends Element {
     let validates;
 
     const includeType = false,
-          specificContext = context,  ///
           generatorString = this.getString(includeType);  ///
 
     context.trace(`Validating the '${generatorString}' generator...`);
@@ -137,15 +136,11 @@ export default define(class Generator extends Element {
 
         this.commit(context);
 
-        context = specificContext;  ///
-
         validates = continuation(generator, context);
 
         return validates;
       });
     }, context);
-
-    context = specificContext;  ///
 
     if (validates) {
       context.debug(`...validated the '${generatorString}' generator.`);

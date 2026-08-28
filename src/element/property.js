@@ -101,7 +101,6 @@ export default define(class Property extends Element {
     let validates;
 
     const includeType = false,
-          specificContext = context,  ///
           propertyString = this.getString(includeType);  ///
 
     context.trace(`Validating the '${propertyString}' property...`);
@@ -118,15 +117,11 @@ export default define(class Property extends Element {
 
         this.commit(context);
 
-        context = specificContext;  ///
-
         validates = continuation(property, context);
 
         return validates;
       });
     }, context);
-
-    context = specificContext;  ///
 
     if (validates) {
       context.debug(`...validated the '${propertyString}' property.`);

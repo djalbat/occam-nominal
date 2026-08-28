@@ -64,8 +64,7 @@ export default define(class SchemaAssertion extends Assertion {
   validate(state, context, continuation) {
     let validates;
 
-    const specificContext = context,  ///
-          schameAssertionString = this.getString();  ///
+    const schameAssertionString = this.getString();  ///
 
     context.trace(`Validating the '${schameAssertionString}' schame assertion...`);
 
@@ -91,8 +90,7 @@ export default define(class SchemaAssertion extends Assertion {
       ], state, context, (state, _ ) => {
         let validates;
 
-        const context = specificContext,  ///
-              schameAssertion = assertion;  ///
+        const schameAssertion = assertion;  ///
 
         validates = continuation(schameAssertion, context);
 
@@ -100,13 +98,9 @@ export default define(class SchemaAssertion extends Assertion {
       });
 
       if (validates) {
-        context = specificContext;  ///
-
         context.addAssertion(assertion);
       }
     }
-
-    context = specificContext;  ///
 
     if (validates) {
       context.debug(`...validated the '${schameAssertionString}' schame assertion.`);

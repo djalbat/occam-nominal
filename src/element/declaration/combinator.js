@@ -37,7 +37,8 @@ export default define(class CombinatorDeclaration extends Declaration {
   verify = breakable(function (context, forward, back) {
     forward = cut(forward, back); ///
 
-    const combinatorDeclarationString = this.getString();  ///
+    const specificContext = context,  ///
+          combinatorDeclarationString = this.getString();  ///
 
     context.trace(`Verifying the '${combinatorDeclarationString}' combinator declaration...`);
 
@@ -45,7 +46,9 @@ export default define(class CombinatorDeclaration extends Declaration {
 
     return all([
       verifyCombinator
-    ], context, (context, back) => {
+    ], context, ( _ , back) => {
+      context = specificContext;  ///
+
       context.addCombinator(this.combinator);
 
       context.debug(`...verified the '${combinatorDeclarationString}' combinator declaration.`);

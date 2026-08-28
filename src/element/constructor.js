@@ -109,7 +109,6 @@ export default define(class Constructor extends Element {
     let constructor;
 
     const includeType = false,
-          specificContext = context,  ///
           constructorString = this.getString(includeType);  ///
 
     context.trace(`Validating the '${constructorString}' constructor...`);
@@ -125,8 +124,6 @@ export default define(class Constructor extends Element {
         validateTermAsConstructor
       ], state, context, (state, context, back) => {
         this.commit(context);
-
-        context = specificContext;  ///
 
         context.debug(`...validated the '${constructorString}' constructor.`);
 

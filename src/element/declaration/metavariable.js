@@ -28,7 +28,8 @@ export default define(class MetavariableDeclaration extends Declaration {
   verify = breakable(function (context, forward, back) {
     forward = cut(forward, back); ///
 
-    const metavariableDeclarationString = this.getString(); ///
+    const specificContext = context,  ///
+          metavariableDeclarationString = this.getString(); ///
 
     context.trace(`Verifying the '${metavariableDeclarationString}' metavariable declaration...`);
 
@@ -38,8 +39,10 @@ export default define(class MetavariableDeclaration extends Declaration {
     return all([
       verifyMetaType,
       verifyMetavariable
-    ],  context, (context, back) => {
+    ],  context, ( _ , back) => {
       const declaredMetavariable = this.metavariable;
+
+      context = specificContext;  ///
 
       context.addDeclaredMetavariable(declaredMetavariable);
 

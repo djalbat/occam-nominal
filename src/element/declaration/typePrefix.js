@@ -30,7 +30,8 @@ export default define(class TypePrefixDeclaration extends Declaration {
   verify = breakable(function (context, forward, back) {
     forward = cut(forward, back); ///
 
-    const typePrefixDeclarationString = this.getString();  ///
+    const specificContext = context,  ///
+          typePrefixDeclarationString = this.getString();  ///
 
     context.trace(`Verifying the '${typePrefixDeclarationString}' type prefix declaration...`);
 
@@ -38,7 +39,9 @@ export default define(class TypePrefixDeclaration extends Declaration {
 
     return all([
       verifyTypePrefix
-    ], context, (context, back) => {
+    ], context, ( _ , back) => {
+      context = specificContext;  ///
+
       context.addTypePrefix(this.typePrefix);
 
       context.debug(`...verified the '${typePrefixDeclarationString}' type prefix declaration.`);

@@ -47,8 +47,7 @@ export default define(class ImplicitAssumption extends Element {
   validate(state, context, continuation) {
     let validates;
 
-    const specificContext = context,  ///
-          implicitAssumptionString = this.getString();  ///
+    const implicitAssumptionString = this.getString();  ///
 
     context.trace(`Validating the '${implicitAssumptionString}' implicit assumption...`);
 
@@ -68,16 +67,13 @@ export default define(class ImplicitAssumption extends Element {
 
         this.commit(context);
 
-        const context = specificContext,  ///
-              implicitAssumption = assumption;  ///
+        const implicitAssumption = assumption;  ///
 
         validates = continuation(implicitAssumption, context);
 
         return validates;
       });
     }, context);
-
-    context = specificContext;  ///
 
     if (validates) {
       context.debug(`...validated the '${implicitAssumptionString}' implicit assumption.`);

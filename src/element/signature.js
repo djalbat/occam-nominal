@@ -83,8 +83,7 @@ export default define(class Signature extends Element {
   validate(state, context, continuation) {
     let validates;
 
-    const specificContext = context,  ///
-          signatureString = this.getString();
+    const signatureString = this.getString();
 
     context.trace(`Validating the '${signatureString}' signature...`);
 
@@ -100,15 +99,11 @@ export default define(class Signature extends Element {
 
         this.commit(context);
 
-        context = specificContext;  ///
-
         validates = continuation(signature, context);
 
         return validates;
       });
     }, context);
-
-    context = specificContext;  ///
 
     if (validates) {
       context.debug(`...validated the '${signatureString}' signature.`);

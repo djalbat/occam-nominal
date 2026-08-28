@@ -67,7 +67,6 @@ export default define(class Combinator extends Element {
     let combinator;
 
     const includeType = false,
-          specificContext = context,  ///
           combinatorString = this.getString(includeType);  ///
 
     context.trace(`Validating the '${combinatorString}' combinator...`);
@@ -81,8 +80,6 @@ export default define(class Combinator extends Element {
         validateStatementAsCombinator
       ], state, context, (state, context, back) => {
         this.commit(context);
-
-        context = specificContext;  ///
 
         context.debug(`...validated the '${combinatorString}' combinator.`);
 

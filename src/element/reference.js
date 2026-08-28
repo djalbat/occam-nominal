@@ -86,8 +86,7 @@ export default define(class Reference extends Element {
   validate(state, context, forward, back) {
     let reference;
 
-    const specificContext = context,  ///
-          referenceString = this.getString(); ///
+    const referenceString = this.getString(); ///
 
     context.trace(`Validating the '${referenceString}' reference...`);
 
@@ -110,8 +109,6 @@ export default define(class Reference extends Element {
         validateMetavariable
       ], state, context, (context, back) => {
         this.commit(context);
-
-        context = specificContext;  ///
 
         context.addReference(reference);
 

@@ -122,7 +122,7 @@ function unifyStepAsQualifiedConstraint(step, context, forward, back) {
   context.trace(`Unifying the '${stepString}' step as a constraint with the '${referenceString}' reference...`);
 
   return declare((state) => {
-    return constraint.validate(state, context, (constraint, context) => {
+    return constraint.validate(state, context, (constraint, _ , back) => {
       context.debug(`...unified the '${stepString}' step as a constraint with the '${referenceString}' reference.`);
 
       return forward(context, back);

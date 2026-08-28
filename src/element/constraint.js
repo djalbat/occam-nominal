@@ -10,7 +10,7 @@ import { constraintFromConstraintNode } from "../utilities/element";
 import { constraintStringFromReferenceAndStatement } from "../utilities/string";
 import { join, ablate, attempt, reconcile, serialise, unserialise, instantiate } from "../utilities/context";
 
-const { some } = continuationUtilities,
+const { all, some } = continuationUtilities,
       { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Constraint extends Element {
@@ -61,64 +61,44 @@ export default define(class Constraint extends Element {
     return constraint;
   }
 
-  validate(state, context, continuation) {
-    let validates;
+  validate(state, context, forward, back) {
+    let constraint;
 
-    const specificContext = context,  ///
-          constraintString = this.getString();  ///
+    const constraintString = this.getString();  ///
 
     context.trace(`Validating the '${constraintString}' constraint...`);
-
-    let constraint;
 
     constraint = this.findConstraint(context);
 
     if (constraint !== null) {
       context.debug(`The '${constraintString}' constraint is already present.`);
 
-      validates = continuation(constraint, context);
-    } else {
-      constraint = this;  ///
-
-      context = this.getContext();
-
-      return attempt((context) => {
-        const validateStatement = this.validateStatement.bind(this),
-              validateReference = this.validateReference.bind(this);
-
-        validates = all([
-          validateStatement,
-          validateReference
-        ], state, context, (state, context) => {
-          let validates;
-
-          this.commit(context);
-
-          context = specificContext;  ///
-
-          validates = continuation(constraint, context);
-
-          return validates;
-        });
-
-        if (validates) {
-          context = specificContext;  ///
-
-          context.addConstraint(constraint);
-        }
-      }, context);
+      return forward(constraint, context, back);
     }
 
-    context = specificContext;  ///
+    constraint = this;  ///
 
-    if (validates) {
-      context.debug(`...validated the '${constraintString}' constraint.`);
-    }
+    context = this.getContext();
 
-    return validates;
+    return attempt((context) => {
+      const validateStatement = this.validateStatement.bind(this),
+            validateReference = this.validateReference.bind(this);
+
+      return all([
+        validateStatement,
+        validateReference
+      ], state, context, (state, context, back) => {
+        this.commit(context);
+
+        context.debug(`...validated the '${constraintString}' constraint.`);
+
+        context.addConstraint(constraint);
+        return validates;
+      }, back);
+    }, context);
   }
 
-  validateReference(state, context, continuation) {
+  validateReference(state, context, forward, back) {
     let referenceValidates;
 
     const constraintString = this.getString();  ///
@@ -142,7 +122,7 @@ export default define(class Constraint extends Element {
     return referenceValidates;
   }
 
-  validateStatement(state, context, continuation) {
+  validateStatement(state, context, forward, back) {
     let statementValidates;
 
     const constraintString = this.getString();  ///
@@ -166,7 +146,7 @@ export default define(class Constraint extends Element {
     return statementValidates;
   }
 
-  unifyReference(reference, generalContext, specificContext, continuation) {
+  unifyReference(reference, generalContext, specificContext, forward, back) {
     const context = specificContext,  ///
           referenceString = reference.getString(),
           constraintString = this.getString(); ///
@@ -184,7 +164,7 @@ export default define(class Constraint extends Element {
     });
   }
 
-  unifyStatement(statement, generalContext, specificContext, continuation) {
+  unifyStatement(statement, generalContext, specificContext, forward, back) {
     const context = specificContext,  ///
           statementString = statement.getString(),
           constraintString = this.getString(); ///
@@ -208,7 +188,7 @@ export default define(class Constraint extends Element {
     });
   }
 
-  unifyAssumption(assumption, context, continuation) {
+  unifyAssumption(assumption, context, forward, back) {
     const constraintString = this.getString(),  ///
           assumptionString = assumption.getString()  ///
 
@@ -249,13 +229,13 @@ export default define(class Constraint extends Element {
     }, context);
   }
 
-  unifyAssumptions(assumptions, context, continuation) {
+  unifyAssumptions(assumptions, context, forward, back) {
     const constraintString = this.getString();
 
     context.trace(`Unifying the assumptions with the '${constraintString}' constraint...`);
 
-    some(assumptions, (assumption, continuation) => {
-      this.unifyAssumption(assumption, context, continuation);
+    some(assumptions, (assumption, forward, back) => {
+      this.unifyAssumption(assumption, context, forward, back);
     }, (assumptionsUnify) => {
       if (assumptionsUnify) {
         context.trace(`...unified the assumptions with the '${constraintString}' constraint.`);
@@ -265,7 +245,7 @@ export default define(class Constraint extends Element {
     });
   }
 
-  unifyImplicitAssumption(implicitAssumption, context, continuation) {
+  unifyImplicitAssumption(implicitAssumption, context, forward, back) {
     const constraintString = this.getString(),  ///
           implicitAssumptionString = implicitAssumption.getString();  ///
 
@@ -299,13 +279,13 @@ export default define(class Constraint extends Element {
     }, specificContext, context);
   }
 
-  unifyImplicitAssumptions(implicitAssumptions, context, continuation) {
+  unifyImplicitAssumptions(implicitAssumptions, context, forward, back) {
     const constraintString = this.getString();
 
     context.trace(`Unifying the implicit assumptions with the '${constraintString}' constraint...`);
 
-    some(implicitAssumptions, (implicitAssumption, continuation) => {
-      this.unifyImplicitAssumption(implicitAssumption, context, continuation);
+    some(implicitAssumptions, (implicitAssumption, forward, back) => {
+      this.unifyImplicitAssumption(implicitAssumption, context, forward, back);
     }, (implicitAssumptionsUnify) => {
       if (implicitAssumptionsUnify) {
         context.trace(`...unified the implicit assumptions with the '${constraintString}' constraint.`);

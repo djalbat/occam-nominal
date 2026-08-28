@@ -68,7 +68,8 @@ export default define(class Schema extends Element {
   verify = breakable(function (context, forward, back) {
     forward = cut(forward, back); ///
 
-    const schemaString = this.getString(); ///
+    const schemaString = this.getString(), ///
+          specificContext = context;  ///
 
     context.trace(`Verifying the '${schemaString}' schema...`);
 
@@ -83,16 +84,16 @@ export default define(class Schema extends Element {
         verifySuppositions,
         verifyDeduction,
         verifyProof
-      ], context, (verifies) => {
-        if (verifies) {
-          const schema = this; ///
+      ], context, ( _ , back) => {
+        const schema = this; ///
 
-          context.addSchema(schema);
+        context = specificContext;  ///
 
-          context.debug(`...verified the '${schemaString}' schema.`);
-        }
+        context.addSchema(schema);
 
-        return continuation(verifies, context);
+        context.debug(`...verified the '${schemaString}' schema.`);
+
+        return forward(context, back);
       }, (excpetion) => {
         if (excpetion) {
           return back();
@@ -105,98 +106,88 @@ export default define(class Schema extends Element {
     }, this.constraints, context);
   });
 
-  verifyLabel(context, continuation) {
+  verifyLabel(context, forward, back) {
     const labelString = this.label.getString(),
           schemaString = this.getString(); ///
 
     context.trace(`Verifying the '${schemaString}' schema's '${labelString}' label...`);
 
-    return this.label.verify((labelVerifies) => {
-      if (labelVerifies) {
-        context.debug(`...verified the '${schemaString}' schema's '${labelString}' label.`);
-      }
+    return this.label.verify((back) => {
+      context.debug(`...verified the '${schemaString}' schema's '${labelString}' label.`);
 
-      return continuation(labelVerifies, context);
-    });
+      return forward(context, back);
+    }, back);
   }
 
-  verifyProof(context, continuation) {
-    if (this.proof === null) {
-      const proofVerifies = true; ///
-
-      return continuation(proofVerifies, context);
-    }
-
+  verifyProof(context, forward, back) {
     const schemaString = this.getString();  ///
 
     context.trace(`Verifying the '${schemaString}' schema's proof...`);
 
     const statement = this.deduction.getStatement();
 
-    return this.proof.verify(statement, context, (proofVerifies) => {
-      if (proofVerifies) {
-        context.debug(`...verified the '${schemaString}' schema's proof.`);
-      }
+    return this.proof.verify(statement, context, (context, back) => {
+      context.debug(`...verified the '${schemaString}' schema's proof.`);
 
-      return continuation(proofVerifies, context);
+      return forward(context, back);
     }, back);
   }
 
-  verifyDeduction(context, continuation) {
+  verifyDeduction(context, forward, back) {
     const schemaString = this.getString(), ///
           deductionString = this.deduction.getString();
 
     context.trace(`Verifying the '${schemaString}' schema's '${deductionString}' deduction...`);
 
-    return this.deduction.verify(context, (deductionVerifies) => {
-      if (deductionVerifies) {
-        context.debug(`...verified the '${schemaString}' schema's '${deductionString}' deduction.`);
-      }
+    return this.deduction.verify(context, (context, back) => {
+      context.debug(`...verified the '${schemaString}' schema's '${deductionString}' deduction.`);
 
-      return continuation(deductionVerifies, context);
-    });
+      return forward(context, back);
+    }, back);
   }
 
-  verifySuppositions(context, continuation) {
+  verifySupposition(supposition, context, forward, back) {
+    const schemaString = this.getString(), ///
+          suppositionString = supposition.getString();
+
+    context.trace(`Verifying the '${schemaString}' schema's '${suppositionString}' supposition...`);
+
+    return supposition.verify(context, (context, back) => {
+      context.debug(`...verified the '${schemaString}' schema's '${suppositionString}' supposition.`);
+
+      return forward(context, back);
+    }, back);
+  }
+
+  verifySuppositions(context, forward, back) {
     const suppositionsLength = this.suppositions.length;
 
     if (suppositionsLength === 0) {
-      const suppositionsVerify = true;  ///
-
-      return continuation(suppositionsVerify, context);
+      return forward(context, back);
     }
 
     const schemaString = this.getString();  ///
 
     context.trace(`Verifying the '${schemaString}' schema's suppositions...`);
 
-    const verifySupposition = this.verifySupposition.bind(this);
+    return forwardsEvery(this.suppositions, (supposition, context, forward, back) => {
+      return this.verifySupposition(supposition, context, ( _ , back) => {
+        const factOrSubproof = supposition; ///
 
-    return forwardsEvery(this.suppositions, verifySupposition, context, (suppositionsVerify) => {
-      if (suppositionsVerify) {
-        context.debug(`...verified the '${schemaString}' schema's suppositions.`);
-      }
+        context.addFactOrSubproof(factOrSubproof);
 
-      return continuation(suppositionsVerify, context);
-    });
+        context.assignAssignments();
+
+        return forward(context, back);
+      }, back);
+    }, context, (context, back) => {
+      context.debug(`...verified the '${schemaString}' schema's suppositions.`);
+
+      return forward(context, back);
+    }, back);
   }
 
-  verifySupposition(supposition, context, continuation) {
-    const schemaString = this.getString(), ///
-          suppositionString = supposition.getString();
-
-    context.trace(`Verifying the '${schemaString}' schema's '${suppositionString}' supposition...`);
-
-    return supposition.verify(context, (suppositionVerifies) => {
-      if (suppositionVerifies) {
-        context.debug(`...verified the '${schemaString}' schema's '${suppositionString}' supposition.`);
-      }
-
-      return continuation(suppositionVerifies, context);
-    });
-  }
-
-  unifyReference(reference, context, continuation) {
+  unifyReference(reference, context, forward, back) {
     const schemaString = this.getString(),  ///
           referenceString = reference.getString();
 
@@ -211,8 +202,8 @@ export default define(class Schema extends Element {
     });
   }
 
-  unifyAssumptions(assumptions, constraints, context, continuation) {
-    filter(constraints, (constraint, continuation) => {
+  unifyAssumptions(assumptions, constraints, context, forward, back) {
+    filter(constraints, (constraint, forward, back) => {
       constraint.unifyAssumptions(assumptions, context, (assumptionsUnify) => {
         let passed = false;
 
@@ -222,10 +213,10 @@ export default define(class Schema extends Element {
 
         return continuation(passed);
       });
-    }, continuation);
+    }, forward, back);
   }
 
-  unifyDeducedStatement(deducedStatement, context, continuation) {
+  unifyDeducedStatement(deducedStatement, context, forward, back) {
     const deductionString = this.deduction.getString(),
           deducedStatementString = deducedStatement.getString();
 
@@ -256,7 +247,7 @@ export default define(class Schema extends Element {
     }, context);
   }
 
-  unifySupposedStatement(supposedStatement, supposition, context, continuation) {
+  unifySupposedStatement(supposedStatement, supposition, context, forward, back) {
     const suppositionString = supposition.getString(),
           supposedStatementString = supposedStatement.getString();
 
@@ -287,7 +278,7 @@ export default define(class Schema extends Element {
     }, context);
   }
 
-  unifySupposedStatements(supposedStatements, context, continuation) {
+  unifySupposedStatements(supposedStatements, context, forward, back) {
     const suppositionsLength = this.suppositions.length,
           supposedStatementsLength = supposedStatements.length;
 
@@ -299,17 +290,17 @@ export default define(class Schema extends Element {
 
     let index = supposedStatementsLength;
 
-    backwardsEvery(supposedStatements, (supposedStatement, continuation) => {
+    backwardsEvery(supposedStatements, (supposedStatement, forward, back) => {
       index--;
 
       const supposition = this.suppositions[index];
 
-      return this.unifySupposedStatement(supposedStatement, supposition, context, continuation);
-    }, continuation);
+      return this.unifySupposedStatement(supposedStatement, supposition, context, forward, back);
+    }, forward, back);
   }
 
-  unifyImplicitAssumptions(implicitAssumptions, constraints, context, continuation) {
-    filter(constraints, (constraint, continuation) => {
+  unifyImplicitAssumptions(implicitAssumptions, constraints, context, forward, back) {
+    filter(constraints, (constraint, forward, back) => {
       constraint.unifyImplicitAssumptions(implicitAssumptions, context, (implicitAssumptionsUnify) => {
         let passed = false;
 
@@ -319,10 +310,10 @@ export default define(class Schema extends Element {
 
         return continuation(passed);
       });
-    }, continuation);
+    }, forward, back);
   }
 
-  unifyStatementAndSchemaAssertion(statement, schameAssertion, context, continuation) {
+  unifyStatementAndSchemaAssertion(statement, schameAssertion, context, forward, back) {
     let schameAssertionUnifies = false;
 
     const schemaString = this.getString(),  ///

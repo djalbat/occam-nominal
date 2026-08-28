@@ -88,7 +88,8 @@ export default define(class Premise extends Fact {
   unifyIndependently = breakable(function (context, forward, back) {
     forward = cut(forward, back); ///
 
-    const premiseString = this.getString(); ///
+    const premiseString = this.getString(), ///
+          specificContext = context;  ///
 
     context.trace(`Unifying the '${premiseString}' premise independently...`);
 
@@ -98,7 +99,9 @@ export default define(class Premise extends Fact {
     return all([
       unifyStatementIndependently,
       unifyProcedureCallIndependently
-    ], context, (context, back) => {
+    ], context, ( _ , back) => {
+      context = specificContext;  ///
+
       context.debug(`...unified the '${premiseString}' premise independently.`);
 
       return forward(context, back);

@@ -49,7 +49,8 @@ export default define(class ConstructorDeclaration extends Declaration {
   verify = breakable(function (context, forward, back) {
     forward = cut(forward, back); ///
 
-    const constructorDeclarationString = this.getString();  ///
+    const specificContext = context,  ///
+          constructorDeclarationString = this.getString();  ///
 
     context.trace(`Verifying the '${constructorDeclarationString}' constructor declaration...`);
 
@@ -67,7 +68,9 @@ export default define(class ConstructorDeclaration extends Declaration {
     return all([
       verifyType,
       verifyConstructor
-    ], context, (context, back) => {
+    ], context, ( _ , back) => {
+      context = specificContext;  ///
+
       this.constructor.setType(this.type);
 
       context.addConstructor(this.constructor);
