@@ -4,6 +4,7 @@ import TermNode from "./node/term";
 import RuleNode from "./node/rule";
 import StepNode from "./node/fact/step";
 import TypeNode from "./node/type";
+import LinkNode from "./node/link";
 import TypesNode from "./node/types";
 import ErrorNode from "./node/error";
 import FrameNode from "./node/frame";
@@ -89,6 +90,7 @@ import {
   STEP_RULE_NAME,
   TERM_RULE_NAME,
   TYPE_RULE_NAME,
+  LINK_RULE_NAME,
   TYPES_RULE_NAME,
   PROOF_RULE_NAME,
   ERROR_RULE_NAME,
@@ -174,6 +176,7 @@ const NonTerminalNodeMap = {
   [STEP_RULE_NAME]: StepNode,
   [TERM_RULE_NAME]: TermNode,
   [TYPE_RULE_NAME]: TypeNode,
+  [LINK_RULE_NAME]: LinkNode,
   [TYPES_RULE_NAME]: TypesNode,
   [ERROR_RULE_NAME]: ErrorNode,
   [FRAME_RULE_NAME]: FrameNode,

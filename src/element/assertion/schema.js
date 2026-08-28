@@ -12,19 +12,19 @@ import { declare } from "../../utilities/state";
 const { some } = continuationUtilities;
 
 export default define(class SchemaAssertion extends Assertion {
-  constructor(context, string, node, breakPoint, frame, reference) {
+  constructor(context, string, node, breakPoint, link, frame) {
     super(context, string, node, breakPoint);
 
+    this.link = link;
     this.frame = frame;
-    this.reference = reference;
+  }
+
+  getLink() {
+    return this.link;
   }
 
   getFrame() {
     return this.frame;
-  }
-
-  getReference() {
-    return this.reference;
   }
 
   getSchemaAssertionNode() {
@@ -82,11 +82,11 @@ export default define(class SchemaAssertion extends Assertion {
       assertion = this;  ///
 
       const validateFrame = this.validateFrame.bind(this),
-            validateReference = this.validateReference.bind(this);
+            validateLink = this.validateLink.bind(this);
 
       validates = all([
         validateFrame,
-        validateReference
+        validateLink
       ], state, context, (state, _ ) => {
         let validates;
 
@@ -133,28 +133,28 @@ export default define(class SchemaAssertion extends Assertion {
     return frameValidates;
   }
 
-  validateReference(state, context, continuation) {
-    let referenceValidates;
+  validateLink(state, context, continuation) {
+    let linkValidates;
 
     const schameAssertionString = this.getString();  ///
 
-    context.trace(`Validating the '${schameAssertionString}' schame assertion's reference...`);
+    context.trace(`Validating the '${schameAssertionString}' schame assertion's link...`);
 
-    referenceValidates = this.reference.validate(state, context, (reference, context) => {
+    linkValidates = this.link.validate(state, context, (link, context) => {
       let validates;
 
-      this.reference = reference;
+      this.link = link;
 
       validates = continuation(state, context);
 
       return validates;
     });
 
-    if (referenceValidates) {
-      context.debug(`...validated the '${schameAssertionString}' schame assertion's reference.`);
+    if (linkValidates) {
+      context.debug(`...validated the '${schameAssertionString}' schame assertion's link.`);
     }
 
-    return referenceValidates;
+    return linkValidates;
   }
 
   unifyStep(step, context, continuation) {

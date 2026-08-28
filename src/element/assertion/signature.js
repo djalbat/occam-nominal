@@ -7,24 +7,24 @@ import Assertion from "../assertion";
 import { define } from "../../elements";
 import { reconcile, instantiate } from "../../utilities/context";
 import { instantiateSignatureAssertion } from "../../process/instantiate";
-import { termsFromSignatureAssertionNode, referenceFromSignatureAssertionNode, signatureAssertionFromStatementNode } from "../../utilities/element";
+import { termsFromSignatureAssertionNode, linkFromSignatureAssertionNode, signatureAssertionFromStatementNode } from "../../utilities/element";
 
 const { breakPointFromJSON } = breakPointUtilities;
 
 export default define(class SignatureAssertion extends Assertion {
-  constructor(context, string, node, breakPoint, terms, reference) {
+  constructor(context, string, node, breakPoint, link, terms) {
     super(context, string, node, breakPoint);
 
+    this.link = link;
     this.terms = terms;
-    this.reference = reference;
   }
 
   getTerms() {
     return this.terms;
   }
 
-  getReference() {
-    return this.reference;
+  getLink() {
+    return this.link;
   }
 
   getSignatureAssertionNode() {
@@ -55,11 +55,11 @@ export default define(class SignatureAssertion extends Assertion {
       assertion = this; ///
 
       const validateTerms = this.validateTerms.bind(this),
-            validateReference = this.validateReference.bind(this);
+            validateLink = this.validateLink.bind(this);
 
       validates = all([
         validateTerms,
-        validateReference
+        validateLink
       ], state, context, (state, context) => {
         let validates;
 
@@ -134,17 +134,17 @@ export default define(class SignatureAssertion extends Assertion {
     return termsValidate
   }
 
-  validateReference(state, context, continuation) {
-    let referenceValidates;
+  validateLink(state, context, continuation) {
+    let linkValidates;
 
     const signatureAssertionString = this.getString();  ///
 
-    context.trace(`Validating the '${signatureAssertionString}' signature assertion's reference...`);
+    context.trace(`Validating the '${signatureAssertionString}' signature assertion's link...`);
 
-    referenceValidates = this.reference.validate(state, context, (reference, context) => {
+    linkValidates = this.link.validate(state, context, (link, context) => {
       let validates = false;
 
-      const axiom = context.findAxiomByReference(reference);
+      const axiom = context.findAxiomByLink(link);
 
       if (axiom !== null) {
         const axiomSatisfiable = axiom.isSatisfiable();
@@ -155,7 +155,7 @@ export default define(class SignatureAssertion extends Assertion {
       }
 
       if (validates) {
-        this.reference = reference;
+        this.link = link;
 
         validates = continuation(state, context);
       }
@@ -163,11 +163,11 @@ export default define(class SignatureAssertion extends Assertion {
       return validates;
     });
 
-    if (referenceValidates) {
-      context.debug(`...validated the '${signatureAssertionString}' signature assertion's reference.`);
+    if (linkValidates) {
+      context.debug(`...validated the '${signatureAssertionString}' signature assertion's link.`);
     }
 
-    return referenceValidates;
+    return linkValidates;
   }
 
   unifyClaim(claim, context, continuation) {
@@ -177,7 +177,7 @@ export default define(class SignatureAssertion extends Assertion {
     context.trace(`Unifying the '${claimString}' claim with the '${signatureAssertionString}' signature assertion...`);
 
     return reconcile((context) => {
-      const axiom = context.findAxiomByReference(this.reference);
+      const axiom = context.findAxiomByLink(this.link);
 
       return axiom.unifyTerms(this.terms, context, (termsUnify) => {
         if (!termsUnify) {
@@ -205,7 +205,7 @@ export default define(class SignatureAssertion extends Assertion {
     let stepAndFactOrSubproofsUnify = false;
 
     return reconcile((context) => {
-      const axiom = context.findAxiomByReference(this.reference),
+      const axiom = context.findAxiomByLink(this.link),
             signatureAssertion = this;  ///
 
       return axiom.unifySignatureAssertion(signatureAssertion, context, (signatureAssertionUnifies) => {
@@ -232,11 +232,11 @@ export default define(class SignatureAssertion extends Assertion {
               node = definedAssertionNode,  ///
               breakPoint = breakPointFromJSON(json),
               terms = termsFromSignatureAssertionNode(definedAssertionNode, context),
-              reference = referenceFromSignatureAssertionNode(definedAssertionNode, context);
+              link = linkFromSignatureAssertionNode(definedAssertionNode, context);
 
         context = null;
 
-        signatureAssertion = new SignatureAssertion(context, string, node, breakPoint, terms, reference);
+        signatureAssertion = new SignatureAssertion(context, string, node, breakPoint, terms, link);
       }, context);
     }
 

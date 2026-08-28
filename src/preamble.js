@@ -4,6 +4,7 @@ import Type from "./element/type";
 import Term from "./element/term";
 import Rule from "./element/rule";
 import Step from "./element/fact/step";
+import Link from "./element/link";
 import Label from "./element/label";
 import Frame from "./element/frame";
 import Proof from "./element/proof";

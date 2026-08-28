@@ -2,14 +2,14 @@
 
 import { NonTerminalNode } from "occam-languages";
 
-import { METAVARIABLE_RULE_NAME, STATEMENT_RULE_NAME } from "../ruleNames";
+import { LINK_RULE_NAME, STATEMENT_RULE_NAME } from "../ruleNames";
 
 export default class AssumptionNode extends NonTerminalNode {
-  getMetavariableNode() {
-    const ruleName = METAVARIABLE_RULE_NAME,
-          metavariableNode = this.getNodeByRuleName(ruleName);
+  getLinkNode() {
+    const ruleName = LINK_RULE_NAME,
+          linkNode = this.getNodeByRuleName(ruleName);
 
-    return metavariableNode;
+    return linkNode;
   }
 
   getStatementNode() {

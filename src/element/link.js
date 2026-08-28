@@ -3,15 +3,15 @@
 import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
 
 import { define } from "../elements";
-import { instantiateReference } from "../process/instantiate";
+import { instantiateLink } from "../process/instantiate";
 import { REFERENCE_META_TYPE_NAME } from "../metaTypeNames";
-import { referenceFromReferenceNode, metavariableFromReferenceNode } from "../utilities/element";
+import { linkFromLinkNode, metavariableFromLinkNode } from "../utilities/element";
 import { join, ablate, attempt, reconcile, serialise, unserialise, instantiate } from "../utilities/context";
 
 const { all, isolate } = continuationUtilities,
       { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
-export default define(class Reference extends Element {
+export default define(class Link extends Element {
   constructor(context, string, node, breakPoint, metavariable) {
     super(context, string, node, breakPoint);
 
@@ -22,11 +22,11 @@ export default define(class Reference extends Element {
     return this.metavariable;
   }
 
-  getReferenceNode() {
+  getLinkNode() {
     const node = this.getNode(),
-          referenceNode = node; ///
+          linkNode = node; ///
 
-    return referenceNode;
+    return linkNode;
   }
 
   getMetavariableNode() {
@@ -37,29 +37,29 @@ export default define(class Reference extends Element {
 
   getMetaType() { return this.metavariable.getMetaType(); }
 
-  isEqualTo(reference) {
-    const referenceNode = reference.getNode(),
-          referenceNodeMatches = this.matchReferenceNode(referenceNode),
-          equalTo = referenceNodeMatches;  ///
+  isEqualTo(link) {
+    const linkNode = link.getNode(),
+          linkNodeMatches = this.matchLinkNode(linkNode),
+          equalTo = linkNodeMatches;  ///
 
     return equalTo;
   }
 
-  matchReferenceNode(referenceNode) {
-    const node = referenceNode, ///
+  matchLinkNode(linkNode) {
+    const node = linkNode, ///
           nodeMatches = this.matchNode(node),
-          referenceNodeMatches = nodeMatches; ///
+          linkNodeMatches = nodeMatches; ///
 
-    return referenceNodeMatches;
+    return linkNodeMatches;
   }
 
   matchMetavariableNode(metavariableNode) { return this.metavariable.matchMetavariableNode(metavariableNode); }
 
-  findReference(context) {
-    const referenceNode = this.getReferenceNode(),
-          reference = context.findReferenceByReferenceNode(referenceNode);
+  findLink(context) {
+    const linkNode = this.getLinkNode(),
+          link = context.findLinkByLinkNode(linkNode);
 
-    return reference;
+    return link;
   }
 
   compareParameter(parameter) {
@@ -83,22 +83,22 @@ export default define(class Reference extends Element {
   }
 
   validate(state, context, forward, back) {
-    let reference;
+    let link;
 
-    const referenceString = this.getString(); ///
+    const linkString = this.getString(); ///
 
-    context.trace(`Validating the '${referenceString}' reference...`);
+    context.trace(`Validating the '${linkString}' link...`);
 
-    reference = this.findReference(context);
+    link = this.findLink(context);
 
-    if (reference !== null) {
-      context.debug(`...the '${referenceString}' reference is already present.`);
+    if (link !== null) {
+      context.debug(`...the '${linkString}' link is already present.`);
 
-      return forward(reference, context, back);
+      return forward(link, context, back);
     }
 
     return isolate((state, context, forward, back) => {
-      reference = this; ///
+      link = this; ///
 
       context = this.getContext();
 
@@ -114,18 +114,18 @@ export default define(class Reference extends Element {
         }, back);
       }, context);
     }, state, context, (state, context, back) => {
-      context.addReference(reference);
+      context.addLink(link);
 
-      context.debug(`...validated the '${referenceString}' reference.`);
+      context.debug(`...validated the '${linkString}' link.`);
 
-      return forward(reference, context, back);
+      return forward(link, context, back);
     }, back);
   }
 
   validateMetavariable(state, context, forward, back) {
-    const referenceString = this.getString(); ///
+    const linkString = this.getString(); ///
 
-    context.trace(`Validating the '${referenceString}' reference's metavariable...'`);
+    context.trace(`Validating the '${linkString}' link's metavariable...'`);
 
     return this.metavariable.validate(state, context, (metavariable, context, back) => {
       let validates = false;
@@ -135,18 +135,18 @@ export default define(class Reference extends Element {
       if (metaType === null) {
         validates = true;
       } else {
-        const referenceMetaTypeName = REFERENCE_META_TYPE_NAME,
-              referenceMetaType = context.findMetaTypeByMetaTypeName(referenceMetaTypeName),
-              metavariableMetaTypeEqualToReferenceMetaType = metavariable.isMetaTypeEqualTo(referenceMetaType);
+        const linkMetaTypeName = REFERENCE_META_TYPE_NAME,
+              linkMetaType = context.findMetaTypeByMetaTypeName(linkMetaTypeName),
+              metavariableMetaTypeEqualToLinkMetaType = metavariable.isMetaTypeEqualTo(linkMetaType);
 
-        if (metavariableMetaTypeEqualToReferenceMetaType) {
+        if (metavariableMetaTypeEqualToLinkMetaType) {
           validates = true;
         } else {
           const metaTypeString = metaType.getString(),
                 metavariableString = metavariable.getString(),
-                referenceMetaTypeString = referenceMetaType.getString();
+                linkMetaTypeString = linkMetaType.getString();
 
-          context.debug(`The '${referenceString}' reference's '${metavariableString}' metavariable's '${metaTypeString}' meta-type should be the '${referenceMetaTypeString}' meta-type.`);
+          context.debug(`The '${linkString}' link's '${metavariableString}' metavariable's '${metaTypeString}' meta-type should be the '${linkMetaTypeString}' meta-type.`);
         }
       }
 
@@ -156,7 +156,7 @@ export default define(class Reference extends Element {
 
       this.metavariable = metavariable;
 
-      context.debug(`...validated the '${referenceString}' reference's metavariable.'`);
+      context.debug(`...validated the '${linkString}' link's metavariable.'`);
 
       return forward(context, back);
     }, back);
@@ -164,9 +164,9 @@ export default define(class Reference extends Element {
 
   unifyLabel(label, context, forward, back) {
     const labelString = label.getString(),
-          referenceString = this.getString(); ///
+          linkString = this.getString(); ///
 
-    context.trace(`Unifying the '${labelString}' label with the '${referenceString}' reference...`);
+    context.trace(`Unifying the '${labelString}' label with the '${linkString}' link...`);
 
     const metavariable = label.getMetavariable(),
           labelContext = label.getContext(),
@@ -185,7 +185,7 @@ export default define(class Reference extends Element {
           }
 
           if (labelUnifies) {
-            context.debug(`...unified the '${labelString}' label with the '${referenceString}' reference.`);
+            context.debug(`...unified the '${labelString}' label with the '${linkString}' link.`);
           }
 
           return continuation(labelUnifies);
@@ -196,10 +196,10 @@ export default define(class Reference extends Element {
 
   unifyMetavariable(metavariable, generalContext, specificContext, forward, back) {
     const context = specificContext,  ///
-          referenceString = this.getString(), ///
+          linkString = this.getString(), ///
           metavariableString = metavariable.getString();
 
-    context.trace(`Unifying the '${metavariableString}' metavariable with the '${referenceString}' reference...`);
+    context.trace(`Unifying the '${metavariableString}' metavariable with the '${linkString}' link...`);
 
     return this.metavariable.unifyMetavariableIntrinsically(metavariable, generalContext, specificContext, (metavariableUnifiesIntrinsically) => {
       let metavariableUnifies = false;
@@ -209,7 +209,7 @@ export default define(class Reference extends Element {
       }
 
       if (metavariableUnifies) {
-        context.debug(`...unified the '${metavariableString}' metavariable with the '${referenceString}' reference.`);
+        context.debug(`...unified the '${metavariableString}' metavariable with the '${linkString}' link.`);
       }
 
       return continuation(metavariableUnifies);
@@ -240,38 +240,23 @@ export default define(class Reference extends Element {
     }, context);
   }
 
-  static name = "Reference";
+  static name = "Link";
 
   static fromJSON(json, context) {
-    let reference;
+    let link;
 
     instantiate((context) => {
       unserialise((json, context) => {
         const { string } = json,
-              referenceNode = instantiateReference(string, context),
-              node = referenceNode,  ///
+              linkNode = instantiateLink(string, context),
+              node = linkNode,  ///
               breakPoint = breakPointFromJSON(json),
-              metavariable = metavariableFromReferenceNode(referenceNode, context);
+              metavariable = metavariableFromLinkNode(linkNode, context);
 
-        reference = new Reference(context, string, node, breakPoint, metavariable);
+        link = new Link(context, string, node, breakPoint, metavariable);
       }, json, context);
     }, context);
 
-    return reference;
-  }
-
-  static fromReferenceString(referenceString, context) {
-    let reference;
-
-    ablate((context) => {
-      instantiate((context) => {
-        const string = referenceString,  ///
-              referenceNode = instantiateReference(string, context);
-
-        reference = referenceFromReferenceNode(referenceNode, context);
-      }, context);
-    }, context);
-
-    return reference;
+    return link;
   }
 });

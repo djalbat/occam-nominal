@@ -4,6 +4,7 @@ export const RULE_RULE_NAME = "rule";
 export const STEP_RULE_NAME = "step";
 export const TERM_RULE_NAME = "term";
 export const TYPE_RULE_NAME = "type";
+export const LINK_RULE_NAME = "link";
 export const STUFF_RULE_NAME = "stuff";
 export const TYPES_RULE_NAME = "types";
 export const LEMMA_RULE_NAME = "lemma";

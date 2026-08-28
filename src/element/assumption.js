@@ -12,22 +12,22 @@ const { backwardsEvery } = continuationUtilities,
       { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Assumption extends Element {
-  constructor(context, string, node, breakPoint, reference, statement) {
+  constructor(context, string, node, breakPoint, link, statement) {
     super(context, string, node, breakPoint);
 
-    this.reference = reference;
+    this.link = link;
     this.statement = statement;
   }
 
-  getReference() {
-    return this.reference;
+  getLink() {
+    return this.link;
   }
 
   getStatement() {
     return this.statement;
   }
 
-  getMetavariable() { return this.reference.getMetavariable(); }
+  getMetavariable() { return this.link.getMetavariable(); }
 
   getStatementNode() { return this.statement.getStatementNode(); }
 
@@ -87,11 +87,11 @@ export default define(class Assumption extends Element {
     } else {
       assumption = this;  ///
 
-      const validateReference = this.validateReference.bind(this),
+      const validateLink = this.validateLink.bind(this),
             validateStatement = this.validateStatement.bind(this);
 
       validates = all([
-        validateReference,
+        validateLink,
         validateStatement
       ], state, context, (state, context) => {
         let validates;
@@ -179,28 +179,28 @@ export default define(class Assumption extends Element {
     return validatesWhenDerived;
   }
 
-  validateReference(state, context, continuation) {
-    let referenceValidates;
+  validateLink(state, context, continuation) {
+    let linkValidates;
 
     const assumptionString = this.getString();  ///
 
-    context.trace(`Validating the '${assumptionString}' assumption's reference...`);
+    context.trace(`Validating the '${assumptionString}' assumption's link...`);
 
-    referenceValidates = this.reference.validate(state, context, (reference, context) => {
+    linkValidates = this.link.validate(state, context, (link, context) => {
       let validates;
 
-      this.reference = reference;
+      this.link = link;
 
       validates = continuation(state, context);
 
       return validates;
     });
 
-    if (referenceValidates) {
-      context.debug(`...validates the '${assumptionString}' assumption's reference.`);
+    if (linkValidates) {
+      context.debug(`...validates the '${assumptionString}' assumption's link.`);
     }
 
-    return referenceValidates;
+    return linkValidates;
   }
 
   validateStatement(state, context, continuation) {
@@ -238,7 +238,7 @@ export default define(class Assumption extends Element {
     return reconcile((context) => {
       const label = schema.getLabel();
 
-      return this.reference.unifyLabel(label, context, (labelUnifies) => {
+      return this.link.unifyLabel(label, context, (labelUnifies) => {
         const specificContext = context;  ///
 
         if (!labelUnifies) {
@@ -401,21 +401,21 @@ export default define(class Assumption extends Element {
             assumptionNode = instantiateAssumption(string, context),
             node = assumptionNode,  ///
             breakPoint = breakPointFromJSON(json),
-            reference = referenceFromAssumptionNode(assumptionNode, context),
+            link = linkFromAssumptionNode(assumptionNode, context),
             statement = statementFromAssumptionNode(assumptionNode, context);
 
-      assumption = new Assumption(context, string, node, breakPoint, reference, statement);
+      assumption = new Assumption(context, string, node, breakPoint, link, statement);
     }, context);
 
     return assumption;
   }
 });
 
-function referenceFromAssumptionNode(assumptionNode, context) {
-  const metavariableNode = assumptionNode.getMetavariableNode(context),
-        reference = context.findReferenceByMetavariableNode(metavariableNode);
+function linkFromAssumptionNode(assumptionNode, context) {
+  const linkNode = assumptionNode.getLinkNode(context),
+        link = context.findLinkByLinkNode(linkNode);
 
-  return reference;
+  return link;
 }
 
 function statementFromAssumptionNode(assumptionNode, context) {
