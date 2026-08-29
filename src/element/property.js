@@ -200,9 +200,8 @@ export default define(class Property extends Element {
     return serialise((context) => {
       const includeType = false,
             typeJSON = typeToTypeJSON(this.type),
-            string = this.getString(includeType);
-
-      const type = typeJSON,  ///
+            string = this.getString(includeType),
+            type = typeJSON,  ///
             json = {
               context,
               string,

@@ -278,9 +278,8 @@ export default define(class Constructor extends Element {
       const includeType = false,
             typeJSON = typeToTypeJSON(this.type),
             hypothesesJSON = hypothesesToHypothesesJSON(this.hypotheses),
-            string = this.getString(includeType);
-
-      const type = typeJSON,  ///
+            string = this.getString(includeType),
+            type = typeJSON,  ///
             hypotheses = hypothesesJSON,  ///
             json = {
               context,

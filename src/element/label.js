@@ -170,12 +170,11 @@ export default define(class Label extends Element {
     const context = this.getContext();
 
     return serialise((context) => {
-      const string = this.getString();
-
-      const json = {
-        context,
-        string
-      };
+      const string = this.getString(),
+            json = {
+              context,
+              string
+            };
 
       return json;
     }, context);
