@@ -69,7 +69,7 @@ export default define(class Supposition extends Fact {
     }
 
     return declare((state) => {
-      return this.validate(state, context, (supposition, _, back) => {
+      return this.validate(state, context, (supposition, context, back) => {
         context.debug(`...verified the '${suppositionString}' supposition.`);
 
         return forward(context, back);

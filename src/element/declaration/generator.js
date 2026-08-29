@@ -49,8 +49,7 @@ export default define(class GeneratorDeclaration extends Declaration {
   verify = breakable(function (context, forward, back) {
     forward = cut(forward, back); ///
 
-    const specificContext = context,  ///
-          generatorDeclarationString = this.getString();  ///
+    const generatorDeclarationString = this.getString();  ///
 
     context.trace(`Verifying the '${generatorDeclarationString}' generator declaration...`);
 
@@ -70,9 +69,7 @@ export default define(class GeneratorDeclaration extends Declaration {
     return all([
       verifyCotype,
       verifyGenerator
-    ], context, ( _ , back) => {
-      context = specificContext;  ///
-
+    ], context, (context, back) => {
       this.generator.setType(this.type);
 
       context.addGenerator(this.generator);

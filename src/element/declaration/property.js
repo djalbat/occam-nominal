@@ -44,8 +44,7 @@ export default define(class PropertyDeclaration extends Declaration {
 
     let verifies = false;
 
-    const specificContext = context,  ///
-          propertyDeclarationString = this.getString();  ///
+    const propertyDeclarationString = this.getString();  ///
 
     context.trace(`Verifying the '${propertyDeclarationString}' property declaration...`);
 
@@ -63,9 +62,7 @@ export default define(class PropertyDeclaration extends Declaration {
     return all([
       verifyType,
       verifyProperty
-    ], context, ( _ , back) => {
-      context = specificContext;  ///
-
+    ], context, (context, back) => {
       this.property.setType(this.type);
 
       context.debug(`...verified the '${propertyDeclarationString}' property declaration.`);

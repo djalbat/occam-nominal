@@ -14,7 +14,7 @@ import { labelFromJSON,
          constraintsToConstraintsJSON,
          suppositionsToSuppositionsJSON } from "../utilities/json";
 
-const { cut, all, filter, forwardsEvery, backwardsEvery } = continuationUtilities,
+const { cut, all, filter, isolate, forwardsEvery, backwardsEvery } = continuationUtilities,
       { breakable, breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Schema extends Element {
@@ -68,42 +68,43 @@ export default define(class Schema extends Element {
   verify = breakable(function (context, forward, back) {
     forward = cut(forward, back); ///
 
-    const schemaString = this.getString(), ///
-          specificContext = context;  ///
+    const schemaString = this.getString();
 
     context.trace(`Verifying the '${schemaString}' schema...`);
 
-    return encapsulate((context) => {
-      const verifyProof = this.verifyProof.bind(this),
-            verifyLabel = this.verifyLabel.bind(this),
-            verifyDeduction = this.verifyDeduction.bind(this),
-            verifySuppositions = this.verifySuppositions.bind(this);
+    return isolate((context, forward, back) => {
+      return encapsulate((context) => {
+        const verifyProof = this.verifyProof.bind(this),
+              verifyLabel = this.verifyLabel.bind(this),
+              verifyDeduction = this.verifyDeduction.bind(this),
+              verifySuppositions = this.verifySuppositions.bind(this);
 
-      return all([
-        verifyLabel,
-        verifySuppositions,
-        verifyDeduction,
-        verifyProof
-      ], context, ( _ , back) => {
-        const schema = this; ///
+        return all([
+          verifyLabel,
+          verifySuppositions,
+          verifyDeduction,
+          verifyProof
+        ], context, (context, back) => {
+          return forward(back);
+        }, back);
+      }, this.constraints, context);
+    }, context, (context, back) => {
+      const schema = this; ///
 
-        context = specificContext;  ///
+      context.addSchema(schema);
 
-        context.addSchema(schema);
+      context.debug(`...verified the '${schemaString}' schema.`);
 
-        context.debug(`...verified the '${schemaString}' schema.`);
+      return forward(context, back);
+    }, (exception) => {
+      if (exception) {
+        return back(exception);
+      }
 
-        return forward(context, back);
-      }, (excpetion) => {
-        if (excpetion) {
-          return back();
-        }
+      context.trace(`Unable to verify the '${schemaString}' schema.`);
 
-        context.trace(`Unable to verify the '${schemaString}' schema.`);
-
-        return back();
-      });
-    }, this.constraints, context);
+      return back();
+    });
   });
 
   verifyLabel(context, forward, back) {
@@ -171,7 +172,7 @@ export default define(class Schema extends Element {
     context.trace(`Verifying the '${schemaString}' schema's suppositions...`);
 
     return forwardsEvery(this.suppositions, (supposition, context, forward, back) => {
-      return this.verifySupposition(supposition, context, ( _ , back) => {
+      return this.verifySupposition(supposition, context, (context, back) => {
         const factOrSubproof = supposition; ///
 
         context.addFactOrSubproof(factOrSubproof);

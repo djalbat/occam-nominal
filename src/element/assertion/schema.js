@@ -102,7 +102,7 @@ export default define(class SchemaAssertion extends Assertion {
       validates = all([
         validateFrame,
         validateLink
-      ], state, context, (state, _ ) => {
+      ], state, context, (state, context) => {
         let validates;
 
         const schameAssertion = assertion;  ///

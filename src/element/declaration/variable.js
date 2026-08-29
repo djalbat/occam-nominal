@@ -40,8 +40,7 @@ export default define(class VariableDeclaration extends Declaration {
   verify = breakable(function (context, forward, back) {
     forward = cut(forward, back); ///
 
-    const specificContext = context,  ///
-          variableDeclarationString = this.getString(); ///
+    const variableDeclarationString = this.getString(); ///
 
     context.trace(`Verifying the '${variableDeclarationString}' variable declaration...`);
 
@@ -51,10 +50,8 @@ export default define(class VariableDeclaration extends Declaration {
     return all([
       verifyType,
       verifyVariable
-    ],  context, ( _ , back) => {
+    ],  context, (context, back) => {
       const declaredVariable = this.variable;
-
-      context = specificContext;  ///
 
       context.addDeclaredVariable(declaredVariable);
 

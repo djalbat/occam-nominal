@@ -244,7 +244,7 @@ export default define(class StatementSubstitution extends Substitution {
           specificStatement = specificSubstitutionTargetStatement; ///
 
     return reconcile((specificContext) => {
-      return generalStatement.unifyStatement(specificStatement, generalContext, specificContext, (generalContext, _, back) => {
+      return generalStatement.unifyStatement(specificStatement, generalContext, specificContext, (generalContext, specificContext, back) => {
         specificContext.commit(context);
 
         context.trace(`...unified the '${specificSubstitutionString}' substitution's target statement with the '${generalSubstitutionString}' substitution's target statement.`);

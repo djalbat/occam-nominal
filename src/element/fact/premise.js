@@ -69,7 +69,7 @@ export default define(class Premise extends Fact {
     }
 
     return declare((state) => {
-      return this.validate(state, context, (premise, _, back) => {
+      return this.validate(state, context, (premise, context, back) => {
         context.debug(`...verified the '${premiseString}' premise.`);
 
         return forward(context, back);
@@ -88,8 +88,7 @@ export default define(class Premise extends Fact {
   unifyIndependently = breakable(function (context, forward, back) {
     forward = cut(forward, back); ///
 
-    const premiseString = this.getString(), ///
-          specificContext = context;  ///
+    const premiseString = this.getString();  ///
 
     context.trace(`Unifying the '${premiseString}' premise independently...`);
 
@@ -99,9 +98,7 @@ export default define(class Premise extends Fact {
     return all([
       unifyStatementIndependently,
       unifyProcedureCallIndependently
-    ], context, ( _ , back) => {
-      context = specificContext;  ///
-
+    ], context, (context, back) => {
       context.debug(`...unified the '${premiseString}' premise independently.`);
 
       return forward(context, back);

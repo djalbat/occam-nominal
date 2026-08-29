@@ -156,7 +156,7 @@ export default define(class Subproof extends Element {
     context.trace(`Verifying the '${subproofString}' subproof's suppositions...`);
 
     return every(this.suppositions, (supposition, contezt, forward, back) => {
-      return this.verifySupposition(supposition, contezt, ( _ , back) => {
+      return this.verifySupposition(supposition, contezt, (context, back) => {
         const factOrSubproof = supposition; ///
 
         context.addFactOrSubproof(factOrSubproof);

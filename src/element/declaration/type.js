@@ -47,8 +47,7 @@ export default define(class TypeDeclaration extends Declaration {
   verify = breakable(function (context, forward, back) {
     forward = cut(forward, back); ///
 
-    const specificContext = context,  ///
-          typeDeclarationString = this.getString();  ///
+    const typeDeclarationString = this.getString();  ///
 
     context.trace(`Verifying the '${typeDeclarationString}' type declaration...`);
 
@@ -60,14 +59,12 @@ export default define(class TypeDeclaration extends Declaration {
       verifyType,
       verifySuperTypes,
       verifyTypePrefix
-    ], context, ( _ , back) => {
+    ], context, (context, back) => {
       const properties = this.getProperties(),
             typePrefix = context.getTypePrefix(),
             prefixName = (typePrefix !== null) ?
                            typePrefix.getPrefixName() :
                              null;
-
-      context = specificContext;  ///
 
       this.type.setProvisional(this.provisional);
 
