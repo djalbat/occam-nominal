@@ -133,7 +133,7 @@ export default class Claim extends Element {
 
     context.trace(`Verifying the '${claimString}' claim's '${labelString}' label...`);
 
-    return label.verify((context, back) => {
+    return label.verify(context, (context, back) => {
       context.debug(`...verified the '${claimString}' claim's '${labelString}' label.`);
 
       return forward(context, back);
@@ -196,7 +196,7 @@ export default class Claim extends Element {
     context.trace(`Verifying the '${claimString}' claim's suppositions...`);
 
     return forwardsEvery(this.suppositions, (supposition, context, forward, back) => {
-      return this.verifySupposition(supposition, context, ( _ , back) => {
+      return this.verifySupposition(supposition, context, (context, back) => {
         const factOrSubproof = supposition; ///
 
         context.addFactOrSubproof(factOrSubproof);

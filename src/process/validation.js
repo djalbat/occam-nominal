@@ -5,7 +5,6 @@ import { continuationUtilities } from "occam-languages";
 import elements from "../elements";
 
 import { choose } from "../utilities/context";
-import { desist, declare } from "../utilities/state";
 import { bracketedConstructorFromNothing, bracketedCombinatorFromNothing } from "../utilities/instance";
 
 const { some } = continuationUtilities;

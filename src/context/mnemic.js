@@ -380,9 +380,33 @@ export default class MnemicContext extends Context {
     });
   }
 
+  addFRames(frames) {
+    frames.forEach((frame) => {
+      this.addFrame(frame);
+    });
+  }
+
+  addEqualities(equalities) {
+    equalities.forEach((equality) => {
+      this.addEquality(equality);
+    });
+  }
+
   addAssertions(assertions) {
     assertions.forEach((assertion) => {
       this.addAssertion(assertion);
+    });
+  }
+
+  addStatements(statements) {
+    statements.forEach((statement) => {
+      this.addStatement(statement);
+    });
+  }
+
+  addAssumptions(assumptions) {
+    assumptions.forEach((assumption) => {
+      this.addAssumption(assumption);
     });
   }
 

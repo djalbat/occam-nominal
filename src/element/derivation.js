@@ -36,7 +36,7 @@ export default define(class Derivation extends Element {
 
   verify(context, forward, back) {
     return every(this.factOrSubproofs, (factOrSubproof, context, forward, back) => {
-      return factOrSubproof.verify(context, (_, back) => {
+      return factOrSubproof.verify(context, (context , back) => {
         context.addFactOrSubproof(factOrSubproof);
 
         context.assignAssignments();
@@ -48,4 +48,3 @@ export default define(class Derivation extends Element {
 
   static name = "Derivation";
 });
-

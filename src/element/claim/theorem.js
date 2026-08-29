@@ -7,8 +7,8 @@ import Claim from "../claim";
 import { define } from "../../elements";
 import { enclose } from "../../utilities/context";
 
-const { cut, all } = continuationUtilities,
-      { breakable } = breakPointUtilities;
+const { breakable } = breakPointUtilities,
+      { cut, all, isolate } = continuationUtilities;
 
 export default define(class Theorem extends Claim {
   getThoeremNode() {
@@ -21,42 +21,43 @@ export default define(class Theorem extends Claim {
   verify = breakable(function (context, forward, back) {
     forward = cut(forward, back); ///
 
-    const theoremString = this.getString(), ///
-          speicifcContext = context;  ///
+    const theoremString = this.getString();  ///
 
     context.trace(`Verifying the '${theoremString}' theorem...`);
 
-    return enclose((context) => {
-      const verifyProof = this.verifyProof.bind(this),
-            verifyLabels = this.verifyLabels.bind(this),
-            verifyDeduction = this.verifyDeduction.bind(this),
-            verifySuppositions = this.verifySuppositions.bind(this);
+    return isolate((context, forward, back) => {
+      return enclose((context) => {
+        const verifyProof = this.verifyProof.bind(this),
+              verifyLabels = this.verifyLabels.bind(this),
+              verifyDeduction = this.verifyDeduction.bind(this),
+              verifySuppositions = this.verifySuppositions.bind(this);
 
-      return all([
-        verifyLabels,
-        verifySuppositions,
-        verifyDeduction,
-        verifyProof
-      ], context, ( _ , back) => {
-        const theorem = this; ///
+        return all([
+          verifyLabels,
+          verifySuppositions,
+          verifyDeduction,
+          verifyProof
+        ], context, (context, back) => {
+          return forward(back);
+        }, back);
+      }, context);
+    }, context, (context, back) => {
+      const theorem = this; ///
 
-        context = speicifcContext;  ///
+      context.addTheorem(theorem);
 
-        context.addTheorem(theorem);
+      context.debug(`...verified the '${theoremString}' theorem.`);
 
-        context.debug(`...verified the '${theoremString}' theorem.`);
+      return forward(context, back);
+    }, (exception) => {
+      if (exception) {
+        return back(exception);
+      }
 
-        return forward(context, back);
-      }, (exception) => {
-        if (exception) {
-          return back(exception);
-        }
+      context.trace(`Unable to verify the '${theoremString}' theorem.`);
 
-        context.trace(`Unable to verify the '${theoremString}' theorem.`);
-
-        return back();
-      });
-    }, context);
+      return back();
+    });
   });
 
   static name = "Theorem";

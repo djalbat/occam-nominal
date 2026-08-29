@@ -6,7 +6,7 @@ import { define } from "../elements";
 import { enclose } from "../utilities/context";
 
 const { breakable } = breakPointUtilities,
-      { cut, all, every } = continuationUtilities;
+      { cut, all, every, isolate } = continuationUtilities;
 
 export default define(class Section extends Element {
   constructor(context, string, node, breakPoint, hypotheses, declaration, claim) {
@@ -39,36 +39,37 @@ export default define(class Section extends Element {
   verify = breakable(function (context, forward, back) {
     forward = cut(forward, back); ///
 
-    const sectionString = this.getString(),  ///
-          specificContext = context;  ///
+    const sectionString = this.getString();  ///
 
     context.trace(`Verifying the '${sectionString}' section...`);
 
-    return enclose((context) => {
-      const verifyClaim = this.verifyClaim.bind(this),
-            verifyHypotheses = this.verifyHypotheses.bind(this),
-            verifyDeclaration = this.verifyDeclaration.bind(this);
+    return isolate((context, forward, back) => {
+      return enclose((context) => {
+        const verifyClaim = this.verifyClaim.bind(this),
+              verifyHypotheses = this.verifyHypotheses.bind(this),
+              verifyDeclaration = this.verifyDeclaration.bind(this);
 
-      return all([
-        verifyHypotheses,
-        verifyDeclaration,
-        verifyClaim
-      ], context, ( _ , back) => {
-        context = specificContext;  ///
+        return all([
+          verifyHypotheses,
+          verifyDeclaration,
+          verifyClaim
+        ], context, (context, back) => {
+          return forward(back);
+        }, back);
+      }, context);
+    }, context, (context, back) => {
+      context.debug(`...verified the '${sectionString}' section.`);
 
-        context.debug(`...verified the '${sectionString}' section.`);
+      return forward(context, back);
+    }, (exception) => {
+      if (exception) {
+        return back(exception);
+      }
 
-        return forward(context, back);
-      }, (exception) => {
-        if (exception) {
-          return back(exception);
-        }
+      context.trace(`Unable to verify the '${sectionString}' section.`);
 
-        context.trace(`Unable to verify the '${sectionString}' section.`);
-
-        return back();
-      });
-    }, context);
+      return back();
+    });
   });
 
   verifyClaim(context, forward, back) {

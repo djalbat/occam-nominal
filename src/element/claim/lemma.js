@@ -7,8 +7,8 @@ import Claim from "../claim";
 import { define } from "../../elements";
 import { enclose } from "../../utilities/context";
 
-const { cut, all } = continuationUtilities,
-      { breakable } = breakPointUtilities;
+const { breakable } = breakPointUtilities,
+      { cut, all, isolate } = continuationUtilities;
 
 export default define(class Lemma extends Claim {
   getLemmaNode() {
@@ -21,42 +21,43 @@ export default define(class Lemma extends Claim {
   verify = breakable(function (context, forward, back) {
     forward = cut(forward, back); ///
 
-    const lemmaString = this.getString(), ///
-          speicifcContext = context;  ///
+    const lemmaString = this.getString();  ///
 
     context.trace(`Verifying the '${lemmaString}' lemma...`);
 
-    return enclose((context) => {
-      const verifyProof = this.verifyProof.bind(this),
-            verifyLabels = this.verifyLabels.bind(this),
-            verifyDeduction = this.verifyDeduction.bind(this),
-            verifySuppositions = this.verifySuppositions.bind(this);
+    return isolate((context, forward, back) => {
+      return enclose((context) => {
+        const verifyProof = this.verifyProof.bind(this),
+          verifyLabels = this.verifyLabels.bind(this),
+          verifyDeduction = this.verifyDeduction.bind(this),
+          verifySuppositions = this.verifySuppositions.bind(this);
 
-      return all([
-        verifyLabels,
-        verifySuppositions,
-        verifyDeduction,
-        verifyProof
-      ], context, ( _ , back) => {
-        const lemma = this; ///
+        return all([
+          verifyLabels,
+          verifySuppositions,
+          verifyDeduction,
+          verifyProof
+        ], context, (context, back) => {
+          return forward(back);
+        }, back);
+      }, context);
+    }, context, (context, back) => {
+      const lemma = this; ///
 
-        context = speicifcContext;  ///
+      context.addLemma(lemma);
 
-        context.addLemma(lemma);
+      context.debug(`...verified the '${lemmaString}' lemma.`);
 
-        context.debug(`...verified the '${lemmaString}' lemma.`);
+      return forward(context, back);
+    }, (exception) => {
+      if (exception) {
+        return back(exception);
+      }
 
-        return forward(context, back);
-      }, (exception) => {
-        if (exception) {
-          return back(exception);
-        }
+      context.trace(`Unable to verify the '${lemmaString}' lemma.`);
 
-        context.trace(`Unable to verify the '${lemmaString}' lemma.`);
-
-        return back();
-      });
-    }, context);
+      return back();
+    });
   });
 
   static name = "Lemma";

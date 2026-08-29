@@ -8,8 +8,8 @@ import { enclose, reconcile } from "../utilities/context";
 import { labelsFromJSON, premisesFromJSON, conclusionFromJSON, labelsToLabelsJSON, premisesToPremisesJSON, conclusionToConclusionJSON } from "../utilities/json";
 
 const { reverse } = arrayUtilities,
-      { cut, all, every, extract, forwardsEvery, backwardsEvery } = continuationUtilities,
-      { breakable, breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
+      { breakable, breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities,
+      { cut, all, every, isolate, extract, forwardsEvery, backwardsEvery } = continuationUtilities;
 
 export default define(class Rule extends Element {
   constructor(context, string, node, breakPoint, proof, labels, premises, conclusion) {
@@ -59,42 +59,43 @@ export default define(class Rule extends Element {
   verify = breakable(function (context, forward, back) {
     forward = cut(forward, back); ///
 
-    const ruleString = this.getString(), ///
-          speicifcContext = context; ///
+    const ruleString = this.getString();
 
     context.trace(`Verifying the '${ruleString}' rule...`);
 
-    return enclose((context) => {
-      const verifyProof = this.verifyProof.bind(this),
-            verifyLabels = this.verifyLabels.bind(this),
-            verifyPremises = this.verifyPremises.bind(this),
-            verifyConclusion = this.verifyConclusion.bind(this);
+    return isolate((context, forward, back) => {
+      return enclose((context) => {
+        const verifyProof = this.verifyProof.bind(this),
+              verifyLabels = this.verifyLabels.bind(this),
+              verifyPremises = this.verifyPremises.bind(this),
+              verifyConclusion = this.verifyConclusion.bind(this);
 
-      return all([
-        verifyLabels,
-        verifyPremises,
-        verifyConclusion,
-        verifyProof
-      ], context, ( _ , back) => {
-        const rule = this; ///
+        return all([
+          verifyLabels,
+          verifyPremises,
+          verifyConclusion,
+          verifyProof
+        ], context, (context, back) => {
+          return forward(back);
+        }, back);
+      }, context);
+    }, context, (context, back) => {
+      const rule = this; ///
 
-        context = speicifcContext;  ///
+      context.addRule(rule);
 
-        context.addRule(rule);
+      context.debug(`...verified the '${ruleString}' rule.`);
 
-        context.debug(`...verified the '${ruleString}' rule.`);
+      return forward(context, back);
+    }, (exception) => {
+      if (exception) {
+        return back(exception);
+      }
 
-        return forward(context, back);
-      }, (exception) => {
-        if (exception) {
-          return back(exception);
-        }
+      context.trace(`Unable to verify the '${ruleString}' rule.`);
 
-        context.trace(`Unable to verify the '${ruleString}' rule.`);
-
-        return back();
-      });
-    }, context);
+      return back();
+    });
   });
 
   unifyStepAndFactOrSubproofs = breakable(function (step, factOrSubproofs, context, forward, back) {
@@ -124,9 +125,9 @@ export default define(class Rule extends Element {
 
     context.trace(`Verifying the '${ruleString}' rule's labels...`);
 
-    const verifyLabel = this.verifyLabel.bind(this);
-
-    return every(this.labels, verifyLabel, context, (context, back) => {
+    return every(this.labels, (label, context, forward, back) => {
+      return this.verifyLabel(label, context, forward, back);
+    }, context, (context, back) => {
       context.debug(`...verified the '${ruleString}' rule's labels.`);
 
       return forward(context, back);
@@ -139,7 +140,7 @@ export default define(class Rule extends Element {
 
     context.trace(`Verifying the '${ruleString}' rule's '${labelString}' label...`);
 
-    return label.verify((context, back) => {
+    return label.verify(context, (context, back) => {
       context.debug(`...verified the '${ruleString}' rule's '${labelString}' label.`);
 
       return forward(context, back);
@@ -189,7 +190,7 @@ export default define(class Rule extends Element {
     context.trace(`Verifying the '${ruleString}' rule's premises...`);
 
     return forwardsEvery(this.premises, (premise, context, forward, back) => {
-      return this.verifyPremise(premise, context, ( _ , back) => {
+      return this.verifyPremise(premise, context, (context, back) => {
         const factOrSubproof = premise; ///
 
         context.addFactOrSubproof(factOrSubproof);

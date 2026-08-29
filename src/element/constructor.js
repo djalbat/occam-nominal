@@ -227,7 +227,7 @@ export default define(class Constructor extends Element {
           generalContext = this.getContext(),  ///
           specificContext = context; ///
 
-    return unifyTermWithConstructor(term, constructor, generalContext, specificContext, ( _ , specificContext, back) => {
+    return unifyTermWithConstructor(term, constructor, generalContext, specificContext, (generalContext, specificContext, back) => {
       const context = specificContext; ///
 
       context.debug(`...unified the '${termString}' term with the '${constructorString}' constructor.`);

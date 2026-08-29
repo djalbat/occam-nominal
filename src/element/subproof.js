@@ -6,7 +6,7 @@ import { define } from "../elements";
 import { enclose } from "../utilities/context";
 
 const { breakable } = breakPointUtilities,
-      { cut, all, every } = continuationUtilities;
+      { cut, all, every, isolate } = continuationUtilities;
 
 export default define(class Subproof extends Element {
   constructor(context, string, node, breakPoint, suppositions, subDerivation) {
@@ -95,44 +95,48 @@ export default define(class Subproof extends Element {
     return comparesToStatement;
   }
 
-  verify = breakable(function(context, forward, back) {
+  verify = breakable(function(statement, context, forward, back) {
     forward = cut(forward, back); ///
 
     const subproofString = this.getString();
 
-    context.trace(`Verifying the '${subproofString}' subprpoof...`);
+    context.trace(`Verifying the '${subproofString}' subproof...`);
 
-    return enclose((context) => {
-      const verifySuppositions = this.verifySuppositions.bind(this),
-            verifySubDerivation = this.verifySubDerivation.bind(this);
+    return isolate((statement, context, forward, back) => {
+      return enclose((context) => {
+        const verifySuppositions = this.verifySuppositions.bind(this),
+              verifySubDerivation = this.verifySubDerivation.bind(this);
 
-      return all([
-        verifySuppositions,
-        verifySubDerivation
-      ], context, (context , back) => {
-        context.debug(`...verified the '${subproofString}' subproof.`);
+        return all([
+          verifySuppositions,
+          verifySubDerivation
+        ], context, (context, back) => {
+          return forward(context, back);
+        }, back);
+      }, context);
+    }, statement, context, (statement, context, back) => {
+      context.debug(`...verified the '${subproofString}' subproof.`);
 
-        return forward(context, back);
-      }, (exception) => {
-        if (exception) {
-          return back(exception);
-        }
+      return forward(context, back);
+    }, (exception) => {
+      if (exception) {
+        return back(exception);
+      }
 
-        context.trace(`Unable to verify the '${subproofString}' subprpoof.`);
+      context.trace(`Unable to verify the '${subproofString}' subproof.`);
 
-        return back();
-      });
-    }, context);
+      return back();
+    });
   });
 
   verifySupposition(supposition, context, forward, back) {
     const subproofString = this.getString(),
           suppositionString = supposition.getString();
 
-    context.trace(`Verifying the '${subproofString}' subprpoof's '${suppositionString}' supposition...`);
+    context.trace(`Verifying the '${subproofString}' subproof's '${suppositionString}' supposition...`);
 
     return supposition.verify(context, (context, back) => {
-      context.debug(`...verified the '${subproofString}' subprpoof's '${suppositionString}' supposition.`);
+      context.debug(`...verified the '${subproofString}' subproof's '${suppositionString}' supposition.`);
 
       return forward(context, back);
     }, back);

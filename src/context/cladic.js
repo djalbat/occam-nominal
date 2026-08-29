@@ -7,12 +7,16 @@ import Context from "../context";
 const { push, extract } = arrayUtilities;
 
 export default class CladicContext extends Context {
-  constructor(context, terms, links, assertions, metavariables) {
+  constructor(context, terms, links, frames, equalities, assertions, statements, assumptions, metavariables) {
     super(context);
 
     this.terms = terms;
     this.links = links;
+    this.frames = frames;
+    this.equalities = equalities;
     this.assertions = assertions;
+    this.statements = statements;
+    this.assumptions = assumptions;
     this.metavariables = metavariables;
   }
 
@@ -36,6 +40,36 @@ export default class CladicContext extends Context {
     return links;
   }
 
+  getFrames(frames = []) {
+    const context = this.getContext();
+
+    push(frames, this.frames);
+
+    context.getFrames(frames);
+
+    return frames;
+  }
+
+  getEqualities(equalities = []) {
+    const context = this.getContext();
+
+    push(equalities, this.equalities);
+
+    context.getEqualities(equalities);
+
+    return equalities;
+  }
+
+  getStatements(statements = []) {
+    const context = this.getContext();
+
+    push(statements, this.statements);
+
+    context.getStatements(statements);
+
+    return statements;
+  }
+
   getAssertions(assertions = []) {
     const context = this.getContext();
 
@@ -44,6 +78,16 @@ export default class CladicContext extends Context {
     context.getAssertions(assertions);
 
     return assertions;
+  }
+
+  getAssumptions(assumptions = []) {
+    const context = this.getContext();
+
+    push(assumptions, this.assumptions);
+
+    context.getAssumptions(assumptions);
+
+    return assumptions;
   }
 
   getMetavariables(metavariables = []) {
@@ -66,7 +110,7 @@ export default class CladicContext extends Context {
 
     extract(this.terms, (term) => {
       const termB = term, ///
-        termAEqualToTermB = termA.isEqualTo(termB);
+            termAEqualToTermB = termA.isEqualTo(termB);
 
       if (termAEqualToTermB) {
         const termString = term.getString();
@@ -108,6 +152,58 @@ export default class CladicContext extends Context {
     context.debug(`...added the '${linkString}' link to the cladic context.`);
   }
 
+  addFrame(frame) {
+    const context = this, ///
+          frameString = frame.getString();
+
+    context.trace(`Adding the '${frameString}' frame to the cladic context...`);
+
+    const frameA = frame; ///
+
+    extract(this.frames, (frame) => {
+      const frameB = frame, ///
+            frameAEqualToFrameB = frameA.isEqualTo(frameB);
+
+      if (frameAEqualToFrameB) {
+        const frameString = frame.getString();
+
+        context.trace(`Removed the existing '${frameString}' frame from the cladic context...`);
+
+        return true;
+      }
+    });
+
+    this.frames.push(frame);
+
+    context.debug(`...added the '${frameString}' frame to the cladic context.`);
+  }
+
+  addEquality(equality) {
+    const context = this, ///
+          equalityString = equality.getString();
+
+    context.trace(`Adding the '${equalityString}' equality to the cladic context...`);
+
+    const equalityA = equality; ///
+
+    extract(this.equalities, (equality) => {
+      const equalityB = equality, ///
+            equalityAEqualToEqualityB = equalityA.isEqualTo(equalityB);
+
+      if (equalityAEqualToEqualityB) {
+        const equalityString = equality.getString();
+
+        context.trace(`Removed the existing '${equalityString}' equality from the cladic context...`);
+
+        return true;
+      }
+    });
+
+    this.equalities.push(equality);
+
+    context.debug(`...added the '${equalityString}' equality to the cladic context.`);
+  }
+
   addAssertion(assertion) {
     const context = this, ///
           assertionString = assertion.getString();
@@ -132,6 +228,58 @@ export default class CladicContext extends Context {
     this.assertions.push(assertion);
 
     context.debug(`...added the '${assertionString}' assertion to the cladic context.`);
+  }
+
+  addStatement(statement) {
+    const context = this, ///
+          statementString = statement.getString();
+
+    context.trace(`Adding the '${statementString}' statement to the cladic context...`);
+
+    const statementA = statement; ///
+
+    extract(this.statements, (statement) => {
+      const statementB = statement, ///
+            statementAEqualToStatementB = statementA.isEqualTo(statementB);
+
+      if (statementAEqualToStatementB) {
+        const statementString = statement.getString();
+
+        context.trace(`Removed the existing '${statementString}' statement from the cladic context...`);
+
+        return true;
+      }
+    });
+
+    this.statements.push(statement);
+
+    context.debug(`...added the '${statementString}' statement to the cladic context.`);
+  }
+
+  addAssumption(assumption) {
+    const context = this, ///
+          assumptionString = assumption.getString();
+
+    context.trace(`Adding the '${assumptionString}' assumption to the cladic context...`);
+
+    const assumptionA = assumption; ///
+
+    extract(this.assumptions, (assumption) => {
+      const assumptionB = assumption, ///
+            assumptionAEqualToAssumptionB = assumptionA.isEqualTo(assumptionB);
+
+      if (assumptionAEqualToAssumptionB) {
+        const assumptionString = assumption.getString();
+
+        context.trace(`Removed the existing '${assumptionString}' assumption from the cladic context...`);
+
+        return true;
+      }
+    });
+
+    this.assumptions.push(assumption);
+
+    context.debug(`...added the '${assumptionString}' assumption to the cladic context.`);
   }
 
   addMetavariable(metavariable) {
@@ -172,9 +320,33 @@ export default class CladicContext extends Context {
     });
   }
 
+  addFRames(frames) {
+    frames.forEach((frame) => {
+      this.addFrame(frame);
+    });
+  }
+
+  addEqualities(equalities) {
+    equalities.forEach((equality) => {
+      this.addEquality(equality);
+    });
+  }
+
   addAssertions(assertions) {
     assertions.forEach((assertion) => {
       this.addAssertion(assertion);
+    });
+  }
+
+  addStatements(statements) {
+    statements.forEach((statement) => {
+      this.addStatement(statement);
+    });
+  }
+
+  addAssumptions(assumptions) {
+    assumptions.forEach((assumption) => {
+      this.addAssumption(assumption);
     });
   }
 
@@ -186,13 +358,13 @@ export default class CladicContext extends Context {
 
   findTermByTermNode(termNode) {
     const terms = this.getTerms(),
-      term = terms.find((term) => {
-        const termNodeMatches = term.matchTermNode(termNode);
+          term = terms.find((term) => {
+            const termNodeMatches = term.matchTermNode(termNode);
 
-        if (termNodeMatches) {
-          return true;
-        }
-      }) || null;
+            if (termNodeMatches) {
+              return true;
+            }
+          }) || null;
 
     return term;
   }
@@ -210,6 +382,32 @@ export default class CladicContext extends Context {
     return link;
   }
 
+  findFrameByFrameNode(frameNode) {
+    const frames = this.getFrames(),
+          frame = frames.find((frame) => {
+            const frameNodeMatches = frame.matchFrameNode(frameNode);
+
+            if (frameNodeMatches) {
+              return true;
+            }
+          }) || null;
+
+    return frame;
+  }
+
+  findEqualityByEqualityNode(equalityNode) {
+    const equalities = this.getEqualities(),
+          equality = equalities.find((equality) => {
+            const equalityNodeMatches = equality.matchEqualityNode(equalityNode);
+
+            if (equalityNodeMatches) {
+              return true;
+            }
+          }) || null;
+
+    return equality;
+  }
+
   findAssertionByAssertionNode(assertionNode) {
     const assertions = this.getAssertions(),
           assertion = assertions.find((assertion) => {
@@ -221,6 +419,32 @@ export default class CladicContext extends Context {
           }) || null;
 
     return assertion;
+  }
+
+  findStatementByStatementNode(statementNode) {
+    const statements = this.getStatements(),
+          statement = statements.find((statement) => {
+            const statementNodeMatches = statement.matchStatementNode(statementNode);
+
+            if (statementNodeMatches) {
+              return true;
+            }
+          }) || null;
+
+    return statement;
+  }
+
+  findAssumptionByAssumptionNode(assumptionNode) {
+    const assumptions = this.getAssumptions(),
+          assumption = assumptions.find((assumption) => {
+            const assumptionNodeMatches = assumption.matchAssumptionNode(assumptionNode);
+
+            if (assumptionNodeMatches) {
+              return true;
+            }
+          }) || null;
+
+    return assumption;
   }
 
   findMetavariableByMetavariableNode(metavariableNode) {
@@ -250,11 +474,39 @@ export default class CladicContext extends Context {
     return linkPresent;
   }
 
+  isFramePresentByFrameNode(frameNode) {
+    const frame = this.findFrameByFrameNode(frameNode),
+          framePresent = (frame !== null);
+
+    return framePresent;
+  }
+
+  isEqualityPresentByEqualityNode(equalityNode) {
+    const equality = this.findEqualityByEqualityNode(equalityNode),
+          equalityPresent = (equality !== null);
+
+    return equalityPresent;
+  }
+
   isAssertionPresentByAssertionNode(assertionNode) {
     const assertion = this.findAssertionByAssertionNode(assertionNode),
           assertionPresent = (assertion !== null);
 
     return assertionPresent;
+  }
+
+  isStatementPresentByStatementNode(statementNode) {
+    const statement = this.findStatementByStatementNode(statementNode),
+          statementPresent = (statement !== null);
+
+    return statementPresent;
+  }
+
+  isAssumptionPresentByAssumptionNode(assumptionNode) {
+    const assumption = this.findAssumptionByAssumptionNode(assumptionNode),
+          assumptionPresent = (assumption !== null);
+
+    return assumptionPresent;
   }
 
   isMetavariablePresentByMetavariableNode(metavariableNode) {
@@ -268,21 +520,25 @@ export default class CladicContext extends Context {
     context.debug(`Merging the cladic context`);
 
     context.addTerms(this.terms);
-
     context.addLinks(this.links);
-
+    context.addFRames(this.frames);
+    context.addEqualities(this.equalities);
     context.addAssertions(this.assertions);
-
+    context.addStatements(this.statements);
+    context.addAssumptions(this.assumptions);
     context.addMetavariables(this.metavariables);
   }
 
   static fromNothing(context) {
     const terms = [],
           links = [],
+          frames = [],
+          equalities = [],
+          statements = [],
           assertions = [],
+          assumptions = [],
           metavariables = [],
-          cladicContext = new CladicContext(context, links, terms, assertions ,metavariables);
-
+          cladicContext = new CladicContext(context, terms, links, frames, equalities, assertions, statements, assumptions, metavariables);
     return cladicContext;
   }
 }

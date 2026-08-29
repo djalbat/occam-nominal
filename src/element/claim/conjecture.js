@@ -7,8 +7,8 @@ import Claim from "../claim";
 import { define } from "../../elements";
 import { enclose } from "../../utilities/context";
 
-const { cut, all } = continuationUtilities,
-      { breakable } = breakPointUtilities;
+const { breakable } = breakPointUtilities,
+      { cut, all, isolate } = continuationUtilities;
 
 export default define(class Conjecture extends Claim {
   getConjectureNode() {
@@ -21,42 +21,43 @@ export default define(class Conjecture extends Claim {
   verify = breakable(function (context, forward, back) {
     forward = cut(forward, back); ///
 
-    const conjectureString = this.getString(), ///
-          speicifcContext = context;  ///
+    const conjectureString = this.getString();  ///
 
     context.trace(`Verifying the '${conjectureString}' conjecture...`);
 
-    return enclose((context) => {
-      const verifyProof = this.verifyProof.bind(this),
-            verifyLabels = this.verifyLabels.bind(this),
-            verifyDeduction = this.verifyDeduction.bind(this),
-            verifySuppositions = this.verifySuppositions.bind(this);
+    return isolate((context, forward, back) => {
+      return enclose((context) => {
+        const verifyProof = this.verifyProof.bind(this),
+              verifyLabels = this.verifyLabels.bind(this),
+              verifyDeduction = this.verifyDeduction.bind(this),
+              verifySuppositions = this.verifySuppositions.bind(this);
 
-      return all([
-        verifyLabels,
-        verifySuppositions,
-        verifyDeduction,
-        verifyProof
-      ], context, ( _ , back) => {
-        const conjecture = this; ///
+        return all([
+          verifyLabels,
+          verifySuppositions,
+          verifyDeduction,
+          verifyProof
+        ], context, (context, back) => {
+          return forward(back);
+        }, back);
+      }, context);
+    }, context, (context, back) => {
+      const conjecture = this; ///
 
-        context = speicifcContext;  ///
+      context.addConjecture(conjecture);
 
-        context.addConjecture(conjecture);
+      context.debug(`...verified the '${conjectureString}' conjecture.`);
 
-        context.debug(`...verified the '${conjectureString}' conjecture.`);
+      return forward(context, back);
+    }, (exception) => {
+      if (exception) {
+        return back(exception);
+      }
 
-        return forward(context, back);
-      }, (exception) => {
-        if (exception) {
-          return back(exception);
-        }
+      context.trace(`Unable to verify the '${conjectureString}' conjecture.`);
 
-        context.trace(`Unable to verify the '${conjectureString}' conjecture.`);
-
-        return back();
-      });
-    }, context);
+      return back();
+    });
   });
 
   static name = "Conjecture";

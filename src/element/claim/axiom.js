@@ -9,7 +9,7 @@ import { termsStringFromTerms } from "../../utilities/string";
 import { join, enclose, reconcile } from "../../utilities/context";
 
 const { breakable } = breakPointUtilities,
-      { cut, all, backwardsEvery } = continuationUtilities;
+      { cut, all, isolate, backwardsEvery } = continuationUtilities;
 
 export default define(class Axiom extends Claim {
   getAxiomNode() {
@@ -29,44 +29,45 @@ export default define(class Axiom extends Claim {
   verify = breakable(function (context, forward, back) {
     forward = cut(forward, back); ///
 
-    const axiomString = this.getString(), ///
-          speicifcContext = context;  ///
+    const axiomString = this.getString();  ///
 
     context.trace(`Verifying the '${axiomString}' axiom...`);
 
-    return enclose((context) => {
-      const verifyProof = this.verifyProof.bind(this),
-            verifyLabels = this.verifyLabels.bind(this),
-            verifySignature = this.verifySignature.bind(this),
-            verifyDeduction = this.verifyDeduction.bind(this),
-            verifySuppositions = this.verifySuppositions.bind(this);
+    return isolate((context, forward, back) => {
+      return enclose((context) => {
+        const verifyProof = this.verifyProof.bind(this),
+              verifyLabels = this.verifyLabels.bind(this),
+              verifySignature = this.verifySignature.bind(this),
+              verifyDeduction = this.verifyDeduction.bind(this),
+              verifySuppositions = this.verifySuppositions.bind(this);
 
-      return all([
-        verifyLabels,
-        verifySignature,
-        verifySuppositions,
-        verifyDeduction,
-        verifyProof
-      ], context, ( _ , back) => {
-        const axiom = this; ///
+        return all([
+          verifyLabels,
+          verifySignature,
+          verifySuppositions,
+          verifyDeduction,
+          verifyProof
+        ], context, (context, back) => {
+          return forward(back);
+        }, back);
+      }, context);
+    }, context, (context, back) => {
+      const axiom = this; ///
 
-        context = speicifcContext;  ///
+      context.addAxiom(axiom);
 
-        context.addAxiom(axiom);
+      context.debug(`...verified the '${axiomString}' axiom.`);
 
-        context.debug(`...verified the '${axiomString}' axiom.`);
+      return forward(context, back);
+    }, (exception) => {
+      if (exception) {
+        return back(exception);
+      }
 
-        return forward(context, back);
-      }, (exception) => {
-        if (exception) {
-          return back(exception);
-        }
+      context.trace(`Unable to verify the '${axiomString}' axiom.`);
 
-        context.trace(`Unable to verify the '${axiomString}' axiom.`);
-
-        return back();
-      });
-    }, context);
+      return back();
+    });
   });
 
   verifySignature(context, forward, back) {

@@ -165,7 +165,7 @@ export default define(class Step extends Fact {
     }
 
     const stepString = this.getString(),  ///
-      schemaAssertionString = this.schemaAssertion.getString();
+          schemaAssertionString = this.schemaAssertion.getString();
 
     context.trace(`Verifying the '${stepString}' step's '${schemaAssertionString}' schema assertion...`);
 

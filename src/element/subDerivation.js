@@ -36,7 +36,7 @@ export default define(class SubDerivation extends Element {
 
   verify(context, forward, back) {
     return every(this.factOrSubproofs, (factOrSubproof, context, forward, back) => {
-      return factOrSubproof.verify(context, ( _ , back) => {
+      return factOrSubproof.verify(context, (context , back) => {
         context.addFactOrSubproof(factOrSubproof);
 
         context.assignAssignments();

@@ -1,9 +1,12 @@
 "use strict";
 
-import { Element } from "occam-languages";
+import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
 
 import { define } from "../elements";
 import { enclose } from "../utilities/context";
+
+const { breakable } = breakPointUtilities,
+      { cut, isolate } = continuationUtilities;
 
 export default define(class Proof extends Element {
   constructor(context, string, node, breakPoint, derivation) {
@@ -33,27 +36,33 @@ export default define(class Proof extends Element {
     return statement;
   }
 
-  verify(statement, context, forward, back) {
-    return enclose((context) => {
-      return this.derivation.verify(context, ( _ , back) => {
-        const lastStep = context.getLastStep();
+  verify = breakable(function(statement, context, forward, back) {
+    forward = cut(forward, back); ///
 
-        if (lastStep === null) {
-          return back();
-        }
+    return isolate((statement, context, forward, back) => {
+      return enclose((context) => {
+        return this.derivation.verify(context, (context, back) => {
+          const lastStep = context.getLastStep();
 
-        const proof = this, ///
-              proofStatement = proof.getStatement(),
-              proofStatementEqualToStatement = proofStatement.isEqualTo(statement);
+          if (lastStep === null) {
+            return back();
+          }
 
-        if (!proofStatementEqualToStatement) {
-          return back();
-        }
+          const proof = this, ///
+                proofStatement = proof.getStatement(),
+                proofStatementEqualToStatement = proofStatement.isEqualTo(statement);
 
-        return forward(context, back);
-      }, back);
-    }, context);
-  }
+          if (!proofStatementEqualToStatement) {
+            return back();
+          }
+
+          return forward(back);
+        }, back);
+      }, context);
+    }, statement, context, (statement, context, back) => {
+      return forward(context, back);
+    }, back);
+  });
 
   static name = "Proof";
 });

@@ -99,17 +99,17 @@ export default define(class Link extends Element {
 
     link = this; ///
 
-      const validateMetavariable = this.validateMetavariable.bind(this);
+    const validateMetavariable = this.validateMetavariable.bind(this);
 
-      return all([
-        validateMetavariable
-      ], state, context, (state, context, back) => {
-        context.addLink(link);
+    return all([
+      validateMetavariable
+    ], state, context, (state, context, back) => {
+      context.addLink(link);
 
-        context.debug(`...validated the '${linkString}' link.`);
+      context.debug(`...validated the '${linkString}' link.`);
 
-        return forward(link, context, back);
-      }, back);
+      return forward(link, context, back);
+    }, back);
   }
 
   validateMetavariable(state, context, forward, back) {
