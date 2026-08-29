@@ -78,6 +78,8 @@ export default define(class Label extends Element {
   }
 
   validate(state, context, forward, back) {
+    forward = cut(forward, back); ///
+
     const labelString = this.getString(); ////
 
     context.trace(`Validating the '${labelString}' label...`);

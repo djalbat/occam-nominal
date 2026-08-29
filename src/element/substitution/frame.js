@@ -10,7 +10,7 @@ import { frameSubstitutionFromFrameSubstitutionNode } from "../../utilities/elem
 import { frameSubstitutionStringFromFrameAndMetavariable } from "../../utilities/string";
 import { ablates, manifest, attempts, participate, instantiate, unserialises } from "../../utilities/context";
 
-const { all, isolate } = continuationUtilities,
+const { cut, all, isolate } = continuationUtilities,
       { breakPointFromJSON } = breakPointUtilities;
 
 export default define(class FrameSubstitution extends Substitution {
@@ -76,6 +76,8 @@ export default define(class FrameSubstitution extends Substitution {
   }
 
   validate(state, context, forward, back) {
+    forward = cut(forward, back); ///
+
     let substitution;
 
     const frameSubstitutionString = this.getString();  ///

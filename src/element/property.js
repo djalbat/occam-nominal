@@ -1,6 +1,6 @@
 "use strict";
 
-import { Element, breakPointUtilities } from "occam-languages";
+import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
 
 import { define } from "../elements";
 import { desist, declare } from "../utilities/state";
@@ -11,7 +11,8 @@ import { validateTermAsProperty } from "../process/validate";
 import { typeFromJSON, typeToTypeJSON } from "../utilities/json";
 import { attempt, serialise, unserialise, instantiate } from "../utilities/context";
 
-const { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
+const { cut, isolate } = continuationUtilities,
+      { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Property extends Element {
   constructor(context, string, node, breakPoint, term, type) {
@@ -62,7 +63,7 @@ export default define(class Property extends Element {
     return malformed;
   }
 
-  verify(context, continuation) {
+  verify(context, forward, back) {
     let verifies = false;
 
     const includeType = false,
@@ -97,7 +98,9 @@ export default define(class Property extends Element {
     return continuation(verifies, context);
   }
 
-  validate(state, context, continuation) {
+  validate(state, context, forward, back) {
+    forward = cut(forward, back); ///
+
     let validates;
 
     const includeType = false,
@@ -106,6 +109,8 @@ export default define(class Property extends Element {
     context.trace(`Validating the '${propertyString}' property...`);
 
     const property = this;
+
+    return isolate(); ///
 
     return attempt((context) => {
       const validateTermAsProperty = this.validateTermAsProperty.bind(this);
@@ -130,7 +135,7 @@ export default define(class Property extends Element {
     return validates;
   }
 
-  validateTermAsProperty(state, context, continuation) {
+  validateTermAsProperty(state, context, forward, back) {
     let termValidatesAsProperty = false;
 
     const includeType = false,
@@ -153,7 +158,7 @@ export default define(class Property extends Element {
     return termValidatesAsProperty;
   }
 
-  unifyTerm(term, context, continuation) {
+  unifyTerm(term, context, forward, back) {
     let termUnifies = false;
 
     const termString = term.getString(),

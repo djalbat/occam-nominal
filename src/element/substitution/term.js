@@ -11,7 +11,7 @@ import { termSubstitutionFromTermSubstitutionNode } from "../../utilities/elemen
 import { termSubstitutionStringFromTermAndVariable } from "../../utilities/string";
 import { join, ablates, manifest, attempts, reconcile, participate, instantiate, unserialises } from "../../utilities/context";
 
-const { all, isolate } = continuationUtilities,
+const { cut, all, isolate } = continuationUtilities,
       { breakPointFromJSON } = breakPointUtilities;
 
 export default define(class TermSubstitution extends Substitution {
@@ -79,6 +79,8 @@ export default define(class TermSubstitution extends Substitution {
   }
 
   validate(state, context, forward, back) {
+    forward = cut(forward, back); ///
+
     let substitution;
 
     const termSubstitutionString = this.getString();  ///

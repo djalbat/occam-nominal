@@ -12,7 +12,7 @@ import { validateTermAsConstructor } from "../process/validate";
 import { attempt, serialise, unserialise, instantiate } from "../utilities/context";
 import { typeFromJSON, typeToTypeJSON, hypothesesFromJSON, hypothesesToHypothesesJSON } from "../utilities/json";
 
-const { all, every, exists, isolate } = continuationUtilities,
+const { cut, all, every, exists, isolate } = continuationUtilities,
       { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Constructor extends Element {
@@ -106,6 +106,8 @@ export default define(class Constructor extends Element {
   }
 
   validate(state, context, forward, back) {
+    forward = cut(forward, back); ///
+
     const includeType = false,
           constructorString = this.getString(includeType);  ///
 

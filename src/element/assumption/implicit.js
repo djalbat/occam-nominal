@@ -8,7 +8,7 @@ import { instantiateImplicitAssumption } from "../../process/instantiate";
 import { implicitAssumptionStringFromStatement } from "../../utilities/string";
 import { implicitAssumptionFromImplicitAssumptionNode } from "../../utilities/element";
 
-const { all, isolate } = continuationUtilities;
+const { cut, all, isolate } = continuationUtilities;
 
 export default define(class ImplicitAssumption extends Element {
   constructor(context, string, node, breakPoint, statement) {
@@ -47,6 +47,8 @@ export default define(class ImplicitAssumption extends Element {
   }
 
   validate(state, context, forward, back) {
+    forward = cut(forward, back); ///
+
     const implicitAssumptionString = this.getString();  ///
 
     context.trace(`Validating the '${implicitAssumptionString}' implicit assumption...`);

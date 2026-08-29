@@ -135,14 +135,16 @@ export default define(class Supposition extends Fact {
   });
 
   validate(state, context, forward, back) {
-    const suppositionsString = this.getString(); ///
+    forward = cut(forward, back); ///
 
-    context.trace(`Validating the '${suppositionsString}' suppositions...`);
+    const suppositionString = this.getString(); ///
+
+    context.trace(`Validating the '${suppositionString}' supposition...`);
 
     return isolate((state, context, forward, back) => {
       return attempt((context) => {
         const validateStatement = this.validateStatement.bind(this),
-          validateProcedureCall = this.validateProcedureCall.bind(this);
+              validateProcedureCall = this.validateProcedureCall.bind(this);
 
         return all([
           validateStatement,
@@ -154,7 +156,7 @@ export default define(class Supposition extends Fact {
         }, back);
       }, context);
     }, state, context, (state, context, back) => {
-      context.debug(`...validated the '${suppositionsString}' suppositions.`);
+      context.debug(`...validated the '${suppositionString}' supposition.`);
 
       return forward(state, context, back);
     }, back);

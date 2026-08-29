@@ -8,7 +8,7 @@ import { termsStringFromTerms } from "../utilities/string";
 import { instantiateSignature } from "../process/instantiate";
 import { attempt, reconcile, serialise, unserialise, instantiate } from "../utilities/context";
 
-const { all, every, isolate } = continuationUtilities,
+const { cut, all, every, isolate } = continuationUtilities,
       { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Signature extends Element {
@@ -81,6 +81,8 @@ export default define(class Signature extends Element {
   }
 
   validate(state, context, forward, back) {
+    forward = cut(forward, back); ///
+
     const signatureString = this.getString(); ////
 
     context.trace(`Validating the '${signatureString}' signature...`);

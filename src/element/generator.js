@@ -12,7 +12,7 @@ import { validateTermAsGenerator } from "../process/validate";
 import { attempt, serialise, unserialise, instantiate } from "../utilities/context";
 import { typeFromJSON, typeToTypeJSON, hypothesesFromJSON, hypothesesToHypothesesJSON } from "../utilities/json";
 
-const { isolate } = continuationUtilities,
+const { cut, isolate } = continuationUtilities,
       { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Generator extends Element {
@@ -116,6 +116,8 @@ export default define(class Generator extends Element {
   }
 
   validate(state, context, forward, back) {
+    forward = cut(forward, back); ///
+
     const includeType = false,
           generatorString = this.getString(includeType);  ///
 

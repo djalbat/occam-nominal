@@ -157,28 +157,31 @@ export default define(class Step extends Fact {
   }
 
   validate(state, context, forward, back) {
+    forward = cut(forward, back); ///
+
     const stepString = this.getString(); ///
 
     context.trace(`Validating the '${stepString}' step...`);
 
     return isolate((state, context, forward, back) => {
-      return attempt((context) => {
-        const validateStatement = this.validateStatement.bind(this),
-              validateReference = this.validateReference.bind(this),
+        const validateReference = this.validateReference.bind(this),
               validateSchemaAssertion = this.validateSchemaAssertion.bind(this),
               validateSignatureAssertion = this.validateSignatureAssertion.bind(this);
 
         return all([
-          validateStatement,
           validateReference,
           validateSchemaAssertion,
           validateSignatureAssertion
         ], state, context, (state, context, back) => {
-          this.commit(context);
+          return attempt((context) => {
+            return this.validateStatement(state, context, (state, context, back) => {
 
-          return forward(back);
+              this.commit(context);
+
+              return forward(back);
+            }, back);
+          }, context);
         }, back);
-      }, context);
     }, state, context, (state, context, back) => {
       context.debug(`...validated the '${stepString}' step.`);
 

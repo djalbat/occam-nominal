@@ -8,7 +8,7 @@ import { REFERENCE_META_TYPE_NAME } from "../metaTypeNames";
 import { metavariableFromReferenceNode } from "../utilities/element";
 import { join, attempt, reconcile, serialise, unserialise, instantiate } from "../utilities/context";
 
-const { all, isolate } = continuationUtilities,
+const { cut, all, isolate } = continuationUtilities,
       { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Reference extends Element {
@@ -76,6 +76,8 @@ export default define(class Reference extends Element {
   }
 
   validate(state, context, forward, back) {
+    forward = cut(forward, back); ///
+
     const referenceString = this.getString(); ////
 
     context.trace(`Validating the '${referenceString}' reference...`);

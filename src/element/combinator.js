@@ -10,7 +10,7 @@ import { unifyStatementWithCombinator } from "../process/unify";
 import { validateStatementAsCombinator } from "../process/validate";
 import { attempt, serialise, unserialise, instantiate } from "../utilities/context";
 
-const { exists, isolate } = continuationUtilities,
+const { cut, exists, isolate } = continuationUtilities,
       { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Combinator extends Element {
@@ -64,6 +64,8 @@ export default define(class Combinator extends Element {
   }
 
   validate(state, context, forward, back) {
+    forward = cut(forward, back); ///
+
     const includeType = false,
           combinatorString = this.getString(includeType);  ///
 

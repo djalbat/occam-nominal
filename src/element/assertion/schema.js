@@ -9,7 +9,7 @@ import elements from "../../elements";
 import { define } from "../../elements";
 import { declare } from "../../utilities/state";
 
-const { some } = continuationUtilities;
+const { cut, some } = continuationUtilities;
 
 export default define(class SchemaAssertion extends Assertion {
   constructor(context, string, node, breakPoint, link, frame) {
@@ -61,7 +61,9 @@ export default define(class SchemaAssertion extends Assertion {
     return implicitAssumptions;
   }
 
-  validate(state, context, continuation) {
+  validate(state, context, forward, back) {
+    forward = cut(forward, back); ///
+
     let validates;
 
     const schameAssertionString = this.getString();  ///
@@ -96,10 +98,6 @@ export default define(class SchemaAssertion extends Assertion {
 
         return validates;
       });
-
-      if (validates) {
-        context.addAssertion(assertion);
-      }
     }
 
     if (validates) {
@@ -109,7 +107,7 @@ export default define(class SchemaAssertion extends Assertion {
     return validates;
   }
 
-  validateFrame(state, context, continuation) {
+  validateFrame(state, context, forward, back) {
     let frameValidates;
 
     const schameAssertionString = this.getString();  ///
@@ -133,7 +131,7 @@ export default define(class SchemaAssertion extends Assertion {
     return frameValidates;
   }
 
-  validateLink(state, context, continuation) {
+  validateLink(state, context, forward, back) {
     let linkValidates;
 
     const schameAssertionString = this.getString();  ///
@@ -157,14 +155,14 @@ export default define(class SchemaAssertion extends Assertion {
     return linkValidates;
   }
 
-  unifyStep(step, context, continuation) {
+  unifyStep(step, context, forward, back) {
     const schemas = context.getSchemas(),
           statement = step.getStatement(),
           schemaAssertion = this; ///
 
-    return some(schemas, (schema, continuation) => {
-      return schema.unifyStatementAndSchemaAssertion(statement, schemaAssertion, context, continuation);
-    }, continuation);
+    return some(schemas, (schema, forward, back) => {
+      return schema.unifyStatementAndSchemaAssertion(statement, schemaAssertion, context, forward, back);
+    }, forward, back);
   }
 
   static name = "SchemaAssertion";

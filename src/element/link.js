@@ -8,7 +8,7 @@ import { REFERENCE_META_TYPE_NAME } from "../metaTypeNames";
 import { linkFromLinkNode, metavariableFromLinkNode } from "../utilities/element";
 import { join, ablate, attempt, reconcile, serialise, unserialise, instantiate } from "../utilities/context";
 
-const { all, isolate } = continuationUtilities,
+const { all } = continuationUtilities,
       { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Link extends Element {
@@ -97,29 +97,19 @@ export default define(class Link extends Element {
       return forward(link, context, back);
     }
 
-    return isolate((state, context, forward, back) => {
-      link = this; ///
+    link = this; ///
 
-      context = this.getContext();
+      const validateMetavariable = this.validateMetavariable.bind(this);
 
-      return attempt((context) => {
-        const validateMetavariable = this.validateMetavariable.bind(this);
+      return all([
+        validateMetavariable
+      ], state, context, (state, context, back) => {
+        context.addLink(link);
 
-        return all([
-          validateMetavariable
-        ], state, context, (state, context, back) => {
-          this.commit(context);
+        context.debug(`...validated the '${linkString}' link.`);
 
-          return forward( back);
-        }, back);
-      }, context);
-    }, state, context, (state, context, back) => {
-      context.addLink(link);
-
-      context.debug(`...validated the '${linkString}' link.`);
-
-      return forward(link, context, back);
-    }, back);
+        return forward(link, context, back);
+      }, back);
   }
 
   validateMetavariable(state, context, forward, back) {

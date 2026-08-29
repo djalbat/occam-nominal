@@ -99,6 +99,8 @@ export default define(class Conclusion extends Resolution {
   });
 
   validate(state, context, forward, back) {
+    forward = cut(forward, back); ///
+
     const conclusionString = this.getString(); ///
 
     context.trace(`Validating the '${conclusionString}' conclusion...`);

@@ -99,6 +99,8 @@ export default define(class Deduction extends Resolution {
   });
 
   validate(state, context, forward, back) {
+    forward = cut(forward, back); ///
+
     const deductionString = this.getString(); ///
 
     context.trace(`Validating the '${deductionString}' deduction...`);

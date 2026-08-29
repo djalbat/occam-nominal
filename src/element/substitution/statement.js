@@ -12,7 +12,7 @@ import { ablates, manifest, attempts, reconcile, participate, instantiate, unser
 import { statementSubstitutionStringFromStatementAndMetavariable, statementSubstitutionStringFromStatementMetavariableAndSubstitution } from "../../utilities/string";
 import state from "easy/lib/mixins/state";
 
-const { all, isolate } = continuationUtilities,
+const { cut, all, isolate } = continuationUtilities,
       { breakPointFromJSON } = breakPointUtilities;
 
 export default define(class StatementSubstitution extends Substitution {
@@ -80,6 +80,8 @@ export default define(class StatementSubstitution extends Substitution {
   }
 
   validate(state, context, forward, back) {
+    forward = cut(forward, back); ///
+
     let substitution;
 
     const statementSubstitutionString = this.getString();  ///

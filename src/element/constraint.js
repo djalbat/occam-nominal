@@ -10,7 +10,7 @@ import { constraintFromConstraintNode } from "../utilities/element";
 import { constraintStringFromReferenceAndStatement } from "../utilities/string";
 import { join, ablate, attempt, reconcile, serialise, unserialise, instantiate } from "../utilities/context";
 
-const { all, some, isolate } = continuationUtilities,
+const { cut, all, some, isolate } = continuationUtilities,
       { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Constraint extends Element {
@@ -62,6 +62,8 @@ export default define(class Constraint extends Element {
   }
 
   validate(state, context, forward, back) {
+    forward = cut(forward, back); ///
+
     let constraint;
 
     const constraintString = this.getString();  ///

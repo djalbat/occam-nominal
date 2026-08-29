@@ -68,14 +68,14 @@ export default define(class ContainedAssertion extends Assertion {
     const validateTerm = this.validateTerm.bind(this),
           validateStatement = this.validateStatement.bind(this);
 
-    all([
+    return all([
       validateTerm,
       validateStatement
     ], state, context, (state, context, back) => {
       const validateWhenDeclared = this.validateWhenDeclared.bind(this),
             validateWhenDerived = this.validateWhenDerived.bind(this);
 
-      exists([
+      return exists([
         validateWhenDeclared,
         validateWhenDerived
       ], state, context, (state, context, back) => {

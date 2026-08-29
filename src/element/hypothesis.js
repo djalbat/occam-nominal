@@ -95,6 +95,8 @@ export default define(class Hypothesis extends Element {
   });
 
   validate(state, context, forward, back) {
+    forward = cut(forward, back); ///
+
     const hypothesisString = this.getString();
 
     context.trace(`Validating the '${hypothesisString}' hypothesis...`);
