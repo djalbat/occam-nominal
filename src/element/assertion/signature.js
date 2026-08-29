@@ -8,9 +8,10 @@ import { define } from "../../elements";
 import { reconcile, instantiate } from "../../utilities/context";
 import { instantiateSignatureAssertion } from "../../process/instantiate";
 import { termsFromSignatureAssertionNode, linkFromSignatureAssertionNode, signatureAssertionFromStatementNode } from "../../utilities/element";
+import {declare} from "../../utilities/state";
 
 const { cut } = continuationUtilities,
-      { breakPointFromJSON } = breakPointUtilities;
+      { unbreakable } = breakPointUtilities;
 
 export default define(class SignatureAssertion extends Assertion {
   constructor(context, string, node, breakPoint, link, terms) {
@@ -34,6 +35,22 @@ export default define(class SignatureAssertion extends Assertion {
 
     return signatureAssertionNode;
   }
+
+  verify = unbreakable(function (context, forward, back) {
+    forward = cut(forward, back); ///
+
+    const signatureAssertionString = this.getString(); ///
+
+    context.trace(`Verifying the '${signatureAssertionString}' signature assertion...`);
+
+    return declare((state) => {
+      return this.validate(state, context, (signatureAssertion, context , back) => {
+        context.debug(`...verified the '${signatureAssertionString}' signature assertion.`);
+
+        return forward(context, back);
+      }, back);
+    });
+  });
 
   validate(state, context, forward, back) {
     forward = cut(forward, back); ///
@@ -210,24 +227,20 @@ export default define(class SignatureAssertion extends Assertion {
   static name = "SignatureAssertion";
 
   static fromJSON(json, context) {
-    let signatureAssertion = null;
+    let signatureAssertion;
 
-    const { name } = json;
+    instantiate((context) => {
+      const { string } = json,
+            definedAssertionNode = instantiateSignatureAssertion(string, context),
+            node = definedAssertionNode,  ///
+            breakPoint = null,
+            terms = termsFromSignatureAssertionNode(definedAssertionNode, context),
+            link = linkFromSignatureAssertionNode(definedAssertionNode, context);
 
-    if (this.name === name) {
-      instantiate((context) => {
-        const { string } = json,
-              definedAssertionNode = instantiateSignatureAssertion(string, context),
-              node = definedAssertionNode,  ///
-              breakPoint = breakPointFromJSON(json),
-              terms = termsFromSignatureAssertionNode(definedAssertionNode, context),
-              link = linkFromSignatureAssertionNode(definedAssertionNode, context);
+      context = null;
 
-        context = null;
-
-        signatureAssertion = new SignatureAssertion(context, string, node, breakPoint, terms, link);
-      }, context);
-    }
+      signatureAssertion = new SignatureAssertion(context, string, node, breakPoint, terms, link);
+    });
 
     return signatureAssertion;
   }

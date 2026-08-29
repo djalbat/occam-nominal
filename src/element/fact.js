@@ -61,24 +61,6 @@ export default class Fact extends Element {
     }, back);
   }
 
-  validateReference(state, context, forward, back) {
-    if (this.reference === null) {
-      return forward(state, context, back);
-    }
-
-    const factString = this.getString();  ///
-
-    context.trace(`Validating the '${factString}' fact's reference...`);
-
-    return this.reference.validate(state, context, (reference, context, back) => {
-      this.reference = reference;
-
-      context.trace(`...validated the '${factString}' fact's reference.`);
-
-      return forward(state, context, back);
-    }, back);
-  }
-
   validateProcedureCall(state, context, forward, back) {
     if (this.procedureCall === null) {
       return forward(state, context, back);

@@ -139,7 +139,7 @@ export default define(class Rule extends Element {
 
     context.trace(`Verifying the '${ruleString}' rule's '${labelString}' label...`);
 
-    return label.verify((back) => {
+    return label.verify((context, back) => {
       context.debug(`...verified the '${ruleString}' rule's '${labelString}' label.`);
 
       return forward(context, back);

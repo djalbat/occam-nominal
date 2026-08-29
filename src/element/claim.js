@@ -133,7 +133,7 @@ export default class Claim extends Element {
 
     context.trace(`Verifying the '${claimString}' claim's '${labelString}' label...`);
 
-    return label.verify((back) => {
+    return label.verify((context, back) => {
       context.debug(`...verified the '${claimString}' claim's '${labelString}' label.`);
 
       return forward(context, back);

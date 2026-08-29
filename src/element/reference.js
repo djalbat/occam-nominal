@@ -3,13 +3,14 @@
 import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
 
 import { define } from "../elements";
+import { declare } from "../utilities/state";
 import { instantiateReference } from "../process/instantiate";
 import { REFERENCE_META_TYPE_NAME } from "../metaTypeNames";
 import { metavariableFromReferenceNode } from "../utilities/element";
-import { join, attempt, reconcile, serialise, unserialise, instantiate } from "../utilities/context";
+import { join, attempt, reconcile, unserialise, instantiate } from "../utilities/context";
 
-const { cut, all, isolate } = continuationUtilities,
-      { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
+const { unbreakable } = breakPointUtilities,
+      { cut, all, isolate } = continuationUtilities;
 
 export default define(class Reference extends Element {
   constructor(context, string, node, breakPoint, metavariable) {
@@ -75,9 +76,23 @@ export default define(class Reference extends Element {
     return comparesToParamter;
   }
 
-  validate(state, context, forward, back) {
+  verify = unbreakable(function (context, forward, back) {
     forward = cut(forward, back); ///
 
+    const referenceString = this.getString(); ///
+
+    context.trace(`Verifying the '${referenceString}' reference...`);
+
+    return declare((state) => {
+      return this.validate(state, context, (reference, context , back) => {
+        context.debug(`...verified the '${referenceString}' reference.`);
+
+        return forward(context, back);
+      }, back);
+    });
+  });
+
+  validate(state, context, forward, back) {
     const referenceString = this.getString(); ////
 
     context.trace(`Validating the '${referenceString}' reference...`);
@@ -199,30 +214,6 @@ export default define(class Reference extends Element {
     });
   }
 
-  toJSON() {
-    const context = this.getContext();
-
-    return serialise((context) => {
-      const string = this.getString();
-
-      let breakPoint;
-
-      breakPoint = this.getBreakPoint();
-
-      const breakPointJSON = breakPointToBreakPointJSON(breakPoint);
-
-      breakPoint = breakPointJSON;  ///
-
-      const json = {
-        context,
-        string,
-        breakPoint
-      };
-
-      return json;
-    }, context);
-  }
-
   static name = "Reference";
 
   static fromJSON(json, context) {
@@ -233,7 +224,7 @@ export default define(class Reference extends Element {
         const { string } = json,
               referenceNode = instantiateReference(string, context),
               node = referenceNode,  ///
-              breakPoint = breakPointFromJSON(json),
+              breakPoint = null,
               metavariable = metavariableFromReferenceNode(referenceNode, context);
 
         reference = new Reference(context, string, node, breakPoint, metavariable);

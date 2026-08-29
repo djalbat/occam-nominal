@@ -10,8 +10,8 @@ import { attempt } from "../../utilities/context";
 import { unifySteps } from "../../process/unification";
 import { derive, declare } from "../../utilities/state";
 
-const { breakable } = breakPointUtilities,
-      { backwardsSome } = arrayUtilities,
+const { backwardsSome } = arrayUtilities,
+      { breakable, unbreakable } = breakPointUtilities,
       { cut, all, some, isolate } = continuationUtilities;
 
 export default define(class Step extends Fact {
@@ -50,7 +50,7 @@ export default define(class Step extends Fact {
     return step;
   }
 
-  idDeclared() {
+  isDeclared() {
     const qualified = this.isQualified(),
           declared = qualified; ///
 
@@ -96,8 +96,7 @@ export default define(class Step extends Fact {
   verify = breakable(function (context, forward, back) {
     forward = cut(forward, back); ///
 
-    const stepString = this.getString(), ///
-          specificContext = context;  ///
+    const stepString = this.getString();  ///
 
     context.trace(`Verifying the '${stepString}' step...`);
 
@@ -109,32 +108,116 @@ export default define(class Step extends Fact {
       return back();
     }
 
-    const declared = this.idDeclared();
+    const verifyReference = this.verifyReference.bind(this),
+          verifySchemaAssertion = this.verifySchemaAssertion.bind(this),
+          verifySignatureAssertion = this.verifySignatureAssertion.bind(this);
 
-    (declared ? declare : derive)((state) => {
-      const unify = this.unify.bind(this),
-            validate = this.validate.bind(this);
+    return all([
+      verifyReference,
+      verifySchemaAssertion,
+      verifySignatureAssertion
+    ], context, (context, back) => {
+      const declared = this.isDeclared();
 
-      return all([
-        validate,
-        unify
-      ], state, context, ( _ , back) => {
-        context = specificContext;  ///
+      (declared ? declare : derive)((state) => {
+        const unify = this.unify.bind(this),
+              validate = this.validate.bind(this);
 
-        context.debug(`...verified the '${stepString}' step.`);
+        return all([
+          validate,
+          unify
+        ], state, context, (state, context, back) => {
+          context.debug(`...verified the '${stepString}' step.`);
 
-        return forward(context, back);
-      }, (exception) => {
-        if (exception) {
-          return back(exception);
-        }
-
-        context.trace(`Unable to verify the '${stepString}' step.`);
-
-        return back();
+          return forward(context, back);
+        }, back);
       });
+    }, (exception) => {
+      if (exception) {
+        return back(exception);
+      }
+
+      context.trace(`Unable to verify the '${stepString}' step.`);
+
+      return back();
     });
   });
+
+  verifyReference(context, forward, back) {
+    if (this.reference === null) {
+      return forward(context, back);
+    }
+
+    const stepString = this.getString();  ///
+
+    context.trace(`Verifying the '${stepString}' step's reference...`);
+
+    return this.reference.verify(context, (context, back) => {
+      context.trace(`...verified the '${stepString}' step's reference.`);
+
+      return forward(context, back);
+    }, back);
+  }
+
+  verifySchemaAssertion(context, forward, back) {
+    if (this.schemaAssertion === null) {
+      return forward(context, back);
+    }
+
+    const stepString = this.getString(),  ///
+      schemaAssertionString = this.schemaAssertion.getString();
+
+    context.trace(`Verifying the '${stepString}' step's '${schemaAssertionString}' schema assertion...`);
+
+    return this.schemaAssertion.verify(context, (context, back) => {
+      context.debug(`...verified the '${stepString}' step's '${schemaAssertionString}' schema assertion.`);
+
+      return forward(context, back);
+    }, back);
+  }
+
+  verifySignatureAssertion(context, forward, back) {
+    if (this.signatureAssertion === null) {
+      return forward(context, back);
+    }
+
+    const stepString = this.getString(),  ///
+          signatureAssertionString = this.signatureAssertion.getString();
+
+    context.trace(`Verifying the '${stepString}' step's '${signatureAssertionString}' signature assertion...`);
+
+    return this.signatureAssertion.verify(context, (context, back) => {
+      context.debug(`...verified the '${stepString}' step's '${signatureAssertionString}' signature assertion.`);
+
+      return forward(context, back);
+    }, back);
+  }
+
+  validate(state, context, forward, back) {
+    forward = cut(forward, back); ///
+
+    const stepString = this.getString(); ///
+
+    context.trace(`Validating the '${stepString}' step...`);
+
+    return isolate((state, context, forward, back) => {
+      return attempt((context) => {
+        const validateStatement = this.validateStatement.bind(this);
+
+        return all([
+          validateStatement
+        ], state, context, (state, context, back) => {
+          this.commit(context);
+
+          return forward(back);
+        }, back);
+      }, context);
+    }, state, context, (state, context, back) => {
+      context.debug(`...validated the '${stepString}' step.`);
+
+      return forward(state, context, back);
+    }, back);
+  }
 
   unify(state, context, forward, back) {
     const stepString = this.getString();  ///
@@ -154,81 +237,6 @@ export default define(class Step extends Fact {
 
       return forward(state, context, back);
     }, back);
-  }
-
-  validate(state, context, forward, back) {
-    forward = cut(forward, back); ///
-
-    const stepString = this.getString(); ///
-
-    context.trace(`Validating the '${stepString}' step...`);
-
-    return isolate((state, context, forward, back) => {
-        const validateReference = this.validateReference.bind(this),
-              validateSchemaAssertion = this.validateSchemaAssertion.bind(this),
-              validateSignatureAssertion = this.validateSignatureAssertion.bind(this);
-
-        return all([
-          validateReference,
-          validateSchemaAssertion,
-          validateSignatureAssertion
-        ], state, context, (state, context, back) => {
-          return attempt((context) => {
-            return this.validateStatement(state, context, (state, context, back) => {
-
-              this.commit(context);
-
-              return forward(back);
-            }, back);
-          }, context);
-        }, back);
-    }, state, context, (state, context, back) => {
-      context.debug(`...validated the '${stepString}' step.`);
-
-      return forward(state, context, back);
-    }, back);
-  }
-
-  validateSchemaAssertion(state, context, forward, back) {
-    if (this.schemaAssertion === null) {
-      return forward(state, context, back);
-    }
-
-    const stepString = this.getString(),  ///
-          schemaAssertionString = this.schemaAssertion.getString();
-
-    context.trace(`Validating the '${stepString}' step's '${schemaAssertionString}' schema assertion...`);
-
-    return derive((state) => {
-      return this.schemaAssertion.validate(state, context, (schemaAssertion, context, back) => {
-        this.schemaAssertion = schemaAssertion;
-
-        context.debug(`...validated the '${stepString}' step's '${schemaAssertionString}' schema assertion.`);
-
-        return forward(state, context, back);
-      }, back);
-    }, state);
-  }
-
-  validateSignatureAssertion(state, context, forward, back) {
-    if (this.signatureAssertion === null) {
-      return forward(state, context, back);
-    }
-
-    const stepString = this.getString(),  ///
-          signatureAssertionString = this.signatureAssertion.getString();
-
-    context.trace(`Validating the '${stepString}' step's '${signatureAssertionString}' signature assertion...`);
-
-    return declare((state) => {
-      return this.signatureAssertion.validate(state, context, (signatureAssertion, contwext, back) => {
-        context.debug(`...validated the '${stepString}' step's '${signatureAssertionString}' signature assertion.`);
-
-        this.signatureAssertion = signatureAssertion;
-
-        return forward(context, back);
-      }, back);
-    }, state);
   }
 
   static name = "Step";

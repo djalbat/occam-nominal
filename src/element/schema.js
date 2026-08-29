@@ -112,7 +112,7 @@ export default define(class Schema extends Element {
 
     context.trace(`Verifying the '${schemaString}' schema's '${labelString}' label...`);
 
-    return this.label.verify((back) => {
+    return this.label.verify((context, back) => {
       context.debug(`...verified the '${schemaString}' schema's '${labelString}' label.`);
 
       return forward(context, back);

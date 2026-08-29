@@ -9,9 +9,10 @@ import { stripBracketsFromStatement } from "../utilities/brackets";
 import { constraintFromConstraintNode } from "../utilities/element";
 import { constraintStringFromReferenceAndStatement } from "../utilities/string";
 import { join, ablate, attempt, reconcile, serialise, unserialise, instantiate } from "../utilities/context";
+import {declare} from "../utilities/state";
 
-const { cut, all, some, isolate } = continuationUtilities,
-      { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
+const { unbreakable } = breakPointUtilities,
+      { cut, all, some, isolate } = continuationUtilities;
 
 export default define(class Constraint extends Element {
   constructor(context, string, node, breakPoint, reference, statement) {
@@ -61,9 +62,23 @@ export default define(class Constraint extends Element {
     return constraint;
   }
 
-  validate(state, context, forward, back) {
+  verify = unbreakable(function (context, forward, back) {
     forward = cut(forward, back); ///
 
+    const referenceString = this.getString(); ///
+
+    context.trace(`Verifying the '${referenceString}' reference...`);
+
+    return declare((state) => {
+      return this.validate(state, context, (reference, context , back) => {
+        context.debug(`...verified the '${referenceString}' reference.`);
+
+        return forward(context, back);
+      }, back);
+    });
+  });
+
+  validate(state, context, forward, back) {
     let constraint;
 
     const constraintString = this.getString();  ///

@@ -1,6 +1,6 @@
 "use strict";
 
-import { continuationUtilities } from "occam-languages";
+import { breakPointUtilities, continuationUtilities } from "occam-languages";
 
 import Assertion from "../assertion";
 
@@ -9,7 +9,8 @@ import elements from "../../elements";
 import { define } from "../../elements";
 import { declare } from "../../utilities/state";
 
-const { cut, some } = continuationUtilities;
+const { cut, some } = continuationUtilities,
+      { unbreakable } = breakPointUtilities;
 
 export default define(class SchemaAssertion extends Assertion {
   constructor(context, string, node, breakPoint, link, frame) {
@@ -61,9 +62,23 @@ export default define(class SchemaAssertion extends Assertion {
     return implicitAssumptions;
   }
 
-  validate(state, context, forward, back) {
+  verify = unbreakable(function (context, forward, back) {
     forward = cut(forward, back); ///
 
+    const schemaAssertionString = this.getString(); ///
+
+    context.trace(`Verifying the '${schemaAssertionString}' schema assertion...`);
+
+    return declare((state) => {
+      return this.validate(state, context, (schemaAssertion, context , back) => {
+        context.debug(`...verified the '${schemaAssertionString}' schema assertion.`);
+
+        return forward(context, back);
+      }, back);
+    });
+  });
+
+  validate(state, context, forward, back) {
     let validates;
 
     const schameAssertionString = this.getString();  ///

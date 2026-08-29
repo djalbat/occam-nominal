@@ -6,10 +6,10 @@ import { define } from "../elements";
 import { declare } from "../utilities/state";
 import { instantiateLabel } from "../process/instantiate";
 import { metavariableFromLabelNode } from "../utilities/element";
-import { join, attempt, reconcile, serialise, unserialise, instantiate} from "../utilities/context";
+import { join, attempt, reconcile, unserialise, instantiate} from "../utilities/context";
 
-const { cut, all, isolate } = continuationUtilities,
-      { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
+const { unbreakable } = breakPointUtilities,
+      { cut, all, isolate } = continuationUtilities;
 
 export default define(class Label extends Element {
   constructor(context, string, node, breakPoint, metavariable) {
@@ -51,7 +51,7 @@ export default define(class Label extends Element {
 
   compareMetavariable(metavariable) { return this.metavariable.compareMetavariable(metavariable); }
 
-  verify(forward, back) {
+  verify = unbreakable(function (forward, back) {
     forward = cut(forward, back); ///
 
     const context = this.getContext(),
@@ -69,17 +69,15 @@ export default define(class Label extends Element {
     }
 
     return declare((state) => {
-      return this.validate(state, context, (label, _ , back) => {
+      return this.validate(state, context, (label, context , back) => {
         context.debug(`...verified the '${labelString}' label.`);
 
-        return forward(back);
+        return forward(context, back);
       }, back);
     });
-  }
+  });
 
   validate(state, context, forward, back) {
-    forward = cut(forward, back); ///
-
     const labelString = this.getString(); ////
 
     context.trace(`Validating the '${labelString}' label...`);
@@ -169,30 +167,6 @@ export default define(class Label extends Element {
     });
   }
 
-  toJSON() {
-    const context = this.getContext();
-
-    return serialise((context) => {
-      const string = this.getString();
-
-      let breakPoint;
-
-      breakPoint = this.getBreakPoint();
-
-      const breakPointJSON = breakPointToBreakPointJSON(breakPoint);
-
-      breakPoint = breakPointJSON;  ///
-
-      const json = {
-        context,
-        string,
-        breakPoint
-      };
-
-      return json;
-    }, context);
-  }
-
   static name = "Label";
 
   static fromJSON(json, context) {
@@ -203,7 +177,7 @@ export default define(class Label extends Element {
         const { string } = json,
               labelNode = instantiateLabel(string, context),
               node = labelNode, ///
-              breakPoint = breakPointFromJSON(json),
+              breakPoint = null,
               metavariable = metavariableFromLabelNode(labelNode, context);
 
         label = new Label(context, string, node, breakPoint, metavariable);
