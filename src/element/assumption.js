@@ -8,7 +8,7 @@ import { join, reconcile } from "../utilities/context";
 import { isDerived, isDeclared } from "../utilities/state";
 import { instantiateAssumption } from "../process/instantiate";
 
-const { backwardsEvery } = continuationUtilities,
+const { all, exists, backwardsEvery } = continuationUtilities,
       { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Assumption extends Element {
@@ -69,61 +69,47 @@ export default define(class Assumption extends Element {
 
   findSubproofAssertion(context) { return this.statement.findSubproofAssertion(context); }
 
-  validate(state, context, continuation) {
-    let validates;
+  validate(state, context, forward, back) {
+    let assumption;
 
     const assumptionString = this.getString();  ///
 
     context.trace(`Validating the '${assumptionString}' assumption...`);
-
-    let assumption;
 
     assumption = this.findAssumption(context);
 
     if (assumption !== null) {
       context.debug(`The '${assumptionString}' assumption is already present.`);
 
-      validates = continuation(assumption, context);
-    } else {
-      assumption = this;  ///
-
-      const validateLink = this.validateLink.bind(this),
-            validateStatement = this.validateStatement.bind(this);
-
-      validates = all([
-        validateLink,
-        validateStatement
-      ], state, context, (state, context) => {
-        let validates;
-
-        const validateWhenDeclared = this.validateWhenDeclared.bind(this),
-              validateWhenDerived = this.validateWhenDerived.bind(this);
-
-        validates = exists([
-          validateWhenDeclared,
-          validateWhenDerived
-        ], state, context, (state, context) => {
-          let validates;
-
-          context.addAssumption(assumption);
-
-          validates = continuation(assumption, context);
-
-          return validates;
-        });
-
-        return validates;
-      });
+      return forward(assumption, context, back);
     }
 
-    if (validates) {
-      context.debug(`...validated the '${assumptionString}' assumption.`);
-    }
+    assumption = this;  ///
 
-    return validates;
+    const validateLink = this.validateLink.bind(this),
+          validateStatement = this.validateStatement.bind(this);
+
+    return all([
+      validateLink,
+      validateStatement
+    ], state, context, (state, context, back) => {
+      const validateWhenDeclared = this.validateWhenDeclared.bind(this),
+            validateWhenDerived = this.validateWhenDerived.bind(this);
+
+      return exists([
+        validateWhenDeclared,
+        validateWhenDerived
+      ], state, context, (state, context, back) => {
+        context.addAssumption(assumption);
+
+        context.debug(`...validated the '${assumptionString}' assumption.`);
+
+        return forward(assumption, context, back);
+      }, back);
+    }, back);
   }
 
-  validateWhenDeclared(state, context, continuation) {
+  validateWhenDeclared(state, context, forward, back) {
     let validatesWhenDeclared = false;
 
     const declared = isDeclared(state);
@@ -143,7 +129,7 @@ export default define(class Assumption extends Element {
     return validatesWhenDeclared;
   }
 
-  validateWhenDerived(state, context, continuation) {
+  validateWhenDerived(state, context, forward, back) {
     let validatesWhenDerived = false;
 
     const derived = isDerived(state);
@@ -179,7 +165,7 @@ export default define(class Assumption extends Element {
     return validatesWhenDerived;
   }
 
-  validateLink(state, context, continuation) {
+  validateLink(state, context, forward, back) {
     let linkValidates;
 
     const assumptionString = this.getString();  ///
@@ -203,7 +189,7 @@ export default define(class Assumption extends Element {
     return linkValidates;
   }
 
-  validateStatement(state, context, continuation) {
+  validateStatement(state, context, forward, back) {
     let statementValidates;
 
     const assumptionString = this.getString();  ///
@@ -227,7 +213,7 @@ export default define(class Assumption extends Element {
     return statementValidates;
   }
 
-  unifySchema(schema, context, continuation) {
+  unifySchema(schema, context, forward, back) {
     const assumptionString = this.getString(),
           schemaString = schema.getString();
 
@@ -285,7 +271,7 @@ export default define(class Assumption extends Element {
     }, context);
   }
 
-  unifyDeduction(deduction, deducedStatement, generalContext, specificContext, continuation) {
+  unifyDeduction(deduction, deducedStatement, generalContext, specificContext, forward, back) {
     const context = specificContext,  ///
           assumptionString = this.getString(),  ///
           deductionString = deduction.getString();
@@ -318,7 +304,7 @@ export default define(class Assumption extends Element {
     }, specificContext, context);
   }
 
-  unifySupposition(supposition, supposedStatement, generalContext, specificContext, continuation) {
+  unifySupposition(supposition, supposedStatement, generalContext, specificContext, forward, back) {
     const context = specificContext,  ///
           suppositionString = supposition.getString(),
           supposedStatementString = supposedStatement.getString();
@@ -351,7 +337,7 @@ export default define(class Assumption extends Element {
     }, specificContext, context);
   }
 
-  unifySuppositions(suppositions, supposedStatements, generalContext, specificContext, continuation) {
+  unifySuppositions(suppositions, supposedStatements, generalContext, specificContext, forward, back) {
     const suppositionsLength = suppositions.length,
           supposedStatementsLength = supposedStatements.length;
 
@@ -363,13 +349,13 @@ export default define(class Assumption extends Element {
 
     let index = suppositionsLength; ///
 
-    return backwardsEvery(suppositions, (supposition, continuation) => {
+    return backwardsEvery(suppositions, (supposition, forward, back) => {
       index--;
 
       const supposedStatement = supposedStatements[index];
 
-      return this.unifySupposition(supposition, supposedStatement, generalContext, specificContext, continuation);
-    }, continuation);
+      return this.unifySupposition(supposition, supposedStatement, generalContext, specificContext, forward, back);
+    }, forward, back);
   }
 
   toJSON() {

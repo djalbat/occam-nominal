@@ -1031,10 +1031,8 @@ export function proofFromSchemaNode(schemaNode, context) {
 }
 
 export function labelFromSchemaNode(schemaNode, context) {
-  const { Label } = elements,
-        labelNode = schemaNode.getLabelNode(),
-        labelString = context.nodeAsString(labelNode),
-        label = Label.fromLabelString(labelString, context);
+  const labelNode = schemaNode.getLabelNode(),
+        label = labelFromLabelNode(labelNode, context);
 
   return label;
 }
@@ -1135,10 +1133,7 @@ export function referenceFromStepNode(stepNode, context) {
   const referenceNode = stepNode.getReferenceNode();
 
   if (referenceNode !== null) {
-    const { Reference } = elements,
-          referenceString = context.nodeAsString(referenceNode);
-
-    reference = Reference.fromReferenceString(referenceString, context);
+    reference = referenceFromReferenceNode(referenceNode, context);
   }
 
   return reference;
@@ -1581,10 +1576,8 @@ export function statementFromHypothesisNode(hypothesisNode, context) {
 }
 
 export function referenceFromConstraintNode(constraintNode, context) {
-  const { Reference } = elements,
-        referenceNode = constraintNode.getReferenceNode(),
-        referenceString = context.nodeAsString(referenceNode),
-        reference = Reference.fromReferenceString(referenceString, context);
+  const referenceNode = constraintNode.getReferenceNode(),
+        reference = referenceFromReferenceNode(referenceNode, context);
 
   return reference;
 }
@@ -2223,9 +2216,7 @@ export function typesFromTypesNode(typesNode, context) {
 
 export function labelsFromLabelNodes(labelNodes, context) {
   const labels = labelNodes.map((labelNode) => {
-    const { Label } = elements,
-          labelString = context.nodeAsString(labelNode),
-          label = Label.fromLabelString(labelString, context);
+    const label = labelFromLabelNode(labelNode, context);
 
     return label;
   });

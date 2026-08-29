@@ -5,8 +5,8 @@ import { Element, breakPointUtilities, continuationUtilities } from "occam-langu
 import { define } from "../elements";
 import { declare } from "../utilities/state";
 import { instantiateLabel } from "../process/instantiate";
-import { labelFromLabelNode, metavariableFromLabelNode } from "../utilities/element";
-import { join, ablate, attempt, reconcile, serialise, unserialise, instantiate} from "../utilities/context";
+import { metavariableFromLabelNode } from "../utilities/element";
+import { join, attempt, reconcile, serialise, unserialise, instantiate} from "../utilities/context";
 
 const { cut, all, isolate } = continuationUtilities,
       { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
@@ -206,21 +206,6 @@ export default define(class Label extends Element {
 
         label = new Label(context, string, node, breakPoint, metavariable);
       }, json, context);
-    }, context);
-
-    return label;
-  }
-
-  static fromLabelString(labelString, context) {
-    let label;
-
-    ablate((context) => {
-      instantiate((context) => {
-        const string = labelString,  ///
-              labelNode = instantiateLabel(string, context);
-
-        label = labelFromLabelNode(labelNode, context);
-      }, context);
     }, context);
 
     return label;

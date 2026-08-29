@@ -5,8 +5,8 @@ import { Element, breakPointUtilities, continuationUtilities } from "occam-langu
 import { define } from "../elements";
 import { instantiateReference } from "../process/instantiate";
 import { REFERENCE_META_TYPE_NAME } from "../metaTypeNames";
-import { referenceFromReferenceNode, metavariableFromReferenceNode } from "../utilities/element";
-import { join, ablate, attempt, reconcile, serialise, unserialise, instantiate } from "../utilities/context";
+import { metavariableFromReferenceNode } from "../utilities/element";
+import { join, attempt, reconcile, serialise, unserialise, instantiate } from "../utilities/context";
 
 const { all, isolate } = continuationUtilities,
       { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
@@ -236,21 +236,6 @@ export default define(class Reference extends Element {
 
         reference = new Reference(context, string, node, breakPoint, metavariable);
       }, json, context);
-    }, context);
-
-    return reference;
-  }
-
-  static fromReferenceString(referenceString, context) {
-    let reference;
-
-    ablate((context) => {
-      instantiate((context) => {
-        const string = referenceString,  ///
-              referenceNode = instantiateReference(string, context);
-
-        reference = referenceFromReferenceNode(referenceNode, context);
-      }, context);
     }, context);
 
     return reference;

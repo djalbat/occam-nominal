@@ -31,13 +31,6 @@ export default class StatementSubstitutionNode extends SubstitutionNode {
     return termSubstitutionNode;
   }
 
-  getFrameSubstitutionNode() {
-    const targetStatementNode = this.getTargetStatementNode(),
-          frameSubstitutionNode = targetStatementNode.getFrameSubstitutionNode();
-
-    return frameSubstitutionNode;
-  }
-
   getTargetStatementNode() {
     const lastStatementNode = this.getLastStatementNode(),
           targetStatementNode = lastStatementNode; ///

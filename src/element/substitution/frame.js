@@ -207,32 +207,6 @@ export default define(class FrameSubstitution extends Substitution {
     return frameSubstitutionn;
   }
 
-  static fromStatementNode(statementNode, context) {
-    let frameSubstitution = null;
-
-    const frameSubstitutionNode = statementNode.getFrameSubstitutionNode();
-
-    if (frameSubstitutionNode !== null) {
-      const generalContext = context, ///
-            specificContext = context,  ///
-            frameSubstitutionString = context.nodeAsString(frameSubstitutionNode);
-
-      ablates((generalContext, specificContext) => {
-        instantiate((specificContext) => {
-          manifest((generalContext) => {
-            const string = frameSubstitutionString,  ///
-              context = specificContext,  ///
-              frameSubstitutionNode = instantiateFrameSubstitution(string, context);
-
-            frameSubstitution = frameSubstitutionFromFrameSubstitutionNode(frameSubstitutionNode, generalContext, specificContext);
-          }, generalContext, specificContext);
-        }, specificContext);
-      }, generalContext, specificContext);
-    }
-
-    return frameSubstitution;
-  }
-
   static fromFrameAndMetavariable(frame, metavariable, generalContext, specificContext) {
     let frameSubstitution;
 

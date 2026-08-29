@@ -13,7 +13,6 @@ import { TERM_RULE_NAME,
          TERM_SUBSTITUTION_RULE_NAME,
          PROPERTY_ASSERTION_RULE_NAME,
          SUBPROOF_ASSERTION_RULE_NAME,
-         FRAME_SUBSTITUTION_RULE_NAME,
          SIGNATURE_ASSERTION_RULE_NAME,
          CONTAINED_ASSERTION_RULE_NAME,
          STATEMENT_SUBSTITUTION_RULE_NAME } from "../ruleNames";
@@ -39,9 +38,8 @@ class StatementNode extends NonTerminalNode {
   }
 
   getSubstitutionNode() {
-    const frameSubstitutionNode = this.getFrameSubstitutionNode(),
-          termSubstitutionNode = this.getTermSubstitutionNode(),
-          substitutionNode = (frameSubstitutionNode || termSubstitutionNode);
+    const termSubstitutionNode = this.getTermSubstitutionNode(),
+          substitutionNode = termSubstitutionNode;  ///
 
     return substitutionNode;
   }
@@ -86,13 +84,6 @@ class StatementNode extends NonTerminalNode {
           termSubstitutionNode = this.getNodeByRuleName(ruleName);
 
     return termSubstitutionNode;
-  }
-
-  getFrameSubstitutionNode() {
-    const ruleName = FRAME_SUBSTITUTION_RULE_NAME,
-          frameSubstitutionNode = this.getNodeByRuleName(ruleName);
-
-    return frameSubstitutionNode;
   }
 
   getSubproofAssertionNode() {
