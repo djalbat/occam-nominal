@@ -1,6 +1,6 @@
 "use strict";
 
-import { breakPointUtilities,continuationUtilities } from "occam-languages";
+import { continuationUtilities } from "occam-languages";
 
 import Assertion from "../assertion";
 
@@ -11,10 +11,8 @@ import { instantiateDefinedAssertion } from "../../process/instantiate";
 import { termFromTermAndSubstitutions } from "../../utilities/substitutions";
 import { separateGroundedTermsAndDefinedVariables } from "../../utilities/equivalences";
 import { termFromJDefinedAssertionNode, negatedFromJDefinedAssertionNode, definedAssertionFromStatementNode } from "../../utilities/element";
-import state from "easy/lib/mixins/state";
 
-const { all, exists } = continuationUtilities,
-      { breakPointFromJSON } = breakPointUtilities;
+const { all, exists } = continuationUtilities;
 
 export default define(class DefinedAssertion extends Assertion {
   constructor(context, string, node, breakPoint, term, negated) {
@@ -154,6 +152,17 @@ export default define(class DefinedAssertion extends Assertion {
     }, back);
   }
 
+  toJSON() {
+    const name = this.getName(),
+          string = this.getString(),
+          json = {
+            name,
+            string
+          };
+
+    return json;
+  }
+
   static name = "DefinedAssertion";
 
   static fromJSON(json, context) {
@@ -166,7 +175,7 @@ export default define(class DefinedAssertion extends Assertion {
         const { string } = json,
               definedAssertionNode = instantiateDefinedAssertion(string, context),
               node = definedAssertionNode,  ///
-              breakPoint = breakPointFromJSON(json),
+              breakPoint = null,
               term = termFromJDefinedAssertionNode(definedAssertionNode, context),
               negated = negatedFromJDefinedAssertionNode(definedAssertionNode, context);
 

@@ -1,8 +1,6 @@
 "use strict";
 
-import { Element, breakPointUtilities } from "occam-languages";
-
-const { breakPointToBreakPointJSON } = breakPointUtilities;
+import { Element } from "occam-languages";
 
 export default class Assertion extends Element {
   getName() {
@@ -39,26 +37,5 @@ export default class Assertion extends Element {
           assertion = context.findAssertionByAssertionNode(assertionNode);
 
     return assertion;
-  }
-
-  toJSON() {
-    const name = this.getName(),
-          string = this.getString();
-
-    let breakPoint;
-
-    breakPoint = this.getBreakPoint();
-
-    const breakPointJSON = breakPointToBreakPointJSON(breakPoint);
-
-    breakPoint = breakPointJSON;  ///
-
-    const json = {
-      name,
-      string,
-      breakPoint
-    };
-
-    return json;
   }
 }

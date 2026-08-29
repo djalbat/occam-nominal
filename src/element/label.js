@@ -6,7 +6,7 @@ import { define } from "../elements";
 import { declare } from "../utilities/state";
 import { instantiateLabel } from "../process/instantiate";
 import { metavariableFromLabelNode } from "../utilities/element";
-import { join, attempt, reconcile, unserialise, instantiate} from "../utilities/context";
+import {join, attempt, reconcile, unserialise, instantiate, serialise} from "../utilities/context";
 
 const { unbreakable } = breakPointUtilities,
       { cut, all, isolate } = continuationUtilities;
@@ -51,11 +51,10 @@ export default define(class Label extends Element {
 
   compareMetavariable(metavariable) { return this.metavariable.compareMetavariable(metavariable); }
 
-  verify = unbreakable(function (forward, back) {
+  verify = unbreakable(function (context, forward, back) {
     forward = cut(forward, back); ///
 
-    const context = this.getContext(),
-          labelString = this.getString(); ///
+    const labelString = this.getString(); ///
 
     context.trace(`Verifying the '${labelString}' label...`);
 
@@ -165,6 +164,21 @@ export default define(class Label extends Element {
 
       return continuation(metavariableUnifies);
     });
+  }
+
+  toJSON() {
+    const context = this.getContext();
+
+    return serialise((context) => {
+      const string = this.getString();
+
+      const json = {
+        context,
+        string
+      };
+
+      return json;
+    }, context);
   }
 
   static name = "Label";

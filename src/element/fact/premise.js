@@ -162,9 +162,11 @@ export default define(class Premise extends Fact {
         }, back);
       }, context);
     }, state, context, (state, context, back) => {
+      const premise = this; ///
+
       context.debug(`...validated the '${premiseString}' premise.`);
 
-      return forward(state, context, back);
+      return forward(premise, context, back);
     }, back);
   }
 

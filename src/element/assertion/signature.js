@@ -5,10 +5,9 @@ import { breakPointUtilities, continuationUtilities } from "occam-languages";
 import Assertion from "../assertion";
 
 import { define } from "../../elements";
-import { reconcile, instantiate } from "../../utilities/context";
-import { instantiateSignatureAssertion } from "../../process/instantiate";
-import { termsFromSignatureAssertionNode, linkFromSignatureAssertionNode, signatureAssertionFromStatementNode } from "../../utilities/element";
-import {declare} from "../../utilities/state";
+import { declare } from "../../utilities/state";
+import { reconcile } from "../../utilities/context";
+import { signatureAssertionFromStatementNode } from "../../utilities/element";
 
 const { cut } = continuationUtilities,
       { unbreakable } = breakPointUtilities;
@@ -223,25 +222,6 @@ export default define(class SignatureAssertion extends Assertion {
   }
 
   static name = "SignatureAssertion";
-
-  static fromJSON(json, context) {
-    let signatureAssertion;
-
-    instantiate((context) => {
-      const { string } = json,
-            definedAssertionNode = instantiateSignatureAssertion(string, context),
-            node = definedAssertionNode,  ///
-            breakPoint = null,
-            terms = termsFromSignatureAssertionNode(definedAssertionNode, context),
-            link = linkFromSignatureAssertionNode(definedAssertionNode, context);
-
-      context = null;
-
-      signatureAssertion = new SignatureAssertion(context, string, node, breakPoint, terms, link);
-    });
-
-    return signatureAssertion;
-  }
 
   static fromStep(step, context) {
     const statementNode = step.getStatementNode(),

@@ -1,6 +1,6 @@
 "use strict";
 
-import { breakPointUtilities, continuationUtilities } from "occam-languages";
+import { continuationUtilities } from "occam-languages";
 
 import Assertion from "../assertion";
 
@@ -13,8 +13,7 @@ import { variableAssignmentFromTypeAssertion } from "../../process/assign";
 import { derive, isDerived, isDeclared, isTransient} from "../../utilities/state";
 import { termFromTypeAssertionNode, typeAssertionFromStatementNode } from "../../utilities/element";
 
-const { all, exists } = continuationUtilities,
-      { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
+const { all, exists } = continuationUtilities;
 
 export default define(class TypeAssertion extends Assertion {
   constructor(context, string, node, breakPoint, term, type) {
@@ -246,21 +245,11 @@ export default define(class TypeAssertion extends Assertion {
   toJSON() {
     const typeJSON = typeToTypeJSON(this.type),
           name = this.getName(),
-          string = this.getString();
-
-    let breakPoint;
-
-    breakPoint = this.getBreakPoint();
-
-    const breakPointJSON = breakPointToBreakPointJSON(breakPoint);
-
-    breakPoint = breakPointJSON;  ///
-
-    const type = typeJSON,
+          string = this.getString(),
+          type = typeJSON,  ///
           json = {
             name,
             string,
-            breakPoint,
             type
           };
 
@@ -279,7 +268,7 @@ export default define(class TypeAssertion extends Assertion {
         const { string } = json,
               typeAssertionNode = instantiateTypeAssertion(string, context),
               node = typeAssertionNode, ///
-              breakPoint = breakPointFromJSON(json),
+              breakPoint = null,
               term = termFromTypeAssertionNode(typeAssertionNode, context),
               type = typeFromJSON(json, context);
 

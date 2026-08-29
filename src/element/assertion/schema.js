@@ -2,9 +2,8 @@
 
 import { breakPointUtilities, continuationUtilities } from "occam-languages";
 
-import Assertion from "../assertion";
-
 import elements from "../../elements";
+import Assertion from "../assertion";
 
 import { define } from "../../elements";
 import { declare } from "../../utilities/state";

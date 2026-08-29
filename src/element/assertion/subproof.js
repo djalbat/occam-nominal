@@ -1,7 +1,7 @@
 "use strict";
 
 import { arrayUtilities } from "necessary";
-import { breakPointUtilities, continuationUtilities } from "occam-languages";
+import { continuationUtilities } from "occam-languages";
 
 import Assertion from "../assertion";
 
@@ -12,7 +12,6 @@ import { instantiateSubproofAssertion } from "../../process/instantiate";
 import { subproofAssertionFromStatementNode } from "../../utilities/element";
 
 const { last, front } = arrayUtilities,
-      { breakPointFromJSON } = breakPointUtilities,
       { all, every, backwardsEvery } = continuationUtilities;
 
 export default define(class SubproofAssertion extends Assertion {
@@ -198,6 +197,17 @@ export default define(class SubproofAssertion extends Assertion {
     }, forward, back);
   }
 
+  toJSON() {
+    const name = this.getName(),
+          string = this.getString(),
+          json = {
+            name,
+            string
+          };
+
+    return json;
+  }
+
   static name = "SubproofAssertion";
 
   static fromJSON(json, context) {
@@ -210,7 +220,7 @@ export default define(class SubproofAssertion extends Assertion {
         const { string } = json,
               subproofAssertionNode = instantiateSubproofAssertion(string, context),
               node = subproofAssertionNode,  ///
-              breakPoint = breakPointFromJSON(json),
+              breakPoint = null,
               statements = statementsFromSubproofAssertionNode(subproofAssertionNode, context);
 
         context = null;

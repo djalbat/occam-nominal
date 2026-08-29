@@ -45,6 +45,14 @@ export default class Context extends ContextBase {
     return terms;
   }
 
+  getLinks(links = []) {
+    const context = this.getContext();
+
+    context.getLinks(links);
+
+    return links;
+  }
+
   getFrames(frames = []) {
     const context = this.getContext();
 

@@ -1,6 +1,6 @@
 "use strict";
 
-import { breakPointUtilities,continuationUtilities } from "occam-languages";
+import { continuationUtilities } from "occam-languages";
 
 import Assertion from "../assertion";
 
@@ -13,10 +13,8 @@ import { termFromContainedAssertionNode,
          negatedFromContainedAssertionNode,
          statementFromContainedAssertionNode,
          containedAssertionFromStatementNode } from "../../utilities/element";
-import state from "easy/lib/mixins/state";
 
-const { breakPointFromJSON } = breakPointUtilities,
-      { all, exists, isolate } = continuationUtilities;
+const { all, exists } = continuationUtilities;
 
 export default define(class ContainedAssertion extends Assertion {
   constructor(context, string, node, breakPoint, term, negated, statement) {
@@ -188,6 +186,17 @@ export default define(class ContainedAssertion extends Assertion {
     }, back);
   }
 
+  toJSON() {
+    const name = this.getName(),
+          string = this.getString(),
+          json = {
+            name,
+            string
+          };
+
+    return json;
+  }
+
   static name = "ContainedAssertion";
 
   static fromJSON(json, context) {
@@ -200,7 +209,7 @@ export default define(class ContainedAssertion extends Assertion {
         const { string } = json,
               containedAssertionNode = instantiateContainedAssertion(string, context),
               node = containedAssertionNode,  ///
-              breakPoint = breakPointFromJSON(json),
+              breakPoint = null,
               term = termFromContainedAssertionNode(containedAssertionNode, context),
               negated = negatedFromContainedAssertionNode(containedAssertionNode, context),
               statement = statementFromContainedAssertionNode(containedAssertionNode, context);

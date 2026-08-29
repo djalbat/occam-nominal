@@ -30,8 +30,7 @@ export default define(class Deduction extends Resolution {
   verify = breakable(function (context, forward, back) {
     forward = cut(forward, back); ///
 
-    const deductionString = this.getString(),  ///
-          specificContext = context;  ///
+    const deductionString = this.getString();  ///
 
     context.trace(`Verifying the '${deductionString}' deduction...`);
 
@@ -46,8 +45,6 @@ export default define(class Deduction extends Resolution {
     declare((state) => {
       desist((state) => {
         return this.validate(state, context, (deduction, context , back) => {
-          context = specificContext;  ///
-
           context.debug(`...verified the '${deductionString}' deduction.`);
 
           return forward(context, back);
@@ -116,9 +113,11 @@ export default define(class Deduction extends Resolution {
         }, back);
       }, context);
     }, state, context, (state, context, back) => {
+      const conclusion = this;  ///
+
       context.debug(`...validated the '${deductionString}' deduction.`);
 
-      return forward(state, context, back);
+      return forward(conclusion, context, back);
     }, back);
   }
 

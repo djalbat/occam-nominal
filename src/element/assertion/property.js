@@ -1,7 +1,5 @@
 "use strict";
 
-import { breakPointUtilities } from "occam-languages";
-
 import Assertion from "../assertion";
 
 import { define } from "../../elements";
@@ -11,8 +9,6 @@ import { unifyTermWithProperties } from "../../process/validation";
 import { instantiatePropertyAssertion } from "../../process/instantiate";
 import { variableAssignmentFromPrepertyAssertion } from "../../process/assign";
 import { propertyAssertionFromStatementNode, subjectTermFromPropertyAssertionNode, propertyTermFromPropertyAssertionNode } from "../../utilities/element";
-
-const { breakPointFromJSON } = breakPointUtilities;
 
 export default define(class PropertyAssertion extends Assertion {
   constructor(context, string, node, breakPoint, subjectTerm, propertyTerm) {
@@ -167,6 +163,17 @@ export default define(class PropertyAssertion extends Assertion {
     context.addAssignment(variableAssigment);
   }
 
+  toJSON() {
+    const name = this.getName(),
+          string = this.getString(),
+          json = {
+            name,
+            string
+          };
+
+    return json;
+  }
+
   static name = "PropertyAssertion";
 
   static fromJSON(json, context) {
@@ -179,7 +186,7 @@ export default define(class PropertyAssertion extends Assertion {
         const { string } = json,
               propertyAssertionNode = instantiatePropertyAssertion(string, context),
               node = propertyAssertionNode,  ///
-              breakPoint = breakPointFromJSON(json),
+              breakPoint = null,
               subjectTerm = subjectTermFromPropertyAssertionNode(propertyAssertionNode, context),
               propertyTerm = propertyTermFromPropertyAssertionNode(propertyAssertionNode, context);
 

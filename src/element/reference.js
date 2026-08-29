@@ -4,10 +4,8 @@ import { Element, breakPointUtilities, continuationUtilities } from "occam-langu
 
 import { define } from "../elements";
 import { declare } from "../utilities/state";
-import { instantiateReference } from "../process/instantiate";
 import { REFERENCE_META_TYPE_NAME } from "../metaTypeNames";
-import { metavariableFromReferenceNode } from "../utilities/element";
-import { join, attempt, reconcile, unserialise, instantiate } from "../utilities/context";
+import { join, attempt, reconcile } from "../utilities/context";
 
 const { unbreakable } = breakPointUtilities,
       { cut, all, isolate } = continuationUtilities;
@@ -126,37 +124,29 @@ export default define(class Reference extends Element {
     context.trace(`Validating the '${referenceString}' reference's metavariable...'`);
 
     return this.metavariable.validate(state, context, (metavariable, context, back) => {
-      let validates = false;
-
       const metaType = metavariable.getMetaType();
 
-      if (metaType === null) {
-        validates = true;
-      } else {
+      if (metaType !== null) {
         const referenceMetaTypeName = REFERENCE_META_TYPE_NAME,
               referenceMetaType = context.findMetaTypeByMetaTypeName(referenceMetaTypeName),
               metavariableMetaTypeEqualToReferenceMetaType = metavariable.isMetaTypeEqualTo(referenceMetaType);
 
-        if (metavariableMetaTypeEqualToReferenceMetaType) {
-          validates = true;
-        } else {
+        if (!metavariableMetaTypeEqualToReferenceMetaType) {
           const metaTypeString = metaType.getString(),
                 metavariableString = metavariable.getString(),
                 referenceMetaTypeString = referenceMetaType.getString();
 
           context.debug(`The '${referenceString}' reference's '${metavariableString}' metavariable's '${metaTypeString}' meta-type should be the '${referenceMetaTypeString}' meta-type.`);
-        }
-      }
 
-      if (!validates) {
-        return back();
+          return back();
+        }
       }
 
       this.metavariable = metavariable;
 
       context.debug(`...validated the '${referenceString}' reference's metavariable.'`);
 
-      return forward(context, back);
+      return forward(state, context, back);
     }, back);
   }
 
@@ -215,22 +205,4 @@ export default define(class Reference extends Element {
   }
 
   static name = "Reference";
-
-  static fromJSON(json, context) {
-    let reference;
-
-    instantiate((context) => {
-      unserialise((json, context) => {
-        const { string } = json,
-              referenceNode = instantiateReference(string, context),
-              node = referenceNode,  ///
-              breakPoint = null,
-              metavariable = metavariableFromReferenceNode(referenceNode, context);
-
-        reference = new Reference(context, string, node, breakPoint, metavariable);
-      }, json, context);
-    }, context);
-
-    return reference;
-  }
 });

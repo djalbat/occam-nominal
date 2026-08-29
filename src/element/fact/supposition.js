@@ -154,9 +154,11 @@ export default define(class Supposition extends Fact {
         }, back);
       }, context);
     }, state, context, (state, context, back) => {
+      const supposition = this; ///
+
       context.debug(`...validated the '${suppositionString}' supposition.`);
 
-      return forward(state, context, back);
+      return forward(supposition, context, back);
     }, back);
   }
 

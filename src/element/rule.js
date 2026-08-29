@@ -135,8 +135,8 @@ export default define(class Rule extends Element {
   }
 
   verifyLabel(label, context, forward, back) {
-    const labelString = label.getString(),
-          ruleString = this.getString(); ///
+    const ruleString = this.getString(), ///
+          labelString = label.getString();
 
     context.trace(`Verifying the '${ruleString}' rule's '${labelString}' label...`);
 

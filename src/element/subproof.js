@@ -95,14 +95,14 @@ export default define(class Subproof extends Element {
     return comparesToStatement;
   }
 
-  verify = breakable(function(statement, context, forward, back) {
+  verify = breakable(function(context, forward, back) {
     forward = cut(forward, back); ///
 
     const subproofString = this.getString();
 
     context.trace(`Verifying the '${subproofString}' subproof...`);
 
-    return isolate((statement, context, forward, back) => {
+    return isolate((context, forward, back) => {
       return enclose((context) => {
         const verifySuppositions = this.verifySuppositions.bind(this),
               verifySubDerivation = this.verifySubDerivation.bind(this);
@@ -111,10 +111,10 @@ export default define(class Subproof extends Element {
           verifySuppositions,
           verifySubDerivation
         ], context, (context, back) => {
-          return forward(context, back);
+          return forward(back);
         }, back);
       }, context);
-    }, statement, context, (statement, context, back) => {
+    }, context, (context, back) => {
       context.debug(`...verified the '${subproofString}' subproof.`);
 
       return forward(context, back);

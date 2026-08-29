@@ -28,9 +28,9 @@ export default define(class Lemma extends Claim {
     return isolate((context, forward, back) => {
       return enclose((context) => {
         const verifyProof = this.verifyProof.bind(this),
-          verifyLabels = this.verifyLabels.bind(this),
-          verifyDeduction = this.verifyDeduction.bind(this),
-          verifySuppositions = this.verifySuppositions.bind(this);
+              verifyLabels = this.verifyLabels.bind(this),
+              verifyDeduction = this.verifyDeduction.bind(this),
+              verifySuppositions = this.verifySuppositions.bind(this);
 
         return all([
           verifyLabels,
