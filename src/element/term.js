@@ -295,6 +295,8 @@ export default define(class Term extends Element {
   }
 
   toJSON() {
+    let json;
+
     const typeJSON = typeToTypeJSON(this.type),
           provisionalJSON = provisionalToProvisionalJSON(this.provisional),
           string = this.getString();
@@ -308,13 +310,14 @@ export default define(class Term extends Element {
     breakPoint = breakPointJSON;  ///
 
     const type = typeJSON,  ///
-          provisional = provisionalJSON,  ///
-          json = {
-            string,
-            breakPoint,
-            type,
-            provisional
-          };
+          provisional = provisionalJSON;  ///
+
+    json = {
+      string,
+      breakPoint,
+      type,
+      provisional
+    };
 
     return json;
   }

@@ -160,7 +160,7 @@ export default define(class TermSubstitution extends Substitution {
     }
 
     return this.targetTerm.validate(state, generalContext, (targetTerm, generalContext) => {
-      this.targetTerm = targetTerm;;
+      this.targetTerm = targetTerm;
 
       context.trace(`...validated the '${termSubstitutionString}' term substitution's target term.`);
 

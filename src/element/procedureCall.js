@@ -158,6 +158,8 @@ export default define(class ProcedureCall extends Element {
   }
 
   toJSON() {
+    let json;
+
     const string = this.getString();
 
     let breakPoint;
@@ -168,7 +170,7 @@ export default define(class ProcedureCall extends Element {
 
     breakPoint = breakPointJSON;  ///
 
-    const json = {
+    json = {
       string,
       breakPoint
     };

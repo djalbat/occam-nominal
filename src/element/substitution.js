@@ -206,9 +206,11 @@ export default class Substitution extends Element {
   }
 
   toJSON() {
+    let json;
+
     const contexts = this.getContexts();
 
-    return serialises((...contexts) => {
+    serialises((...contexts) => {
       const name = this.getName(),
             string = this.getString();
 
@@ -220,14 +222,14 @@ export default class Substitution extends Element {
 
       breakPoint = breakPointJSON;  ///
 
-      const json = {
+      json = {
         name,
         contexts,
         string,
         breakPoint
       };
-
-      return json;
     }, ...contexts);
+
+    return json;
   }
 }

@@ -56,6 +56,108 @@ export default class MetexicContext extends Context {
     return declaredVariables;
   }
 
+  addTerm(term) {
+    const context = this.getContext();
+
+    context.addTerm(term);
+  }
+
+  addFrame(frame) {
+    const context = this.getContext();
+
+    context.addFrame(frame);
+  }
+
+  addEquality(equality) {
+    const context = this.getContext();
+
+    context.addEquality(equality);
+  }
+
+  addAssertion(assertion) {
+    const context = this.getContext();
+
+    context.addAssertion(assertion);
+  }
+
+  addStatement(statement) {
+    const context = this.getContext();
+
+    context.addStatement(statement);
+  }
+
+  addAssumption(assumption) {
+    const context = this.getContext();
+
+    context.addAssumption(assumption);
+  }
+
+  addMetavariable(metavariable) {
+    const context = this.getContext();
+
+    context.addMetavariable(metavariable);
+  }
+
+  addSubstitution(substitution) {
+    const context = this.getContext();
+
+    context.addSubstitution(substitution);
+  }
+
+  addTerms(terms) {
+    const context = this.getContext();
+
+    context.addTerms(terms);
+  }
+
+  addLinks(links) {
+    const context = this.getContext();
+
+    context.addLinks(links);
+  }
+
+  addFrames(frames) {
+    const context = this.getContext();
+
+    context.addFrames(frames);
+  }
+
+  addEqualities(equalities) {
+    const context = this.getContext();
+
+    context.addEqualities(equalities);
+  }
+
+  addAssertions(assertions) {
+    const context = this.getContext();
+
+    context.addAssertions(assertions);
+  }
+
+  addStatements(statements) {
+    const context = this.getContext();
+
+    context.addStatements(statements);
+  }
+
+  addAssumptions(assumptions) {
+    const context = this.getContext();
+
+    context.addAssumptions(assumptions);
+  }
+
+  addMetavariables(metavariables) {
+    const context = this.getContext();
+
+    context.addMetavariables(metavariables);
+  }
+
+  addAssignment(assignment) {
+    const context = this.getContext();
+
+    context.addAssignment(assignment);
+  }
+
   static fromContexts(contexts) {
     contexts = [  ///
       ...contexts

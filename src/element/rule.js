@@ -264,6 +264,8 @@ export default define(class Rule extends Element {
   }
 
   toJSON() {
+    let json;
+
     const labelsJSON = labelsToLabelsJSON(this.labels),
           premisesJSON = premisesToPremisesJSON(this.premises),
           conclusionJSON = conclusionToConclusionJSON(this.conclusion),
@@ -279,14 +281,15 @@ export default define(class Rule extends Element {
 
     const labels = labelsJSON,  ///
           premises = premisesJSON,  ///
-          conclusion = conclusionJSON,  ///
-          json = {
-            string,
-            breakPoint,
-            labels,
-            premises,
-            conclusion
-          };
+          conclusion = conclusionJSON;  ///
+
+    json = {
+      string,
+      breakPoint,
+      labels,
+      premises,
+      conclusion
+    };
 
     return json;
   }

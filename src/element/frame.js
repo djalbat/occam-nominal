@@ -259,6 +259,8 @@ export default define(class Frame extends Element {
   }
 
   toJSON() {
+    let json;
+
     const string = this.getString();
 
     let breakPoint;
@@ -269,7 +271,7 @@ export default define(class Frame extends Element {
 
     breakPoint = breakPointJSON;  ///
 
-    const json = {
+    json = {
       string,
       breakPoint
     };

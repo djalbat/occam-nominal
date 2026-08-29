@@ -195,21 +195,24 @@ export default define(class Property extends Element {
   }
 
   toJSON() {
+    let json;
+
     const context = this.getContext();
 
-    return serialise((context) => {
+    serialise((context) => {
       const includeType = false,
             typeJSON = typeToTypeJSON(this.type),
             string = this.getString(includeType),
-            type = typeJSON,  ///
-            json = {
-              context,
-              string,
-              type
-            };
+            type = typeJSON;  ///
 
-      return json;
+      json = {
+        context,
+        string,
+        type
+      };
     }, context);
+
+    return json;
   }
 
   static name = "Property";

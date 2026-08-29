@@ -553,6 +553,8 @@ export default define(class Metavariable extends Element {
   }
 
   toJSON() {
+    let json;
+
     const metaTypeJSON = metaTypeToMetaTypeJSON(this.metaType),
           metaType = metaTypeJSON,  ///
           string = this.getString();
@@ -565,7 +567,7 @@ export default define(class Metavariable extends Element {
 
     breakPoint = breakPointJSON;  ///
 
-    const json = {
+    json = {
       string,
       breakPoint,
       metaType

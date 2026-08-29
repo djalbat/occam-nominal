@@ -301,6 +301,8 @@ export default class Claim extends Element {
   }
 
   toJSON() {
+    let json;
+
     const labelsJSON = labelsToLabelsJSON(this.labels),
           deductionJSON = deductionToDeductionJSON(this.deduction),
           suppositionsJSON = suppositionsToSuppositionsJSON(this.suppositions),
@@ -320,16 +322,17 @@ export default class Claim extends Element {
           deduction = deductionJSON,  ///
           suppositions = suppositionsJSON,  ///
           signature = signatureJSON,  ///
-          hypotheses = hypothesesJSON,  ///
-          json = {
-            string,
-            breakPoint,
-            labels,
-            deduction,
-            suppositions,
-            signature,
-            hypotheses
-          };
+          hypotheses = hypothesesJSON;  ///
+
+    json = {
+      string,
+      breakPoint,
+      labels,
+      deduction,
+      suppositions,
+      signature,
+      hypotheses
+    };
 
     return json;
   }

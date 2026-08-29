@@ -137,7 +137,7 @@ export function termsFromJSON(json, context) {
 }
 
 export function linksFromJSON(json, context) {
-  let { links = [] } = json;
+  let { links } = json;
 
   const { Link } = elements,
         linksJSON = links; ///

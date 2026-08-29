@@ -212,17 +212,20 @@ export default define(class Signature extends Element {
   }
 
   toJSON() {
+    let json;
+
     const context = this.getContext();
 
-    return serialise((context) => {
-      const string = this.getString(),
-            json = {
-              context,
-              string
-            };
+    serialise((context) => {
+      const string = this.getString();
 
-      return json;
+      json = {
+        context,
+        string
+      };
     }, context);
+
+    return json;
   }
 
   static name = "Signature";

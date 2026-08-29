@@ -383,6 +383,8 @@ export default define(class Schema extends Element {
   }
 
   toJSON() {
+    let json;
+
     const labelJSON = labelToLabelJSON(this.label),
           deductionJSON = deductionToDeductionJSON(this.deduction),
           suppositionsJSON = suppositionsToSuppositionsJSON(this.suppositions),
@@ -400,15 +402,16 @@ export default define(class Schema extends Element {
     const label = labelJSON,  ///
           deduction = deductionJSON,  ///
           suppositions = suppositionsJSON,  ///
-          constraints = constraintsJSON,  ///
-          json = {
-            string,
-            breakPoint,
-            label,
-            deduction,
-            suppositions,
-            constraints
-          };
+          constraints = constraintsJSON;  ///
+
+    json = {
+      string,
+      breakPoint,
+      label,
+      deduction,
+      suppositions,
+      constraints
+    };
 
     return json;
   }

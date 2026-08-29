@@ -272,24 +272,27 @@ export default define(class Constructor extends Element {
   }
 
   toJSON() {
+    let json;
+
     const context = this.getContext();
 
-    return serialise((context) => {
+    serialise((context) => {
       const includeType = false,
             typeJSON = typeToTypeJSON(this.type),
             hypothesesJSON = hypothesesToHypothesesJSON(this.hypotheses),
             string = this.getString(includeType),
             type = typeJSON,  ///
-            hypotheses = hypothesesJSON,  ///
-            json = {
-              context,
-              string,
-              type,
-              hypotheses
-            };
+            hypotheses = hypothesesJSON;  ///
 
-      return json;
+      json = {
+        context,
+        string,
+        type,
+        hypotheses
+      };
     }, context);
+
+    return json;
   }
 
   static name = "Constructor";

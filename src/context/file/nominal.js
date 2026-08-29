@@ -754,6 +754,8 @@ export default class NominalFileContext extends FileContext {
   }
 
   toJSON() {
+    let json;
+
     const typesJSON = typesToTypesJSON(this.types),
           rulesJSON = rulesToRulesJSON(this.rules),
           axiomsJSON = axiomsToAxiomsJSON(this.axioms),
@@ -779,23 +781,24 @@ export default class NominalFileContext extends FileContext {
           typePrefixes = typePrefixesJSON,  ///
           constructors = constructorsJSON,  ///
           declaredVariables = declaredVariablesJSON,  ///
-          declaredMetavariables = declaredMetavariablesJSON,  ///
-          json = {
-            fileContent,
-            filePath,
-            types,
-            rules,
-            axioms,
-            schemas,
-            theorems,
-            generators,
-            conjectures,
-            combinators,
-            typePrefixes,
-            constructors,
-            declaredVariables,
-            declaredMetavariables
-          };
+          declaredMetavariables = declaredMetavariablesJSON;  ///
+
+    json = {
+      fileContent,
+      filePath,
+      types,
+      rules,
+      axioms,
+      schemas,
+      theorems,
+      generators,
+      conjectures,
+      combinators,
+      typePrefixes,
+      constructors,
+      declaredVariables,
+      declaredMetavariables
+    };
 
     return json;
   }

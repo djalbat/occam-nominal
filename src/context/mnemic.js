@@ -364,6 +364,12 @@ export default class MnemicContext extends Context {
     context.debug(`...added the '${substitutionString}' substitution to the mnemic context.`);
   }
 
+  addAssignment(assignment) {
+    const context = this.getContext();
+
+    context.addAssignment(assignment);
+  }
+
   addInferredSubstitutions(inferredSubstitutions) {
     ///
   }
@@ -380,7 +386,7 @@ export default class MnemicContext extends Context {
     });
   }
 
-  addFRames(frames) {
+  addFrames(frames) {
     frames.forEach((frame) => {
       this.addFrame(frame);
     });
@@ -617,6 +623,8 @@ export default class MnemicContext extends Context {
   }
 
   toJSON() {
+    let json;
+
     let terms = this.getTerms(),
         links = this.getLinks(),
         frames = this.getFrames(),
@@ -647,7 +655,7 @@ export default class MnemicContext extends Context {
     metavariables = metavariablesJSON;  //
     substitutions = substitutionsJSON; ///
 
-    const json = {
+    json = {
       terms,
       links,
       frames,

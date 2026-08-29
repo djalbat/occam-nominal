@@ -207,9 +207,11 @@ export default define(class Link extends Element {
   }
 
   toJSON() {
+    let json;
+
     const context = this.getContext();
 
-    return serialise((context) => {
+    serialise((context) => {
       const string = this.getString();
 
       let breakPoint;
@@ -220,14 +222,14 @@ export default define(class Link extends Element {
 
       breakPoint = breakPointJSON;  ///
 
-      const json = {
+      json = {
         context,
         string,
         breakPoint
       };
-
-      return json;
     }, context);
+
+    return json;
   }
 
   static name = "Link";

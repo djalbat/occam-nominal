@@ -164,12 +164,15 @@ export default define(class PropertyAssertion extends Assertion {
   }
 
   toJSON() {
+    let json;
+
     const name = this.getName(),
-          string = this.getString(),
-          json = {
-            name,
-            string
-          };
+          string = this.getString();
+
+    json = {
+      name,
+      string
+    };
 
     return json;
   }

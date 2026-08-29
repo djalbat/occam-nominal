@@ -308,6 +308,18 @@ export default class CladicContext extends Context {
     context.debug(`...added the '${metavariableString}' metavariable to the cladic context.`);
   }
 
+  addSubstitution(substitution) {
+    const context = this.getContext();
+
+    context.addSubstitution(substitution);
+  }
+
+  addAssignment(assignment) {
+    const context = this.getContext();
+
+    context.addAssignment(assignment);
+  }
+
   addTerms(terms) {
     terms.forEach((term) => {
       this.addTerm(term);
@@ -320,7 +332,7 @@ export default class CladicContext extends Context {
     });
   }
 
-  addFRames(frames) {
+  addFrames(frames) {
     frames.forEach((frame) => {
       this.addFrame(frame);
     });
@@ -520,12 +532,19 @@ export default class CladicContext extends Context {
     context.debug(`Merging the cladic context`);
 
     context.addTerms(this.terms);
+
     context.addLinks(this.links);
-    context.addFRames(this.frames);
+
+    context.addFrames(this.frames);
+
     context.addEqualities(this.equalities);
+
     context.addAssertions(this.assertions);
+
     context.addStatements(this.statements);
+
     context.addAssumptions(this.assumptions);
+
     context.addMetavariables(this.metavariables);
   }
 
