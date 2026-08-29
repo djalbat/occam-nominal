@@ -2,7 +2,7 @@
 
 import elements from "../elements";
 
-function unifyStepWithRule(step, context, forward, back) {
+function applyRule(step, context, forward, back) {
   const reference = step.getReference();
 
   if (reference === null) {
@@ -15,20 +15,12 @@ function unifyStepWithRule(step, context, forward, back) {
     return back();
   }
 
-  const stepString = step.getString(),
-        ruleString = rule.getString(),
-        factOrSubproofs = context.getFactOrSubproofs();
+  const factOrSubproofs = context.getFactOrSubproofs();
 
-  context.trace(`Unifying the '${stepString}' step with the '${ruleString}' rule...`);
-
-  return rule.unifyStepAndFactOrSubproofs(step, factOrSubproofs, context, (context, back) => {
-    context.debug(`...unified the '${stepString}' step with the '${ruleString}' rule.`);
-
-    return forward(context, back);
-  }, back);
+  return rule.apply(step, factOrSubproofs, context, forward, back);
 }
 
-function unifyStepWithClaim(step, context, forward, back) {
+function applyClaim(step, context, forward, back) {
   const reference = step.getReference();
 
   if (reference === null) {
@@ -47,56 +39,31 @@ function unifyStepWithClaim(step, context, forward, back) {
     return back();
   }
 
-  const stepString = step.getString(),
-        claimString = reference.getString(),
-        factOrSubproofs = context.getFactOrSubproofs();
+  const factOrSubproofs = context.getFactOrSubproofs();
 
-  context.trace(`Unifying the '${stepString}' step with the '${claimString}' claim...`);
-
-  return claim.unifyStepAndFactOrSubproofs(step, factOrSubproofs, context, (context, back) => {
-    context.debug(`...unified the '${stepString}' step with the '${claimString}' claim.`);
-
-    return forward(context, back);
-  }, back);
+  return claim.apply(step, factOrSubproofs, context, forward, back);
 }
 
-function unifyStepWithSchemaAssertion(step, context, forward, back) {
+function applySchemaAssertion(step, context, forward, back) {
   const schemaAssertion = step.getSchemaAssertion();
 
   if (schemaAssertion === null) {
     return back();
   }
 
-  const stepString = step.getString(),
-        schemaAssertionString = schemaAssertion.getString();
-
-  context.trace(`Unifying the '${stepString}' step with the '${schemaAssertionString}' schema assertion...`);
-
-  return schemaAssertion.unifyStep(step, context, (context, back) => {
-    context.debug(`...unified the '${stepString}' step with the '${schemaAssertionString}' schema assertion.`);
-
-    return forward(context, back);
-  }, back);
+  return schemaAssertion.apply(step, context, forward, back);
 }
 
-function unifyStepWithSignatureAssertion(step, context, forward, back) {
+function applySignatureAssertion(step, context, forward, back) {
   const signatureAssertion = step.getSignatureAssertion();
 
   if (signatureAssertion === null) {
     return back();
   }
 
-  const stepString = step.getString(),
-        factOrSubproofs = context.getFactOrSubproofs(),
-        signatureAssertionString = signatureAssertion.getString();
+  const factOrSubproofs = context.getFactOrSubproofs();
 
-  context.trace(`Unifying the '${stepString}' step with the '${signatureAssertionString}' signature assertion...`);
-
-  return signatureAssertion.unifyStepAndFactOrSubproofs(step, factOrSubproofs, context, (context, back) => {
-    context.debug(`...unified the '${stepString}' step with the '${signatureAssertionString}' signature assertion.`);
-
-    return forward(context, back);
-  }, back);
+  return signatureAssertion.apply(step, factOrSubproofs, context, forward, back);
 }
 
 function unifyStepAsQualifiedConstraint(step, context, forward, back) {
@@ -255,10 +222,10 @@ function compareStepToFactOrSubproofs(step, context, forward, back) {
 }
 
 export const unifySteps = [
-  unifyStepWithRule,
-  unifyStepWithClaim,
-  unifyStepWithSchemaAssertion,
-  unifyStepWithSignatureAssertion,
+  applyRule,
+  applyClaim,
+  applySchemaAssertion,
+  applySignatureAssertion,
   unifyStepAsQualifiedConstraint,
   unifyStepAsUnqualifiedEquality,
   unifyStepAsUnqualifiedTypeAssertion,

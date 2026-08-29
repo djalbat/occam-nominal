@@ -61,13 +61,13 @@ export default define(class Conclusion extends Resolution {
     });
   });
 
-  unifyStep = breakable(function (step, context, forward, back) {
+  apply = breakable(function (step, context, forward, back) {
     forward = cut(forward, back); ///
 
     const stepString = step.getString(),
           conclusionString = this.getString();  ///
 
-    context.trace(`Unifying the '${stepString}' step with the '${conclusionString}' conclusion...`);
+    context.trace(`Applying the '${conclusionString}' conclusion to the '${stepString}' step...`);
 
     const stepContext = step.getContext(),
           conclusionContext = this.getContext(),  ///
@@ -80,7 +80,7 @@ export default define(class Conclusion extends Resolution {
       return this.statement.unifyStatement(statement, generalContext, specificContext, (generalContext, specificContext, back) => {
         specificContext.commit(context);
 
-        context.debug(`...unified the '${stepString}' step with the '${conclusionString}' conclusion.`);
+        context.debug(`...applied the '${conclusionString}' conclusion to the '${stepString}' step.`);
 
         return forward(context, back);
       }, (exception) => {
@@ -88,7 +88,7 @@ export default define(class Conclusion extends Resolution {
           return back(exception);
         }
 
-        context.trace(`Unable to unify the '${stepString}' step with the '${conclusionString}' conclusion.`);
+        context.trace(`Unable to apply the '${conclusionString}' conclusion to the '${stepString}' step.`);
 
         return back();
       });

@@ -84,11 +84,11 @@ export default define(class ProcedureCall extends Element {
     return forward(procedureCall, context, back);
   }
 
-  unifyIndependently(generalContext, specificContext, forward, back) {
+  applyIndependently(generalContext, specificContext, forward, back) {
     const context = specificContext,
           procedureCallString = this.getString(); ///
 
-    context.trace(`Unifying the '${procedureCallString}' procedure call independently...`);
+    context.trace(`Applying the '${procedureCallString}' procedure call independently...`);
 
     const procedureName = this.getProcedureName(),
           procedure = context.findProcedureByProcedureName(procedureName),
@@ -109,7 +109,7 @@ export default define(class ProcedureCall extends Element {
         return back();
       }
 
-      context.trace(`...unified the '${procedureCallString}' procedure call independently.`);
+      context.trace(`...applied the '${procedureCallString}' procedure call independently.`);
 
       return forward(generalContext, specificContext, back);
     }, back);

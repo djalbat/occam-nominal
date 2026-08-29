@@ -85,41 +85,13 @@ export default define(class Premise extends Fact {
     });
   });
 
-  unifyIndependently = breakable(function (context, forward, back) {
-    forward = cut(forward, back); ///
-
-    const premiseString = this.getString();  ///
-
-    context.trace(`Unifying the '${premiseString}' premise independently...`);
-
-    const unifyStatementIndependently = this.unifyStatementIndependently.bind(this),
-          unifyProcedureCallIndependently = this.unifyProcedureCallIndependently.bind(this);
-
-    return all([
-      unifyStatementIndependently,
-      unifyProcedureCallIndependently
-    ], context, (context, back) => {
-      context.debug(`...unified the '${premiseString}' premise independently.`);
-
-      return forward(context, back);
-    }, (exception) => {
-      if (exception) {
-        return back(exception);
-      }
-
-      context.trace(`Unable to Unify the '${premiseString}' premise independently.`);
-
-      return back();
-    });
-  });
-
-  unifyFactOrSubproof = breakable(function (factOrSubproof, context, forward, back) {
+  apply = breakable(function (factOrSubproof, context, forward, back) {
     forward = cut(forward, back); ///
 
     const premiseString = this.getString(), ///
           factOrSubproofString = factOrSubproof.getString();
 
-    context.trace(`Unifying the '${factOrSubproofString}' fact or subproof with the '${premiseString}' premise...`);
+    context.trace(`Applying the '${premiseString}' premise to the the '${factOrSubproofString}' fact or subproof...`);
 
     const unifyFact = this.unifyFact.bind(this),
           unifySubproof = this.unifySubproof.bind(this);
@@ -128,7 +100,7 @@ export default define(class Premise extends Fact {
       unifyFact,
       unifySubproof
     ], factOrSubproof, context, (factOrSubproof, context, back) => {
-      context.debug(`...unified the '${factOrSubproofString}' fact or subproof with the '${premiseString}' premise.`);
+      context.debug(`...applied the '${premiseString}' premise to the the '${factOrSubproofString}' fact or subproof.`);
 
       return forward(context, back);
     }, (exception) => {
@@ -136,7 +108,35 @@ export default define(class Premise extends Fact {
         return back(exception);
       }
 
-      context.trace(`Unable to unify the '${factOrSubproofString}' fact or subproof with the '${premiseString}' premise.`);
+      context.trace(`Unable to apply the '${premiseString}' premise to the the '${factOrSubproofString}' fact or subproof.`);
+
+      return back();
+    });
+  });
+
+  applyIndependently = breakable(function (context, forward, back) {
+    forward = cut(forward, back); ///
+
+    const premiseString = this.getString();  ///
+
+    context.trace(`Applying the '${premiseString}' premise independently...`);
+
+    const applyStatementIndependently = this.applyStatementIndependently.bind(this),
+          applyProcedureCallIndependently = this.applyProcedureCallIndependently.bind(this);
+
+    return all([
+      applyStatementIndependently,
+      applyProcedureCallIndependently
+    ], context, (context, back) => {
+      context.debug(`...applied the '${premiseString}' premise independently.`);
+
+      return forward(context, back);
+    }, (exception) => {
+      if (exception) {
+        return back(exception);
+      }
+
+      context.trace(`Unable to apply the '${premiseString}' premise independently.`);
 
       return back();
     });

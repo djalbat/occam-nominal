@@ -137,16 +137,16 @@ export default define(class DefinedAssertion extends Assertion {
     }, back);
   }
 
-  unifyIndependently(generalContext, specificContext, forward, back) {
+  applyIndependently(generalContext, specificContext, forward, back) {
     const context = specificContext, ///
           definedAssertionString = this.getString(); ///
 
-    context.trace(`Unifying the '${definedAssertionString}' defined assertion independently...`);
+    context.trace(`Ap0lying the '${definedAssertionString}' defined assertion independently...`);
 
     const term = termFromTermAndSubstitutions(this.term, context);
 
     return validateWhenDerived(term, this.negated, context, (context, back) => {
-      context.debug(`...unified the '${definedAssertionString}' defined assertion independently.`);
+      context.debug(`...applied the '${definedAssertionString}' defined assertion independently.`);
 
       return forward(generalContext, specificContext, back);
     }, back);

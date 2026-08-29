@@ -17,7 +17,7 @@ import { labelsFromJSON,
          suppositionsToSuppositionsJSON } from "../utilities/json";
 
 const { reverse } = arrayUtilities,
-      { every, extract, forwardsEvery, backwardsEvery } = continuationUtilities,
+      { cut, every, extract, forwardsEvery, backwardsEvery } = continuationUtilities,
       { breakable, breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default class Claim extends Element {
@@ -91,19 +91,27 @@ export default class Claim extends Element {
     return metavariableNodeMatches;
   }
 
-  unifyStepAndFactOrSubproofs = breakable(function (step, factOrSubproofs, context, forward, back) {
+  apply = breakable(function (step, factOrSubproofs, context, forward, back) {
+    forward = cut(forward, back); ///
+
     const specificContext = context;  ///
 
+    const claimString = this.getString();
+
+    context.trace(`Applying the '${claimString}' claim...`);
+
     return reconcile((context) => {
-      return this.unifyStepWithDeduction(step, context, (context, back) => {
-        return this.unifyFactOrSubproofsWithSuppositions(factOrSubproofs, context, (context, back) => {
+      return this.applyDeduction(step, context, (context, back) => {
+        return this.applySuppositions(factOrSubproofs, context, (context, back) => {
           const complexSubstitutionsUnsolved = context.areComplexSubstitutionsUnsolved();
 
           if (complexSubstitutionsUnsolved) {
-            context.debug(`Unable to unify the step and fact or subproofs because thre are unsolved complex substitutions.`);
+            context.debug(`Unable to unify the rule because thre are unsolved complex substitutions.`);
 
             return back();
           }
+
+          context.debug(`...applied the '${claimString}' claim.`);
 
           context = specificContext;  ///
 
@@ -256,24 +264,24 @@ export default class Claim extends Element {
     });
   }
 
-  unifyStepWithDeduction(step, context, forward, back) {
+  applyDeduction(step, context, forward, back) {
     const stepString = step.getString(),
           claimString = this.getString(),
           deductionString = this.deduction.getString();
 
-    context.trace(`Unifying the '${stepString}' step with the '${claimString}' claim's '${deductionString}' deduction...`);
+    context.trace(`Applying the '${claimString}' claim's '${deductionString}' deduction to the '${stepString}' step...`);
 
-    return this.deduction.unifyStep(step, context, (context, back) => {
-      context.debug(`...unified the '${stepString}' step with the '${claimString}' claim's '${deductionString}' deduction.`);
+    return this.deduction.apply(step, context, (context, back) => {
+      context.debug(`...applied the '${claimString}' claim's '${deductionString}' deduction to the '${stepString}' step.`);
 
       return forward(context, back);
     }, back);
   }
 
-  unifyFactOrSubproofsWithSupposition(factOrSubproofs, supposition, context, forward, back) {
+  applySupposition(factOrSubproofs, supposition, context, forward, back) {
     return extract(factOrSubproofs,
       (factOrSubproof, forward, back) => {
-        return supposition.unifyFactOrSubproof(factOrSubproof, context, forward, back);
+        return supposition.apply(factOrSubproof, context, forward, back);
       }, (factOrSubproofs, factOrSubproof, context, back) => {
         return context.solveInferredSubstitutions((back) => {
           return forward(factOrSubproofs, context, back);
@@ -283,18 +291,18 @@ export default class Claim extends Element {
           return back(exception);
         }
 
-        return supposition.unifyIndependently(context, (context, back) => {
+        return supposition.applyIndependently(context, (context, back) => {
           return forward(factOrSubproofs, context, back);
         }, back);
       }
     );
   }
 
-  unifyFactOrSubproofsWithSuppositions(factOrSubproofs, context, forward, back) {
+  applySuppositions(factOrSubproofs, context, forward, back) {
     factOrSubproofs = reverse(factOrSubproofs); ///
 
     return backwardsEvery(this.suppositions, (supposition, factOrSubproofs, context, forward, back) => {
-      return this.unifyFactOrSubproofsWithSupposition(factOrSubproofs, supposition, context, forward, back);
+      return this.applySupposition(factOrSubproofs, supposition, context, forward, back);
     }, factOrSubproofs, context, (factOrSubproofs, context, back) => {
       return forward(context, back);
     }, back);

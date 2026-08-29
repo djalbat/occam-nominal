@@ -98,12 +98,18 @@ export default define(class Rule extends Element {
     });
   });
 
-  unifyStepAndFactOrSubproofs = breakable(function (step, factOrSubproofs, context, forward, back) {
+  apply = breakable(function (step, factOrSubproofs, context, forward, back) {
+    forward = cut(forward, back); ///
+
     const specificContext = context;  ///
 
+    const ruleString = this.getString();  ///
+
+    context.trace(`Applying the '${ruleString}' rule...`);
+
     return reconcile((context) => {
-      return this.unifyStepWithConclusion(step, context, (context, back) => {
-        return this.unifyFactOrSubproofsWithPremises(factOrSubproofs, context, (context, back) => {
+      return this.applyConclusion(step, context, (context, back) => {
+        return this.applyPremises(factOrSubproofs, context, (context, back) => {
           const complexSubstitutionsUnsolved = context.areComplexSubstitutionsUnsolved();
 
           if (complexSubstitutionsUnsolved) {
@@ -113,6 +119,8 @@ export default define(class Rule extends Element {
           }
 
           context = specificContext;  ///
+
+          context.debug(`...applied the '${ruleString}' rule.`);
 
           return forward(context, back);
         }, back);
@@ -219,24 +227,10 @@ export default define(class Rule extends Element {
     }, back);
   }
 
-  unifyStepWithConclusion(step, context, forward, back) {
-    const ruleString = this.getString(),
-          stepString = step.getString(),
-          conclusionString = this.conclusion.getString();
-
-    context.trace(`Unifying the '${stepString}' step with the '${ruleString}' rule's '${conclusionString}' conclusion...`);
-
-    return this.conclusion.unifyStep(step, context, (context, back) => {
-      context.debug(`...unified the '${stepString}' step with the '${ruleString}' rule's '${conclusionString}' conclusion.`);
-
-      return forward(context, back);
-    }, back);
-  }
-
-  unifyFactOrSubproofsWithPremise(factOrSubproofs, premise, context, forward, back) {
+  applyPremise(factOrSubproofs, premise, context, forward, back) {
     return extract(factOrSubproofs,
       (factOrSubproof, forward, back) => {
-        return premise.unifyFactOrSubproof(factOrSubproof, context, forward, back);
+        return premise.apply(factOrSubproof, context, forward, back);
       }, (factOrSubproofs, factOrSubproof, context, back) => {
         return context.solveInferredSubstitutions((back) => {
           return forward(factOrSubproofs, context, back);
@@ -246,19 +240,33 @@ export default define(class Rule extends Element {
           return back(exception);
         }
 
-        return premise.unifyIndependently(context, (context, back) => {
+        return premise.applyIndependently(context, (context, back) => {
           return forward(factOrSubproofs, context, back);
         }, back);
       }
     );
   }
 
-  unifyFactOrSubproofsWithPremises(factOrSubproofs, context, forward, back) {
+  applyPremises(factOrSubproofs, context, forward, back) {
     factOrSubproofs = reverse(factOrSubproofs); ///
 
     return backwardsEvery(this.premises, (premise, factOrSubproofs, context, forward, back) => {
-      return this.unifyFactOrSubproofsWithPremise(factOrSubproofs, premise, context, forward, back);
+      return this.applyPremise(factOrSubproofs, premise, context, forward, back);
     }, factOrSubproofs, context, (factOrSubproofs, context, back) => {
+      return forward(context, back);
+    }, back);
+  }
+
+  applyConclusion(step, context, forward, back) {
+    const ruleString = this.getString(),
+          stepString = step.getString(),
+          conclusionString = this.conclusion.getString();
+
+    context.trace(`Applying the '${ruleString}' rule's '${conclusionString}' conclusion to the '${stepString}' step...`);
+
+    return this.conclusion.apply(step, context, (context, back) => {
+      context.debug(`...applied the '${ruleString}' rule's '${conclusionString}' conclusion to the '${stepString}' step.`);
+
       return forward(context, back);
     }, back);
   }

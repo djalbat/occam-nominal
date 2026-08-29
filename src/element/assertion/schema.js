@@ -75,6 +75,25 @@ export default define(class SchemaAssertion extends Assertion {
     });
   });
 
+  apply = unbreakable(function (step, context, forward, back) {
+    forward = cut(forward, back); ///
+
+    const schemas = context.getSchemas(),
+          statement = step.getStatement(),
+          schemaAssertion = this, ///
+          schemaAssertionString = this.getString();
+
+    context.trace(`Applying the '${schemaAssertionString}' schema assertion...`);
+
+    return some(schemas, (schema, forward, back) => {
+      return schema.unifyStatementAndSchemaAssertion(statement, schemaAssertion, context, (context, back) => {
+        context.debug(`...applied the '${schemaAssertionString}' schema assertion.`);
+
+        return forward(context, back);
+      }, back);
+    }, forward, back);
+  });
+
   validate(state, context, forward, back) {
     let validates;
 
@@ -165,16 +184,6 @@ export default define(class SchemaAssertion extends Assertion {
     }
 
     return linkValidates;
-  }
-
-  unifyStep(step, context, forward, back) {
-    const schemas = context.getSchemas(),
-          statement = step.getStatement(),
-          schemaAssertion = this; ///
-
-    return some(schemas, (schema, forward, back) => {
-      return schema.unifyStatementAndSchemaAssertion(statement, schemaAssertion, context, forward, back);
-    }, forward, back);
   }
 
   static name = "SchemaAssertion";

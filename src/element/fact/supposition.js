@@ -85,33 +85,13 @@ export default define(class Supposition extends Fact {
     });
   });
 
-  unifyIndependently = breakable( function(context, forward, back) {
-    forward = cut(forward, back); ///
-
-    const suppositionString = this.getString(); ///
-
-    context.trace(`Unifying the '${suppositionString}' supposition independently...`);
-
-    const unifyStatementIndependently = this.unifyStatementIndependently.bind(this),
-          unifyProcedureCallIndependently = this.unifyProcedureCallIndependently.bind(this);
-
-    return all([
-      unifyStatementIndependently,
-      unifyProcedureCallIndependently
-    ], context, (context , back) => {
-      context.debug(`...unified the '${suppositionString}' supposition independently.`);
-
-      return forward(context, back);
-    }, back);
-  });
-
-  unifyFactOrSubproof = breakable(function (factOrSubproof, context, forward, back) {
+  apply = breakable(function (factOrSubproof, context, forward, back) {
     forward = cut(forward, back); ///
 
     const suppositionString = this.getString(), ///
           factOrSubproofString = factOrSubproof.getString();
 
-    context.trace(`Unifying the '${factOrSubproofString}' fact or subproof with the '${suppositionString}' supposition...`);
+    context.trace(`Applying the '${suppositionString}' supposition to the '${factOrSubproofString}' fact or subproof...`);
 
     const unifyFact = this.unifyFact.bind(this),
           unifySubproof = this.unifySubproof.bind(this);
@@ -120,7 +100,7 @@ export default define(class Supposition extends Fact {
       unifyFact,
       unifySubproof
     ], factOrSubproof, context, (factOrSubproof, context, back) => {
-      context.debug(`Unified the '${factOrSubproofString}' fact or subproof with the '${suppositionString}' supposition.`);
+      context.debug(`...applied the '${suppositionString}' supposition to the '${factOrSubproofString}' fact or subproof.`);
 
       return forward(context, back);
     }, (exception) => {
@@ -128,7 +108,35 @@ export default define(class Supposition extends Fact {
         return back(exception);
       }
 
-      context.trace(`Unable to unify the '${factOrSubproofString}' fact or subproof with the '${suppositionString}' supposition.`);
+      context.trace(`Unable to apply the '${suppositionString}' supposition to the '${factOrSubproofString}' fact or subproof.`);
+
+      return back();
+    });
+  });
+
+  applyIndependently = breakable( function(context, forward, back) {
+    forward = cut(forward, back); ///
+
+    const suppositionString = this.getString(); ///
+
+    context.trace(`Applying the '${suppositionString}' supposition independently...`);
+
+    const applyStatementIndependently = this.applyStatementIndependently.bind(this),
+          applyProcedureCallIndependently = this.applyProcedureCallIndependently.bind(this);
+
+    return all([
+      applyStatementIndependently,
+      applyProcedureCallIndependently
+    ], context, (context , back) => {
+      context.debug(`...applied the '${suppositionString}' supposition independently.`);
+
+      return forward(context, back);
+    }, (exception) => {
+      if (exception) {
+        return back(exception);
+      }
+
+      context.trace(`Unable to apply the '${suppositionString}' supposition independently.`);
 
       return back();
     });

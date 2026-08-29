@@ -61,13 +61,13 @@ export default define(class Deduction extends Resolution {
     });
   });
 
-  unifyStep = breakable(function (step, context, forward, back) {
+  apply = breakable(function (step, context, forward, back) {
     forward = cut(forward, back); ///
 
     const stepString = step.getString(),
           deductionString = this.getString();  ///
 
-    context.trace(`Unifying the '${stepString}' step with the '${deductionString}' deduction...`);
+    context.trace(`Applying the '${deductionString}' deduction to the '${stepString}' step...`);
 
     const stepContext = step.getContext(),
           deductionContext = this.getContext(),  ///
@@ -80,7 +80,7 @@ export default define(class Deduction extends Resolution {
       return this.statement.unifyStatement(statement, generalContext, specificContext, (generalContext, specificContext, back) => {
         specificContext.commit(context);
 
-        context.debug(`...unified the '${stepString}' step with the '${deductionString}' deduction.`);
+        context.debug(`...applied the '${deductionString}' deduction to the '${stepString}' step.`);
 
         return forward(context, back);
       }, (exception) => {
@@ -88,7 +88,7 @@ export default define(class Deduction extends Resolution {
           return back(exception);
         }
 
-        context.trace(`Unable to unify the '${stepString}' step with the '${deductionString}' deduction.`);
+        context.trace(`Unable to apply the '${deductionString}' deduction to the '${stepString}' step.`);
 
         return back();
       });

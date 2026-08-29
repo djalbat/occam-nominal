@@ -142,41 +142,41 @@ export default class Fact extends Element {
     }, back);
   }
 
-  unifyStatementIndependently(context, forward, back) {
+  applyStatementIndependently(context, forward, back) {
     if (this.statement === null) {
       return forward(context, back);
     }
 
     const factString = this.getString(); ///
 
-    context.trace(`Unifying the '${factString}' fact's statement independently...`);
+    context.trace(`Appplying the '${factString}' fact's statement independently...`);
 
     const factContext = this.getContext(), ///
           generalContext = factContext,  ///
           specificContext = context;  ///
 
-    return this.statement.unifyIndependently(generalContext, specificContext, (generalContext, specificContext, back) => {
-      context.debug(`...unified the '${factString}' fact's statement independently.`);
+    return this.statement.applyIndependently(generalContext, specificContext, (generalContext, specificContext, back) => {
+      context.debug(`...applied the '${factString}' fact's statement independently.`);
 
       return forward(context, back);
     }, back);
   }
 
-  unifyProcedureCallIndependently(context, forward, back) {
+  applyProcedureCallIndependently(context, forward, back) {
     if (this.procedureCall === null) {
       return forward(context, back);
     }
 
     const factString = this.getString(); ///
 
-    context.trace(`Unifying the '${factString}' fact's procedure call independently...`);
+    context.trace(`Applying the '${factString}' fact's procedure call independently...`);
 
     const factContext = this.getContext(), ///
           generalContext = factContext,  ///
           specificContext = context;  ///
 
-    return this.procedureCall.unifyIndependently(generalContext, specificContext, (generalContext, specificContext, back) => {
-      context.debug(`...unified the '${factString}' fact's procedure call independently.`);
+    return this.procedureCall.applyIndependently(generalContext, specificContext, (generalContext, specificContext, back) => {
+      context.debug(`...applied the '${factString}' fact's procedure call independently.`);
 
       return forward(context, back);
     }, back);

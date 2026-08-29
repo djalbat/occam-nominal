@@ -51,6 +51,31 @@ export default define(class SignatureAssertion extends Assertion {
     });
   });
 
+  apply = unbreakable(function (step, factOrSubproofs, context, forward, back) {
+    forward = cut(forward, back); ///
+
+    let stepAndFactOrSubproofsUnify = false;
+
+    const signatureAssertionString = this.getString();  ///
+
+    context.trace(`Applying the '${signatureAssertionString}' signature assertion...`);
+
+    return reconcile((context) => {
+      const axiom = context.findAxiomByLink(this.link),
+        signatureAssertion = this;  ///
+
+      return axiom.unifySignatureAssertion(signatureAssertion, context, (signatureAssertionUnifies) => {
+        if (!signatureAssertionUnifies) {
+          return continuation(stepAndFactOrSubproofsUnify);
+        }
+
+        context.debug(`applied the '${signatureAssertionString}' signature assertion.`);
+
+        axiom.unifyStepAndFactOrSubproofs(step, factOrSubproofs, context, forward, back);
+      });
+    }, context);
+  });
+
   validate(state, context, forward, back) {
     const signatureAssertionString = this.getString();  ///
 
@@ -200,23 +225,6 @@ export default define(class SignatureAssertion extends Assertion {
 
           return continuation(claimUnifies);
         });
-      });
-    }, context);
-  }
-
-  unifyStepAndFactOrSubproofs(step, factOrSubproofs, context, forward, back) {
-    let stepAndFactOrSubproofsUnify = false;
-
-    return reconcile((context) => {
-      const axiom = context.findAxiomByLink(this.link),
-            signatureAssertion = this;  ///
-
-      return axiom.unifySignatureAssertion(signatureAssertion, context, (signatureAssertionUnifies) => {
-        if (!signatureAssertionUnifies) {
-          return continuation(stepAndFactOrSubproofsUnify);
-        }
-
-        axiom.unifyStepAndFactOrSubproofs(step, factOrSubproofs, context, forward, back);
       });
     }, context);
   }

@@ -199,13 +199,13 @@ export default define(class TypeAssertion extends Assertion {
     }, back);
   }
 
-  unifyIndependently(generalContext, specificContext, forward, back) {
+  applyIndependently(generalContext, specificContext, forward, back) {
     let unifiesIndependently = false;
 
     const context = specificContext, ///
           typeAssertionString = this.getString(); ///
 
-    context.trace(`Unifying the '${typeAssertionString}' type assertion independently...`);
+    context.trace(`Applying the '${typeAssertionString}' type assertion independently...`);
 
     const term = termFromTermAndSubstitutions(this.term, context);
 
@@ -222,7 +222,7 @@ export default define(class TypeAssertion extends Assertion {
     });
 
     if (unifiesIndependently) {
-      context.debug(`...unified the '${typeAssertionString}' type assertion independently.`);
+      context.debug(`...applied the '${typeAssertionString}' type assertion independently.`);
     }
 
     return continuation(unifiesIndependently);
