@@ -146,8 +146,6 @@ export default define(class Premise extends Fact {
   });
 
   validate(state, context, forward, back) {
-    forward = cut(forward, back); ///
-
     const premiseString = this.getString(); ///
 
     context.trace(`Validating the '${premiseString}' premise...`);

@@ -324,8 +324,6 @@ export default define(class Metavariable extends Element {
   }
 
   unifyFrame(frame, generalContext, specificContext, forward, back) {
-    let frameUnifies = false;
-
     const context = specificContext,  ///
           frameString = frame.getString(),
           metavariableString = this.getString();
@@ -335,9 +333,7 @@ export default define(class Metavariable extends Element {
     const frameMetavariableCompares = this.compareFrameMetavariable(frame, generalContext, specificContext);
 
     if (frameMetavariableCompares) {
-      frameUnifies = true;
-
-      return continuation(frameUnifies, context);
+      return forward(generalContext, specificContext, back);
     }
 
     const metavariable = this,  ///
@@ -345,45 +341,31 @@ export default define(class Metavariable extends Element {
           inferredSubstitution = context.findInferredSubstitutionByMetavariableNode(metavariableNode);
 
     if (inferredSubstitution !== null) {
-      const inferredSubstitutionComparesToTerm = inferredSubstitution.compareFrame(frame, context);
+      const inferredSubstitutionComparesToFrame = inferredSubstitution.compareFrame(frame, context);
 
-      if (inferredSubstitutionComparesToTerm) {
+      if (inferredSubstitutionComparesToFrame) {
         const inferredSubstitutionString = inferredSubstitution.getString();
 
         context.trace(`The '${inferredSubstitutionString}' inferred substitution is already present.`);
 
-        frameUnifies = true;
+        return forward(generalContext, specificContext, back);
       }
 
-      return continuation(frameUnifies, context);
+      return back();
     }
 
     const { FrameSubstitution } = elements,
           frameSubstitution = FrameSubstitution.fromFrameAndMetavariable(frame, metavariable, generalContext, specificContext);
 
-    declare((state) => {
-      desist((state) => {
-        frameSubstitution.validate(state, context, (frameSubstitution, context) => {
-          let validates;
+    return frameSubstitution.verify(context, (context, back) => {
+      const inferredSubstitution = frameSubstitution;  ///
 
-          const inferredSubstitution = frameSubstitution;  ///
+      context.addInferredSubstitution(inferredSubstitution);
 
-          context.addInferredSubstitution(inferredSubstitution);
+      context.debug(`...unified the '${frameString}' frame with the '${metavariableString}' metavariable.`);
 
-          validates = true;
-
-          return validates;
-        });
-      }, state)
-    });
-
-    frameUnifies = true;
-
-    if (frameUnifies) {
-      context.debug(`...unified the '${frameString}' frame with the '${metavariableString}' variable.`);
-    }
-
-    return continuation(frameUnifies, context);
+      return forward(generalContext, specificContext, back);
+    }, back);
   }
 
   unifyStatement(statement, generalContext, specificContext, forward, back) {
@@ -401,8 +383,8 @@ export default define(class Metavariable extends Element {
 
     const metavariable = this,  ///
           metavariableNode = metavariable.getNode(),
-          sublingSubstitutionNode = metavariableNode.getSiblingSubstitutionNode(),
-          substitutionNode = sublingSubstitutionNode, ///
+          siblingSubstitutionNode = metavariableNode.getSiblingSubstitutionNode(),
+          substitutionNode = siblingSubstitutionNode, ///
           inferredSubstitution = (substitutionNode !== null) ?
                                   context.findInferredSubstitutionByMetavariableNodeAndSubstitutionNode(metavariableNode, substitutionNode) :
                                     context.findInferredSubstitutionByMetavariableNode(metavariableNode);
@@ -434,19 +416,15 @@ export default define(class Metavariable extends Element {
       statementSubstitution = StatementSubstitution.fromStatementAndMetavariable(statement, metavariable, generalContext, specificContext);
     }
 
-    return declare((state) => {
-      return desist((state) => {
-        return statementSubstitution.validate(state, context, (statementSubstitution, _ , back) => {
-          const inferredSubstitution = statementSubstitution;  ///
+    return statementSubstitution.verify(context, (context, back) => {
+      const inferredSubstitution = statementSubstitution;  ///
 
-          context.addInferredSubstitution(inferredSubstitution);
+      context.addInferredSubstitution(inferredSubstitution);
 
-          context.debug(`...unified the '${statementString}' statement with the '${metavariableString}' metavariable.`);
+      context.debug(`...unified the '${statementString}' statement with the '${metavariableString}' metavariable.`);
 
-          return forward(generalContext, specificContext, back);
-        }, back);
-      }, state);
-    });
+      return forward(generalContext, specificContext, back);
+    }, back);
   }
 
   unifyMetavariable(metavariable, context, forward, back) {

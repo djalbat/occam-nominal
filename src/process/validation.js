@@ -113,7 +113,7 @@ export function validateStatementAsMetavariable(statement, state, context, forwa
   const strict = true;  ///
 
   return metavariable.validate(strict, state, context, (metavariable, context, back) => {
-    return validateSubstitution(statement, context, (context, back) => {
+    return verifySubstitution(statement, context, (context, back) => {
       context.debug(`...validated the '${statementString}' statement as a metavariable.`);
 
       return forward(statement, state, context, back);
@@ -320,20 +320,16 @@ export function unifyTermWithProperties(term, state, context, forward, back) {
   }, back);
 }
 
-function validateSubstitution(statement, context, forward, back) {
+function verifySubstitution(statement, context, forward, back) {
   const substitution = statement.getSubstitution();
 
   if (substitution === null) {
     return forward(context, back);
   }
 
-  return declare((state) => {
-    return desist((state) => {
-      return substitution.validate(state, context, (substitution, context, back) => {
-        statement.setSubstitution(substitution);
+  return substitution.verify(context, (context, back) => {
+    statement.setSubstitution(substitution);
 
-        return forward(context, back);
-      }, back);
-    }, state);
-  });
+    return forward(context, back);
+  }, back);
 }

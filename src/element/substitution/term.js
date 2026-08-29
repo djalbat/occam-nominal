@@ -5,14 +5,15 @@ import { breakPointUtilities, continuationUtilities } from "occam-languages";
 import Substitution from "../substitution";
 
 import { define } from "../../elements";
+import { desist, declare } from "../../utilities/state";
 import { stripBracketsFromTerm } from "../../utilities/brackets";
 import { instantiateTermSubstitution } from "../../process/instantiate";
 import { termSubstitutionFromTermSubstitutionNode } from "../../utilities/element";
 import { termSubstitutionStringFromTermAndVariable } from "../../utilities/string";
 import { join, ablates, manifest, attempts, reconcile, participate, instantiate, unserialises } from "../../utilities/context";
 
-const { cut, all, isolate } = continuationUtilities,
-      { breakPointFromJSON } = breakPointUtilities;
+const { unbreakable } = breakPointUtilities,
+      { cut, all, isolate } = continuationUtilities;
 
 export default define(class TermSubstitution extends Substitution {
   constructor(context, string, node, breakPoint, targetTerm, replacementTerm) {
@@ -78,9 +79,25 @@ export default define(class TermSubstitution extends Substitution {
     return comparedToTerm;
   }
 
-  validate(state, context, forward, back) {
+  verify = unbreakable(function (context, forward, back) {
     forward = cut(forward, back); ///
 
+    const termSubstitutionString = this.getString(); ///
+
+    context.trace(`Verifying the '${termSubstitutionString}' term substitution...`);
+
+    return desist((state) => {
+      return declare((state) => {
+        return this.validate(state, context, (termSubstitution, context , back) => {
+          context.debug(`...verified the '${termSubstitutionString}' term substitution.`);
+
+          return forward(context, back);
+        }, back);
+      }, state);
+    });
+  });
+
+  validate(state, context, forward, back) {
     let substitution;
 
     const termSubstitutionString = this.getString();  ///
@@ -284,7 +301,7 @@ export default define(class TermSubstitution extends Substitution {
                   generalContext,
                   specificContext
                 ],
-                breakPoint = breakPointFromJSON(json),
+                breakPoint = null,
                 targetTerm = targetTermFromTermSubstitutionNode(termSubstitutionNode, generalContext),
                 replacementTerm = replacementTermFromTermSubstitutionNode(termSubstitutionNode, specificContext);
 

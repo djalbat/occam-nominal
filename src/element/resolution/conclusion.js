@@ -45,7 +45,7 @@ export default define(class Conclusion extends Resolution {
 
     declare((state) => {
       desist((state) => {
-        return this.validate(state, context, (conclusion, _ , back) => {
+        return this.validate(state, context, (conclusion, context, back) => {
           context = specificContext;  ///
 
           context.debug(`...verified the '${conclusionString}' conclusion.`);
@@ -99,8 +99,6 @@ export default define(class Conclusion extends Resolution {
   });
 
   validate(state, context, forward, back) {
-    forward = cut(forward, back); ///
-
     const conclusionString = this.getString(); ///
 
     context.trace(`Validating the '${conclusionString}' conclusion...`);

@@ -12,8 +12,8 @@ import { validateTermAsConstructor } from "../process/validate";
 import { attempt, serialise, unserialise, instantiate } from "../utilities/context";
 import { typeFromJSON, typeToTypeJSON, hypothesesFromJSON, hypothesesToHypothesesJSON } from "../utilities/json";
 
-const { cut, all, every, exists, isolate } = continuationUtilities,
-      { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
+const { unbreakable } = breakPointUtilities,
+      { cut, all, every, exists, isolate } = continuationUtilities;
 
 export default define(class Constructor extends Element {
   constructor(context, string, node, breakPoint, term, type, hypotheses) {
@@ -80,7 +80,9 @@ export default define(class Constructor extends Element {
     return malformed;
   }
 
-  verify(context, forward, back) {
+  verify = unbreakable(function (context, forward, back) {
+    forward = cut(forward, back); ///
+
     const includeType = false,
           constructorString = this.getString(includeType);  ///
 
@@ -96,18 +98,16 @@ export default define(class Constructor extends Element {
 
     return declare((state) => {
       return desist((state) => {
-        return this.validate(state, context, (constructor, _ , back) => {
+        return this.validate(state, context, (constructor, context, back) => {
           context.debug(`...verified the '${constructorString}' constructor.`);
 
           return forward(context, back);
         }, back);
       }, state);
     });
-  }
+  });
 
   validate(state, context, forward, back) {
-    forward = cut(forward, back); ///
-
     const includeType = false,
           constructorString = this.getString(includeType);  ///
 
@@ -280,20 +280,11 @@ export default define(class Constructor extends Element {
             hypothesesJSON = hypothesesToHypothesesJSON(this.hypotheses),
             string = this.getString(includeType);
 
-      let breakPoint;
-
-      breakPoint = this.getBreakPoint();
-
-      const breakPointJSON = breakPointToBreakPointJSON(breakPoint);
-
-      breakPoint = breakPointJSON;  ///
-
       const type = typeJSON,  ///
             hypotheses = hypothesesJSON,  ///
             json = {
               context,
               string,
-              breakPoint,
               type,
               hypotheses
             };
@@ -312,7 +303,7 @@ export default define(class Constructor extends Element {
         const { string } = json,
               constructorNode = instantiateConstructor(string, context),
               node = constructorNode, ///
-              breakPoint = breakPointFromJSON(json),
+              breakPoint = null,
               term = termFromConstructorNode(constructorNode, context),
               type = typeFromJSON(json, context),
               hypotheses = hypothesesFromJSON(json, context);

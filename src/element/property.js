@@ -11,8 +11,8 @@ import { validateTermAsProperty } from "../process/validate";
 import { typeFromJSON, typeToTypeJSON } from "../utilities/json";
 import { attempt, serialise, unserialise, instantiate } from "../utilities/context";
 
-const { cut, isolate } = continuationUtilities,
-      { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
+const { unbreakable } = breakPointUtilities,
+      { cut, isolate } = continuationUtilities;
 
 export default define(class Property extends Element {
   constructor(context, string, node, breakPoint, term, type) {
@@ -63,7 +63,9 @@ export default define(class Property extends Element {
     return malformed;
   }
 
-  verify(context, forward, back) {
+  verify = unbreakable(function (context, forward, back) {
+    forward = cut(forward, back); ///
+
     let verifies = false;
 
     const includeType = false,
@@ -96,11 +98,9 @@ export default define(class Property extends Element {
     }
 
     return continuation(verifies, context);
-  }
+  });
 
   validate(state, context, forward, back) {
-    forward = cut(forward, back); ///
-
     let validates;
 
     const includeType = false,
@@ -202,19 +202,10 @@ export default define(class Property extends Element {
             typeJSON = typeToTypeJSON(this.type),
             string = this.getString(includeType);
 
-      let breakPoint;
-
-      breakPoint = this.getBreakPoint();
-
-      const breakPointJSON = breakPointToBreakPointJSON(breakPoint);
-
-      breakPoint = breakPointJSON;  ///
-
       const type = typeJSON,  ///
             json = {
               context,
               string,
-              breakPoint,
               type
             };
 
@@ -232,7 +223,7 @@ export default define(class Property extends Element {
         const { string } = json,
               propertyNode = instantiateProperty(string, context),
               node = propertyNode, ///
-              breakPoint = breakPointFromJSON(json),
+              breakPoint = null,
               term = termFromPropertyNode(propertyNode, context),
               type = typeFromJSON(json, context);
 

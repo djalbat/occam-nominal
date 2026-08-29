@@ -3,13 +3,13 @@
 import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
 
 import { define } from "../elements";
+import { declare } from "../utilities/state";
 import { unifyStatement } from "../process/unify";
 import { instantiateConstraint } from "../process/instantiate";
 import { stripBracketsFromStatement } from "../utilities/brackets";
 import { constraintFromConstraintNode } from "../utilities/element";
 import { constraintStringFromReferenceAndStatement } from "../utilities/string";
-import { join, ablate, attempt, reconcile, serialise, unserialise, instantiate } from "../utilities/context";
-import {declare} from "../utilities/state";
+import { join, ablate, attempt, reconcile, unserialise, instantiate } from "../utilities/context";
 
 const { unbreakable } = breakPointUtilities,
       { cut, all, some, isolate } = continuationUtilities;
@@ -65,13 +65,13 @@ export default define(class Constraint extends Element {
   verify = unbreakable(function (context, forward, back) {
     forward = cut(forward, back); ///
 
-    const referenceString = this.getString(); ///
+    const constraintString = this.getString(); ///
 
-    context.trace(`Verifying the '${referenceString}' reference...`);
+    context.trace(`Verifying the '${constraintString}' constraint...`);
 
     return declare((state) => {
-      return this.validate(state, context, (reference, context , back) => {
-        context.debug(`...verified the '${referenceString}' reference.`);
+      return this.validate(state, context, (constraint, context , back) => {
+        context.debug(`...verified the '${constraintString}' constraint.`);
 
         return forward(context, back);
       }, back);
@@ -317,30 +317,6 @@ export default define(class Constraint extends Element {
     });
   }
 
-  toJSON() {
-    const context = this.getContext();
-
-    return serialise((context) => {
-      const string = this.getString();
-
-      let breakPoint;
-
-      breakPoint = this.getBreakPoint();
-
-      const breakPointJSON = breakPointToBreakPointJSON(breakPoint);
-
-      breakPoint = breakPointJSON;  ///
-
-      const json = {
-        context,
-        string,
-        breakPoint
-      };
-
-      return json;
-    }, context);
-  }
-
   static name = "Constraint";
 
   static fromJSON(json, context) {
@@ -351,7 +327,7 @@ export default define(class Constraint extends Element {
         const { string } = json,
               constraintNode = instantiateConstraint(string, context),
               node = constraintNode,  ///
-              breakPoint = breakPointFromJSON(json),
+              breakPoint = null,
               reference = referenceFromConstraintNode(constraintNode, context),
               statement = statementFromConstraintNode(constraintNode, context);
 

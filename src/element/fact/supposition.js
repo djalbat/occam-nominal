@@ -135,8 +135,6 @@ export default define(class Supposition extends Fact {
   });
 
   validate(state, context, forward, back) {
-    forward = cut(forward, back); ///
-
     const suppositionString = this.getString(); ///
 
     context.trace(`Validating the '${suppositionString}' supposition...`);

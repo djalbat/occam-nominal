@@ -4,11 +4,10 @@ import { arrayUtilities } from "necessary";
 import { continuationUtilities } from "occam-languages";
 
 import Context from "../context";
-import elements from "../elements";
 
 import { metavariableNodesFromInferredSubstitutions } from "../utilities/substitutions";
 
-const { cut, forEach } = continuationUtilities,
+const { forEach } = continuationUtilities,
       { push, find, first } = arrayUtilities;
 
 export default class LiminalContext extends Context {
@@ -94,8 +93,6 @@ export default class LiminalContext extends Context {
   }
 
   solveInferredSubstitutions(forward, back) {
-    forward = cut(forward, back); ///
-
     const inferredSubstitutions = this.getInferredSubstitutions(),
           metavariableNodes = metavariableNodesFromInferredSubstitutions(inferredSubstitutions);
 
@@ -152,31 +149,6 @@ export default class LiminalContext extends Context {
           empty = (inferredSubstitutionsLength === 0);
 
     return empty;
-  }
-
-  qualify(assumption, constraint) {
-    let qualifies = false;
-
-    const empty = this.isEmpty();
-
-    if (empty) {
-      qualifies = true;
-    } else {
-      const soleInferredSubstitution = this.getSoleInferredSubstitution();
-
-      if (soleInferredSubstitution !== null) {
-        const { ReferenceInferredSubstitution } = elements,
-              context = this, ///
-              referenceInferredSubstitution = ReferenceInferredSubstitution.fromAssumptionAndConstraint(assumption, constraint, context),
-              referenceInferredSubstitutionComparesToSsoleInferredSubstitution = referenceInferredSubstitution.compareSubstitution(soleInferredSubstitution);
-
-        if (referenceInferredSubstitutionComparesToSsoleInferredSubstitution) {
-          qualifies = true;
-        }
-      }
-    }
-
-    return qualifies;
   }
 
   merge(context) {

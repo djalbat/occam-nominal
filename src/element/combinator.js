@@ -10,8 +10,8 @@ import { unifyStatementWithCombinator } from "../process/unify";
 import { validateStatementAsCombinator } from "../process/validate";
 import { attempt, serialise, unserialise, instantiate } from "../utilities/context";
 
-const { cut, exists, isolate } = continuationUtilities,
-      { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
+const { unbreakable } = breakPointUtilities,
+      { cut, exists, isolate } = continuationUtilities;
 
 export default define(class Combinator extends Element {
   constructor(context, string, node, breakPoint, statement) {
@@ -38,7 +38,9 @@ export default define(class Combinator extends Element {
     return malformed;
   }
 
-  verify(context, forward, back) {
+  verify = unbreakable(function (context, forward, back) {
+    forward = cut(forward, back); ///
+
     const includeType = false,
           cbmbinatorString = this.getString(includeType);  ///
 
@@ -54,18 +56,16 @@ export default define(class Combinator extends Element {
 
     return declare((state) => {
       return desist((state) => {
-        return this.validate(state, context, (cbmbinator, _ , back) => {
+        return this.validate(state, context, (cbmbinator, context, back) => {
           context.debug(`...verified the '${cbmbinatorString}' cbmbinator.`);
 
           return forward(context, back);
         }, back);
       }, state);
     });
-  }
+  });
 
   validate(state, context, forward, back) {
-    forward = cut(forward, back); ///
-
     const includeType = false,
           combinatorString = this.getString(includeType);  ///
 
@@ -128,21 +128,11 @@ export default define(class Combinator extends Element {
     const context = this.getContext();
 
     return serialise((context) => {
-      const string = this.getString();
-
-      let breakPoint;
-
-      breakPoint = this.getBreakPoint();
-
-      const breakPointJSON = breakPointToBreakPointJSON(breakPoint);
-
-      breakPoint = breakPointJSON;  ///
-
-      const json = {
-        context,
-        string,
-        breakPoint
-      };
+      const string = this.getString(),
+            json = {
+              context,
+              string
+            };
 
       return json;
     }, context);
@@ -158,7 +148,7 @@ export default define(class Combinator extends Element {
         const { string } = json,
               combinatorNode = instantiateCombinator(string, context),
               node = combinatorNode,  ///
-              breakPoint = breakPointFromJSON(json),
+              breakPoint = null,
               statement = statementFromCombinatorNode(combinatorNode, context);
 
         combinator = new Combinator(context, string, node, breakPoint, statement);

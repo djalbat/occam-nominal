@@ -1,14 +1,16 @@
 "use strict";
 
-import { Element, continuationUtilities } from "occam-languages";
+import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
 
 import { define } from "../../elements";
+import { declare } from "../../utilities/state";
 import { ablate, attempt, instantiate } from "../../utilities/context";
 import { instantiateImplicitAssumption } from "../../process/instantiate";
 import { implicitAssumptionStringFromStatement } from "../../utilities/string";
 import { implicitAssumptionFromImplicitAssumptionNode } from "../../utilities/element";
 
-const { cut, all, isolate } = continuationUtilities;
+const { unbreakable } = breakPointUtilities,
+      { cut, all, isolate } = continuationUtilities;
 
 export default define(class ImplicitAssumption extends Element {
   constructor(context, string, node, breakPoint, statement) {
@@ -46,9 +48,23 @@ export default define(class ImplicitAssumption extends Element {
     return implicitAssumptionNodeMatches;
   }
 
-  validate(state, context, forward, back) {
+  verify = unbreakable(function (context, forward, back) {
     forward = cut(forward, back); ///
 
+    const implicitAssumptionString = this.getString(); ///
+
+    context.trace(`Verifying the '${implicitAssumptionString}' implicit assumption...`);
+
+    return declare((state) => {
+      return this.validate(state, context, (implicitAssumption, context , back) => {
+        context.debug(`...verified the '${implicitAssumptionString}' implicit assumption.`);
+
+        return forward(context, back);
+      }, back);
+    });
+  });
+
+  validate(state, context, forward, back) {
     const implicitAssumptionString = this.getString();  ///
 
     context.trace(`Validating the '${implicitAssumptionString}' implicit assumption...`);

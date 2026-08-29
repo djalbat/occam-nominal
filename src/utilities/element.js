@@ -1686,10 +1686,9 @@ export function metavariableFromReferenceNode(referenceNode, context) {
 }
 
 export function substitutionFromStatementNode(statementNode, context) {
-  const { FrameSubstitution, TermSubstitution } = elements,
-        frameSubstitution = FrameSubstitution.fromStatementNode(statementNode, context),
+  const { TermSubstitution } = elements,
         termSubstitution = TermSubstitution.fromStatementNode(statementNode, context),
-        substitution = (frameSubstitution || termSubstitution);
+        substitution = termSubstitution;  ///
 
   return substitution;
 }

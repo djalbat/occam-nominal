@@ -6,9 +6,7 @@ import elements from "../elements";
 
 import { define } from "../elements";
 import { instantiate } from "../utilities/context";
-import { declare, desist  } from "../utilities/state";
 import { instantiateVariable } from "../process/instantiate";
-import { provisionallyStringFromProvisional } from "../utilities/string";
 import { variableFromTermNode, identifierFromVariableNode } from "../utilities/element";
 import { typeFromJSON, typeToTypeJSON, provisionalFromJSON, provisionalToProvisionalJSON } from "../utilities/json";
 
@@ -139,19 +137,15 @@ export default define(class Variable extends Element {
     const { TermSubstitution } = elements,
           termSubstitution = TermSubstitution.fromTermAndVariable(term, variable, generalContext, specificContext);
 
-    return declare((state) => {
-      return desist((state) => {
-        return termSubstitution.validate(state, context, (termSubstitution, context) => {
-          const inferredSubstitution = termSubstitution;  ///
+    return termSubstitution.verify(context, (context, back) => {
+      const inferredSubstitution = termSubstitution;  ///
 
-          context.addInferredSubstitution(inferredSubstitution);
+      context.addInferredSubstitution(inferredSubstitution);
 
-          context.debug(`...unified the '${termString}' term with the '${variableString}' variable.`);
+      context.debug(`...unified the '${termString}' term with the '${variableString}' variable.`);
 
-          return forward(generalContext, specificContext, back);
-        }, back);
-      }, state);
-    });
+      return forward(generalContext, specificContext, back);
+    }, back);
   }
 
   compareTermVariable(term, generalContext, specificContext) {

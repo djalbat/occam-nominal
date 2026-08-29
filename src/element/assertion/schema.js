@@ -51,9 +51,7 @@ export default define(class SchemaAssertion extends Assertion {
         const statement = fact.getStatement(),
               implicitAssumption = ImplicitAssumption.fromStatement(statement, context);
 
-        declare((state) => {
-          implicitAssumption.validate(state, context, (implicitAssumption, context) => true)  ///
-        });
+        implicitAssumption.verify(context, (implicitAssumption, context) => true)  ///
 
         implicitAssumptions.push(implicitAssumption);
       });

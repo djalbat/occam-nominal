@@ -2,8 +2,6 @@
 
 import elements from "../elements";
 
-import { declare } from "../utilities/state";
-
 function unifyStepWithRule(step, context, forward, back) {
   const reference = step.getReference();
 
@@ -121,13 +119,11 @@ function unifyStepAsQualifiedConstraint(step, context, forward, back) {
 
   context.trace(`Unifying the '${stepString}' step as a constraint with the '${referenceString}' reference...`);
 
-  return declare((state) => {
-    return constraint.validate(state, context, (constraint, _ , back) => {
-      context.debug(`...unified the '${stepString}' step as a constraint with the '${referenceString}' reference.`);
+  return constraint.verify(context, (context, back) => {
+    context.debug(`...unified the '${stepString}' step as a constraint with the '${referenceString}' reference.`);
 
-      return forward(context, back);
-    }, back);
-  });
+    return forward(context, back);
+  }, back);
 }
 
 function unifyStepAsUnqualifiedEquality(step, context, forward, back) {

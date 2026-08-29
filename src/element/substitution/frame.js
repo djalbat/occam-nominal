@@ -5,13 +5,14 @@ import { breakPointUtilities, continuationUtilities } from "occam-languages";
 import Substitution from "../substitution";
 
 import { define } from "../../elements";
+import { desist, declare } from "../../utilities/state";
 import { instantiateFrameSubstitution } from "../../process/instantiate";
 import { frameSubstitutionFromFrameSubstitutionNode } from "../../utilities/element";
 import { frameSubstitutionStringFromFrameAndMetavariable } from "../../utilities/string";
 import { ablates, manifest, attempts, participate, instantiate, unserialises } from "../../utilities/context";
 
-const { cut, all, isolate } = continuationUtilities,
-      { breakPointFromJSON } = breakPointUtilities;
+const { unbreakable } = breakPointUtilities,
+      { cut, all, isolate } = continuationUtilities;
 
 export default define(class FrameSubstitution extends Substitution {
   constructor(contexts, string, node, breakPoint, targetFrame, replacementFrame) {
@@ -75,9 +76,25 @@ export default define(class FrameSubstitution extends Substitution {
     return comparedToFrame;
   }
 
-  validate(state, context, forward, back) {
+  verify = unbreakable(function (context, forward, back) {
     forward = cut(forward, back); ///
 
+    const frameSubstitutionString = this.getString(); ///
+
+    context.trace(`Verifying the '${frameSubstitutionString}' frame substitution...`);
+
+    return desist((state) => {
+      return declare((state) => {
+        return this.validate(state, context, (frameSubstitution, context , back) => {
+          context.debug(`...verified the '${frameSubstitutionString}' frame substitution.`);
+
+          return forward(context, back);
+        }, back);
+      }, state);
+    });
+  });
+
+  validate(state, context, forward, back) {
     let substitution;
 
     const frameSubstitutionString = this.getString();  ///
@@ -197,7 +214,7 @@ export default define(class FrameSubstitution extends Substitution {
                   generalContext,
                   specificContext
                 ],
-                breakPoint = breakPointFromJSON(json),
+                breakPoint = null,
                 targetFrame = targetFrameFromFrameSubstitutionNode(frameSubstitutionNode, generalContext),
                 replacementFrame = replacementFrameFromFrameSubstitutionNode(frameSubstitutionNode, specificContext);
 

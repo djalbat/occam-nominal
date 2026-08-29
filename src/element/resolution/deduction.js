@@ -45,7 +45,7 @@ export default define(class Deduction extends Resolution {
 
     declare((state) => {
       desist((state) => {
-        return this.validate(state, context, (deduction, _ , back) => {
+        return this.validate(state, context, (deduction, context , back) => {
           context = specificContext;  ///
 
           context.debug(`...verified the '${deductionString}' deduction.`);
@@ -99,8 +99,6 @@ export default define(class Deduction extends Resolution {
   });
 
   validate(state, context, forward, back) {
-    forward = cut(forward, back); ///
-
     const deductionString = this.getString(); ///
 
     context.trace(`Validating the '${deductionString}' deduction...`);

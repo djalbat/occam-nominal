@@ -53,8 +53,6 @@ export default define(class SignatureAssertion extends Assertion {
   });
 
   validate(state, context, forward, back) {
-    forward = cut(forward, back); ///
-
     const signatureAssertionString = this.getString();  ///
 
     context.trace(`Validating the '${signatureAssertionString}' signature assertion...`);

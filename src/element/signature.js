@@ -8,8 +8,8 @@ import { termsStringFromTerms } from "../utilities/string";
 import { instantiateSignature } from "../process/instantiate";
 import { attempt, reconcile, serialise, unserialise, instantiate } from "../utilities/context";
 
-const { cut, all, every, isolate } = continuationUtilities,
-      { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
+const { unbreakable } = breakPointUtilities,
+      { cut, all, every, isolate } = continuationUtilities;
 
 export default define(class Signature extends Element {
   constructor(context, string, node, breakPoint, terms) {
@@ -58,7 +58,9 @@ export default define(class Signature extends Element {
     return signatureNodeMatches;
   }
 
-  verify(context, continuation) {
+  verify = unbreakable(function (context, forward, back) {
+    forward = cut(forward, back); ///
+
     let verifies = false;
 
     const signatureString = this.getString(); ///
@@ -78,11 +80,9 @@ export default define(class Signature extends Element {
     }
 
     return continuation(verifies, context);
-  }
+  });
 
   validate(state, context, forward, back) {
-    forward = cut(forward, back); ///
-
     const signatureString = this.getString(); ////
 
     context.trace(`Validating the '${signatureString}' signature...`);
@@ -110,7 +110,7 @@ export default define(class Signature extends Element {
     }, back);
   }
 
-  validateTerm(term, terms, state, context, continuation) {
+  validateTerm(term, terms, state, context, forward, back) {
     let termValidates;
 
     const termString = term.getString(),
@@ -135,7 +135,7 @@ export default define(class Signature extends Element {
     return termValidates;
   }
 
-  validateTerms(state, context, continuation) {
+  validateTerms(state, context, forward, back) {
     let termsValidate;
 
     const signatureString = this.getString();  ///
@@ -164,7 +164,7 @@ export default define(class Signature extends Element {
     return termsValidate
   }
 
-  unifyTerms(terms, context, continuation) {
+  unifyTerms(terms, context, forward, back) {
     let termsUnify = false;
 
     const quoted = true,
@@ -191,12 +191,12 @@ export default define(class Signature extends Element {
     let index = -1;
 
     return reconcile((specificContext) => {
-      return every(generalTerms, (generalTerm, continuation) => {
+      return every(generalTerms, (generalTerm, forward, back) => {
         index++;
 
         const specificTerm = specificTerms[index];
 
-        generalTerm.unifyTerm(specificTerm, generalContext, specificContext, continuation);
+        generalTerm.unifyTerm(specificTerm, generalContext, specificContext, forward, back);
       }, (termsUnify) => {
         if (termsUnify) {
           specificContext.commit();
@@ -217,18 +217,9 @@ export default define(class Signature extends Element {
     return serialise((context) => {
       const string = this.getString();
 
-      let breakPoint;
-
-      breakPoint = this.getBreakPoint();
-
-      const breakPointJSON = breakPointToBreakPointJSON(breakPoint);
-
-      breakPoint = breakPointJSON;  ///
-
       const json = {
         context,
-        string,
-        breakPoint
+        string
       };
 
       return json;
@@ -245,7 +236,7 @@ export default define(class Signature extends Element {
         const { string } = json,
               signatureNode = instantiateSignature(string, context),
               node = signatureNode,  ///
-              breakPoint = breakPointFromJSON(json),
+              breakPoint = null,
               terms = termsFromSignatureNode(signatureNode, context);
 
         signature = new Signature(context, string, node, breakPoint, terms);

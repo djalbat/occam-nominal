@@ -194,8 +194,6 @@ export default define(class Step extends Fact {
   }
 
   validate(state, context, forward, back) {
-    forward = cut(forward, back); ///
-
     const stepString = this.getString(); ///
 
     context.trace(`Validating the '${stepString}' step...`);

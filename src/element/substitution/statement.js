@@ -5,15 +5,15 @@ import { breakPointUtilities, continuationUtilities } from "occam-languages";
 import Substitution from "../substitution";
 
 import { define } from "../../elements";
+import { desist, declare } from "../../utilities/state";
 import { stripBracketsFromStatement } from "../../utilities/brackets";
 import { instantiateStatementSubstitution } from "../../process/instantiate";
 import { statementSubstitutionFromStatementSubstitutionNode } from "../../utilities/element";
 import { ablates, manifest, attempts, reconcile, participate, instantiate, unserialises } from "../../utilities/context";
 import { statementSubstitutionStringFromStatementAndMetavariable, statementSubstitutionStringFromStatementMetavariableAndSubstitution } from "../../utilities/string";
-import state from "easy/lib/mixins/state";
 
-const { cut, all, isolate } = continuationUtilities,
-      { breakPointFromJSON } = breakPointUtilities;
+const { unbreakable } = breakPointUtilities,
+      { cut, all, isolate } = continuationUtilities;
 
 export default define(class StatementSubstitution extends Substitution {
   constructor(contexts, string, node, breakPoint, solved, targetStatement, replacementStatement) {
@@ -79,9 +79,67 @@ export default define(class StatementSubstitution extends Substitution {
     return comparesToParameter;
   }
 
-  validate(state, context, forward, back) {
+  verify = unbreakable(function (context, forward, back) {
     forward = cut(forward, back); ///
 
+    const statementSubstitutionString = this.getString(); ///
+
+    context.trace(`Verifying the '${statementSubstitutionString}' statement substitution...`);
+
+    return desist((state) => {
+      return declare((state) => {
+        return this.validate(state, context, (statementSubstitution, context , back) => {
+          context.debug(`...verified the '${statementSubstitutionString}' statement substitution.`);
+
+          return forward(context, back);
+        }, back);
+      }, state);
+    });
+  });
+
+  solve = unbreakable(function (context, forward, back) {
+    forward = cut(forward, back); ///
+
+    const metavariableNode = this.getMetavariableNode(),
+          simpleInferredSubstitution = context.findSimpleInferredSubstitutionByMetavariableNode(metavariableNode),
+          simpleSubstitution = simpleInferredSubstitution, ///
+          complexSubstitution = this, ///
+          complexSubstitutionString = complexSubstitution.getString();
+
+    if (simpleSubstitution === null) {
+      context.trace(`Cannot solve the '${complexSubstitutionString}' complex substitution because there is no corresponding simple substitution.`);
+
+      return forward(context, back);
+    }
+
+    const simpleSubstitutionString = simpleSubstitution.getString();
+
+    context.trace(`Solving the '${complexSubstitutionString}' complex substitution given the '${simpleSubstitutionString}' simple substitution...`);
+
+    return simpleSubstitution.unifyComplexSubstitution(complexSubstitution, context, (substitution, context, back) => {
+      const simpleSubstitution = substitution; ///
+
+      substitution = this.targetStatement.getSubstitution();
+
+      return substitution.unifySimpleSubstitution(simpleSubstitution, context, (context, back) => {
+        this.solved = true;
+
+        context.debug(`...solved the '${complexSubstitutionString}' complex substitution given the '${simpleSubstitutionString}' simple substitution.`);
+
+        return forward(context, back);
+      }, back);
+    }, (exception) => {
+      if (exception) {
+        return back(exception);
+      }
+
+      context.trace(`Unable to solve the '${complexSubstitutionString}' complex substitution given the '${simpleSubstitutionString}' simple substitution.`);
+
+      return back();
+    });
+  });
+
+  validate(state, context, forward, back) {
     let substitution;
 
     const statementSubstitutionString = this.getString();  ///
@@ -242,46 +300,6 @@ export default define(class StatementSubstitution extends Substitution {
     }, back);
   }
 
-  solve(context, forward, back) {
-    const metavariableNode = this.getMetavariableNode(),
-          simpleInferredSubstitution = context.findSimpleInferredSubstitutionByMetavariableNode(metavariableNode),
-          simpleSubstitution = simpleInferredSubstitution, ///
-          complexSubstitution = this, ///
-          complexSubstitutionString = complexSubstitution.getString();
-
-    if (simpleSubstitution === null) {
-      context.trace(`Cannot solve the '${complexSubstitutionString}' complex substitution because there is no corresponding simple substitution.`);
-
-      return forward(context, back);
-    }
-
-    const simpleSubstitutionString = simpleSubstitution.getString();
-
-    context.trace(`Solving the '${complexSubstitutionString}' complex substitution given the '${simpleSubstitutionString}' simple substitution...`);
-
-    return simpleSubstitution.unifyComplexSubstitution(complexSubstitution, context, (substitution, context, back) => {
-      const simpleSubstitution = substitution; ///
-
-      substitution = this.targetStatement.getSubstitution();
-
-      return substitution.unifySimpleSubstitution(simpleSubstitution, context, (context, back) => {
-        this.solved = true;
-
-        context.debug(`...solved the '${complexSubstitutionString}' complex substitution given the '${simpleSubstitutionString}' simple substitution.`);
-
-        return forward(context, back);
-      }, back);
-    }, (exception) => {
-      if (exception) {
-        return back(exception);
-      }
-
-      context.trace(`Unable to solve the '${complexSubstitutionString}' complex substitution given the '${simpleSubstitutionString}' simple substitution.`);
-
-      return back();
-    });
-  }
-
   static name = "StatementSubstitution";
 
   static fromJSON(json, context) {
@@ -299,7 +317,7 @@ export default define(class StatementSubstitution extends Substitution {
                   generalContext,
                   specificContext
                 ],
-                breakPoint = breakPointFromJSON(json),
+                breakPoint = null,
                 solved = solvedFromStatementSubstitutionNode(statementSubstitutionNode, generalContext, specificContext),
                 targetStatement = targetStatementFromStatementSubstitutionNode(statementSubstitutionNode, generalContext),
                 replacementStatement = replacementStatementFromStatementSubstitutionNode(statementSubstitutionNode, specificContext);
