@@ -3,7 +3,6 @@
 import { arrayUtilities } from "necessary";
 import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
 
-import { reconcile } from "../utilities/context";
 import { claimStringFromLabelsSignatureSuppositionsAndDeduction } from "../utilities/string";
 import { labelsFromJSON,
          deductionFromJSON,
@@ -17,8 +16,8 @@ import { labelsFromJSON,
          suppositionsToSuppositionsJSON } from "../utilities/json";
 
 const { reverse } = arrayUtilities,
-      { cut, every, extract, forwardsEvery, backwardsEvery } = continuationUtilities,
-      { breakable, breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
+      { every, extract, forwardsEvery, backwardsEvery } = continuationUtilities,
+      { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default class Claim extends Element {
   constructor(context, string, node, breakPoint, labels, suppositions, deduction, proof, signature, hypotheses) {
@@ -90,36 +89,6 @@ export default class Claim extends Element {
 
     return metavariableNodeMatches;
   }
-
-  apply = breakable(function (step, factOrSubproofs, context, forward, back) {
-    forward = cut(forward, back); ///
-
-    const specificContext = context;  ///
-
-    const claimString = this.getString();
-
-    context.trace(`Applying the '${claimString}' claim...`);
-
-    return reconcile((context) => {
-      return this.applyDeduction(step, context, (context, back) => {
-        return this.applySuppositions(factOrSubproofs, context, (context, back) => {
-          const complexSubstitutionsUnsolved = context.areComplexSubstitutionsUnsolved();
-
-          if (complexSubstitutionsUnsolved) {
-            context.debug(`Unable to unify the rule because thre are unsolved complex substitutions.`);
-
-            return back();
-          }
-
-          context.debug(`...applied the '${claimString}' claim.`);
-
-          context = specificContext;  ///
-
-          return forward(context, back);
-        }, back);
-      }, back);
-    }, context);
-  });
 
   verifyLabels(context, forward, back) {
     const claimString = this.getString();  ///
@@ -264,7 +233,7 @@ export default class Claim extends Element {
     });
   }
 
-  applyDeduction(step, context, forward, back) {
+  applyDeduction(step, factOrSubproofs, context, forward, back) {
     const stepString = step.getString(),
           claimString = this.getString(),
           deductionString = this.deduction.getString();
@@ -274,7 +243,7 @@ export default class Claim extends Element {
     return this.deduction.apply(step, context, (context, back) => {
       context.debug(`...applied the '${claimString}' claim's '${deductionString}' deduction to the '${stepString}' step.`);
 
-      return forward(context, back);
+      return forward(step, factOrSubproofs, context, back);
     }, back);
   }
 
@@ -298,13 +267,13 @@ export default class Claim extends Element {
     );
   }
 
-  applySuppositions(factOrSubproofs, context, forward, back) {
+  applySuppositions(step, factOrSubproofs, context, forward, back) {
     factOrSubproofs = reverse(factOrSubproofs); ///
 
     return backwardsEvery(this.suppositions, (supposition, factOrSubproofs, context, forward, back) => {
       return this.applySupposition(factOrSubproofs, supposition, context, forward, back);
     }, factOrSubproofs, context, (factOrSubproofs, context, back) => {
-      return forward(context, back);
+      return forward(step, factOrSubproofs, context, back);
     }, back);
   }
 

@@ -70,6 +70,48 @@ export default define(class Axiom extends Claim {
     });
   });
 
+  apply = breakable(function (step, factOrSubproofs, context, forward, back) {
+    forward = cut(forward, back); ///
+
+    const axiomString = this.getString();  ///
+
+    context.trace(`Applying the '${axiomString}' axiom...`);
+
+    return isolate((step, factOrSubproofs, context, forward, back) => {
+      const applyDeduction = this.applyDeduction.bind(this),
+        applySuppositions = this.applySuppositions.bind(this);
+
+      return reconcile((context) => {
+        return all([
+          applyDeduction,
+          applySuppositions
+        ], step, factOrSubproofs, context, (step, factOrSubproofs, context, back) => {
+          const complexSubstitutionsUnsolved = context.areComplexSubstitutionsUnsolved();
+
+          if (complexSubstitutionsUnsolved) {
+            context.debug(`There are unsolved complex substitutions.`);
+
+            return back();
+          }
+
+          return forward(back);
+        }, back);
+      }, context)
+    }, step, factOrSubproofs, context, (step, factOrSubproofs, context, back) => {
+      context.debug(`...applied the '${axiomString}' axiom.`);
+
+      return forward(context, back);
+    }, (exception) => {
+      if (exception) {
+        return back(exception);
+      }
+
+      context.trace(`Unable to apply the '${axiomString}' axiom.`);
+
+      return back();
+    });
+  });
+
   verifySignature(context, forward, back) {
     const satisfiable = this.isSatisfiable();
 

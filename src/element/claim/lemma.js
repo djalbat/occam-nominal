@@ -60,5 +60,47 @@ export default define(class Lemma extends Claim {
     });
   });
 
+  apply = breakable(function (step, factOrSubproofs, context, forward, back) {
+    forward = cut(forward, back); ///
+
+    const lemmaString = this.getString();  ///
+
+    context.trace(`Applying the '${lemmaString}' lemma...`);
+
+    return isolate((step, factOrSubproofs, context, forward, back) => {
+      const applyDeduction = this.applyDeduction.bind(this),
+        applySuppositions = this.applySuppositions.bind(this);
+
+      return reconcile((context) => {
+        return all([
+          applyDeduction,
+          applySuppositions
+        ], step, factOrSubproofs, context, (step, factOrSubproofs, context, back) => {
+          const complexSubstitutionsUnsolved = context.areComplexSubstitutionsUnsolved();
+
+          if (complexSubstitutionsUnsolved) {
+            context.debug(`There are unsolved complex substitutions.`);
+
+            return back();
+          }
+
+          return forward(back);
+        }, back);
+      }, context)
+    }, step, factOrSubproofs, context, (step, factOrSubproofs, context, back) => {
+      context.debug(`...applied the '${lemmaString}' lemma.`);
+
+      return forward(context, back);
+    }, (exception) => {
+      if (exception) {
+        return back(exception);
+      }
+
+      context.trace(`Unable to apply the '${lemmaString}' lemma.`);
+
+      return back();
+    });
+  });
+
   static name = "Lemma";
 });

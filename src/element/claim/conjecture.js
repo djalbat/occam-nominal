@@ -60,6 +60,48 @@ export default define(class Conjecture extends Claim {
     });
   });
 
+  apply = breakable(function (step, factOrSubproofs, context, forward, back) {
+    forward = cut(forward, back); ///
+
+    const conjectureString = this.getString();  ///
+
+    context.trace(`Applying the '${conjectureString}' conjecture...`);
+
+    return isolate((step, factOrSubproofs, context, forward, back) => {
+      const applyDeduction = this.applyDeduction.bind(this),
+        applySuppositions = this.applySuppositions.bind(this);
+
+      return reconcile((context) => {
+        return all([
+          applyDeduction,
+          applySuppositions
+        ], step, factOrSubproofs, context, (step, factOrSubproofs, context, back) => {
+          const complexSubstitutionsUnsolved = context.areComplexSubstitutionsUnsolved();
+
+          if (complexSubstitutionsUnsolved) {
+            context.debug(`There are unsolved complex substitutions.`);
+
+            return back();
+          }
+
+          return forward(back);
+        }, back);
+      }, context)
+    }, step, factOrSubproofs, context, (step, factOrSubproofs, context, back) => {
+      context.debug(`...applied the '${conjectureString}' conjecture.`);
+
+      return forward(context, back);
+    }, (exception) => {
+      if (exception) {
+        return back(exception);
+      }
+
+      context.trace(`Unable to apply the '${conjectureString}' conjecture.`);
+
+      return back();
+    });
+  });
+
   static name = "Conjecture";
 
   static fromJSON(json, context) { return Claim.fromJSON(Conjecture, json, context); }

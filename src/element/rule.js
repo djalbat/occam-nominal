@@ -101,31 +101,43 @@ export default define(class Rule extends Element {
   apply = breakable(function (step, factOrSubproofs, context, forward, back) {
     forward = cut(forward, back); ///
 
-    const specificContext = context;  ///
-
     const ruleString = this.getString();  ///
 
     context.trace(`Applying the '${ruleString}' rule...`);
 
-    return reconcile((context) => {
-      return this.applyConclusion(step, context, (context, back) => {
-        return this.applyPremises(factOrSubproofs, context, (context, back) => {
+    return isolate((step, factOrSubproofs, context, forward, back) => {
+      const applyPremises = this.applyPremises.bind(this),
+            applyConclusion = this.applyConclusion.bind(this);
+
+      return reconcile((context) => {
+        return all([
+          applyConclusion,
+          applyPremises
+        ], step, factOrSubproofs, context, (step, factOrSubproofs, context, back) => {
           const complexSubstitutionsUnsolved = context.areComplexSubstitutionsUnsolved();
 
           if (complexSubstitutionsUnsolved) {
-            context.debug(`Unable to unify the step and fact or subproofs because thre are unsolved complex substitutions.`);
+            context.debug(`There are unsolved complex substitutions.`);
 
             return back();
           }
 
-          context = specificContext;  ///
-
-          context.debug(`...applied the '${ruleString}' rule.`);
-
-          return forward(context, back);
+          return forward(back);
         }, back);
-      }, back);
-    }, context)
+      }, context)
+    }, step, factOrSubproofs, context, (step, factOrSubproofs, context, back) => {
+      context.debug(`...applied the '${ruleString}' rule.`);
+
+      return forward(context, back);
+    }, (exception) => {
+      if (exception) {
+        return back(exception);
+      }
+
+      context.trace(`Unable to apply the '${ruleString}' rule.`);
+
+      return back();
+    });
   });
 
   verifyLabels(context, forward, back) {
@@ -247,17 +259,17 @@ export default define(class Rule extends Element {
     );
   }
 
-  applyPremises(factOrSubproofs, context, forward, back) {
+  applyPremises(step, factOrSubproofs, context, forward, back) {
     factOrSubproofs = reverse(factOrSubproofs); ///
 
     return backwardsEvery(this.premises, (premise, factOrSubproofs, context, forward, back) => {
       return this.applyPremise(factOrSubproofs, premise, context, forward, back);
     }, factOrSubproofs, context, (factOrSubproofs, context, back) => {
-      return forward(context, back);
+      return forward(step, factOrSubproofs, context, back);
     }, back);
   }
 
-  applyConclusion(step, context, forward, back) {
+  applyConclusion(step, factOrSubproofs, context, forward, back) {
     const ruleString = this.getString(),
           stepString = step.getString(),
           conclusionString = this.conclusion.getString();
@@ -267,7 +279,7 @@ export default define(class Rule extends Element {
     return this.conclusion.apply(step, context, (context, back) => {
       context.debug(`...applied the '${ruleString}' rule's '${conclusionString}' conclusion to the '${stepString}' step.`);
 
-      return forward(context, back);
+      return forward(step, factOrSubproofs, context, back);
     }, back);
   }
 
