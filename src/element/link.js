@@ -118,37 +118,29 @@ export default define(class Link extends Element {
     context.trace(`Validating the '${linkString}' link's metavariable...'`);
 
     return this.metavariable.validate(state, context, (metavariable, context, back) => {
-      let validates = false;
-
       const metaType = metavariable.getMetaType();
 
-      if (metaType === null) {
-        validates = true;
-      } else {
-        const linkMetaTypeName = REFERENCE_META_TYPE_NAME,
-              linkMetaType = context.findMetaTypeByMetaTypeName(linkMetaTypeName),
-              metavariableMetaTypeEqualToLinkMetaType = metavariable.isMetaTypeEqualTo(linkMetaType);
+      if (metaType !== null) {
+        const referenceMetaTypeName = REFERENCE_META_TYPE_NAME,
+              referenceMetaType = context.findMetaTypeByMetaTypeName(referenceMetaTypeName),
+              metavariableMetaTypeEqualToReferenceMetaType = metavariable.isMetaTypeEqualTo(referenceMetaType);
 
-        if (metavariableMetaTypeEqualToLinkMetaType) {
-          validates = true;
-        } else {
+        if (!metavariableMetaTypeEqualToReferenceMetaType) {
           const metaTypeString = metaType.getString(),
                 metavariableString = metavariable.getString(),
-                linkMetaTypeString = linkMetaType.getString();
+                referenceMetaTypeString = referenceMetaType.getString();
 
-          context.debug(`The '${linkString}' link's '${metavariableString}' metavariable's '${metaTypeString}' meta-type should be the '${linkMetaTypeString}' meta-type.`);
+          context.debug(`The '${linkString}' link's '${metavariableString}' metavariable's '${metaTypeString}' meta-type should be the '${referenceMetaTypeString}' meta-type.`);
+
+          return back();
         }
-      }
-
-      if (!validates) {
-        return back();
       }
 
       this.metavariable = metavariable;
 
       context.debug(`...validated the '${linkString}' link's metavariable.'`);
 
-      return forward(context, back);
+      return forward(state, context, back);
     }, back);
   }
 

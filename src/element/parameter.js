@@ -1,6 +1,6 @@
 "use strict";
 
-import { Element, breakPointUtilities } from "occam-languages";
+import { Element } from "occam-languages";
 
 import Value from "../value";
 
@@ -8,8 +8,6 @@ import { define } from "../elements";
 import { instantiate } from "../utilities/context";
 import { instantiateParameter } from "../process/instantiate";
 import { nameFromParaneterNode, identifierFromParameterNode } from "../utilities/element";
-
-const { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Parameter extends Element {
   constructor(context, string, node, breakPoint, name, identifier) {
@@ -58,17 +56,8 @@ export default define(class Parameter extends Element {
 
     const string = this.getString();
 
-    let breakPoint;
-
-    breakPoint = this.getBreakPoint();
-
-    const breakPointJSON = breakPointToBreakPointJSON(breakPoint);
-
-    breakPoint = breakPointJSON;  ///
-
     json = {
-      string,
-      breakPoint
+      string
     };
 
     return json;
@@ -83,7 +72,7 @@ export default define(class Parameter extends Element {
       const { string } = json,
             parameterNode = instantiateParameter(string, context),
             node = parameterNode,  ///
-            breakPoint = breakPointFromJSON(json),
+            breakPoint = null,
             name = nameFromParaneterNode(parameterNode, context),
             identifier = identifierFromParameterNode(parameterNode, context);
 

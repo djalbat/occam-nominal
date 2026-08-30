@@ -1,29 +1,30 @@
 "use strict";
 
-import { Element, breakPointUtilities } from "occam-languages";
+import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
 
 import { define } from "../elements";
 import { instantiate } from "../utilities/context";
 import { instantiateFrame } from "../process/instantiate";
+import { linkFromFrameNode } from "../utilities/element";
 import { FRAME_META_TYPE_NAME } from "../metaTypeNames";
-import { metavariableFromFrameNode } from "../utilities/element";
 
-const { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
+const { all, every } = continuationUtilities,
+      { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Frame extends Element {
-  constructor(context, string, node, breakPoint, assumptions, metavariable) {
+  constructor(context, string, node, breakPoint, link, assumptions) {
     super(context, string, node, breakPoint);
 
+    this.link = link;
     this.assumptions = assumptions;
-    this.metavariable = metavariable;
+  }
+
+  getLink() {
+    return this.link;
   }
 
   getAssumptions() {
     return this.assumptions;
-  }
-
-  getMetavariable() {
-    return this.metavariable;
   }
 
   getFrameNode() {
@@ -31,25 +32,6 @@ export default define(class Frame extends Element {
           frameNode = node; ///
 
     return frameNode;
-  }
-
-  getMetavariableNode() {
-    const frameNode = this.getFrameNode(),
-          metavariableNode = frameNode.getMetavariableNode();
-
-    return metavariableNode;
-  }
-
-  getMetavariableName() {
-    let metavariableName = null;
-
-    const singular = this.isSingular();
-
-    if (singular) {
-      metavariableName = this.metavariable.getName();
-    }
-
-    return metavariableName;
   }
 
   isEqualTo(frame) {
@@ -81,38 +63,6 @@ export default define(class Frame extends Element {
     return frameNodeMatches;
   }
 
-  matchMetavariableNode(metavariableNode) {
-    let metavariableNodeMatches = false;
-
-    const singular = this.isSingular();
-
-    if (singular) {
-      metavariableNodeMatches = this.metavariable.matchMetavariableNode(metavariableNode);
-    }
-
-    return metavariableNodeMatches;
-  }
-
-  compareParameter(parameter) {
-    let comparesToParamter = false;
-
-    const singular = this.isSingular();
-
-    if (singular) {
-      const parameterName = parameter.getName();
-
-      if (parameterName !== null) {
-        const metavariableName = this.getMetavariableName();
-
-        if (parameterName === metavariableName) {
-          comparesToParamter = true;
-        }
-      }
-    }
-
-    return comparesToParamter;
-  }
-
   findFrame(context) {
     const frameNode = this.getFrameNode(),
           frame = context.findFrameByFrameNode(frameNode);
@@ -120,142 +70,111 @@ export default define(class Frame extends Element {
     return frame;
   }
 
-  validate(state, context, continuation) {
-    let validates;
+  validate(state, context, forward, back) {
+    let frame;
 
     const frameString = this.getString();  ///
 
     context.trace(`Validating the '${frameString}' frame...`);
-
-    let frame;
 
     frame = this.findFrame(context);
 
     if (frame !== null) {
       context.debug(`The '${frameString}' frame is already present.`);
 
-      validates = continuation(frame, context);
-    } else {
-      frame = this; ///
-
-      const validateAssumptions = this.validateAssumptions.bind(this),
-            validateMetavariable = this.validateMetavariable.bind(this);
-
-      validates = all([
-        validateMetavariable,
-        validateAssumptions
-      ], state, context, (state, context) => {
-        let validates;
-
-        context.addFrame(frame);
-
-        validates = continuation(frame, context);
-
-        return validates;
-      });
+      return forward(frame, context, back);
     }
 
-    if (validates) {
+    frame = this; ///
+
+    const validateLink = this.validateLink.bind(this),
+          validateAssumptions = this.validateAssumptions.bind(this);
+
+    return all([
+      validateLink,
+      validateAssumptions
+    ], state, context, (state, context, back) => {
+      context.addFrame(frame);
+
       context.debug(`...validated the '${frameString}' frame.`);
-    }
 
-    return validates;
+      return forward(frame, context, back);
+    }, back);
   }
 
-  validateAssumption(assumption, assumptions, state, context, continuation) {
-    let assumptionValidates;
+  validateLink(state, context, forward, back) {
+    const frameString = this.getString();  ///
 
+    context.trace(`Validating the '${frameString}' frame's link...`);
+
+    return this.link.validate(state, context, (link, context, back) => {
+      const metaType = link.getMetaType(),
+            linkString = link.getString();
+
+      if (metaType === null) {
+        context.debug(`The '${frameString}' frame's '${linkString}' link does not have a type.`);
+
+        return back();
+      }
+
+      const frameMetaTypeName = FRAME_META_TYPE_NAME,
+            frameMetaType = context.findMetaTypeByMetaTypeName(frameMetaTypeName),
+            linkMetaTypeEqualToFrameMetaType = link.isMetaTypeEqualTo(frameMetaType);
+
+      if (!linkMetaTypeEqualToFrameMetaType) {
+        const metaTypeString = metaType.getString(),
+              frameMetaTypeString = frameMetaType.getString();
+
+        context.debug(`The '${frameString}' frame's '${linkString}' link's '${metaTypeString}' meta-type should be the '${frameMetaTypeString}' meta-type.`);
+
+        return back();
+      }
+
+      this.link = link;
+
+      context.debug(`...validated the '${frameString}' frame's link.'`);
+
+      return forward(state, context, back);
+    }, back);
+  }
+
+  validateAssumption(assumption, assumptions, state, context, forward, back) {
     const frameString = this.getString(),  ///
           assumptionString = assumption.getString();
 
     context.trace(`Validating the '${frameString}' frame's '${assumptionString}' assumption...`);
 
-    assumptionValidates = assumption.validate(state, context, (assumption, context) => {
-      let validates;
-
+    return assumption.validate(state, context, (assumption, context) => {
       assumptions.push(assumption);
 
-      validates = continuation(assumptions, state, context);
-
-      return validates;
-    });
-
-    if (assumptionValidates) {
       context.debug(`...validated the '${frameString}' frame's '${assumptionString}' assumption.`);
-    }
 
-    return assumptionValidates;
+      return forward(assumptions, state, context, back);
+    }, back);
   }
 
-  validateAssumptions(state, context, continuation) {
-    let assumptionsValidate;
+  validateAssumptions(state, context, forward, back) {
+    const assumptionsLength = this.assumptions.length;
+
+    if (assumptionsLength === 0) {
+      return forward(state, context, back);
+    }
 
     const frameString = this.getString();  ///
 
     context.trace(`Validating the '${frameString}' frame's assumptions...`);
 
-    const assumptions = [],
-          validateAssumption = this.validateAssumption.bind(this);
+    const assumptions = [];
 
-    assumptionsValidate = every(this.assumptions, validateAssumption, assumptions, state, context, (assumptions, state, context) => {
-      let assumptionsValidate;
-
+    return every(this.assumptions, (assumption, assumptions, state, context, forward, back) => {
+      return this.validateAssumption(assumption, assumptions, state, context, forward, back);
+    }, assumptions, state, context, (assumptions, state, context, back) => {
       this.assumptions = assumptions;
 
-      assumptionsValidate = continuation(state, context);
-
-      return assumptionsValidate;
-    });
-
-    if (assumptionsValidate) {
       context.debug(`...validates the '${frameString}' frame's assumptions.`);
-    }
 
-    return assumptionsValidate;
-  }
-
-  validateMetavariable(state, context, continuation) {
-    let metavariableValidates;
-
-    const frameString = this.getString();  ///
-
-    context.trace(`Validating the '${frameString}' frame's metavariable...`);
-
-    metavariableValidates = this.metavariable.validate(state, context, (metavariable, context) => {
-      let validates = false;
-
-      const metaType = metavariable.getMetaType();
-
-      if (metaType !== null) {
-        const frameMetaTypeName = FRAME_META_TYPE_NAME,
-              frameMetaType = context.findMetaTypeByMetaTypeName(frameMetaTypeName),
-              metavariableMetaTypeEqualToFrameMetaType = metavariable.isMetaTypeEqualTo(frameMetaType);
-
-        if (metavariableMetaTypeEqualToFrameMetaType) {
-          validates = true;
-        } else {
-          const metaTypeString = metaType.getString(),
-                metavariableString = metavariable.getString(),
-                frameMetaTypeString = frameMetaType.getString();
-
-          context.debug(`The '${frameString}' frame's '${metavariableString}' metavariable's '${metaTypeString}' meta-type should be the '${frameMetaTypeString}' meta-type.`);
-        }
-      }
-
-      if (validates) {
-        this.metavariable = metavariable;
-
-        validates = continuation(state, context);
-      }
-
-      return validates;
-    });
-
-    if (metavariableValidates) {
-      context.debug(`...validates the '${frameString}' frame's metavariable.`);
-    }
-
-    return metavariableValidates;
+      return forward(state, context, back);
+    }, back);
   }
 
   toJSON() {
@@ -289,12 +208,12 @@ export default define(class Frame extends Element {
             frameNode = instantiateFrame(string, context),
             node = frameNode, ///
             breakPoint = breakPointFromJSON(json),
-            assumptions = assumptionsFromFrameNode(frameNode, context),
-            metavariable = metavariableFromFrameNode(frameNode, context);
+            link = linkFromFrameNode(frameNode, context),
+            assumptions = assumptionsFromFrameNode(frameNode, context);
 
       context = null;
 
-      frame = new Frame(context, string, node, breakPoint, assumptions, metavariable);
+      frame = new Frame(context, string, node, breakPoint, link, assumptions);
     }, context);
 
     return frame;

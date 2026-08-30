@@ -314,36 +314,36 @@ export default define(class Schema extends Element {
     }, forward, back);
   }
 
-  unifyStatementAndSchemaAssertion(statement, schameAssertion, context, forward, back) {
-    let schameAssertionUnifies = false;
+  unifyStatementAndSchemaAssertion(statement, schemaAssertion, context, forward, back) {
+    let schemaAssertionUnifies = false;
 
     const schemaString = this.getString(),  ///
           statementString = statement.getString(),  ///
-          schameAssertionString = schameAssertion.getString();
+          schemaAssertionString = schemaAssertion.getString();
 
-    context.trace(`Unifying the '${statementString}' statement and ${schameAssertionString}' schame assertion with the '${schemaString}' schema...`);
+    context.trace(`Unifying the '${statementString}' statement and ${schemaAssertionString}' schema assertion with the '${schemaString}' schema...`);
 
     return reconcile((context) => {
-      const reference = schameAssertion.getReference();
+      const reference = schemaAssertion.getReference();
 
       return this.unifyReference(reference, context, (referenceUnifies) => {
         if (!referenceUnifies) {
-          return continuation(schameAssertionUnifies);
+          return continuation(schemaAssertionUnifies);
         }
 
-        const assumptions = schameAssertion.getAssumptions(context),
+        const assumptions = schemaAssertion.getAssumptions(context),
               constraints = [
                 ...this.constraints
               ];
 
         return this.unifyAssumptions(assumptions, constraints, context, () => {
-          const implicitAssumptions = schameAssertion.getImplicitAssumptions(context);
+          const implicitAssumptions = schemaAssertion.getImplicitAssumptions(context);
 
           return this.unifyImplicitAssumptions(implicitAssumptions, constraints, context, () => {
             const constraintsLength = constraints.length;
 
             if (constraintsLength > 0) {
-              return continuation(schameAssertionUnifies);
+              return continuation(schemaAssertionUnifies);
             }
 
             const conditional = this.isConditional(),
@@ -352,28 +352,28 @@ export default define(class Schema extends Element {
             if (conditional !== statementConditional) {
               context.trace(`Either the '${statementString}' statement is unconditional whilst the '${schemaString}' schema is conditional or vice verse.`);
 
-              return continuation(schameAssertionUnifies);
+              return continuation(schemaAssertionUnifies);
             }
 
             const deducedStatement = statement.findDeducedStatement(context);
 
             return this.unifyDeducedStatement(deducedStatement, context, (deducedStatementUnifies) => {
               if (!deducedStatementUnifies) {
-                return continuation(schameAssertionUnifies);
+                return continuation(schemaAssertionUnifies);
               }
 
               const supposedStatements = statement.findSupposedStatements(context);
 
               return this.unifySupposedStatements(supposedStatements, context, (supposedStatementsUnify) => {
                 if (supposedStatementsUnify) {
-                  schameAssertionUnifies = true;
+                  schemaAssertionUnifies = true;
                 }
 
-                if (schameAssertionUnifies) {
-                  context.debug(`...unified the '${statementString}' statement and ${schameAssertionString}' schame assertion with the '${schemaString}' schema.`);
+                if (schemaAssertionUnifies) {
+                  context.debug(`...unified the '${statementString}' statement and ${schemaAssertionString}' schema assertion with the '${schemaString}' schema.`);
                 }
 
-                return continuation(schameAssertionUnifies);
+                return continuation(schemaAssertionUnifies);
               });
             });
           });

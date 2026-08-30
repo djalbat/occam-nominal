@@ -153,12 +153,12 @@ export function frameFromFrameNode(frameNode, context) {
         node = frameNode, ///
         string = context.nodeAsString(node),
         breakPoint = null,
-        assumptions = assumptionsFromFrameNode(frameNode, context),
-        metavariable = metavariableFromFrameNode(frameNode, context);
+        link = linkFromFrameNode(frameNode, context),
+        assumptions = assumptionsFromFrameNode(frameNode, context);
 
   context = null;
 
-  const frame = new Frame(context, string, node, breakPoint, assumptions, metavariable);
+  const frame = new Frame(context, string, node, breakPoint, link, assumptions);
 
   return frame;
 }
@@ -997,6 +997,18 @@ export function proofFromRuleNode(ruleNode, context) {
   return proof;
 }
 
+export function linkFromFrameNode(frameNode, context) {
+  let link = null;
+
+  const linkNode = frameNode.getLinkNode();
+
+  if (linkNode !== null) {
+    link = linkFromLinkNode(linkNode, context);
+  }
+
+  return link;
+}
+
 export function proofFromClaimNode(claimNode, context) {
   let proof = null;
 
@@ -1375,18 +1387,6 @@ export function suppositionsFromClaimNode(claimNode, context) {
     suppositions = suppositionsFromSuppositionNodes(suppositionNodes, context);
 
   return suppositions;
-}
-
-export function metavariableFromFrameNode(frameNode, context) {
-  let metavariable = null;
-
-  const metavariableNode = frameNode.getMetavariableNode();
-
-  if (metavariableNode !== null) {
-    metavariable = metavariableFromMetavariableNode(metavariableNode, context);
-  }
-
-  return metavariable;
 }
 
 export function metavariableFromLabelNode(labelNode, context) {

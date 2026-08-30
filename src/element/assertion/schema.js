@@ -7,9 +7,10 @@ import Assertion from "../assertion";
 
 import { define } from "../../elements";
 import { declare } from "../../utilities/state";
+import { attempt } from "../../utilities/context";
 
-const { cut, some } = continuationUtilities,
-      { unbreakable } = breakPointUtilities;
+const { unbreakable } = breakPointUtilities,
+      { cut, all, some, isolate } = continuationUtilities;
 
 export default define(class SchemaAssertion extends Assertion {
   constructor(context, string, node, breakPoint, link, frame) {
@@ -66,12 +67,24 @@ export default define(class SchemaAssertion extends Assertion {
 
     context.trace(`Verifying the '${schemaAssertionString}' schema assertion...`);
 
-    return declare((state) => {
-      return this.validate(state, context, (schemaAssertion, context , back) => {
-        context.debug(`...verified the '${schemaAssertionString}' schema assertion.`);
+    return isolate((context, forward, back) => {
+      return declare((state) => {
+        return this.validate(state, context, (schemaAssertion, context, back) => {
+          return forward(back);
+        }, back);
+      });
+    }, context, (context, back) => {
+      context.debug(`...verified the '${schemaAssertionString}' schema assertion.`);
 
-        return forward(context, back);
-      }, back);
+      return forward(context, back);
+    }, (exception) => {
+      if (exception) {
+        return back(exception);
+      }
+
+      context.trace(`Unable to verify the '${schemaAssertionString}' schema assertion.`);
+
+      return back();
     });
   });
 
@@ -95,95 +108,57 @@ export default define(class SchemaAssertion extends Assertion {
   });
 
   validate(state, context, forward, back) {
-    let validates;
+    const schemaAssertionString = this.getString();  ///
 
-    const schameAssertionString = this.getString();  ///
+    context.trace(`Validating the '${schemaAssertionString}' schema assertion...`);
 
-    context.trace(`Validating the '${schameAssertionString}' schame assertion...`);
+    return isolate((state, context, forward, back) => {
+      return attempt((context) => {
+        const validateLink = this.validateLink.bind(this),
+              validateFrame = this.validateFrame.bind(this);
 
-    let assertion;
+        return all([
+          validateLink,
+          validateFrame
+        ], state, context, (state, context, back) => {
+          this.commit(context);
 
-    assertion = this.findAssertion(context);
+          return forward(back);
+        }, back);
+      }, context);
+    }, state, context, (state, context, back) => {
+      context.debug(`...validated the '${schemaAssertionString}' schema assertion.`);
 
-    if (assertion !== null) {
-      const schameAssertion = assertion;  ///
-
-      context.debug(`The '${schameAssertionString}' schame assertion is already present.`);
-
-      validates = continuation(schameAssertion, context);
-    } else {
-      assertion = this;  ///
-
-      const validateFrame = this.validateFrame.bind(this),
-            validateLink = this.validateLink.bind(this);
-
-      validates = all([
-        validateFrame,
-        validateLink
-      ], state, context, (state, context) => {
-        let validates;
-
-        const schameAssertion = assertion;  ///
-
-        validates = continuation(schameAssertion, context);
-
-        return validates;
-      });
-    }
-
-    if (validates) {
-      context.debug(`...validated the '${schameAssertionString}' schame assertion.`);
-    }
-
-    return validates;
-  }
-
-  validateFrame(state, context, forward, back) {
-    let frameValidates;
-
-    const schameAssertionString = this.getString();  ///
-
-    context.trace(`Validating the '${schameAssertionString}' schame assertion's frame...`);
-
-    frameValidates = this.frame.validate(state, context, (frame, context) => {
-      let validates;
-
-      this.frame = frame;
-
-      validates = continuation(state, context);
-
-      return validates;
-    });
-
-    if (frameValidates) {
-      context.debug(`...validated the '${schameAssertionString}' schame assertion's frame.`);
-    }
-
-    return frameValidates;
+      return forward(context, back);
+    }, back);
   }
 
   validateLink(state, context, forward, back) {
-    let linkValidates;
+    const schemaAssertionString = this.getString();  ///
 
-    const schameAssertionString = this.getString();  ///
+    context.trace(`Validating the '${schemaAssertionString}' schema assertion's link...`);
 
-    context.trace(`Validating the '${schameAssertionString}' schame assertion's link...`);
-
-    linkValidates = this.link.validate(state, context, (link, context) => {
-      let validates;
-
+    return this.link.validate(state, context, (link, context, back) => {
       this.link = link;
 
-      validates = continuation(state, context);
+      context.debug(`...validated the '${schemaAssertionString}' schema assertion's link.`);
 
-      return validates;
-    });
+      return forward(state, context, back);
+    }, back);
+  }
 
-    if (linkValidates) {
-      context.debug(`...validated the '${schameAssertionString}' schame assertion's link.`);
-    }
+  validateFrame(state, context, forward, back) {
+    const schemaAssertionString = this.getString();  ///
 
-    return linkValidates;
+    context.trace(`Validating the '${schemaAssertionString}' schema assertion's frame...`);
+
+    return this.frame.validate(state, context, (frame, context, back) => {
+      this.frame = frame;
+
+      context.debug(`...validated the '${schemaAssertionString}' schema assertion's frame.`);
+
+      return forward(state, context, back);
+    }, back);
   }
 
   static name = "SchemaAssertion";
