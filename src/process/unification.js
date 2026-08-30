@@ -81,13 +81,12 @@ function unifyStepAsQualifiedConstraint(step, context, forward, back) {
 
   const { Constraint } = elements,
         constraint = Constraint.fromStep(step, context),
-        stepString = step.getString(),
-        referenceString = reference.getString();
+        stepString = step.getString();
 
-  context.trace(`Unifying the '${stepString}' step as a constraint with the '${referenceString}' reference...`);
+  context.trace(`Unifying the '${stepString}' step as a constraint...`);
 
   return constraint.verify(context, (context, back) => {
-    context.debug(`...unified the '${stepString}' step as a constraint with the '${referenceString}' reference.`);
+    context.debug(`...unified the '${stepString}' step as a constraint.`);
 
     return forward(context, back);
   }, back);

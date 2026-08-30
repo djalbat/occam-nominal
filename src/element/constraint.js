@@ -9,7 +9,7 @@ import { instantiateConstraint } from "../process/instantiate";
 import { stripBracketsFromStatement } from "../utilities/brackets";
 import { constraintFromConstraintNode } from "../utilities/element";
 import { constraintStringFromReferenceAndStatement } from "../utilities/string";
-import { join, ablate, attempt, reconcile, unserialise, instantiate } from "../utilities/context";
+import { pare, join, ablate, attempt, reconcile, unserialise, instantiate } from "../utilities/context";
 
 const { unbreakable } = breakPointUtilities,
       { cut, all, some, isolate } = continuationUtilities;
@@ -69,13 +69,19 @@ export default define(class Constraint extends Element {
 
     context.trace(`Verifying the '${constraintString}' constraint...`);
 
-    return declare((state) => {
-      return this.validate(state, context, (constraint, context , back) => {
-        context.debug(`...verified the '${constraintString}' constraint.`);
+    return isolate((context, forward, back) => {
+      return pare((context) => {
+        return declare((state) => {
+          return this.validate(state, context, (constraint, context, back) => {
+            return forward(back);
+          }, back);
+        });
+      }, context);
+    }, context, (context, back) => {
+      context.debug(`...verified the '${constraintString}' constraint.`);
 
-        return forward(context, back);
-      }, back);
-    });
+      return forward(context, back);
+    }, back);
   });
 
   validate(state, context, forward, back) {
@@ -121,51 +127,31 @@ export default define(class Constraint extends Element {
   }
 
   validateReference(state, context, forward, back) {
-    let referenceValidates;
-
     const constraintString = this.getString();  ///
 
     context.trace(`Validating the '${constraintString}' constraint's reference...`);
 
-    referenceValidates = this.reference.validate(state, context, (reference, context) => {
-      let validates;
-
+    return this.reference.validate(state, context, (reference, context, back) => {
       this.reference = reference;
 
-      validates = continuation(state, context);
+      context.trace(`...validated the '${constraintString}' constraint's reference.`);
 
-      return validates;
-    });
-
-    if (referenceValidates) {
-      context.debug(`...validated the '${constraintString}' constraint's reference.`);
-    }
-
-    return referenceValidates;
+      return forward(state, context, back);
+    }, back);
   }
 
   validateStatement(state, context, forward, back) {
-    let statementValidates;
-
     const constraintString = this.getString();  ///
 
     context.trace(`Validating the '${constraintString}' constraint's statement...`);
 
-    statementValidates = this.statement.validate(state, context, (statement, context) => {
-      let validates;
-
+    return this.statement.validate(state, context, (statement, context, back) => {
       this.statement = statement;
 
-      validates = continuation(state, context);
+      context.trace(`...validated the '${constraintString}' constraint's statement.`);
 
-      return validates;
-    });
-
-    if (statementValidates) {
-      context.debug(`...validated the '${constraintString}' constraint's statement.`);
-    }
-
-    return statementValidates;
+      return forward(state, context, back);
+    }, back);
   }
 
   unifyReference(reference, generalContext, specificContext, forward, back) {

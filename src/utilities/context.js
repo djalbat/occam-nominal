@@ -51,16 +51,22 @@ export function encapsulate(innerFunction, constraints, context) {
   return innerFunction(context);
 }
 
-export function choose(innerFunction, context) {
-  const cladicContext = CladicContext.fromNothing(context);
-
-  context = cladicContext;  ///
+export function pare(innerFunction, context) {
+  context = pareContext(context); ///
 
   return innerFunction(context);
 }
 
 export function ablate(innerFunction, context) {
   context = ablateContext(context); ///
+
+  return innerFunction(context);
+}
+
+export function choose(innerFunction, context) {
+  const cladicContext = CladicContext.fromNothing(context);
+
+  context = cladicContext;  ///
 
   return innerFunction(context);
 }
@@ -185,6 +191,22 @@ function ablateContext(context) {
       context = context.getContext();
 
       contextNominalFileContext = NominalFileContext.prototype.isPrototypeOf(context);
+    }
+  }
+
+  return context;
+}
+
+function pareContext(context) {
+  const unreleased = context.isUnreleased();
+
+  if (unreleased) {
+    let contextTemericContext = TemenicContext.prototype.isPrototypeOf(context);
+
+    while (!contextTemericContext) {
+      context = context.getContext();
+
+      contextTemericContext = TemenicContext.prototype.isPrototypeOf(context);
     }
   }
 

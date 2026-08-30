@@ -132,6 +132,8 @@ export default define(class Hypothesis extends Element {
     context.trace(`Validating the '${hypothesisString}' hypothesis' statement...`);
 
     return this.statement.validate(state, context, (statement, context, back) => {
+      this.statement = statement;
+
       context.trace(`...validated the '${hypothesisString}' hypothesis' statement.`);
 
       return forward(state, context, back);
@@ -148,6 +150,8 @@ export default define(class Hypothesis extends Element {
     context.trace(`Validating the '${hypothesisString}' hypothesis' procedure call...`);
 
     return this.procedureCall.validate(state, context, (procedureCall, context, back) => {
+      this.procedureCall = procedureCall;
+
       context.trace(`...validated the '${hypothesisString}' hypothesis' procedure call.`);
 
       return forward(state, context, back);

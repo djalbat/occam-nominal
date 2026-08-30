@@ -152,7 +152,9 @@ class TemenicContext extends Context {
 
   addConstraint(constraint) {
     if (this.constraints === null) {
-      super.addConstraint(constraint);
+      const context = this.getContext();
+
+      context.addConstraint(constraint);
 
       return;
     }

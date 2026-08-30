@@ -79,7 +79,7 @@ export default define(class Axiom extends Claim {
 
     return isolate((step, factOrSubproofs, context, forward, back) => {
       const applyDeduction = this.applyDeduction.bind(this),
-        applySuppositions = this.applySuppositions.bind(this);
+            applySuppositions = this.applySuppositions.bind(this);
 
       return reconcile((context) => {
         return all([
