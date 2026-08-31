@@ -106,7 +106,7 @@ export default define(class Variable extends Element {
   unifyTerm(term, generalContext, specificContext, forward, back) {
     const context = specificContext,  ///
           termString = term.getString(),
-          variableString = this.getString();
+          variableString = this.getString();  ///
 
     context.trace(`Unifying the '${termString}' term with the '${variableString}' variable...`);
 

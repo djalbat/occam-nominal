@@ -275,7 +275,7 @@ export default define(class Generator extends Element {
     const hypothetical = this.isHypothetical();
 
     if(hypothetical) {
-      const generatorString = this.getString();
+      const generatorString = this.getString(); ///
 
       context.trace(`Discharging the '${generatorString}' generator's hypotheses...`);
 

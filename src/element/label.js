@@ -6,7 +6,7 @@ import { define } from "../elements";
 import { declare } from "../utilities/state";
 import { instantiateLabel } from "../process/instantiate";
 import { metavariableFromLabelNode } from "../utilities/element";
-import {join, attempt, reconcile, unserialise, instantiate, serialise} from "../utilities/context";
+import { join, attempt, reconcile, serialise, unserialise, instantiate } from "../utilities/context";
 
 const { unbreakable } = breakPointUtilities,
       { cut, all, isolate } = continuationUtilities;
@@ -118,16 +118,17 @@ export default define(class Label extends Element {
     }, back);
   }
 
-  unifyLink(link, context, forward, back) {
-    const labelString = this.getString(), ///
-          linkString = link.getString();
+  unifySchemaAssertionLink(schemaAssertion, context, forward, back) {
+    const link = schemaAssertion.getLink(),
+          labelString = this.getString(), ///
+          schemaAssertionString = schemaAssertion.getString();
 
-    context.trace(`Unifying the '${linkString}' link with the '${labelString}' label...`);
+    context.trace(`Unifying the '${schemaAssertionString}' schema assertion's link with the '${labelString}' label...`);
 
-    const linkContext = link.getContext(),
-          labelContext = this.getContext(), ///
+    const labelContext = this.getContext(), ///
+          schemaAssertionContext = schemaAssertion.getContext(),
           generalContext = labelContext, ///
-          specificContext = linkContext;  ///
+          specificContext = schemaAssertionContext;  ///
 
     return join((specificContext) => {
       return reconcile((specificContext) => {
@@ -136,7 +137,7 @@ export default define(class Label extends Element {
         return this.unifyMetavariable(metavariable, generalContext, specificContext, (generalContext, specificContext, back) => {
           specificContext.commit(context);
 
-          context.debug(`...unified the '${linkString}' link with the '${labelString}' label.`);
+          context.debug(`...unified the '${schemaAssertionString}' schema assertion's link with the '${labelString}' label.`);
 
           return forward(context, back);
         }, back);
@@ -146,14 +147,14 @@ export default define(class Label extends Element {
 
   unifyReference(reference, context, forward, back) {
     const labelString = this.getString(), ///
-      referenceString = reference.getString();
+          referenceString = reference.getString();
 
     context.trace(`Unifying the '${referenceString}' reference with the '${labelString}' label...`);
 
     const labelContext = this.getContext(), ///
-      referenceContext = reference.getContext(),
-      generalContext = labelContext, ///
-      specificContext = referenceContext;  ///
+          referenceContext = reference.getContext(),
+          generalContext = labelContext, ///
+          specificContext = referenceContext;  ///
 
     return join((specificContext) => {
       return reconcile((specificContext) => {

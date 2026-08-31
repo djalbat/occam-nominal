@@ -139,7 +139,7 @@ export default define(class Metavariable extends Element {
   }
 
   verifyTerm(context, forward, back) {
-    const metavariableString = this.getString();
+    const metavariableString = this.getString();  ///
 
     context.trace(`Verifying the '${metavariableString}' metavariable's term...`);
 
@@ -326,7 +326,7 @@ export default define(class Metavariable extends Element {
   unifyFrame(frame, generalContext, specificContext, forward, back) {
     const context = specificContext,  ///
           frameString = frame.getString(),
-          metavariableString = this.getString();
+          metavariableString = this.getString();  ///
 
     context.trace(`Unifying the '${frameString}' frame with the '${metavariableString}' metavariable...`);
 
@@ -371,7 +371,7 @@ export default define(class Metavariable extends Element {
   unifyStatement(statement, generalContext, specificContext, forward, back) {
     const context = specificContext,  ///
           statementString = statement.getString(),
-          metavariableString = this.getString();
+          metavariableString = this.getString();  ///
 
     context.trace(`Unifying the '${statementString}' statement with the '${metavariableString}' metavariable...`);
 
@@ -499,7 +499,7 @@ export default define(class Metavariable extends Element {
 
     const context = specificContext,  ///
           referenceString = reference.getString(),
-          metavariableString = this.getString();
+          metavariableString = this.getString();  ///
 
     context.trace(`Comparing the '${referenceString}' reference's metavariable to the '${metavariableString}' metavariable...`);
 

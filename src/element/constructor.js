@@ -244,7 +244,7 @@ export default define(class Constructor extends Element {
     }
 
     const termString = term.getString(),
-          constructorString = this.getString();
+          constructorString = this.getString(); ///
 
     context.trace(`Discharging the '${constructorString}' constructor's hypotheses given the '${termString}' term...`);
 

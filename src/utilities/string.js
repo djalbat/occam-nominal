@@ -103,20 +103,6 @@ export function parametersStringFromParameters(parameters) {
   return parametersString;
 }
 
-export function assumptionsStringFromAssumptions(assumptions) {
-  const assumptionsString = assumptions.reduce((assumptionsString, assumption) => {
-    const assumptionString = assumption.getString();
-
-    assumptionsString = (assumptionsString === null) ?
-                          assumptionString: ///
-                           `${assumptionsString}, ${assumptionString}`;
-
-    return assumptionsString;
-  }, null);
-
-  return assumptionsString;
-}
-
 export function suppositionsStringFromSuppositions(suppositions) {
   const suppositionsString = suppositions.reduce((suppositionsString, supposition) => {
     const suppositionString = supposition.getString();

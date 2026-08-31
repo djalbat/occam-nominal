@@ -62,7 +62,7 @@ export default define(class SignatureAssertion extends Assertion {
 
     return reconcile((context) => {
       const axiom = context.findAxiomByLink(this.link),
-        signatureAssertion = this;  ///
+            signatureAssertion = this;  ///
 
       return axiom.unifySignatureAssertion(signatureAssertion, context, (signatureAssertionUnifies) => {
         if (!signatureAssertionUnifies) {

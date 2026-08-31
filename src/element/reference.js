@@ -150,36 +150,27 @@ export default define(class Reference extends Element {
     }, back);
   }
 
-  unifyLabel(label, context, forward, back) {
-    const labelString = label.getString(),
+  unifyLink(link, generalContext, specificContext, forward, back) {
+    const context = specificContext,  ///
+          linkString = link.getString(),
           referenceString = this.getString(); ///
 
-    context.trace(`Unifying the '${labelString}' label with the '${referenceString}' reference...`);
+    context.trace(`Unifying the '${linkString}' link with the '${referenceString}' reference...`);
 
-    const metavariable = label.getMetavariable(),
-          labelContext = label.getContext(),
-          generalContext = this.getContext(), ///
-          specificContext = labelContext;  ///
+    return isolate((link, generalContext, specificContext, forward, back) => {
+      const context = this.getContext(),
+            metavariable = link.getMetavariable();
 
-    return join((specificContext) => {
-      return reconcile((specificContext) => {
-        return this.unifyMetavariable(metavariable, generalContext, specificContext, (metavariableUnifies) => {
-          let labelUnifies = false;
+      generalContext = context; ///
 
-          if (metavariableUnifies) {
-            specificContext.commit(context);
+      return this.unifyMetavariable(metavariable, generalContext, specificContext, (generalContext, specificContext, back) => {
+        return forward(back);
+      }, back);
+    }, link, generalContext, specificContext, (link, generalContext, specificContext, back) => {
+      context.debug(`...unified the '${linkString}' link with the '${referenceString}' reference.`);
 
-            labelUnifies = true;
-          }
-
-          if (labelUnifies) {
-            context.debug(`...unified the '${labelString}' label with the '${referenceString}' reference.`);
-          }
-
-          return continuation(labelUnifies);
-        });
-      }, specificContext);
-    }, specificContext, context);
+      return forward(generalContext, specificContext, back);
+    }, back);
   }
 
   unifyMetavariable(metavariable, generalContext, specificContext, forward, back) {
@@ -189,19 +180,11 @@ export default define(class Reference extends Element {
 
     context.trace(`Unifying the '${metavariableString}' metavariable with the '${referenceString}' reference...`);
 
-    return this.metavariable.unifyMetavariableIntrinsically(metavariable, generalContext, specificContext, (metavariableUnifiesIntrinsically) => {
-      let metavariableUnifies = false;
+    return this.metavariable.unifyMetavariableIntrinsically(metavariable, generalContext, specificContext, (generalContext, specificContext, back) => {
+      context.debug(`...unified the '${metavariableString}' metavariable with the '${referenceString}' reference.`);
 
-      if (metavariableUnifiesIntrinsically) {
-        metavariableUnifies = true;
-      }
-
-      if (metavariableUnifies) {
-        context.debug(`...unified the '${metavariableString}' metavariable with the '${referenceString}' reference.`);
-      }
-
-      return continuation(metavariableUnifies);
-    });
+      return forward(generalContext, specificContext, back);
+    }, back);
   }
 
   static name = "Reference";

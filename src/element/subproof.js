@@ -98,7 +98,7 @@ export default define(class Subproof extends Element {
   verify = breakable(function(context, forward, back) {
     forward = cut(forward, back); ///
 
-    const subproofString = this.getString();
+    const subproofString = this.getString();  ///
 
     context.trace(`Verifying the '${subproofString}' subproof...`);
 
@@ -130,7 +130,7 @@ export default define(class Subproof extends Element {
   });
 
   verifySupposition(supposition, context, forward, back) {
-    const subproofString = this.getString(),
+    const subproofString = this.getString(),  ///
           suppositionString = supposition.getString();
 
     context.trace(`Verifying the '${subproofString}' subproof's '${suppositionString}' supposition...`);

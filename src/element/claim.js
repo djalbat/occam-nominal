@@ -235,7 +235,7 @@ export default class Claim extends Element {
 
   applyDeduction(step, factOrSubproofs, context, forward, back) {
     const stepString = step.getString(),
-          claimString = this.getString(),
+          claimString = this.getString(), ///
           deductionString = this.deduction.getString();
 
     context.trace(`Applying the '${claimString}' claim's '${deductionString}' deduction to the '${stepString}' step...`);

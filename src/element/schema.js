@@ -121,15 +121,15 @@ export default define(class Schema extends Element {
         const constraints = [
                 ...this.constraints
               ],
-              unifyLink = this.unifyLink.bind(this),
-              unifyAssumptions = this.unifyAssumptions.bind(this),
               unifyDeducedStatement = this.unifyDeducedStatement.bind(this),
               unifySupposedStatements = this.unifySupposedStatements.bind(this),
-              unifyImplicitAssumptions = this.unifyImplicitAssumptions.bind(this);
+              unifyImplicitAssumptions = this.unifyImplicitAssumptions.bind(this),
+              unifySchemaAssertionLink = this.unifySchemaAssertionLink.bind(this),
+              unifySchemaAssertionAssumptions = this.unifySchemaAssertionAssumptions.bind(this);
 
         return all([
-          unifyLink,
-          unifyAssumptions,
+          unifySchemaAssertionLink,
+          unifySchemaAssertionAssumptions,
           unifyImplicitAssumptions,
           unifyDeducedStatement,
           unifySupposedStatements
@@ -233,42 +233,6 @@ export default define(class Schema extends Element {
     }, back);
   }
 
-  unifyLink(constraints, statement, schemaAssertion, context, forward, back) {
-    const link = schemaAssertion.getLink(),
-          schemaString = this.getString(),  ///
-          schemaAssertionString = schemaAssertion.getString();
-
-    context.trace(`Unifying the '${schemaAssertionString}' schema assertion's link with the '${schemaString}' schema...`);
-
-    return this.label.unifyLink(link, context, (context, back) => {
-      context.debug(`...unified the '${schemaAssertionString}' schema assertion's link with the '${schemaString}' schema.`);
-
-      return forward(constraints, statement, schemaAssertion, context, back);
-    }, back);
-  }
-
-  unifyAssumptions(constraints, statement, schemaAssertion, context, forward, back) {
-    const assumptions = schemaAssertion.getAssumptions(),
-          assumptionsLength = assumptions.length;
-
-    if (assumptionsLength === 0) {
-      return forward(constraints, statement, schemaAssertion, context, back);
-    }
-
-    const schemaString = this.getString(),  ///
-          schemaAssertionString = schemaAssertion.getString();
-
-    context.trace(`Unifying the '${schemaAssertionString}' schema assertion's assumptions with the '${schemaString}' schema...`);
-
-    return filter(constraints, (constraint, forward, back) => {
-      return constraint.unifyAssumptions(assumptions, context, forward, back);
-    }, (constraints, context, back) => {
-      context.debug(`...unified the '${schemaAssertionString}' schema assertion's assumptions with the '${schemaString}' schema.`);
-
-      return forward(constraints, statement, schemaAssertion, context, back);
-    }, back);
-  }
-
   unifyDeducedStatement(constraints, statement, schemaAssertion, context, forward, back) {
     const conditional = this.isConditional(),
           statementConditional = statement.isConditional();
@@ -288,23 +252,27 @@ export default define(class Schema extends Element {
 
     context.trace(`Unifying the '${deducedStatementString}' deduced statement with the '${deductionString}' deductino...`);
 
-    const deductionContext = this.deduction.getContext(), ///
-          generalContext = deductionContext; ///
+    return isolate((constraints, statement, schemaAssertion, context, forward, back) => {
+      const deductionContext = this.deduction.getContext(), ///
+            generalContext = deductionContext; ///
 
-    return reconcile((context) => {
-      const statement = deducedStatement, ///
-            specificContext = context;  ///
+      return reconcile((context) => {
+        const statement = deducedStatement, ///
+              specificContext = context;  ///
 
-      return this.deduction.unifyStatement(statement, generalContext, specificContext, (generalContext, specificContext, back) => {
-        context = specificContext;  ///
+        return this.deduction.unifyStatement(statement, generalContext, specificContext, (generalContext, specificContext, back) => {
+          context = specificContext;  ///
 
-        context.commit();
+          context.commit();
 
-        context.debug(`...unified the '${deducedStatementString}' deduced statement with the '${deductionString}' deduction.`);
+          return forward(back);
+        }, back);
+      }, context);
+    }, constraints, statement, schemaAssertion, context, (constraints, statement, schemaAssertion, context, back) => {
+      context.debug(`...unified the '${deducedStatementString}' deduced statement with the '${deductionString}' deduction.`);
 
-        return forward(constraints, statement, schemaAssertion, context, back);
-      }, back);
-    }, context);
+      return forward(constraints, statement, schemaAssertion, context, back);
+    }, back);
   }
 
   unifySupposedStatement(supposedStatement, context, forward, back, index) {
@@ -314,23 +282,27 @@ export default define(class Schema extends Element {
 
     context.trace(`Unifying the '${supposedStatementString}' supposed statement with the '${suppositionString}' deductino...`);
 
-    const suppositionContext = supposition.getContext(), ///
-          generalContext = suppositionContext; ///
+    return isolate((supposedStatement, context, forward, back) => {
+      const suppositionContext = supposition.getContext(), ///
+            generalContext = suppositionContext; ///
 
-    return reconcile((context) => {
-      const statement = supposedStatement, ///
-            specificContext = context;  ///
+      return reconcile((context) => {
+        const statement = supposedStatement, ///
+              specificContext = context;  ///
 
-      return supposition.unifyStatement(statement, generalContext, specificContext, (generalContext, specificContext, back) => {
-        context = specificContext;  ///
+        return supposition.unifyStatement(statement, generalContext, specificContext, (generalContext, specificContext, back) => {
+          context = specificContext;  ///
 
-        context.commit();
+          context.commit();
 
-        context.debug(`...unified the '${supposedStatementString}' supposed statement with the '${suppositionString}' supposition.`);
+          return forward(back);
+        }, back);
+      }, context);
+    }, supposedStatement, context, context, (supposedStatement, context, back) => {
+      context.debug(`...unified the '${supposedStatementString}' supposed statement with the '${suppositionString}' supposition.`);
 
-        return forward(context, back);
-      }, back);
-    }, context);
+      return forward(context, back);
+    }, back);
   }
 
   unifySupposedStatements(constraints, statement, schemaAssertion, context, forward, back) {
@@ -383,6 +355,42 @@ export default define(class Schema extends Element {
 
         return forward(constraints, statement, schemaAssertion, context, back);
       }, back);
+    }, back);
+  }
+
+  unifySchemaAssertionLink(constraints, statement, schemaAssertion, context, forward, back) {
+    const schemaString = this.getString(),  ///
+          schemaAssertionString = schemaAssertion.getString();
+
+    context.trace(`Unifying the '${schemaAssertionString}' schema assertion's link with the '${schemaString}' schema...`);
+
+    return this.label.unifySchemaAssertionLink(schemaAssertion, context, (context, back) => {
+      context.debug(`...unified the '${schemaAssertionString}' schema assertion's link with the '${schemaString}' schema.`);
+
+      return forward(constraints, statement, schemaAssertion, context, back);
+    }, back);
+  }
+
+  unifySchemaAssertionAssumptions(constraints, statement, schemaAssertion, context, forward, back) {
+    const schemaAssertionSingular = schemaAssertion.isSingular();
+
+    if (schemaAssertionSingular) {
+      return forward(constraints, statement, schemaAssertion, context, back);
+    }
+
+    const schemaString = this.getString(),  ///
+          schemaAssertionString = schemaAssertion.getString();
+
+    context.trace(`Unifying the '${schemaAssertionString}' schema assertion's assumptions with the '${schemaString}' schema...`);
+
+    return filter(constraints, (constraint, forward, back) => {
+      return constraint.unifySchemaAssertionAssumptions(schemaAssertion, context, forward, back);
+    }, (constraints, remainingConstraints, context, back) => {
+      constraints = remainingConstraints; ///
+
+      context.debug(`...unified the '${schemaAssertionString}' schema assertion's assumptions with the '${schemaString}' schema.`);
+
+      return forward(constraints, statement, schemaAssertion, context, back);
     }, back);
   }
 

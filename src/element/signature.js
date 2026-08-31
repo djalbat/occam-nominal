@@ -169,7 +169,7 @@ export default define(class Signature extends Element {
 
     const quoted = true,
           termsString = termsStringFromTerms(terms, quoted),
-          signatureString = this.getString();
+          signatureString = this.getString(); ///
 
     context.trace(`Unifying the ${termsString} terms with the '${signatureString}' signature...`);
 

@@ -59,7 +59,7 @@ export default define(class Rule extends Element {
   verify = breakable(function (context, forward, back) {
     forward = cut(forward, back); ///
 
-    const ruleString = this.getString();
+    const ruleString = this.getString();  ///
 
     context.trace(`Verifying the '${ruleString}' rule...`);
 
@@ -270,7 +270,7 @@ export default define(class Rule extends Element {
   }
 
   applyConclusion(step, factOrSubproofs, context, forward, back) {
-    const ruleString = this.getString(),
+    const ruleString = this.getString(),  ///
           stepString = step.getString(),
           conclusionString = this.conclusion.getString();
 

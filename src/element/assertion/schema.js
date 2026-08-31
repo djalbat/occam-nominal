@@ -35,6 +35,8 @@ export default define(class SchemaAssertion extends Assertion {
     return schemaAssertionNode;
   }
 
+  isSingular() { return this.frame.isSingular(); }
+
   getAssumptions() { return this.frame.getAssumptions(); }
 
   getMetavariable() { return this.frame.getMetavariable(); }
@@ -98,7 +100,7 @@ export default define(class SchemaAssertion extends Assertion {
     const schemas = context.getSchemas(),
           statement = step.getStatement(),
           schemaAssertion = this, ///
-          schemaAssertionString = this.getString();
+          schemaAssertionString = this.getString(); ///
 
     context.trace(`Applying the '${schemaAssertionString}' schema assertion...`);
 

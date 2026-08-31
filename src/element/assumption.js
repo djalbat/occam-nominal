@@ -110,23 +110,21 @@ export default define(class Assumption extends Element {
   }
 
   validateWhenDeclared(state, context, forward, back) {
-    let validatesWhenDeclared = false;
-
     const declared = isDeclared(state);
 
-    if (declared) {
-      const assumptionString = this.getString(); ///
-
-      context.trace(`Validating the '${assumptionString}' declared assumption...`);
-
-      validatesWhenDeclared = continuation(state, context);
-
-      if (validatesWhenDeclared) {
-        context.debug(`...validated the '${assumptionString}' declared assumption.`);
-      }
+    if (!declared) {
+      return back();
     }
 
-    return validatesWhenDeclared;
+    const assumptionString = this.getString(); ///
+
+    context.trace(`Validating the '${assumptionString}' declared assumption...`);
+
+    ///
+
+    context.debug(`...validated the '${assumptionString}' declared assumption.`);
+
+    return forward(state, context, back);
   }
 
   validateWhenDerived(state, context, forward, back) {
@@ -134,83 +132,65 @@ export default define(class Assumption extends Element {
 
     const derived = isDerived(state);
 
-    if (derived) {
-      const assumptionString = this.getString(); ///
+    if (!derived) {
+      return back();
+    }
 
-      context.trace(`Validating the '${assumptionString}' derived assumption...`);
+    const assumptionString = this.getString(); ///
 
-      const schemas = context.getSchemas();
+    context.trace(`Validating the '${assumptionString}' derived assumption...`);
 
-      validatesWhenDerived = some(schemas, (schema, context) => {
-        let success = false;
+    const schemas = context.getSchemas();
 
-        this.unifySchema(schema, context, (schemaUnifies) => {
-          if (schemaUnifies) {
-            success = true;
-          }
-        });
+    validatesWhenDerived = some(schemas, (schema, context) => {
+      let success = false;
 
-        return success;
-      }, context, (context) => true); ///
+      this.unifySchema(schema, context, (schemaUnifies) => {
+        if (schemaUnifies) {
+          success = true;
+        }
+      });
 
-      if (validatesWhenDerived) {
-        validatesWhenDerived = continuation(state, context);
-      }
+      return success;
+    }, context, (context) => true); ///
 
-      if (validatesWhenDerived) {
-        context.debug(`...validated the '${assumptionString}' derived assumption.`);
-      }
+    if (validatesWhenDerived) {
+      validatesWhenDerived = continuation(state, context);
+    }
+
+    if (validatesWhenDerived) {
+      context.debug(`...validated the '${assumptionString}' derived assumption.`);
     }
 
     return validatesWhenDerived;
   }
 
   validateLink(state, context, forward, back) {
-    let linkValidates;
-
     const assumptionString = this.getString();  ///
 
     context.trace(`Validating the '${assumptionString}' assumption's link...`);
 
-    linkValidates = this.link.validate(state, context, (link, context) => {
-      let validates;
-
+    return this.link.validate(state, context, (link, context, back) => {
       this.link = link;
 
-      validates = continuation(state, context);
-
-      return validates;
-    });
-
-    if (linkValidates) {
       context.debug(`...validates the '${assumptionString}' assumption's link.`);
-    }
 
-    return linkValidates;
+      return forward(state, context, back);
+    }, back);
   }
 
   validateStatement(state, context, forward, back) {
-    let statementValidates;
-
     const assumptionString = this.getString();  ///
 
     context.trace(`Validating the '${assumptionString}' assumption's statement...`);
 
-    statementValidates = this.statement.validate(state, context, (statement, context) => {
-      let validates;
-
+    return this.statement.validate(state, context, (statement, context, back) => {
       this.statement = statement;
 
-      validates = continuation(state, context);
-
-      return validates;
-    });
-
-    if (statementValidates) {
       context.debug(`...validates the '${assumptionString}' assumption's statement.`);
-    }
 
-    return statementValidates;
+      return forward(state, context, back);
+    }, back);
   }
 
   unifySchema(schema, context, forward, back) {

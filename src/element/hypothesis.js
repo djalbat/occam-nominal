@@ -95,7 +95,7 @@ export default define(class Hypothesis extends Element {
   });
 
   validate(state, context, forward, back) {
-    const hypothesisString = this.getString();
+    const hypothesisString = this.getString();  ///
 
     context.trace(`Validating the '${hypothesisString}' hypothesis...`);
 
@@ -165,7 +165,7 @@ export default define(class Hypothesis extends Element {
       return continuation(statementDischarges, context);
     }
 
-    const hypothesisString = this.getString();
+    const hypothesisString = this.getString();  ///
 
     context.trace(`Discharging the '${hypothesisString}' hypothesis' statement...`);
 
@@ -205,7 +205,7 @@ export default define(class Hypothesis extends Element {
     }
 
     const termString = term.getString(),
-          hypothesisString = this.getString();
+          hypothesisString = this.getString();  ///
 
     context.trace(`Discharging the '${hypothesisString}' hypothesis' procedure call given the '${termString}' term...`);
 
