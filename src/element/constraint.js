@@ -7,7 +7,7 @@ import { declare } from "../utilities/state";
 import { unifyStatement } from "../process/unify";
 import { instantiateConstraint } from "../process/instantiate";
 import { stripBracketsFromStatement } from "../utilities/brackets";
-import { constraintFromConstraintNode } from "../utilities/element";
+import { constraintFromConstraintNode, referenceFromConstraintNode } from "../utilities/element";
 import { pare, join, ablate, attempt, reconcile, serialise, unserialise, instantiate } from "../utilities/context";
 import { constraintStringFromReferenceAndStatement, implicitAssumptionsStringFromImplicitAssumptions } from "../utilities/string";
 
@@ -359,13 +359,6 @@ export default define(class Constraint extends Element {
     return constraint;
   }
 });
-
-function referenceFromConstraintNode(constraintNode, context) {
-  const referenceNode = constraintNode.getReferenceNode(),
-        refernece = context.findReferenceByReferenceNode(referenceNode);
-
-  return refernece;
-}
 
 function statementFromConstraintNode(constraintNode, context) {
   const statementNode = constraintNode.getStatementNode(),
