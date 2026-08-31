@@ -8,8 +8,8 @@ import { unifyStatement } from "../process/unify";
 import { instantiateConstraint } from "../process/instantiate";
 import { stripBracketsFromStatement } from "../utilities/brackets";
 import { constraintFromConstraintNode } from "../utilities/element";
-import { pare, join, ablate, attempt, reconcile, unserialise, instantiate } from "../utilities/context";
-import { assumptionsStringFromAssumptions, constraintStringFromReferenceAndStatement, implicitAssumptionsStringFromImplicitAssumptions } from "../utilities/string";
+import { pare, join, ablate, attempt, reconcile, serialise, unserialise, instantiate } from "../utilities/context";
+import { constraintStringFromReferenceAndStatement, implicitAssumptionsStringFromImplicitAssumptions } from "../utilities/string";
 
 const { unbreakable } = breakPointUtilities,
       { cut, all, some, isolate } = continuationUtilities;
@@ -302,13 +302,16 @@ export default define(class Constraint extends Element {
   toJSON() {
     let json;
 
-    const name = this.getName(),
-          string = this.getString();
+    const context = this.getContext();
 
-    json = {
-      name,
-      string
-    };
+    serialise((context) => {
+      const string = this.getString();
+
+      json = {
+        context,
+        string
+      };
+    }, context);
 
     return json;
   }
