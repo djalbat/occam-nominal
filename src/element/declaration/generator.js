@@ -56,11 +56,9 @@ export default define(class GeneratorDeclaration extends Declaration {
     const malformed = this.isMalformed();
 
     if (malformed) {
-      const verifies = false;
-
       context.trace(`Unable to verify the '${generatorDeclarationString}' generator declaration because it is malformed.`);
 
-      return continuation(verifies, context);
+      return back();
     }
 
     const verifyCotype = this.verifyCotype.bind(this),
@@ -88,9 +86,7 @@ export default define(class GeneratorDeclaration extends Declaration {
     });
   });
 
-  verifyCotype(context, continuation) {
-    let cotypeVerifies = false;
-
+  verifyCotype(context, forward, back) {
     const generatorDeclarationString = this.getString();  ///
 
     context.trace(`Verifying the '${generatorDeclarationString}' generator declaration's type...`);
@@ -99,50 +95,50 @@ export default define(class GeneratorDeclaration extends Declaration {
           typeString = this.type.getString(),
           type = context.findTypeByNominalTypeName(nominalTypeName);
 
-    if (type !== null) {
-      const typeCotype = type.isCotype();
-
-      if (typeCotype) {
-        const provisional = this.isProvisional(),
-              typeComparesToProvisional = type.compareProvisional(provisional);
-
-        if (!typeComparesToProvisional) {
-          provisional ?
-            context.debug(`The '${typeString}' type is present but not provisional.`) :
-                context.debug(`The '${typeString}' type is present but provisional.`);
-        } else {
-          this.type = type;
-
-          cotypeVerifies = true;
-        }
-      } else {
-        context.debug(`The '${typeString}' type is not a cotype.`);
-      }
-    } else {
+    if (type === null) {
       context.debug(`The '${typeString}' type is not present.`);
+
+      return back();
     }
 
-    if (cotypeVerifies) {
-      context.debug(`...verified the '${generatorDeclarationString}' generator declaration's type.`);
+    const typeCotype = type.isCotype();
+
+    if (!typeCotype) {
+      context.debug(`The '${typeString}' type is a type.`);
+
+      return back();
     }
 
-    return continuation(cotypeVerifies, context);
+    const provisional = this.isProvisional(),
+          typeComparesToProvisional = type.compareProvisional(provisional);
+
+    if (!typeComparesToProvisional) {
+      provisional ?
+        context.debug(`The '${typeString}' type is present but not provisional.`) :
+          context.debug(`The '${typeString}' type is present but provisional.`);
+
+      return back();
+    }
+
+    this.type = type;
+
+    context.debug(`...verified the '${generatorDeclarationString}' generator declaration's type.`);
+
+    return forward(context, back);
   }
 
-  verifyGenerator(context, continuation) {
+  verifyGenerator(context, forward, back) {
     const includeType = false,
           generatorString = this.generator.getString(includeType),
           generatorDeclarationString = this.getString();  ///
 
     context.trace(`Verifying the '${generatorDeclarationString}' generator declaration's '${generatorString}' generator...`);
 
-    return this.generator.verify(context, (generatorVerifies, context) => {
-      if (generatorVerifies) {
-        context.debug(`...verified the '${generatorDeclarationString}' generator declaration's '${generatorString}' generator.`);
-      }
+    return this.generator.verify(context, (context, back) => {
+      context.debug(`...verified the '${generatorDeclarationString}' generator declaration's '${generatorString}' generator.`);
 
-      return continuation(generatorVerifies, context);
-    });
+      return forward(context, back);
+    }, back);
   }
 
   static name = "GeneratorDeclaration";

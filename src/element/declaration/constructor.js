@@ -87,8 +87,6 @@ export default define(class ConstructorDeclaration extends Declaration {
   });
 
   verifyType(context, forward, back) {
-    let typeVerifies = false;
-
     const constructorDeclarationString = this.getString();  ///
 
     context.trace(`Verifying the '${constructorDeclarationString}' constructor declaration's type...`);
@@ -97,32 +95,32 @@ export default define(class ConstructorDeclaration extends Declaration {
           typeString = this.type.getString(),
           type = context.findTypeByNominalTypeName(nominalTypeName);
 
-    if (type !== null) {
-      const typeCotype = type.isCotype();
-
-      if (!typeCotype) {
-        const provisional = this.isProvisional(),
-              typeComparesToProvisional = type.compareProvisional(provisional);
-
-        if (!typeComparesToProvisional) {
-          provisional ?
-            context.debug(`The '${typeString}' type is present but not provisional.`) :
-              context.debug(`The '${typeString}' type is present but provisional.`);
-        } else {
-          this.type = type;
-
-          typeVerifies = true;
-        }
-      } else {
-        context.debug(`The '${typeString}' type is a cotype.`);
-      }
-    } else {
+    if (type === null) {
       context.debug(`The '${typeString}' type is not present.`);
-    }
 
-    if (!typeVerifies) {
       return back();
     }
+
+    const typeCotype = type.isCotype();
+
+    if (typeCotype) {
+      context.debug(`The '${typeString}' type is a cotype.`);
+
+      return back();
+    }
+
+    const provisional = this.isProvisional(),
+          typeComparesToProvisional = type.compareProvisional(provisional);
+
+    if (!typeComparesToProvisional) {
+      provisional ?
+        context.debug(`The '${typeString}' type is present but not provisional.`) :
+          context.debug(`The '${typeString}' type is present but provisional.`);
+
+      return back();
+    }
+
+    this.type = type;
 
     context.debug(`...verified the '${constructorDeclarationString}' constructor declaration's type.`);
 

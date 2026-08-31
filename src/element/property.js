@@ -131,39 +131,51 @@ export default define(class Property extends Element {
   }
 
   unifyTerm(term, context, forward, back) {
-    let termUnifies = false;
+    const termString = term.getString();
 
+    context.trace(`Unifying the '${termString}' term...`);
+
+    const unifyTermWithProperty = this.unifyTermWithProperty.bind(this);
+
+    return all([
+      unifyTermWithProperty
+    ], term, context, (term, context, back) => {
+      const provisional = this.type.isProvisional();
+
+      term.setProvisional(provisional);
+
+      term.setType(this.type);
+
+      context.debug(`...unified the '${termString}' term.`);
+
+      return forward(term, context, back);
+    }, back);
+  }
+
+  unifyTermWithProperty(term, context, forward, back) {
     const termString = term.getString(),
           includeType = true,
           propertyString = this.getString(includeType);  ///
 
+    const hypothetical = this.isHypothetical();
+
+    if (hypothetical) {
+      return forward(term, context, back);
+    }
+
     context.trace(`Unifying the '${termString}' term with the '${propertyString}' property...`);
 
     const property = this, ///
-          propertyContext = property.getContext(),
-          generalContext = propertyContext,  ///
-          specificContext = context, ///
-          termUnifiesWithProperty = unifyTermWithProperty(term, property, generalContext, specificContext, (generalContext, specificContext) => {
-            let termUnifiesWithProperty;
+          generalContext = this.getContext(),  ///
+          specificContext = context; ///
 
-            const context = specificContext; ///
+    return unifyTermWithProperty(term, property, generalContext, specificContext, (generalContext, specificContext, back) => {
+      const context = specificContext; ///
 
-            term.setType(this.type);
-
-            termUnifiesWithProperty = continuation(term, context);
-
-            return termUnifiesWithProperty;
-          });
-
-    if (termUnifiesWithProperty) {
-      termUnifies = true;
-    }
-
-    if (termUnifies) {
       context.debug(`...unified the '${termString}' term with the '${propertyString}' property.`);
-    }
 
-    return termUnifies;
+      return forward(term, context, back);
+    }, back);
   }
 
   toJSON() {
