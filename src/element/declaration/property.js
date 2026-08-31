@@ -42,8 +42,6 @@ export default define(class PropertyDeclaration extends Declaration {
   verify = breakable(function (context, forward, back) {
     forward = cut(forward, back); ///
 
-    let verifies = false;
-
     const propertyDeclarationString = this.getString();  ///
 
     context.trace(`Verifying the '${propertyDeclarationString}' property declaration...`);
@@ -53,7 +51,7 @@ export default define(class PropertyDeclaration extends Declaration {
     if (malformed) {
       context.trace(`Unable to verify the '${propertyDeclarationString}' property delcaration because it is malformed.`);
 
-      return continuation(verifies);
+      return back();
     }
 
     const verifyType = this.verifyType.bind(this),
@@ -79,9 +77,7 @@ export default define(class PropertyDeclaration extends Declaration {
     });
   });
 
-  verifyType(context, continuation) {
-    let typeVerifies = false;
-
+  verifyType(context, forward, back) {
     const propertyDeclarationString = this.getString();  ///
 
     context.trace(`Verifying the '${propertyDeclarationString}' property declaration's type...`);
@@ -90,35 +86,31 @@ export default define(class PropertyDeclaration extends Declaration {
           typeString = this.type.getString(),
           type = context.findTypeByNominalTypeName(nominalTypeName);
 
-    if (type !== null) {
-      this.type = type;
-
-      typeVerifies = true;
-    } else {
+    if (type === null) {
       context.debug(`The '${typeString}' type is not present.`);
+
+      return back();
     }
 
-    if (typeVerifies) {
-      context.debug(`...verified the '${propertyDeclarationString}' property declaration's type.`);
-    }
+    this.type = type;
 
-    return continuation(typeVerifies, context);
+    context.debug(`...verified the '${propertyDeclarationString}' property declaration's type.`);
+
+    return forward(context, back);
   }
 
-  verifyProperty(context, continuation) {
+  verifyProperty(context, forward, back) {
     const includeType = false,
           propertyString = this.property.getString(includeType),
           propertyDeclarationString = this.getString();  ///
 
     context.trace(`Verifying the '${propertyDeclarationString}' property declaration's '${propertyString}' property...`);
 
-    return this.property.verify(context, (propertyVerifies, context) => {
-      if (propertyVerifies) {
-        context.debug(`...verified the '${propertyDeclarationString}' property declaration's '${propertyString}' property.`);
-      }
+    return this.property.verify(context, (context, back) => {
+      context.debug(`...verified the '${propertyDeclarationString}' property declaration's '${propertyString}' property.`);
 
-      return continuation(propertyVerifies, context);
-    });
+      return forward(context, back);
+    }, back);
   }
 
   static name = "PropertyDeclaration";

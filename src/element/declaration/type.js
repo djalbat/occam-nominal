@@ -94,28 +94,30 @@ export default define(class TypeDeclaration extends Declaration {
 
     context.trace(`Verifying the '${typeDeclarationString}' type declaration's '${typeString}' type...`);
 
-    let typeVerifies = false;
+    let typePresent;
 
     const typeName = this.type.getName(),
-          includeRelease = false,
-          typePresent = context.isTypePresentByTypeName(typeName, includeRelease);
+          includeRelease = false;
 
-    if (!typePresent) {
-      const prefixedTypeName = typeName, ///
-            typePresent = context.isTypePresentByPrefixedTypeName(prefixedTypeName);
+    typePresent = context.isTypePresentByTypeName(typeName, includeRelease);
 
-      if (!typePresent) {
-        typeVerifies = true;
-      } else {
-        context.debug(`The '${typeString}' type is already present.`);
-      }
-    } else {
+    if (typePresent) {
       context.debug(`The '${typeString}' type is already present.`);
-    }
 
-    if (!typeVerifies) {
       return back();
     }
+
+    const prefixedTypeName = typeName; ///
+
+    typePresent = context.isTypePresentByPrefixedTypeName(prefixedTypeName);
+
+    if (typePresent) {
+      context.debug(`The '${typeString}' type is already present.`);
+
+      return back();
+    }
+
+    this.type.setProvisional(this.provisional);
 
     context.debug(`...verified the '${typeDeclarationString}' type declaration's '${typeString}' type`);
 
@@ -128,17 +130,11 @@ export default define(class TypeDeclaration extends Declaration {
 
     context.trace(`Verifying the '${typeDeclarationString}' type declaration's '${typeString}' type's prefix...`);
 
-    let typePrefixVerifies = false;
-
     const typePrefixed = this.type.isPrefixed();
 
-    if (!typePrefixed) {
-      typePrefixVerifies = true;
-    } else {
+    if (typePrefixed) {
       context.debug(`The '${typeDeclarationString}' type declaration's '${typeString}' type is prefixed.`);
-    }
 
-    if (!typePrefixVerifies) {
       return back();
     }
 
@@ -182,29 +178,25 @@ export default define(class TypeDeclaration extends Declaration {
 
     context.trace(`Verifying the '${typeDeclarationString}' type declaration's '${superTypeString}' super-type...`);
 
-    let superTypeVerifies = false;
-
     const nominalTypeName = superType.getNominalTypeName(),
           typeName = nominalTypeName, ///
           typeComparesToTypeName = this.type.compareTypeName(typeName);
 
-    if (!typeComparesToTypeName) {
-      superType = context.findTypeByNominalTypeName(nominalTypeName);
-
-      if (superType !== null) {
-        superTypes.push(superType);
-
-        superTypeVerifies = true;
-      } else {
-        context.debug(`The '${superTypeString}' super-type is not present.`);
-      }
-    } else {
+    if (typeComparesToTypeName) {
       context.debug(`The '${superTypeString}' super-type's name compares to the ${typeName}' type's name.`);
-    }
 
-    if (!superTypeVerifies) {
       return back();
     }
+
+    superType = context.findTypeByNominalTypeName(nominalTypeName);
+
+    if (superType === null) {
+      context.debug(`The '${superTypeString}' super-type is not present.`);
+
+      return back();
+    }
+
+    superTypes.push(superType);
 
     context.debug(`...verified the '${typeDeclarationString}' type declaration's '${superTypeString}' super-type.`);
 

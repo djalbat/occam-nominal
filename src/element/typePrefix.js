@@ -39,40 +39,40 @@ export default define(class TypePrefix extends Element {
     return comparesToTypePrefixName;
   }
 
-  verify(context, continuation) {
-    let verifies = false;
-
+  verify(context, forward, back) {
     const typePrefixString = this.getString();  ///
 
     context.trace(`Verifying the '${typePrefixString}' type prefix...`);
 
     const typePrefix = context.getTypePrefix();
 
-    if (typePrefix === null) {
-      const typePrefixName = this.name, ///
-            typePrefixPresent = context.isTypePrefixPresentByTypePrefixName(typePrefixName);
-
-      if (!typePrefixPresent) {
-        const nominalTypeName = typePrefixName,  ///
-              typePresent = context.isTypePresentByNominalTypeName(nominalTypeName);
-
-        if (!typePresent) {
-          verifies = true;
-        } else {
-          context.debug(`The '${typePrefixString}' type is already present.`);
-        }
-      } else {
-        context.debug(`The '${typePrefixString}' type prefix is already present.`);
-      }
-    } else {
+    if (typePrefix !== null) {
       context.trace(`The package already has a '${typePrefixString}' type prefix.`);
+
+      return back();
     }
 
-    if (verifies) {
-      context.debug(`...verified the '${typePrefixString}' type prefix.`);
+    const typePrefixName = this.name, ///
+          typePrefixPresent = context.isTypePrefixPresentByTypePrefixName(typePrefixName);
+
+    if (typePrefixPresent) {
+      context.debug(`The '${typePrefixString}' type prefix is already present.`);
+
+      return back();
     }
 
-    return continuation(verifies, context);
+    const nominalTypeName = typePrefixName,  ///
+          typePresent = context.isTypePresentByNominalTypeName(nominalTypeName);
+
+    if (typePresent) {
+      context.debug(`The '${typePrefixString}' type is already present.`);
+
+      return back();
+    }
+
+    context.debug(`...verified the '${typePrefixString}' type prefix.`);
+
+    return forward(context, back);
   }
 
   toJSON() {

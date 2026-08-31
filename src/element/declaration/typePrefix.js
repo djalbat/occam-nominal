@@ -55,9 +55,7 @@ export default define(class TypePrefixDeclaration extends Declaration {
     });
   });
 
-  verifyTypePrefix(context, continuation) {
-    let typePrevixVerifies = false;
-
+  verifyTypePrefix(context, forward, back) {
     const typePrefixDeclarationString = this.getString();  ///
 
     context.trace(`Verifying the '${typePrefixDeclarationString}' type prefix declaration's type prefix...`);
@@ -69,16 +67,14 @@ export default define(class TypePrefixDeclaration extends Declaration {
     if (typesLength !== 0) {
       context.debug(`Unable to verify the '${typePrefixDeclarationString}' type prefix declaration because types have already been declared.`);
 
-      return continuation(typePrevixVerifies, context);
+      return back();
     }
 
-    return this.typePrefix.verify(context, (typePrevixVerifies, context) => {
-      if (typePrevixVerifies) {
-        context.debug(`...verified the '${typePrefixDeclarationString}' type prefix declaration's type prefix.`);
-      }
+    return this.typePrefix.verify(context, (context, back) => {
+      context.debug(`...verified the '${typePrefixDeclarationString}' type prefix declaration's type prefix.`);
 
-      return continuation(typePrevixVerifies, context);
-    });
+      return forward(context, back);
+    }, back);
   }
 
 

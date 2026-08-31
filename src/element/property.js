@@ -12,7 +12,7 @@ import { typeFromJSON, typeToTypeJSON } from "../utilities/json";
 import { attempt, serialise, unserialise, instantiate } from "../utilities/context";
 
 const { unbreakable } = breakPointUtilities,
-      { cut, isolate } = continuationUtilities;
+      { cut, exists, isolate } = continuationUtilities;
 
 export default define(class Property extends Element {
   constructor(context, string, node, breakPoint, term, type) {
@@ -66,8 +66,6 @@ export default define(class Property extends Element {
   verify = unbreakable(function (context, forward, back) {
     forward = cut(forward, back); ///
 
-    let verifies = false;
-
     const includeType = false,
           propertyString = this.getString(includeType);  ///
 
@@ -76,86 +74,60 @@ export default define(class Property extends Element {
     const malformed = this.isMalformed();
 
     if (malformed) {
-      const verifies = false;
-
       context.trace(`Unable to verify the '${propertyString}' property because it is malformed.`);
 
-      return continuation(verifies, context);
+      return back();
     }
 
     declare((state) => {
       desist((state) => {
-        const validates = this.validate(state, context, (ocmbinator, context) => true); ///
+        return this.validate(state, context, (property, context, back) => {
+          context.debug(`...verified the '${propertyString}' property.`);
 
-        if (validates) {
-          verifies = true;
-        }
+          return forward(context, back);
+        });
       }, state);
     });
-
-    if (verifies) {
-      context.debug(`...verified the '${propertyString}' property.`);
-    }
-
-    return continuation(verifies, context);
   });
 
   validate(state, context, forward, back) {
-    let validates;
-
     const includeType = false,
           propertyString = this.getString(includeType);  ///
 
     context.trace(`Validating the '${propertyString}' property...`);
 
-    const property = this;
+    return isolate((state, context, forward, back) => {
+      return attempt((context) => {
+        const validateTermAsProperty = this.validateTermAsProperty.bind(this);
 
-    return isolate(); ///
+        return exists([
+          validateTermAsProperty
+        ], state, context, (state, context, back) => {
+          this.commit(context);
 
-    return attempt((context) => {
-      const validateTermAsProperty = this.validateTermAsProperty.bind(this);
+          return forward(back);
+        }, back);
+      }, context);
+    }, state, context, (state, context, back) => {
+      const property = this; ///
 
-      validates = exists([
-        validateTermAsProperty
-      ], state, context, (state, context) => {
-        let validates;
-
-        this.commit(context);
-
-        validates = continuation(property, context);
-
-        return validates;
-      });
-    }, context);
-
-    if (validates) {
       context.debug(`...validated the '${propertyString}' property.`);
-    }
 
-    return validates;
+      return forward(property, context, back);
+    }, back);
   }
 
   validateTermAsProperty(state, context, forward, back) {
-    let termValidatesAsProperty = false;
-
     const includeType = false,
           propertyString = this.getString(includeType);  ///
 
     context.trace(`Validating the '${propertyString}' property's term...`);
 
-    termValidatesAsProperty = validateTermAsProperty(this.term, context, (context) => {
-      let validates;
-
-      validates = continuation(state, context);
-
-      return validates;
-    });
-
-    if (termValidatesAsProperty) {
+    return validateTermAsProperty(this.term, context, (context, back) => {
       context.debug(`...validated the '${propertyString}' property's term.`);
-    }
 
-    return termValidatesAsProperty;
+      return forward(state, context, back);
+    }, back);
   }
 
   unifyTerm(term, context, forward, back) {

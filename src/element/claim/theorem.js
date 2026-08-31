@@ -96,7 +96,7 @@ export default define(class Theorem extends Claim {
         return back(exception);
       }
 
-      context.trace(`Unable to apply the '${claimString}' claim.`);
+      context.trace(`Unable to apply the '${theoremString}' theorem.`);
 
       return back();
     });
