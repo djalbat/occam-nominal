@@ -459,13 +459,11 @@ export default define(class Metavariable extends Element {
 
     context.trace(`Unifying the '${specificMetavariableString}' metavariable with the '${generalMetavariableString}' metavariable intrinsically...`);
 
-    return unifyMetavariableIntrinsically(generalMetavariable, specificMetavariable, generalContext, specificContext, (metavariableUnifiesIntrinsically) => {
-      if (metavariableUnifiesIntrinsically) {
-        context.debug(`...unified the '${specificMetavariableString}' metavariable with the '${generalMetavariableString}' metavariable intrinsically.`);
-      }
+    return unifyMetavariableIntrinsically(generalMetavariable, specificMetavariable, generalContext, specificContext, (generalContext, specificContext, back) => {
+      context.debug(`...unified the '${specificMetavariableString}' metavariable with the '${generalMetavariableString}' metavariable intrinsically.`);
 
-      return continuation(metavariableUnifiesIntrinsically);
-    });
+      return forward(generalContext, specificContext, back);
+    }, back);
   }
 
   compareFrameMetavariable(frame, generalContext, specificContext) {

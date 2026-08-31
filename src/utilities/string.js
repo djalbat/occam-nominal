@@ -1,7 +1,7 @@
 "use strict";
 
 import { baseTypeFromNothing } from "../utilities/type";
-import { EMPTY_STRING, PROVISIONAL, PROVISIONALLY } from "../constants";
+import { EMPTY_STRING, PROVISIONAL } from "../constants";
 
 export function termsStringFromTerms(terms, quoted = false) {
   const termsString = terms.reduce((termsString, term) => {
@@ -103,20 +103,18 @@ export function parametersStringFromParameters(parameters) {
   return parametersString;
 }
 
-export function provisinalStringFromProvisional(provisional) {
-  const provisinalString = provisional ?
-                            `${PROVISIONAL} ` :
-                              EMPTY_STRING;
+export function assumptionsStringFromAssumptions(assumptions) {
+  const assumptionsString = assumptions.reduce((assumptionsString, assumption) => {
+    const assumptionString = assumption.getString();
 
-  return provisinalString;
-}
+    assumptionsString = (assumptionsString === null) ?
+                          assumptionString: ///
+                           `${assumptionsString}, ${assumptionString}`;
 
-export function provisionallyStringFromProvisional(provisional) {
-  const provisinallyString = provisional ?
-                              ` ${PROVISIONALLY}` :
-                                 EMPTY_STRING;
+    return assumptionsString;
+  }, null);
 
-  return provisinallyString;
+  return assumptionsString;
 }
 
 export function suppositionsStringFromSuppositions(suppositions) {
@@ -131,6 +129,28 @@ export function suppositionsStringFromSuppositions(suppositions) {
   }, null);
 
   return suppositionsString;
+}
+
+export function implicitAssumptionsStringFromImplicitAssumptions(implicitAssumptions) {
+  const implicitAssumptionsString = implicitAssumptions.reduce((implicitAssumptionsString, implicitAssumption) => {
+    const implicitAssumptionString = implicitAssumption.getString();
+
+    implicitAssumptionsString = (implicitAssumptionsString === null) ?
+                                  implicitAssumptionString: ///
+                                   `${implicitAssumptionsString}, ${implicitAssumptionString}`;
+
+    return implicitAssumptionsString;
+  }, null);
+
+  return implicitAssumptionsString;
+}
+
+export function provisinalStringFromProvisional(provisional) {
+  const provisinalString = provisional ?
+                            `${PROVISIONAL} ` :
+                              EMPTY_STRING;
+
+  return provisinalString;
 }
 
 export function equivalenceStringFromTerms(terms) {

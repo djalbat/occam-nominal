@@ -93,27 +93,17 @@ export default define(class ImplicitAssumption extends Element {
   }
 
   validateStatement(state, context, forward, back) {
-    let statementValidates;
-
     const implicitAssumptionString = this.getString();  ///
 
     context.trace(`Validating the '${implicitAssumptionString}' implicit assumption's statement...`);
 
-    statementValidates = this.statement.validate(state, context, (statement, context) => {
-      let validates;
-
+    return this.statement.validate(state, context, (statement, context, back) => {
       this.statement = statement;
 
-      validates = continuation(state, context);
+      context.trace(`...validated the '${implicitAssumptionString}' implicit assumption's statement.`);
 
-      return validates;
-    });
-
-    if (statementValidates) {
-      context.debug(`...validated the '${implicitAssumptionString}' implicit assumption's statement.`);
-    }
-
-    return statementValidates;
+      return forward(state, context, back);
+    }, back);
   }
 
   unifyStatement(statement, generalContext, specificContext) {

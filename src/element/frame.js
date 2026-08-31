@@ -5,26 +5,26 @@ import { Element, breakPointUtilities, continuationUtilities } from "occam-langu
 import { define } from "../elements";
 import { instantiate } from "../utilities/context";
 import { instantiateFrame } from "../process/instantiate";
-import { linkFromFrameNode } from "../utilities/element";
 import { FRAME_META_TYPE_NAME } from "../metaTypeNames";
+import { metavariableFromFrameNode } from "../utilities/element";
 
 const { all, every } = continuationUtilities,
       { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Frame extends Element {
-  constructor(context, string, node, breakPoint, link, assumptions) {
+  constructor(context, string, node, breakPoint, assumptions, metavariable) {
     super(context, string, node, breakPoint);
 
-    this.link = link;
     this.assumptions = assumptions;
-  }
-
-  getLink() {
-    return this.link;
+    this.metavariable = metavariable;
   }
 
   getAssumptions() {
     return this.assumptions;
+  }
+
+  getMetavariable() {
+    return this.metavariable;
   }
 
   getFrameNode() {
@@ -40,12 +40,6 @@ export default define(class Frame extends Element {
           equalTo = frameNodeMatches;  ///
 
     return equalTo;
-  }
-
-  isImplicit() {
-    const implicit = (this.metavariable !== null);
-
-    return implicit;
   }
 
   isSingular() {
@@ -87,12 +81,12 @@ export default define(class Frame extends Element {
 
     frame = this; ///
 
-    const validateLink = this.validateLink.bind(this),
-          validateAssumptions = this.validateAssumptions.bind(this);
+    const validateAssumptions = this.validateAssumptions.bind(this),
+          validateMetavariable = this.validateMetavariable.bind(this);
 
     return all([
-      validateLink,
-      validateAssumptions
+      validateAssumptions,
+      validateMetavariable
     ], state, context, (state, context, back) => {
       context.addFrame(frame);
 
@@ -102,37 +96,37 @@ export default define(class Frame extends Element {
     }, back);
   }
 
-  validateLink(state, context, forward, back) {
+  validateMetavariable(state, context, forward, back) {
     const frameString = this.getString();  ///
 
-    context.trace(`Validating the '${frameString}' frame's link...`);
+    context.trace(`Validating the '${frameString}' frame's metavariable...`);
 
-    return this.link.validate(state, context, (link, context, back) => {
-      const metaType = link.getMetaType(),
-            linkString = link.getString();
+    return this.metavariable.validate(state, context, (metavariable, context, back) => {
+      const metaType = metavariable.getMetaType(),
+            metavariableString = metavariable.getString();
 
       if (metaType === null) {
-        context.debug(`The '${frameString}' frame's '${linkString}' link does not have a type.`);
+        context.debug(`The '${frameString}' frame's '${metavariableString}' metavariable does not have a type.`);
 
         return back();
       }
 
       const frameMetaTypeName = FRAME_META_TYPE_NAME,
             frameMetaType = context.findMetaTypeByMetaTypeName(frameMetaTypeName),
-            linkMetaTypeEqualToFrameMetaType = link.isMetaTypeEqualTo(frameMetaType);
+            metavariableMetaTypeEqualToFrameMetaType = metavariable.isMetaTypeEqualTo(frameMetaType);
 
-      if (!linkMetaTypeEqualToFrameMetaType) {
+      if (!metavariableMetaTypeEqualToFrameMetaType) {
         const metaTypeString = metaType.getString(),
               frameMetaTypeString = frameMetaType.getString();
 
-        context.debug(`The '${frameString}' frame's '${linkString}' link's '${metaTypeString}' meta-type should be the '${frameMetaTypeString}' meta-type.`);
+        context.debug(`The '${frameString}' frame's '${metavariableString}' metavariable's '${metaTypeString}' meta-type should be the '${frameMetaTypeString}' meta-type.`);
 
         return back();
       }
 
-      this.link = link;
+      this.metavariable = metavariable;
 
-      context.debug(`...validated the '${frameString}' frame's link.'`);
+      context.debug(`...validated the '${frameString}' frame's metavariable.'`);
 
       return forward(state, context, back);
     }, back);
@@ -208,12 +202,12 @@ export default define(class Frame extends Element {
             frameNode = instantiateFrame(string, context),
             node = frameNode, ///
             breakPoint = breakPointFromJSON(json),
-            link = linkFromFrameNode(frameNode, context),
-            assumptions = assumptionsFromFrameNode(frameNode, context);
+            assumptions = assumptionsFromFrameNode(frameNode, context),
+            metavariable = metavariableFromFrameNode(frameNode, context);
 
       context = null;
 
-      frame = new Frame(context, string, node, breakPoint, link, assumptions);
+      frame = new Frame(context, string, node, breakPoint, assumptions, metavariable);
     }, context);
 
     return frame;

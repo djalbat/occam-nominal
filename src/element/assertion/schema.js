@@ -10,7 +10,7 @@ import { declare } from "../../utilities/state";
 import { attempt } from "../../utilities/context";
 
 const { unbreakable } = breakPointUtilities,
-      { cut, all, some, isolate } = continuationUtilities;
+      { cut, all, some, every, isolate } = continuationUtilities;
 
 export default define(class SchemaAssertion extends Assertion {
   constructor(context, string, node, breakPoint, link, frame) {
@@ -39,25 +39,29 @@ export default define(class SchemaAssertion extends Assertion {
 
   getMetavariable() { return this.frame.getMetavariable(); }
 
-  getImplicitAssumptions(context) {
+  getImplicitAssumptions(context, forward, back) {
     const implicitAssumptions = [],
           metavariable = this.getMetavariable();
 
-    if (metavariable !== null) {
-      const { ImplicitAssumption } = elements,
-            facts = context.getFacts();
-
-      facts.forEach((fact) => {
-        const statement = fact.getStatement(),
-              implicitAssumption = ImplicitAssumption.fromStatement(statement, context);
-
-        implicitAssumption.verify(context, (implicitAssumption, context) => true)  ///
-
-        implicitAssumptions.push(implicitAssumption);
-      });
+    if (metavariable === null) {
+      return forward(implicitAssumptions, context, back);
     }
 
-    return implicitAssumptions;
+    const facts = context.getFacts();
+
+    facts.forEach((fact) => {
+      const { ImplicitAssumption } = elements,
+            statement = fact.getStatement(),
+            implicitAssumption = ImplicitAssumption.fromStatement(statement, context);
+
+      implicitAssumptions.push(implicitAssumption);
+    });
+
+    return every(implicitAssumptions, (implicitAssumption, context, forward, back) => {
+      return implicitAssumption.verify(context, forward, back);
+    }, context, (context, back) => {
+      return forward(implicitAssumptions, context, back);
+    }, back);
   }
 
   verify = unbreakable(function (context, forward, back) {
@@ -99,7 +103,7 @@ export default define(class SchemaAssertion extends Assertion {
     context.trace(`Applying the '${schemaAssertionString}' schema assertion...`);
 
     return some(schemas, (schema, forward, back) => {
-      return schema.unifyStatementAndSchemaAssertion(statement, schemaAssertion, context, (context, back) => {
+      return schema.apply(statement, schemaAssertion, context, (context, back) => {
         context.debug(`...applied the '${schemaAssertionString}' schema assertion.`);
 
         return forward(context, back);

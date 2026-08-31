@@ -8,8 +8,8 @@ import { unifyStatement } from "../process/unify";
 import { instantiateConstraint } from "../process/instantiate";
 import { stripBracketsFromStatement } from "../utilities/brackets";
 import { constraintFromConstraintNode } from "../utilities/element";
-import { constraintStringFromReferenceAndStatement } from "../utilities/string";
 import { pare, join, ablate, attempt, reconcile, unserialise, instantiate } from "../utilities/context";
+import { assumptionsStringFromAssumptions, constraintStringFromReferenceAndStatement, implicitAssumptionsStringFromImplicitAssumptions } from "../utilities/string";
 
 const { unbreakable } = breakPointUtilities,
       { cut, all, some, isolate } = continuationUtilities;
@@ -187,13 +187,11 @@ export default define(class Constraint extends Element {
 
     const generalStatement = this.statement;  ///
 
-    return unifyStatement(generalStatement, specificStatement, generalContext, specificContext, (statementUnifies) => {
-      if (statementUnifies) {
-        context.debug(`...unified the '${statementString}' statement with the '${constraintString}' constraint's statement.`);
-      }
+    return unifyStatement(generalStatement, specificStatement, generalContext, specificContext, (generalContext, specificContext, back) => {
+      context.debug(`...unified the '${statementString}' statement with the '${constraintString}' constraint's statement.`);
 
-      return continuation(statementUnifies);
-    });
+      return forward(generalContext, specificContext, back);
+    }, back);
   }
 
   unifyAssumption(assumption, context, forward, back) {
@@ -209,48 +207,33 @@ export default define(class Constraint extends Element {
       const reference = assumption.getReference(),
             specificContext = context;  ///
 
-      return this.unifyReference(reference, generalContext, specificContext, (referenceUnifies) => {
-        if (!referenceUnifies) {
-          const assumptionUnifies = false;
-
-          return continuation(assumptionUnifies);
-        }
-
+      return this.unifyReference(reference, generalContext, specificContext, (generalContext, specificContext, back) => {
         const statement = assumption.getStatement();
 
-        return this.unifyStatement(statement, generalContext, specificContext, (statementUnifies) => {
-          let assumptionUnifies = false;
+        return this.unifyStatement(statement, generalContext, specificContext, (generalContext, specificContext, back) => {
+          context.commit();
 
-          if (statementUnifies) {
-            context.commit();
+          context.debug(`...unified the '${assumptionString}' assumption with the '${constraintString}' constraint...`);
 
-            assumptionUnifies = true;
-          }
-
-          if (assumptionUnifies) {
-            context.debug(`...unified the '${assumptionString}' assumption with the '${constraintString}' constraint...`);
-          }
-
-          return continuation(assumptionUnifies);
-        });
-      });
+          return forward(context, back);
+        }, back);
+      }, back);
     }, context);
   }
 
   unifyAssumptions(assumptions, context, forward, back) {
-    const constraintString = this.getString();
+    const constraintString = this.getString(),
+          assumptionsString = assumptionsStringFromAssumptions(assumptions);
 
-    context.trace(`Unifying the assumptions with the '${constraintString}' constraint...`);
+    context.trace(`Unifying the ${assumptionsString} assumptions with the '${constraintString}' constraint...`);
 
-    some(assumptions, (assumption, forward, back) => {
-      this.unifyAssumption(assumption, context, forward, back);
-    }, (assumptionsUnify) => {
-      if (assumptionsUnify) {
-        context.trace(`...unified the assumptions with the '${constraintString}' constraint.`);
-      }
+    return some(assumptions, (assumption, context, forward, back) => {
+      return this.unifyAssumption(assumption, context, forward, back);
+    }, context, (context, back) => {
+      context.debug(`...unified the ${assumptionsString} assumptions with the '${constraintString}' constraint.`);
 
-      return continuation(assumptionsUnify);
-    });
+      return forward(context, back);
+    }, back);
   }
 
   unifyImplicitAssumption(implicitAssumption, context, forward, back) {
@@ -268,39 +251,30 @@ export default define(class Constraint extends Element {
       return reconcile((specificContext) => {
         const statement = implicitAssumption.getStatement();
 
-        return this.unifyStatement(statement, generalContext, specificContext, (statementUnifies) => {
-          let implicitAssumptionUnifies = false;
+        return this.unifyStatement(statement, generalContext, specificContext, (generalContext, specificContext, back) => {
+          specificContext.commit(context);
 
-          if (statementUnifies) {
-            specificContext.commit(context);
+          context.debug(`...unified the '${implicitAssumptionString}' impllicit assumption with the '${constraintString}' constraint...`);
 
-            implicitAssumptionUnifies = true;
-          }
-
-          if (implicitAssumptionUnifies) {
-            context.debug(`...unified the '${implicitAssumptionString}' impllicit assumption with the '${constraintString}' constraint...`);
-          }
-
-          return continuation(implicitAssumptionUnifies);
-        });
+          return forward(context, back);
+        }, back);
       }, specificContext);
     }, specificContext, context);
   }
 
   unifyImplicitAssumptions(implicitAssumptions, context, forward, back) {
-    const constraintString = this.getString();
+    const constraintString = this.getString(),
+          implicitAssertionsString = implicitAssumptionsStringFromImplicitAssumptions(implicitAssumptions);
 
-    context.trace(`Unifying the implicit assumptions with the '${constraintString}' constraint...`);
+    context.trace(`Unifying the ${implicitAssertionsString} implicit assumptions with the '${constraintString}' constraint...`);
 
-    some(implicitAssumptions, (implicitAssumption, forward, back) => {
+    return some(implicitAssumptions, (implicitAssumption, context, forward, back) => {
       this.unifyImplicitAssumption(implicitAssumption, context, forward, back);
-    }, (implicitAssumptionsUnify) => {
-      if (implicitAssumptionsUnify) {
-        context.trace(`...unified the implicit assumptions with the '${constraintString}' constraint.`);
-      }
+    }, context, (context, back) => {
+      context.debug(`...unified the ${implicitAssertionsString} implicit assumptions with the '${constraintString}' constraint.`);
 
-      return continuation(implicitAssumptionsUnify);
-    });
+      return forward(context, back);
+    }, back);
   }
 
   static name = "Constraint";

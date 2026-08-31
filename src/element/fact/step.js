@@ -10,8 +10,8 @@ import { attempt } from "../../utilities/context";
 import { unifySteps } from "../../process/unification";
 import { derive, declare } from "../../utilities/state";
 
-const { backwardsSome } = arrayUtilities,
-      { breakable, unbreakable } = breakPointUtilities,
+const { breakable } = breakPointUtilities,
+      { backwardsSome } = arrayUtilities,
       { cut, all, some, isolate } = continuationUtilities;
 
 export default define(class Step extends Fact {

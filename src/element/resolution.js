@@ -32,19 +32,17 @@ export default class Resolution extends Element {
   }
 
   unifyStatement(statement, generalContext, specificContext, forward, back) {
-    const context = specificContext,  ///
-          resolutionString = this.getString(), ///
-          statementString = statement.getString();
+    const context = specificContext, ///
+          statementString = statement.getString(),
+          resolutinoString = this.getString();  ///
 
-    context.trace(`Unifying the '${statementString}' statement with the '${resolutionString}' resolution's statement...`);
+    context.trace(`Unifying the '${statementString}' statement with the '${resolutinoString}' resolutino's statement...`);
 
-    return this.statement.unifyStatement(statement, generalContext, specificContext, (statementUnifies) => {
-      if (statementUnifies) {
-        context.debug(`...unified the '${statementString}' statement with the '${resolutionString}' resolution's statement.`);
-      }
+    return this.statement.unifyStatement(statement, generalContext, specificContext, (generalContext, specificContext, back) => {
+      context.debug(`...unified the '${statementString}' statement with the '${resolutinoString}' resolutino's statement.`);
 
-      return continuation(statementUnifies);
-    });
+      return forward(generalContext, specificContext, back);
+    }, back);
   }
 
   toJSON() {
