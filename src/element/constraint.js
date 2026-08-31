@@ -299,6 +299,20 @@ export default define(class Constraint extends Element {
 
   static name = "Constraint";
 
+  toJSON() {
+    let json;
+
+    const name = this.getName(),
+          string = this.getString();
+
+    json = {
+      name,
+      string
+    };
+
+    return json;
+  }
+
   static fromJSON(json, context) {
     let constraint;
 
