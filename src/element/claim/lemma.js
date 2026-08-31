@@ -5,7 +5,7 @@ import { breakPointUtilities, continuationUtilities } from "occam-languages";
 import Claim from "../claim";
 
 import { define } from "../../elements";
-import { enclose } from "../../utilities/context";
+import { enclose, reconcile } from "../../utilities/context";
 
 const { breakable } = breakPointUtilities,
       { cut, all, isolate } = continuationUtilities;
