@@ -9,8 +9,8 @@ import { instantiate } from "../../utilities/context";
 import { isDerived, isDeclared } from "../../utilities/state";
 import { instantiateDefinedAssertion } from "../../process/instantiate";
 import { termFromTermAndSubstitutions } from "../../utilities/substitutions";
+import { definedAssertionFromStatementNode } from "../../utilities/element";
 import { separateGroundedTermsAndDefinedVariables } from "../../utilities/equivalences";
-import { termFromJDefinedAssertionNode, negatedFromJDefinedAssertionNode, definedAssertionFromStatementNode } from "../../utilities/element";
 
 const { all, exists } = continuationUtilities;
 
@@ -238,4 +238,17 @@ function validateWhenDerived(term, negated, context, forward, back) {
   }
 
   return forward(context, back);
+}
+
+function termFromJDefinedAssertionNode(definedAssertionNode, context) {
+  const termNode = definedAssertionNode.getTermNode(),
+        term = context.findTermByTermNode(termNode);
+
+  return term;
+}
+
+function negatedFromJDefinedAssertionNode(definedAssertionNode, context) {
+  const negated = definedAssertionNode.isNegated();
+
+  return negated;
 }

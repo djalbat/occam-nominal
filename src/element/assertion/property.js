@@ -9,8 +9,8 @@ import { instantiate } from "../../utilities/context";
 import { isDerived, isTransient } from "../../utilities/state";
 import { unifyTermWithProperties } from "../../process/validation";
 import { instantiatePropertyAssertion } from "../../process/instantiate";
+import { propertyAssertionFromStatementNode } from "../../utilities/element";
 import { variableAssignmentFromPrepertyAssertion } from "../../process/assign";
-import { propertyAssertionFromStatementNode, subjectTermFromPropertyAssertionNode, propertyTermFromPropertyAssertionNode } from "../../utilities/element";
 
 const { all } = continuationUtilities;
 
@@ -196,3 +196,17 @@ export default define(class PropertyAssertion extends Assertion {
     return propertyAssertion;
   }
 });
+
+function subjectTermFromPropertyAssertionNode(propertyAssertionNode, context) {
+  const subjectTermNode = propertyAssertionNode.getSubjectTermNode(),
+        subjectTerm = context.findTermByTermNode(subjectTermNode);
+
+  return subjectTerm;
+}
+
+function propertyTermFromPropertyAssertionNode(propertyAssertionNode, context) {
+  const propertyTermNode = propertyAssertionNode.getPropertyTermNode(),
+        propertyTerm = context.findTermByTermNode(propertyTermNode);
+
+  return propertyTerm;
+}

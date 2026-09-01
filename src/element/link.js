@@ -5,11 +5,10 @@ import { Element, breakPointUtilities, continuationUtilities } from "occam-langu
 import { define } from "../elements";
 import { instantiateLink } from "../process/instantiate";
 import { REFERENCE_META_TYPE_NAME } from "../metaTypeNames";
-import { linkFromLinkNode, metavariableFromLinkNode } from "../utilities/element";
-import { join, ablate, attempt, reconcile, serialise, unserialise, instantiate } from "../utilities/context";
+import { join, reconcile, instantiate } from "../utilities/context";
 
 const { all } = continuationUtilities,
-      { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
+      { breakPointFromJSON } = breakPointUtilities;
 
 export default define(class Link extends Element {
   constructor(context, string, node, breakPoint, metavariable) {
@@ -193,25 +192,11 @@ export default define(class Link extends Element {
   toJSON() {
     let json;
 
-    const context = this.getContext();
+    const string = this.getString();
 
-    serialise((context) => {
-      const string = this.getString();
-
-      let breakPoint;
-
-      breakPoint = this.getBreakPoint();
-
-      const breakPointJSON = breakPointToBreakPointJSON(breakPoint);
-
-      breakPoint = breakPointJSON;  ///
-
-      json = {
-        context,
-        string,
-        breakPoint
-      };
-    }, context);
+    json = {
+      string
+    };
 
     return json;
   }
@@ -222,17 +207,24 @@ export default define(class Link extends Element {
     let link;
 
     instantiate((context) => {
-      unserialise((json, context) => {
-        const { string } = json,
-              linkNode = instantiateLink(string, context),
-              node = linkNode,  ///
-              breakPoint = breakPointFromJSON(json),
-              metavariable = metavariableFromLinkNode(linkNode, context);
+      const { string } = json,
+            linkNode = instantiateLink(string, context),
+            node = linkNode,  ///
+            breakPoint = breakPointFromJSON(json),
+            metavariable = metavariableFromLinkNode(linkNode, context);
 
-        link = new Link(context, string, node, breakPoint, metavariable);
-      }, json, context);
+      context = null;
+
+      link = new Link(context, string, node, breakPoint, metavariable);
     }, context);
 
     return link;
   }
 });
+
+function metavariableFromLinkNode(linkNode, context) {
+  const metavariableNode = linkNode.getMetavariableNode(),
+        metavariable = context.findMetavariableByMetavariableNode(metavariableNode);
+
+  return metavariable;
+}

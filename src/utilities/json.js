@@ -353,37 +353,23 @@ export function statementsFromJSON(json, context) {
 export function assertionsFromJSON(json, context) {
   let { assertions } = json;
 
-  const { TypeAssertion, DefinedAssertion, PropertyAssertion, SubproofAssertion, ContainedAssertion } = elements,
+  const { TypeAssertion, SchemaAssertion, DefinedAssertion, PropertyAssertion, SubproofAssertion, ContainedAssertion, SignatureAssertino } = elements,
         assertionsJSON = assertions; ///
 
   assertions = assertionsJSON.map((assertionJSON) => {
     const json = assertionJSON,  ///
           assertion = TypeAssertion.fromJSON(json, context)
+                   || SchemaAssertion.fromJSON(json, context)
                    || DefinedAssertion.fromJSON(json, context)
                    || PropertyAssertion.fromJSON(json, context)
                    || SubproofAssertion.fromJSON(json, context)
-                   || ContainedAssertion.fromJSON(json, context);
+                   || ContainedAssertion.fromJSON(json, context)
+                   || SignatureAssertino.fromJSON(json, context);
 
     return assertion;
   });
 
   return assertions;
-}
-
-export function signaturesFromJSON(json, context) {
-  let { signatures } = json;
-
-  const { Signature } = elements,
-        signaturesJSON = signatures; ///
-
-  signatures = signaturesJSON.map((signatureJSON) => {
-    const json = signatureJSON,  ///
-          signature = Signature.fromJSON(json, context);
-
-    return signature;
-  });
-
-  return signatures;
 }
 
 export function generatorsFromJSON(json, context) {

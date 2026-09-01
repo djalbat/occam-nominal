@@ -5,7 +5,8 @@ import { breakPointUtilities, continuationUtilities } from "occam-languages";
 import Assertion from "../assertion";
 
 import { define } from "../../elements";
-import { isolate, reconcile } from "../../utilities/context";
+import { instantiatePropertyAssertion } from "../../process/instantiate";
+import { isolate, reconcile, instantiate } from "../../utilities/context";
 import { signatureAssertionFromStatementNode } from "../../utilities/element";
 
 const { unbreakable } = breakPointUtilities,
@@ -173,7 +174,44 @@ export default define(class SignatureAssertion extends Assertion {
     }, context);
   }
 
+  toJSON() {
+    let json;
+
+    const name = this.getName(),
+          string = this.getString();
+
+    json = {
+      name,
+      string
+    };
+
+    return json;
+  }
+
   static name = "SignatureAssertion";
+
+  static fromJSON(json, context) {
+    let signatureAssertion = null;
+
+    const { name } = json;
+
+    if (this.name === name) {
+      instantiate((context) => {
+        const { string } = json,
+              signatureAssertionNode = instantiatePropertyAssertion(string, context),
+              node = signatureAssertionNode,  ///
+              breakPoint = null,
+              link = linkFromSignatureAssertionNode(signatureAssertionNode, context),
+              terms = termsFromSignatureAssertionNode(signatureAssertionNode, context);
+
+        context = null;
+
+        signatureAssertion = new SignatureAssertion(context, string, node, breakPoint, link, terms);
+      }, context);
+    }
+
+    return signatureAssertion;
+  }
 
   static fromStep(step, context) {
     const statementNode = step.getStatementNode(),
@@ -189,3 +227,21 @@ export default define(class SignatureAssertion extends Assertion {
     return signatureAssertion;
   }
 });
+
+function linkFromSignatureAssertionNode(signatureAssertionNode, context) {
+  const linkNode = signatureAssertionNode.getLinkNode(),
+        link = context.findLinkByLinkNode(linkNode);
+
+  return link;
+}
+
+function termsFromSignatureAssertionNode(signatureAssertionNode, context) {
+  const termNodes = signatureAssertionNode.getTermNodes(),
+        terms = termNodes.map((termNode) => {
+          const term = context.findTermByTermNode(termNode);
+
+          return term;
+        });
+
+  return terms;
+}

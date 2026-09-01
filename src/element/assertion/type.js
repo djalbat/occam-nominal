@@ -9,9 +9,9 @@ import { instantiate } from "../../utilities/context";
 import { instantiateTypeAssertion } from "../../process/instantiate";
 import { typeFromJSON, typeToTypeJSON } from "../../utilities/json";
 import { termFromTermAndSubstitutions } from "../../utilities/substitutions";
+import { typeAssertionFromStatementNode } from "../../utilities/element";
 import { variableAssignmentFromTypeAssertion } from "../../process/assign";
 import { derive, isDerived, isDeclared, isTransient} from "../../utilities/state";
-import { termFromTypeAssertionNode, typeAssertionFromStatementNode } from "../../utilities/element";
 
 const { all, exists } = continuationUtilities;
 
@@ -315,4 +315,11 @@ function validateWhenDerived(term, type, state, context, forward, back) {
 
     return forward(term, context, back);
   }, back);
+}
+
+function termFromTypeAssertionNode(typeAssertionNode, context) {
+  const termNode = typeAssertionNode.getTermNode(),
+        term = context.findTermByTermNode(termNode);
+
+  return term;
 }

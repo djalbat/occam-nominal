@@ -6,6 +6,8 @@ import elements from "../../elements";
 import Assertion from "../assertion";
 
 import { define } from "../../elements";
+import { instantiate } from "../../utilities/context";
+import { instantiatePropertyAssertion } from "../../process/instantiate";
 
 const { unbreakable } = breakPointUtilities,
       { cut, all, some, every } = continuationUtilities;
@@ -147,5 +149,56 @@ export default define(class SchemaAssertion extends Assertion {
     }, back);
   }
 
+  toJSON() {
+    let json;
+
+    const name = this.getName(),
+          string = this.getString();
+
+    json = {
+      name,
+      string
+    };
+
+    return json;
+  }
+
   static name = "SchemaAssertion";
+
+  static fromJSON(json, context) {
+    let schemaAssertion = null;
+
+    const { name } = json;
+
+    if (this.name === name) {
+      instantiate((context) => {
+        const { string } = json,
+              schemaAssertionNode = instantiatePropertyAssertion(string, context),
+              node = schemaAssertionNode,  ///
+              breakPoint = null,
+              link = linkFromSchemaAssertionNode(schemaAssertionNode, context),
+              frame = frameFromSchemaAssertionNode(schemaAssertionNode, context);
+
+        context = null;
+
+        schemaAssertion = new SchemaAssertion(context, string, node, breakPoint, link, frame);
+      }, context);
+    }
+
+    return schemaAssertion;
+  }
 });
+
+function linkFromSchemaAssertionNode(schemaAssertionNode, context) {
+  const linkNode = schemaAssertionNode.getLinkNode(),
+        link = context.findLinkByLinkNode(linkNode);
+
+  return link;
+}
+
+function frameFromSchemaAssertionNode(schemaAssertionNode, context) {
+  const frameNode = schemaAssertionNode.getFrameNode(),
+        frame = context.findFrameByFrameNode(frameNode);
+
+  return frame;
+}
