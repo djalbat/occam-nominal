@@ -7,10 +7,10 @@ import Fact from "../fact";
 import { define } from "../../elements";
 import { declare } from "../../utilities/state";
 import { instantiateSupposition } from "../../process/instantiate";
-import { attempt, reconcile, serialise, unserialise, instantiate } from "../../utilities/context";
 import { referenceFromSuppositionNode, procedureCallFromSuppositionNode } from "../../utilities/element";
+import { isolate, attempt, reconcile, serialise, unserialise, instantiate } from "../../utilities/context";
 
-const { cut, all, isolate } = continuationUtilities,
+const { cut, all } = continuationUtilities,
       { breakable, breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Supposition extends Fact {

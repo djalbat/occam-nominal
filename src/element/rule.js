@@ -4,12 +4,12 @@ import { arrayUtilities } from "necessary";
 import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
 
 import { define } from "../elements";
-import { enclose, reconcile } from "../utilities/context";
+import { isolate, enclose, reconcile } from "../utilities/context";
 import { labelsFromJSON, premisesFromJSON, conclusionFromJSON, labelsToLabelsJSON, premisesToPremisesJSON, conclusionToConclusionJSON } from "../utilities/json";
 
 const { reverse } = arrayUtilities,
-      { breakable, breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities,
-      { cut, all, every, isolate, extract, forwardsEvery, backwardsEvery } = continuationUtilities;
+      { cut, all, every, extract, forwardsEvery, backwardsEvery } = continuationUtilities,
+      { breakable, breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Rule extends Element {
   constructor(context, string, node, breakPoint, proof, labels, premises, conclusion) {

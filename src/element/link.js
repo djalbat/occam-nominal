@@ -157,21 +157,13 @@ export default define(class Link extends Element {
 
     return join((specificContext) => {
       return reconcile((specificContext) => {
-        return this.unifyMetavariable(metavariable, generalContext, specificContext, (metavariableUnifies) => {
-          let labelUnifies = false;
+        return this.unifyMetavariable(metavariable, generalContext, specificContext, (generalContext, specificContext, back) => {
+          specificContext.commit(context);
 
-          if (metavariableUnifies) {
-            specificContext.commit(context);
+          context.debug(`...unified the '${labelString}' label with the '${linkString}' link.`);
 
-            labelUnifies = true;
-          }
-
-          if (labelUnifies) {
-            context.debug(`...unified the '${labelString}' label with the '${linkString}' link.`);
-          }
-
-          return continuation(labelUnifies);
-        });
+          return forward(context, back);
+        }, back);
       }, specificContext);
     }, specificContext, context);
   }

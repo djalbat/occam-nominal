@@ -1,5 +1,7 @@
 "use strict";
 
+import { continuationUtilities } from "occam-languages";
+
 import LexicContext from "../context/lexic";
 import CladicContext from "../context/cladic";
 import KrasicContext from "../context/krasic";
@@ -13,6 +15,8 @@ import ProlepticContext from "../context/proleptic";
 import NominalFileContext from "../context/file/nominal";
 
 import { mnemicContextFromJSON, mnemicContextsFromJSON, mnemicContextToMnemicContextJSON, mnemicContextsToMnemicContextsJSON } from "../utilities/json";
+
+export const { isolate } = continuationUtilities;
 
 export function ground(innerFunction) {
   let context;

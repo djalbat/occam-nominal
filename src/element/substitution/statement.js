@@ -9,11 +9,11 @@ import { desist, declare } from "../../utilities/state";
 import { stripBracketsFromStatement } from "../../utilities/brackets";
 import { instantiateStatementSubstitution } from "../../process/instantiate";
 import { statementSubstitutionFromStatementSubstitutionNode } from "../../utilities/element";
-import { ablates, manifest, attempts, reconcile, participate, instantiate, unserialises } from "../../utilities/context";
+import { isolate, ablates, manifest, attempts, reconcile, participate, instantiate, unserialises } from "../../utilities/context";
 import { statementSubstitutionStringFromStatementAndMetavariable, statementSubstitutionStringFromStatementMetavariableAndSubstitution } from "../../utilities/string";
 
-const { unbreakable } = breakPointUtilities,
-      { cut, all, isolate } = continuationUtilities;
+const { cut, all } = continuationUtilities,
+      { unbreakable } = breakPointUtilities;
 
 export default define(class StatementSubstitution extends Substitution {
   constructor(contexts, string, node, breakPoint, solved, targetStatement, replacementStatement) {

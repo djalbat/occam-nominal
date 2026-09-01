@@ -8,11 +8,11 @@ import { unifyStatement } from "../process/unify";
 import { instantiateConstraint } from "../process/instantiate";
 import { stripBracketsFromStatement } from "../utilities/brackets";
 import { constraintFromConstraintNode, referenceFromConstraintNode } from "../utilities/element";
-import { pare, join, ablate, attempt, reconcile, serialise, unserialise, instantiate } from "../utilities/context";
+import { pare, join, ablate, isolate, attempt, reconcile, serialise, unserialise, instantiate } from "../utilities/context";
 import { constraintStringFromReferenceAndStatement, implicitAssumptionsStringFromImplicitAssumptions } from "../utilities/string";
 
 const { unbreakable } = breakPointUtilities,
-      { cut, all, some, isolate } = continuationUtilities;
+      { cut, all, some } = continuationUtilities;
 
 export default define(class Constraint extends Element {
   constructor(context, string, node, breakPoint, reference, statement) {
@@ -292,7 +292,6 @@ export default define(class Constraint extends Element {
 
           return forward(context, back);
         }, back);
-
       }, specificContext);
     }, specificContext, context);
   }

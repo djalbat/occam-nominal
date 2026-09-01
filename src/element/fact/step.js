@@ -6,13 +6,13 @@ import { breakPointUtilities, continuationUtilities } from "occam-languages";
 import Fact from "../fact";
 
 import { define } from "../../elements";
-import { attempt } from "../../utilities/context";
 import { unifySteps } from "../../process/unification";
 import { derive, declare } from "../../utilities/state";
+import { isolate, attempt } from "../../utilities/context";
 
 const { breakable } = breakPointUtilities,
       { backwardsSome } = arrayUtilities,
-      { cut, all, some, isolate } = continuationUtilities;
+      { cut, all, some } = continuationUtilities;
 
 export default define(class Step extends Fact {
   constructor(context, string, node, breakPoint, statement, reference, procedureCall, schemaAssertion, signatureAssertion) {
@@ -108,14 +108,10 @@ export default define(class Step extends Fact {
       return back();
     }
 
-    const verifyReference = this.verifyReference.bind(this),
-          verifySchemaAssertion = this.verifySchemaAssertion.bind(this),
-          verifySignatureAssertion = this.verifySignatureAssertion.bind(this);
+    const verifyReference = this.verifyReference.bind(this);
 
     return all([
-      verifyReference,
-      verifySchemaAssertion,
-      verifySignatureAssertion
+      verifyReference
     ], context, (context, back) => {
       const declared = this.isDeclared();
 
@@ -159,40 +155,6 @@ export default define(class Step extends Fact {
     }, back);
   }
 
-  verifySchemaAssertion(context, forward, back) {
-    if (this.schemaAssertion === null) {
-      return forward(context, back);
-    }
-
-    const stepString = this.getString(),  ///
-          schemaAssertionString = this.schemaAssertion.getString();
-
-    context.trace(`Verifying the '${stepString}' step's '${schemaAssertionString}' schema assertion...`);
-
-    return this.schemaAssertion.verify(context, (context, back) => {
-      context.debug(`...verified the '${stepString}' step's '${schemaAssertionString}' schema assertion.`);
-
-      return forward(context, back);
-    }, back);
-  }
-
-  verifySignatureAssertion(context, forward, back) {
-    if (this.signatureAssertion === null) {
-      return forward(context, back);
-    }
-
-    const stepString = this.getString(),  ///
-          signatureAssertionString = this.signatureAssertion.getString();
-
-    context.trace(`Verifying the '${stepString}' step's '${signatureAssertionString}' signature assertion...`);
-
-    return this.signatureAssertion.verify(context, (context, back) => {
-      context.debug(`...verified the '${stepString}' step's '${signatureAssertionString}' signature assertion.`);
-
-      return forward(context, back);
-    }, back);
-  }
-
   validate(state, context, forward, back) {
     const stepString = this.getString(); ///
 
@@ -200,10 +162,14 @@ export default define(class Step extends Fact {
 
     return isolate((state, context, forward, back) => {
       return attempt((context) => {
-        const validateStatement = this.validateStatement.bind(this);
+        const validateStatement = this.validateStatement.bind(this),
+              validateSchemaAssertion = this.validateSchemaAssertion.bind(this),
+              validateSignatureAssertion = this.validateSignatureAssertion.bind(this);
 
         return all([
-          validateStatement
+          validateStatement,
+          validateSchemaAssertion,
+          validateSignatureAssertion
         ], state, context, (state, context, back) => {
           this.commit(context);
 
@@ -212,6 +178,42 @@ export default define(class Step extends Fact {
       }, context);
     }, state, context, (state, context, back) => {
       context.debug(`...validated the '${stepString}' step.`);
+
+      return forward(state, context, back);
+    }, back);
+  }
+
+  validateSchemaAssertion(state, context, forward, back) {
+    if (this.schemaAssertion === null) {
+      return forward(state, context, back);
+    }
+
+    const factString = this.getString();  ///
+
+    context.trace(`Validating the '${factString}' fact's schema assertion...`);
+
+    return this.schemaAssertion.validate(state, context, (schemaAssertion, context, back) => {
+      this.schemaAssertion = schemaAssertion;
+
+      context.trace(`...validated the '${factString}' fact's schema assertion.`);
+
+      return forward(state, context, back);
+    }, back);
+  }
+
+  validateSignatureAssertion(state, context, forward, back) {
+    if (this.signatureAssertion === null) {
+      return forward(state, context, back);
+    }
+
+    const factString = this.getString();  ///
+
+    context.trace(`Validating the '${factString}' fact's signature assertion...`);
+
+    return this.signatureAssertion.validate(state, context, (signatureAssertion, context, back) => {
+      this.signatureAssertion = signatureAssertion;
+
+      context.trace(`...validated the '${factString}' fact's signature assertion.`);
 
       return forward(state, context, back);
     }, back);

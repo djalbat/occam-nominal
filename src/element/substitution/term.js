@@ -10,10 +10,10 @@ import { stripBracketsFromTerm } from "../../utilities/brackets";
 import { instantiateTermSubstitution } from "../../process/instantiate";
 import { termSubstitutionFromTermSubstitutionNode } from "../../utilities/element";
 import { termSubstitutionStringFromTermAndVariable } from "../../utilities/string";
-import { join, ablates, manifest, attempts, reconcile, participate, instantiate, unserialises } from "../../utilities/context";
+import { join, isolate, ablates, manifest, attempts, reconcile, participate, instantiate, unserialises } from "../../utilities/context";
 
-const { unbreakable } = breakPointUtilities,
-      { cut, all, isolate } = continuationUtilities;
+const { cut, all } = continuationUtilities,
+      { unbreakable } = breakPointUtilities;
 
 export default define(class TermSubstitution extends Substitution {
   constructor(context, string, node, breakPoint, targetTerm, replacementTerm) {

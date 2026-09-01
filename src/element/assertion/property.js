@@ -1,5 +1,7 @@
 "use strict";
 
+import { continuationUtilities } from "occam-languages";
+
 import Assertion from "../assertion";
 
 import { define } from "../../elements";
@@ -9,6 +11,8 @@ import { unifyTermWithProperties } from "../../process/validation";
 import { instantiatePropertyAssertion } from "../../process/instantiate";
 import { variableAssignmentFromPrepertyAssertion } from "../../process/assign";
 import { propertyAssertionFromStatementNode, subjectTermFromPropertyAssertionNode, propertyTermFromPropertyAssertionNode } from "../../utilities/element";
+
+const { all } = continuationUtilities;
 
 export default define(class PropertyAssertion extends Assertion {
   constructor(context, string, node, breakPoint, subjectTerm, propertyTerm) {
@@ -40,14 +44,12 @@ export default define(class PropertyAssertion extends Assertion {
     return propertyType;
   }
 
-  validate(state, context, continuation) {
-    let validates;
+  validate(state, context, forward, back) {
+    let assertion;
 
     const propertyAssertionString = this.getString();  ///
 
     context.trace(`Validating the '${propertyAssertionString}' property assertion...`);
-
-    let assertion;
 
     assertion = this.findAssertion(context);
 
@@ -56,97 +58,82 @@ export default define(class PropertyAssertion extends Assertion {
 
       context.debug(`The '${propertyAssertionString}' property assertion is already present.`);
 
-      validates = continuation(propertyAssertion, context);
-    } else {
-      assertion = this;
-
-      const validateTerms = this.validateTerms.bind(this);
-
-      validates = all([
-        validateTerms
-      ], state, context, (state, context) => {
-        let validates;
-
-        context.addAssertion(assertion);
-
-        const propertyAssertion = assertion; ///
-
-        validates = continuation(propertyAssertion, context);
-
-        return validates;
-      });
-
-      if (validates) {
-        this.assign(state, context);
-      }
+      return forward(propertyAssertion, context, back);
     }
 
-    if (validates) {
+    assertion = this;
+
+    const validateTerms = this.validateTerms.bind(this);
+
+    return all([
+      validateTerms
+    ], state, context, (state, context, back) => {
+      this.assign(state, context);
+
+      context.addAssertion(assertion);
+
+      const propertyAssertion = assertion; ///
+
       context.debug(`...validated the '${propertyAssertionString}' property assertion.`);
-    }
 
-    return validates;
+      return forward(propertyAssertion, context, back);
+    }, back);
   }
 
-  validateTerms(state, context, continuation) {
-    let termsValidate = false;
-
+  validateTerms(state, context, forward, back) {
     const propertyAssertionString = this.getString(); ///
 
     context.trace(`Validating the '${propertyAssertionString}' property assertion's terms...`);
 
-    const subjectTermValidtes = this.subjectTerm.validate(state, context, (subjectTerm, context) => {
-      const propertyTermValidates = this.validatePropertyTerm(state, context, (propertyTerm, context) => {
-        let validates = false;
+    const validateSubjectTerm = this.validateSubjectTerm.bind(this),
+          validatePropertyTerm = this.validatePropertyTerm.bind(this);
 
-        const subjectTermType = subjectTerm.getType(),
-              propertyTermType = propertyTerm.getType(),
-              subjectTermTypeEqualToSubTypeOrSuperTypeOfPropertyTermType = subjectTermType.isEqualToSubTypeOrSuperTypeOf(propertyTermType);
+    return all([
+      validateSubjectTerm,
+      validatePropertyTerm
+    ], state, context, (state, context, back) => {
+      const subjectTermType = this.subjectTerm.getType(),
+            propertyTermType = this.propertyTerm.getType(),
+            subjectTermTypeEqualToSubTypeOrSuperTypeOfPropertyTermType = subjectTermType.isEqualToSubTypeOrSuperTypeOf(propertyTermType);
 
-        if (subjectTermTypeEqualToSubTypeOrSuperTypeOfPropertyTermType) {
-          this.subjectTerm = subjectTerm;
+      if (!subjectTermTypeEqualToSubTypeOrSuperTypeOfPropertyTermType) {
+        return back();
+      }
 
-          this.propertyTerm = propertyTerm;
-
-          validates = continuation(state, context);
-        }
-
-        return validates;
-      });
-
-      return propertyTermValidates;
-    });
-
-    if (subjectTermValidtes) {
-      termsValidate = true;
-    }
-
-    if (termsValidate) {
       context.debug(`...validated the '${propertyAssertionString}' property assertion's terms.`);
-    }
 
-    return termsValidate;
+      return forward(state, context, back);
+    }, back);
   }
 
-  validatePropertyTerm(state, context, continuation) {
-    let propertyTermValidates = false;
+  validateSubjectTerm(state, context, forward, back) {
+    const includeType = false,
+          propertyString = this.getString(includeType);  ///
 
+    context.trace(`Validating the '${propertyString}' property assertion's subject term...`);
+
+    return this.subjectTerm.validate(state, context, (subjectTerm, context, back) => {
+      this.subjectTerm = subjectTerm;
+
+      context.debug(`...validated the '${propertyString}' property assertion's subject term.`);
+
+      return forward(state, context, back);
+    }, back);
+  }
+
+  validatePropertyTerm(state, context, forward, back) {
     const includeType = false,
           propertyString = this.getString(includeType);  ///
 
     context.trace(`Validating the '${propertyString}' property assertion's property term...`);
 
-    const propertyTermUnifiesWithProperties = unifyTermWithProperties(this.propertyTerm, state, context, continuation)
+    return unifyTermWithProperties(this.propertyTerm, state, context, (propertyTerm, state, context, back) => {
+      this.propertyTerm = propertyTerm;
 
-    if (propertyTermUnifiesWithProperties) {
-      propertyTermValidates = true;
-    }
-
-    if (propertyTermValidates) {
       context.debug(`...validated the '${propertyString}' property assertion's property term.`);
-    }
 
-    return propertyTermValidates;
+      return forward(state, context, back);
+    }, back)
   }
 
   assign(state, context) {

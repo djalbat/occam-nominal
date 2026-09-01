@@ -6,10 +6,10 @@ import { define } from "../elements";
 import { declare } from "../utilities/state";
 import { instantiateLabel } from "../process/instantiate";
 import { metavariableFromLabelNode } from "../utilities/element";
-import { join, attempt, reconcile, serialise, unserialise, instantiate } from "../utilities/context";
+import { join, isolate, attempt, reconcile, serialise, unserialise, instantiate } from "../utilities/context";
 
-const { unbreakable } = breakPointUtilities,
-      { cut, all, isolate } = continuationUtilities;
+const { cut, all } = continuationUtilities,
+      { unbreakable } = breakPointUtilities;
 
 export default define(class Label extends Element {
   constructor(context, string, node, breakPoint, metavariable) {

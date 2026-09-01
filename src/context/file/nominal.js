@@ -1,12 +1,13 @@
 "use strict";
 
 import { arrayUtilities } from "necessary";
-import { FileContext, nominalUtilities, continuationUtilities } from "occam-languages";
+import { FileContext, nominalUtilities } from "occam-languages";
 
 import NominalLexer from "../../nominal/lexer";
 import NominalParser from "../../nominal/parser";
 
-import { findType} from "../../utilities/type";
+import { isolate } from "../../utilities/context";
+import { findType } from "../../utilities/type";
 import { verifyFile } from "../../process/verify";
 import { findMetaTypeByMetaTypeName } from "../../metaTypes";
 import { typesFromJSON,
@@ -35,7 +36,6 @@ import { typesFromJSON,
          declaredMetavariablesToDeclaredMetavariablesJSON } from "../../utilities/json";
 
 const { push } = arrayUtilities,
-      { isolate } = continuationUtilities,
       { nominalLexerFromCombinedCustomGrammar, nominalParserFromCombinedCustomGrammar } = nominalUtilities;
 
 export default class NominalFileContext extends FileContext {
@@ -445,9 +445,9 @@ export default class NominalFileContext extends FileContext {
     return rule;
   }
 
-  findAxiomByReference(reference) {
+  findAxiomByLink(link) {
     const axioms = this.getAxioms(),
-          metavariableNode = reference.getMetavariableNode(),
+          metavariableNode = link.getMetavariableNode(),
           axiom = axioms.find((axiom) => {
             const metavariableNodeMatches = axiom.matchMetavariableNode(metavariableNode);
 
@@ -457,6 +457,20 @@ export default class NominalFileContext extends FileContext {
           }) || null;
 
     return axiom;
+  }
+
+  findClaimByReference(reference) {
+    const claims = this.getClaims(),
+          metavariableNode = reference.getMetavariableNode(),
+          claim = claims.find((claim) => {
+            const metavariableNodeMatches = claim.matchMetavariableNode(metavariableNode);
+
+            if (metavariableNodeMatches) {
+              return true;
+            }
+          }) || null;
+
+    return claim;
   }
 
   findLemmaByReference(reference) {
@@ -499,20 +513,6 @@ export default class NominalFileContext extends FileContext {
           }) || null;
 
     return conjecture;
-  }
-
-  findClaimByReference(reference) {
-    const claims = this.getClaims(),
-          metavariableNode = reference.getMetavariableNode(),
-          claim = claims.find((claim) => {
-            const metavariableNodeMatches = claim.matchMetavariableNode(metavariableNode);
-
-            if (metavariableNodeMatches) {
-              return true;
-            }
-          }) || null;
-
-    return claim;
   }
 
   findTypeByTypeName(typeName, includeRelease = true) {

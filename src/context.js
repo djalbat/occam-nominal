@@ -264,9 +264,9 @@ export default class Context extends ContextBase {
     return rule;
   }
 
-  findAxiomByReference(reference) {
+  findAxiomByLink(link) {
     const context = this.getContext(),
-          axiom = context.findAxiomByReference(reference);
+          axiom = context.findAxiomByLink(link);
 
     return axiom;
   }
@@ -280,7 +280,14 @@ export default class Context extends ContextBase {
 
   findTermByTermNode(termNode) {
     const context = this.getContext(),
-          term = context.findTermByTermNode(termNode);
+      term = context.findTermByTermNode(termNode);
+
+    return term;
+  }
+
+  findLinkByLinkNode(linkNode) {
+    const context = this.getContext(),
+          term = context.findLinkByLinkNode(linkNode);
 
     return term;
   }
@@ -364,7 +371,7 @@ export default class Context extends ContextBase {
 
   findTypeByTypeName(typeName) {
     const context = this.getContext(),
-          type = context.findTypeByTypeName(typeName);
+      type = context.findTypeByTypeName(typeName);
 
     return type;
   }

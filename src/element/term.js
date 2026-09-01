@@ -271,8 +271,6 @@ export default define(class Term extends Element {
   }
 
   unifyTerm(term, generalContext, specificContext, forward, back) {
-    let termUnifies = false;
-
     const context = specificContext,  ///
           generalTerm = this, ///
           specificTerm = term,
@@ -281,17 +279,11 @@ export default define(class Term extends Element {
 
     context.trace(`Unifying the '${specifixTermString}' term with the '${generalTermString}' term...`);
 
-    return unifyTermIntrinsically(generalTerm, specificTerm, generalContext, specificContext, (termUnifiesIntrinsically) => {
-      if (termUnifiesIntrinsically) {
-        termUnifies = true;
-      }
+    return unifyTermIntrinsically(generalTerm, specificTerm, generalContext, specificContext, (generalContext, specificContext, back) => {
+      context.debug(`...unified the '${specifixTermString}' term with the '${generalTermString}' term.`);
 
-      if (termUnifies) {
-        context.debug(`...unified the '${specifixTermString}' term with the '${generalTermString}' term.`);
-      }
-
-      return continuation(termUnifies);
-    });
+      return forward(generalContext, specificContext, back);
+    }, back);
   }
 
   toJSON() {

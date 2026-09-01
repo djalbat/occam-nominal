@@ -9,11 +9,11 @@ import { instantiateConstructor } from "../process/instantiate";
 import { termFromConstructorNode } from "../utilities/element";
 import { unifyTermWithConstructor } from "../process/unify";
 import { validateTermAsConstructor } from "../process/validate";
-import { attempt, serialise, unserialise, instantiate } from "../utilities/context";
+import { isolate, attempt, serialise, unserialise, instantiate } from "../utilities/context";
 import { typeFromJSON, typeToTypeJSON, hypothesesFromJSON, hypothesesToHypothesesJSON } from "../utilities/json";
 
 const { unbreakable } = breakPointUtilities,
-      { cut, all, every, exists, isolate } = continuationUtilities;
+      { cut, all, every, exists } = continuationUtilities;
 
 export default define(class Constructor extends Element {
   constructor(context, string, node, breakPoint, term, type, hypotheses) {

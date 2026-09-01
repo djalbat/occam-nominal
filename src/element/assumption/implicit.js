@@ -4,13 +4,13 @@ import { Element, breakPointUtilities, continuationUtilities } from "occam-langu
 
 import { define } from "../../elements";
 import { declare } from "../../utilities/state";
-import { ablate, attempt, instantiate } from "../../utilities/context";
+import { ablate, isolate, attempt, instantiate } from "../../utilities/context";
 import { instantiateImplicitAssumption } from "../../process/instantiate";
 import { implicitAssumptionStringFromStatement } from "../../utilities/string";
 import { implicitAssumptionFromImplicitAssumptionNode } from "../../utilities/element";
 
-const { unbreakable } = breakPointUtilities,
-      { cut, all, isolate } = continuationUtilities;
+const { cut, all } = continuationUtilities,
+      { unbreakable } = breakPointUtilities;
 
 export default define(class ImplicitAssumption extends Element {
   constructor(context, string, node, breakPoint, statement) {

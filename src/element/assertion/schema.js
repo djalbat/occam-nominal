@@ -6,11 +6,10 @@ import elements from "../../elements";
 import Assertion from "../assertion";
 
 import { define } from "../../elements";
-import { declare } from "../../utilities/state";
-import { attempt } from "../../utilities/context";
+import { isolate, attempt } from "../../utilities/context";
 
 const { unbreakable } = breakPointUtilities,
-      { cut, all, some, every, isolate } = continuationUtilities;
+      { cut, all, some, every } = continuationUtilities;
 
 export default define(class SchemaAssertion extends Assertion {
   constructor(context, string, node, breakPoint, link, frame) {
@@ -65,34 +64,6 @@ export default define(class SchemaAssertion extends Assertion {
       return forward(implicitAssumptions, context, back);
     }, back);
   }
-
-  verify = unbreakable(function (context, forward, back) {
-    forward = cut(forward, back); ///
-
-    const schemaAssertionString = this.getString(); ///
-
-    context.trace(`Verifying the '${schemaAssertionString}' schema assertion...`);
-
-    return isolate((context, forward, back) => {
-      return declare((state) => {
-        return this.validate(state, context, (schemaAssertion, context, back) => {
-          return forward(back);
-        }, back);
-      });
-    }, context, (context, back) => {
-      context.debug(`...verified the '${schemaAssertionString}' schema assertion.`);
-
-      return forward(context, back);
-    }, (exception) => {
-      if (exception) {
-        return back(exception);
-      }
-
-      context.trace(`Unable to verify the '${schemaAssertionString}' schema assertion.`);
-
-      return back();
-    });
-  });
 
   apply = unbreakable(function (step, context, forward, back) {
     forward = cut(forward, back); ///

@@ -9,11 +9,11 @@ import { instantiateGenerator } from "../process/instantiate";
 import { termFromGeneratorNode } from "../utilities/element";
 import { unifyTermWithGenerator } from "../process/unify";
 import { validateTermAsGenerator } from "../process/validate";
-import { attempt, serialise, unserialise, instantiate } from "../utilities/context";
+import { isolate, attempt, serialise, unserialise, instantiate } from "../utilities/context";
 import { typeFromJSON, typeToTypeJSON, hypothesesFromJSON, hypothesesToHypothesesJSON } from "../utilities/json";
 
 const { unbreakable } = breakPointUtilities,
-      { cut, isolate, exists } = continuationUtilities;
+      { cut, all, exists } = continuationUtilities;
 
 export default define(class Generator extends Element {
   constructor(context, string, node, breakPoint, term, type, hypotheses) {

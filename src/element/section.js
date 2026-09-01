@@ -3,10 +3,10 @@
 import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
 
 import { define } from "../elements";
-import { enclose } from "../utilities/context";
+import { isolate, enclose } from "../utilities/context";
 
 const { breakable } = breakPointUtilities,
-      { cut, all, every, isolate } = continuationUtilities;
+      { cut, all, every } = continuationUtilities;
 
 export default define(class Section extends Element {
   constructor(context, string, node, breakPoint, hypotheses, declaration, claim) {

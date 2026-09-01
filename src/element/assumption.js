@@ -265,21 +265,13 @@ export default define(class Assumption extends Element {
 
     return join((specificContext) => {
       return reconcile((specificContext) => {
-        return deducedStatement.unifyStatement(statement, generalContext, specificContext, (statementUnifies) => {
-          let deductionUnifies = false;
+        return deducedStatement.unifyStatement(statement, generalContext, specificContext, (generalContext, specificContext, back) => {
+          specificContext.commit(context);
 
-          if (statementUnifies) {
-            specificContext.commit(context);
+          context.debug(`...unified the '${deductionString}' deduction's statement with the '${assumptionString}' assumption's '${assumptionString}' statement.`);
 
-            deductionUnifies = true;
-          }
-
-          if (deductionUnifies) {
-            context.debug(`...unified the '${deductionString}' deduction's statement with the '${assumptionString}' assumption's '${assumptionString}' statement.`);
-          }
-
-          return continuation(deductionUnifies);
-        });
+          return forward(generalContext, specificContext, back);
+        }, back);
       }, specificContext);
     }, specificContext, context);
   }
@@ -298,21 +290,13 @@ export default define(class Assumption extends Element {
 
     return join((specificContext) => {
       return reconcile((specificContext) => {
-        return supposedStatement.unifyStatement(statement, generalContext, specificContext, (statementUnifies) => {
-          let suppositionUnifies = false;
+        return supposedStatement.unifyStatement(statement, generalContext, specificContext, (generalContext, specificContext, back) => {
+          specificContext.commit(context);
 
-          if (statementUnifies) {
-            specificContext.commit(context);
+          context.debug(`...unified the '${suppositionString}' supposition's statement  with the '${supposedStatementString}' supposed statement.`);
 
-            suppositionUnifies = true;
-          }
-
-          if (suppositionUnifies) {
-            context.debug(`...unified the '${suppositionString}' supposition's statement  with the '${supposedStatementString}' supposed statement.`);
-          }
-
-          return continuation(suppositionUnifies);
-        });
+          return forward(generalContext, specificContext, back);
+        }, back);
       }, specificContext);
     }, specificContext, context);
   }

@@ -8,9 +8,9 @@ import { define } from "../../elements";
 import { declare } from "../../utilities/state";
 import { instantiatePremise } from "../../process/instantiate";
 import { referenceFromPremiseNode, procedureCallFromPremiseNode } from "../../utilities/element";
-import { attempt, reconcile, serialise, unserialise, instantiate } from "../../utilities/context";
+import { isolate, attempt, reconcile, serialise, unserialise, instantiate } from "../../utilities/context";
 
-const { cut, all, isolate } = continuationUtilities,
+const { cut, all } = continuationUtilities,
       { breakable, breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Premise extends Fact {

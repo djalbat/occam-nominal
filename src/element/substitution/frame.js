@@ -9,10 +9,10 @@ import { desist, declare } from "../../utilities/state";
 import { instantiateFrameSubstitution } from "../../process/instantiate";
 import { frameSubstitutionFromFrameSubstitutionNode } from "../../utilities/element";
 import { frameSubstitutionStringFromFrameAndMetavariable } from "../../utilities/string";
-import { ablates, manifest, attempts, participate, instantiate, unserialises } from "../../utilities/context";
+import { isolate, ablates, manifest, attempts, participate, instantiate, unserialises } from "../../utilities/context";
 
-const { unbreakable } = breakPointUtilities,
-      { cut, all, isolate } = continuationUtilities;
+const { cut, all } = continuationUtilities,
+      { unbreakable } = breakPointUtilities;
 
 export default define(class FrameSubstitution extends Substitution {
   constructor(contexts, string, node, breakPoint, targetFrame, replacementFrame) {

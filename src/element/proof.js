@@ -3,10 +3,10 @@
 import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
 
 import { define } from "../elements";
-import { enclose } from "../utilities/context";
+import { isolate, enclose } from "../utilities/context";
 
-const { breakable } = breakPointUtilities,
-      { cut, isolate } = continuationUtilities;
+const { cut } = continuationUtilities,
+      { breakable } = breakPointUtilities;
 
 export default define(class Proof extends Element {
   constructor(context, string, node, breakPoint, derivation) {

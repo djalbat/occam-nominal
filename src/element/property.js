@@ -9,10 +9,10 @@ import { termFromPropertyNode } from "../utilities/element";
 import { unifyTermWithProperty } from "../process/unify";
 import { validateTermAsProperty } from "../process/validate";
 import { typeFromJSON, typeToTypeJSON } from "../utilities/json";
-import { attempt, serialise, unserialise, instantiate } from "../utilities/context";
+import { isolate, attempt, serialise, unserialise, instantiate } from "../utilities/context";
 
 const { unbreakable } = breakPointUtilities,
-      { cut, exists, isolate } = continuationUtilities;
+      { cut, all, exists } = continuationUtilities;
 
 export default define(class Property extends Element {
   constructor(context, string, node, breakPoint, term, type) {
@@ -85,7 +85,7 @@ export default define(class Property extends Element {
           context.debug(`...verified the '${propertyString}' property.`);
 
           return forward(context, back);
-        });
+        }, back);
       }, state);
     });
   });
@@ -156,12 +156,6 @@ export default define(class Property extends Element {
     const termString = term.getString(),
           includeType = true,
           propertyString = this.getString(includeType);  ///
-
-    const hypothetical = this.isHypothetical();
-
-    if (hypothetical) {
-      return forward(term, context, back);
-    }
 
     context.trace(`Unifying the '${termString}' term with the '${propertyString}' property...`);
 

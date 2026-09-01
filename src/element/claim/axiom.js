@@ -6,10 +6,10 @@ import Claim from "../claim";
 
 import { define } from "../../elements";
 import { termsStringFromTerms } from "../../utilities/string";
-import { join, enclose, reconcile } from "../../utilities/context";
+import { join, isolate, enclose, reconcile } from "../../utilities/context";
 
 const { breakable } = breakPointUtilities,
-      { cut, all, isolate, backwardsEvery } = continuationUtilities;
+      { cut, all, backwardsEvery } = continuationUtilities;
 
 export default define(class Axiom extends Claim {
   getAxiomNode() {
@@ -124,7 +124,7 @@ export default define(class Axiom extends Claim {
 
     context.trace(`Verifying the '${axiomString}' axiom's signature...`);
 
-    return signature.verify(context, (back) => {
+    return signature.verify(context, (context, back) => {
       context.trace(`...verified the '${axiomString}' axiom's signature.`);
 
       return forward(context, back);
@@ -187,8 +187,6 @@ export default define(class Axiom extends Claim {
   }
 
   unifyDeduction(deduction, context, forward, back) {
-    let deductionUnifies = false;
-
     const generalDeduction = this.getDeduction(), ///
           specificDeduction = deduction,  ///
           generalDeductionString = generalDeduction.getString(),
@@ -207,28 +205,18 @@ export default define(class Axiom extends Claim {
 
         deduction = generalDeduction; ///
 
-        return deduction.unifyStatement(statement, generalContext, specificContext, (statementUnifies) => {
-          if (statementUnifies) {
-            deductionUnifies = true;
-          }
+        return deduction.unifyStatement(statement, generalContext, specificContext, (generalContext, specificContext, back) => {
+          specificContext.commit(context);
 
-          if (deductionUnifies) {
-            specificContext.commit(context);
-          }
+          context.debug(`...unified the '${specificDeductionString}' deduction with the '${generalDeductionString}' deduction.`);
 
-          if (deductionUnifies) {
-            context.debug(`...unified the '${specificDeductionString}' deduction with the '${generalDeductionString}' deduction.`);
-          }
-
-          return continuation(deductionUnifies);
-        });
+          return forward(context, back);
+        }, back);
       }, specificContext);
     }, specificContext, context);
   }
 
   unifySupposition(specificSupposition, generalSupposition, context, forward, back) {
-    let suppositionUnifies = false;
-
     const generalSuppositionString = generalSupposition.getString(),
           specificSuppositionString = specificSupposition.getString();
 
@@ -244,21 +232,13 @@ export default define(class Axiom extends Claim {
         const statement = specificSupposition.getStatement(),
               supposition = generalSupposition; ///
 
-        return supposition.unifyStatement(statement, generalContext, specificContext, (statementUnifies) => {
-          if (statementUnifies) {
-            suppositionUnifies = true;
-          }
+        return supposition.unifyStatement(statement, generalContext, specificContext, (generalContext, specificContext, back) => {
+          specificContext.commit(context);
 
-          if (suppositionUnifies) {
-            specificContext.commit(context);
-          }
+          context.debug(`...unified the '${specificSuppositionString}' supposition with the '${generalSuppositionString}' supposition.`);
 
-          if (suppositionUnifies) {
-            context.debug(`...unified the '${specificSuppositionString}' supposition with the '${generalSuppositionString}' supposition.`);
-          }
-
-          return continuation(suppositionUnifies);
-        });
+          return forward(context, back);
+        }, back);
       }, specificContext);
     }, specificContext, context);
   }
@@ -290,8 +270,6 @@ export default define(class Axiom extends Claim {
   }
 
   unifySignatureAssertion(signatureAssertion, context, forward, back) {
-    let signatureAssertionUnifies = false;
-
     const axiomString = this.getString(), ///
           signatureAssertionString = signatureAssertion.getString();
 
@@ -300,17 +278,11 @@ export default define(class Axiom extends Claim {
     const terms = signatureAssertion.getTerms(),
           signature = this.getSignature();
 
-    return signature.unifyTerms(terms, context, (termsUnify) => {
-      if (termsUnify) {
-        signatureAssertionUnifies = true;
-      }
+    return signature.unifyTerms(terms, context, (context, back) => {
+      context.debug(`...unified the '${signatureAssertionString}' signature assertion with the '${axiomString}' axiom.`);
 
-      if (signatureAssertionUnifies) {
-        context.debug(`...unified the '${signatureAssertionString}' signature assertion with the '${axiomString}' axiom.`);
-      }
-
-      return continuation(signatureAssertionUnifies);
-    });
+      return forward(context, back);
+    }, back);
   }
 
   static name = "Axiom";

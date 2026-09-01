@@ -3,7 +3,7 @@
 import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
 
 import { define } from "../elements";
-import { reconcile, encapsulate } from "../utilities/context";
+import { isolate, reconcile, encapsulate } from "../utilities/context";
 import { schemaStringFromLabelSuppositionsAndDeduction, implicitAssumptionsStringFromImplicitAssumptions } from "../utilities/string";
 import { labelFromJSON,
          labelToLabelJSON,
@@ -14,7 +14,7 @@ import { labelFromJSON,
          constraintsToConstraintsJSON,
          suppositionsToSuppositionsJSON } from "../utilities/json";
 
-const { cut, all, filter, isolate, forwardsEvery, backwardsEvery } = continuationUtilities,
+const { cut, all, filter, forwardsEvery, backwardsEvery } = continuationUtilities,
       { breakable, unbreakable, breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Schema extends Element {

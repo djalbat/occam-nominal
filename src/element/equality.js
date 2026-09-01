@@ -131,26 +131,55 @@ export default define(class Equality extends Element {
 
     context.trace(`Validating the '${equalityString}' equality's terms...`);
 
+    const validateLeftTerm = this.validateLeftTerm.bind(this),
+          validateRightTerm = this.validateRightTerm.bind(this);
+
+    return all([
+      validateLeftTerm,
+      validateRightTerm
+    ], state, context, (state, context, back) => {
+      const leftTermType = this.leftTerm.getType(),
+            rightTermType = this.rightTerm.getType(),
+            leftTermTypeBaseType = leftTermType.isBaseType(),
+            rightTermTypeBaseType = rightTermType.isBaseType(),
+            leftTermTypeJoinedToRightTermType = leftTermType.isJoinedTo(rightTermType);
+
+      if (!leftTermTypeBaseType && !rightTermTypeBaseType && !leftTermTypeJoinedToRightTermType) {
+        return back();
+      }
+
+      context.debug(`...validated the '${equalityString}' equality's terms.`);
+
+      return forward(state, context, back);
+
+    }, back);
+  }
+
+  validateLeftTerm(state, context, forward, back) {
+    const equalityString = this.getString(); ///
+
+    context.trace(`Validating the '${equalityString}' equality's left term...`);
+
     return this.leftTerm.validate(state, context, (leftTerm, context, back) => {
-      return this.rightTerm.validate(state, context, (rightTerm, context, back) => {
-        const leftTermType = leftTerm.getType(),
-              rightTermType = rightTerm.getType(),
-              leftTermTypeBaseType = leftTermType.isBaseType(),
-              rightTermTypeBaseType = rightTermType.isBaseType(),
-              leftTermTypeJoinedToRightTermType = leftTermType.isJoinedTo(rightTermType);
+      this.leftTerm = leftTerm;
 
-        if (!leftTermTypeBaseType && !rightTermTypeBaseType && !leftTermTypeJoinedToRightTermType) {
-          return back();
-        }
+      context.debug(`...validated the '${equalityString}' equality's left term.`);
 
-        this.leftTerm = leftTerm;
+      return forward(state, context, back);
+    }, back);
+  }
 
-        this.rightTerm = rightTerm;
+  validateRightTerm(state, context, forward, back) {
+    const equalityString = this.getString(); ///
 
-        context.debug(`...validated the '${equalityString}' equality's terms.`);
+    context.trace(`Validating the '${equalityString}' equality's right term...`);
 
-        return forward(state, context, back);
-      }, back);
+    return this.rightTerm.validate(state, context, (rightTerm, context, back) => {
+      this.rightTerm = rightTerm;
+
+      context.debug(`...validated the '${equalityString}' equality's right term.`);
+
+      return forward(state, context, back);
     }, back);
   }
 

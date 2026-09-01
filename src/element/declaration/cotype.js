@@ -5,12 +5,11 @@ import { breakPointUtilities, continuationUtilities } from "occam-languages";
 import Declaration from "../declaration";
 
 import { define } from "../../elements";
-import { anticipate } from "../../utilities/context";
 import { baseTypeFromNothing } from "../../utilities/type";
-import {isolate} from "occam-languages/lib/utilities/continuation";
+import { isolate, anticipate } from "../../utilities/context";
 
 const { breakable } = breakPointUtilities,
-      { cut, all, every, isolate } = continuationUtilities;
+      { cut, all, every } = continuationUtilities;
 
 export default define(class CotypeDeclaration extends Declaration {
   constructor(context, string, node, breakPoint, type, superTypes, provisional, propertyDeclarations) {

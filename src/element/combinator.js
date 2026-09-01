@@ -8,10 +8,10 @@ import { instantiateCombinator } from "../process/instantiate";
 import { statementFromCombinatorNode } from "../utilities/element";
 import { unifyStatementWithCombinator } from "../process/unify";
 import { validateStatementAsCombinator } from "../process/validate";
-import { attempt, serialise, unserialise, instantiate } from "../utilities/context";
+import { isolate, attempt, serialise, unserialise, instantiate } from "../utilities/context";
 
 const { unbreakable } = breakPointUtilities,
-      { cut, exists, isolate } = continuationUtilities;
+      { cut, exists } = continuationUtilities;
 
 export default define(class Combinator extends Element {
   constructor(context, string, node, breakPoint, statement) {

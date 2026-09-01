@@ -4,11 +4,11 @@ import { Element, breakPointUtilities, continuationUtilities } from "occam-langu
 
 import { define } from "../elements";
 import { declare } from "../utilities/state";
+import { isolate, attempt } from "../utilities/context";
 import { REFERENCE_META_TYPE_NAME } from "../metaTypeNames";
-import { join, attempt, reconcile } from "../utilities/context";
 
-const { unbreakable } = breakPointUtilities,
-      { cut, all, isolate } = continuationUtilities;
+const { cut, all } = continuationUtilities,
+      { unbreakable } = breakPointUtilities;
 
 export default define(class Reference extends Element {
   constructor(context, string, node, breakPoint, metavariable) {

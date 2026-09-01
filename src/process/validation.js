@@ -55,9 +55,7 @@ function unifyTermWithGenerators(term, state, context, forward, back) {
 
   return some(generators, (generator, context, forward, back) => {
     return choose((context) => {
-      return generator.unifyTerm(term, context, (term, context, back) => {
-        return forward(term, state, context, back);
-      }, back);
+      return generator.unifyTerm(term, context, forward, back);
     }, context);
   }, context, (state, context, back) => {
     context.debug(`...unified the '${termString}' term with generators.`);
@@ -310,9 +308,9 @@ export function unifyTermWithProperties(term, state, context, forward, back) {
 
   return some(properties, (property, context, forward, back) => {
     return choose((context) => {
-      return property.unifyTerm(term, state, context, forward, back);
+      return property.unifyTerm(term, context, forward, back);
     }, context);
-  }, context, (back) => {
+  }, context, (term, context, back) => {
     context.debug(`...unified the '${termString}' term with properties.`);
 
     return forward(term, state, context, back);

@@ -5,10 +5,10 @@ import { breakPointUtilities, continuationUtilities } from "occam-languages";
 import Claim from "../claim";
 
 import { define } from "../../elements";
-import { enclose, reconcile } from "../../utilities/context";
+import { isolate, enclose, reconcile } from "../../utilities/context";
 
-const { breakable } = breakPointUtilities,
-      { cut, all, isolate } = continuationUtilities;
+const { cut, all } = continuationUtilities,
+      { breakable } = breakPointUtilities;
 
 export default define(class Lemma extends Claim {
   getLemmaNode() {

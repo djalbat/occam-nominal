@@ -5,12 +5,11 @@ import { breakPointUtilities, continuationUtilities } from "occam-languages";
 import Assertion from "../assertion";
 
 import { define } from "../../elements";
-import { declare } from "../../utilities/state";
-import {attempt, reconcile} from "../../utilities/context";
+import { isolate, reconcile } from "../../utilities/context";
 import { signatureAssertionFromStatementNode } from "../../utilities/element";
 
-const { cut } = continuationUtilities,
-      { unbreakable } = breakPointUtilities;
+const { unbreakable } = breakPointUtilities,
+      { cut, all, every } = continuationUtilities;
 
 export default define(class SignatureAssertion extends Assertion {
   constructor(context, string, node, breakPoint, link, terms) {
@@ -35,70 +34,79 @@ export default define(class SignatureAssertion extends Assertion {
     return signatureAssertionNode;
   }
 
-  verify = unbreakable(function (context, forward, back) {
-    forward = cut(forward, back); ///
-
-    const signatureAssertionString = this.getString(); ///
-
-    context.trace(`Verifying the '${signatureAssertionString}' signature assertion...`);
-
-    return declare((state) => {
-      return this.validate(state, context, (signatureAssertion, context , back) => {
-        context.debug(`...verified the '${signatureAssertionString}' signature assertion.`);
-
-        return forward(context, back);
-      }, back);
-    });
-  });
-
   apply = unbreakable(function (step, factOrSubproofs, context, forward, back) {
     forward = cut(forward, back); ///
-
-    let stepAndFactOrSubproofsUnify = false;
 
     const signatureAssertionString = this.getString();  ///
 
     context.trace(`Applying the '${signatureAssertionString}' signature assertion...`);
 
-    return reconcile((context) => {
-      const axiom = context.findAxiomByLink(this.link),
-            signatureAssertion = this;  ///
+    return isolate((step, factOrSubproofs, context, forward, back) => {
+      return reconcile((context) => {
+        const axiom = context.findAxiomByLink(this.link),
+              signatureAssertion = this;  ///
 
-      return axiom.unifySignatureAssertion(signatureAssertion, context, (signatureAssertionUnifies) => {
-        if (!signatureAssertionUnifies) {
-          return continuation(stepAndFactOrSubproofsUnify);
-        }
+        return axiom.unifySignatureAssertion(signatureAssertion, context, (context, back) => {
+          axiom.apply(step, factOrSubproofs, context, (context, back) => {
+            return forward(back);
+          }, back);
+        }, back);
+      }, context);
+    }, step, factOrSubproofs, context, (step, factOrSubproofs, context, back) => {
+      context.debug(`applied the '${signatureAssertionString}' signature assertion.`);
 
-        context.debug(`applied the '${signatureAssertionString}' signature assertion.`);
-
-        axiom.unifyStepAndFactOrSubproofs(step, factOrSubproofs, context, forward, back);
-      });
-    }, context);
+      return forward(context, back);
+    }, back);
   });
 
   validate(state, context, forward, back) {
+    let assertion;
+
     const signatureAssertionString = this.getString();  ///
 
     context.trace(`Validating the '${signatureAssertionString}' signature assertion...`);
 
-    return isolate((state, context, forward, back) => {
-      return attempt((context) => {
-        const validateLink = this.validateLink.bind(this),
-              validateTerms = this.validateTerms.bind(this);
+    assertion = this.findAssertion(context);
 
-        return all([
-          validateLink,
-          validateTerms
-        ], state, context, (state, context, back) => {
-          this.commit(context);
+    if (assertion !== null) {
+      const signatureAssertion = assertion; ///
 
-          return forward(back);
-        }, back);
-      }, context);
-    }, state, context, (state, context, back) => {
+      context.debug(`The '${signatureAssertionString}' signature assertion is already present.`);
+
+      return forward(signatureAssertion, context, back);
+    }
+
+    assertion = this; ///
+
+    const validateLink = this.validateLink.bind(this),
+          validateTerms = this.validateTerms.bind(this);
+
+    return all([
+      validateLink,
+      validateTerms
+    ], state, context, (state, context, back) => {
+      context.addAssertion(assertion);
+
+      const signatureAssertion = assertion; ///
+
       context.debug(`...validated the '${signatureAssertionString}' signature assertion.`);
 
-      return forward(context, back);
+      return forward(signatureAssertion, context, back);
+    }, back);
+  }
+
+  validateTerm(term, terms, state, context, forward, back) {
+    const termString = term.getString(),
+          signatureAssertionString = this.getString();  ///
+
+    context.trace(`Validating the '${signatureAssertionString}' signature assertion's '${termString}' term...`);
+
+    return term.validate(state, context, (term, context, back) => {
+      terms.push(term);
+
+      context.debug(`...validated the '${signatureAssertionString}' signature assertion's '${termString}' term.`);
+
+      return forward(terms, state, context, back);
     }, back);
   }
 
@@ -116,31 +124,6 @@ export default define(class SignatureAssertion extends Assertion {
     }, back);
   }
 
-  validateTerm(term, terms, state, context, forward, back) {
-    let termValidates;
-
-    const termString = term.getString(),
-          signatureAssertionString = this.getString();  ///
-
-    context.trace(`Validating the '${signatureAssertionString}' signature assertion's '${termString}' term...`);
-
-    termValidates = term.validate(state, context, (term, context) => {
-      let validates;
-
-      terms.push(term);
-
-      validates = continuation(terms, state, context);
-
-      return validates;
-    });
-
-    if (termValidates) {
-      context.debug(`...validated the '${signatureAssertionString}' signature assertion's '${termString}' term.`);
-    }
-
-    return termValidates;
-  }
-
   validateTerms(state, context, forward, back) {
     const signatureAssertionString = this.getString();  ///
 
@@ -148,23 +131,15 @@ export default define(class SignatureAssertion extends Assertion {
 
     const terms = [];
 
-    return every(this.terms, validateTerm, terms, state, context, (terms, state, context) => {
-      let termsValidate;
+    return every(this.terms, (term, terms, state, context, forward, back) => {
+      return this.validateTerm(term, terms, state, context, forward, back);
+    }, terms, state, context, (terms, state, context, back) => {
+      this.terms = terms;
 
-      termsValidate = continuation(state, context);
-
-      if (termsValidate) {
-        this.terms = terms;
-      }
-
-      return termsValidate;
-    });
-
-    if (termsValidate){
       context.debug(`...validated the '${signatureAssertionString}' signature assertion's terms.`);
-    }
 
-    return termsValidate
+      return forward(state, context, back);
+    }, back);
   }
 
   unifyClaim(claim, context, forward, back) {

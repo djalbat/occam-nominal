@@ -7,9 +7,9 @@ import Resolution from "../resolution";
 import { define } from "../../elements";
 import { desist, declare } from "../../utilities/state";
 import { instantiateDeduction } from "../../process/instantiate";
-import { attempt, reconcile, unserialise, instantiate } from "../../utilities/context";
+import { isolate, attempt, reconcile, unserialise, instantiate } from "../../utilities/context";
 
-const { cut, all, isolate } = continuationUtilities,
+const { cut, all } = continuationUtilities,
       { breakable, breakPointFromJSON } = breakPointUtilities;
 
 export default define(class Deduction extends Resolution {

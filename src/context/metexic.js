@@ -62,6 +62,12 @@ export default class MetexicContext extends Context {
     context.addTerm(term);
   }
 
+  addLink(link) {
+    const context = this.getContext();
+
+    context.addLink(link);
+  }
+
   addFrame(frame) {
     const context = this.getContext();
 
