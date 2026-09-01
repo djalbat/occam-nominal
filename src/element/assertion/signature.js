@@ -6,7 +6,7 @@ import Assertion from "../assertion";
 
 import { define } from "../../elements";
 import { declare } from "../../utilities/state";
-import { reconcile } from "../../utilities/context";
+import {attempt, reconcile} from "../../utilities/context";
 import { signatureAssertionFromStatementNode } from "../../utilities/element";
 
 const { cut } = continuationUtilities,
@@ -81,31 +81,39 @@ export default define(class SignatureAssertion extends Assertion {
 
     context.trace(`Validating the '${signatureAssertionString}' signature assertion...`);
 
-    assertion = this; ///
+    return isolate((state, context, forward, back) => {
+      return attempt((context) => {
+        const validateLink = this.validateLink.bind(this),
+              validateTerms = this.validateTerms.bind(this);
 
-    const validateTerms = this.validateTerms.bind(this),
-          validateLink = this.validateLink.bind(this);
+        return all([
+          validateLink,
+          validateTerms
+        ], state, context, (state, context, back) => {
+          this.commit(context);
 
-    validates = all([
-      validateTerms,
-      validateLink
-    ], state, context, (state, context) => {
-      let validates;
-
-      context.addAssertion(assertion);
-
-      const signatureAssertion = assertion; ///
-
-      validates = continuation(signatureAssertion, context);
-
-      return validates;
-    });
-
-    if (validates) {
+          return forward(back);
+        }, back);
+      }, context);
+    }, state, context, (state, context, back) => {
       context.debug(`...validated the '${signatureAssertionString}' signature assertion.`);
-    }
 
-    return validates;
+      return forward(context, back);
+    }, back);
+  }
+
+  validateLink(state, context, forward, back) {
+    const signatureAssertionString = this.getString();  ///
+
+    context.trace(`Validating the '${signatureAssertionString}' signature assertion's link...`);
+
+    return this.link.validate(state, context, (link, context, back) => {
+      this.link = link;
+
+      context.debug(`...validated the '${signatureAssertionString}' signature assertion's link.`);
+
+      return forward(state, context, back);
+    }, back);
   }
 
   validateTerm(term, terms, state, context, forward, back) {
@@ -134,16 +142,13 @@ export default define(class SignatureAssertion extends Assertion {
   }
 
   validateTerms(state, context, forward, back) {
-    let termsValidate;
-
     const signatureAssertionString = this.getString();  ///
 
     context.trace(`Validating the '${signatureAssertionString}' signature assertion's terms...`);
 
-    const terms = [],
-          validateTerm = this.validateTerm.bind(this);
+    const terms = [];
 
-    termsValidate = every(this.terms, validateTerm, terms, state, context, (terms, state, context) => {
+    return every(this.terms, validateTerm, terms, state, context, (terms, state, context) => {
       let termsValidate;
 
       termsValidate = continuation(state, context);
@@ -160,42 +165,6 @@ export default define(class SignatureAssertion extends Assertion {
     }
 
     return termsValidate
-  }
-
-  validateLink(state, context, forward, back) {
-    let linkValidates;
-
-    const signatureAssertionString = this.getString();  ///
-
-    context.trace(`Validating the '${signatureAssertionString}' signature assertion's link...`);
-
-    linkValidates = this.link.validate(state, context, (link, context) => {
-      let validates = false;
-
-      const axiom = context.findAxiomByLink(link);
-
-      if (axiom !== null) {
-        const axiomSatisfiable = axiom.isSatisfiable();
-
-        if (axiomSatisfiable) {
-          validates = true;
-        }
-      }
-
-      if (validates) {
-        this.link = link;
-
-        validates = continuation(state, context);
-      }
-
-      return validates;
-    });
-
-    if (linkValidates) {
-      context.debug(`...validated the '${signatureAssertionString}' signature assertion's link.`);
-    }
-
-    return linkValidates;
   }
 
   unifyClaim(claim, context, forward, back) {
