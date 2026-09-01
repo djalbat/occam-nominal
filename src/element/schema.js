@@ -4,7 +4,7 @@ import { Element, breakPointUtilities, continuationUtilities } from "occam-langu
 
 import { define } from "../elements";
 import { isolate, reconcile, encapsulate } from "../utilities/context";
-import { schemaStringFromLabelSuppositionsAndDeduction, implicitAssumptionsStringFromImplicitAssumptions } from "../utilities/string";
+import { constraintsStringFrooConstraints, schemaStringFromLabelSuppositionsAndDeduction } from "../utilities/string";
 import { labelFromJSON,
          labelToLabelJSON,
          deductionFromJSON,
@@ -14,7 +14,7 @@ import { labelFromJSON,
          constraintsToConstraintsJSON,
          suppositionsToSuppositionsJSON } from "../utilities/json";
 
-const { cut, all, filter, forwardsEvery, backwardsEvery } = continuationUtilities,
+const { cut, all, every, forwardsEvery, backwardsEvery } = continuationUtilities,
       { breakable, unbreakable, breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Schema extends Element {
@@ -118,22 +118,17 @@ export default define(class Schema extends Element {
 
     return isolate((statement, schemaAssertion, context, forward, back) => {
       return reconcile((context) => {
-        const constraints = [
-                ...this.constraints
-              ],
+        const applyConstraints = this.applyConstraints.bind(this),
               unifyDeducedStatement = this.unifyDeducedStatement.bind(this),
               unifySupposedStatements = this.unifySupposedStatements.bind(this),
-              unifyImplicitAssumptions = this.unifyImplicitAssumptions.bind(this),
-              unifySchemaAssertionLink = this.unifySchemaAssertionLink.bind(this),
-              unifySchemaAssertionAssumptions = this.unifySchemaAssertionAssumptions.bind(this);
+              unifySchemaAssertionLink = this.unifySchemaAssertionLink.bind(this);
 
         return all([
           unifySchemaAssertionLink,
-          unifySchemaAssertionAssumptions,
-          unifyImplicitAssumptions,
+          applyConstraints,
           unifyDeducedStatement,
           unifySupposedStatements
-        ], constraints, statement, schemaAssertion, context, (constraints, statement, schemaAssertion, context, back) => {
+        ], statement, schemaAssertion, context, (statement, schemaAssertion, context, back) => {
           return forward(back);
         }, back);
       }, context);
@@ -233,7 +228,30 @@ export default define(class Schema extends Element {
     }, back);
   }
 
-  unifyDeducedStatement(constraints, statement, schemaAssertion, context, forward, back) {
+  applyConstraints(statement, schemaAssertion, context, forward, back) {
+    return schemaAssertion.getImplicitAssumptions(context, (implicitAssumptions, context, back) => {
+      const assumptions = schemaAssertion.getAssumptions(),
+            constraintsString = constraintsStringFrooConstraints(this.constraints);
+
+      context.trace(`Applying the schema's '${constraintsString}' constraints...`);
+
+      return every(this.constraints, (constraint, context, forward, back) => {
+        return constraint.apply(implicitAssumptions, assumptions, context, forward, back);
+      }, context, (context, back) => {
+        context.debug(`...applied the schema's '${constraintsString}' constraints.`);
+
+        return forward(statement, schemaAssertion, context, back);
+      }, (exception) => {
+        if (exception) {
+          return back(exception);
+        }
+
+        context.trace(`Unable to applying the schema's '${constraintsString}' constraints.`);
+      });
+    }, back);
+  }
+
+  unifyDeducedStatement(statement, schemaAssertion, context, forward, back) {
     const conditional = this.isConditional(),
           statementConditional = statement.isConditional();
 
@@ -252,7 +270,7 @@ export default define(class Schema extends Element {
 
     context.trace(`Unifying the '${deducedStatementString}' deduced statement with the '${deductionString}' deductino...`);
 
-    return isolate((constraints, statement, schemaAssertion, context, forward, back) => {
+    return isolate((statement, schemaAssertion, context, forward, back) => {
       const deductionContext = this.deduction.getContext(), ///
             generalContext = deductionContext; ///
 
@@ -268,10 +286,10 @@ export default define(class Schema extends Element {
           return forward(back);
         }, back);
       }, context);
-    }, constraints, statement, schemaAssertion, context, (constraints, statement, schemaAssertion, context, back) => {
+    }, statement, schemaAssertion, context, (statement, schemaAssertion, context, back) => {
       context.debug(`...unified the '${deducedStatementString}' deduced statement with the '${deductionString}' deduction.`);
 
-      return forward(constraints, statement, schemaAssertion, context, back);
+      return forward(statement, schemaAssertion, context, back);
     }, back);
   }
 
@@ -305,7 +323,7 @@ export default define(class Schema extends Element {
     }, back);
   }
 
-  unifySupposedStatements(constraints, statement, schemaAssertion, context, forward, back) {
+  unifySupposedStatements(statement, schemaAssertion, context, forward, back) {
     const suppositionsLength = this.suppositions.length,
           supposedStatements = statement.findSupposedStatements(context),
           supposedStatementsLength = supposedStatements.length;
@@ -317,80 +335,21 @@ export default define(class Schema extends Element {
     return backwardsEvery(supposedStatements, (supposedStatement, forward, back, index) => {
       return this.unifySupposedStatement(supposedStatement, context, forward, back, index);
     }, (context, back) => {
-      return forward(constraints, statement, schemaAssertion, context, back);
+      return forward(statement, schemaAssertion, context, back);
     }, back);
   }
 
-  unifyImplicitAssumptions(constraints, statement, schemaAssertion, context, forward, back) {
-    return schemaAssertion.getImplicitAssumptions(context, (implicitAssumptions, context, back) => {
-      const implicitAssumptionsLength = implicitAssumptions.length;
-
-      if (implicitAssumptionsLength === 0) {
-        const constraintsLength = constraints.length;
-
-        if (constraintsLength > 0) {
-          context.trace(`Not all of the constraints could be applied.`);
-
-          return back();
-        }
-      }
-
-      const schemaString = this.getString(),  ///
-            implicitAssertionsString = implicitAssumptionsStringFromImplicitAssumptions(implicitAssumptions);
-
-      context.trace(`Unifying the '${implicitAssertionsString}' implicit assumptions with the '${schemaString}' schema...`);
-
-      return filter(constraints, (constraint, forward, back) => {
-        return constraint.unifyImplicitAssumptions(implicitAssumptions, context, forward, back);
-      }, (constraints, remainingConstraints, context, back) => {
-        const remainingConstraintsLength = remainingConstraints.length;
-
-        if (remainingConstraintsLength > 0) {
-          context.trace(`Not all of the constraints could be applied.`);
-
-          return back();
-        }
-
-        context.debug(`...unified the '${implicitAssertionsString}' implicit assumptions with the '${schemaString}' schema.`);
-
-        return forward(constraints, statement, schemaAssertion, context, back);
-      }, back);
-    }, back);
-  }
-
-  unifySchemaAssertionLink(constraints, statement, schemaAssertion, context, forward, back) {
-    const schemaString = this.getString(),  ///
+  unifySchemaAssertionLink(statement, schemaAssertion, context, forward, back) {
+    const link = schemaAssertion.getLink(),
+          schemaString = this.getString(),  ///
           schemaAssertionString = schemaAssertion.getString();
 
     context.trace(`Unifying the '${schemaAssertionString}' schema assertion's link with the '${schemaString}' schema...`);
 
-    return this.label.unifySchemaAssertionLink(schemaAssertion, context, (context, back) => {
+    return this.label.unifyLink(link, context, (context, back) => {
       context.debug(`...unified the '${schemaAssertionString}' schema assertion's link with the '${schemaString}' schema.`);
 
-      return forward(constraints, statement, schemaAssertion, context, back);
-    }, back);
-  }
-
-  unifySchemaAssertionAssumptions(constraints, statement, schemaAssertion, context, forward, back) {
-    const schemaAssertionSingular = schemaAssertion.isSingular();
-
-    if (schemaAssertionSingular) {
-      return forward(constraints, statement, schemaAssertion, context, back);
-    }
-
-    const schemaString = this.getString(),  ///
-          schemaAssertionString = schemaAssertion.getString();
-
-    context.trace(`Unifying the '${schemaAssertionString}' schema assertion's assumptions with the '${schemaString}' schema...`);
-
-    return filter(constraints, (constraint, forward, back) => {
-      return constraint.unifySchemaAssertionAssumptions(schemaAssertion, context, forward, back);
-    }, (constraints, remainingConstraints, context, back) => {
-      constraints = remainingConstraints; ///
-
-      context.debug(`...unified the '${schemaAssertionString}' schema assertion's assumptions with the '${schemaString}' schema.`);
-
-      return forward(constraints, statement, schemaAssertion, context, back);
+      return forward(statement, schemaAssertion, context, back);
     }, back);
   }
 
@@ -399,8 +358,8 @@ export default define(class Schema extends Element {
 
     const labelJSON = labelToLabelJSON(this.label),
           deductionJSON = deductionToDeductionJSON(this.deduction),
-          suppositionsJSON = suppositionsToSuppositionsJSON(this.suppositions),
           constraintsJSON = constraintsToConstraintsJSON(this.constraints),
+          suppositionsJSON = suppositionsToSuppositionsJSON(this.suppositions),
           string = this.getString();
 
     let breakPoint;
@@ -413,16 +372,16 @@ export default define(class Schema extends Element {
 
     const label = labelJSON,  ///
           deduction = deductionJSON,  ///
-          suppositions = suppositionsJSON,  ///
-          constraints = constraintsJSON;  ///
+          constraints = constraintsJSON,  ///
+          suppositions = suppositionsJSON;  ///
 
     json = {
       string,
       breakPoint,
       label,
       deduction,
-      suppositions,
-      constraints
+      constraints,
+      suppositions
     };
 
     return json;
@@ -433,8 +392,8 @@ export default define(class Schema extends Element {
   static fromJSON(json, context) {
     const label = labelFromJSON(json, context),
           deduction = deductionFromJSON(json, context),
-          suppositions = suppositionsFromJSON(json, context),
           constraints = constraintsFromJSON(json, context),
+          suppositions = suppositionsFromJSON(json, context),
           string = schemaStringFromLabelSuppositionsAndDeduction(label, suppositions, deduction),
           node = null,
           breakPoint = breakPointFromJSON(json),

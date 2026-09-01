@@ -6,7 +6,6 @@ import elements from "../../elements";
 import Assertion from "../assertion";
 
 import { define } from "../../elements";
-import { isolate, attempt } from "../../utilities/context";
 
 const { unbreakable } = breakPointUtilities,
       { cut, all, some, every } = continuationUtilities;
@@ -85,28 +84,38 @@ export default define(class SchemaAssertion extends Assertion {
   });
 
   validate(state, context, forward, back) {
+    let assertion;
+
     const schemaAssertionString = this.getString();  ///
 
     context.trace(`Validating the '${schemaAssertionString}' schema assertion...`);
 
-    return isolate((state, context, forward, back) => {
-      return attempt((context) => {
-        const validateLink = this.validateLink.bind(this),
-              validateFrame = this.validateFrame.bind(this);
+    assertion = this.findAssertion(context);
 
-        return all([
-          validateLink,
-          validateFrame
-        ], state, context, (state, context, back) => {
-          this.commit(context);
+    if (assertion !== null) {
+      const schemaAssertion = assertion; ///
 
-          return forward(back);
-        }, back);
-      }, context);
-    }, state, context, (state, context, back) => {
+      context.debug(`The '${schemaAssertionString}' schema assertion is already present.`);
+
+      return forward(schemaAssertion, context, back);
+    }
+
+    assertion = this; ///
+
+    const validateLink = this.validateLink.bind(this),
+          validateFrame = this.validateFrame.bind(this);
+
+    return all([
+      validateLink,
+      validateFrame
+    ], state, context, (state, context, back) => {
+      context.addAssertion(assertion);
+
+      const schemaAssertion = assertion; ///
+
       context.debug(`...validated the '${schemaAssertionString}' schema assertion.`);
 
-      return forward(context, back);
+      return forward(schemaAssertion, context, back);
     }, back);
   }
 

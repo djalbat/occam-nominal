@@ -118,31 +118,31 @@ export default define(class Label extends Element {
     }, back);
   }
 
-  unifySchemaAssertionLink(schemaAssertion, context, forward, back) {
-    const link = schemaAssertion.getLink(),
-          labelString = this.getString(), ///
-          schemaAssertionString = schemaAssertion.getString();
+  unifyLink(link, context, forward, back) {
+    const linkString = link.getString(),
+          labelString = this.getString(); ///
 
-    context.trace(`Unifying the '${schemaAssertionString}' schema assertion's link with the '${labelString}' label...`);
+    context.trace(`Unifying the '${linkString}' link with the '${labelString}' label...`);
 
-    const labelContext = this.getContext(), ///
-          schemaAssertionContext = schemaAssertion.getContext(),
-          generalContext = labelContext, ///
-          specificContext = schemaAssertionContext;  ///
-
-    return join((specificContext) => {
-      return reconcile((specificContext) => {
-        const metavariable = link.getMetavariable();
+    return isolate((link, context, forward, back) => {
+      return reconcile((context) => {
+        const metavariable = link.getMetavariable(),
+              generalContext = this.getContext(),  ///
+              specificContext = context;  ///
 
         return this.unifyMetavariable(metavariable, generalContext, specificContext, (generalContext, specificContext, back) => {
-          specificContext.commit(context);
+          context = specificContext;  ///
 
-          context.debug(`...unified the '${schemaAssertionString}' schema assertion's link with the '${labelString}' label.`);
+          context.commit();
 
-          return forward(context, back);
+          return forward(back);
         }, back);
-      }, specificContext);
-    }, specificContext, context);
+      }, context);
+    }, link, context, (link, context, back) => {
+      context.debug(`...unified the '${linkString}' link with the '${labelString}' label.`);
+
+      return forward(context, back);
+    }, back);
   }
 
   unifyReference(reference, context, forward, back) {

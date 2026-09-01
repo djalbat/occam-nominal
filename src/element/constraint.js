@@ -7,12 +7,12 @@ import { declare } from "../utilities/state";
 import { unifyStatement } from "../process/unify";
 import { instantiateConstraint } from "../process/instantiate";
 import { stripBracketsFromStatement } from "../utilities/brackets";
+import { constraintStringFromReferenceAndStatement } from "../utilities/string";
 import { constraintFromConstraintNode, referenceFromConstraintNode } from "../utilities/element";
 import { pare, join, ablate, isolate, attempt, reconcile, serialise, unserialise, instantiate } from "../utilities/context";
-import { constraintStringFromReferenceAndStatement, implicitAssumptionsStringFromImplicitAssumptions } from "../utilities/string";
 
 const { unbreakable } = breakPointUtilities,
-      { cut, all, some } = continuationUtilities;
+      { cut, all, some, exists } = continuationUtilities;
 
 export default define(class Constraint extends Element {
   constructor(context, string, node, breakPoint, reference, statement) {
@@ -82,6 +82,34 @@ export default define(class Constraint extends Element {
 
       return forward(context, back);
     }, back);
+  });
+
+  apply = unbreakable(function (implicitAssumptions, assumptions, context, forward, back) {
+    forward = cut(forward, back); ///
+
+    const constraingString = this.getString();  ///
+
+    context.trace(`Applying the '${constraingString}' constraint...`);
+
+    const unifyAssumptions = this.unifyAssumptions.bind(this),
+          unifyImplicitAssumptions = this.unifyImplicitAssumptions.bind(this);
+
+    return exists([
+      unifyAssumptions,
+      unifyImplicitAssumptions
+    ], implicitAssumptions, assumptions, context, (implicitAssumptions, assumptions, context, back) => {
+      context.debug(`...applied the '${constraingString}' constraint.`);
+
+      return forward(context, back);
+    }, (exception) => {
+      if (exception) {
+        return back(exception);
+      }
+
+      context.trace(`Unable to apply the '${constraingString}' constraint.`);
+
+      return back();
+    });
   });
 
   validate(state, context, forward, back) {
@@ -154,24 +182,6 @@ export default define(class Constraint extends Element {
     }, back);
   }
 
-  unifyReference(reference, generalContext, specificContext, forward, back) {
-    const context = specificContext,  ///
-          referenceString = reference.getString(),
-          constraintString = this.getString(); ///
-
-    context.trace(`Unifying the '${referenceString}' reference with the '${constraintString}' constraint's metavaraiable...`);
-
-    const metavariable = this.getMetavariable();
-
-    return metavariable.unifyReference(reference, generalContext, specificContext, (referenceUnifies) => {
-      if (referenceUnifies) {
-        context.debug(`..unified the '${referenceString}' with the '${constraintString}' constraint's metavariable.`);
-      }
-
-      return continuation(referenceUnifies);
-    });
-  }
-
   unifyLink(link, generalContext, specificContext, forward, back) {
     const context = specificContext,  ///
           linkString = link.getString(),
@@ -208,28 +218,47 @@ export default define(class Constraint extends Element {
     }, back);
   }
 
-  unifyAssumption(asumption, generalContext, specificContext, forward, back) {
-    const context = specificContext,  ///
-          asumptionString = asumption.getString(),  ///
-          constraintString = this.getString();  ///
+  unifyAssumption(assumption, context, forward, back) {
+    const constraintString = this.getString(),  ///
+          assumptionString = assumption.getString();
 
-    context.trace(`Unifying the '${asumptionString}' assumption with the '${constraintString}' constraint...`);
+    context.trace(`Unifying the '${assumptionString}' implicit assumption with the '${constraintString}' constraint...`);
 
-    const link = asumption.getLink(),
-          statement = asumption.getStatement();
+    return isolate((assumption, context, forward, back) => {
+      return reconcile((context) => {
+        const link = assumption.getLink(),
+              statement = assumption.getStatement(),
+              generalContext = this.getContext(), ///
+              specificContext = context;  ///
 
-    return this.unifyStatement(statement, generalContext, specificContext, (generalContext, specificContext, back) => {
-      return this.unifyLink(link, generalContext, specificContext, (generalContext, specificContext, back) => {
-        context.debug(`...unified the '${asumptionString}' assumption with the '${constraintString}' constraint...`);
+        return this.unifyStatement(statement, generalContext, specificContext, (generalContext, specificContext, back) => {
+          return this.unifyLink(link, generalContext, specificContext, (generalContext, specificContext, back) => {
+            context = specificContext;  ///
 
-        return forward(generalContext, specificContext, back);
-      }, back);
+            context.commit();
+
+            return forward(back);
+          }, back);
+        }, back);
+      }, context);
+    }, assumption, context, (assumption, context, back) => {
+      context.debug(`...unified the '${assumptionString}' implicit assumption with the '${constraintString}' constraint...`);
+
+      return forward(context, back);
     }, back);
+  }
+
+  unifyAssumptions(implicitAssumptions, assumptions, context, forward, back) {
+    return some(assumptions, (assumption, context, forward, back) => {
+      return this.unifyAssumption(assumption, context, (context, back) => {
+        return forward(implicitAssumptions, assumptions, context, back);
+      }, back);
+    }, context, forward, back);
   }
 
   unifyImplicitAssumption(implicitAssumption, context, forward, back) {
     const constraintString = this.getString(),  ///
-          implicitAssumptionString = implicitAssumption.getString();  ///
+          implicitAssumptionString = implicitAssumption.getString();
 
     context.trace(`Unifying the '${implicitAssumptionString}' implicit assumption with the '${constraintString}' constraint...`);
 
@@ -253,47 +282,12 @@ export default define(class Constraint extends Element {
     }, specificContext, context);
   }
 
-  unifyImplicitAssumptions(implicitAssumptions, context, forward, back) {
-    const constraintString = this.getString(),  ///
-          implicitAssertionsString = implicitAssumptionsStringFromImplicitAssumptions(implicitAssumptions);
-
-    context.trace(`Unifying the ${implicitAssertionsString} implicit assumptions with the '${constraintString}' constraint...`);
-
+  unifyImplicitAssumptions(implicitAssumptions, assumptions, context, forward, back) {
     return some(implicitAssumptions, (implicitAssumption, context, forward, back) => {
       this.unifyImplicitAssumption(implicitAssumption, context, forward, back);
     }, context, (context, back) => {
-      context.debug(`...unified the ${implicitAssertionsString} implicit assumptions with the '${constraintString}' constraint.`);
-
-      return forward(context, back);
+      return forward(implicitAssumptions, assumptions, context, back);
     }, back);
-  }
-
-  unifySchemaAssertionAssumptions(schemaAssertion, context, forward, back) {
-    const constraintString = this.getString(),  ///
-          schemaAssertionString = schemaAssertion.getString();
-
-    context.trace(`Unifying the '${schemaAssertionString}' schema assertion's assumptions with the '${constraintString}' constraint...`);
-
-    const constraintContext = this.getContext(), ///
-          schemaAssertionContext = schemaAssertion.getContext(),
-          generalContext = constraintContext,  ///
-          specificContext = schemaAssertionContext; ///
-
-    return join((specificContext) => {
-      return reconcile((specificContext) => {
-        const assumptions = schemaAssertion.getAssumptions();
-
-        return some(assumptions, (assumption, generalContext, specificContext, forward, back) => {
-          return this.unifyAssumption(assumption, generalContext, specificContext, forward, back);
-        }, generalContext, specificContext, (generalContext, specificContext, back) => {
-          specificContext.commit(context);
-
-          context.debug(`...unified the '${schemaAssertionString}' schema assertion's assumptions with the '${constraintString}' constraint.`);
-
-          return forward(context, back);
-        }, back);
-      }, specificContext);
-    }, specificContext, context);
   }
 
   static name = "Constraint";

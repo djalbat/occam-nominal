@@ -103,6 +103,20 @@ export function parametersStringFromParameters(parameters) {
   return parametersString;
 }
 
+export function constraintsStringFrooConstraints(constraints) {
+  const constraintsString = constraints.reduce((constraintsString, constraint) => {
+    const constraintString = constraint.getString();
+
+    constraintsString = (constraintsString === null) ?
+                          constraintString: ///
+                           `${constraintsString}, ${constraintString}`;
+
+    return constraintsString;
+  }, null);
+
+  return constraintsString;
+}
+
 export function suppositionsStringFromSuppositions(suppositions) {
   const suppositionsString = suppositions.reduce((suppositionsString, supposition) => {
     const suppositionString = supposition.getString();
@@ -115,20 +129,6 @@ export function suppositionsStringFromSuppositions(suppositions) {
   }, null);
 
   return suppositionsString;
-}
-
-export function implicitAssumptionsStringFromImplicitAssumptions(implicitAssumptions) {
-  const implicitAssumptionsString = implicitAssumptions.reduce((implicitAssumptionsString, implicitAssumption) => {
-    const implicitAssumptionString = implicitAssumption.getString();
-
-    implicitAssumptionsString = (implicitAssumptionsString === null) ?
-                                  implicitAssumptionString: ///
-                                   `${implicitAssumptionsString}, ${implicitAssumptionString}`;
-
-    return implicitAssumptionsString;
-  }, null);
-
-  return implicitAssumptionsString;
 }
 
 export function provisinalStringFromProvisional(provisional) {
