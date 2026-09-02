@@ -3,12 +3,13 @@
 import { Element } from "occam-languages";
 import { arrayUtilities } from "necessary";
 
+import elements from "../elements";
+
 import { define } from "../elements";
 import { instantiate } from "../utilities/context";
+import { instantiateTerm } from "../process/instantiate";
 import { stripBracketsFromTerm } from "../utilities/brackets";
-import { instantiateEquivalence } from "../process/instantiate";
 import { equivalenceStringFromTerms } from "../utilities/string";
-import { equivalenceFromEquivalenceNode } from "../utilities/element";
 
 const { first, second, compress } = arrayUtilities;
 
@@ -21,13 +22,6 @@ export default define(class Equivalence extends Element {
 
   getTerms() {
     return this.terms;
-  }
-
-  getEquivalenceNode() {
-    const node = this.getNode(),
-          equivalenceNode = node; ///
-
-    return equivalenceNode;
   }
 
   getGroundedTerms(definedVariables, groundedTerms, context) {
@@ -169,21 +163,17 @@ export default define(class Equivalence extends Element {
   }
 
   mergedWith(equivalence, context) {
-    instantiate((context) => {
-      let terms;
+    let terms;
 
-      terms = equivalence.getTerms();
+    terms = equivalence.getTerms();
 
-      const combinedTerms = this.combineTerms(terms);
+    const combinedTerms = this.combineTerms(terms);
 
-      terms = combinedTerms;  ///
+    terms = combinedTerms;  ///
 
-      const equivalenceString = equivalenceStringFromTerms(terms),
-            string = equivalenceString,  ///
-            equivalenceNode = instantiateEquivalence(string, context);
+    terms = reinstantiateTerms(terms, context); ///
 
-      equivalence = equivalenceFromEquivalenceNode(equivalenceNode, context);
-    }, context);
+    equivalence = equivalenceFromTerms(terms, context);
 
     return equivalence;
   }
@@ -220,6 +210,8 @@ export default define(class Equivalence extends Element {
       return term;
     });
 
+    terms = reinstantiateTerms(terms, context); ///
+
     const firstTerm = first(terms),
           secondTerm = second(terms),
           firstTermEqualToSecondTerm = firstTerm.isEqualTo(secondTerm);
@@ -232,14 +224,50 @@ export default define(class Equivalence extends Element {
       ];
     }
 
-    instantiate((context) => {
-      const equivalenceString = equivalenceStringFromTerms(terms),
-            string = equivalenceString,  ///
-            equivalenceNode = instantiateEquivalence(string, context);
-
-      equivalence = equivalenceFromEquivalenceNode(equivalenceNode, context);
-    }, context);
+    equivalence = equivalenceFromTerms(terms, context);
 
     return equivalence;
   }
 });
+
+function equivalenceFromTerms(terms, context) {
+  const { Equivalence } = elements,
+        equivalenceString = equivalenceStringFromTerms(terms),
+        string = equivalenceString, ///
+        node = null,
+        breakPoint = null;
+
+  const equivalence = new Equivalence(context, string, node, breakPoint, terms);
+
+  return equivalence;
+}
+
+function reinstantiateTerms(terms, context) {
+  terms = terms.map((term) => { ///
+    term = reinstantiateTerm(term, context);  ///
+
+    return term;
+  });
+
+  return terms;
+}
+
+function reinstantiateTerm(term, context) {
+  const { Term } = elements;
+
+  instantiate((context) => {
+    const string = term.getString(),
+          termNode = instantiateTerm(string, context),
+          node = termNode,  ///
+          breakPoint = null,
+          type = null,
+          provisional = null;
+
+    context = null;
+
+    term = new Term(context, string, node, breakPoint, type, provisional);
+  }, context);
+
+  return term;
+}
+

@@ -190,32 +190,24 @@ export default class Claim extends Element {
   }
 
   dischargeHypothesis(hypothesis, context, forward, back) {
-    debugger
-
     const claimString = this.getString(), ///
           hypothesisString = hypothesis.getString();
 
     context.trace(`Discharging the '${claimString}' claim's '${hypothesisString}' hypothesis...`);
 
-    return hypothesis.discharge(context, (hypothesisDischarges, context) => {
-      if (hypothesisDischarges) {
-        context.trace(`...discharges the '${claimString}' claim's '${hypothesisString}' hypothesis.`);
-      }
+    return hypothesis.discharge(context, (context, back) => {
+      context.trace(`...discharges the '${claimString}' claim's '${hypothesisString}' hypothesis.`);
 
-      return continuation(hypothesisDischarges, context);
-    });
+      return forward(context, back);
+    }, back);
   }
 
-  dischargeHypotheses(context, forward, back) {
-    debugger
-
+  dischargeHypotheses(step, factOrSubproofs, context, forward, back) {
     const hypotheses = this.getHypotheses(),
-         hypothesesLength = hypotheses.length;
+          hypothesesLength = hypotheses.length;
 
     if (hypothesesLength === 0) {
-      const hypothesesDischarged = true;
-
-      return continuation(hypothesesDischarged, context);
+      return forward(step, factOrSubproofs, context, back);
     }
 
     const claimString = this.getString(); ///
@@ -224,13 +216,11 @@ export default class Claim extends Element {
 
     const dischargeHypothesis = this.dischargeHypothesis.bind(this);
 
-    return every(hypotheses, dischargeHypothesis, context, (hypothesesDischarged) => {
-      if (hypothesesDischarged) {
-        context.trace(`...discharged the '${claimString}' claim's hypotheses.`);
-      }
+    return every(hypotheses, dischargeHypothesis, context, (context, back) => {
+      context.trace(`...discharged the '${claimString}' claim's hypotheses.`);
 
-      return continuation(hypothesesDischarged, context);
-    });
+      return forward(step, factOrSubproofs, context, back);
+    }, back);
   }
 
   applyDeduction(step, factOrSubproofs, context, forward, back) {

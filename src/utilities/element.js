@@ -3,8 +3,7 @@
 import elements from "../elements";
 
 import { baseTypeFromNothing } from "../utilities/type";
-import { equivalenceStringFromTerms,
-         typeStringFromNominalTypeName,
+import { typeStringFromNominalTypeName,
          rulsStringFromLabelsPremisesAndConclusion,
          schemaStringFromLabelSuppositionsAndDeduction,
          subproofStringFromSuppositionsAndSubDerivation,
@@ -554,21 +553,6 @@ export function suppositionFromSuppositionNode(suppositionNode, context) {
         supposition = new Supposition(context, string, node, breakPoint, statement, reference, procedureCall);
 
   return supposition
-}
-
-export function equivalenceFromEquivalenceNode(equivalenceNode, context) {
-  const { Equivalence } = elements,
-        node = equivalenceNode, ///
-        breakPoint = null,
-        terms = termsFromEquivalenceNode(equivalenceNode, context),
-        equivalenceString = equivalenceStringFromTerms(terms),
-        string = equivalenceString; ///
-
-  context = null;
-
-  const equivalence = new Equivalence(context, string, node, breakPoint, terms);
-
-  return equivalence;
 }
 
 export function metavariableFromMetavariableNode(metavariableNode, context) {

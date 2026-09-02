@@ -125,6 +125,30 @@ class TemenicContext extends Context {
     return metaLevel;
   }
 
+  addAxiom(axiom) {
+    const context = this.getContext();
+
+    context.addAxiom(axiom);
+  }
+
+  addLemma(lemma) {
+    const context = this.getContext();
+
+    context.addLemma(lemma);
+  }
+
+  addTheorem(thorem) {
+    const context = this.getContext();
+
+    context.addTheorem(thorem);
+  }
+
+  addConjecture(conjecture) {
+    const context = this.getContext();
+
+    context.addConjecture(conjecture);
+  }
+
   addAssignment(assignment) {
     this.assignments.push(assignment);
   }
