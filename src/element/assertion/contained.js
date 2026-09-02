@@ -234,17 +234,11 @@ export default define(class ContainedAssertion extends Assertion {
 function validateWhenDerived(term, statement, negated, context, forward, back) {
   const termContained = statement.isTermContained(term, context);
 
-  let validatesWhenDerived = false;
-
-  if (!negated && termContained) {
-    validatesWhenDerived = true;
+  if (negated && termContained) {
+    return back();
   }
 
-  if (negated && !termContained) {
-    validatesWhenDerived = true;
-  }
-
-  if (!validatesWhenDerived) {
+  if (!negated && !termContained) {
     return back();
   }
 

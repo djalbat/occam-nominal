@@ -600,9 +600,9 @@ export default class MnemicContext extends Context {
 
     this.terms = termsFromJSON(json, context);
 
-    this.metavariables = metavariablesFromJSON(json, context);
-
     this.statements = statementsFromJSON(json, context);
+
+    this.metavariables = metavariablesFromJSON(json, context);
 
     this.equalities = equalitiesFromJSON(json, context);
     this.assumptions = assumptionsFromJSON(json, context);

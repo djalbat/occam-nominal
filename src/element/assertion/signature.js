@@ -149,29 +149,31 @@ export default define(class SignatureAssertion extends Assertion {
 
     context.trace(`Unifying the '${claimString}' claim with the '${signatureAssertionString}' signature assertion...`);
 
-    return reconcile((context) => {
-      const axiom = context.findAxiomByLink(this.link);
+    return isolate((claim, context, forward, back) => {
+      return reconcile((context) => {
+        const axiom = context.findAxiomByLink(this.link);
 
-      return axiom.unifyTerms(this.terms, context, (termsUnify) => {
-        if (!termsUnify) {
-          const claimUnifies = false;
-
-          return continuation(claimUnifies);
-        }
-
-        return axiom.unifyClaim(claim, context, (claimUnifies) => {
-          if (claimUnifies) {
-            context.debug(`...unified the '${claimString}' claim with the '${signatureAssertionString}' signature assertion.`);
-          }
-
-          if (claimUnifies) {
+        return axiom.unifyTerms(this.terms, context, (context, back) => {
+          return axiom.unifyClaim(claim, context, (context, back) => {
             context.commit();
-          }
 
-          return continuation(claimUnifies);
-        });
-      });
-    }, context);
+            return forward(back);
+          }, back);
+        }, back);
+      }, context);
+    }, claim, context, (claim, context, back) => {
+      context.debug(`...unified the '${claimString}' claim with the '${signatureAssertionString}' signature assertion.`);
+
+      return forward(context, back);
+    }, (exception) => {
+      if (exception) {
+        return back(exception);
+      }
+
+      context.trace(`Unable to unify the '${claimString}' claim with the '${signatureAssertionString}' signature assertion.`);
+
+      return back();
+    });
   }
 
   toJSON() {

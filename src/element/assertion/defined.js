@@ -223,17 +223,11 @@ function validateWhenDerived(term, negated, context, forward, back) {
         declaredDariable = context.findDeclaredVariableByVariableIdentifier(variableIdentifier),
         declaredDariableDefined = isVariableDefined(declaredDariable, context);
 
-  let validatesWhenDerived = false;
-
-  if (!negated && declaredDariableDefined) {
-    validatesWhenDerived = true;
+  if (negated && declaredDariableDefined) {
+    return back();
   }
 
-  if (negated && !declaredDariableDefined) {
-    validatesWhenDerived = true;
-  }
-
-  if (!validatesWhenDerived) {
+  if (!negated && !declaredDariableDefined) {
     return back();
   }
 

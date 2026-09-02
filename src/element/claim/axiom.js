@@ -140,50 +140,48 @@ export default define(class Axiom extends Claim {
 
     const signature = this.getSignature();
 
-    return signature.unifyTerms(terms, context, (termsUnify) => {
-      if (termsUnify) {
-        context.debug(`...unified the ${termsString} terms with the '${axiomString}' axiom...`);
-      }
+    return signature.unifyTerms(terms, context, (context, back) => {
+      context.debug(`...unified the ${termsString} terms with the '${axiomString}' axiom...`);
 
-      return continuation(termsUnify);
-    });
+      return forward(context, back);
+    }, back);
   }
 
   unifyClaim(claim, context, forward, back) {
-    let claimUnifies = false;
+    forward = cut(forward, back); ///
 
     const axiomString = this.getString(), ///
           claimString = claim.getString();
 
     context.trace(`Unifying the '${claimString}' claim with the '${axiomString}' axiom...`);
 
-    return reconcile((context) => {
-      const deduction = claim.getDeduction();
+    return isolate((claim, context, forward, back) => {
+      return reconcile((context) => {
+        const deduction = claim.getDeduction();
 
-      return this.unifyDeduction(deduction, context, (deductionUnifies) => {
-        if (!deductionUnifies) {
-          return continuation(claimUnifies);
-        }
+        return this.unifyDeduction(deduction, context, (context, back) => {
+          const suppositions = claim.getSuppositions();
 
-        const suppositions = claim.getSuppositions();
-
-        return this.unifySuppositions(suppositions, context, (suppositionsUnify) => {
-          if (suppositionsUnify) {
-            claimUnifies = true;
-          }
-
-          if (claimUnifies) {
+          return this.unifySuppositions(suppositions, context, (context, back) => {
             context.commit();
-          }
 
-          if (claimUnifies) {
-            context.debug(`...unified the '${claimString}' claim with the '${axiomString}' axiom.`);
-          }
+            return forward(back);
+          }, back);
+        }, back);
+      }, context);
+    }, claim, context, (claim, context, back) => {
+      context.debug(`...unified the '${claimString}' claim with the '${axiomString}' axiom.`);
 
-          return continuation(claimUnifies);
-        });
-      });
-    }, context);
+      return forward(context, back);
+    }, (exception) => {
+      if (exception) {
+        return back(exception);
+      }
+
+      context.trace(`Unable to unify the '${claimString}' claim with the '${axiomString}' axiom.`);
+
+      return back();
+    });
   }
 
   unifyDeduction(deduction, context, forward, back) {
@@ -216,8 +214,13 @@ export default define(class Axiom extends Claim {
     }, specificContext, context);
   }
 
-  unifySupposition(specificSupposition, generalSupposition, context, forward, back) {
-    const generalSuppositionString = generalSupposition.getString(),
+  unifySupposition(supposition, context, forward, back, index) {
+    const specificSupposition = supposition;  ///
+
+    supposition = this.getSupposition(index);
+
+    const generalSupposition = supposition, ///
+          generalSuppositionString = generalSupposition.getString(),
           specificSuppositionString = specificSupposition.getString();
 
     context.trace(`Unifying the '${specificSuppositionString}' supposition with the '${generalSuppositionString}' supposition...`);
@@ -244,8 +247,6 @@ export default define(class Axiom extends Claim {
   }
 
   unifySuppositions(suppositions, context, forward, back) {
-    let suppositionsUnify = false;
-
     const specificSuppositions = suppositions,  ///
           specificSuppositionsLength = specificSuppositions.length;
 
@@ -255,18 +256,12 @@ export default define(class Axiom extends Claim {
           generalSuppositionsLength = generalSuppositions.length;
 
     if (generalSuppositionsLength !== specificSuppositionsLength) {
-      return continuation(suppositionsUnify);
+      return back();
     }
 
-    let index = specificSuppositionsLength;
-
-    return backwardsEvery(generalSuppositions, (generalSupposition, continuation) => {
-      index--;
-
-      const specificSupposition = specificSuppositions[index];
-
-      return this.unifySupposition(specificSupposition, generalSupposition, context, continuation);
-    }, continuation);
+    return backwardsEvery(suppositions, (supposition, context, forward, back, index) => {
+      return this.unifySupposition(supposition, context, forward, back, index);
+    }, context, forward, back);
   }
 
   unifySignatureAssertion(signatureAssertion, context, forward, back) {

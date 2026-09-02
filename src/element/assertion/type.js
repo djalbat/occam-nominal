@@ -200,8 +200,6 @@ export default define(class TypeAssertion extends Assertion {
   }
 
   applyIndependently(generalContext, specificContext, forward, back) {
-    let unifiesIndependently = false;
-
     const context = specificContext, ///
           typeAssertionString = this.getString(); ///
 
@@ -209,23 +207,15 @@ export default define(class TypeAssertion extends Assertion {
 
     const term = termFromTermAndSubstitutions(this.term, context);
 
-    derive((state) => {
-      validateWhenDerived(term, this.type, state, context, (term, context) => {
-        let validatesWhenDerived;
+    return derive((state) => {
+      return validateWhenDerived(term, this.type, state, context, (term, context, back) => {
+        specificContext = context;  ///
 
-        unifiesIndependently = true;
+        context.debug(`...applied the '${typeAssertionString}' type assertion independently.`);
 
-        validatesWhenDerived = true;
-
-        return validatesWhenDerived;
-      });
+        return forward(generalContext, specificContext, back);
+      }, back);
     });
-
-    if (unifiesIndependently) {
-      context.debug(`...applied the '${typeAssertionString}' type assertion independently.`);
-    }
-
-    return continuation(unifiesIndependently);
   }
 
   assign(state, context) {
