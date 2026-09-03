@@ -10,7 +10,7 @@ import { dischargeStatements } from "../process/discharge";
 import { instantiateStatement } from "../process/instantiate";
 import { substitutionFromStatementNode } from "../utilities/element";
 
-const { all, exists } = continuationUtilities,
+const { all, some, exists } = continuationUtilities,
       { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Statement extends Element {
@@ -293,27 +293,20 @@ export default define(class Statement extends Element {
   }
 
   discharge(generalContext, specificContext, forward, back) {
-    let discharges;
-
     const context = specificContext,  ///
           statementString = this.getString();  ///
 
     context.trace(`Dicharging the '${statementString}' statement...`);
 
-    discharges = dischargeStatements.some((dischargeStatement) => {
-      const statement = this, ///
-            statementDischarges = dischargeStatement(statement, generalContext, specificContext);
+    const statement = this; ///
 
-      if (statementDischarges) {
-        return true;
-      }
-    });
-
-    if (discharges) {
+    return some(dischargeStatements, (dischargeStatement, generalContext, specificContext, forward, back) => {
+      return dischargeStatement(statement, generalContext, specificContext, forward, back);
+    }, generalContext, specificContext, (generalContext, specificContext, back) => {
       context.debug(`...discharged the '${statementString}' statement.`);
-    }
 
-    return continuation(discharges, context);
+      return forward(generalContext, specificContext, back);
+    }, back);
   }
 
   unifyStatement(statement, generalContext, specificContext, forward, back) {

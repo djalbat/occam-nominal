@@ -38,34 +38,23 @@ export default define(class TypeAssertion extends Assertion {
     return typeAssertionNode;
   }
 
-  discharge(context) {
-    let discharges = false;
-
-    const typeAssertionString = this.getString();  ///
+  discharge(generalContext, specificContext, forward, back) {
+    const context = specificContext, ///
+          typeAssertionString = this.getString(); ///
 
     context.trace(`Discharging the '${typeAssertionString}' type assertion...`);
 
     const term = termFromTermAndSubstitutions(this.term, context);
 
-    derive((state) => {
-      const validatesWhenDerived = validateWhenDerived(term, this.type, state, context, (term, context) => {
-        let validatesWhenDerived;
+    return derive((state) => {
+      return validateWhenDerived(term, this.type, state, context, (term, context, back) => {
+        specificContext = context;  ///
 
-        validatesWhenDerived = true;
+        context.debug(`...discharged the '${typeAssertionString}' type assertion.`);
 
-        return validatesWhenDerived;
-      });
-
-      if (validatesWhenDerived) {
-        discharges = true;
-      }
+        return forward(generalContext, specificContext, back);
+      }, back);
     });
-
-    if (discharges) {
-      context.debug(`...discharged the '${typeAssertionString}' type assertion.`);
-    }
-
-    return discharges;
   }
 
   validate(state, context, forward, back) {
@@ -284,22 +273,16 @@ export default define(class TypeAssertion extends Assertion {
 
 function validateWhenDerived(term, type, state, context, forward, back) {
   return term.validate(state, context, (term, context, back) => {
-    let validatesWhenDerived = false;
+    const termType = term.getType(),
+          termTypeEqualToOrSubTypeOfType = termType.isEqualToOrSubTypeOf(type);
 
-    if (term !== null) {
-      const termType = term.getType(),
-            termTypeEqualToOrSubTypeOfType = termType.isEqualToOrSubTypeOf(type);
-
-      if (termTypeEqualToOrSubTypeOfType) {
-        const termEstablished = term.isEstablished();
-
-        if (termEstablished) {
-          validatesWhenDerived = true;
-        }
-      }
+    if (!termTypeEqualToOrSubTypeOfType) {
+      return back();
     }
 
-    if (!validatesWhenDerived) {
+    const termEstablished = term.isEstablished();
+
+    if (!termEstablished) {
       return back();
     }
 

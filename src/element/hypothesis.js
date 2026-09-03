@@ -85,13 +85,11 @@ export default define(class Hypothesis extends Element {
 
     return all([
       dischargeStatement
-    ], context, (discharges) => {
-      if (discharges) {
-        context.debug(`...discharged the '${hypothesisString}' hypothesis.`);
-      }
+    ], context, () => {
+      context.debug(`...discharged the '${hypothesisString}' hypothesis.`);
 
-      return continuation(discharges, context);
-    });
+      return forward(context, back);
+    }, back);
   });
 
   validate(state, context, forward, back) {
@@ -160,9 +158,7 @@ export default define(class Hypothesis extends Element {
 
   dischargeStatement(context, forward, back) {
     if (this.statement === null) {
-      const statementDischarges = true;
-
-      return continuation(statementDischarges, context);
+      return forward(context, back);
     }
 
     const hypothesisString = this.getString();  ///
@@ -173,17 +169,15 @@ export default define(class Hypothesis extends Element {
 
     context = this.getContext();
 
-    const generalCotnext = context; ///
+    const generalContext = context; ///
 
-    return this.statement.discharge(generalCotnext, specificContext, (statementDischarges) => {
+    return this.statement.discharge(generalContext, specificContext, (generalContext, specificContext, bcak) => {
       context = specificContext;  ///
 
-      if (statementDischarges) {
-        context.debug(`...discharged the '${hypothesisString}' hypothesis' statement.`);
-      }
+      context.debug(`...discharged the '${hypothesisString}' hypothesis' statement.`);
 
-      return continuation(statementDischarges, context);
-    });
+      return forward(context, bcak);
+    }, back);
   }
 
   dischargeGivenTerm(term, context, forward, back) {
