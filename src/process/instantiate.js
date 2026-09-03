@@ -3,6 +3,7 @@
 import { bnfUtilities } from "occam-languages";
 
 import { TERM_RULE_NAME,
+         LINK_RULE_NAME,
          TYPE_RULE_NAME,
          FRAME_RULE_NAME,
          LABEL_RULE_NAME,
@@ -37,6 +38,7 @@ import { TERM_RULE_NAME,
 const { instantiate, ruleFromRuleName } = bnfUtilities;
 
 const termPlaceholderRule = ruleFromRuleName(TERM_RULE_NAME),
+      linkPlaceholderRule = ruleFromRuleName(LINK_RULE_NAME),
       typePlaceholderRule = ruleFromRuleName(TYPE_RULE_NAME),
       framePlaceholderRule = ruleFromRuleName(FRAME_RULE_NAME),
       labelPlaceholderRule = ruleFromRuleName(LABEL_RULE_NAME),
@@ -97,6 +99,8 @@ export function instantiateSupposition(string, context) {
 }
 
 export function instantiateTerm(string, context) { return instantiate(termPlaceholderRule, string, context); }
+
+export function instantiateLink(string, context) { return instantiate(linkPlaceholderRule, string, context); }
 
 export function instantiateType(string, context) { return instantiate(typePlaceholderRule, string, context); }
 
