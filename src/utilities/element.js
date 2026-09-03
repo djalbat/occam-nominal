@@ -1310,13 +1310,6 @@ export function leftTermFromEqualityNode(equalityNode, context) {
   return leftTerm;
 }
 
-export function termsFromEquivalenceNode(equivalenceNode, context) {
-  const termNodes = equivalenceNode.getTermNodes(),
-        terms = termsFromTermNodes(termNodes, context);
-
-  return terms;
-}
-
 export function nameFromMetavariableNode(metavariableNode, context) {
   const metametavariableName = metavariableNode.getMetavariableName(),
         name = metametavariableName;  ///

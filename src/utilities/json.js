@@ -643,7 +643,9 @@ export function mnemicContextToMnemicContextJSON(mnemicContext) {
 
 export function substitutionFromSubstitutionJSON(json, context) {
   const { TermSubstitution, FrameSubstitution, StatementSubstitution } = elements,
-        substitution = TermSubstitution.fromJSON(json, context) || FrameSubstitution.fromJSON(json, context) || StatementSubstitution.fromJSON(json, context);
+        substitution = TermSubstitution.fromJSON(json, context)
+                    || FrameSubstitution.fromJSON(json, context)
+                    || StatementSubstitution.fromJSON(json, context);
 
   return substitution;
 }
