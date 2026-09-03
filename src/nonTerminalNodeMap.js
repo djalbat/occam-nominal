@@ -67,7 +67,6 @@ import TermSubstitutionNode from "./node/substitution/term";
 import ConjectureHeaderNode from "./node/header/conjecture";
 import PropertyAssertionNode from "./node/assertion/property";
 import SubproofAssertionNode from "./node/assertion/subproof";
-import FrameSubstitutionNode from "./node/substitution/frame";
 import CotypeDeclarationNode from "./node/declaration/cotype";
 import ParenthesisedLabelNode from "./node/parenthesisedLabel";
 import ProcedureReferenceNode from "./node/procedureReference";
@@ -238,7 +237,6 @@ const NonTerminalNodeMap = {
   [COTYPE_DECLARATION_RULE_NAME]: CotypeDeclarationNode,
   [SUBPROOF_ASSERTION_RULE_NAME]: SubproofAssertionNode,
   [PROPERTY_ASSERTION_RULE_NAME]: PropertyAssertionNode,
-  [FRAME_SUBSTITUTION_RULE_NAME]: FrameSubstitutionNode,
   [PROCEDURE_REFERENCE_RULE_NAME]: ProcedureReferenceNode,
   [PARENTHESISED_LABEL_RULE_NAME]: ParenthesisedLabelNode,
   [SIGNATURE_ASSERTION_RULE_NAME]: SignatureAssertionNode,

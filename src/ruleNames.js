@@ -70,7 +70,6 @@ export const TERM_SUBSTITUTION_RULE_NAME = "termSubstitution";
 export const COTYPE_DECLARATION_RULE_NAME = "cotypeDeclaration";
 export const PROPERTY_ASSERTION_RULE_NAME = "propertyAssertion";
 export const SUBPROOF_ASSERTION_RULE_NAME = "subproofAssertion";
-export const FRAME_SUBSTITUTION_RULE_NAME = "frameSubstitution";
 export const PARENTHESISED_LABEL_RULE_NAME = "parenthesisedLabel";
 export const PROCEDURE_REFERENCE_RULE_NAME = "procedureReference";
 export const CONTAINED_ASSERTION_RULE_NAME = "containedAssertion";

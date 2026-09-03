@@ -45,7 +45,6 @@ import TypeDeclaration from "./element/declaration/type";
 import SchemaAssertion from "./element/assertion/schema";
 import DefinedAssertion from "./element/assertion/defined";
 import TermSubstitution from "./element/substitution/term";
-import FrameSubstitution from "./element/substitution/frame";
 import SubproofAssertion from "./element/assertion/subproof";
 import PropertyAssertion from "./element/assertion/property";
 import CotypeDeclaration from "./element/declaration/cotype";

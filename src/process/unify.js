@@ -16,7 +16,6 @@ const typeNodeQuery = nodeQuery("/type"),
       metaTypeNodeQuery = nodeQuery("/metaType"),
       statementNodeQuery = nodeQuery("/statement"),
       termVariableNodeQuery = nodeQuery("/term/variable!"),
-      frameMetavariableNodeQuery = nodeQuery("/frame/metavariable!"),
       statementMetavariableNodeQuery = nodeQuery("/statement/metavariable!");
 
 class UnifyStatementPass extends ContinuationZipPass {
@@ -39,28 +38,6 @@ class UnifyStatementPass extends ContinuationZipPass {
         const statement = context.findStatementByStatementNode(statementNode);
 
         return metavariable.unifyStatement(statement, generalContext, specificContext, (generalContext, specificContext, back) => {
-          return forward(generalContext, specificContext, back);
-        }, back);
-      }
-    },
-    {
-      generalNodeQuery: frameMetavariableNodeQuery,
-      specificNodeQuery: frameNodeQuery,
-      run: (generalFrameMetavariableNode, specificFrameNode, generalContext, specificContext, forward, back) => {
-        const frameNode = specificFrameNode, ///
-              metavariableNode = generalFrameMetavariableNode;
-
-        let context;
-
-        context = generalContext; ///
-
-        const metavariable = context.findMetavariableByMetavariableNode(metavariableNode);
-
-        context = specificContext;  ///
-
-        const frame = context.findFrameByFrameNode(frameNode);
-
-        return metavariable.unifyFrame(frame, generalContext, specificContext, (back) => {
           return forward(generalContext, specificContext, back);
         }, back);
       }

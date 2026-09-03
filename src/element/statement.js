@@ -139,32 +139,6 @@ export default define(class Statement extends Element {
     return termContained;
   }
 
-  isFrameContained(frame, context) {
-    let frameContained;
-
-    const frameString = frame.getString(),
-          statementString = this.getString();  ///
-
-    context.trace(`Is the '${frameString}' frame contained in the '${statementString}' statement...`);
-
-    const statementNode = this.getStatementNode(),
-          statementNodeFrameNodes = statementNode.getFrameNodes();
-
-    frameContained = statementNodeFrameNodes.some((statementNodeFrameNode) => {  ///
-      const statementNodeFrameNodeMatches = frame.matchNode(statementNodeFrameNode);
-
-      if (statementNodeFrameNodeMatches) {
-        return true;
-      }
-    });
-
-    if (frameContained) {
-      context.debug(`...the '${frameString}' frame is contained in the '${statementString}' statement.`);
-    }
-
-    return frameContained;
-  }
-
   matchStatementNode(statementNode) {
     const node = statementNode, ///
           nodeMatches = this.matchNode(node),

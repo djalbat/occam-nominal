@@ -688,23 +688,6 @@ export function termSubstitutionFromTermSubstitutionNode(termSubstitutionNode, g
   return termSubstitution;
 }
 
-export function frameSubstitutionFromFrameSubstitutionNode(frameSubstitutionNode, generalContext, specificContext) {
-  const { FrameSubstitution } = elements,
-        node = frameSubstitutionNode,  ///
-        context = specificContext,  ///
-        string = context.nodeAsString(node),
-        contexts = [
-          generalContext,
-          specificContext
-        ],
-        breakPoint = null,
-        targetFrame = targetFrameFromFrameSubstitutionNode(frameSubstitutionNode, generalContext),
-        replacementFrame = replacementFrameFromFrameSubstitutionNode(frameSubstitutionNode, specificContext),
-        frameSubstitution = new FrameSubstitution(contexts, string, node, breakPoint, targetFrame, replacementFrame);
-
-  return frameSubstitution;
-}
-
 export function propertyAssertionFromPropertyAssertionNode(propertyAssertionNode, context) {
   const { PropertyAssertion } = elements,
         node = propertyAssertionNode,  ///
@@ -2011,14 +1994,6 @@ export function subjectTermFromPropertyAssertionNode(propertyAssertionNode, cont
   return subjectTerm;
 }
 
-export function targetFrameFromFrameSubstitutionNode(frameSubstitutionNode, generalContext) {
-  const context = generalContext, ///
-        targetFrameNode = frameSubstitutionNode.getTargetFrameNode(),
-        targetFrame = frameFromFrameNode(targetFrameNode, context);
-
-  return targetFrame;
-}
-
 export function provisionalFromCotypeDeclarationNode(cotypeDeclarationNode, context) {
   const provisional = cotypeDeclarationNode.isProvisional();
 
@@ -2116,14 +2091,6 @@ export function metaTypeFromMetavariableDeclarationNode(metavariableDeclarationN
         metaType = context.findMetaTypeByMetaTypeName(metaTypeName);
 
   return metaType;
-}
-
-export function replacementFrameFromFrameSubstitutionNode(frameSubstitutionNode, specificContext) {
-  const context = specificContext, ///
-        replacementFrameNode = frameSubstitutionNode.getReplacementFrameNode(),
-        replacementFrame = frameFromFrameNode(replacementFrameNode, context);
-
-  return replacementFrame;
 }
 
 export function constructorFromConstructorDeclarationNode(constructorDeclarationNode, context) {

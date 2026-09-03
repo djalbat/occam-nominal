@@ -30,7 +30,6 @@ import { TERM_RULE_NAME,
          TERM_SUBSTITUTION_RULE_NAME,
          PROPERTY_ASSERTION_RULE_NAME,
          SUBPROOF_ASSERTION_RULE_NAME,
-         FRAME_SUBSTITUTION_RULE_NAME,
          SIGNATURE_ASSERTION_RULE_NAME,
          PROCEDURE_REFERENCE_RULE_NAME,
          CONTAINED_ASSERTION_RULE_NAME,
@@ -67,7 +66,6 @@ const termPlaceholderRule = ruleFromRuleName(TERM_RULE_NAME),
       termSubstitutionPlaceholderRule = ruleFromRuleName(TERM_SUBSTITUTION_RULE_NAME),
       subproofAssertionlaceholderRule = ruleFromRuleName(SUBPROOF_ASSERTION_RULE_NAME),
       propertyAssertionPlaceholderRule = ruleFromRuleName(PROPERTY_ASSERTION_RULE_NAME),
-      frameSubstitutionPlaceholderRule = ruleFromRuleName(FRAME_SUBSTITUTION_RULE_NAME),
       signatureAssertionPlaceholderRule = ruleFromRuleName(SIGNATURE_ASSERTION_RULE_NAME),
       procedureReferencePlaceholderRule = ruleFromRuleName(PROCEDURE_REFERENCE_RULE_NAME),
       containedAssertionPlaceholderRule = ruleFromRuleName(CONTAINED_ASSERTION_RULE_NAME),
@@ -149,8 +147,6 @@ export function instantiateTermSubstitution(string, context) { return instantiat
 export function instantiateSubproofAssertion(string, context) { return instantiate(subproofAssertionlaceholderRule, string, context); }
 
 export function instantiatePropertyAssertion(string, context) { return instantiate(propertyAssertionPlaceholderRule, string, context); }
-
-export function instantiateFrameSubstitution(string, context) { return instantiate(frameSubstitutionPlaceholderRule, string, context); }
 
 export function instantiateSignatureAssertion(string, context) { return instantiate(signatureAssertionPlaceholderRule, string, context); }
 

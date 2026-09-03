@@ -241,14 +241,6 @@ export function subproofStringFromSuppositionsAndSubDerivation(suppositions, sub
   return subproofString;
 }
 
-export function frameSubstitutionStringFromFrameAndMetavariable(frame, metavariable) {
-  const frameString = frame.getString(),
-        metavariableString = metavariable.getString(),
-        string = `[${frameString} for [${metavariableString}]]`;
-
-  return string;
-}
-
 export function claimStringFromLabelsSignatureSuppositionsAndDeduction(labels, signature, suppositions, deduction) {
   let claimString = EMPTY_STRING;
 
