@@ -1,7 +1,7 @@
 "use strict";
 
 import { arrayUtilities } from "necessary";
-import { Element, continuationUtilities } from "occam-languages";
+import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
 
 import { define } from "../elements";
 import { instantiate } from "../utilities/context";
@@ -12,7 +12,8 @@ import { validateTerms, validateTermAsVariable } from "../process/validation";
 import { typeFromJSON, typeToTypeJSON, provisionalFromJSON, provisionalToProvisionalJSON } from "../utilities/json";
 
 const { filter } = arrayUtilities,
-      { exists } = continuationUtilities;
+      { exists } = continuationUtilities,
+      { unbreakable } = breakPointUtilities;
 
 export default define(class Term extends Element {
   constructor(context, string, node, breakPoint, type, provisional) {
@@ -180,7 +181,7 @@ export default define(class Term extends Element {
     return term;
   }
 
-  validate(state, context, forward, back) {
+  validate = unbreakable(function (state, context, forward, back) {
     let term;
 
     const termString = this.getString();  ///
@@ -204,7 +205,7 @@ export default define(class Term extends Element {
 
       return forward(term, context, back);
     }, back);
-  }
+  });
 
   validateGivenType(strict, type, state, context, forward, back) {
     if (back === undefined) {

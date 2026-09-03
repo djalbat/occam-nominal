@@ -10,8 +10,8 @@ import { dischargeStatements } from "../process/discharge";
 import { instantiateStatement } from "../process/instantiate";
 import { substitutionFromStatementNode } from "../utilities/element";
 
-const { all, some, exists } = continuationUtilities,
-      { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
+const { unbreakable } = breakPointUtilities,
+      { all, some, exists } = continuationUtilities;
 
 export default define(class Statement extends Element {
   constructor(context, string, node, breakPoint, substitution) {
@@ -266,7 +266,7 @@ export default define(class Statement extends Element {
     return comparesToParamter;
   }
 
-  validate(state, context, forward, back) {
+  validate = unbreakable( function(state, context, forward, back) {
     let statement;
 
     const statementString = this.getString();  ///
@@ -290,7 +290,7 @@ export default define(class Statement extends Element {
 
       return forward(statement, context, back);
     }, back);
-  }
+  });
 
   discharge(generalContext, specificContext, forward, back) {
     const context = specificContext,  ///
@@ -429,17 +429,8 @@ export default define(class Statement extends Element {
 
     const string = this.getString();
 
-    let breakPoint;
-
-    breakPoint = this.getBreakPoint();
-
-    const breakPointJSON = breakPointToBreakPointJSON(breakPoint);
-
-    breakPoint = breakPointJSON;  ///
-
     json = {
-      string,
-      breakPoint
+      string
     };
 
     return json;
@@ -454,7 +445,7 @@ export default define(class Statement extends Element {
       const { string } = json,
             statementNode = instantiateStatement(string, context),
             node = statementNode, ///
-            breakPoint = breakPointFromJSON(json),
+            breakPoint = null,
             substitution = substitutionFromStatementNode(statementNode, context);
 
       context = null;

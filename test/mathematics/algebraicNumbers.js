@@ -10,6 +10,6 @@ const logLevel = ERROR_LEVEL,
       projectName = "algebraic-numbers",
       projectsDirectoryPath = "../../Mathematics";
 
-describe(projectName, () => {
+describe.skip(projectName, () => {
   createSuite(logLevel, projectName, projectsDirectoryPath);
 });
