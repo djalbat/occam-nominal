@@ -5,7 +5,7 @@ import { breakPointUtilities, continuationUtilities } from "occam-languages";
 import Assertion from "../assertion";
 
 import { define } from "../../elements";
-import { instantiatePropertyAssertion } from "../../process/instantiate";
+import { instantiateSignatureAssertion } from "../../process/instantiate";
 import { isolate, reconcile, instantiate } from "../../utilities/context";
 import { signatureAssertionFromStatementNode } from "../../utilities/element";
 
@@ -200,7 +200,7 @@ export default define(class SignatureAssertion extends Assertion {
     if (this.name === name) {
       instantiate((context) => {
         const { string } = json,
-              signatureAssertionNode = instantiatePropertyAssertion(string, context),
+              signatureAssertionNode = instantiateSignatureAssertion(string, context),
               node = signatureAssertionNode,  ///
               breakPoint = null,
               link = linkFromSignatureAssertionNode(signatureAssertionNode, context),

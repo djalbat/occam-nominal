@@ -25,11 +25,13 @@ import { TERM_RULE_NAME,
          CONSTRUCTOR_RULE_NAME,
          METAVARIABLE_RULE_NAME,
          TYPE_ASSERTION_RULE_NAME,
+         SCHEMA_ASSERTION_RULE_NAME,
          DEFINED_ASSERTION_RULE_NAME,
          TERM_SUBSTITUTION_RULE_NAME,
          PROPERTY_ASSERTION_RULE_NAME,
          SUBPROOF_ASSERTION_RULE_NAME,
          FRAME_SUBSTITUTION_RULE_NAME,
+         SIGNATURE_ASSERTION_RULE_NAME,
          PROCEDURE_REFERENCE_RULE_NAME,
          CONTAINED_ASSERTION_RULE_NAME,
          IMPLICIT_ASSUMPTION_RULE_NAME,
@@ -60,12 +62,14 @@ const termPlaceholderRule = ruleFromRuleName(TERM_RULE_NAME),
       constructorPlaceholderRule = ruleFromRuleName(CONSTRUCTOR_RULE_NAME),
       metavariablePlaceholderRule = ruleFromRuleName(METAVARIABLE_RULE_NAME),
       typeAssertionPlaceholderRule = ruleFromRuleName(TYPE_ASSERTION_RULE_NAME),
+      schemaAssertionPlaceholderRule = ruleFromRuleName(SCHEMA_ASSERTION_RULE_NAME),
       definedAssertionPlaceholderRule = ruleFromRuleName(DEFINED_ASSERTION_RULE_NAME),
       termSubstitutionPlaceholderRule = ruleFromRuleName(TERM_SUBSTITUTION_RULE_NAME),
       subproofAssertionlaceholderRule = ruleFromRuleName(SUBPROOF_ASSERTION_RULE_NAME),
       propertyAssertionPlaceholderRule = ruleFromRuleName(PROPERTY_ASSERTION_RULE_NAME),
       frameSubstitutionPlaceholderRule = ruleFromRuleName(FRAME_SUBSTITUTION_RULE_NAME),
-      procedureReferencelaceholderRule = ruleFromRuleName(PROCEDURE_REFERENCE_RULE_NAME),
+      signatureAssertionPlaceholderRule = ruleFromRuleName(SIGNATURE_ASSERTION_RULE_NAME),
+      procedureReferencePlaceholderRule = ruleFromRuleName(PROCEDURE_REFERENCE_RULE_NAME),
       containedAssertionPlaceholderRule = ruleFromRuleName(CONTAINED_ASSERTION_RULE_NAME),
       implicitAssumptionPlaceholderRule = ruleFromRuleName(IMPLICIT_ASSUMPTION_RULE_NAME),
       statementSubstitutionPlaceholderRule = ruleFromRuleName(STATEMENT_SUBSTITUTION_RULE_NAME);
@@ -136,6 +140,8 @@ export function instantiateMetavariable(string, context) { return instantiate(me
 
 export function instantiateTypeAssertion(string, context) { return instantiate(typeAssertionPlaceholderRule, string, context); }
 
+export function instantiateSchemaAssertion(string, context) { return instantiate(schemaAssertionPlaceholderRule, string, context); }
+
 export function instantiateDefinedAssertion(string, context) { return instantiate(definedAssertionPlaceholderRule, string, context); }
 
 export function instantiateTermSubstitution(string, context) { return instantiate(termSubstitutionPlaceholderRule, string, context); }
@@ -146,7 +152,9 @@ export function instantiatePropertyAssertion(string, context) { return instantia
 
 export function instantiateFrameSubstitution(string, context) { return instantiate(frameSubstitutionPlaceholderRule, string, context); }
 
-export function instantiateProcedureReference(string, context) { return instantiate(procedureReferencelaceholderRule, string, context); }
+export function instantiateSignatureAssertion(string, context) { return instantiate(signatureAssertionPlaceholderRule, string, context); }
+
+export function instantiateProcedureReference(string, context) { return instantiate(procedureReferencePlaceholderRule, string, context); }
 
 export function instantiateContainedAssertion(string, context) { return instantiate(containedAssertionPlaceholderRule, string, context); }
 

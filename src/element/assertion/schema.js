@@ -7,7 +7,7 @@ import Assertion from "../assertion";
 
 import { define } from "../../elements";
 import { instantiate } from "../../utilities/context";
-import { instantiatePropertyAssertion } from "../../process/instantiate";
+import { instantiateSchemaAssertion } from "../../process/instantiate";
 
 const { unbreakable } = breakPointUtilities,
       { cut, all, some, every } = continuationUtilities;
@@ -173,7 +173,7 @@ export default define(class SchemaAssertion extends Assertion {
     if (this.name === name) {
       instantiate((context) => {
         const { string } = json,
-              schemaAssertionNode = instantiatePropertyAssertion(string, context),
+              schemaAssertionNode = instantiateSchemaAssertion(string, context),
               node = schemaAssertionNode,  ///
               breakPoint = null,
               link = linkFromSchemaAssertionNode(schemaAssertionNode, context),
