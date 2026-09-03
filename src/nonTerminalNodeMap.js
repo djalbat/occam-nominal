@@ -46,11 +46,9 @@ import SchemaBodyNode from "./node/body/schema";
 import SuppositionNode from "./node/fact/supposition";
 import PlaceholderNode from "./node/placeholder";
 import ConstructorNode from "./node/constructor";
-import EquivalenceNode from "./node/equivalence";
 import TheoremBodyNode from "./node/body/theorem";
 import AxiomHeaderNode from "./node/header/axiom";
 import LemmaHeaderNode from "./node/header/lemma";
-import EquivalencesNode from "./node/equivalences";
 import MetaArgumentNode from "./node/metaArgument";
 import MetavariableNode from "./node/metavariable";
 import SchemaHeaderNode from "./node/header/schema";
@@ -129,9 +127,7 @@ import {
   SUPPOSITION_RULE_NAME,
   RULE_HEADER_RULE_NAME,
   CONSTRUCTOR_RULE_NAME,
-  EQUIVALENCE_RULE_NAME,
   SCHEMA_BODY_RULE_NAME,
-  EQUIVALENCES_RULE_NAME,
   AXIOM_HEADER_RULE_NAME,
   LEMMA_HEADER_RULE_NAME,
   THEOREM_BODY_RULE_NAME,
@@ -152,7 +148,6 @@ import {
   COTYPE_DECLARATION_RULE_NAME,
   SUBPROOF_ASSERTION_RULE_NAME,
   PROPERTY_ASSERTION_RULE_NAME,
-  FRAME_SUBSTITUTION_RULE_NAME,
   PROCEDURE_REFERENCE_RULE_NAME,
   CONTAINED_ASSERTION_RULE_NAME,
   SIGNATURE_ASSERTION_RULE_NAME,
@@ -214,13 +209,11 @@ const NonTerminalNodeMap = {
   [PLACEHOLDER_RULE_NAME]: PlaceholderNode,
   [SUPPOSITION_RULE_NAME]: SuppositionNode,
   [CONSTRUCTOR_RULE_NAME]: ConstructorNode,
-  [EQUIVALENCE_RULE_NAME]: EquivalenceNode,
   [SCHEMA_BODY_RULE_NAME]: SchemaBodyNode,
   [AXIOM_HEADER_RULE_NAME]: AxiomHeaderNode,
   [LEMMA_HEADER_RULE_NAME]: LemmaHeaderNode,
   [THEOREM_BODY_RULE_NAME]: TheoremBodyNode,
   [METAVARIABLE_RULE_NAME]: MetavariableNode,
-  [EQUIVALENCES_RULE_NAME]: EquivalencesNode,
   [META_ARGUMENT_RULE_NAME]: MetaArgumentNode,
   [SCHEMA_HEADER_RULE_NAME]: SchemaHeaderNode,
   [QUALIFICATION_RULE_NAME]: QualificationNode,
