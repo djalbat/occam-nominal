@@ -1,14 +1,13 @@
 "use strict";
 
-import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
+import { Element, continuationUtilities } from "occam-languages";
 
 import { define } from "../elements";
 import { instantiateLink } from "../process/instantiate";
 import { REFERENCE_META_TYPE_NAME } from "../metaTypeNames";
 import { join, reconcile, instantiate } from "../utilities/context";
 
-const { all } = continuationUtilities,
-      { breakPointFromJSON } = breakPointUtilities;
+const { all } = continuationUtilities;
 
 export default define(class Link extends Element {
   constructor(context, string, node, breakPoint, metavariable) {
@@ -210,7 +209,7 @@ export default define(class Link extends Element {
       const { string } = json,
             linkNode = instantiateLink(string, context),
             node = linkNode,  ///
-            breakPoint = breakPointFromJSON(json),
+            breakPoint = null,
             metavariable = metavariableFromLinkNode(linkNode, context);
 
       context = null;
