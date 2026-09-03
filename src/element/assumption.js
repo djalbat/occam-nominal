@@ -3,12 +3,11 @@
 import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
 
 import { define } from "../elements";
-import { instantiate } from "../utilities/context";
-import { join, reconcile } from "../utilities/context";
 import { isDerived, isDeclared } from "../utilities/state";
 import { instantiateAssumption } from "../process/instantiate";
+import { join, isolate, reconcile, instantiate } from "../utilities/context";
 
-const { all, exists, backwardsEvery } = continuationUtilities,
+const { all, some, exists, backwardsEvery } = continuationUtilities,
       { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Assumption extends Element {
@@ -120,16 +119,18 @@ export default define(class Assumption extends Element {
 
     context.trace(`Validating the '${assumptionString}' declared assumption...`);
 
-    ///
+    const schemas = context.getSchemas();
 
-    context.debug(`...validated the '${assumptionString}' declared assumption.`);
+    return some(schemas, (schema, context, forward, back) => {
+      return this.unifySchema(schema, context, forward, back);
+    }, context, (context, back) => {
+      context.debug(`...validated the '${assumptionString}' declared assumption.`);
 
-    return forward(state, context, back);
+      return forward(state, context, back);
+    }, back);
   }
 
   validateWhenDerived(state, context, forward, back) {
-    let validatesWhenDerived = false;
-
     const derived = isDerived(state);
 
     if (!derived) {
@@ -140,29 +141,11 @@ export default define(class Assumption extends Element {
 
     context.trace(`Validating the '${assumptionString}' derived assumption...`);
 
-    const schemas = context.getSchemas();
+    ///
 
-    validatesWhenDerived = some(schemas, (schema, context) => {
-      let success = false;
+    context.debug(`...validated the '${assumptionString}' derived assumption.`);
 
-      this.unifySchema(schema, context, (schemaUnifies) => {
-        if (schemaUnifies) {
-          success = true;
-        }
-      });
-
-      return success;
-    }, context, (context) => true); ///
-
-    if (validatesWhenDerived) {
-      validatesWhenDerived = continuation(state, context);
-    }
-
-    if (validatesWhenDerived) {
-      context.debug(`...validated the '${assumptionString}' derived assumption.`);
-    }
-
-    return validatesWhenDerived;
+    return forward(state, context, back);
   }
 
   validateLink(state, context, forward, back) {
@@ -199,56 +182,40 @@ export default define(class Assumption extends Element {
 
     context.trace(`Unifying the '${schemaString}' schema with the '${assumptionString}' assumption...`);
 
-    const generalContext = context;  ///
+    return isolate((schema, context, forward, back) => {
+      const generalContext = context;  ///
 
-    return reconcile((context) => {
-      const label = schema.getLabel();
+      return reconcile((context) => {
+        const label = schema.getLabel();
 
-      return this.link.unifyLabel(label, context, (labelUnifies) => {
-        const specificContext = context;  ///
+        return this.link.unifyLabel(label, context, (context, back) => {
+          const specificContext = context;  ///
 
-        if (!labelUnifies) {
-          const schemaUnifies = false;
+          const deduction = schema.getDeduction(),
+                deducedStatement = this.findDeducedStatement(context);
 
-          return continuation(schemaUnifies);
-        }
+          return this.unifyDeduction(deduction, deducedStatement, generalContext, specificContext, (generalContext, specificContext, back) => {
+            const conditional = this.isConditional(),
+                  schemaConditional = schema.isConditional();
 
-        const deduction = schema.getDeduction(),
-              deducedStatement = this.findDeducedStatement(context);
+            if (conditional !== schemaConditional) {
+              context.trace(`Either the '${schemaString}' schema is unconditional whilst the '${assumptionString}' assumption is conditional or vice verse.`);
 
-        return this.unifyDeduction(deduction, deducedStatement, generalContext, specificContext, (deductionUnifies) => {
-          let schemaUnifies = false;
-
-          if (!deductionUnifies) {
-            return continuation(schemaUnifies);
-          }
-
-          const conditional = this.isConditional(),
-                schemaConditional = schema.isConditional();
-
-          if (conditional !== schemaConditional) {
-            context.trace(`Either the '${schemaString}' schema is unconditional whilst the '${assumptionString}' assumption is conditional or vice verse.`);
-
-            return continuation(schemaUnifies);
-          }
-
-          const suppositions = schema.getSuppositions(),
-                supposedStatements = this.findSupposedStatements(context);
-
-          return this.unifySuppositions(suppositions, supposedStatements, generalContext, specificContext, (suppositionsUnify) => {
-            if (suppositionsUnify) {
-              schemaUnifies = true;
+              return back();
             }
 
-            if (schemaUnifies) {
-              context.debug(`...unified the '${schemaString}' schema with the '${assumptionString}' assumption.`);
-            }
+            const suppositions = schema.getSuppositions(),
+                  supposedStatements = this.findSupposedStatements(context);
 
-            return continuation(schemaUnifies);
-          });
-        });
-      });
-    }, context);
+            return this.unifySuppositions(suppositions, supposedStatements, generalContext, specificContext, forward, back);
+          }, back);
+        }, back);
+      }, context);
+    }, schema, context, (schema, context, back) => {
+      context.debug(`...unified the '${schemaString}' schema with the '${assumptionString}' assumption.`);
+
+      return forward(context, back);
+    }, back);
   }
 
   unifyDeduction(deduction, deducedStatement, generalContext, specificContext, forward, back) {
@@ -306,16 +273,10 @@ export default define(class Assumption extends Element {
           supposedStatementsLength = supposedStatements.length;
 
     if (suppositionsLength !== supposedStatementsLength) {
-      const suppositionsUnify = false;
-
-      return continuation(suppositionsUnify);
+      return back();
     }
 
-    let index = suppositionsLength; ///
-
-    return backwardsEvery(suppositions, (supposition, forward, back) => {
-      index--;
-
+    return backwardsEvery(suppositions, (supposition, forward, back, index) => {
       const supposedStatement = supposedStatements[index];
 
       return this.unifySupposition(supposition, supposedStatement, generalContext, specificContext, forward, back);

@@ -146,9 +146,7 @@ export default define(class Subproof extends Element {
     const suppositionsLength = this.suppositions.length;
 
     if (suppositionsLength === 0) {
-      const suppositionsVerify = true;  ///
-
-      return continuation(suppositionsVerify, context);
+      return back();
     }
 
     const subproofString = this.getString();  ///

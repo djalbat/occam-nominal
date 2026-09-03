@@ -173,19 +173,11 @@ export default define(class Link extends Element {
 
     context.trace(`Unifying the '${metavariableString}' metavariable with the '${linkString}' link...`);
 
-    return this.metavariable.unifyMetavariableIntrinsically(metavariable, generalContext, specificContext, (metavariableUnifiesIntrinsically) => {
-      let metavariableUnifies = false;
+    return this.metavariable.unifyMetavariableIntrinsically(metavariable, generalContext, specificContext, (generalContext, specificContext, back) => {
+      context.debug(`...unified the '${metavariableString}' metavariable with the '${linkString}' link.`);
 
-      if (metavariableUnifiesIntrinsically) {
-        metavariableUnifies = true;
-      }
-
-      if (metavariableUnifies) {
-        context.debug(`...unified the '${metavariableString}' metavariable with the '${linkString}' link.`);
-      }
-
-      return continuation(metavariableUnifies);
-    });
+      return forward(generalContext, specificContext, back);
+    }, back);
   }
 
   toJSON() {
