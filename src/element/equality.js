@@ -10,8 +10,8 @@ import { equalityFromStatementNode } from "../utilities/element";
 import { isDerived, isDeclared, isTransient } from "../utilities/state";
 import { equalityAssignmentFromEquality, leftVariableAssignmentFromEquality, rightVariableAssignmentFromEquality } from "../process/assign";
 
-const { all, exists } = continuationUtilities,
-      { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
+const { unbreakable } = breakPointUtilities,
+      { all, exists } = continuationUtilities;
 
 export default define(class Equality extends Element {
   constructor(context, string, node, breakPoint, negated, leftTerm, rightTerm) {
@@ -85,7 +85,7 @@ export default define(class Equality extends Element {
     return equality;
   }
 
-  validate(state, context, forward, back) {
+  validate = unbreakable(function (state, context, forward, back) {
     let equality;
 
     const equalityString = this.getString();  ///
@@ -123,8 +123,7 @@ export default define(class Equality extends Element {
         return forward(equality, context, back);
       }, back);
     }, back);
-
-  }
+  });
 
   validateTerms(state, context, forward, back) {
     const equalityString = this.getString(); ///
@@ -259,17 +258,8 @@ export default define(class Equality extends Element {
 
     const string = this.getString();
 
-    let breakPoint;
-
-    breakPoint = this.getBreakPoint();
-
-    const breakPointJSON = breakPointToBreakPointJSON(breakPoint);
-
-    breakPoint = breakPointJSON;  ///
-
     json = {
-      string,
-      breakPoint
+      string
     };
 
     return json;
@@ -284,7 +274,7 @@ export default define(class Equality extends Element {
       const { string } = json,
             equalityNode = instantiateEquality(string, context),
             node = equalityNode,  ///
-            breakPoint = breakPointFromJSON(json),
+            breakPoint = null,
             negated = negatedFromEqualityNode(equalityNode, context),
             leftTerm = leftTermFromEqualityNode(equalityNode, context),
             rightTerm = rightTermFromEqualityNode(equalityNode, context);

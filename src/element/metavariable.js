@@ -12,7 +12,7 @@ import { unifyMetavariable, unifyMetavariableIntrinsically } from "../process/un
 import { nameFromMetavariableNode, termFromMetavariableNode, typeFromMetavariableNode, metavariableFromStatementNode } from "../utilities/element";
 
 const { all } = continuationUtilities,
-      { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
+      { unbreakable } = breakPointUtilities;
 
 export default define(class Metavariable extends Element {
   constructor(context, string, node, breakPoint, name, term, type, metaType) {
@@ -176,7 +176,7 @@ export default define(class Metavariable extends Element {
     return forward(context, back);
   }
 
-  validate(strict, state, context, forward, back) {
+  validate = unbreakable(function (strict, state, context, forward, back) {
     if (back === undefined) {
       back = forward; ///
 
@@ -220,7 +220,7 @@ export default define(class Metavariable extends Element {
 
       return forward(metavariable, context, back);
     }, back);
-  }
+  });
 
   validateName(strict, state, context, forward, back) {
     const metavariableString = this.getString();  ///
@@ -455,17 +455,8 @@ export default define(class Metavariable extends Element {
           metaType = metaTypeJSON,  ///
           string = this.getString();
 
-    let breakPoint;
-
-    breakPoint = this.getBreakPoint();
-
-    const breakPointJSON = breakPointToBreakPointJSON(breakPoint);
-
-    breakPoint = breakPointJSON;  ///
-
     json = {
       string,
-      breakPoint,
       metaType
     };
 
@@ -481,7 +472,7 @@ export default define(class Metavariable extends Element {
       const { string } = json,
             metavariableNode = instantiateMetavariable(string, context),
             node = metavariableNode,  ///
-            breakPoint = breakPointFromJSON(json),
+            breakPoint = null,
             name = nameFromMetavariableNode(metavariableNode, context),
             term = termFromMetavariableNode(metavariableNode, context),
             type = typeFromMetavariableNode(metavariableNode, context),

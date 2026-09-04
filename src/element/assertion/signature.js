@@ -60,7 +60,7 @@ export default define(class SignatureAssertion extends Assertion {
     }, back);
   });
 
-  validate(state, context, forward, back) {
+  validate = unbreakable(function (state, context, forward, back) {
     let assertion;
 
     const signatureAssertionString = this.getString();  ///
@@ -94,7 +94,7 @@ export default define(class SignatureAssertion extends Assertion {
 
       return forward(signatureAssertion, context, back);
     }, back);
-  }
+  });
 
   validateTerm(term, terms, state, context, forward, back) {
     const termString = term.getString(),

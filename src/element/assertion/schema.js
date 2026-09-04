@@ -85,7 +85,7 @@ export default define(class SchemaAssertion extends Assertion {
     }, forward, back);
   });
 
-  validate(state, context, forward, back) {
+  validate = unbreakable(function (state, context, forward, back) {
     let assertion;
 
     const schemaAssertionString = this.getString();  ///
@@ -119,7 +119,7 @@ export default define(class SchemaAssertion extends Assertion {
 
       return forward(schemaAssertion, context, back);
     }, back);
-  }
+  });
 
   validateLink(state, context, forward, back) {
     const schemaAssertionString = this.getString();  ///

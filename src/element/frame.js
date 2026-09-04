@@ -8,7 +8,7 @@ import { instantiateFrame } from "../process/instantiate";
 import { FRAME_META_TYPE_NAME } from "../metaTypeNames";
 
 const { all, every } = continuationUtilities,
-      { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
+      { unbreakable } = breakPointUtilities;
 
 export default define(class Frame extends Element {
   constructor(context, string, node, breakPoint, assumptions, metavariable) {
@@ -63,7 +63,7 @@ export default define(class Frame extends Element {
     return frame;
   }
 
-  validate(state, context, forward, back) {
+  validate = unbreakable(function (state, context, forward, back) {
     let frame;
 
     const frameString = this.getString();  ///
@@ -93,7 +93,7 @@ export default define(class Frame extends Element {
 
       return forward(frame, context, back);
     }, back);
-  }
+  });
 
   validateMetavariable(state, context, forward, back) {
     const frameString = this.getString();  ///
@@ -175,17 +175,8 @@ export default define(class Frame extends Element {
 
     const string = this.getString();
 
-    let breakPoint;
-
-    breakPoint = this.getBreakPoint();
-
-    const breakPointJSON = breakPointToBreakPointJSON(breakPoint);
-
-    breakPoint = breakPointJSON;  ///
-
     json = {
-      string,
-      breakPoint
+      string
     };
 
     return json;
@@ -200,7 +191,7 @@ export default define(class Frame extends Element {
       const { string } = json,
             frameNode = instantiateFrame(string, context),
             node = frameNode, ///
-            breakPoint = breakPointFromJSON(json),
+            breakPoint = null,
             assumptions = assumptionsFromFrameNode(frameNode, context),
             metavariable = metavariableFromFrameNode(frameNode, context);
 

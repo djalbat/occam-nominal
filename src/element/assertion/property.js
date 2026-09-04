@@ -1,6 +1,6 @@
 "use strict";
 
-import { continuationUtilities } from "occam-languages";
+import { breakPointUtilities, continuationUtilities } from "occam-languages";
 
 import Assertion from "../assertion";
 
@@ -12,7 +12,8 @@ import { instantiatePropertyAssertion } from "../../process/instantiate";
 import { propertyAssertionFromStatementNode } from "../../utilities/element";
 import { variableAssignmentFromPrepertyAssertion } from "../../process/assign";
 
-const { all } = continuationUtilities;
+const { all } = continuationUtilities,
+      { unbreakable } = breakPointUtilities;
 
 export default define(class PropertyAssertion extends Assertion {
   constructor(context, string, node, breakPoint, subjectTerm, propertyTerm) {
@@ -44,7 +45,7 @@ export default define(class PropertyAssertion extends Assertion {
     return propertyType;
   }
 
-  validate(state, context, forward, back) {
+  validate = unbreakable(function (state, context, forward, back) {
     let assertion;
 
     const propertyAssertionString = this.getString();  ///
@@ -78,7 +79,7 @@ export default define(class PropertyAssertion extends Assertion {
 
       return forward(propertyAssertion, context, back);
     }, back);
-  }
+  });
 
   validateTerms(state, context, forward, back) {
     const propertyAssertionString = this.getString(); ///

@@ -1,13 +1,14 @@
 "use strict";
 
-import { Element, continuationUtilities } from "occam-languages";
+import { Element,breakPointUtilities, continuationUtilities } from "occam-languages";
 
 import { define } from "../elements";
 import { instantiateLink } from "../process/instantiate";
 import { REFERENCE_META_TYPE_NAME } from "../metaTypeNames";
 import { join, reconcile, instantiate } from "../utilities/context";
 
-const { all } = continuationUtilities;
+const { all } = continuationUtilities,
+      { unbreakable } = breakPointUtilities;
 
 export default define(class Link extends Element {
   constructor(context, string, node, breakPoint, metavariable) {
@@ -80,7 +81,7 @@ export default define(class Link extends Element {
     return comparesToParamter;
   }
 
-  validate(state, context, forward, back) {
+  validate = unbreakable(function (state, context, forward, back) {
     let link;
 
     const linkString = this.getString(); ///
@@ -108,7 +109,7 @@ export default define(class Link extends Element {
 
       return forward(link, context, back);
     }, back);
-  }
+  });
 
   validateMetavariable(state, context, forward, back) {
     const linkString = this.getString(); ///

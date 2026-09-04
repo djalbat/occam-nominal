@@ -7,8 +7,8 @@ import { isDerived, isDeclared } from "../utilities/state";
 import { instantiateAssumption } from "../process/instantiate";
 import { join, isolate, reconcile, instantiate } from "../utilities/context";
 
-const { all, some, exists, backwardsEvery } = continuationUtilities,
-      { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
+const { unbreakable } = breakPointUtilities,
+      { all, some, exists, backwardsEvery } = continuationUtilities;
 
 export default define(class Assumption extends Element {
   constructor(context, string, node, breakPoint, link, statement) {
@@ -75,7 +75,7 @@ export default define(class Assumption extends Element {
 
   findSubproofAssertion(context) { return this.statement.findSubproofAssertion(context); }
 
-  validate(state, context, forward, back) {
+  validate = unbreakable(function (state, context, forward, back) {
     let assumption;
 
     const assumptionString = this.getString();  ///
@@ -113,7 +113,7 @@ export default define(class Assumption extends Element {
         return forward(assumption, context, back);
       }, back);
     }, back);
-  }
+  });
 
   validateWhenDeclared(state, context, forward, back) {
     const declared = isDeclared(state);
@@ -312,17 +312,8 @@ export default define(class Assumption extends Element {
 
     const string = this.getString();
 
-    let breakPoint;
-
-    breakPoint = this.getBreakPoint();
-
-    const breakPointJSON = breakPointToBreakPointJSON(breakPoint);
-
-    breakPoint = breakPointJSON;  ///
-
     json = {
-      string,
-      breakPoint
+      string
     };
 
     return json;
@@ -337,7 +328,7 @@ export default define(class Assumption extends Element {
       const { string } = json,
             assumptionNode = instantiateAssumption(string, context),
             node = assumptionNode,  ///
-            breakPoint = breakPointFromJSON(json),
+            breakPoint = null,
             link = linkFromAssumptionNode(assumptionNode, context),
             statement = statementFromAssumptionNode(assumptionNode, context);
 

@@ -1,6 +1,6 @@
 "use strict";
 
-import { continuationUtilities } from "occam-languages";
+import { breakPointUtilities, continuationUtilities } from "occam-languages";
 
 import Assertion from "../assertion";
 
@@ -13,7 +13,8 @@ import { typeAssertionFromStatementNode } from "../../utilities/element";
 import { variableAssignmentFromTypeAssertion } from "../../process/assign";
 import { derive, isDerived, isDeclared, isTransient} from "../../utilities/state";
 
-const { all, exists } = continuationUtilities;
+const { unbreakable } = breakPointUtilities,
+      { all, exists } = continuationUtilities;
 
 export default define(class TypeAssertion extends Assertion {
   constructor(context, string, node, breakPoint, term, type) {
@@ -57,7 +58,7 @@ export default define(class TypeAssertion extends Assertion {
     });
   }
 
-  validate(state, context, forward, back) {
+  validate = unbreakable(function (state, context, forward, back) {
     let assertion;
 
     const typeAssertionString = this.getString();  ///
@@ -99,7 +100,7 @@ export default define(class TypeAssertion extends Assertion {
         return forward(typeAssertion, context, back);
       }, back);
     }, back);
-  }
+  });
 
   validateType(state, context, forward, back) {
     const typeAssertionString = this.getString();  ///

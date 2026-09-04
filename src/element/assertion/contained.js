@@ -1,6 +1,6 @@
 "use strict";
 
-import { continuationUtilities } from "occam-languages";
+import { breakPointUtilities, continuationUtilities } from "occam-languages";
 
 import Assertion from "../assertion";
 
@@ -11,7 +11,8 @@ import { instantiateContainedAssertion } from "../../process/instantiate";
 import { containedAssertionFromStatementNode } from "../../utilities/element";
 import { termFromTermAndSubstitutions, statementFromStatementAndSubstitutions } from "../../utilities/substitutions";
 
-const { all, exists } = continuationUtilities;
+const { unbreakable } = breakPointUtilities,
+      { all, exists } = continuationUtilities;
 
 export default define(class ContainedAssertion extends Assertion {
   constructor(context, string, node, breakPoint, term, negated, statement) {
@@ -41,7 +42,7 @@ export default define(class ContainedAssertion extends Assertion {
     return containedAssertionNode;
   }
 
-  validate(state, context, forward, back) {
+  validate = unbreakable(function (state, context, forward, back) {
     let assertion;
 
     const containedAssertionString = this.getString();  ///
@@ -83,7 +84,7 @@ export default define(class ContainedAssertion extends Assertion {
         return forward(containedAssertion, context, back);
       }, back);
     }, back);
-  }
+  });
 
   validateTerm(state, context, forward, back) {
     const containedAssertionString = this.getString();  ///
