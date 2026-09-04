@@ -268,18 +268,6 @@ export default define(class Schema extends Element {
   }
 
   unifyDeducedStatement(statement, schemaAssertion, context, forward, back) {
-    const conditional = this.isConditional(),
-          statementConditional = statement.isConditional();
-
-    if (conditional !== statementConditional) {
-      const schemaString = this.getString(),  ///
-            statementString = statement.getString();
-
-      context.trace(`Either the '${statementString}' statement is unconditional whilst the '${schemaString}' schema is conditional or vice verse.`);
-
-      return back();
-    }
-
     const deductionString = this.deduction.getString(),
           deducedStatement = statement.findDeducedStatement(context),
           deducedStatementString = deducedStatement.getString();
@@ -345,12 +333,14 @@ export default define(class Schema extends Element {
           supposedStatementsLength = supposedStatements.length;
 
     if (suppositionsLength !== supposedStatementsLength) {
+      context.trace(`The number of the schema's suppositions does not match the number of the scheema assertion's supposed statements.`);
+
       return back();
     }
 
-    return backwardsEvery(supposedStatements, (supposedStatement, forward, back, index) => {
+    return backwardsEvery(supposedStatements, (supposedStatement, context, forward, back, index) => {
       return this.unifySupposedStatement(supposedStatement, context, forward, back, index);
-    }, (context, back) => {
+    }, context, (context, back) => {
       return forward(statement, schemaAssertion, context, back);
     }, back);
   }

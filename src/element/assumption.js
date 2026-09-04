@@ -64,6 +64,13 @@ export default define(class Assumption extends Element {
 
   findDeducedStatement(context) { return this.statement.findDeducedStatement(context); }
 
+  findSupposedStatement(index, context) {
+    const suppostedStatements = this.findDeducedStatement(context),
+          supposedStatement = suppostedStatements[index] || null;
+
+    return supposedStatement;
+  }
+
   findSupposedStatements(context) { return this.statement.findSupposedStatements(context); }
 
   findSubproofAssertion(context) { return this.statement.findSubproofAssertion(context); }
@@ -177,8 +184,8 @@ export default define(class Assumption extends Element {
   }
 
   unifySchema(schema, context, forward, back) {
-    const assumptionString = this.getString(),
-          schemaString = schema.getString();
+    const schemaString = schema.getString(),
+          assumptionString = this.getString();  ///
 
     context.trace(`Unifying the '${schemaString}' schema with the '${assumptionString}' assumption...`);
 
@@ -186,28 +193,18 @@ export default define(class Assumption extends Element {
       const generalContext = context;  ///
 
       return reconcile((context) => {
-        const specificContext = context,  ///
-              label = schema.getLabel();
+        const specificContext = context;  ///
 
-        return this.unifyLabel(label, generalContext, specificContext, (generalContext, specificContext, back) => {
-          const deduction = schema.getDeduction(),
-                deducedStatement = this.findDeducedStatement(context);
+        const unifySchemaLabel = this.unifySchemaLabel.bind(this),
+              unifySchemaDeduction = this.unifySchemaDeduction.bind(this),
+              unifySchemaSuppostions = this.unifySchemaSuppostions.bind(this);
 
-          return this.unifyDeduction(deduction, deducedStatement, generalContext, specificContext, (generalContext, specificContext, back) => {
-            const conditional = this.isConditional(),
-                  schemaConditional = schema.isConditional();
-
-            if (conditional !== schemaConditional) {
-              context.trace(`Either the '${schemaString}' schema is unconditional whilst the '${assumptionString}' assumption is conditional or vice verse.`);
-
-              return back();
-            }
-
-            const suppositions = schema.getSuppositions(),
-                  supposedStatements = this.findSupposedStatements(context);
-
-            return this.unifySuppositions(suppositions, supposedStatements, generalContext, specificContext, forward, back);
-          }, back);
+        return all([
+          unifySchemaLabel,
+          unifySchemaDeduction,
+          unifySchemaSuppostions
+        ], schema, generalContext, specificContext, (schema, generalContext, specificContext, back) => {
+          return forward(back);
         }, back);
       }, context);
     }, schema, context, (schema, context, back) => {
@@ -217,19 +214,33 @@ export default define(class Assumption extends Element {
     }, back);
   }
 
-  unifyLabel(label, generalContext, specificContext, forward, back) {
-    this.link.unifyLabel(label, generalContext, specificContext, forward, back);
+  unifySchemaLabel(schema, generalContext, specificContext, forward, back) {
+    const context = specificContext,  ///
+          schemaString = schema.getString(),
+          assumptionString = this.getString();  ///
+
+    context.trace(`Unifying the '${schemaString}' schema's label with the '${assumptionString}' assumption's link...`);
+
+    const label = schema.getLabel();
+
+    return this.link.unifyLabel(label, generalContext, specificContext, (generalContext, specificContext, back) => {
+      context.debug(`...unified the '${schemaString}' schema's label with the '${assumptionString}' assumption's link.`);
+
+      return forward(schema, generalContext, specificContext, back);
+    }, back);
   }
 
-  unifyDeduction(deduction, deducedStatement, generalContext, specificContext, forward, back) {
+  unifySchemaDeduction(schema, generalContext, specificContext, forward, back) {
     const context = specificContext,  ///
+          deduction = schema.getDeduction(),
           deductionString = deduction.getString(),
           assumptionString = this.getString();  ///
 
-    context.trace(`Unifying the '${deductionString}' deduction's statement  with the '${assumptionString}' assumption's statement...`);
+    context.trace(`Unifying the '${deductionString}' deduction's statement with the '${assumptionString}' assumption's deduced statement...`);
 
     const statement = deduction.getStatement(),
-          deductionContext = deduction.getContext();
+          deductionContext = deduction.getContext(),
+          deducedStatement = this.findDeducedStatement(context)
 
     specificContext = deductionContext; ///
 
@@ -240,17 +251,38 @@ export default define(class Assumption extends Element {
 
           specificContext = context;  ///
 
-          context.debug(`...unified the '${deductionString}' deduction's statement with the '${assumptionString}' assumption's statement.`);
+          context.debug(`...unified the '${deductionString}' deduction's statement with the '${assumptionString}' assumption's deduced statement.`);
 
-          return forward(generalContext, specificContext, back);
+          return forward(schema, generalContext, specificContext, back);
         }, back);
       }, specificContext);
     }, specificContext, context);
   }
 
-  unifySupposition(supposition, supposedStatement, generalContext, specificContext, forward, back) {
+  unifySchemaSuppostions(schema, generalContext, specificContext, forward, back) {
+    const context = specificContext,  ///
+          suppositions = schema.getSuppositions(),
+          supposedStatements = this.findSupposedStatements(context),
+          suppositionsLength = suppositions.length,
+          supposedStatementsLength = supposedStatements.length;
+
+    if (suppositionsLength !== supposedStatementsLength) {
+      context.trace(`The number of the schema's suppositions does not match the number of the assumption's supposed statements.`);
+
+      return back();
+    }
+
+    return backwardsEvery(suppositions, (supposition, generalContext, specificContext, forward, back, index) => {
+      return this.unifySupposition(supposition, generalContext, specificContext, forward, back, index);
+    }, generalContext, specificContext, (generalContext, specificContext, back) => {
+      return forward(schema, generalContext, specificContext, back);
+    }, back);
+  }
+
+  unifySupposition(supposition, generalContext, specificContext, forward, back, index) {
     const context = specificContext,  ///
           suppositionString = supposition.getString(),
+          supposedStatement = this.findSupposedStatement(index, context),
           supposedStatementString = supposedStatement.getString();
 
     context.trace(`Unifying the '${suppositionString}' supposition's statement  with the '${supposedStatementString}' supposed statement...`);
@@ -273,21 +305,6 @@ export default define(class Assumption extends Element {
         }, back);
       }, specificContext);
     }, specificContext, context);
-  }
-
-  unifySuppositions(suppositions, supposedStatements, generalContext, specificContext, forward, back) {
-    const suppositionsLength = suppositions.length,
-          supposedStatementsLength = supposedStatements.length;
-
-    if (suppositionsLength !== supposedStatementsLength) {
-      return back();
-    }
-
-    return backwardsEvery(suppositions, (supposition, forward, back, index) => {
-      const supposedStatement = supposedStatements[index];
-
-      return this.unifySupposition(supposition, supposedStatement, generalContext, specificContext, forward, back);
-    }, forward, back);
   }
 
   toJSON() {
