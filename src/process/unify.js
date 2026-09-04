@@ -18,30 +18,8 @@ const typeNodeQuery = nodeQuery("/type"),
       termVariableNodeQuery = nodeQuery("/term/variable!"),
       statementMetavariableNodeQuery = nodeQuery("/statement/metavariable!");
 
-class UnifyStatementPass extends ContinuationZipPass {
+class UnifyTermIntrinsicallyPass extends ContinuationZipPass {
   static maps = [
-    {
-      generalNodeQuery: statementMetavariableNodeQuery,
-      specificNodeQuery: statementNodeQuery,
-      run: (generalStatementMetavariableNode, specificStatementNode, generalContext, specificContext, forward, back) => {
-        const statementNode = specificStatementNode, ///
-              metavariableNode = generalStatementMetavariableNode;
-
-        let context;
-
-        context = generalContext; ///
-
-        const metavariable = context.findMetavariableByMetavariableNode(metavariableNode);
-
-        context = specificContext;  ///
-
-        const statement = context.findStatementByStatementNode(statementNode);
-
-        return metavariable.unifyStatement(statement, generalContext, specificContext, (generalContext, specificContext, back) => {
-          return forward(generalContext, specificContext, back);
-        }, back);
-      }
-    },
     {
       generalNodeQuery: termVariableNodeQuery,
       specificNodeQuery: termNodeQuery,
@@ -69,40 +47,30 @@ class UnifyStatementPass extends ContinuationZipPass {
   ];
 }
 
-class UnifyMetavariablePass extends ContinuationZipPass {
+class UnifyStatementIntrisicallyPass extends ContinuationZipPass {
   static maps = [
     {
-      generalNodeQuery: typeNodeQuery,
-      specificNodeQuery: termNodeQuery,
-      run: (generalTypeNode, specificTermNode, generalContext, specificContext, forward, back) => {
-        let context;
+      generalNodeQuery: statementMetavariableNodeQuery,
+      specificNodeQuery: statementNodeQuery,
+      run: (generalStatementMetavariableNode, specificStatementNode, generalContext, specificContext, forward, back) => {
+        const statementNode = specificStatementNode, ///
+              metavariableNode = generalStatementMetavariableNode;
 
-        const typeNode = generalTypeNode, ///
-              termNode = specificTermNode, ///
-              nominalTypeName = typeNode.getNominalTypeName();
+        let context;
 
         context = generalContext; ///
 
-        const type = context.findTypeByNominalTypeName(nominalTypeName);
+        const metavariable = context.findMetavariableByMetavariableNode(metavariableNode);
 
-        context = specificContext; ///
+        context = specificContext;  ///
 
-        const term = context.findTermByTermNode(termNode),
-              termType = term.getType(),
-              termTypeEqualToOrSubTypeOfGivenTypeType = termType.isEqualToOrSubTypeOf(type);
+        const statement = context.findStatementByStatementNode(statementNode);
 
-        if (!termTypeEqualToOrSubTypeOfGivenTypeType) {
-          return back();
-        }
-
-        return forward(generalContext, specificContext, back);
+        return metavariable.unifyStatement(statement, generalContext, specificContext, (generalContext, specificContext, back) => {
+          return forward(generalContext, specificContext, back);
+        }, back);
       }
-    }
-  ];
-}
-
-class UnifyTermIntrinsicallyPass extends ContinuationZipPass {
-  static maps = [
+    },
     {
       generalNodeQuery: termVariableNodeQuery,
       specificNodeQuery: termNodeQuery,
@@ -357,32 +325,13 @@ class UnifyStatementWithCombinatorPass extends ContinuationZipPass {
   ];
 }
 
-const unifyStatementPass = new UnifyStatementPass(),
-      unifyMetavariablePass = new UnifyMetavariablePass(),
-      unifyTermInstrinsicallyPass = new UnifyTermIntrinsicallyPass(),
+const unifyTermInstrinsicallyPass = new UnifyTermIntrinsicallyPass(),
+      unifyStatementIntrinsicallyPass = new UnifyStatementIntrisicallyPass(),
       unifyMetavariableIntrisicallyPass = new UnifyMetavariableIntrisicallyPass(),
       unifyTermWithPropertyPass = new UnifyTermWithPropertyPass(),
       unifyTermWithGeneratorPass = new UnifyTermWithGeneratorPass(),
       unifyTermWithConstructorPass = new UnifyTermWithConstructorPass(),
       unifyStatementWithCombinatorPass = new UnifyStatementWithCombinatorPass();
-
-export function unifyStatement(generalStatement, specificStatement, generalContext, specificContext, forward, back) {
-  const generalStatementNode = generalStatement.getNode(),
-        specificStatementNode = specificStatement.getNode(),
-        generalNode = generalStatementNode, ///
-        specificNode = specificStatementNode;  ///
-
-  return unifyStatementPass.run(generalNode, specificNode, generalContext, specificContext, forward, back);
-}
-
-export function unifyMetavariable(generalMetavariable, specificMetavariable, generalContext, specificContext, forward, back) {
-  const generalMetavariableNode = generalMetavariable.getNode(),
-        specificMetavariableNode = specificMetavariable.getNode(),
-        generalMetavariableChildNodes = generalMetavariableNode.getChildNodes(),  ///
-        specificMetavariableChildNodes = specificMetavariableNode.getChildNodes();  ///
-
-  return unifyMetavariablePass.descend(generalMetavariableChildNodes, specificMetavariableChildNodes, generalContext, specificContext, forward, back);
-}
 
 export function unifyTermIntrinsically(generalTerm, specificTerm, generalContext, specificContext, forward, back) {
   const generalTermNode = generalTerm.getNode(),
@@ -391,6 +340,15 @@ export function unifyTermIntrinsically(generalTerm, specificTerm, generalContext
         specificNode = specificTermNode; ///
 
   return unifyTermInstrinsicallyPass.run(generalNode, specificNode, generalContext, specificContext, forward, back);
+}
+
+export function unifyStatementIntrinsically(generalStatement, specificStatement, generalContext, specificContext, forward, back) {
+  const generalStatementNode = generalStatement.getNode(),
+        specificStatementNode = specificStatement.getNode(),
+        generalNode = generalStatementNode, ///
+        specificNode = specificStatementNode;  ///
+
+  return unifyStatementIntrinsicallyPass.run(generalNode, specificNode, generalContext, specificContext, forward, back);
 }
 
 export function unifyMetavariableIntrinsically(generalMetavariable, specificMetavariable, generalContext, specificContext, forward, back) {

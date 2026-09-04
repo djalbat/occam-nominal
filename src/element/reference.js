@@ -150,29 +150,6 @@ export default define(class Reference extends Element {
     }, back);
   }
 
-  unifyLink(link, generalContext, specificContext, forward, back) {
-    const context = specificContext,  ///
-          linkString = link.getString(),
-          referenceString = this.getString(); ///
-
-    context.trace(`Unifying the '${linkString}' link with the '${referenceString}' reference...`);
-
-    return isolate((link, generalContext, specificContext, forward, back) => {
-      const context = this.getContext(),
-            metavariable = link.getMetavariable();
-
-      generalContext = context; ///
-
-      return this.unifyMetavariable(metavariable, generalContext, specificContext, (generalContext, specificContext, back) => {
-        return forward(back);
-      }, back);
-    }, link, generalContext, specificContext, (link, generalContext, specificContext, back) => {
-      context.debug(`...unified the '${linkString}' link with the '${referenceString}' reference.`);
-
-      return forward(generalContext, specificContext, back);
-    }, back);
-  }
-
   unifyMetavariable(metavariable, generalContext, specificContext, forward, back) {
     const context = specificContext,  ///
           referenceString = this.getString(), ///

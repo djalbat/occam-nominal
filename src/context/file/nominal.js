@@ -417,20 +417,6 @@ export default class NominalFileContext extends FileContext {
     this.trace(`Added the '${declaredMetavariableString}' declared metavariable to the '${filePath}' file context.`)
   }
 
-  findMetavariable(metavariable, context) {
-    const declaredMetavariables = this.getDeclaredMetavariables();
-
-    metavariable = declaredMetavariables.find((declaredMetavariable) => {
-      const metavariableUnifies = declaredMetavariable.unifyMetavariable(metavariable, context);
-
-      if (metavariableUnifies) {
-        return true;
-      }
-    }) || null;
-
-    return metavariable;
-  }
-
   findRuleByReference(reference) {
     const rules = this.getRules(),
           metavariableNode = reference.getMetavariableNode(),

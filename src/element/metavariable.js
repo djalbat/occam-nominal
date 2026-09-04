@@ -7,8 +7,8 @@ import elements from "../elements";
 import { define } from "../elements";
 import { instantiate } from "../utilities/context";
 import { instantiateMetavariable } from "../process/instantiate";
+import { unifyMetavariableIntrinsically } from "../process/unify";
 import { metaTypeFromJSON, metaTypeToMetaTypeJSON } from "../utilities/json";
-import { unifyMetavariable, unifyMetavariableIntrinsically } from "../process/unify";
 import { nameFromMetavariableNode, termFromMetavariableNode, typeFromMetavariableNode, metavariableFromStatementNode } from "../utilities/element";
 
 const { all } = continuationUtilities,
@@ -381,13 +381,8 @@ export default define(class Metavariable extends Element {
     }, back);
   }
 
-  unifyMetavariable(metavariable, context, forward, back) {
-    let metavariableUnifies;
-
-    debugger
-
-    const generalContext = context, ///
-          specificContext = context,  ///
+  unifyMetavariable(metavariable, generalContext, specificContext, forward, back) {
+    const context = specificContext,  ///
           generalMetavariable = this, ///
           specificMetavariable = metavariable,  ///
           generalMetavariableString = generalMetavariable.getString(),
@@ -395,13 +390,11 @@ export default define(class Metavariable extends Element {
 
     context.trace(`Unifying the '${specificMetavariableString}' metavariable with the '${generalMetavariableString}' metavariable...`);
 
-    metavariableUnifies = unifyMetavariable(generalMetavariable, specificMetavariable, generalContext, specificContext);
-
-    if (metavariableUnifies) {
+    return unifyMetavariableIntrinsically(generalMetavariable, specificMetavariable, generalContext, specificContext, (generalContext, specificContext, back) => {
       context.debug(`...unified the '${specificMetavariableString}' metavariable with the '${generalMetavariableString}' metavariable.`);
-    }
 
-    return metavariableUnifies;
+      return forward(generalContext, specificContext, back);
+    }, back);
   }
 
   unifyMetavariableIntrinsically(metavariable, generalContext, specificContext, forward, back) {

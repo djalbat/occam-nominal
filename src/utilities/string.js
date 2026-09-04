@@ -175,14 +175,6 @@ export function termSubstitutionStringFromTermAndVariable(term, variable) {
   return termSubstitutionString;
 }
 
-export function constraintStringFromReferenceAndStatement(reference, statement) {
-  const statementString = statement.getString(),
-        referneceString = reference.getString(),
-        constraintString = `${referneceString} :: ${statementString}`;
-
-  return constraintString;
-}
-
 export function rulsStringFromLabelsPremisesAndConclusion(labels, premises, conclusion) {
   let ruleString = EMPTY_STRING;
 
@@ -197,6 +189,14 @@ export function rulsStringFromLabelsPremisesAndConclusion(labels, premises, conc
                    `${ruleString}${conclusionString}`;
 
   return ruleString;
+}
+
+export function constraintStringFromStatementAndMetavariable(statement, metavariable) {
+  const statementString = statement.getString(),
+        metavariableString = metavariable.getString(),
+        constraintString = `${metavariableString} :: ${statementString}`;
+
+  return constraintString;
 }
 
 export function schemaStringFromLabelSuppositionsAndDeduction(label, suppositions, deduction) {

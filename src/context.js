@@ -243,20 +243,6 @@ export default class Context extends ContextBase {
     return types;
   }
 
-  findMetavariable(metavariable, context) {
-    const childContext = context; ///
-
-    context = this.getContext();
-
-    const parentContext = context; ///
-
-    context = childContext; ///
-
-    metavariable = parentContext.findMetavariable(metavariable, context);
-
-    return metavariable;
-  }
-
   findRuleByReference(reference) {
     const context = this.getContext(),
           rule = context.findRuleByReference(reference);

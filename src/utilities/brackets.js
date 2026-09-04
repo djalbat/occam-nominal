@@ -33,7 +33,7 @@ export function stripBracketsFromTermNode(termNode) {
 
 export function stripBracketsFromStatement(statement, context) {
   let statementNode = statement.getNode(),
-    bracketedStatementChildNode = bracketedStatementChildNodeFromStatementNode(statementNode);
+        bracketedStatementChildNode = bracketedStatementChildNodeFromStatementNode(statementNode);
 
   while (bracketedStatementChildNode !== null) {
     statementNode = bracketedStatementChildNode;  ///

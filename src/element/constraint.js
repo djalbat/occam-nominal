@@ -4,30 +4,29 @@ import { Element, breakPointUtilities, continuationUtilities } from "occam-langu
 
 import { define } from "../elements";
 import { declare } from "../utilities/state";
-import { unifyStatement } from "../process/unify";
 import { instantiateConstraint } from "../process/instantiate";
 import { stripBracketsFromStatement } from "../utilities/brackets";
-import { constraintStringFromReferenceAndStatement } from "../utilities/string";
-import { constraintFromConstraintNode, referenceFromConstraintNode } from "../utilities/element";
+import { constraintStringFromStatementAndMetavariable } from "../utilities/string";
+import { constraintFromConstraintNode, metavariableFromConstraintNode } from "../utilities/element";
 import { pare, join, ablate, isolate, attempt, reconcile, serialise, unserialise, instantiate } from "../utilities/context";
 
 const { unbreakable } = breakPointUtilities,
       { cut, all, some, exists } = continuationUtilities;
 
 export default define(class Constraint extends Element {
-  constructor(context, string, node, breakPoint, reference, statement) {
+  constructor(context, string, node, breakPoint, statement, metavariable) {
     super(context, string, node, breakPoint);
 
-    this.reference = reference;
     this.statement = statement;
-  }
-
-  getReference() {
-    return this.reference;
+    this.metavariable = metavariable;
   }
 
   getStatement() {
     return this.statement;
+  }
+
+  getMetavariable() {
+    return this.metavariable;
   }
 
   getConstraintNode() {
@@ -36,8 +35,6 @@ export default define(class Constraint extends Element {
 
     return constraintNode;
   }
-
-  getMetavariable() { return this.reference.getMetavariable(); }
 
   isEqualTo(constraint) {
     const constraintNode = constraint.getNode(),
@@ -134,11 +131,11 @@ export default define(class Constraint extends Element {
 
       return attempt((context) => {
         const validateStatement = this.validateStatement.bind(this),
-              validateReference = this.validateReference.bind(this);
+              validateMetavaraible = this.validateMetavaraible.bind(this);
 
         return all([
           validateStatement,
-          validateReference
+          validateMetavaraible
         ], state, context, (state, context, back) => {
           this.commit(context);
 
@@ -154,15 +151,15 @@ export default define(class Constraint extends Element {
     }, back);
   }
 
-  validateReference(state, context, forward, back) {
+  validateMetavaraible(state, context, forward, back) {
     const constraintString = this.getString();  ///
 
-    context.trace(`Validating the '${constraintString}' constraint's reference...`);
+    context.trace(`Validating the '${constraintString}' constraint's metavariable...`);
 
-    return this.reference.validate(state, context, (reference, context, back) => {
-      this.reference = reference;
+    return this.metavariable.validate(state, context, (metavariable, context, back) => {
+      this.metavariable = metavariable;
 
-      context.trace(`...validated the '${constraintString}' constraint's reference.`);
+      context.trace(`...validated the '${constraintString}' constraint's metavariable.`);
 
       return forward(state, context, back);
     }, back);
@@ -187,10 +184,22 @@ export default define(class Constraint extends Element {
           linkString = link.getString(),
           constraintString = this.getString(); ///
 
-    context.trace(`Unifying the '${linkString}' link with the '${constraintString}' constraint's reference...`);
+    context.trace(`Unifying the '${linkString}' link with the '${constraintString}' constraint's metavariable...`);
 
-    return this.reference.unifyLink(link, generalContext, specificContext, (generalContext, specificContext, back) => {
-      context.debug(`...unified the '${linkString}' link with the '${constraintString}' constraint's reference.`);
+    return isolate((link, generalContext, specificContext, forward, back) => {
+      const metavariable = link.getMetavariable();
+
+      return reconcile((specificContext) => {
+        return this.metavariable.unifyMetavariable(metavariable, generalContext, specificContext, (generalContext, specificContext, back) => {
+          const context = specificContext;  ///
+
+          context.commit();
+
+          return forward(back)
+        }, back);
+      }, specificContext);
+    }, link, generalContext, specificContext, (link, generalContext, specificContext, back) => {
+      context.debug(`...unified the '${linkString}' link with the '${constraintString}' constraint's metavariable.`);
 
       return forward(generalContext, specificContext, back);
     }, back);
@@ -203,15 +212,25 @@ export default define(class Constraint extends Element {
 
     context.trace(`Unifying the '${statementString}' statement with the '${constraintString}' constraint's statement...`);
 
-    let specificStatement;
+    return isolate((statement, generalContext, specificContext, forward, back) => {
+      let specificStatement;
 
-    specificStatement = statement;  ///
+      specificStatement = statement;  ///
 
-    specificStatement = stripBracketsFromStatement(specificStatement, context);  ///
+      specificStatement = stripBracketsFromStatement(specificStatement, context);  ///
 
-    const generalStatement = this.statement;  ///
+      const generalStatement = this.statement;  ///
 
-    return unifyStatement(generalStatement, specificStatement, generalContext, specificContext, (generalContext, specificContext, back) => {
+      return reconcile((specificContext) => {
+        return generalStatement.unifyStatement(specificStatement, generalContext, specificContext, (generalContext, specificContext, back) => {
+          const context = specificContext;  ///
+
+          context.commit();
+
+          return forward(back)
+        }, back);
+      }, specificContext);
+    }, statement, generalContext, specificContext, (statement, generalContext, specificContext, back) => {
       context.debug(`...unified the '${statementString}' statement with the '${constraintString}' constraint's statement.`);
 
       return forward(generalContext, specificContext, back);
@@ -318,10 +337,10 @@ export default define(class Constraint extends Element {
               constraintNode = instantiateConstraint(string, context),
               node = constraintNode,  ///
               breakPoint = null,
-              reference = referenceFromConstraintNode(constraintNode, context),
-              statement = statementFromConstraintNode(constraintNode, context);
+              statement = statementFromConstraintNode(constraintNode, context),
+              metavariable = metavariableFromConstraintNode(constraintNode, context);
 
-        constraint = new Constraint(context, string, node, breakPoint, reference, statement);
+        constraint = new Constraint(context, string, node, breakPoint, statement, metavariable);
       }, json, context);
     }, context);
 
@@ -337,11 +356,12 @@ export default define(class Constraint extends Element {
 
     statement = stripBracketsFromStatement(statement, context); ///
 
-    const reference = step.getReference();
+    const reference = step.getReference(),
+          metavariable = reference.getMetavariable();
 
     ablate((context) => {
       instantiate((context) => {
-        const constraintString = constraintStringFromReferenceAndStatement(reference, statement),
+        const constraintString = constraintStringFromStatementAndMetavariable(statement, metavariable),
               string = constraintString,  ///
               constraintNode = instantiateConstraint(string, context);
 

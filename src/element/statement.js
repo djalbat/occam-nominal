@@ -4,10 +4,10 @@ import { Element, breakPointUtilities, continuationUtilities } from "occam-langu
 
 import { define } from "../elements";
 import { instantiate } from "../utilities/context";
-import { unifyStatement } from "../process/unify";
 import { validateStatements } from "../process/validation";
 import { dischargeStatements } from "../process/discharge";
 import { instantiateStatement } from "../process/instantiate";
+import { unifyStatementIntrinsically } from "../process/unify";
 import { substitutionFromStatementNode } from "../utilities/element";
 
 const { unbreakable } = breakPointUtilities,
@@ -292,7 +292,7 @@ export default define(class Statement extends Element {
 
     context.trace(`Unifying the '${specificStatementString}' statement with the '${generalStatementString}' statement...`);
 
-    return unifyStatement(generalStatement, specificStatement, generalContext, specificContext, (generalContext, specificContext, back) => {
+    return unifyStatementIntrinsically(generalStatement, specificStatement, generalContext, specificContext, (generalContext, specificContext, back) => {
       context.debug(`...unified the '${specificStatementString}' statement with the '${generalStatementString}' statement.`);
 
       return forward(generalContext, specificContext, back);

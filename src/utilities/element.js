@@ -430,9 +430,9 @@ export function constraintFromConstraintNode(constraintNode, context) {
         node = constraintNode,  ///
         string = context.nodeAsString(node),
         breakPoint = null,
-        reference = referenceFromConstraintNode(constraintNode, context),
         statement = statementFromConstraintNode(constraintNode, context),
-        constraint = new Constraint(context, string, node, breakPoint, reference, statement);
+        metavariable = metavariableFromConstraintNode(constraintNode, context),
+        constraint = new Constraint(context, string, node, breakPoint, statement, metavariable);
 
   return constraint;
 }
@@ -1535,13 +1535,6 @@ export function statementFromHypothesisNode(hypothesisNode, context) {
   return statement;
 }
 
-export function referenceFromConstraintNode(constraintNode, context) {
-  const referenceNode = constraintNode.getReferenceNode(),
-        reference = referenceFromReferenceNode(referenceNode, context);
-
-  return reference;
-}
-
 export function statementFromConstraintNode(constraintNode, context) {
   const statementNode = constraintNode.getStatementNode(),
         statement = statementFromStatementNode(statementNode, context);
@@ -1700,6 +1693,13 @@ export function typeAssertionFromStatementNode(statementNode, context) {
   }
 
   return typeAssertion;
+}
+
+export function metavariableFromConstraintNode(constraintNode, context) {
+  const metavaribleNode = constraintNode.getMetavariableNode(),
+        metavarible = metavariableFromMetavariableNode(metavaribleNode, context);
+
+  return metavarible;
 }
 
 export function subproofFromStepOrSubproofNode(subproofOrSubproofNode, context) {
