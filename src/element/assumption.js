@@ -186,11 +186,10 @@ export default define(class Assumption extends Element {
       const generalContext = context;  ///
 
       return reconcile((context) => {
-        const label = schema.getLabel();
+        const specificContext = context,  ///
+              label = schema.getLabel();
 
-        return this.link.unifyLabel(label, context, (context, back) => {
-          const specificContext = context;  ///
-
+        return this.unifyLabel(label, generalContext, specificContext, (generalContext, specificContext, back) => {
           const deduction = schema.getDeduction(),
                 deducedStatement = this.findDeducedStatement(context);
 
@@ -218,12 +217,16 @@ export default define(class Assumption extends Element {
     }, back);
   }
 
+  unifyLabel(label, generalContext, specificContext, forward, back) {
+    this.link.unifyLabel(label, generalContext, specificContext, forward, back);
+  }
+
   unifyDeduction(deduction, deducedStatement, generalContext, specificContext, forward, back) {
     const context = specificContext,  ///
-          assumptionString = this.getString(),  ///
-          deductionString = deduction.getString();
+          deductionString = deduction.getString(),
+          assumptionString = this.getString();  ///
 
-    context.trace(`Unifying the '${deductionString}' deduction's statement  with the '${assumptionString}' assumption's '${assumptionString}' statement...`);
+    context.trace(`Unifying the '${deductionString}' deduction's statement  with the '${assumptionString}' assumption's statement...`);
 
     const statement = deduction.getStatement(),
           deductionContext = deduction.getContext();
@@ -235,7 +238,9 @@ export default define(class Assumption extends Element {
         return deducedStatement.unifyStatement(statement, generalContext, specificContext, (generalContext, specificContext, back) => {
           specificContext.commit(context);
 
-          context.debug(`...unified the '${deductionString}' deduction's statement with the '${assumptionString}' assumption's '${assumptionString}' statement.`);
+          specificContext = context;  ///
+
+          context.debug(`...unified the '${deductionString}' deduction's statement with the '${assumptionString}' assumption's statement.`);
 
           return forward(generalContext, specificContext, back);
         }, back);
@@ -259,6 +264,8 @@ export default define(class Assumption extends Element {
       return reconcile((specificContext) => {
         return supposedStatement.unifyStatement(statement, generalContext, specificContext, (generalContext, specificContext, back) => {
           specificContext.commit(context);
+
+          specificContext = context;  ///
 
           context.debug(`...unified the '${suppositionString}' supposition's statement  with the '${supposedStatementString}' supposed statement.`);
 

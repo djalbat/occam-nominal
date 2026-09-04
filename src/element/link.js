@@ -142,25 +142,28 @@ export default define(class Link extends Element {
     }, back);
   }
 
-  unifyLabel(label, context, forward, back) {
-    const labelString = label.getString(),
-          linkString = this.getString(); ///
+  unifyLabel(label, generalContext, specificContext, forward, back) {
+    const context = specificContext,  ///
+          linkString = this.getString(),  ///
+          labelString = label.getString();
 
     context.trace(`Unifying the '${labelString}' label with the '${linkString}' link...`);
 
     const metavariable = label.getMetavariable(),
-          labelContext = label.getContext(),
-          generalContext = this.getContext(), ///
-          specificContext = labelContext;  ///
+          labelContext = label.getContext();
+
+    specificContext = labelContext;  ///
 
     return join((specificContext) => {
       return reconcile((specificContext) => {
         return this.unifyMetavariable(metavariable, generalContext, specificContext, (generalContext, specificContext, back) => {
           specificContext.commit(context);
 
+          specificContext = context;  ///
+
           context.debug(`...unified the '${labelString}' label with the '${linkString}' link.`);
 
-          return forward(context, back);
+          return forward(generalContext, specificContext, back);
         }, back);
       }, specificContext);
     }, specificContext, context);
