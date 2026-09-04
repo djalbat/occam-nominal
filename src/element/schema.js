@@ -118,13 +118,13 @@ export default define(class Schema extends Element {
 
     return isolate((statement, schemaAssertion, context, forward, back) => {
       return reconcile((context) => {
-        const applyConstraints = this.applyConstraints.bind(this),
+        const unifyLink = this.unifyLink.bind(this),
+              applyConstraints = this.applyConstraints.bind(this),
               unifyDeducedStatement = this.unifyDeducedStatement.bind(this),
-              unifySupposedStatements = this.unifySupposedStatements.bind(this),
-              unifySchemaAssertionLink = this.unifySchemaAssertionLink.bind(this);
+              unifySupposedStatements = this.unifySupposedStatements.bind(this);
 
         return all([
-          unifySchemaAssertionLink,
+          unifyLink,
           applyConstraints,
           unifyDeducedStatement,
           unifySupposedStatements
@@ -246,8 +246,24 @@ export default define(class Schema extends Element {
           return back(exception);
         }
 
-        context.trace(`Unable to applying the schema's '${constraintsString}' constraints.`);
+        context.trace(`Unable to apply the schema's '${constraintsString}' constraints.`);
+
+        return back();
       });
+    }, back);
+  }
+
+  unifyLink(statement, schemaAssertion, context, forward, back) {
+    const link = schemaAssertion.getLink(),
+          schemaString = this.getString(),  ///
+          schemaAssertionString = schemaAssertion.getString();
+
+    context.trace(`Unifying the '${schemaAssertionString}' schema assertion's link with the '${schemaString}' schema...`);
+
+    return this.label.unifyLink(link, context, (context, back) => {
+      context.debug(`...unified the '${schemaAssertionString}' schema assertion's link with the '${schemaString}' schema.`);
+
+      return forward(statement, schemaAssertion, context, back);
     }, back);
   }
 
@@ -316,7 +332,7 @@ export default define(class Schema extends Element {
           return forward(back);
         }, back);
       }, context);
-    }, supposedStatement, context, context, (supposedStatement, context, back) => {
+    }, supposedStatement, context, (supposedStatement, context, back) => {
       context.debug(`...unified the '${supposedStatementString}' supposed statement with the '${suppositionString}' supposition.`);
 
       return forward(context, back);
@@ -335,20 +351,6 @@ export default define(class Schema extends Element {
     return backwardsEvery(supposedStatements, (supposedStatement, forward, back, index) => {
       return this.unifySupposedStatement(supposedStatement, context, forward, back, index);
     }, (context, back) => {
-      return forward(statement, schemaAssertion, context, back);
-    }, back);
-  }
-
-  unifySchemaAssertionLink(statement, schemaAssertion, context, forward, back) {
-    const link = schemaAssertion.getLink(),
-          schemaString = this.getString(),  ///
-          schemaAssertionString = schemaAssertion.getString();
-
-    context.trace(`Unifying the '${schemaAssertionString}' schema assertion's link with the '${schemaString}' schema...`);
-
-    return this.label.unifyLink(link, context, (context, back) => {
-      context.debug(`...unified the '${schemaAssertionString}' schema assertion's link with the '${schemaString}' schema.`);
-
       return forward(statement, schemaAssertion, context, back);
     }, back);
   }

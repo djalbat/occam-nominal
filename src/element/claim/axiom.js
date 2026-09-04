@@ -150,8 +150,6 @@ export default define(class Axiom extends Claim {
   }
 
   unifyClaim(claim, context, forward, back) {
-    forward = cut(forward, back); ///
-
     const axiomString = this.getString(), ///
           claimString = claim.getString();
 
