@@ -135,6 +135,24 @@ export default define(class Signature extends Element {
     }, back);
   }
 
+  unifyTerm(terms, generalContext, specificContext, forward, back, index) {
+    const context = specificContext,  ///
+          generalTerms = this.terms,  ///
+          specificTerms = terms,  //
+          generalTerm = generalTerms[index],
+          specificTerm = specificTerms[index],
+          generalTermString = generalTerm.getString(),
+          specificTermString = specificTerm.getString();
+
+    context.trace(`Unifying the ${specificTermString} term with the signature's ${generalTermString}' term...`);
+
+    return generalTerm.unifyTerm(specificTerm, generalContext, specificContext, (generalContext, specificTerm, back) => {
+      context.debug(`...unified the ${specificTermString} term with the signature's ${generalTermString}' term.`);
+
+      return forward(generalContext, specificContext, back);
+    }, back);
+  }
+
   unifyTerms(terms, context, forward, back) {
     const quoted = true,
           termsString = termsStringFromTerms(terms, quoted),
@@ -157,9 +175,7 @@ export default define(class Signature extends Element {
               specificContext = context;  ///
 
         return every(generalTerms, (generalTerm, generalContext, specificContext, forward, back, index) => {
-          const specificTerm = specificTerms[index];
-
-          return generalTerm.unifyTerm(specificTerm, generalContext, specificContext, forward, back);
+          return this.unifyTerm(terms, generalContext, specificContext, forward, back, index);
         }, generalContext, specificContext, (generalContext, specificContext, back) => {
           context = specificContext;  ///
 

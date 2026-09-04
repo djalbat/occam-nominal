@@ -192,9 +192,9 @@ export default define(class SubproofAssertion extends Assertion {
       return back();
     }
 
-    return backwardsEvery(suppositions, (supposition, forward, back, index) => {
+    return backwardsEvery(suppositions, (supposition, generalContext, specificContext, forward, back, index) => {
       return this.unifySupposition(supposition, generalContext, specificContext, forward, back, index);
-    }, forward, back);
+    }, generalContext, specificContext, forward, back);
   }
 
   toJSON() {
