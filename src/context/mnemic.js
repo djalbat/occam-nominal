@@ -421,7 +421,7 @@ export default class MnemicContext extends Context {
     const context = this, ///
           procedureReferenceString = procedureReference.getString();
 
-    context.trace(`Adding the '${procedureReferenceString}' procedure call to the mnemic context...`);
+    context.trace(`Adding the '${procedureReferenceString}' function call to the mnemic context...`);
 
     const procedureReferenceA = procedureReference; ///
 
@@ -432,7 +432,7 @@ export default class MnemicContext extends Context {
       if (procedureReferenceAEqualToProcedureallB) {
         const procedureReferenceString = procedureReference.getString();
 
-        context.trace(`Removed the existing '${procedureReferenceString}' procedure call from the mnemic context...`);
+        context.trace(`Removed the existing '${procedureReferenceString}' function call from the mnemic context...`);
 
         return true;
       }
@@ -440,7 +440,7 @@ export default class MnemicContext extends Context {
 
     this.procedureReferences.push(procedureReference);
 
-    context.debug(`...added the '${procedureReferenceString}' procedure call to the mnemic context.`);
+    context.debug(`...added the '${procedureReferenceString}' function call to the mnemic context.`);
   }
 
   addAssignment(assignment) {

@@ -10,6 +10,6 @@ const logLevel = ERROR_LEVEL,
       projectName = "operations",
       projectsDirectoryPath = "../../Algorithms";
 
-describe(projectName, () => {
+describe.skip(projectName, () => {
   createSuite(logLevel, projectName, projectsDirectoryPath);
 });

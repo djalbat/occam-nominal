@@ -87,12 +87,12 @@ export default define(class ProcedureReference extends Element {
 
     const procedureReferenceString = this.getString();  ///
 
-    context.trace(`Validating the '${procedureReferenceString}' procedure call...`);
+    context.trace(`Validating the '${procedureReferenceString}' function reference...`);
 
     procedureReference = this.findProcedureReference(context);
 
     if (procedureReference !== null) {
-      context.debug(`The '${procedureReferenceString}' procedure call is already present.`);
+      context.debug(`The '${procedureReferenceString}' function reference is already present.`);
 
       return forward(procedureReference, context, back);
     }
@@ -106,7 +106,7 @@ export default define(class ProcedureReference extends Element {
     ], state, context, (state, context, back) => {
       context.addProcedureReference(procedureReference);
 
-      context.debug(`...validated the '${procedureReferenceString}' procedure call.`);
+      context.debug(`...validated the '${procedureReferenceString}' function reference.`);
 
       return forward(procedureReference, context, back);
     }, back);
@@ -116,12 +116,12 @@ export default define(class ProcedureReference extends Element {
     const parameterString = parameter.getString(),
           procedureReferenceString = this.getString();  ///
 
-    context.trace(`Validating the '${procedureReferenceString}' procedure call's '${parameterString}' parameter...`);
+    context.trace(`Validating the '${procedureReferenceString}' function reference's '${parameterString}' parameter...`);
 
     return parameter.validate(state, context, (parameter, context, back) => {
       parameters.push(parameter);
 
-      context.debug(`...validated the '${procedureReferenceString}' procedure call's '${parameterString}' parameter.`);
+      context.debug(`...validated the '${procedureReferenceString}' function reference's '${parameterString}' parameter.`);
 
       return forward(parameters, state, context, back);
     }, back);
@@ -130,7 +130,7 @@ export default define(class ProcedureReference extends Element {
   validateParameters(state, context, forward, back) {
     const procedureReferenceString = this.getString();  ///
 
-    context.trace(`Validating the '${procedureReferenceString}' procedure call's parameters...`);
+    context.trace(`Validating the '${procedureReferenceString}' function reference's parameters...`);
 
     const parameters = [];
 
@@ -139,7 +139,7 @@ export default define(class ProcedureReference extends Element {
     }, parameters, state, context, (parameters, state, context, back) => {
       this.parameters = parameters;
 
-      context.debug(`...validated the '${procedureReferenceString}' procedure call's parameters.`);
+      context.debug(`...validated the '${procedureReferenceString}' function reference's parameters.`);
 
       return forward(state, context, back);
     }, back);
@@ -149,7 +149,7 @@ export default define(class ProcedureReference extends Element {
     const context = specificContext,
           procedureReferenceString = this.getString(); ///
 
-    context.trace(`Applying the '${procedureReferenceString}' procedure call independently...`);
+    context.trace(`Applying the '${procedureReferenceString}' function reference independently...`);
 
     const procedureName = this.getProcedureName(),
           procedure = context.findProcedureByProcedureName(procedureName),
@@ -159,7 +159,7 @@ export default define(class ProcedureReference extends Element {
       const boolean = value.isBoolean();
 
       if (!boolean) {
-        context.info(`The '${procedureReferenceString}' procedure call did not return a boolean.`);
+        context.info(`The '${procedureReferenceString}' function reference did not return a boolean.`);
 
         return back();
       }
@@ -170,29 +170,29 @@ export default define(class ProcedureReference extends Element {
         return back();
       }
 
-      context.trace(`...applied the '${procedureReferenceString}' procedure call independently.`);
+      context.trace(`...applied the '${procedureReferenceString}' function reference independently.`);
 
       return forward(generalContext, specificContext, back);
     }, back);
   }
 
-  dischargeGivenParameter(parameter, context, forward, back) {
-    const parameterString = parameter.getString(),
+  dischargeGivenTerm(term, context, forward, back) {
+    const termString = term.getString(),
           procedureReferenceString = this.getString(); ///
 
-    context.trace(`Discharging the '${procedureReferenceString}' procedure call given the '${parameterString}' parameter...`);
+    context.trace(`Discharging the '${procedureReferenceString}' function reference given the '${termString}' term...`);
 
     const unary = this.isUnary();
 
     if (!unary) {
-      context.debug(`The '${procedureReferenceString}' procedure call is not unary.`);
+      context.debug(`The '${procedureReferenceString}' function reference is not unary.`);
 
       return back();
     }
 
     const procedureName = this.getProcedureName(),
           procedure = context.findProcedureByProcedureName(procedureName),
-          value = Value.fromParameter(parameter, context),
+          value = Value.fromTerm(term, context),
           values = [
             value
           ];
@@ -201,7 +201,7 @@ export default define(class ProcedureReference extends Element {
       const boolean = value.isBoolean();
 
       if (!boolean) {
-        context.info(`The '${procedureReferenceString}' procedure call did not return a boolean.`);
+        context.info(`The '${procedureReferenceString}' function reference did not return a boolean.`);
 
         return back();
       }
@@ -212,7 +212,7 @@ export default define(class ProcedureReference extends Element {
         return back();
       }
 
-      context.debug(`...discharged the '${procedureReferenceString}' procedure call given the '${parameterString}' parameter.`);
+      context.debug(`...discharged the '${procedureReferenceString}' function reference given the '${termString}' term.`);
 
       return forward(back);
     }, back);

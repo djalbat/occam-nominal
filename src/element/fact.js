@@ -68,12 +68,12 @@ export default class Fact extends Element {
 
     const factString = this.getString();  ///
 
-    context.trace(`Validating the '${factString}' fact's procedure call...`);
+    context.trace(`Validating the '${factString}' fact's function reference...`);
 
     return this.procedureReference.validate(state, context, (procedureReference, context, back) => {
       this.procedureReference = procedureReference;
 
-      context.trace(`...validated the '${factString}' fact's procedure call.`);
+      context.trace(`...validated the '${factString}' fact's function reference.`);
 
       return forward(state, context, back);
     }, back);
@@ -169,14 +169,14 @@ export default class Fact extends Element {
 
     const factString = this.getString(); ///
 
-    context.trace(`Applying the '${factString}' fact's procedure call independently...`);
+    context.trace(`Applying the '${factString}' fact's function reference independently...`);
 
     const factContext = this.getContext(), ///
           generalContext = factContext,  ///
           specificContext = context;  ///
 
     return this.procedureReference.applyIndependently(generalContext, specificContext, (generalContext, specificContext, back) => {
-      context.debug(`...applied the '${factString}' fact's procedure call independently.`);
+      context.debug(`...applied the '${factString}' fact's function reference independently.`);
 
       return forward(context, back);
     }, back);

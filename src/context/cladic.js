@@ -366,7 +366,7 @@ export default class CladicContext extends Context {
     const context = this, ///
           procedureReferenceString = procedureReference.getString();
 
-    context.trace(`Adding the '${procedureReferenceString}' procedure call to the cladic context...`);
+    context.trace(`Adding the '${procedureReferenceString}' function call to the cladic context...`);
 
     const procedureReferenceA = procedureReference; ///
 
@@ -377,7 +377,7 @@ export default class CladicContext extends Context {
       if (procedureReferenceAEqualToProcedureallB) {
         const procedureReferenceString = procedureReference.getString();
 
-        context.trace(`Removed the existing '${procedureReferenceString}' procedure call from the cladic context...`);
+        context.trace(`Removed the existing '${procedureReferenceString}' function call from the cladic context...`);
 
         return true;
       }
@@ -385,7 +385,7 @@ export default class CladicContext extends Context {
 
     this.procedureReferences.push(procedureReference);
 
-    context.debug(`...added the '${procedureReferenceString}' procedure call to the cladic context.`);
+    context.debug(`...added the '${procedureReferenceString}' function call to the cladic context.`);
   }
 
   addAssignment(assignment) {

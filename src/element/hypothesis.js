@@ -144,12 +144,12 @@ export default define(class Hypothesis extends Element {
 
     const hypothesisString = this.getString();  ///
 
-    context.trace(`Validating the '${hypothesisString}' hypothesis' procedure call...`);
+    context.trace(`Validating the '${hypothesisString}' hypothesis' function reference...`);
 
     return this.procedureReference.validate(state, context, (procedureReference, context, back) => {
       this.procedureReference = procedureReference;
 
-      context.trace(`...validated the '${hypothesisString}' hypothesis' procedure call.`);
+      context.trace(`...validated the '${hypothesisString}' hypothesis' function reference.`);
 
       return forward(state, context, back);
     }, back);
@@ -200,10 +200,10 @@ export default define(class Hypothesis extends Element {
     const termString = term.getString(),
           hypothesisString = this.getString();  ///
 
-    context.trace(`Discharging the '${hypothesisString}' hypothesis' procedure call given the '${termString}' term...`);
+    context.trace(`Discharging the '${hypothesisString}' hypothesis' function reference given the '${termString}' term...`);
 
     this.procedureReference.dischargeGivenTerm(term, context, (back) => {
-      context.debug(`...discharged the '${hypothesisString}' hypothesis' procedure call given the '${termString}' term.`);
+      context.debug(`...discharged the '${hypothesisString}' hypothesis' function reference given the '${termString}' term.`);
 
       return forward(context, back);
     }, back);
