@@ -5,6 +5,13 @@ import AssertionNode from "../../node/assertion";
 import { TERM_RULE_NAME, TYPE_RULE_NAME } from "../../ruleNames";
 
 export default class TypeAssertionNode extends AssertionNode {
+  getTypeName() {
+    const typeNode = this.getTypeNode(),
+          typeName = typeNode.getTypeName();
+
+    return typeName;
+  }
+
   getTermNode() {
     const ruleName = TERM_RULE_NAME,
           termNode = this.getNodeByRuleName(ruleName);

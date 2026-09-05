@@ -58,6 +58,18 @@ export default class MetavariableNode extends NonTerminalNode {
     return metavariableName;
   }
 
+  getTypeName() {
+    let typeName = null;
+
+    const typeNode = this.getTypeNode();
+
+    if (typeNode !== null) {
+      typeName = typeNode.getTypeName();
+    }
+
+    return typeName;
+  }
+
   getTermNode() {
     const ruleName = TERM_RULE_NAME,
           termNode = this.getNodeByRuleName(ruleName);

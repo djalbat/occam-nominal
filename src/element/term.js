@@ -289,11 +289,10 @@ export default define(class Term extends Element {
   toJSON() {
     let json;
 
-    const typeJSON = typeToTypeJSON(this.type),
+    const string = this.getString(),
+          typeJSON = typeToTypeJSON(this.type),
           provisionalJSON = provisionalToProvisionalJSON(this.provisional),
-          string = this.getString();
-
-    const type = typeJSON,  ///
+          type = typeJSON,  ///
           provisional = provisionalJSON;  ///
 
     json = {

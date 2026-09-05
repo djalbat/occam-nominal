@@ -7,9 +7,9 @@ import elements from "../elements";
 import { define } from "../elements";
 import { instantiate } from "../utilities/context";
 import { instantiateMetavariable } from "../process/instantiate";
+import { metavariableFromStatementNode } from "../utilities/element";
 import { unifyMetavariableIntrinsically } from "../process/unify";
 import { metaTypeFromJSON, metaTypeToMetaTypeJSON } from "../utilities/json";
-import { nameFromMetavariableNode, termFromMetavariableNode, typeFromMetavariableNode, metavariableFromStatementNode } from "../utilities/element";
 
 const { all } = continuationUtilities,
       { unbreakable } = breakPointUtilities;
@@ -444,9 +444,9 @@ export default define(class Metavariable extends Element {
   toJSON() {
     let json;
 
-    const metaTypeJSON = metaTypeToMetaTypeJSON(this.metaType),
-          metaType = metaTypeJSON,  ///
-          string = this.getString();
+    const string = this.getString(),
+          metaTypeJSON = metaTypeToMetaTypeJSON(this.metaType),
+          metaType = metaTypeJSON  ///
 
     json = {
       string,
@@ -484,3 +484,34 @@ export default define(class Metavariable extends Element {
     return metavariable;
   }
 });
+
+function nameFromMetavariableNode(metavariableNode, context) {
+  const metametavariableName = metavariableNode.getMetavariableName(),
+        name = metametavariableName;  ///
+
+  return name;
+}
+
+function termFromMetavariableNode(metavariableNode, context) {
+  let term = null;
+
+  const termNode = metavariableNode.getTermNode();
+
+  if (termNode !== null) {
+    term = context.findTermByTermNode(termNode);
+  }
+
+  return term;
+}
+
+function typeFromMetavariableNode(metavariableNode, context) {
+  let type = null;
+
+  const typemName = metavariableNode.getTypeName();
+
+  if (typemName !== null) {
+    type = context.findTypeByTypeName(typemName);
+  }
+
+  return type;
+}

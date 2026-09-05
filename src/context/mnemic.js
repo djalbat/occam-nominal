@@ -598,6 +598,8 @@ export default class MnemicContext extends Context {
   initialise(json) {
     const context = this; ///
 
+    this.substitutions = substitutionsFromJSON(json, context);
+
     this.terms = termsFromJSON(json, context);
 
     this.statements = statementsFromJSON(json, context);
@@ -613,8 +615,6 @@ export default class MnemicContext extends Context {
     this.frames = framesFromJSON(json, context);
 
     this.assertions = assertionsFromJSON(json, context);
-
-    this.substitutions = substitutionsFromJSON(json, context);
   }
 
   commit() {

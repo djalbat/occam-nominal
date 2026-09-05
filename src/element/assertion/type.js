@@ -6,8 +6,8 @@ import Assertion from "../assertion";
 
 import { define } from "../../elements";
 import { instantiate } from "../../utilities/context";
+import { typeToTypeJSON } from "../../utilities/json";
 import { instantiateTypeAssertion } from "../../process/instantiate";
-import { typeFromJSON, typeToTypeJSON } from "../../utilities/json";
 import { termFromTermAndSubstitutions } from "../../utilities/substitutions";
 import { typeAssertionFromStatementNode } from "../../utilities/element";
 import { variableAssignmentFromTypeAssertion } from "../../process/assign";
@@ -253,7 +253,7 @@ export default define(class TypeAssertion extends Assertion {
               node = typeAssertionNode, ///
               breakPoint = null,
               term = termFromTypeAssertionNode(typeAssertionNode, context),
-              type = typeFromJSON(json, context);
+              type = typeFromTypeAssertionNode(typeAssertionNode, context);
 
         context = null;
 
@@ -296,4 +296,11 @@ function termFromTypeAssertionNode(typeAssertionNode, context) {
         term = context.findTermByTermNode(termNode);
 
   return term;
+}
+
+function typeFromTypeAssertionNode(typeAssertionNode, context) {
+  const typeName = typeAssertionNode.getTypeName(),
+        type = context.findTypeByTypeName(typeName);
+
+  return type;
 }

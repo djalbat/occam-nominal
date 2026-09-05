@@ -8,7 +8,6 @@ import { validateStatements } from "../process/validation";
 import { dischargeStatements } from "../process/discharge";
 import { instantiateStatement } from "../process/instantiate";
 import { unifyStatementIntrinsically } from "../process/unify";
-import { substitutionFromStatementNode } from "../utilities/element";
 
 const { unbreakable } = breakPointUtilities,
       { all, some, exists } = continuationUtilities;
@@ -430,3 +429,15 @@ export default define(class Statement extends Element {
     return statement;
   }
 });
+
+function substitutionFromStatementNode(statementNode, context) {
+  let substitution = null;
+
+  const substitutionNode = statementNode.getSubstitutionNode();
+
+  if (substitutionNode !== null) {
+    substitution = context.findSubstitutionBySubstitutionNode(substitutionNode);
+  }
+
+  return substitution;
+}
