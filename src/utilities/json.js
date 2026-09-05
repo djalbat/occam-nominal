@@ -307,10 +307,10 @@ export function superTypesFromJSON(json, context) {
 
   const superTypes = superTypesJSON.map((superTypeJSON) => {
     const json = superTypeJSON,  ///
-      { string } = json,
-      name = string,  ///
-      type = findTypeByName(name, context),
-      superType = type; ///
+          { string } = json,
+          name = string,  ///
+          type = findTypeByName(name, context),
+          superType = type; ///
 
     return superType;
   });

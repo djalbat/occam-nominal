@@ -5,7 +5,6 @@ import { Element, breakPointUtilities, continuationUtilities } from "occam-langu
 import { define } from "../elements";
 import { desist, declare } from "../utilities/state";
 import { instantiateProperty } from "../process/instantiate";
-import { termFromPropertyNode } from "../utilities/element";
 import { unifyTermWithProperty } from "../process/unify";
 import { validateTermAsProperty } from "../process/validate";
 import { typeFromJSON, typeToTypeJSON } from "../utilities/json";
@@ -124,6 +123,8 @@ export default define(class Property extends Element {
     context.trace(`Validating the '${propertyString}' property's term...`);
 
     return validateTermAsProperty(this.term, context, (context, back) => {
+      context.addTerm(this.term);
+
       context.debug(`...validated the '${propertyString}' property's term.`);
 
       return forward(state, context, back);
@@ -179,8 +180,8 @@ export default define(class Property extends Element {
 
     serialise((context) => {
       const includeType = false,
-            typeJSON = typeToTypeJSON(this.type),
             string = this.getString(includeType),
+            typeJSON = typeToTypeJSON(this.type),
             type = typeJSON;  ///
 
       json = {
@@ -214,3 +215,10 @@ export default define(class Property extends Element {
     return property;
   }
 });
+
+function termFromPropertyNode(propertyNode, context) {
+  const termNode = propertyNode.getTermNode(),
+        term = context.findTermByTermNode(termNode);
+
+  return term;
+}

@@ -507,10 +507,10 @@ function termFromMetavariableNode(metavariableNode, context) {
 function typeFromMetavariableNode(metavariableNode, context) {
   let type = null;
 
-  const typemName = metavariableNode.getTypeName();
+  const typeName = metavariableNode.getTypeName();
 
-  if (typemName !== null) {
-    type = context.findTypeByTypeName(typemName);
+  if (typeName !== null) {
+    type = context.findTypeByTypeName(typeName);
   }
 
   return type;

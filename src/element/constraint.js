@@ -6,8 +6,8 @@ import { define } from "../elements";
 import { declare } from "../utilities/state";
 import { instantiateConstraint } from "../process/instantiate";
 import { stripBracketsFromStatement } from "../utilities/brackets";
+import { constraintFromConstraintNode } from "../utilities/element";
 import { constraintStringFromStatementAndMetavariable } from "../utilities/string";
-import { constraintFromConstraintNode, metavariableFromConstraintNode } from "../utilities/element";
 import { pare, join, ablate, isolate, attempt, reconcile, serialise, unserialise, instantiate } from "../utilities/context";
 
 const { unbreakable } = breakPointUtilities,
@@ -378,4 +378,11 @@ function statementFromConstraintNode(constraintNode, context) {
         statement = context.findStatementByStatementNode(statementNode);
 
   return statement;
+}
+
+function metavariableFromConstraintNode(constraintNode, context) {
+  const metavariableNode = constraintNode.getMetavariableNode(),
+        metavariable = context.findMetavariableByMetavariableNode(metavariableNode);
+
+  return metavariable;
 }

@@ -5,8 +5,8 @@ import { Element, breakPointUtilities, continuationUtilities } from "occam-langu
 import { define } from "../elements";
 import { declare } from "../utilities/state";
 import { instantiateHypothesis } from "../process/instantiate";
+import { procedureCallFromHypothesisNode } from "../utilities/element";
 import { isolate, attempt, serialise, unserialise, instantiate } from "../utilities/context";
-import { statementFromHypothesisNode, procedureCallFromHypothesisNode } from "../utilities/element";
 
 const { cut, all } = continuationUtilities,
       { breakable, breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
@@ -257,3 +257,10 @@ export default define(class Hypothesis extends Element {
     return hypothesis;
   }
 });
+
+function statementFromHypothesisNode(hypothesisNode, context) {
+  const statementNode = hypothesisNode.getStatementNode(),
+        statement = context.findStatementByStatementNode(statementNode);
+
+  return statement;
+}

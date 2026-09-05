@@ -214,19 +214,10 @@ export default class Substitution extends Element {
       const name = this.getName(),
             string = this.getString();
 
-      let breakPoint;
-
-      breakPoint = this.getBreakPoint();
-
-      const breakPointJSON = breakPointToBreakPointJSON(breakPoint);
-
-      breakPoint = breakPointJSON;  ///
-
       json = {
         name,
         contexts,
-        string,
-        breakPoint
+        string
       };
     }, ...contexts);
 

@@ -357,7 +357,7 @@ export default class Context extends ContextBase {
 
   findTypeByTypeName(typeName) {
     const context = this.getContext(),
-      type = context.findTypeByTypeName(typeName);
+          type = context.findTypeByTypeName(typeName);
 
     return type;
   }

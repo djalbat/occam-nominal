@@ -6,7 +6,6 @@ import { define } from "../elements";
 import { declare, desist } from "../utilities/state";
 import { baseTypeFromNothing } from "../utilities/type";
 import { instantiateConstructor } from "../process/instantiate";
-import { termFromConstructorNode } from "../utilities/element";
 import { unifyTermWithConstructor } from "../process/unify";
 import { validateTermAsConstructor } from "../process/validate";
 import { isolate, attempt, serialise, unserialise, instantiate } from "../utilities/context";
@@ -180,6 +179,8 @@ export default define(class Constructor extends Element {
     context.trace(`Validating the '${constructorString}' constructor's term...`);
 
     return validateTermAsConstructor(this.term, context, (context, back) => {
+      context.addTerm(this.term);
+
       context.debug(`...validated the '${constructorString}' constructor's term.`);
 
       return forward(state, context, back);
@@ -278,9 +279,9 @@ export default define(class Constructor extends Element {
 
     serialise((context) => {
       const includeType = false,
+            string = this.getString(includeType),
             typeJSON = typeToTypeJSON(this.type),
             hypothesesJSON = hypothesesToHypothesesJSON(this.hypotheses),
-            string = this.getString(includeType),
             type = typeJSON,  ///
             hypotheses = hypothesesJSON;  ///
 
@@ -317,3 +318,10 @@ export default define(class Constructor extends Element {
     return constructor;
   }
 });
+
+function termFromConstructorNode(constructorNode, context) {
+  const termNode = constructorNode.getTermNode(),
+        term = context.findTermByTermNode(termNode);
+
+  return term;
+}

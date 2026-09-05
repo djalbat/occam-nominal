@@ -5,7 +5,6 @@ import { Element, breakPointUtilities, continuationUtilities } from "occam-langu
 import { define } from "../elements";
 import { desist, declare } from "../utilities/state";
 import { instantiateCombinator } from "../process/instantiate";
-import { statementFromCombinatorNode } from "../utilities/element";
 import { unifyStatementWithCombinator } from "../process/unify";
 import { validateStatementAsCombinator } from "../process/validate";
 import { isolate, attempt, serialise, unserialise, instantiate } from "../utilities/context";
@@ -99,6 +98,8 @@ export default define(class Combinator extends Element {
     context.trace(`Validating the '${combinatorString}' combinator's statement...`);
 
     return validateStatementAsCombinator(this.statement, context, (context, back) => {
+      context.addStatement(this.statement);
+
       context.debug(`...validated the '${combinatorString}' combinator's statement.`);
 
       return forward(state, context, back);
@@ -161,3 +162,10 @@ export default define(class Combinator extends Element {
     return combinator;
   }
 });
+
+function statementFromCombinatorNode(combinatorNode, context) {
+  const statementNode = combinatorNode.getStatementNode(),
+        statement = context.findStatementByStatementNode(statementNode);
+
+  return statement;
+}

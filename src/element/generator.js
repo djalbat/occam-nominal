@@ -6,7 +6,6 @@ import { define } from "../elements";
 import { desist, declare } from "../utilities/state";
 import { baseTypeFromNothing } from "../utilities/type";
 import { instantiateGenerator } from "../process/instantiate";
-import { termFromGeneratorNode } from "../utilities/element";
 import { unifyTermWithGenerator } from "../process/unify";
 import { validateTermAsGenerator } from "../process/validate";
 import { isolate, attempt, serialise, unserialise, instantiate } from "../utilities/context";
@@ -180,6 +179,8 @@ export default define(class Generator extends Element {
     context.trace(`Validating the '${generatorString}' generator's term...`);
 
     return validateTermAsGenerator(this.term, context, (context, back) => {
+      context.addTerm(this.term);
+
       context.debug(`...validated the '${generatorString}' generator's term.`);
 
       return forward(state, context, back);
@@ -278,9 +279,9 @@ export default define(class Generator extends Element {
 
     serialise((context) => {
       const includeType = false,
+            string = this.getString(includeType),
             typeJSON = typeToTypeJSON(this.type),
             hypothesesJSON = hypothesesToHypothesesJSON(this.hypotheses),
-            string = this.getString(includeType),
             type = typeJSON,  ///
             hypotheses = hypothesesJSON;  ///
 
@@ -317,3 +318,10 @@ export default define(class Generator extends Element {
     return generator;
   }
 });
+
+function termFromGeneratorNode(generatorNode, context) {
+  const termNode = generatorNode.getTermNode(),
+        term = context.findTermByTermNode(termNode);
+
+  return term;
+}
