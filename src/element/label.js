@@ -5,7 +5,6 @@ import { Element, breakPointUtilities, continuationUtilities } from "occam-langu
 import { define } from "../elements";
 import { declare } from "../utilities/state";
 import { instantiateLabel } from "../process/instantiate";
-import { metavariableFromLabelNode } from "../utilities/element";
 import { join, isolate, attempt, reconcile, serialise, unserialise, instantiate } from "../utilities/context";
 
 const { cut, all } = continuationUtilities,
@@ -222,3 +221,10 @@ export default define(class Label extends Element {
     return label;
   }
 });
+
+function metavariableFromLabelNode(labelNode, context) {
+  const metavariablenode = labelNode.getMetavariableNode(),
+        metavariable = context.findMetavariableByMetavariableNode(metavariablenode);
+
+  return metavariable;
+}

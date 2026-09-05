@@ -7,7 +7,6 @@ import Fact from "../fact";
 import { define } from "../../elements";
 import { declare } from "../../utilities/state";
 import { instantiatePremise } from "../../process/instantiate";
-import { referenceFromPremiseNode } from "../../utilities/element";
 import { isolate, attempt, reconcile, serialise, unserialise, instantiate } from "../../utilities/context";
 
 const { cut, all } = continuationUtilities,
@@ -283,6 +282,12 @@ export default define(class Premise extends Fact {
     return premise;
   }
 });
+
+function referenceFromPremiseNode(premiseNode, context) {
+  const reference = null;
+
+  return reference;
+}
 
 function statementFromPremiseNode(premiseNode, context) {
   const statementNode = premiseNode.getStatementNode(),

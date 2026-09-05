@@ -7,7 +7,6 @@ import Fact from "../fact";
 import { define } from "../../elements";
 import { declare } from "../../utilities/state";
 import { instantiateSupposition } from "../../process/instantiate";
-import { referenceFromSuppositionNode } from "../../utilities/element";
 import { isolate, attempt, reconcile, serialise, unserialise, instantiate } from "../../utilities/context";
 
 const { cut, all } = continuationUtilities,
@@ -283,6 +282,12 @@ export default define(class Supposition extends Fact {
     return supposition;
   }
 });
+
+function referenceFromSuppositionNode(suppositionNode, context) {
+  const reference = null;
+
+  return reference;
+}
 
 function statementFromSuppositionNode(suppositionNode, context) {
   const statementNode = suppositionNode.getStatementNode(),
