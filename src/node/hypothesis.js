@@ -2,7 +2,7 @@
 
 import { NonTerminalNode } from "occam-languages";
 
-import { NONSENSE_RULE_NAME, STATEMENT_RULE_NAME, PROCEDURE_CALL_RULE_NAME } from "../ruleNames";
+import { NONSENSE_RULE_NAME, STATEMENT_RULE_NAME, PROCEDURE_REFERENCE_RULE_NAME } from "../ruleNames";
 
 export default class HypothesisNode extends NonTerminalNode {
   isMalformed() {
@@ -26,11 +26,11 @@ export default class HypothesisNode extends NonTerminalNode {
     return statementNode;
   }
 
-  getProcedureCallNode() {
-    const ruleName = PROCEDURE_CALL_RULE_NAME,
-          procedureCaslNode = this.getNodeByRuleName(ruleName);
+  getProcedureReferenceNode() {
+    const ruleName = PROCEDURE_REFERENCE_RULE_NAME,
+          procedureReferenceNode = this.getNodeByRuleName(ruleName);
 
-    return procedureCaslNode;
+    return procedureReferenceNode;
   }
 
   static fromRuleNameChildNodesOpacityAndPrecedence(ruleName, childNodes, opacity, precedence) { return NonTerminalNode.fromRuleNameChildNodesOpacityAndPrecedence(HypothesisNode, ruleName, childNodes, opacity, precedence); }

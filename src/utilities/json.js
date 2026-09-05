@@ -565,22 +565,6 @@ export function mnemicContextsFromJSON(json, context) {
   return mnemicContexts;
 }
 
-export function procedureCallsFromJSON(json, context) {
-  let { procedureCalls } = json;
-
-  const { ProcedureCall } = elements,
-        procedureCallsJSON = procedureCalls; ///
-
-  procedureCalls = procedureCallsJSON.map((procedureCallJSON) => {
-    const json = procedureCallJSON,  ///
-          procedureCall = ProcedureCall.fromJSON(json, context);
-
-    return procedureCall;
-  });
-
-  return procedureCalls;
-}
-
 export function declaredVariablesFromJSON(json, context) {
   let { declaredVariables } = json;
 
@@ -596,6 +580,22 @@ export function declaredVariablesFromJSON(json, context) {
   });
 
   return declaredVariables;
+}
+
+export function procedureReferencesFromJSON(json, context) {
+  let { procedureReferences } = json;
+
+  const { ProcedureReference } = elements,
+        procedureReferencesJSON = procedureReferences; ///
+
+  procedureReferences = procedureReferencesJSON.map((procedureReferenceJSON) => {
+    const json = procedureReferenceJSON,  ///
+          procedureReference = ProcedureReference.fromJSON(json, context);
+
+    return procedureReference;
+  });
+
+  return procedureReferences;
 }
 
 export function declaredMetavariablesFromJSON(json, context) {
@@ -967,14 +967,14 @@ export function mnemicContextsToMnemicContextsJSON(mnemicContexts) {
   return mnemicContextsJSON;
 }
 
-export function procedureCallsToProcedureCallsJSON(procedureCalls) {
-  const procedureCallsJSON = procedureCalls.map((procedureCall) => {
-    const procedureCallJSON = procedureCall.toJSON();
+export function procedureReferencesToProcedureReferencesJSON(procedureReferences) {
+  const procedureReferencesJSON = procedureReferences.map((procedureReference) => {
+    const procedureReferenceJSON = procedureReference.toJSON();
 
-    return procedureCallJSON;
+    return procedureReferenceJSON;
   });
 
-  return procedureCallsJSON;
+  return procedureReferencesJSON;
 }
 
 export function declaredVariablesToDeclaredVariablesJSON(declaredVariables) {

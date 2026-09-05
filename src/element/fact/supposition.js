@@ -122,11 +122,11 @@ export default define(class Supposition extends Fact {
     context.trace(`Applying the '${suppositionString}' supposition independently...`);
 
     const applyStatementIndependently = this.applyStatementIndependently.bind(this),
-          applyProcedureCallIndependently = this.applyProcedureCallIndependently.bind(this);
+          applyProcedureReferenceIndependently = this.applyProcedureReferenceIndependently.bind(this);
 
     return all([
       applyStatementIndependently,
-      applyProcedureCallIndependently
+      applyProcedureReferenceIndependently
     ], context, (context , back) => {
       context.debug(`...applied the '${suppositionString}' supposition independently.`);
 
@@ -150,11 +150,11 @@ export default define(class Supposition extends Fact {
     return isolate((state, context, forward, back) => {
       return attempt((context) => {
         const validateStatement = this.validateStatement.bind(this),
-              validateProcedureCall = this.validateProcedureCall.bind(this);
+              validateProcedureReference = this.validateProcedureReference.bind(this);
 
         return all([
           validateStatement,
-          validateProcedureCall
+          validateProcedureReference
         ], state, context, (state, context, back) => {
           this.commit(context);
 
@@ -274,9 +274,9 @@ export default define(class Supposition extends Fact {
               breakPoint = breakPointFromJSON(json),
               reference = referenceFromSuppositionNode(suppositionNode, context),
               statement = statementFromSuppositionNode(suppositionNode, context),
-              procedureCall = procedureCallFromSuppositionNode(suppositionNode, context);
+              procedureReference = procedureReferenceFromSuppositionNode(suppositionNode, context);
 
-        supposition = new Supposition(context, string, node, breakPoint, reference, statement, procedureCall);
+        supposition = new Supposition(context, string, node, breakPoint, reference, statement, procedureReference);
       }, json, context);
     }, context);
 
@@ -291,9 +291,9 @@ function statementFromSuppositionNode(suppositionNode, context) {
   return statement;
 }
 
-function procedureCallFromSuppositionNode(suppositionNode, context) {
-  const procedureCallNode = suppositionNode.getProcedureCallNode(),
-        procedureCall = context.findProcedureCallByProcedureCallNode(procedureCallNode);
+function procedureReferenceFromSuppositionNode(suppositionNode, context) {
+  const procedureReferenceNode = suppositionNode.getProcedureReferenceNode(),
+        procedureReference = context.findProcedureReferenceByProcedureReferenceNode(procedureReferenceNode);
 
-  return procedureCall;
+  return procedureReference;
 }

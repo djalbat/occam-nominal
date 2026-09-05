@@ -227,7 +227,7 @@ subDerivation                        ::=  (
 
 
 
-premise.                             ::=  procedureCall <END_OF_LINE>  
+premise.                             ::=  procedureReferece <END_OF_LINE>  
 
                                        |  statement... <END_OF_LINE>  
 
@@ -235,7 +235,7 @@ premise.                             ::=  procedureCall <END_OF_LINE>
                                        
                                        ;
 
-supposition.                         ::=  procedureCall <END_OF_LINE>  
+supposition.                         ::=  procedureReferece <END_OF_LINE>  
 
                                        |  statement... <END_OF_LINE>  
 
@@ -255,7 +255,7 @@ deduction.                           ::=  statement... <END_OF_LINE>
                                        
                                        ;
 
-hypothesis.                          ::=  procedureCall <END_OF_LINE>  
+hypothesis.                          ::=  procedureReferece <END_OF_LINE>  
 
                                        |  statement... <END_OF_LINE>  
 
@@ -285,7 +285,7 @@ qualification                        ::=  "because" signatureAssertion
 
 
 
-procedureCall                        ::=  "@"<NO_WHITESPACE>[name]<NO_WHITESPACE>"(" parameter ( "," parameter )* ")" ;
+procedureReferece                    ::=  "@"<NO_WHITESPACE>[name]<NO_WHITESPACE>"(" parameter ( "," parameter )* ")" ;
 
 
 

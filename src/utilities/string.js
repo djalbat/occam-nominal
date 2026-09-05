@@ -167,13 +167,6 @@ export function implicitAssumptionStringFromStatement(stastement) {
   return implicitAssumptionString;
 }
 
-export function procedureCallStringFromNameAndParameters(name, parameters) {
-  const parametersString = parametersStringFromParameters(parameters),
-        procedureCallString = `@${name}(${parametersString})`;
-
-  return procedureCallString;
-}
-
 export function termSubstitutionStringFromTermAndVariable(term, variable) {
   const termString = term.getString(),
         variableString = variable.getString(),
@@ -204,6 +197,13 @@ export function constraintStringFromStatementAndMetavariable(statement, metavari
         constraintString = `${metavariableString} :: ${statementString}`;
 
   return constraintString;
+}
+
+export function procedureReferenceStringFromNameAndParameters(name, parameters) {
+  const parametersString = parametersStringFromParameters(parameters),
+        procedureReferenceString = `@${name}(${parametersString})`;
+
+  return procedureReferenceString;
 }
 
 export function schemaStringFromLabelSuppositionsAndDeduction(label, suppositions, deduction) {

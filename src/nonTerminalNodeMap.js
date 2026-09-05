@@ -56,7 +56,6 @@ import QualificationNode from "./node/qualification";
 import SubDerivationNode from "./node/subDerivation";
 import TheoremHeaderNode from "./node/header/theorem";
 import TypeAssertionNode from "./node/assertion/type";
-import ProcedureCallNode from "./node/procedureCall";
 import ConjectureBodyNode from "./node/body/conjecture";
 import TypeDeclarationNode from "./node/declaration/type";
 import SchemaAssertionNode from "./node/assertion/schema";
@@ -70,6 +69,7 @@ import ParenthesisedLabelNode from "./node/parenthesisedLabel";
 import ContainedAssertionNode from "./node/assertion/contained";
 import SignatureAssertionNode from "./node/assertion/signature";
 import ImplicitAssumptionNode from "./node/assumption/implicit";
+import ProcedureReferenceNode from "./node/procedureReference";
 import ParenthesisedLabelsNode from "./node/parenthesisedLabels"
 import PropertyDeclarationNode from "./node/declaration/property";
 import VariableDeclarationNode from "./node/declaration/variable";
@@ -134,7 +134,6 @@ import {
   SCHEMA_HEADER_RULE_NAME,
   QUALIFICATION_RULE_NAME,
   META_ARGUMENT_RULE_NAME,
-  PROCEDURE_CALL_RULE_NAME,
   THEOREM_HEADER_RULE_NAME,
   SUB_DERIVATION_RULE_NAME,
   TYPE_ASSERTION_RULE_NAME,
@@ -216,7 +215,6 @@ const NonTerminalNodeMap = {
   [META_ARGUMENT_RULE_NAME]: MetaArgumentNode,
   [SCHEMA_HEADER_RULE_NAME]: SchemaHeaderNode,
   [QUALIFICATION_RULE_NAME]: QualificationNode,
-  [PROCEDURE_CALL_RULE_NAME]: ProcedureCallNode,
   [TYPE_ASSERTION_RULE_NAME]: TypeAssertionNode,
   [SUB_DERIVATION_RULE_NAME]: SubDerivationNode,
   [THEOREM_HEADER_RULE_NAME]: TheoremHeaderNode,
@@ -229,6 +227,7 @@ const NonTerminalNodeMap = {
   [COTYPE_DECLARATION_RULE_NAME]: CotypeDeclarationNode,
   [SUBPROOF_ASSERTION_RULE_NAME]: SubproofAssertionNode,
   [PROPERTY_ASSERTION_RULE_NAME]: PropertyAssertionNode,
+  [PROCEDURE_REFERENCE_RULE_NAME]: ProcedureReferenceNode,
   [PARENTHESISED_LABEL_RULE_NAME]: ParenthesisedLabelNode,
   [SIGNATURE_ASSERTION_RULE_NAME]: SignatureAssertionNode,
   [CONTAINED_ASSERTION_RULE_NAME]: ContainedAssertionNode,

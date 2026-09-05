@@ -5,12 +5,12 @@ import { Element } from "occam-languages";
 import { equateStatements } from "../process/equate";
 
 export default class Fact extends Element {
-  constructor(context, string, node, breakPoint, reference, statement, procedureCall) {
+  constructor(context, string, node, breakPoint, reference, statement, procedureReference) {
     super(context, string, node, breakPoint);
 
     this.reference = reference;
     this.statement = statement;
-    this.procedureCall = procedureCall;
+    this.procedureReference = procedureReference;
   }
 
   getReference() {
@@ -21,8 +21,8 @@ export default class Fact extends Element {
     return this.statement;
   }
 
-  getProcedureCall() {
-    return this.procedureCall;
+  getProcedureReference() {
+    return this.procedureReference;
   }
 
   isFact() {
@@ -61,8 +61,8 @@ export default class Fact extends Element {
     }, back);
   }
 
-  validateProcedureCall(state, context, forward, back) {
-    if (this.procedureCall === null) {
+  validateProcedureReference(state, context, forward, back) {
+    if (this.procedureReference === null) {
       return forward(state, context, back);
     }
 
@@ -70,8 +70,8 @@ export default class Fact extends Element {
 
     context.trace(`Validating the '${factString}' fact's procedure call...`);
 
-    return this.procedureCall.validate(state, context, (procedureCall, context, back) => {
-      this.procedureCall = procedureCall;
+    return this.procedureReference.validate(state, context, (procedureReference, context, back) => {
+      this.procedureReference = procedureReference;
 
       context.trace(`...validated the '${factString}' fact's procedure call.`);
 
@@ -162,8 +162,8 @@ export default class Fact extends Element {
     }, back);
   }
 
-  applyProcedureCallIndependently(context, forward, back) {
-    if (this.procedureCall === null) {
+  applyProcedureReferenceIndependently(context, forward, back) {
+    if (this.procedureReference === null) {
       return forward(context, back);
     }
 
@@ -175,7 +175,7 @@ export default class Fact extends Element {
           generalContext = factContext,  ///
           specificContext = context;  ///
 
-    return this.procedureCall.applyIndependently(generalContext, specificContext, (generalContext, specificContext, back) => {
+    return this.procedureReference.applyIndependently(generalContext, specificContext, (generalContext, specificContext, back) => {
       context.debug(`...applied the '${factString}' fact's procedure call independently.`);
 
       return forward(context, back);

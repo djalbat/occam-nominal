@@ -164,10 +164,10 @@ export default class MetexicContext extends Context {
     context.addMetavariables(metavariables);
   }
 
-  addProcedureCalls(procedureCalls) {
+  addProcedureReferences(procedureReferences) {
     const context = this.getContext();
 
-    context.addProcedureCalls(procedureCalls);
+    context.addProcedureReferences(procedureReferences);
   }
 
   addAssignment(assignment) {

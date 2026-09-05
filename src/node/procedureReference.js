@@ -5,7 +5,7 @@ import { NonTerminalNode } from "occam-languages";
 import { NAME_TOKEN_TYPE } from "../tokenTypes";
 import { PARAMETER_RULE_NAME } from "../ruleNames";
 
-export default class ProcedureCallNode extends NonTerminalNode {
+export default class ProcedureReferenceNode extends NonTerminalNode {
   getName() {
     let name;
 
@@ -37,5 +37,5 @@ export default class ProcedureCallNode extends NonTerminalNode {
     return parameterNodes;
   }
 
-  static fromRuleNameChildNodesOpacityAndPrecedence(ruleName, childNodes, opacity, precedence) { return NonTerminalNode.fromRuleNameChildNodesOpacityAndPrecedence(ProcedureCallNode, ruleName, childNodes, opacity, precedence); }
+  static fromRuleNameChildNodesOpacityAndPrecedence(ruleName, childNodes, opacity, precedence) { return NonTerminalNode.fromRuleNameChildNodesOpacityAndPrecedence(ProcedureReferenceNode, ruleName, childNodes, opacity, precedence); }
 }

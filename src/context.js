@@ -133,12 +133,12 @@ export default class Context extends ContextBase {
     return substitutions;
   }
 
-  getProcedureCalls(procedureCalls = []) {
+  getProcedureReferences(procedureReferences = []) {
     const context = this.getContext();
 
-    context.getProcedureCalls(procedureCalls);
+    context.getProcedureReferences(procedureReferences);
 
-    return procedureCalls;
+    return procedureReferences;
   }
 
   getInferredSubstitutions(inferredSubstitutions = []) {
@@ -357,11 +357,11 @@ export default class Context extends ContextBase {
     return substitution;
   }
 
-  findProcedureCallByProcedureCallNode(procedureCallNode) {
+  findProcedureReferenceByProcedureReferenceNode(procedureReferenceNode) {
     const context = this.getContext(),
-          procedureCall = context.findProcedureCallByProcedureCallNode(procedureCallNode);
+          procedureReference = context.findProcedureReferenceByProcedureReferenceNode(procedureReferenceNode);
 
-    return procedureCall;
+    return procedureReference;
   }
 
   findInferredSubstitutionByVariableNode(variableNode) {
@@ -490,11 +490,11 @@ export default class Context extends ContextBase {
     return metavariablePresent;
   }
 
-  isProcedureCallPresentByProcedureCallNode(procedureCalltNode) {
+  isProcedureReferencePresentByProcedureReferenceNode(procedureReferencetNode) {
     const context = this.getContext(),
-          procedureCalltPresent = context.isProcedureCallPresentByProcedureCallNode(procedureCalltNode);
+          procedureReferencetPresent = context.isProcedureReferencePresentByProcedureReferenceNode(procedureReferencetNode);
 
-    return procedureCalltPresent;
+    return procedureReferencetPresent;
   }
 
   isTypePresentByNominalTypeName(nominalTypeName) {

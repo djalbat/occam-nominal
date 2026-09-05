@@ -11,19 +11,19 @@ const { cut, all } = continuationUtilities,
       { breakable, breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Hypothesis extends Element {
-  constructor(context, string, node, breakPoint, statement, procedureCall) {
+  constructor(context, string, node, breakPoint, statement, procedureReference) {
     super(context, string, node, breakPoint);
 
     this.statement = statement;
-    this.procedureCall = procedureCall;
+    this.procedureReference = procedureReference;
   }
 
   getStatement() {
     return this.statement;
   }
 
-  getProcedureCall() {
-    return this.procedureCall;
+  getProcedureReference() {
+    return this.procedureReference;
   }
 
   getHypothesisNode() {
@@ -99,11 +99,11 @@ export default define(class Hypothesis extends Element {
     return isolate((state, context, forward, back) => {
       return attempt((context) => {
         const validateStatement = this.validateStatement.bind(this),
-              validateProcedureCall = this.validateProcedureCall.bind(this);
+              validateProcedureReference = this.validateProcedureReference.bind(this);
 
         return all([
           validateStatement,
-          validateProcedureCall
+          validateProcedureReference
         ], state, context, (state, context, back) => {
           this.commit(context);
 
@@ -137,8 +137,8 @@ export default define(class Hypothesis extends Element {
     }, back);
   }
 
-  validateProcedureCall(state, context, forward, back) {
-    if (this.procedureCall === null) {
+  validateProcedureReference(state, context, forward, back) {
+    if (this.procedureReference === null) {
       return forward(state, context, back);
     }
 
@@ -146,8 +146,8 @@ export default define(class Hypothesis extends Element {
 
     context.trace(`Validating the '${hypothesisString}' hypothesis' procedure call...`);
 
-    return this.procedureCall.validate(state, context, (procedureCall, context, back) => {
-      this.procedureCall = procedureCall;
+    return this.procedureReference.validate(state, context, (procedureReference, context, back) => {
+      this.procedureReference = procedureReference;
 
       context.trace(`...validated the '${hypothesisString}' hypothesis' procedure call.`);
 
@@ -185,15 +185,15 @@ export default define(class Hypothesis extends Element {
 
     context.trace(`Discharging the '${hypothesisString}' hypothesis given the '${termString}' term...`);
 
-    this.dischargeProcedureCallGivenTerm(term, context, (context, back) => {
+    this.dischargeProcedureReferenceGivenTerm(term, context, (context, back) => {
       context.debug(`...discharged the '${hypothesisString}' hypothesis given the '${termString}' term.`);
 
       return forward(context, back);
     }, back);
   }
 
-  dischargeProcedureCallGivenTerm(term, context, forward, back) {
-    if (this.procedureCall === null) {
+  dischargeProcedureReferenceGivenTerm(term, context, forward, back) {
+    if (this.procedureReference === null) {
       return back();
     }
 
@@ -202,7 +202,7 @@ export default define(class Hypothesis extends Element {
 
     context.trace(`Discharging the '${hypothesisString}' hypothesis' procedure call given the '${termString}' term...`);
 
-    this.procedureCall.dischargeGivenTerm(term, context, (back) => {
+    this.procedureReference.dischargeGivenTerm(term, context, (back) => {
       context.debug(`...discharged the '${hypothesisString}' hypothesis' procedure call given the '${termString}' term.`);
 
       return forward(context, back);
@@ -247,9 +247,9 @@ export default define(class Hypothesis extends Element {
               node = hypothesisNode,  ///
               breakPoint = breakPointFromJSON(json),
               statement = statementFromHypothesisNode(hypothesisNode, context),
-              procedureCall = procedureCallFromHypothesisNode(hypothesisNode, context);
+              procedureReference = procedureReferenceFromHypothesisNode(hypothesisNode, context);
 
-        hypothesis = new Hypothesis(context, string, node, breakPoint, statement, procedureCall);
+        hypothesis = new Hypothesis(context, string, node, breakPoint, statement, procedureReference);
       }, json, context);
     }, context);
 
@@ -264,9 +264,9 @@ function statementFromHypothesisNode(hypothesisNode, context) {
   return statement;
 }
 
-function procedureCallFromHypothesisNode(hypothesisNode, context) {
-  const procedureCallNode = hypothesisNode.getProcedureCallNode(),
-        procedureCall = context.findProcedureCallByProcedureCallNode(procedureCallNode);
+function procedureReferenceFromHypothesisNode(hypothesisNode, context) {
+  const procedureReferenceNode = hypothesisNode.getProcedureReferenceNode(),
+        procedureReference = context.findProcedureReferenceByProcedureReferenceNode(procedureReferenceNode);
 
-  return procedureCall;
+  return procedureReference;
 }

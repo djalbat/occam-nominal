@@ -122,11 +122,11 @@ export default define(class Premise extends Fact {
     context.trace(`Applying the '${premiseString}' premise independently...`);
 
     const applyStatementIndependently = this.applyStatementIndependently.bind(this),
-          applyProcedureCallIndependently = this.applyProcedureCallIndependently.bind(this);
+          applyProcedureReferenceIndependently = this.applyProcedureReferenceIndependently.bind(this);
 
     return all([
       applyStatementIndependently,
-      applyProcedureCallIndependently
+      applyProcedureReferenceIndependently
     ], context, (context, back) => {
       context.debug(`...applied the '${premiseString}' premise independently.`);
 
@@ -150,11 +150,11 @@ export default define(class Premise extends Fact {
     return isolate((state, context, forward, back) => {
       return attempt((context) => {
         const validateStatement = this.validateStatement.bind(this),
-              validateProcedureCall = this.validateProcedureCall.bind(this);
+              validateProcedureReference = this.validateProcedureReference.bind(this);
 
         return all([
           validateStatement,
-          validateProcedureCall
+          validateProcedureReference
         ], state, context, (state, context, back) => {
           this.commit(context);
 
@@ -274,9 +274,9 @@ export default define(class Premise extends Fact {
               breakPoint = breakPointFromJSON(json),
               reference = referenceFromPremiseNode(premiseNode, context),
               statement = statementFromPremiseNode(premiseNode, context),
-              procedureCall = procedureCallFromPremiseNode(premiseNode, context);
+              procedureReference = procedureReferenceFromPremiseNode(premiseNode, context);
 
-        premise = new Premise(context, string, node, breakPoint, reference, statement, procedureCall);
+        premise = new Premise(context, string, node, breakPoint, reference, statement, procedureReference);
       }, json, context);
     }, context);
 
@@ -291,9 +291,9 @@ function statementFromPremiseNode(premiseNode, context) {
   return statement;
 }
 
-function procedureCallFromPremiseNode(premiseNode, context) {
-  const procedureCallNode = premiseNode.getProcedureCallNode(),
-        procedureCall = context.findProcedureCallByProcedureCallNode(procedureCallNode);
+function procedureReferenceFromPremiseNode(premiseNode, context) {
+  const procedureReferenceNode = premiseNode.getProcedureReferenceNode(),
+        procedureReference = context.findProcedureReferenceByProcedureReferenceNode(procedureReferenceNode);
 
-  return procedureCall;
+  return procedureReference;
 }

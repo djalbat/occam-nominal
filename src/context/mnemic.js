@@ -15,7 +15,7 @@ import {
   assumptionsFromJSON,
   metavariablesFromJSON,
   substitutionsFromJSON,
-  procedureCallsFromJSON,
+  procedureReferencesFromJSON,
   termsToTermsJSON,
   linksToLinksJSON,
   framesToFramesJSON,
@@ -26,12 +26,12 @@ import {
   assumptionsToAssumptionsJSON,
   metavariablesToMetavariablesJSON,
   substitutionsToSubstitutionsJSON,
-  procedureCallsToProcedureCallsJSON } from "../utilities/json";
+  procedureReferencesToProcedureReferencesJSON } from "../utilities/json";
 
 const { push, extract } = arrayUtilities;
 
 export default class MnemicContext extends Context {
-  constructor(context, terms, links, frames, equalities, assertions, statements, parameters, assumptions, metavariables, substitutions, procedureCalls) {
+  constructor(context, terms, links, frames, equalities, assertions, statements, parameters, assumptions, metavariables, substitutions, procedureReferences) {
     super(context);
 
     this.terms = terms;
@@ -44,7 +44,7 @@ export default class MnemicContext extends Context {
     this.assumptions = assumptions;
     this.metavariables = metavariables;
     this.substitutions = substitutions;
-    this.procedureCalls = procedureCalls;
+    this.procedureReferences = procedureReferences;
   }
 
   getTerms(terms = []) {
@@ -147,14 +147,14 @@ export default class MnemicContext extends Context {
     return substitutions;
   }
 
-  getProcedureCalls(procedureCalls = []) {
+  getProcedureReferences(procedureReferences = []) {
     const context = this.getContext();
 
-    push(procedureCalls, this.procedureCalls);
+    push(procedureReferences, this.procedureReferences);
 
-    context.getProcedureCalls(procedureCalls);
+    context.getProcedureReferences(procedureReferences);
 
-    return procedureCalls;
+    return procedureReferences;
   }
 
   addTerm(term) {
@@ -417,30 +417,30 @@ export default class MnemicContext extends Context {
     context.debug(`...added the '${substitutionString}' substitution to the mnemic context.`);
   }
 
-  addProcedureCall(procedureCall) {
+  addProcedureReference(procedureReference) {
     const context = this, ///
-          procedureCallString = procedureCall.getString();
+          procedureReferenceString = procedureReference.getString();
 
-    context.trace(`Adding the '${procedureCallString}' procedure call to the mnemic context...`);
+    context.trace(`Adding the '${procedureReferenceString}' procedure call to the mnemic context...`);
 
-    const procedureCallA = procedureCall; ///
+    const procedureReferenceA = procedureReference; ///
 
-    extract(this.procedureCalls, (procedureCall) => {
-      const procedureCallB = procedureCall, ///
-            procedureCallAEqualToProcedureallB = procedureCallA.isEqualTo(procedureCallB);
+    extract(this.procedureReferences, (procedureReference) => {
+      const procedureReferenceB = procedureReference, ///
+            procedureReferenceAEqualToProcedureallB = procedureReferenceA.isEqualTo(procedureReferenceB);
 
-      if (procedureCallAEqualToProcedureallB) {
-        const procedureCallString = procedureCall.getString();
+      if (procedureReferenceAEqualToProcedureallB) {
+        const procedureReferenceString = procedureReference.getString();
 
-        context.trace(`Removed the existing '${procedureCallString}' procedure call from the mnemic context...`);
+        context.trace(`Removed the existing '${procedureReferenceString}' procedure call from the mnemic context...`);
 
         return true;
       }
     });
 
-    this.procedureCalls.push(procedureCall);
+    this.procedureReferences.push(procedureReference);
 
-    context.debug(`...added the '${procedureCallString}' procedure call to the mnemic context.`);
+    context.debug(`...added the '${procedureReferenceString}' procedure call to the mnemic context.`);
   }
 
   addAssignment(assignment) {
@@ -507,9 +507,9 @@ export default class MnemicContext extends Context {
     });
   }
 
-  addProcedureCalls(procedureCalls) {
-    procedureCalls.forEach((procedureCall) => {
-      this.addProcedureCall(procedureCall);
+  addProcedureReferences(procedureReferences) {
+    procedureReferences.forEach((procedureReference) => {
+      this.addProcedureReference(procedureReference);
     });
   }
 
@@ -643,17 +643,17 @@ export default class MnemicContext extends Context {
     return substitution;
   }
 
-  findProcedureCallByProcedureCallNode(procedureCallNode) {
-    const procedureCalls = this.getProcedureCalls(),
-          procedureCall = procedureCalls.find((procedureCall) => {
-            const procedureCallNodeMatches = procedureCall.matchProcedureCallNode(procedureCallNode);
+  findProcedureReferenceByProcedureReferenceNode(procedureReferenceNode) {
+    const procedureReferences = this.getProcedureReferences(),
+          procedureReference = procedureReferences.find((procedureReference) => {
+            const procedureReferenceNodeMatches = procedureReference.matchProcedureReferenceNode(procedureReferenceNode);
 
-            if (procedureCallNodeMatches) {
+            if (procedureReferenceNodeMatches) {
               return true;
             }
           }) || null;
 
-    return procedureCall;
+    return procedureReference;
   }
 
   isTermPresentByTermNode(termNode) {
@@ -719,11 +719,11 @@ export default class MnemicContext extends Context {
     return metavariablenPresent;
   }
 
-  isProcedureCallPresentByProcedureCallNode(procedureCallNode) {
-    const procedureCall = this.findProcedureCallByProcedureCallNode(procedureCallNode),
-          procedureCallPresent = (procedureCall !== null);
+  isProcedureReferencePresentByProcedureReferenceNode(procedureReferenceNode) {
+    const procedureReference = this.findProcedureReferenceByProcedureReferenceNode(procedureReferenceNode),
+          procedureReferencePresent = (procedureReference !== null);
 
-    return procedureCallPresent;
+    return procedureReferencePresent;
   }
 
   initialise(json) {
@@ -749,7 +749,7 @@ export default class MnemicContext extends Context {
 
     this.parameters = parametersFromJSON(json, context);
 
-    this.procedureCalls = procedureCallsFromJSON(json, context);
+    this.procedureReferences = procedureReferencesFromJSON(json, context);
   }
 
   commit() {
@@ -773,7 +773,7 @@ export default class MnemicContext extends Context {
         assumptions = this.getAssumptions(),
         metavariables = this.getMetavariables(),
         substitutions = this.getSubstitutions(),
-        procedureCalls = this.getProcedureCalls();
+        procedureReferences = this.getProcedureReferences();
 
     const termsJSON = termsToTermsJSON(terms),
           linksJSON = linksToLinksJSON(links),
@@ -785,7 +785,7 @@ export default class MnemicContext extends Context {
           assumptionsJSON = assumptionsToAssumptionsJSON(assumptions),
           metavariablesJSON = metavariablesToMetavariablesJSON(metavariables),
           substitutionsJSON = substitutionsToSubstitutionsJSON(substitutions),
-          procedureCAllsJSON = procedureCallsToProcedureCallsJSON(procedureCalls);
+          procedureReferencesJSON = procedureReferencesToProcedureReferencesJSON(procedureReferences);
 
     terms = termsJSON; ///
     links = linksJSON; ///
@@ -797,7 +797,7 @@ export default class MnemicContext extends Context {
     assumptions = assumptionsJSON; ///
     metavariables = metavariablesJSON;  //
     substitutions = substitutionsJSON; ///
-    procedureCalls = procedureCAllsJSON; ///
+    procedureReferences = procedureReferencesJSON; ///
 
     json = {
       terms,
@@ -810,7 +810,7 @@ export default class MnemicContext extends Context {
       assumptions,
       metavariables,
       substitutions,
-      procedureCalls
+      procedureReferences
     };
 
     return json;
@@ -827,8 +827,8 @@ export default class MnemicContext extends Context {
           assumptions = null,
           metavariables = null,
           substitutions = null,
-          procedureCalls = null,
-          mnemicContext = new MnemicContext(context, terms, links, frames, equalities, assertions, statements, parameters, assumptions, metavariables, substitutions, procedureCalls);
+          procedureReferences = null,
+          mnemicContext = new MnemicContext(context, terms, links, frames, equalities, assertions, statements, parameters, assumptions, metavariables, substitutions, procedureReferences);
 
     mnemicContext.initialise(json);
 
@@ -846,8 +846,8 @@ export default class MnemicContext extends Context {
           assumptions = [],
           metavariables = [],
           substitutions = [],
-          procedureCalls = [],
-          mnemicContext = new MnemicContext(context, terms, links, frames, equalities, assertions, statements, parameters, assumptions, metavariables, substitutions, procedureCalls);
+          procedureReferences = [],
+          mnemicContext = new MnemicContext(context, terms, links, frames, equalities, assertions, statements, parameters, assumptions, metavariables, substitutions, procedureReferences);
 
     return mnemicContext;
   }

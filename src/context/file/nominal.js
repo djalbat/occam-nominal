@@ -288,8 +288,8 @@ export default class NominalFileContext extends FileContext {
     return substitutions;
   }
 
-  getProcedureCalls(procedureCalls = []) {
-    return procedureCalls;
+  getProcedureReferences(procedureReferences = []) {
+    return procedureReferences;
   }
 
   getInferredSubstitutions(inferredSubstitutions = []) {
