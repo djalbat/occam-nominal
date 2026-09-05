@@ -5,7 +5,6 @@ import { Element, breakPointUtilities, continuationUtilities } from "occam-langu
 import { define } from "../elements";
 import { declare } from "../utilities/state";
 import { instantiateHypothesis } from "../process/instantiate";
-import { procedureCallFromHypothesisNode } from "../utilities/element";
 import { isolate, attempt, serialise, unserialise, instantiate } from "../utilities/context";
 
 const { cut, all } = continuationUtilities,
@@ -263,4 +262,11 @@ function statementFromHypothesisNode(hypothesisNode, context) {
         statement = context.findStatementByStatementNode(statementNode);
 
   return statement;
+}
+
+function procedureCallFromHypothesisNode(hypothesisNode, context) {
+  const procedureCallNode = hypothesisNode.getProcedureCallNode(),
+        procedureCall = context.findProcedureCallByProcedureCallNode(procedureCallNode);
+
+  return procedureCall;
 }

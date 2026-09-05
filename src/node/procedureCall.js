@@ -2,14 +2,32 @@
 
 import { NonTerminalNode } from "occam-languages";
 
-import { PARAMETER_RULE_NAME, PROCEDURE_REFERENCE_RULE_NAME } from "../ruleNames";
+import { NAME_TOKEN_TYPE } from "../tokenTypes";
+import { PARAMETER_RULE_NAME } from "../ruleNames";
 
 export default class ProcedureCallNode extends NonTerminalNode {
-  getProcedureName() {
-    const procedureReferenceNode = this.getProcedureReferenceNode(),
-          procedureName = procedureReferenceNode.getProcedureName();
+  getName() {
+    let name;
 
-    return procedureName;
+    this.someChildNode((childNode) => {
+      const childNodeTerminalNode = childNode.isTerminalNode();
+
+      if (childNodeTerminalNode) {
+        const terminalNode = childNode, ///
+              type = terminalNode.getType(),
+              typeNameTokenType = (type === NAME_TOKEN_TYPE);
+
+        if (typeNameTokenType) {
+          const content = terminalNode.getContent();
+
+          name = content; ///
+
+          return true;
+        }
+      }
+    });
+
+    return name;
   }
 
   getParameterNodes() {
@@ -17,13 +35,6 @@ export default class ProcedureCallNode extends NonTerminalNode {
           parameterNodes = this.getNodesByRuleName(ruleName);
 
     return parameterNodes;
-  }
-
-  getProcedureReferenceNode() {
-    const ruleName = PROCEDURE_REFERENCE_RULE_NAME,
-          procedureReferenceNode = this.getNodeByRuleName(ruleName);
-
-    return procedureReferenceNode;
   }
 
   static fromRuleNameChildNodesOpacityAndPrecedence(ruleName, childNodes, opacity, precedence) { return NonTerminalNode.fromRuleNameChildNodesOpacityAndPrecedence(ProcedureCallNode, ruleName, childNodes, opacity, precedence); }

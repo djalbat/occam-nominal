@@ -7,7 +7,7 @@ import Context from "../context";
 const { push, extract } = arrayUtilities;
 
 export default class CladicContext extends Context {
-  constructor(context, terms, links, frames, equalities, assertions, statements, assumptions, metavariables) {
+  constructor(context, terms, links, frames, equalities, assertions, statements, parameters, assumptions, metavariables, procedureCalls) {
     super(context);
 
     this.terms = terms;
@@ -16,8 +16,10 @@ export default class CladicContext extends Context {
     this.equalities = equalities;
     this.assertions = assertions;
     this.statements = statements;
+    this.parameters = parameters;
     this.assumptions = assumptions;
     this.metavariables = metavariables;
+    this.procedureCalls = procedureCalls;
   }
 
   getTerms(terms = []) {
@@ -70,6 +72,16 @@ export default class CladicContext extends Context {
     return statements;
   }
 
+  getParameters(parameters = []) {
+    const context = this.getContext();
+
+    push(parameters, this.parameters);
+
+    context.getParameters(parameters);
+
+    return parameters;
+  }
+
   getAssertions(assertions = []) {
     const context = this.getContext();
 
@@ -98,6 +110,16 @@ export default class CladicContext extends Context {
     context.getMetavariables(metavariables);
 
     return metavariables;
+  }
+
+  getProcedureCalls(procedureCalls = []) {
+    const context = this.getContext();
+
+    push(procedureCalls, this.procedureCalls);
+
+    context.getProcedureCalls(procedureCalls);
+
+    return procedureCalls;
   }
 
   addTerm(term) {
@@ -232,7 +254,7 @@ export default class CladicContext extends Context {
 
   addStatement(statement) {
     const context = this, ///
-          statementString = statement.getString();
+      statementString = statement.getString();
 
     context.trace(`Adding the '${statementString}' statement to the cladic context...`);
 
@@ -240,7 +262,7 @@ export default class CladicContext extends Context {
 
     extract(this.statements, (statement) => {
       const statementB = statement, ///
-            statementAEqualToStatementB = statementA.isEqualTo(statementB);
+        statementAEqualToStatementB = statementA.isEqualTo(statementB);
 
       if (statementAEqualToStatementB) {
         const statementString = statement.getString();
@@ -254,6 +276,32 @@ export default class CladicContext extends Context {
     this.statements.push(statement);
 
     context.debug(`...added the '${statementString}' statement to the cladic context.`);
+  }
+
+  addParameter(paramter) {
+    const context = this, ///
+          paramterString = paramter.getString();
+
+    context.trace(`Adding the '${paramterString}' paramter to the cladic context...`);
+
+    const paramterA = paramter; ///
+
+    extract(this.paramters, (paramter) => {
+      const paramterB = paramter, ///
+            paramterAEqualToParameterB = paramterA.isEqualTo(paramterB);
+
+      if (paramterAEqualToParameterB) {
+        const paramterString = paramter.getString();
+
+        context.trace(`Removed the existing '${paramterString}' paramter from the cladic context...`);
+
+        return true;
+      }
+    });
+
+    this.paramters.push(paramter);
+
+    context.debug(`...added the '${paramterString}' paramter to the cladic context.`);
   }
 
   addAssumption(assumption) {
@@ -314,6 +362,32 @@ export default class CladicContext extends Context {
     context.addSubstitution(substitution);
   }
 
+  addProcedureCall(procedureCall) {
+    const context = this, ///
+          procedureCallString = procedureCall.getString();
+
+    context.trace(`Adding the '${procedureCallString}' procedure call to the cladic context...`);
+
+    const procedureCallA = procedureCall; ///
+
+    extract(this.procedureCalls, (procedureCall) => {
+      const procedureCallB = procedureCall, ///
+            procedureCallAEqualToProcedureallB = procedureCallA.isEqualTo(procedureCallB);
+
+      if (procedureCallAEqualToProcedureallB) {
+        const procedureCallString = procedureCall.getString();
+
+        context.trace(`Removed the existing '${procedureCallString}' procedure call from the cladic context...`);
+
+        return true;
+      }
+    });
+
+    this.procedureCalls.push(procedureCall);
+
+    context.debug(`...added the '${procedureCallString}' procedure call to the cladic context.`);
+  }
+
   addAssignment(assignment) {
     const context = this.getContext();
 
@@ -356,6 +430,12 @@ export default class CladicContext extends Context {
     });
   }
 
+  addParameters(parameters) {
+    parameters.forEach((parameter) => {
+      this.addParameter(parameter);
+    });
+  }
+
   addAssumptions(assumptions) {
     assumptions.forEach((assumption) => {
       this.addAssumption(assumption);
@@ -365,6 +445,12 @@ export default class CladicContext extends Context {
   addMetavariables(metavariables) {
     metavariables.forEach((metavariable) => {
       this.addMetavariable(metavariable);
+    });
+  }
+
+  addProcedureCalls(procedureCalls) {
+    procedureCalls.forEach((procedureCall) => {
+      this.addProcedureCall(procedureCall);
     });
   }
 
@@ -446,6 +532,19 @@ export default class CladicContext extends Context {
     return statement;
   }
 
+  findParameterByParameterNode(parameterNode) {
+    const parameters = this.getParameters(),
+          parameter = parameters.find((parameter) => {
+            const parameterNodeMatches = parameter.matchParameterNode(parameterNode);
+
+            if (parameterNodeMatches) {
+              return true;
+            }
+          }) || null;
+
+    return parameter;
+  }
+
   findAssumptionByAssumptionNode(assumptionNode) {
     const assumptions = this.getAssumptions(),
           assumption = assumptions.find((assumption) => {
@@ -470,6 +569,19 @@ export default class CladicContext extends Context {
           }) || null;
 
     return metavariable;
+  }
+
+  findProcedureCallByProcedureCallNode(procedureCallNode) {
+    const procedureCalls = this.getProcedureCalls(),
+          procedureCall = procedureCalls.find((procedureCall) => {
+            const procedureCallNodeMatches = procedureCall.matchProcedureCallNode(procedureCallNode);
+
+            if (procedureCallNodeMatches) {
+              return true;
+            }
+          }) || null;
+
+    return procedureCall;
   }
 
   isTermPresentByTermNode(termNode) {
@@ -514,6 +626,13 @@ export default class CladicContext extends Context {
     return statementPresent;
   }
 
+  isParameterPresentByParameterNode(parameterNode) {
+    const parameter = this.findParameterByParameterNode(parameterNode),
+          parameterPresent = (parameter !== null);
+
+    return parameterPresent;
+  }
+
   isAssumptionPresentByAssumptionNode(assumptionNode) {
     const assumption = this.findAssumptionByAssumptionNode(assumptionNode),
           assumptionPresent = (assumption !== null);
@@ -526,6 +645,13 @@ export default class CladicContext extends Context {
           metavariablenPresent = (metavariablen !== null);
 
     return metavariablenPresent;
+  }
+
+  isProcedureCallPresentByProcedureCallNode(procedureCallNode) {
+    const procedureCall = this.findProcedureCallByProcedureCallNode(procedureCallNode),
+          procedureCallPresent = (procedureCall !== null);
+
+    return procedureCallPresent;
   }
 
   merge(context) {
@@ -543,9 +669,13 @@ export default class CladicContext extends Context {
 
     context.addStatements(this.statements);
 
+    context.addParameters(this.parameters);
+
     context.addAssumptions(this.assumptions);
 
     context.addMetavariables(this.metavariables);
+
+    context.addProcedureCalls(this.procedureCalls);
   }
 
   static fromNothing(context) {
@@ -554,10 +684,13 @@ export default class CladicContext extends Context {
           frames = [],
           equalities = [],
           statements = [],
+          parameters = [],
           assertions = [],
           assumptions = [],
           metavariables = [],
-          cladicContext = new CladicContext(context, terms, links, frames, equalities, assertions, statements, assumptions, metavariables);
+          procedureCalls = [],
+          cladicContext = new CladicContext(context, terms, links, frames, equalities, assertions, statements, parameters, assumptions, metavariables, procedureCalls);
+
     return cladicContext;
   }
 }

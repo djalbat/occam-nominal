@@ -4,29 +4,34 @@ import { arrayUtilities } from "necessary";
 
 import Context from "../context";
 
-import { termsFromJSON,
-         linksFromJSON,
-         framesFromJSON,
-         termsToTermsJSON,
-         linksToLinksJSON,
-         framesToFramesJSON,
-         equalitiesFromJSON,
-         statementsFromJSON,
-         assertionsFromJSON,
-         assumptionsFromJSON,
-         metavariablesFromJSON,
-         substitutionsFromJSON,
-         equalitiesToEqualitiesJSON,
-         statementsToStatementsJSON,
-         assertionsToAssertionsJSON,
-         assumptionsToAssumptionsJSON,
-         metavariablesToMetavariablesJSON,
-         substitutionsToSubstitutionsJSON } from "../utilities/json";
+import {
+  termsFromJSON,
+  linksFromJSON,
+  framesFromJSON,
+  equalitiesFromJSON,
+  statementsFromJSON,
+  assertionsFromJSON,
+  parametersFromJSON,
+  assumptionsFromJSON,
+  metavariablesFromJSON,
+  substitutionsFromJSON,
+  procedureCallsFromJSON,
+  termsToTermsJSON,
+  linksToLinksJSON,
+  framesToFramesJSON,
+  parametersToParametersJSON,
+  equalitiesToEqualitiesJSON,
+  statementsToStatementsJSON,
+  assertionsToAssertionsJSON,
+  assumptionsToAssumptionsJSON,
+  metavariablesToMetavariablesJSON,
+  substitutionsToSubstitutionsJSON,
+  procedureCallsToProcedureCallsJSON } from "../utilities/json";
 
 const { push, extract } = arrayUtilities;
 
 export default class MnemicContext extends Context {
-  constructor(context, terms, links, frames, equalities, assertions, statements, assumptions, metavariables, substitutions) {
+  constructor(context, terms, links, frames, equalities, assertions, statements, parameters, assumptions, metavariables, substitutions, procedureCalls) {
     super(context);
 
     this.terms = terms;
@@ -35,9 +40,11 @@ export default class MnemicContext extends Context {
     this.equalities = equalities;
     this.assertions = assertions;
     this.statements = statements;
+    this.parameters = parameters;
     this.assumptions = assumptions;
     this.metavariables = metavariables;
     this.substitutions = substitutions;
+    this.procedureCalls = procedureCalls;
   }
 
   getTerms(terms = []) {
@@ -80,6 +87,16 @@ export default class MnemicContext extends Context {
     return equalities;
   }
 
+  getAssertions(assertions = []) {
+    const context = this.getContext();
+
+    push(assertions, this.assertions);
+
+    context.getAssertions(assertions);
+
+    return assertions;
+  }
+
   getStatements(statements = []) {
     const context = this.getContext();
 
@@ -90,14 +107,14 @@ export default class MnemicContext extends Context {
     return statements;
   }
 
-  getAssertions(assertions = []) {
+  getParameters(parameters = []) {
     const context = this.getContext();
 
-    push(assertions, this.assertions);
+    push(parameters, this.parameters);
 
-    context.getAssertions(assertions);
+    context.getParameters(parameters);
 
-    return assertions;
+    return parameters;
   }
 
   getAssumptions(assumptions = []) {
@@ -128,6 +145,16 @@ export default class MnemicContext extends Context {
     context.getSubstitutions(substitutions);
 
     return substitutions;
+  }
+
+  getProcedureCalls(procedureCalls = []) {
+    const context = this.getContext();
+
+    push(procedureCalls, this.procedureCalls);
+
+    context.getProcedureCalls(procedureCalls);
+
+    return procedureCalls;
   }
 
   addTerm(term) {
@@ -286,6 +313,32 @@ export default class MnemicContext extends Context {
     context.debug(`...added the '${statementString}' statement to the mnemic context.`);
   }
 
+  addParameter(parameter) {
+    const context = this, ///
+          parameterString = parameter.getString();
+
+    context.trace(`Adding the '${parameterString}' parameter to the mnemic context...`);
+
+    const parameterA = parameter; ///
+
+    extract(this.parameters, (parameter) => {
+      const parameterB = parameter, ///
+            parameterAEqualToParameterB = parameterA.isEqualTo(parameterB);
+
+      if (parameterAEqualToParameterB) {
+        const parameterString = parameter.getString();
+
+        context.trace(`Removed the existing '${parameterString}' parameter from the mnemic context...`);
+
+        return true;
+      }
+    });
+
+    this.parameters.push(parameter);
+
+    context.debug(`...added the '${parameterString}' parameter to the mnemic context.`);
+  }
+
   addAssumption(assumption) {
     const context = this, ///
           assumptionString = assumption.getString();
@@ -340,7 +393,7 @@ export default class MnemicContext extends Context {
 
   addSubstitution(substitution) {
     const context = this, ///
-          substitutionString = substitution.getString();
+      substitutionString = substitution.getString();
 
     context.trace(`Adding the '${substitutionString}' substitution to the mnemic context...`);
 
@@ -348,7 +401,7 @@ export default class MnemicContext extends Context {
 
     extract(this.substitutions, (substitution) => {
       const substitutionB = substitution, ///
-            substitutionAEqualToSubstitutionB = substitutionA.isEqualTo(substitutionB);
+        substitutionAEqualToSubstitutionB = substitutionA.isEqualTo(substitutionB);
 
       if (substitutionAEqualToSubstitutionB) {
         const substitutionString = substitution.getString();
@@ -362,6 +415,32 @@ export default class MnemicContext extends Context {
     this.substitutions.push(substitution);
 
     context.debug(`...added the '${substitutionString}' substitution to the mnemic context.`);
+  }
+
+  addProcedureCall(procedureCall) {
+    const context = this, ///
+          procedureCallString = procedureCall.getString();
+
+    context.trace(`Adding the '${procedureCallString}' procedure call to the mnemic context...`);
+
+    const procedureCallA = procedureCall; ///
+
+    extract(this.procedureCalls, (procedureCall) => {
+      const procedureCallB = procedureCall, ///
+            procedureCallAEqualToProcedureallB = procedureCallA.isEqualTo(procedureCallB);
+
+      if (procedureCallAEqualToProcedureallB) {
+        const procedureCallString = procedureCall.getString();
+
+        context.trace(`Removed the existing '${procedureCallString}' procedure call from the mnemic context...`);
+
+        return true;
+      }
+    });
+
+    this.procedureCalls.push(procedureCall);
+
+    context.debug(`...added the '${procedureCallString}' procedure call to the mnemic context.`);
   }
 
   addAssignment(assignment) {
@@ -410,6 +489,12 @@ export default class MnemicContext extends Context {
     });
   }
 
+  addParameters(parameters) {
+    parameters.forEach((parameter) => {
+      this.addParameter(parameter);
+    });
+  }
+
   addAssumptions(assumptions) {
     assumptions.forEach((assumption) => {
       this.addAssumption(assumption);
@@ -419,6 +504,12 @@ export default class MnemicContext extends Context {
   addMetavariables(metavariables) {
     metavariables.forEach((metavariable) => {
       this.addMetavariable(metavariable);
+    });
+  }
+
+  addProcedureCalls(procedureCalls) {
+    procedureCalls.forEach((procedureCall) => {
+      this.addProcedureCall(procedureCall);
     });
   }
 
@@ -450,13 +541,13 @@ export default class MnemicContext extends Context {
 
   findFrameByFrameNode(frameNode) {
     const frames = this.getFrames(),
-          frame = frames.find((frame) => {
-            const frameNodeMatches = frame.matchFrameNode(frameNode);
+      frame = frames.find((frame) => {
+        const frameNodeMatches = frame.matchFrameNode(frameNode);
 
-            if (frameNodeMatches) {
-              return true;
-            }
-          }) || null;
+        if (frameNodeMatches) {
+          return true;
+        }
+      }) || null;
 
     return frame;
   }
@@ -500,6 +591,19 @@ export default class MnemicContext extends Context {
     return statement;
   }
 
+  findParameterByParameterNode(parameterNode) {
+    const parameters = this.getParameters(),
+          parameter = parameters.find((parameter) => {
+            const parameterNodeMatches = parameter.matchParameterNode(parameterNode);
+
+            if (parameterNodeMatches) {
+              return true;
+            }
+          }) || null;
+
+    return parameter;
+  }
+
   findAssumptionByAssumptionNode(assumptionNode) {
     const assumptions = this.getAssumptions(),
           assumption = assumptions.find((assumption) => {
@@ -537,6 +641,19 @@ export default class MnemicContext extends Context {
           }) || null;
 
     return substitution;
+  }
+
+  findProcedureCallByProcedureCallNode(procedureCallNode) {
+    const procedureCalls = this.getProcedureCalls(),
+          procedureCall = procedureCalls.find((procedureCall) => {
+            const procedureCallNodeMatches = procedureCall.matchProcedureCallNode(procedureCallNode);
+
+            if (procedureCallNodeMatches) {
+              return true;
+            }
+          }) || null;
+
+    return procedureCall;
   }
 
   isTermPresentByTermNode(termNode) {
@@ -581,6 +698,13 @@ export default class MnemicContext extends Context {
     return statementPresent;
   }
 
+  isParameterPresentByParameterNode(parameterNode) {
+    const parameter = this.findParameterByParameterNode(parameterNode),
+          parameterPresent = (parameter !== null);
+
+    return parameterPresent;
+  }
+
   isAssumptionPresentByAssumptionNode(assumptionNode) {
     const assumption = this.findAssumptionByAssumptionNode(assumptionNode),
           assumptionPresent = (assumption !== null);
@@ -593,6 +717,13 @@ export default class MnemicContext extends Context {
           metavariablenPresent = (metavariablen !== null);
 
     return metavariablenPresent;
+  }
+
+  isProcedureCallPresentByProcedureCallNode(procedureCallNode) {
+    const procedureCall = this.findProcedureCallByProcedureCallNode(procedureCallNode),
+          procedureCallPresent = (procedureCall !== null);
+
+    return procedureCallPresent;
   }
 
   initialise(json) {
@@ -615,6 +746,10 @@ export default class MnemicContext extends Context {
     this.frames = framesFromJSON(json, context);
 
     this.assertions = assertionsFromJSON(json, context);
+
+    this.parameters = parametersFromJSON(json, context);
+
+    this.procedureCalls = procedureCallsFromJSON(json, context);
   }
 
   commit() {
@@ -634,9 +769,11 @@ export default class MnemicContext extends Context {
         equalities = this.getEqualities(),
         assertions = this.getAssertions(),
         statements = this.getStatements(),
+        parameters = this.getParameters(),
         assumptions = this.getAssumptions(),
         metavariables = this.getMetavariables(),
-        substitutions = this.getSubstitutions();
+        substitutions = this.getSubstitutions(),
+        procedureCalls = this.getProcedureCalls();
 
     const termsJSON = termsToTermsJSON(terms),
           linksJSON = linksToLinksJSON(links),
@@ -644,9 +781,11 @@ export default class MnemicContext extends Context {
           equalitiesJSON = equalitiesToEqualitiesJSON(equalities),
           assertionsJSON = assertionsToAssertionsJSON(assertions),
           statementsJSON = statementsToStatementsJSON(statements),
+          parametersJSON = parametersToParametersJSON(parameters),
           assumptionsJSON = assumptionsToAssumptionsJSON(assumptions),
           metavariablesJSON = metavariablesToMetavariablesJSON(metavariables),
-          substitutionsJSON = substitutionsToSubstitutionsJSON(substitutions);
+          substitutionsJSON = substitutionsToSubstitutionsJSON(substitutions),
+          procedureCAllsJSON = procedureCallsToProcedureCallsJSON(procedureCalls);
 
     terms = termsJSON; ///
     links = linksJSON; ///
@@ -654,9 +793,11 @@ export default class MnemicContext extends Context {
     equalities = equalitiesJSON; ///
     assertions = assertionsJSON; ///
     statements = statementsJSON; ///
+    parameters = parametersJSON;  ///
     assumptions = assumptionsJSON; ///
     metavariables = metavariablesJSON;  //
     substitutions = substitutionsJSON; ///
+    procedureCalls = procedureCAllsJSON; ///
 
     json = {
       terms,
@@ -665,9 +806,11 @@ export default class MnemicContext extends Context {
       equalities,
       assertions,
       statements,
+      parameters,
       assumptions,
       metavariables,
-      substitutions
+      substitutions,
+      procedureCalls
     };
 
     return json;
@@ -678,12 +821,14 @@ export default class MnemicContext extends Context {
           links = null,
           frames = null,
           equalities = null,
-          statements = null,
           assertions = null,
+          statements = null,
+          parameters = null,
           assumptions = null,
           metavariables = null,
           substitutions = null,
-          mnemicContext = new MnemicContext(context, terms, links, frames, equalities, assertions, statements, assumptions, metavariables, substitutions);
+          procedureCalls = null,
+          mnemicContext = new MnemicContext(context, terms, links, frames, equalities, assertions, statements, parameters, assumptions, metavariables, substitutions, procedureCalls);
 
     mnemicContext.initialise(json);
 
@@ -695,12 +840,14 @@ export default class MnemicContext extends Context {
           links = [],
           frames = [],
           equalities = [],
-          statements = [],
           assertions = [],
+          statements = [],
+          parameters = [],
           assumptions = [],
           metavariables = [],
           substitutions = [],
-          mnemicContext = new MnemicContext(context, terms, links, frames, equalities, assertions, statements, assumptions, metavariables, substitutions);
+          procedureCalls = [],
+          mnemicContext = new MnemicContext(context, terms, links, frames, equalities, assertions, statements, parameters, assumptions, metavariables, substitutions, procedureCalls);
 
     return mnemicContext;
   }

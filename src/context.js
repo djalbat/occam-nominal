@@ -85,6 +85,14 @@ export default class Context extends ContextBase {
     return statements;
   }
 
+  getParameters(parameters = []) {
+    const context = this.getContext();
+
+    context.getParameters(parameters);
+
+    return parameters;
+  }
+
   getSignatures(signatures = []) {
     const context = this.getContext();
 
@@ -123,6 +131,14 @@ export default class Context extends ContextBase {
     context.getSubstitutions(substitutions);
 
     return substitutions;
+  }
+
+  getProcedureCalls(procedureCalls = []) {
+    const context = this.getContext();
+
+    context.getProcedureCalls(procedureCalls);
+
+    return procedureCalls;
   }
 
   getInferredSubstitutions(inferredSubstitutions = []) {
@@ -306,6 +322,13 @@ export default class Context extends ContextBase {
     return statement;
   }
 
+  findParameterByParameterNode(parameterNode) {
+    const context = this.getContext(),
+          parameter = context.findParameterByParameterNode(parameterNode);
+
+    return parameter;
+  }
+
   findAssumptionByAssumptionNode(assumptionNode) {
     const context = this.getContext(),
           assumption = context.findAssumptionByAssumptionNode(assumptionNode);
@@ -332,6 +355,13 @@ export default class Context extends ContextBase {
           substitution = context.findSubstitutionBySubstitutionNode(substitutionNode);
 
     return substitution;
+  }
+
+  findProcedureCallByProcedureCallNode(procedureCallNode) {
+    const context = this.getContext(),
+          procedureCall = context.findProcedureCallByProcedureCallNode(procedureCallNode);
+
+    return procedureCall;
   }
 
   findInferredSubstitutionByVariableNode(variableNode) {
@@ -446,11 +476,25 @@ export default class Context extends ContextBase {
     return statementPresent;
   }
 
+  isParameterPresentByParameterNode(parametertNode) {
+    const context = this.getContext(),
+          parametertPresent = context.isParameterPresentByParameterNode(parametertNode);
+
+    return parametertPresent;
+  }
+
   isMetavariablePresentByMetavariableNode(metavariableNode) {
     const context = this.getContext(),
           metavariablePresent = context.isMetavariablePresentByMetavariableNode(metavariableNode);
 
     return metavariablePresent;
+  }
+
+  isProcedureCallPresentByProcedureCallNode(procedureCalltNode) {
+    const context = this.getContext(),
+          procedureCalltPresent = context.isProcedureCallPresentByProcedureCallNode(procedureCalltNode);
+
+    return procedureCalltPresent;
   }
 
   isTypePresentByNominalTypeName(nominalTypeName) {

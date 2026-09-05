@@ -285,7 +285,7 @@ qualification                        ::=  "because" signatureAssertion
 
 
 
-procedureCall                        ::=  "@"<NO_WHITESPACE>procedureReference<NO_WHITESPACE>"(" parameter ( "," parameter )* ")" ;
+procedureCall                        ::=  "@"<NO_WHITESPACE>[name]<NO_WHITESPACE>"(" parameter ( "," parameter )* ")" ;
 
 
 
@@ -318,8 +318,6 @@ metaArgument                         ::=  statement ( )
                                        |  metaType ( ) 
                                        
                                        ;
-
-procedureReference.                  ::=  [name] ;
 
 reference.                           ::=  metavariable ;
 

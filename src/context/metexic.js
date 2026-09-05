@@ -146,6 +146,12 @@ export default class MetexicContext extends Context {
     context.addStatements(statements);
   }
 
+  addParameters(parameters) {
+    const context = this.getContext();
+
+    context.addParameters(parameters);
+  }
+
   addAssumptions(assumptions) {
     const context = this.getContext();
 
@@ -156,6 +162,12 @@ export default class MetexicContext extends Context {
     const context = this.getContext();
 
     context.addMetavariables(metavariables);
+  }
+
+  addProcedureCalls(procedureCalls) {
+    const context = this.getContext();
+
+    context.addProcedureCalls(procedureCalls);
   }
 
   addAssignment(assignment) {

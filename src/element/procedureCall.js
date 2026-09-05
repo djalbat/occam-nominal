@@ -1,28 +1,30 @@
 "use strict";
 
-import { Element } from "occam-languages";
+import {Element, continuationUtilities, breakPointUtilities} from "occam-languages";
 
 import Value from "../value";
 
 import { define } from "../elements";
 import { instantiate } from "../utilities/context";
 import { instantiateProcedureCall } from "../process/instantiate";
-import { parametersFromProcedureCallNode, procedureReferenceFromProcedureCallNode } from "../utilities/element";
+
+const { all, every } = continuationUtilities,
+      { unbreakable } = breakPointUtilities;
 
 export default define(class ProcedureCall extends Element {
-  constructor(context, string, node, breakPoint, parameters, procedureReference) {
+  constructor(context, string, node, breakPoint, name, parameters) {
     super(context, string, node, breakPoint);
 
+    this.name = name;
     this.parameters = parameters;
-    this.procedureReference = procedureReference;
+  }
+
+  getName() {
+    return this.name;
   }
 
   getParameters() {
     return this.parameters;
-  }
-
-  getProcedureReference() {
-    return this.procedureReference;
   }
 
   getProcedureCallNode() {
@@ -32,13 +34,33 @@ export default define(class ProcedureCall extends Element {
     return procedureCallNode;
   }
 
-  getProcedureName() { return this.procedureReference.getProcedureName(); }
+  getProcedureName() {
+    const procedureName = this.name;
+
+    return procedureName;
+  }
 
   isUnary() {
     const parametersLength = this.parameters.length,
           unary = (parametersLength === 1);
 
     return unary;
+  }
+
+  isEqualTo(procedureCall) {
+    const procedureCallNode = procedureCall.getNode(),
+          procedureCallNodeMatches = this.matchProcedureCallNode(procedureCallNode),
+          equalTo = procedureCallNodeMatches;  ///
+
+    return equalTo;
+  }
+
+  matchProcedureCallNode(procedureCallNode) {
+    const node = procedureCallNode, ///
+          nodeMatches = this.matchNode(node),
+          procedureCallNodeMatches = nodeMatches; ///
+
+    return procedureCallNodeMatches;
   }
 
   findValues(context) {
@@ -53,33 +75,74 @@ export default define(class ProcedureCall extends Element {
     return values;
   }
 
-  validate(state, context, forward, back) {
-    const procedureCallString = this.getString(); ///
+  findProcedureCall(context) {
+    const procedureCallNode = this.getProcedureCallNode(),
+          procedureCall = context.findProcedureCallByProcedureCallNode(procedureCallNode);
+
+    return procedureCall;
+  }
+
+  validate = unbreakable(function (state, context, forward, back) {
+    let procedureCall;
+
+    const procedureCallString = this.getString();  ///
 
     context.trace(`Validating the '${procedureCallString}' procedure call...`);
 
-    const procedureName = this.getProcedureName(),
-          procedure = context.findProcedureByProcedureName(procedureName);
+    procedureCall = this.findProcedureCall(context);
 
-    if (procedure === null) {
-      context.debug(`The '${procedureCallString}' procedure is not present.`);
+    if (procedureCall !== null) {
+      context.debug(`The '${procedureCallString}' procedure call is already present.`);
 
-      return back();
+      return forward(procedureCall, context, back);
     }
 
-    const procedureBoolean = procedure.isBoolean();
+    procedureCall = this; ///
 
-    if (!procedureBoolean) {
-      context.debug(`The '${procedureCallString}' procedure is not boolean.`);
+    const validateParameters = this.validateParameters.bind(this);
 
-      return back();
-    }
+    return all([
+      validateParameters
+    ], state, context, (state, context, back) => {
+      context.addProcedureCall(procedureCall);
 
-    const procedureCall = this; ///
+      context.debug(`...validated the '${procedureCallString}' procedure call.`);
 
-    context.debug(`...validated the '${procedureCallString}' procedure call.`);
+      return forward(procedureCall, context, back);
+    }, back);
+  });
 
-    return forward(procedureCall, context, back);
+  validateParameter(parameter, parameters, state, context, forward, back) {
+    const parameterString = parameter.getString(),
+          procedureCallString = this.getString();  ///
+
+    context.trace(`Validating the '${procedureCallString}' procedure call's '${parameterString}' parameter...`);
+
+    return parameter.validate(state, context, (parameter, context, back) => {
+      parameters.push(parameter);
+
+      context.debug(`...validated the '${procedureCallString}' procedure call's '${parameterString}' parameter.`);
+
+      return forward(parameters, state, context, back);
+    }, back);
+  }
+
+  validateParameters(state, context, forward, back) {
+    const procedureCallString = this.getString();  ///
+
+    context.trace(`Validating the '${procedureCallString}' procedure call's parameters...`);
+
+    const parameters = [];
+
+    return every(this.parameters, (parameter, parameters, state, context, forward, back) => {
+      return this.validateParameter(parameter, parameters, state, context, forward, back);
+    }, parameters, state, context, (parameters, state, context, back) => {
+      this.parameters = parameters;
+
+      context.debug(`...validated the '${procedureCallString}' procedure call's parameters.`);
+
+      return forward(state, context, back);
+    }, back);
   }
 
   applyIndependently(generalContext, specificContext, forward, back) {
@@ -113,11 +176,11 @@ export default define(class ProcedureCall extends Element {
     }, back);
   }
 
-  dischargeGivenTerm(term, context, forward, back) {
-    const termString = term.getString(),
+  dischargeGivenParameter(parameter, context, forward, back) {
+    const parameterString = parameter.getString(),
           procedureCallString = this.getString(); ///
 
-    context.trace(`Discharging the '${procedureCallString}' procedure call given the '${termString}' term...`);
+    context.trace(`Discharging the '${procedureCallString}' procedure call given the '${parameterString}' parameter...`);
 
     const unary = this.isUnary();
 
@@ -129,7 +192,7 @@ export default define(class ProcedureCall extends Element {
 
     const procedureName = this.getProcedureName(),
           procedure = context.findProcedureByProcedureName(procedureName),
-          value = Value.fromTerm(term, context),
+          value = Value.fromParameter(parameter, context),
           values = [
             value
           ];
@@ -149,7 +212,7 @@ export default define(class ProcedureCall extends Element {
         return back();
       }
 
-      context.debug(`...discharged the '${procedureCallString}' procedure call given the '${termString}' term.`);
+      context.debug(`...discharged the '${procedureCallString}' procedure call given the '${parameterString}' parameter.`);
 
       return forward(back);
     }, back);
@@ -177,14 +240,31 @@ export default define(class ProcedureCall extends Element {
             procedureCallNode = instantiateProcedureCall(string, context),
             node = procedureCallNode,  ///
             breakPoint = null,
-            parameters = parametersFromProcedureCallNode(json, context),
-            procedureReference = procedureReferenceFromProcedureCallNode(json, context);
+            name = nameFromProcedureCallNode(procedureCallNode, context),
+            parameters = parametersFromProcedureCallNode(procedureCallNode, context);
 
       context = null;
 
-      procedureCall = new ProcedureCall(context, string, node, breakPoint, parameters, procedureReference);
+      procedureCall = new ProcedureCall(context, string, node, breakPoint, name, parameters);
     }, context);
 
     return procedureCall;
   }
 });
+
+function nameFromProcedureCallNode(procedureCallNode, context) {
+  const name = procedureCallNode.getName();
+
+  return name;
+}
+
+function parametersFromProcedureCallNode(procedureCallNode, context) {
+  const parameterNodes = procedureCallNode.getParameterNodes(),
+        parameters = parameterNodes.map((parameterNode) => {
+          const parameter = context.findParameterByParameterNode(parameterNode);
+
+          return parameter;
+        });
+
+  return parameters;
+}

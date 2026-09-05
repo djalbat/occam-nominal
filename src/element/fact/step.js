@@ -15,8 +15,8 @@ const { breakable } = breakPointUtilities,
       { cut, all, some } = continuationUtilities;
 
 export default define(class Step extends Fact {
-  constructor(context, string, node, breakPoint, statement, reference, procedureCall, schemaAssertion, signatureAssertion) {
-    super(context, string, node, breakPoint, statement, reference, procedureCall);
+  constructor(context, string, node, breakPoint, reference, statement, procedureCall, schemaAssertion, signatureAssertion) {
+    super(context, string, node, breakPoint, reference, statement, procedureCall);
 
     this.schemaAssertion = schemaAssertion;
     this.signatureAssertion = signatureAssertion;

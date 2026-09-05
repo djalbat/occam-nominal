@@ -7,7 +7,7 @@ import Fact from "../fact";
 import { define } from "../../elements";
 import { declare } from "../../utilities/state";
 import { instantiatePremise } from "../../process/instantiate";
-import { referenceFromPremiseNode, procedureCallFromPremiseNode } from "../../utilities/element";
+import { referenceFromPremiseNode } from "../../utilities/element";
 import { isolate, attempt, reconcile, serialise, unserialise, instantiate } from "../../utilities/context";
 
 const { cut, all } = continuationUtilities,
@@ -272,11 +272,11 @@ export default define(class Premise extends Fact {
               premiseNode = instantiatePremise(string, context),
               node = premiseNode,  ///
               breakPoint = breakPointFromJSON(json),
-              statement = statementFromPremiseNode(premiseNode, context),
               reference = referenceFromPremiseNode(premiseNode, context),
+              statement = statementFromPremiseNode(premiseNode, context),
               procedureCall = procedureCallFromPremiseNode(premiseNode, context);
 
-        premise = new Premise(context, string, node, breakPoint, statement, reference, procedureCall);
+        premise = new Premise(context, string, node, breakPoint, reference, statement, procedureCall);
       }, json, context);
     }, context);
 
@@ -289,4 +289,11 @@ function statementFromPremiseNode(premiseNode, context) {
         statement = context.findStatementByStatementNode(statementNode);
 
   return statement;
+}
+
+function procedureCallFromPremiseNode(premiseNode, context) {
+  const procedureCallNode = premiseNode.getProcedureCallNode(),
+        procedureCall = context.findProcedureCallByProcedureCallNode(procedureCallNode);
+
+  return procedureCall;
 }

@@ -167,6 +167,13 @@ export function implicitAssumptionStringFromStatement(stastement) {
   return implicitAssumptionString;
 }
 
+export function procedureCallStringFromNameAndParameters(name, parameters) {
+  const parametersString = parametersStringFromParameters(parameters),
+        procedureCallString = `@${name}(${parametersString})`;
+
+  return procedureCallString;
+}
+
 export function termSubstitutionStringFromTermAndVariable(term, variable) {
   const termString = term.getString(),
         variableString = variable.getString(),
@@ -263,14 +270,6 @@ export function claimStringFromLabelsSignatureSuppositionsAndDeduction(labels, s
                    `${claimString} :: ${deductionString}`;
 
   return claimString;
-}
-
-export function procedureCallStringFromProcedureReferenceAndParameters(procedureReference, parameters) {
-  const procedureReferenceName = procedureReference.getName(),
-        parametersString = parametersStringFromParameters(parameters),
-        procedureCallString = `@${procedureReferenceName}(${parametersString})`;
-
-  return procedureCallString;
 }
 
 export function cotypeDeclarationStringFromTypeSuperTypesAndProvisional(type, superTypes, provisional) {

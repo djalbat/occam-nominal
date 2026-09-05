@@ -67,7 +67,6 @@ import PropertyAssertionNode from "./node/assertion/property";
 import SubproofAssertionNode from "./node/assertion/subproof";
 import CotypeDeclarationNode from "./node/declaration/cotype";
 import ParenthesisedLabelNode from "./node/parenthesisedLabel";
-import ProcedureReferenceNode from "./node/procedureReference";
 import ContainedAssertionNode from "./node/assertion/contained";
 import SignatureAssertionNode from "./node/assertion/signature";
 import ImplicitAssumptionNode from "./node/assumption/implicit";
@@ -230,7 +229,6 @@ const NonTerminalNodeMap = {
   [COTYPE_DECLARATION_RULE_NAME]: CotypeDeclarationNode,
   [SUBPROOF_ASSERTION_RULE_NAME]: SubproofAssertionNode,
   [PROPERTY_ASSERTION_RULE_NAME]: PropertyAssertionNode,
-  [PROCEDURE_REFERENCE_RULE_NAME]: ProcedureReferenceNode,
   [PARENTHESISED_LABEL_RULE_NAME]: ParenthesisedLabelNode,
   [SIGNATURE_ASSERTION_RULE_NAME]: SignatureAssertionNode,
   [CONTAINED_ASSERTION_RULE_NAME]: ContainedAssertionNode,

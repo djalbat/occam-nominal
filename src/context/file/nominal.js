@@ -264,6 +264,10 @@ export default class NominalFileContext extends FileContext {
     return statements;
   }
 
+  getParameters(parameters = []) {
+    return parameters;
+  }
+
   getSignatures(signatures = []) {
     return signatures;
   }
@@ -282,6 +286,10 @@ export default class NominalFileContext extends FileContext {
 
   getSubstitutions(substitutions = []) {
     return substitutions;
+  }
+
+  getProcedureCalls(procedureCalls = []) {
+    return procedureCalls;
   }
 
   getInferredSubstitutions(inferredSubstitutions = []) {

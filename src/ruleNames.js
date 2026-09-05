@@ -69,7 +69,6 @@ export const COTYPE_DECLARATION_RULE_NAME = "cotypeDeclaration";
 export const PROPERTY_ASSERTION_RULE_NAME = "propertyAssertion";
 export const SUBPROOF_ASSERTION_RULE_NAME = "subproofAssertion";
 export const PARENTHESISED_LABEL_RULE_NAME = "parenthesisedLabel";
-export const PROCEDURE_REFERENCE_RULE_NAME = "procedureReference";
 export const CONTAINED_ASSERTION_RULE_NAME = "containedAssertion";
 export const SIGNATURE_ASSERTION_RULE_NAME = "signatureAssertion";
 export const IMPLICIT_ASSUMPTION_RULE_NAME = "implicitAssumption";

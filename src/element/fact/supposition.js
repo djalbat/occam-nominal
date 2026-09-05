@@ -7,7 +7,7 @@ import Fact from "../fact";
 import { define } from "../../elements";
 import { declare } from "../../utilities/state";
 import { instantiateSupposition } from "../../process/instantiate";
-import { referenceFromSuppositionNode, procedureCallFromSuppositionNode } from "../../utilities/element";
+import { referenceFromSuppositionNode } from "../../utilities/element";
 import { isolate, attempt, reconcile, serialise, unserialise, instantiate } from "../../utilities/context";
 
 const { cut, all } = continuationUtilities,
@@ -272,11 +272,11 @@ export default define(class Supposition extends Fact {
               suppositionNode = instantiateSupposition(string, context),
               node = suppositionNode,  ///
               breakPoint = breakPointFromJSON(json),
-              statement = statementFromSuppositionNode(suppositionNode, context),
               reference = referenceFromSuppositionNode(suppositionNode, context),
+              statement = statementFromSuppositionNode(suppositionNode, context),
               procedureCall = procedureCallFromSuppositionNode(suppositionNode, context);
 
-        supposition = new Supposition(context, string, node, breakPoint, statement, reference, procedureCall);
+        supposition = new Supposition(context, string, node, breakPoint, reference, statement, procedureCall);
       }, json, context);
     }, context);
 
@@ -286,7 +286,14 @@ export default define(class Supposition extends Fact {
 
 function statementFromSuppositionNode(suppositionNode, context) {
   const statementNode = suppositionNode.getStatementNode(),
-    statement = context.findStatementByStatementNode(statementNode);
+        statement = context.findStatementByStatementNode(statementNode);
 
   return statement;
+}
+
+function procedureCallFromSuppositionNode(suppositionNode, context) {
+  const procedureCallNode = suppositionNode.getProcedureCallNode(),
+        procedureCall = context.findProcedureCallByProcedureCallNode(procedureCallNode);
+
+  return procedureCall;
 }

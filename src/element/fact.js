@@ -5,20 +5,20 @@ import { Element } from "occam-languages";
 import { equateStatements } from "../process/equate";
 
 export default class Fact extends Element {
-  constructor(context, string, node, breakPoint, statement, reference, procedureCall) {
+  constructor(context, string, node, breakPoint, reference, statement, procedureCall) {
     super(context, string, node, breakPoint);
 
-    this.statement = statement;
     this.reference = reference;
+    this.statement = statement;
     this.procedureCall = procedureCall;
-  }
-
-  getStatement() {
-    return this.statement;
   }
 
   getReference() {
     return this.reference;
+  }
+
+  getStatement() {
+    return this.statement;
   }
 
   getProcedureCall() {

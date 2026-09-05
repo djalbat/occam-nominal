@@ -49,7 +49,6 @@ import SubproofAssertion from "./element/assertion/subproof";
 import PropertyAssertion from "./element/assertion/property";
 import CotypeDeclaration from "./element/declaration/cotype";
 import ImplicitAssumption from "./element/assumption/implicit";
-import ProcedureReference from "./element/procedureReference";
 import ContainedAssertion from "./element/assertion/contained";
 import signatureAssertion from "./element/assertion/signature";
 import PropertyDeclaration from "./element/declaration/property";

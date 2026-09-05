@@ -124,11 +124,11 @@ export function termsFromJSON(json, context) {
   let { terms } = json;
 
   const { Term } = elements,
-    termsJSON = terms; ///
+        termsJSON = terms; ///
 
   terms = termsJSON.map((termJSON) => {
     const json = termJSON,  ///
-      term = Term.fromJSON(json, context);
+          term = Term.fromJSON(json, context);
 
     return term;
   });
@@ -262,6 +262,22 @@ export function theoremsFromJSON(json, context) {
   });
 
   return theorems;
+}
+
+export function parametersFromJSON(json, context) {
+  let { parameters } = json;
+
+  const { Parameter } = elements,
+        parametersJSON = parameters; ///
+
+  parameters = parametersJSON.map((parameterJSON) => {
+    const json = parameterJSON,  ///
+          parameter = Parameter.fromJSON(json, context);
+
+    return parameter;
+  });
+
+  return parameters;
 }
 
 export function equalitiesFromJSON(json, context) {
@@ -549,6 +565,22 @@ export function mnemicContextsFromJSON(json, context) {
   return mnemicContexts;
 }
 
+export function procedureCallsFromJSON(json, context) {
+  let { procedureCalls } = json;
+
+  const { ProcedureCall } = elements,
+        procedureCallsJSON = procedureCalls; ///
+
+  procedureCalls = procedureCallsJSON.map((procedureCallJSON) => {
+    const json = procedureCallJSON,  ///
+          procedureCall = ProcedureCall.fromJSON(json, context);
+
+    return procedureCall;
+  });
+
+  return procedureCalls;
+}
+
 export function declaredVariablesFromJSON(json, context) {
   let { declaredVariables } = json;
 
@@ -748,6 +780,16 @@ export function theoremsToTheoremsJSON(theorems) {
   return theoremsJSON;
 }
 
+export function parametersToParametersJSON(parameters) {
+  const parametersJSON = parameters.map((parameter) => {
+    const parameterJSON = parameter.toJSON();
+
+    return parameterJSON;
+  });
+
+  return parametersJSON;
+}
+
 export function hypothesesToHypothesesJSON(hypotheses) {
   const hypothesesJSON = hypotheses.map((hypothesis) => {
     const hypothesisJSON = hypothesis.toJSON();
@@ -923,6 +965,16 @@ export function mnemicContextsToMnemicContextsJSON(mnemicContexts) {
   });
 
   return mnemicContextsJSON;
+}
+
+export function procedureCallsToProcedureCallsJSON(procedureCalls) {
+  const procedureCallsJSON = procedureCalls.map((procedureCall) => {
+    const procedureCallJSON = procedureCall.toJSON();
+
+    return procedureCallJSON;
+  });
+
+  return procedureCallsJSON;
 }
 
 export function declaredVariablesToDeclaredVariablesJSON(declaredVariables) {
