@@ -270,12 +270,12 @@ export default class Claim extends Element {
   toJSON() {
     let json;
 
-    const labelsJSON = labelsToLabelsJSON(this.labels),
+    const string = this.getString(),
+          labelsJSON = labelsToLabelsJSON(this.labels),
           deductionJSON = deductionToDeductionJSON(this.deduction),
           suppositionsJSON = suppositionsToSuppositionsJSON(this.suppositions),
           signatureJSON = signatureToSignatureJSON(this.signature),
-          hypothesesJSON = hypothesesToHypothesesJSON(this.hypotheses),
-          string = this.getString();
+          hypothesesJSON = hypothesesToHypothesesJSON(this.hypotheses);
 
     let breakPoint;
 

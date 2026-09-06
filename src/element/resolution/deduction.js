@@ -6,11 +6,10 @@ import Resolution from "../resolution";
 
 import { define } from "../../elements";
 import { desist, declare } from "../../utilities/state";
-import { instantiateDeduction } from "../../process/instantiate";
-import { isolate, attempt, reconcile, unserialise, instantiate } from "../../utilities/context";
+import { isolate, attempt, reconcile } from "../../utilities/context";
 
 const { cut, all } = continuationUtilities,
-      { breakable, breakPointFromJSON } = breakPointUtilities;
+      { breakable, unbreakable } = breakPointUtilities;
 
 export default define(class Deduction extends Resolution {
   getDeductionNode() {
@@ -95,7 +94,7 @@ export default define(class Deduction extends Resolution {
     }, specificContext);
   });
 
-  validate(state, context, forward, back) {
+  validate = unbreakable(function (state, context, forward, back) {
     const deductionString = this.getString(); ///
 
     context.trace(`Validating the '${deductionString}' deduction...`);
@@ -119,32 +118,9 @@ export default define(class Deduction extends Resolution {
 
       return forward(conclusion, context, back);
     }, back);
-  }
+  });
 
   static name = "Deduction";
 
-  static fromJSON(json, context) {
-    let deduction;
-
-    instantiate((context) => {
-      unserialise((json, context) => {
-        const { string } = json,
-              deductionNode = instantiateDeduction(string, context),
-              node = deductionNode,  ///
-              breakPoint = breakPointFromJSON(json),
-              statement = statementFromDeductionNode(deductionNode, context);
-
-        deduction = new Deduction(context, string, node, breakPoint, statement);
-      }, json, context);
-    }, context);
-
-    return deduction;
-  }
+  static fromJSON(json, context) { return Resolution.fromJSON(Deduction, json, context); }
 });
-
-function statementFromDeductionNode(deductionNode, context) {
-  const statementNode = deductionNode.getStatementNode(),
-        statement = context.findStatementByStatementNode(statementNode);
-
-  return statement;
-}

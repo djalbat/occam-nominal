@@ -64,7 +64,7 @@ export default define(class ImplicitAssumption extends Element {
     });
   });
 
-  validate(state, context, forward, back) {
+  validate = unbreakable(function (state, context, forward, back) {
     const implicitAssumptionString = this.getString();  ///
 
     context.trace(`Validating the '${implicitAssumptionString}' implicit assumption...`);
@@ -90,7 +90,7 @@ export default define(class ImplicitAssumption extends Element {
 
       return forward(implicitAssumption, context, back);
     }, back);
-  }
+  });
 
   validateStatement(state, context, forward, back) {
     const implicitAssumptionString = this.getString();  ///
@@ -104,26 +104,6 @@ export default define(class ImplicitAssumption extends Element {
 
       return forward(state, context, back);
     }, back);
-  }
-
-  unifyStatement(statement, generalContext, specificContext) {
-    debugger
-
-    let statementUnifies;
-
-    const context = specificContext, ///
-          statementString = statement.getString(),
-          proofAssertionString = this.getString();  ///
-
-    context.trace(`Unifying the '${statementString}' statement with the '${proofAssertionString}' implicitAssumption's statement...`);
-
-    statementUnifies = this.statement.unifyStatement(statement, generalContext, specificContext);
-
-    if (statementUnifies) {
-      context.debug(`...unified the '${statementString}' statement with the '${proofAssertionString}' implicitAssumption's statement.`);
-    }
-
-    return statementUnifies;
   }
 
   static name = "ImplicitAssumption";

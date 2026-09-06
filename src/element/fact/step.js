@@ -10,9 +10,9 @@ import { unifySteps } from "../../process/unification";
 import { derive, declare } from "../../utilities/state";
 import { isolate, attempt } from "../../utilities/context";
 
-const { breakable } = breakPointUtilities,
-      { backwardsSome } = arrayUtilities,
-      { cut, all, some } = continuationUtilities;
+const { backwardsSome } = arrayUtilities,
+      { cut, all, some } = continuationUtilities,
+      { breakable, unbreakable } = breakPointUtilities;
 
 export default define(class Step extends Fact {
   constructor(context, string, node, breakPoint, reference, statement, procedureReference, schemaAssertion, signatureAssertion) {
@@ -139,23 +139,7 @@ export default define(class Step extends Fact {
     });
   });
 
-  verifyReference(context, forward, back) {
-    if (this.reference === null) {
-      return forward(context, back);
-    }
-
-    const stepString = this.getString();  ///
-
-    context.trace(`Verifying the '${stepString}' step's reference...`);
-
-    return this.reference.verify(context, (context, back) => {
-      context.trace(`...verified the '${stepString}' step's reference.`);
-
-      return forward(context, back);
-    }, back);
-  }
-
-  validate(state, context, forward, back) {
+  validate = unbreakable(function (state, context, forward, back) {
     const stepString = this.getString(); ///
 
     context.trace(`Validating the '${stepString}' step...`);
@@ -180,6 +164,22 @@ export default define(class Step extends Fact {
       context.debug(`...validated the '${stepString}' step.`);
 
       return forward(state, context, back);
+    }, back);
+  });
+
+  verifyReference(context, forward, back) {
+    if (this.reference === null) {
+      return forward(context, back);
+    }
+
+    const stepString = this.getString();  ///
+
+    context.trace(`Verifying the '${stepString}' step's reference...`);
+
+    return this.reference.verify(context, (context, back) => {
+      context.trace(`...verified the '${stepString}' step's reference.`);
+
+      return forward(context, back);
     }, back);
   }
 

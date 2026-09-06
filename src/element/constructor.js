@@ -106,7 +106,7 @@ export default define(class Constructor extends Element {
     });
   });
 
-  validate(state, context, forward, back) {
+  validate = unbreakable(function (state, context, forward, back) {
     const includeType = false,
           constructorString = this.getString(includeType);  ///
 
@@ -133,7 +133,7 @@ export default define(class Constructor extends Element {
 
       return forward(constructor, context, back);
     }, back);
-  }
+  });
 
   validateTermAsVariable(state, context, forward, back) {
     const includeType = false,

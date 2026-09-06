@@ -1,12 +1,14 @@
 "use strict";
 
 import { arrayUtilities } from "necessary";
-import { Element, continuationUtilities } from "occam-languages";
+import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
 
 import { define } from "../elements";
+import {unbreakable} from "occam-languages/lib/utilities/breakPoint";
 
 const { last } = arrayUtilities,
-      { every } = continuationUtilities;
+      { every } = continuationUtilities,
+      { unbreakable } = breakPointUtilities;
 
 export default define(class Derivation extends Element {
   constructor(context, string, node, breakPoint, factOrSubproofs) {
@@ -34,7 +36,7 @@ export default define(class Derivation extends Element {
     return lastStep;
   }
 
-  verify(context, forward, back) {
+  verify = unbreakable(function (context, forward, back) {
     return every(this.factOrSubproofs, (factOrSubproof, context, forward, back) => {
       return factOrSubproof.verify(context, (context , back) => {
         context.addFactOrSubproof(factOrSubproof);
@@ -44,7 +46,7 @@ export default define(class Derivation extends Element {
         return forward(context, back);
       }, back);
     }, context, forward, back);
-  }
+  });
 
   static name = "Derivation";
 });

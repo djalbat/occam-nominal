@@ -109,7 +109,7 @@ export default define(class Constraint extends Element {
     });
   });
 
-  validate(state, context, forward, back) {
+  validate = unbreakable(function (state, context, forward, back) {
     let constraint;
 
     const constraintString = this.getString();  ///
@@ -149,7 +149,7 @@ export default define(class Constraint extends Element {
 
       return forward(constraint, context, back);
     }, back);
-  }
+  });
 
   validateMetavaraible(state, context, forward, back) {
     const constraintString = this.getString();  ///

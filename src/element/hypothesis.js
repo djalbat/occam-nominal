@@ -6,9 +6,10 @@ import { define } from "../elements";
 import { declare } from "../utilities/state";
 import { instantiateHypothesis } from "../process/instantiate";
 import { isolate, attempt, serialise, unserialise, instantiate } from "../utilities/context";
+import {unbreakable} from "occam-languages/lib/utilities/breakPoint";
 
 const { cut, all } = continuationUtilities,
-      { breakable, breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
+      { breakable, unbreakable, breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Hypothesis extends Element {
   constructor(context, string, node, breakPoint, statement, procedureReference) {
@@ -91,7 +92,7 @@ export default define(class Hypothesis extends Element {
     }, back);
   });
 
-  validate(state, context, forward, back) {
+  validate = unbreakable(function (state, context, forward, back) {
     const hypothesisString = this.getString();  ///
 
     context.trace(`Validating the '${hypothesisString}' hypothesis...`);
@@ -117,7 +118,7 @@ export default define(class Hypothesis extends Element {
 
       return forward(hypothesis, context, back);
     }, back);
-  }
+  });
 
   validateStatement(state, context, forward, back) {
     if (this.statement === null) {

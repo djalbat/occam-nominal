@@ -106,7 +106,7 @@ export default define(class Generator extends Element {
     });
   });
 
-  validate(state, context, forward, back) {
+  validate = unbreakable(function (state, context, forward, back) {
     const includeType = false,
           generatorString = this.getString(includeType);  ///
 
@@ -133,7 +133,7 @@ export default define(class Generator extends Element {
 
       return forward(generator, context, back);
     }, back);
-  }
+  });
 
   validateTermAsVariable(state, context, forward, back) {
     const includeType = false,

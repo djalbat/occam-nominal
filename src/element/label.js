@@ -75,7 +75,7 @@ export default define(class Label extends Element {
     });
   });
 
-  validate(state, context, forward, back) {
+  validate = unbreakable(function (state, context, forward, back) {
     const labelString = this.getString(); ////
 
     context.trace(`Validating the '${labelString}' label...`);
@@ -101,7 +101,7 @@ export default define(class Label extends Element {
 
       return forward(label, context, back);
     }, back);
-  }
+  });
 
   validateMetavariable(state, context, forward, back) {
     const labelString = this.getString(); ///

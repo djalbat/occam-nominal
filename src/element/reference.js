@@ -90,7 +90,7 @@ export default define(class Reference extends Element {
     });
   });
 
-  validate(state, context, forward, back) {
+  validate = unbreakable(function (state, context, forward, back) {
     const referenceString = this.getString(); ////
 
     context.trace(`Validating the '${referenceString}' reference...`);
@@ -116,7 +116,7 @@ export default define(class Reference extends Element {
 
       return forward(reference, context, back);
     }, back);
-  }
+  });
 
   validateMetavariable(state, context, forward, back) {
     const referenceString = this.getString(); ///

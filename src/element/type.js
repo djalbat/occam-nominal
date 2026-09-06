@@ -1,7 +1,7 @@
 "use strict";
 
+import { Element } from "occam-languages";
 import { arrayUtilities } from "necessary";
-import { Element, breakPointUtilities } from "occam-languages";
 
 import { define } from "../elements";
 import { instantiate } from "../utilities/context";
@@ -18,8 +18,7 @@ import { propertiesFromJSON,
          propertiesToPropertiesJSON,
          provisionalToProvisionalJSON } from "../utilities/json";
 
-const { push, first, intersection } = arrayUtilities,
-      { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
+const { push, first, intersection } = arrayUtilities;
 
 export default define(class Type extends Element {
   constructor(context, string, node, breakPoint, name, prefixName, superTypes, properties, provisional) {
@@ -361,17 +360,8 @@ export default define(class Type extends Element {
   toJSON(abridged = false) {
     const string = this.getString();
 
-    let breakPoint;
-
-    breakPoint = this.getBreakPoint();
-
-    const breakPointJSON = breakPointToBreakPointJSON(breakPoint);
-
-    breakPoint = breakPointJSON;  ///
-
     const json = {
-      string,
-      breakPoint
+      string
     };
 
     if (!abridged) {
@@ -404,7 +394,7 @@ export default define(class Type extends Element {
       const { string } = json,
             typeNode = instantiateType(string, context),
             node = typeNode, ///
-            breakPoint = breakPointFromJSON(json),
+            breakPoint = null,
             name = nameFromTypeNode(typeNode, context),
             prefixName = prefixNameFromJSON(json, context),
             superTypes = superTypesFromJSON(json, context),

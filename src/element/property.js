@@ -89,7 +89,7 @@ export default define(class Property extends Element {
     });
   });
 
-  validate(state, context, forward, back) {
+  validate = unbreakable(function (state, context, forward, back) {
     const includeType = false,
           propertyString = this.getString(includeType);  ///
 
@@ -114,7 +114,7 @@ export default define(class Property extends Element {
 
       return forward(property, context, back);
     }, back);
-  }
+  });
 
   validateTermAsProperty(state, context, forward, back) {
     const includeType = false,

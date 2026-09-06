@@ -111,7 +111,7 @@ export default define(class Metavariable extends Element {
     return comparesToMetavariableName;
   }
 
-  verify(context, forward, back) {
+  verify = unbreakable(function (context, forward, back) {
     const metavariableString = this.getString();  ///
 
     context.trace(`Verifying the '${metavariableString}' metavariable...`);
@@ -135,46 +135,7 @@ export default define(class Metavariable extends Element {
 
       return forward(context, back);
     }, back);
-  }
-
-  verifyTerm(context, forward, back) {
-    const metavariableString = this.getString();  ///
-
-    context.trace(`Verifying the '${metavariableString}' metavariable's term...`);
-
-    if (this.term !== null) {
-      context.debug(`The '${metavariableString}' metavariable can only have a type and not a term.`);
-
-      return back();
-    }
-
-    context.debug(`...verified the '${metavariableString}' metavariable's term.`);
-
-    return forward(context, back);
-  }
-
-  verifyType(context, forward, back) {
-    if (this.type === null) {
-      return forward(context, back);
-    }
-
-    const metavariableString = this.getString();  ///
-
-    context.trace(`Verifying the '${metavariableString}' metavariable's type...`);
-
-    const typeName = this.type.getName(),
-          type = context.findTypeByTypeName(typeName);
-
-    if (type === null) {
-      return back();
-    }
-
-    this.type = type;
-
-    context.debug(`...verifieds the '${metavariableString}' metavariable's type.`);
-
-    return forward(context, back);
-  }
+  });
 
   validate = unbreakable(function (strict, state, context, forward, back) {
     if (back === undefined) {
@@ -221,6 +182,45 @@ export default define(class Metavariable extends Element {
       return forward(metavariable, context, back);
     }, back);
   });
+
+  verifyTerm(context, forward, back) {
+    const metavariableString = this.getString();  ///
+
+    context.trace(`Verifying the '${metavariableString}' metavariable's term...`);
+
+    if (this.term !== null) {
+      context.debug(`The '${metavariableString}' metavariable can only have a type and not a term.`);
+
+      return back();
+    }
+
+    context.debug(`...verified the '${metavariableString}' metavariable's term.`);
+
+    return forward(context, back);
+  }
+
+  verifyType(context, forward, back) {
+    if (this.type === null) {
+      return forward(context, back);
+    }
+
+    const metavariableString = this.getString();  ///
+
+    context.trace(`Verifying the '${metavariableString}' metavariable's type...`);
+
+    const typeName = this.type.getName(),
+          type = context.findTypeByTypeName(typeName);
+
+    if (type === null) {
+      return back();
+    }
+
+    this.type = type;
+
+    context.debug(`...verifieds the '${metavariableString}' metavariable's type.`);
+
+    return forward(context, back);
+  }
 
   validateName(strict, state, context, forward, back) {
     const metavariableString = this.getString();  ///

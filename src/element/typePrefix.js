@@ -7,7 +7,7 @@ import { instantiate } from "../utilities/context";
 import { instantiateTypePrefix } from "../process/instantiate";
 import { nameFromTypePrefixNode } from "../utilities/element";
 
-const { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
+const { unbreakable } = breakPointUtilities;
 
 export default define(class TypePrefix extends Element {
   constructor(context, string, node, breakPoint, name) {
@@ -39,7 +39,7 @@ export default define(class TypePrefix extends Element {
     return comparesToTypePrefixName;
   }
 
-  verify(context, forward, back) {
+  verify = unbreakable(function (context, forward, back) {
     const typePrefixString = this.getString();  ///
 
     context.trace(`Verifying the '${typePrefixString}' type prefix...`);
@@ -73,24 +73,15 @@ export default define(class TypePrefix extends Element {
     context.debug(`...verified the '${typePrefixString}' type prefix.`);
 
     return forward(context, back);
-  }
+  });
 
   toJSON() {
     let json;
 
     const string = this.getString();
 
-    let breakPoint;
-
-    breakPoint = this.getBreakPoint();
-
-    const breakPointJSON = breakPointToBreakPointJSON(breakPoint);
-
-    breakPoint = breakPointJSON;  ///
-
     json = {
-      string,
-      breakPoint
+      string
     };
 
     return json;
@@ -105,7 +96,7 @@ export default define(class TypePrefix extends Element {
       const { string } = json,
             typePrefixNode = instantiateTypePrefix(string, context),
             node = typePrefixNode, ///
-            breakPoint = breakPointFromJSON(json),
+            breakPoint = null,
             name = nameFromTypePrefixNode(typePrefixNode, context);
 
       context = null; ///

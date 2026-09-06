@@ -6,11 +6,10 @@ import Resolution from "../resolution";
 
 import { define } from "../../elements";
 import { desist, declare } from "../../utilities/state";
-import { instantiateConclusion } from "../../process/instantiate";
-import { isolate, attempt, reconcile, unserialise, instantiate } from "../../utilities/context";
+import { isolate, attempt, reconcile } from "../../utilities/context";
 
 const { cut, all } = continuationUtilities,
-      { breakable, breakPointFromJSON } = breakPointUtilities;
+      { breakable, unbreakable } = breakPointUtilities;
 
 export default define(class Conclusion extends Resolution {
   getConclusionNode() {
@@ -95,7 +94,7 @@ export default define(class Conclusion extends Resolution {
     }, specificContext);
   });
 
-  validate(state, context, forward, back) {
+  validate = unbreakable(function (state, context, forward, back) {
     const conclusionString = this.getString(); ///
 
     context.trace(`Validating the '${conclusionString}' conclusion...`);
@@ -119,32 +118,9 @@ export default define(class Conclusion extends Resolution {
 
       return forward(conclusion, context, back);
     }, back);
-  }
+  });
 
   static name = "Conclusion";
 
-  static fromJSON(json, context) {
-    let conclusion;
-
-    instantiate((context) => {
-      unserialise((json, context) => {
-        const { string } = json,
-              conclusionNode = instantiateConclusion(string, context),
-              node = conclusionNode,  ///
-              breakPoint = breakPointFromJSON(json),
-              statement = statementFromConclusionNode(conclusionNode, context);
-
-        conclusion = new Conclusion(context, string, node, breakPoint, statement);
-      }, json, context);
-    }, context);
-
-    return conclusion;
-  }
+  static fromJSON(json, context) { return Resolution.fromJSON(Conclusion, json, context); }
 });
-
-function statementFromConclusionNode(conclusionNode, context) {
-  const statementNode = conclusionNode.getStatementNode(),
-        statement = context.findStatementByStatementNode(statementNode);
-
-  return statement;
-}

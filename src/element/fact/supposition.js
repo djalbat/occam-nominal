@@ -10,7 +10,7 @@ import { instantiateSupposition } from "../../process/instantiate";
 import { isolate, attempt, reconcile, serialise, unserialise, instantiate } from "../../utilities/context";
 
 const { cut, all } = continuationUtilities,
-      { breakable, breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
+      { breakable, unbreakable, breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Supposition extends Fact {
   getSuppositionNode() {
@@ -113,6 +113,34 @@ export default define(class Supposition extends Fact {
     });
   });
 
+  validate = unbreakable(function (state, context, forward, back) {
+    const suppositionString = this.getString(); ///
+
+    context.trace(`Validating the '${suppositionString}' supposition...`);
+
+    return isolate((state, context, forward, back) => {
+      return attempt((context) => {
+        const validateStatement = this.validateStatement.bind(this),
+              validateProcedureReference = this.validateProcedureReference.bind(this);
+
+        return all([
+          validateStatement,
+          validateProcedureReference
+        ], state, context, (state, context, back) => {
+          this.commit(context);
+
+          return forward(back);
+        }, back);
+      }, context);
+    }, state, context, (state, context, back) => {
+      const supposition = this; ///
+
+      context.debug(`...validated the '${suppositionString}' supposition.`);
+
+      return forward(supposition, context, back);
+    }, back);
+  });
+
   applyIndependently = breakable( function(context, forward, back) {
     forward = cut(forward, back); ///
 
@@ -140,34 +168,6 @@ export default define(class Supposition extends Fact {
       return back();
     });
   });
-
-  validate(state, context, forward, back) {
-    const suppositionString = this.getString(); ///
-
-    context.trace(`Validating the '${suppositionString}' supposition...`);
-
-    return isolate((state, context, forward, back) => {
-      return attempt((context) => {
-        const validateStatement = this.validateStatement.bind(this),
-              validateProcedureReference = this.validateProcedureReference.bind(this);
-
-        return all([
-          validateStatement,
-          validateProcedureReference
-        ], state, context, (state, context, back) => {
-          this.commit(context);
-
-          return forward(back);
-        }, back);
-      }, context);
-    }, state, context, (state, context, back) => {
-      const supposition = this; ///
-
-      context.debug(`...validated the '${suppositionString}' supposition.`);
-
-      return forward(supposition, context, back);
-    }, back);
-  }
 
   unifyFact(factOrSubproof, context, forward, back) {
     const factOrSubproofFact = factOrSubproof.isFact();

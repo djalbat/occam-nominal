@@ -8,9 +8,10 @@ import { define } from "../../elements";
 import { declare } from "../../utilities/state";
 import { instantiatePremise } from "../../process/instantiate";
 import { isolate, attempt, reconcile, serialise, unserialise, instantiate } from "../../utilities/context";
+import {unbreakable} from "occam-languages/lib/utilities/breakPoint";
 
 const { cut, all } = continuationUtilities,
-      { breakable, breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
+      { breakable, unbreakable, breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Premise extends Fact {
   getPremiseNode() {
@@ -113,6 +114,34 @@ export default define(class Premise extends Fact {
     });
   });
 
+  validate = unbreakable(function (state, context, forward, back) {
+    const premiseString = this.getString(); ///
+
+    context.trace(`Validating the '${premiseString}' premise...`);
+
+    return isolate((state, context, forward, back) => {
+      return attempt((context) => {
+        const validateStatement = this.validateStatement.bind(this),
+              validateProcedureReference = this.validateProcedureReference.bind(this);
+
+        return all([
+          validateStatement,
+          validateProcedureReference
+        ], state, context, (state, context, back) => {
+          this.commit(context);
+
+          return forward(back);
+        }, back);
+      }, context);
+    }, state, context, (state, context, back) => {
+      const premise = this; ///
+
+      context.debug(`...validated the '${premiseString}' premise.`);
+
+      return forward(premise, context, back);
+    }, back);
+  });
+
   applyIndependently = breakable(function (context, forward, back) {
     forward = cut(forward, back); ///
 
@@ -140,34 +169,6 @@ export default define(class Premise extends Fact {
       return back();
     });
   });
-
-  validate(state, context, forward, back) {
-    const premiseString = this.getString(); ///
-
-    context.trace(`Validating the '${premiseString}' premise...`);
-
-    return isolate((state, context, forward, back) => {
-      return attempt((context) => {
-        const validateStatement = this.validateStatement.bind(this),
-              validateProcedureReference = this.validateProcedureReference.bind(this);
-
-        return all([
-          validateStatement,
-          validateProcedureReference
-        ], state, context, (state, context, back) => {
-          this.commit(context);
-
-          return forward(back);
-        }, back);
-      }, context);
-    }, state, context, (state, context, back) => {
-      const premise = this; ///
-
-      context.debug(`...validated the '${premiseString}' premise.`);
-
-      return forward(premise, context, back);
-    }, back);
-  }
 
   unifyFact(factOrSubproof, context, forward, back) {
     const factOrSubproofFact = factOrSubproof.isFact();

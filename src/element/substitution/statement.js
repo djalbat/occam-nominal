@@ -139,7 +139,7 @@ export default define(class StatementSubstitution extends Substitution {
     });
   });
 
-  validate(state, context, forward, back) {
+  validate = unbreakable(function (state, context, forward, back) {
     let substitution;
 
     const statementSubstitutionString = this.getString();  ///
@@ -184,7 +184,7 @@ export default define(class StatementSubstitution extends Substitution {
 
       return forward(statementSubstitution, context, back);
     }, back);
-  }
+  });
 
   validateTargetStatement(state, context, generalContext, specificContext, forward, back) {
     const statementSubstitutionString = this.getString();  ///

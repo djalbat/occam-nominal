@@ -225,9 +225,9 @@ export default define(class TypeAssertion extends Assertion {
   toJSON() {
     let json;
 
-    const typeJSON = typeToTypeJSON(this.type),
-          name = this.getName(),
+    const name = this.getName(),
           string = this.getString(),
+          typeJSON = typeToTypeJSON(this.type),
           type = typeJSON;  ///
 
     json = {

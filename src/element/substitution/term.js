@@ -97,7 +97,7 @@ export default define(class TermSubstitution extends Substitution {
     });
   });
 
-  validate(state, context, forward, back) {
+  validate = unbreakable(function (state, context, forward, back) {
     let substitution;
 
     const termSubstitutionString = this.getString();  ///
@@ -142,7 +142,7 @@ export default define(class TermSubstitution extends Substitution {
 
       return forward(termSubstitution, context, back);
     }, back);
-  }
+  });
 
   validateTargetTerm(state, context, generalContext, specificContext, forward, back) {
     const termSubstitutionString = this.getString();  ///

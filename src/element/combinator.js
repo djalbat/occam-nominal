@@ -64,7 +64,7 @@ export default define(class Combinator extends Element {
     });
   });
 
-  validate(state, context, forward, back) {
+  validate = unbreakable(function (state, context, forward, back) {
     const includeType = false,
           combinatorString = this.getString(includeType);  ///
 
@@ -89,7 +89,7 @@ export default define(class Combinator extends Element {
 
       return forward(combinator, context, back);
     }, back);
-  }
+  });
 
   validateStatementAsCombinator(state, context, forward, back) {
     const includeType = false,

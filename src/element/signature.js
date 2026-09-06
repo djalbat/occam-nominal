@@ -75,7 +75,7 @@ export default define(class Signature extends Element {
     });
   });
 
-  validate(state, context, forward, back) {
+  validate = unbreakable(function (state, context, forward, back) {
     const signatureString = this.getString(); ////
 
     context.trace(`Validating the '${signatureString}' signature...`);
@@ -101,7 +101,7 @@ export default define(class Signature extends Element {
 
       return forward(signature, context, back);
     }, back);
-  }
+  });
 
   validateTermAsAVariable(term, terms, state, context, forward, back) {
     const termString = term.getString(),
