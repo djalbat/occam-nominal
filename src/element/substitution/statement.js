@@ -101,8 +101,8 @@ export default define(class StatementSubstitution extends Substitution {
     forward = cut(forward, back); ///
 
     const metavariableNode = this.getMetavariableNode(),
-          simpleInferredSubstitution = context.findSimpleInferredSubstitutionByMetavariableNode(metavariableNode),
-          simpleSubstitution = simpleInferredSubstitution, ///
+          simpleDerivedSubstitution = context.findSimpleDerivedSubstitutionByMetavariableNode(metavariableNode),
+          simpleSubstitution = simpleDerivedSubstitution, ///
           complexSubstitution = this, ///
           complexSubstitutionString = complexSubstitution.getString();
 
@@ -273,13 +273,13 @@ export default define(class StatementSubstitution extends Substitution {
 
     return reconcile((specificContext) => {
       return generalStatement.unifyStatement(specificStatement, generalContext, specificContext, (generalContext, specificContext, back) => {
-        const singularNonTrivialInferredSubstitution = specificContext.getSingularNonTrivialInferredSubstitution();
+        const singularNonTrivialDerivedSubstitution = specificContext.getSingularNonTrivialDerivedSubstitution();
 
-        if (singularNonTrivialInferredSubstitution === null) {
+        if (singularNonTrivialDerivedSubstitution === null) {
           return back();
         }
 
-        const substitution = singularNonTrivialInferredSubstitution; ///
+        const substitution = singularNonTrivialDerivedSubstitution; ///
 
         return forward(substitution, context, back);
       }, back);

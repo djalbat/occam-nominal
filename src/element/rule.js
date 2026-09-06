@@ -244,7 +244,7 @@ export default define(class Rule extends Element {
       (factOrSubproof, forward, back) => {
         return premise.apply(factOrSubproof, context, forward, back);
       }, (factOrSubproofs, factOrSubproof, context, back) => {
-        return context.solveInferredSubstitutions((back) => {
+        return context.solveDerivedSubstitutions((back) => {
           return forward(factOrSubproofs, context, back);
         }, back);
       }, (exception) => {

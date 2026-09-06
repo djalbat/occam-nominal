@@ -13,7 +13,7 @@ export default class KrasicContext extends Context {
     return this.contexts;
   }
 
-  getInferredSubstitutions(inferredSubstitutions = []) {
+  getDerivedSubstitutions(derivedSubstitutions = []) {
     const context = this.getContext(),
           contexts = [
             context,
@@ -21,10 +21,10 @@ export default class KrasicContext extends Context {
           ];
 
     contexts.forEach((context) => {
-      context.getInferredSubstitutions(inferredSubstitutions);
+      context.getDerivedSubstitutions(derivedSubstitutions);
     })
 
-    return inferredSubstitutions;
+    return derivedSubstitutions;
   }
 
   static fromContexts(contexts) {

@@ -10,10 +10,10 @@ export function termFromTermAndSubstitutions(term, context) {
 
   if (termSingular) {
     const variableNode = termNode.getVariableNode(),
-          inferredSubstitution = context.findInferredSubstitutionByVariableNode(variableNode);
+          derivedSubstitution = context.findDerivedSubstitutionByVariableNode(variableNode);
 
-    if (inferredSubstitution !== null) {
-      const replacementTerm = inferredSubstitution.getReplacementTerm();
+    if (derivedSubstitution !== null) {
+      const replacementTerm = derivedSubstitution.getReplacementTerm();
 
       term = replacementTerm; ///
     }
@@ -28,10 +28,10 @@ export function statementFromStatementAndSubstitutions(statement, context) {
 
   if (statementSingular) {
     const metavariableNode = statementNode.getMetavariableNode(),
-          inferredSubstitution = context.findInferredSubstitutionByMetavariableNode(metavariableNode);
+          derivedSubstitution = context.findDerivedSubstitutionByMetavariableNode(metavariableNode);
 
-    if (inferredSubstitution !== null) {
-      const replacementStatement = inferredSubstitution.getReplacementStatement();
+    if (derivedSubstitution !== null) {
+      const replacementStatement = derivedSubstitution.getReplacementStatement();
 
       statement = replacementStatement; ///
     }
@@ -40,11 +40,11 @@ export function statementFromStatementAndSubstitutions(statement, context) {
   return statement;
 }
 
-export function metavariableNodesFromInferredSubstitutions(inferredSubstitutions) {
+export function metavariableNodesFromDerivedSubstitutions(derivedSubstitutions) {
   const metavariableNodes = [];
 
-  inferredSubstitutions.forEach((inferredSubstitution) => {
-    const metavariableNode = inferredSubstitution.getMetavariableNode();
+  derivedSubstitutions.forEach((derivedSubstitution) => {
+    const metavariableNode = derivedSubstitution.getMetavariableNode();
 
     if (metavariableNode !== null) {
       metavariableNodes.push(metavariableNode);

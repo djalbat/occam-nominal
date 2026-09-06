@@ -118,15 +118,15 @@ export default define(class Variable extends Element {
 
     const variable = this,  ///
           variableNode = variable.getNode(),
-          inferredSubstitution = context.findInferredSubstitutionByVariableNode(variableNode);
+          derivedSubstitution = context.findDerivedSubstitutionByVariableNode(variableNode);
 
-    if (inferredSubstitution !== null) {
-      const inferredSubstitutionComparesToTerm = inferredSubstitution.compareTerm(term, context);
+    if (derivedSubstitution !== null) {
+      const derivedSubstitutionComparesToTerm = derivedSubstitution.compareTerm(term, context);
 
-      if (inferredSubstitutionComparesToTerm) {
-        const inferredSubstitutionString = inferredSubstitution.getString();
+      if (derivedSubstitutionComparesToTerm) {
+        const derivedSubstitutionString = derivedSubstitution.getString();
 
-        context.trace(`The '${inferredSubstitutionString}' inferred substitution is already present.`);
+        context.trace(`The '${derivedSubstitutionString}' derived substitution is already present.`);
 
         return forward(generalContext, specificContext, back);
       }
@@ -138,9 +138,9 @@ export default define(class Variable extends Element {
           termSubstitution = TermSubstitution.fromTermAndVariable(term, variable, generalContext, specificContext);
 
     return termSubstitution.verify(context, (context, back) => {
-      const inferredSubstitution = termSubstitution;  ///
+      const derivedSubstitution = termSubstitution;  ///
 
-      context.addInferredSubstitution(inferredSubstitution);
+      context.addDerivedSubstitution(derivedSubstitution);
 
       context.debug(`...unified the '${termString}' term with the '${variableString}' variable.`);
 

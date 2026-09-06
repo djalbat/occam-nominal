@@ -141,12 +141,12 @@ export default class Context extends ContextBase {
     return procedureReferences;
   }
 
-  getInferredSubstitutions(inferredSubstitutions = []) {
+  getDerivedSubstitutions(derivedSubstitutions = []) {
     const context = this.getContext();
 
-    context.getInferredSubstitutions(inferredSubstitutions);
+    context.getDerivedSubstitutions(derivedSubstitutions);
 
-    return inferredSubstitutions;
+    return derivedSubstitutions;
   }
 
   getGenerators(includeRelease = true) {
@@ -364,18 +364,18 @@ export default class Context extends ContextBase {
     return procedureReference;
   }
 
-  findInferredSubstitutionByVariableNode(variableNode) {
+  findDerivedSubstitutionByVariableNode(variableNode) {
     const context = this.getContext(),
-          inferredSubstitution = context.findInferredSubstitutionByVariableNode(variableNode);
+          derivedSubstitution = context.findDerivedSubstitutionByVariableNode(variableNode);
 
-    return inferredSubstitution;
+    return derivedSubstitution;
   }
 
-  findInferredSubstitutionByMetavariableNode(metavariableNode) {
+  findDerivedSubstitutionByMetavariableNode(metavariableNode) {
     const context = this.getContext(),
-          inferredSubstitution = context.findInferredSubstitutionByMetavariableNode(metavariableNode);
+          derivedSubstitution = context.findDerivedSubstitutionByMetavariableNode(metavariableNode);
 
-    return inferredSubstitution;
+    return derivedSubstitution;
   }
 
   findConstraintByConstraintNode(constraintNode) {
@@ -525,18 +525,18 @@ export default class Context extends ContextBase {
     return referencePresent;
   }
 
-  isInferredSubstitutionPresentByMetavariableNode(metavariableNode) {
+  isDerivedSubstitutionPresentByMetavariableNode(metavariableNode) {
     const context = this.getContext(),
-          inferredSubstitutionPresent = context.isInferredSubstitutionPresentByMetavariableNode(metavariableNode);
+          derivedSubstitutionPresent = context.isDerivedSubstitutionPresentByMetavariableNode(metavariableNode);
 
-    return inferredSubstitutionPresent;
+    return derivedSubstitutionPresent;
   }
 
-  isInferredSubstitutionPresentByMetavariableNodeAndSubstitutionNode(metavariableNode, substitutionNode) {
+  isDerivedSubstitutionPresentByMetavariableNodeAndSubstitutionNode(metavariableNode, substitutionNode) {
     const context = this.getContext(),
-          inferredSubstitutionPresent = context.isInferredSubstitutionPresentByMetavariableNodeAndSubstitutionNode(metavariableNode, substitutionNode);
+          derivedSubstitutionPresent = context.isDerivedSubstitutionPresentByMetavariableNodeAndSubstitutionNode(metavariableNode, substitutionNode);
 
-    return inferredSubstitutionPresent;
+    return derivedSubstitutionPresent;
   }
 
   isMetaLevel() {

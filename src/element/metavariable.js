@@ -339,17 +339,17 @@ export default define(class Metavariable extends Element {
           metavariableNode = metavariable.getNode(),
           siblingSubstitutionNode = metavariableNode.getSiblingSubstitutionNode(),
           substitutionNode = siblingSubstitutionNode, ///
-          inferredSubstitution = (substitutionNode !== null) ?
-                                  context.findInferredSubstitutionByMetavariableNodeAndSubstitutionNode(metavariableNode, substitutionNode) :
-                                    context.findInferredSubstitutionByMetavariableNode(metavariableNode);
+          derivedSubstitution = (substitutionNode !== null) ?
+                                  context.findDerivedSubstitutionByMetavariableNodeAndSubstitutionNode(metavariableNode, substitutionNode) :
+                                    context.findDerivedSubstitutionByMetavariableNode(metavariableNode);
 
-    if (inferredSubstitution !== null) {
-      const inferredSubstitutionComparesToStatement = inferredSubstitution.compareStatement(statement, context);
+    if (derivedSubstitution !== null) {
+      const derivedSubstitutionComparesToStatement = derivedSubstitution.compareStatement(statement, context);
 
-      if (inferredSubstitutionComparesToStatement) {
-        const inferredSubstitutionString = inferredSubstitution.getString();
+      if (derivedSubstitutionComparesToStatement) {
+        const derivedSubstitutionString = derivedSubstitution.getString();
 
-        context.trace(`The '${inferredSubstitutionString}' inferred substitution is already present.`);
+        context.trace(`The '${derivedSubstitutionString}' derived substitution is already present.`);
 
         return forward(generalContext, specificContext, back);
       }
@@ -371,9 +371,9 @@ export default define(class Metavariable extends Element {
     }
 
     return statementSubstitution.verify(context, (context, back) => {
-      const inferredSubstitution = statementSubstitution;  ///
+      const derivedSubstitution = statementSubstitution;  ///
 
-      context.addInferredSubstitution(inferredSubstitution);
+      context.addDerivedSubstitution(derivedSubstitution);
 
       context.debug(`...unified the '${statementString}' statement with the '${metavariableString}' metavariable.`);
 

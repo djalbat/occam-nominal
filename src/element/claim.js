@@ -242,7 +242,7 @@ export default class Claim extends Element {
       (factOrSubproof, forward, back) => {
         return supposition.apply(factOrSubproof, context, forward, back);
       }, (factOrSubproofs, factOrSubproof, context, back) => {
-        return context.solveInferredSubstitutions((back) => {
+        return context.solveDerivedSubstitutions((back) => {
           return forward(factOrSubproofs, context, back);
         }, back);
       }, (exception) => {

@@ -64,8 +64,8 @@ export default define(class ProcedureReference extends Element {
   }
 
   findValues(context) {
-    const inferredSubstitutions = context.getInferredSubstitutions(),
-          substitutions = inferredSubstitutions, ///
+    const derivedSubstitutions = context.getDerivedSubstitutions(),
+          substitutions = derivedSubstitutions, ///
           values = this.parameters.map((parameter) => {
             const value = parameter.findValue(substitutions);
 

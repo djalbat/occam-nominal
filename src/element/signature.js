@@ -6,6 +6,7 @@ import { define } from "../elements";
 import { declare } from "../utilities/state";
 import { termsStringFromTerms } from "../utilities/string";
 import { instantiateSignature } from "../process/instantiate";
+import { validateTermAsVariable } from "../process/validation"
 import { isolate, attempt, reconcile, serialise, unserialise, instantiate } from "../utilities/context";
 
 const { unbreakable } = breakPointUtilities,
@@ -83,10 +84,10 @@ export default define(class Signature extends Element {
       context = this.getContext();
 
       return attempt((context) => {
-        const validateTerms = this.validateTerms.bind(this);
+        const validateTermsAsVariables = this.validateTermsAsVariables.bind(this);
 
         return all([
-          validateTerms
+          validateTermsAsVariables
         ], state, context, (state, context, back) => {
           this.commit(context);
 
@@ -102,34 +103,34 @@ export default define(class Signature extends Element {
     }, back);
   }
 
-  validateTerm(term, terms, state, context, forward, back) {
+  validateTermAsAVariable(term, terms, state, context, forward, back) {
     const termString = term.getString(),
           signatureString = this.getString();  ///
 
-    context.trace(`Validating the '${signatureString}' signature's '${termString}' term...`);
+    context.trace(`Validating the '${signatureString}' signature's '${termString}' term as a variable...`);
 
-    return term.validate(state, context, (term, context, back) => {
+    return validateTermAsVariable(term, state, context, (term, state, context, back) => {
       terms.push(term);
 
-      context.debug(`...validated the '${signatureString}' signature's '${termString}' term.`);
+      context.debug(`...validated the '${signatureString}' signature's '${termString}' term as a variable.`);
 
       return forward(terms, state, context, back);
     }, back);
   }
 
-  validateTerms(state, context, forward, back) {
+  validateTermsAsVariables(state, context, forward, back) {
     const signatureString = this.getString();  ///
 
-    context.trace(`Validating the '${signatureString}' signature's terms...`);
+    context.trace(`Validating the '${signatureString}' signature's terms as variables...`);
 
     const terms = [];
 
     return every(this.terms, (term, terms, state, context, forward, back) => {
-      return this.validateTerm(term, terms, state, context, forward, back);
+      return this.validateTermAsAVariable(term, terms, state, context, forward, back);
     }, terms, state, context, (terms, state, context, back) => {
       this.terms = terms;
 
-      context.debug(`...validated the '${signatureString}' signature's terms.`);
+      context.debug(`...validated the '${signatureString}' signature's terms as variables.`);
 
       return forward(state, context, back);
     }, back);

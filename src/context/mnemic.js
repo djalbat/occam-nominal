@@ -449,7 +449,7 @@ export default class MnemicContext extends Context {
     context.addAssignment(assignment);
   }
 
-  addInferredSubstitutions(inferredSubstitutions) {
+  addDerivedSubstitutions(derivedSubstitutions) {
     ///
   }
 

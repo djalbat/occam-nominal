@@ -292,8 +292,8 @@ export default class NominalFileContext extends FileContext {
     return procedureReferences;
   }
 
-  getInferredSubstitutions(inferredSubstitutions = []) {
-    return inferredSubstitutions;
+  getDerivedSubstitutions(derivedSubstitutions = []) {
+    return derivedSubstitutions;
   }
 
   getEquivalences() {
