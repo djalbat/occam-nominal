@@ -95,9 +95,9 @@ export default class Claim extends Element {
 
     context.trace(`Verifying the '${claimString}' claim's labels...`);
 
-    const verifyLabel = this.verifyLabel.bind(this);
-
-    return every(this.labels, verifyLabel, context, (context, back) => {
+    return every(this.labels, (label, context, forward, back) => {
+      return this.verifyLabel(label, context, forward, back);
+    }, context, (context, back) => {
       context.debug(`...verified the '${claimString}' claim's labels.`);
 
       return forward(context, back);
