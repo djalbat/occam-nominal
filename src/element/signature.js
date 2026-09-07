@@ -112,6 +112,8 @@ export default define(class Signature extends Element {
     return validateTermAsVariable(term, state, context, (term, state, context, back) => {
       terms.push(term);
 
+      context.addTerm(term);
+
       context.debug(`...validated the '${signatureString}' signature's '${termString}' term as a variable.`);
 
       return forward(terms, state, context, back);
