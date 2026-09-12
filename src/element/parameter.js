@@ -1,8 +1,7 @@
 "use strict";
 
+import { NominalValue } from "occam-furtle";
 import { Element, breakPointUtilities } from "occam-languages";
-
-import Value from "../value";
 
 import { define } from "../elements";
 import { instantiate } from "../utilities/context";
@@ -49,8 +48,8 @@ export default define(class Parameter extends Element {
     return parameterNodeMatches;
   }
 
-  findValue(substitutions) {
-    let value = null;
+  findNominalValue(substitutions) {
+    let nominalValue = null;
 
     const parameter = this, ///
           substitution = substitutions.find((substitution) => {
@@ -62,10 +61,10 @@ export default define(class Parameter extends Element {
           }) || null;
 
     if (substitution !== null) {
-      value = Value.fromSubstitution(substitution);
+      nominalValue = NominalValue.fromSubstitution(substitution);
     }
 
-    return value;
+    return nominalValue;
   }
 
   findParameter(context) {

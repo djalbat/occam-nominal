@@ -1,8 +1,7 @@
 "use strict";
 
-import {Element, continuationUtilities, breakPointUtilities} from "occam-languages";
-
-import Value from "../value";
+import { NominalValue } from "occam-furtle";
+import { Element, continuationUtilities, breakPointUtilities } from "occam-languages";
 
 import { define } from "../elements";
 import { instantiate } from "../utilities/context";
@@ -63,16 +62,16 @@ export default define(class ProcedureReference extends Element {
     return procedureReferenceNodeMatches;
   }
 
-  findValues(context) {
+  findNominalValues(context) {
     const derivedSubstitutions = context.getDerivedSubstitutions(),
           substitutions = derivedSubstitutions, ///
-          values = this.parameters.map((parameter) => {
-            const value = parameter.findValue(substitutions);
+          nominalValues = this.parameters.map((parameter) => {
+            const nominalValue = parameter.findNominalValue(substitutions);
 
-            return value;
+            return nominalValue;
           });
 
-    return values;
+    return nominalValues;
   }
 
   findProcedureReference(context) {
@@ -151,11 +150,11 @@ export default define(class ProcedureReference extends Element {
 
     context.trace(`Applying the '${procedureReferenceString}' function reference independently...`);
 
-    const procedureName = this.getProcedureName(),
-          procedure = context.findProcedureByProcedureName(procedureName),
-          values = this.findValues(context);
+    const nominalValues = this.findNominalValues(context),
+          procedureName = this.getProcedureName(),
+          procedure = context.findProcedureByProcedureName(procedureName);
 
-    return procedure.callNominally(values, (value, back) => {
+    return procedure.callNominally(nominalValues, (value, back) => {
       const boolean = value.isBoolean();
 
       if (!boolean) {
@@ -192,12 +191,13 @@ export default define(class ProcedureReference extends Element {
 
     const procedureName = this.getProcedureName(),
           procedure = context.findProcedureByProcedureName(procedureName),
-          value = Value.fromTerm(term, context),
-          values = [
-            value
+          node = term.getNode(),
+          nominalValue = NominalValue.fromNode(node, context),
+          nominalValues = [
+            nominalValue
           ];
 
-    return procedure.callNominally(values, (value, back) => {
+    return procedure.callNominally(nominalValues, (value, back) => {
       const boolean = value.isBoolean();
 
       if (!boolean) {

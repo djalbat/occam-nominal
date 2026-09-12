@@ -10,6 +10,6 @@ const logLevel = TRACE_LEVEL,
       projectName = "polynomials",
       projectsDirectoryPath = "../../Mathematics";
 
-describe.skip(projectName, () => {
+describe.only(projectName, () => {
   createSuite(logLevel, projectName, projectsDirectoryPath);
 });
