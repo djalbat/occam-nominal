@@ -51,7 +51,8 @@ export default define(class TypeDeclaration extends Declaration {
 
     context.trace(`Verifying the '${typeDeclarationString}' type declaration...`);
 
-    const verifyType = this.verifyType.bind(this),
+    const superTypes = [],
+          verifyType = this.verifyType.bind(this),
           verifySuperTypes = this.verifySuperTypes.bind(this),
           verifyTypePrefix = this.verifyTypePrefix.bind(this);
 
@@ -59,7 +60,7 @@ export default define(class TypeDeclaration extends Declaration {
       verifyType,
       verifySuperTypes,
       verifyTypePrefix
-    ], context, (context, back) => {
+    ], superTypes, context, (superTypes, context, back) => {
       const properties = this.getProperties(),
             typePrefix = context.getTypePrefix(),
             prefixName = (typePrefix !== null) ?
@@ -71,6 +72,8 @@ export default define(class TypeDeclaration extends Declaration {
       this.type.setProperties(properties);
 
       this.type.setPrefixName(prefixName);
+
+      this.type.setSuperTypes(superTypes);
 
       context.addType(this.type);
 
@@ -88,7 +91,7 @@ export default define(class TypeDeclaration extends Declaration {
     });
   });
 
-  verifyType(context, forward, back) {
+  verifyType(superTypes, context, forward, back) {
     const typeString = this.type.getString(),
           typeDeclarationString = this.getString(); ///
 
@@ -117,14 +120,12 @@ export default define(class TypeDeclaration extends Declaration {
       return back();
     }
 
-    this.type.setProvisional(this.provisional);
-
     context.debug(`...verified the '${typeDeclarationString}' type declaration's '${typeString}' type`);
 
-    return forward(context, back);
+    return forward(superTypes, context, back);
   }
 
-  verifyTypePrefix(context, forward, back) {
+  verifyTypePrefix(superTypes, context, forward, back) {
     const typeString = this.type.getString(),
           typeDeclarationString = this.getString(); ///
 
@@ -140,10 +141,10 @@ export default define(class TypeDeclaration extends Declaration {
 
     context.debug(`...verified the '${typeDeclarationString}' type declaration's '${typeString}' type's prefix.`);
 
-    return forward(context, back);
+    return forward(superTypes, context, back);
   }
 
-  verifySuperTypes(context, forward, back) {
+  verifySuperTypes(superTypes, context, forward, back) {
     const typeDeclarationString = this.getString(); ///
 
     context.trace(`Verifying the '${typeDeclarationString}' type declaration's super-types...`);
@@ -152,27 +153,21 @@ export default define(class TypeDeclaration extends Declaration {
 
     if (superTypesLength === 0) {
       const baseType = baseTypeFromNothing(),
-            superTyupe = baseType;  ///
+            superType = baseType;  ///
 
-      this.type.setSuperType(superTyupe);
-
-      return forward(context, back);
+      this.superTypes.push(superType);
     }
 
-    const superTypes = []; ///
-
     return every(this.superTypes, (superType, context, forward, back) => {
-      return this.verifySuperType(superType, superTypes, context, forward, back);
+      return this.verifySuperType(superTypes, superType, context, forward, back);
     }, context, (context, back) => {
-      this.type.setSuperTypes(superTypes);
-
       context.debug(`...verified the '${typeDeclarationString}' type declaration's super-types.`);
 
-      return forward(context, back);
+      return forward(superTypes, context, back);
     }, back);
   }
 
-  verifySuperType(superType, superTypes, context, forward, back) {
+  verifySuperType(superTypes, superType, context, forward, back) {
     const superTypeString = superType.getString(),
           typeDeclarationString = this.getString(); ///
 
@@ -192,6 +187,14 @@ export default define(class TypeDeclaration extends Declaration {
 
     if (superType === null) {
       context.debug(`The '${superTypeString}' super-type is not present.`);
+
+      return back();
+    }
+
+    const superTypeProvisional = superType.isProvisional();
+
+    if (superTypeProvisional && !this.provisional) {
+      context.debug(`The '${superTypeString}' super-type is provisional but the the '${typeDeclarationString}' type declaration is not.`);
 
       return back();
     }

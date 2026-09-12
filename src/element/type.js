@@ -62,22 +62,8 @@ export default define(class Type extends Element {
     return properties;
   }
 
-  isProvisional(includeSuperTypes = true) {
-    let provisional = this.provisional;
-
-    if (includeSuperTypes) {
-      if (!provisional) {
-        provisional = this.superTypes.some((superType) => {
-          const superTypeProvisional = superType.isProvisional();
-
-          if (superTypeProvisional) {
-            return true;
-          }
-        });
-      }
-    }
-
-    return provisional;
+  isProvisional() {
+    return this.provisional;
   }
 
   setName(name) {
@@ -116,8 +102,8 @@ export default define(class Type extends Element {
     return baseType;
   }
 
-  isEstablished(includeSuperTypes = true) {
-    const provisional = this.isProvisional(includeSuperTypes),
+  isEstablished() {
+    const provisional = this.isProvisional(),
           established = !provisional;
 
     return established;
@@ -303,16 +289,8 @@ export default define(class Type extends Element {
     return comparesToTypeName;
   }
 
-  compareProvisional(provisional, includeSupertypes = true) {
-    let comparesToProvisional;
-
-    const provisionalA = provisional; ///
-
-    provisional = this.isProvisional(includeSupertypes);
-
-    const provisionalB = provisional; ///
-
-    comparesToProvisional = (provisionalA === provisionalB);
+  compareProvisional(provisional) {
+    const comparesToProvisional = (provisional === this.provisional);
 
     return comparesToProvisional;
   }

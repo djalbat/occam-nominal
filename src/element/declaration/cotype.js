@@ -61,7 +61,8 @@ export default define(class CotypeDeclaration extends Declaration {
 
     context.trace(`Verifying the '${cotypeDeclarationString}' cotype declaration...`);
 
-    const verifyType = this.verifyType.bind(this),
+    const superTypes = [],
+          verifyType = this.verifyType.bind(this),
           verifySuperTypes = this.verifySuperTypes.bind(this),
           verifyTypePrefix = this.verifyTypePrefix.bind(this),
           verifyPropertyDeclaratisons = this.verifyPropertyDeclaratisons.bind(this);
@@ -71,7 +72,7 @@ export default define(class CotypeDeclaration extends Declaration {
       verifySuperTypes,
       verifyTypePrefix,
       verifyPropertyDeclaratisons
-    ], context, (context, back) => {
+    ], superTypes, context, (superTypes, context, back) => {
       const properties = this.getProperties(),
             typePrefix = context.getTypePrefix(),
             prefixName = (typePrefix !== null) ?
@@ -83,6 +84,8 @@ export default define(class CotypeDeclaration extends Declaration {
       this.type.setProperties(properties);
 
       this.type.setPrefixName(prefixName);
+
+      this.type.setSuperTypes(superTypes);
 
       context.addType(this.type);
 
@@ -100,7 +103,7 @@ export default define(class CotypeDeclaration extends Declaration {
     });
   });
 
-  verifyType(context, forward, back) {
+  verifyType(superTypes, context, forward, back) {
     const typeString = this.type.getString(),
           cotypeDeclarationString = this.getString(); ///
 
@@ -129,14 +132,12 @@ export default define(class CotypeDeclaration extends Declaration {
       return back();
     }
 
-    this.type.setProvisional(this.provisional);
-
     context.debug(`...verified the '${cotypeDeclarationString}' cotype declaration's '${typeString}' type`);
 
-    return forward(context, back);
+    return forward(superTypes, context, back);
   }
 
-  verifyTypePrefix(context, forward, back) {
+  verifyTypePrefix(superTypes, context, forward, back) {
     const typeString = this.type.getString(),
           cotypeDeclarationString = this.getString(); ///
 
@@ -152,10 +153,10 @@ export default define(class CotypeDeclaration extends Declaration {
 
     context.debug(`...verified the '${cotypeDeclarationString}' cotype declaration's '${typeString}' type's prefix.`);
 
-    return forward(context, back);
+    return forward(superTypes, context, back);
   }
 
-  verifySuperTypes(context, forward, back) {
+  verifySuperTypes(superTypes, context, forward, back) {
     const cotypeDeclarationString = this.getString(); ///
 
     context.trace(`Verifying the '${cotypeDeclarationString}' cotype declaration's super-types...`);
@@ -164,27 +165,21 @@ export default define(class CotypeDeclaration extends Declaration {
 
     if (superTypesLength === 0) {
       const baseType = baseTypeFromNothing(),
-        superTyupe = baseType;  ///
+            superType = baseType;  ///
 
-      this.type.setSuperType(superTyupe);
-
-      return forward(context, back);
+      this.superTypes.push(superType);
     }
 
-    const superTypes = []; ///
-
     return every(this.superTypes, (superType, context, forward, back) => {
-      return this.verifySuperType(superType, superTypes, context, forward, back);
+      return this.verifySuperType(superTypes, superType, context, forward, back);
     }, context, (context, back) => {
-      this.type.setSuperTypes(superTypes);
-
       context.debug(`...verified the '${cotypeDeclarationString}' cotype declaration's super-types.`);
 
-      return forward(context, back);
+      return forward(superTypes, context, back);
     }, back);
   }
 
-  verifySuperType(superType, superTypes, context, forward, back) {
+  verifySuperType(superTypes, superType, context, forward, back) {
     const superTypeString = superType.getString(),
           cotypeDeclarationString = this.getString(); ///
 
@@ -208,6 +203,14 @@ export default define(class CotypeDeclaration extends Declaration {
       return back();
     }
 
+    const superTypeProvisional = superType.isProvisional();
+
+    if (superTypeProvisional && !this.provisional) {
+      context.debug(`The '${superTypeString}' super-type is provisional but the the '${cotypeDeclarationString}' cotype declaration is not.`);
+
+      return back();
+    }
+
     superTypes.push(superType);
 
     context.debug(`...verified the '${cotypeDeclarationString}' cotype declaration's '${superTypeString}' super-type.`);
@@ -215,7 +218,7 @@ export default define(class CotypeDeclaration extends Declaration {
     return forward(context, back);
   }
 
-  verifyPropertyDeclaratisons(context, forward, back) {
+  verifyPropertyDeclaratisons(superTypes, context, forward, back) {
     const typeString = this.type.getString(),
           cotypeDeclarationString = this.getString(); ///
 
@@ -232,7 +235,7 @@ export default define(class CotypeDeclaration extends Declaration {
     }, context, (context, back) => {
       context.debug(`...verified the '${cotypeDeclarationString}' cotype declaration's '${typeString}' type's property declarations.`);
 
-      return forward(context, back);
+      return forward(superTypes, context, back);
     }, back);
   }
 
