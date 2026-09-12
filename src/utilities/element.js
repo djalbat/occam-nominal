@@ -1044,8 +1044,13 @@ export function lemmaFromSectionNode(sectionNode, context) {
 }
 
 export function termFromPropertyNode(propertyNode, context) {
-  const termNode = propertyNode.getTermNode(),
+  let term = null;
+
+  const termNode = propertyNode.getTermNode();
+
+  if (termNode !== null) {
     term = termFromTermNode(termNode, context);
+  }
 
   return term;
 }
@@ -1099,8 +1104,13 @@ export function nameFromParaneterNode(parameterNode, context) {
 }
 
 export function termFromGeneratorNode(generatorNode, context) {
-  const termNode = generatorNode.getTermNode(),
-        term = termFromTermNode(termNode, context);
+  let term = null;
+
+  const termNode = generatorNode.getTermNode();
+
+  if (termNode !== null) {
+    term = termFromTermNode(termNode, context);
+  }
 
   return term;
 }
@@ -1228,8 +1238,13 @@ export function negatedFromEqualityNode(equalityNode, context) {
 }
 
 export function termFromConstructorNode(ocnstructorNode, context) {
-  const termNode = ocnstructorNode.getTermNode(),
-        term = termFromTermNode(termNode, context);
+  let term = null;
+
+  const termNode = ocnstructorNode.getTermNode();
+
+  if (termNode !== null) {
+    term = termFromTermNode(termNode, context);
+  }
 
   return term;
 }
@@ -1485,8 +1500,13 @@ export function statementFromAssumptionNode(assumptionNode, context) {
 }
 
 export function statementFromCombinatorNode(combinatorNode, context) {
-  const statementNode = combinatorNode.getStatementNode(),
-        statement = statementFromStatementNode(statementNode, context);
+  let statement;
+
+  const statementNode = combinatorNode.getStatementNode();
+
+  if (statementNode !== null) {
+    statement = statementFromStatementNode(statementNode, context);
+  }
 
   return statement;
 }
