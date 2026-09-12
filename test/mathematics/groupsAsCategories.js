@@ -10,6 +10,6 @@ const logLevel = ERROR_LEVEL,
       projectName = "groups-as-categories",
       projectsDirectoryPath = "../../Mathematics";
 
-(projectName, () => {
+describe(projectName, () => {
   createSuite(logLevel, projectName, projectsDirectoryPath);
 });
