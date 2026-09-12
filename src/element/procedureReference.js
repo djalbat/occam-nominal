@@ -62,6 +62,13 @@ export default define(class ProcedureReference extends Element {
     return procedureReferenceNodeMatches;
   }
 
+  findProcecure(context) {
+    const procedureName = this.getProcedureName(),
+          procedure = context.findProcedureByProcedureName(procedureName);
+
+    return procedure;
+  }
+
   findNominalValues(context) {
     const derivedSubstitutions = context.getDerivedSubstitutions(),
           substitutions = derivedSubstitutions, ///
@@ -150,9 +157,8 @@ export default define(class ProcedureReference extends Element {
 
     context.trace(`Applying the '${procedureReferenceString}' function reference independently...`);
 
-    const nominalValues = this.findNominalValues(context),
-          procedureName = this.getProcedureName(),
-          procedure = context.findProcedureByProcedureName(procedureName);
+    const procedure = this.findProcecure(context),
+          nominalValues = this.findNominalValues(context);
 
     return procedure.callNominally(nominalValues, (value, back) => {
       const boolean = value.isBoolean();
