@@ -44,10 +44,6 @@ function createSuite(logLevel, projectName, projectsDirectoryPath) {
 
     function fail(exception) {
       throw exception;
-
-      assert.isTrue(false);
-
-      done();
     }
   });
 
@@ -68,8 +64,10 @@ function createSuite(logLevel, projectName, projectsDirectoryPath) {
       done();
     }
 
-    function back(exception) {
-      throw exception;
+    function back(exception = null) {
+      if (exception !== null) {
+        throw exception;
+      }
 
       assert.isTrue(false);
 
@@ -91,7 +89,14 @@ function createSuite(logLevel, projectName, projectsDirectoryPath) {
 
   it("unserialise", () => {
     const name = projectName, ///
-          releaseContext = ReleaseContext.fromLogNameJSONEntriesCallbackAndCustomGrammar(log, name, json, entries, callback, customGrammar);
+          dependencyReleaseContexts = releaseContext.getDependencyReleaseContexts();
+
+    releaseContext = ReleaseContext.fromLogNameJSONEntriesCallbackAndCustomGrammar(log, name, json, entries, callback, customGrammar);
+
+    const releaseContexts = [ ///
+      releaseContext,
+      ...dependencyReleaseContexts
+    ];
 
     releaseContext.initialise(releaseContexts, FileContextFromFilePath);
   });
