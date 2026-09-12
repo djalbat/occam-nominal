@@ -203,14 +203,6 @@ export default define(class CotypeDeclaration extends Declaration {
       return back();
     }
 
-    const superTypeProvisional = superType.isProvisional();
-
-    if (superTypeProvisional && !this.provisional) {
-      context.debug(`The '${superTypeString}' super-type is provisional but the the '${cotypeDeclarationString}' cotype declaration is not.`);
-
-      return back();
-    }
-
     superTypes.push(superType);
 
     context.debug(`...verified the '${cotypeDeclarationString}' cotype declaration's '${superTypeString}' super-type.`);

@@ -191,14 +191,6 @@ export default define(class TypeDeclaration extends Declaration {
       return back();
     }
 
-    const superTypeProvisional = superType.isProvisional();
-
-    if (superTypeProvisional && !this.provisional) {
-      context.debug(`The '${superTypeString}' super-type is provisional but the the '${typeDeclarationString}' type declaration is not.`);
-
-      return back();
-    }
-
     superTypes.push(superType);
 
     context.debug(`...verified the '${typeDeclarationString}' type declaration's '${superTypeString}' super-type.`);
