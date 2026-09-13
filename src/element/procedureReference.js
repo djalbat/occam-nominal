@@ -160,7 +160,7 @@ export default define(class ProcedureReference extends Element {
     const procedure = this.findProcecure(context),
           nominalValues = this.findNominalValues(context);
 
-    return procedure.callNominally(nominalValues, (value, back) => {
+    return procedure.evaluateNominally(nominalValues, (value, back) => {
       const boolean = value.isBoolean();
 
       if (!boolean) {
@@ -203,7 +203,7 @@ export default define(class ProcedureReference extends Element {
             nominalValue
           ];
 
-    return procedure.callNominally(nominalValues, (value, back) => {
+    return procedure.evaluateNominally(nominalValues, (value, back) => {
       const boolean = value.isBoolean();
 
       if (!boolean) {
