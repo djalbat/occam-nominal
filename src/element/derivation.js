@@ -4,7 +4,6 @@ import { arrayUtilities } from "necessary";
 import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
 
 import { define } from "../elements";
-import {unbreakable} from "occam-languages/lib/utilities/breakPoint";
 
 const { last } = arrayUtilities,
       { every } = continuationUtilities,

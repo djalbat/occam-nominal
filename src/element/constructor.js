@@ -56,13 +56,12 @@ export default define(class Constructor extends Element {
   getString(includeType = true) {
     let string;
 
-    if (includeType) {
-      const termString = this.term.getString(),
-            typeString = this.type.getString();
+    string = super.getString();
 
-      string = `${termString}.${typeString}`;
-    } else {
-      string = super.getString();
+    if (includeType) {
+      const typeString = this.type.getString();
+
+      string = `${string}.${typeString}`;
     }
 
     return string;
@@ -74,7 +73,7 @@ export default define(class Constructor extends Element {
 
   isMalformed() {
     const constructorNode = this.getConstructorNode(),
-      malformed = constructorNode.isMalformed();
+          malformed = constructorNode.isMalformed();
 
     return malformed;
   }

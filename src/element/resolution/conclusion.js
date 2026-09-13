@@ -6,10 +6,11 @@ import Resolution from "../resolution";
 
 import { define } from "../../elements";
 import { desist, declare } from "../../utilities/state";
-import { isolate, attempt, reconcile } from "../../utilities/context";
+import { instantiateConclusion } from "../../process/instantiate";
+import { isolate, attempt, reconcile, serialise, unserialise, instantiate } from "../../utilities/context";
 
 const { cut, all } = continuationUtilities,
-      { breakable, unbreakable } = breakPointUtilities;
+      { breakable, unbreakable, breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
 
 export default define(class Conclusion extends Resolution {
   getConclusionNode() {
@@ -120,7 +121,56 @@ export default define(class Conclusion extends Resolution {
     }, back);
   });
 
+  toJSON() {
+    let json;
+
+    const context = this.getContext();
+
+    serialise((context) => {
+      const string = this.getString();
+
+      let breakPoint;
+
+      breakPoint = this.getBreakPoint();
+
+      const breakPointJSON = breakPointToBreakPointJSON(breakPoint);
+
+      breakPoint = breakPointJSON;  ///
+
+      json = {
+        context,
+        string,
+        breakPoint
+      };
+    }, context);
+
+    return json;
+  }
+
   static name = "Conclusion";
 
-  static fromJSON(json, context) { return Resolution.fromJSON(Conclusion, json, context); }
+  static fromJSON(json, context) {
+    let conclusion;
+
+    instantiate((context) => {
+      unserialise((json, context) => {
+        const { string } = json,
+              conclusionNode = instantiateConclusion(string, context),
+              node = conclusionNode,  ///
+              breakPoint = breakPointFromJSON(json),
+              statement = statementFromConclusionNode(conclusionNode, context);
+
+        conclusion = new Conclusion(context, string, node, breakPoint, statement);
+      }, json, context);
+    }, context);
+
+    return conclusion;
+  }
 });
+
+function statementFromConclusionNode(conclusionNode, context) {
+  const statementNode = conclusionNode.getStatementNode(),
+        statement = context.findStatementByStatementNode(statementNode);
+
+  return statement;
+}

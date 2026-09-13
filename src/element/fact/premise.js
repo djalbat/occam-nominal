@@ -8,7 +8,6 @@ import { define } from "../../elements";
 import { declare } from "../../utilities/state";
 import { instantiatePremise } from "../../process/instantiate";
 import { isolate, attempt, reconcile, serialise, unserialise, instantiate } from "../../utilities/context";
-import {unbreakable} from "occam-languages/lib/utilities/breakPoint";
 
 const { cut, all } = continuationUtilities,
       { breakable, unbreakable, breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;

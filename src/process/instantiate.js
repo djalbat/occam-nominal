@@ -100,6 +100,13 @@ export function instantiateSupposition(string, context) {
   return instantiate(suppositionPlaceholderRule, string, context);
 }
 
+export function instantiateHypothesis(string, context) {
+  string = `${string}
+`;  ///
+
+  return instantiate(hypothesisPlaceholderRule, string, context);
+}
+
 export function instantiateTerm(string, context) { return instantiate(termPlaceholderRule, string, context); }
 
 export function instantiateLink(string, context) { return instantiate(linkPlaceholderRule, string, context); }
@@ -125,8 +132,6 @@ export function instantiateStatement(string, context) { return instantiate(state
 export function instantiateSignature(string, context) { return instantiate(signaturePlaceholderRule, string, context); }
 
 export function instantiateCombinator(string, context) { return instantiate(combinatorPlaceholderRule, string, context); }
-
-export function instantiateHypothesis(string, context) { return instantiate(hypothesisPlaceholderRule, string, context); }
 
 export function instantiateConstraint(string, context) { return instantiate(constraintPlaceholderRule, string, context); }
 

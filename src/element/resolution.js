@@ -1,11 +1,6 @@
 "use strict";
 
-import { Element, breakPointUtilities } from "occam-languages";
-
-import { instantiateDeduction } from "../process/instantiate";
-import { serialise, unserialise, instantiate } from "../utilities/context";
-
-const { breakPointFromJSON, breakPointToBreakPointJSON } = breakPointUtilities;
+import { Element } from "occam-languages";
 
 export default class Resolution extends Element {
   constructor(context, string, node, breakPoint, statement) {
@@ -45,55 +40,4 @@ export default class Resolution extends Element {
       return forward(generalContext, specificContext, back);
     }, back);
   }
-
-  toJSON() {
-    let json;
-
-    const context = this.getContext();
-
-    serialise((context) => {
-      const string = this.getString();
-
-      let breakPoint;
-
-      breakPoint = this.getBreakPoint();
-
-      const breakPointJSON = breakPointToBreakPointJSON(breakPoint);
-
-      breakPoint = breakPointJSON;  ///
-
-      json = {
-        context,
-        string,
-        breakPoint
-      };
-    }, context);
-
-    return json;
-  }
-
-  static fromJSON(Class, json, context) {
-    let deduction;
-
-    instantiate((context) => {
-      unserialise((json, context) => {
-        const { string } = json,
-              deductionNode = instantiateDeduction(string, context),
-              node = deductionNode,  ///
-              breakPoint = breakPointFromJSON(json),
-              statement = statementFromDeductionNode(deductionNode, context);
-
-        deduction = new Class(context, string, node, breakPoint, statement);
-      }, json, context);
-    }, context);
-
-    return deduction;
-  }
-}
-
-function statementFromDeductionNode(deductionNode, context) {
-  const statementNode = deductionNode.getStatementNode(),
-        statement = context.findStatementByStatementNode(statementNode);
-
-  return statement;
 }
