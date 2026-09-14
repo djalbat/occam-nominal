@@ -64,10 +64,14 @@ export default define(class PropertyAssertion extends Assertion {
 
     assertion = this;
 
-    const validateTerms = this.validateTerms.bind(this);
+    const validateTypes = this.validateTypes.bind(this),
+          validateSubjectTerm = this.validateSubjectTerm.bind(this),
+          validatePropertyTerm = this.validatePropertyTerm.bind(this);
 
     return all([
-      validateTerms
+      validatePropertyTerm,
+      validateSubjectTerm,
+      validateTypes
     ], state, context, (state, context, back) => {
       this.assign(state, context);
 
@@ -81,30 +85,25 @@ export default define(class PropertyAssertion extends Assertion {
     }, back);
   });
 
-  validateTerms(state, context, forward, back) {
+  validateTypes(state, context, forward, back) {
     const propertyAssertionString = this.getString(); ///
 
-    context.trace(`Validating the '${propertyAssertionString}' property assertion's terms...`);
+    const subjectTermType = this.subjectTerm.getType(),
+          propertyTermType = this.propertyTerm.getType(),
+          subjectTermTypeString = subjectTermType.getString(),
+          propertyTermTypeString = propertyTermType.getString();
 
-    const validateSubjectTerm = this.validateSubjectTerm.bind(this),
-          validatePropertyTerm = this.validatePropertyTerm.bind(this);
+    context.trace(`Validating the '${propertyAssertionString}' property assertion's '${subjectTermTypeString}' subject type and '${propertyTermTypeString}' property type...`);
 
-    return all([
-      validateSubjectTerm,
-      validatePropertyTerm
-    ], state, context, (state, context, back) => {
-      const subjectTermType = this.subjectTerm.getType(),
-            propertyTermType = this.propertyTerm.getType(),
-            subjectTermTypeEqualToSubTypeOrSuperTypeOfPropertyTermType = subjectTermType.isEqualToSubTypeOrSuperTypeOf(propertyTermType);
+    const subjectTermTypeEqualToOrSubTypeOfPropertyTermType = subjectTermType.isEqualToOrSubTypeOf(propertyTermType);
 
-      if (!subjectTermTypeEqualToSubTypeOrSuperTypeOfPropertyTermType) {
-        return back();
-      }
+    if (!subjectTermTypeEqualToOrSubTypeOfPropertyTermType) {
+      return back();
+    }
 
-      context.debug(`...validated the '${propertyAssertionString}' property assertion's terms.`);
+    context.debug(`...validated the '${propertyAssertionString}' property assertion's '${subjectTermTypeString}' subject type and '${propertyTermTypeString}' property type.`);
 
-      return forward(state, context, back);
-    }, back);
+    return forward(state, context, back);
   }
 
   validateSubjectTerm(state, context, forward, back) {

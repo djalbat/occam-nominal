@@ -102,14 +102,14 @@ export default define(class TypeDeclaration extends Declaration {
 
   verifyType(superTypes, context, forward, back) {
     const typeString = this.type.getString(),
-      typeDeclarationString = this.getString(); ///
+          typeDeclarationString = this.getString(); ///
 
     context.trace(`Verifying the '${typeDeclarationString}' type declaration's '${typeString}' type...`);
 
     let typePresent;
 
     const typeName = this.type.getName(),
-      includeRelease = false;
+          includeRelease = false;
 
     typePresent = context.isTypePresentByTypeName(typeName, includeRelease);
 

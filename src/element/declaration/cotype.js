@@ -205,6 +205,8 @@ export default define(class CotypeDeclaration extends Declaration {
       return back();
     }
 
+    superTypes.push(superType);
+
     context.debug(`...verified the '${cotypeDeclarationString}' cotype declaration's '${superTypeString}' super-type.`);
 
     return forward(context, back);
