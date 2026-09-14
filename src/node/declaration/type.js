@@ -2,10 +2,32 @@
 
 import DeclarationNode from "../../node/declaration";
 
-import { PROVISIONAL } from "../../constants";
+import { CLOSED ,PROVISIONAL } from "../../constants";
 import { TYPE_RULE_NAME, TYPES_RULE_NAME } from "../../ruleNames";
 
 export default class TypeDeclarationNode extends DeclarationNode {
+  isClosed() {
+    let closed = false;
+
+    this.someChildNode((childNode) => {
+      const childNodeTerminalNode = childNode.isTerminalNode();
+
+      if (childNodeTerminalNode) {
+        const terminalNode = childNode, ///
+              content = terminalNode.getContent(),
+              contentProvisional = (content === CLOSED);
+
+        if (contentProvisional) {
+          closed = true;
+
+          return true;
+        }
+      }
+    });
+
+    return closed;
+  }
+
   isProvisional() {
     let provisional = false;
 
@@ -13,7 +35,7 @@ export default class TypeDeclarationNode extends DeclarationNode {
       const childNodeTerminalNode = childNode.isTerminalNode();
 
       if (childNodeTerminalNode) {
-        const terminalNode = childNode,
+        const terminalNode = childNode, ///
               content = terminalNode.getContent(),
               contentProvisional = (content === PROVISIONAL);
 

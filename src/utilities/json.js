@@ -168,6 +168,12 @@ export function rulesFromJSON(json, context) {
   return rules;
 }
 
+export function closedFromJSON(json, context) {
+  const { closed } = json;
+
+  return closed;
+}
+
 export function framesFromJSON(json, context) {
   let { frames } = json;
 
@@ -720,6 +726,12 @@ export function rulesToRulesJSON(rules) {
   return rulesJSON;
 }
 
+export function closedToClosedJSON(closed) {
+  const closedJSON = closed;  ///
+
+  return closedJSON;
+}
+
 export function labelsToLabelsJSON(labels) {
   const labelsJSON = labels.map((label) => {
     const labelJSON = label.toJSON();
@@ -800,8 +812,8 @@ export function hypothesesToHypothesesJSON(hypotheses) {
   return hypothesesJSON;
 }
 
-export function prefixnameToPrevixNameJSON(prefixname) {
-  const prefixNameJSON = prefixname;  ///
+export function prefixNameToPrevixNameJSON(prefixName) {
+  const prefixNameJSON = prefixName;  ///
 
   return prefixNameJSON;
 }
@@ -967,16 +979,6 @@ export function mnemicContextsToMnemicContextsJSON(mnemicContexts) {
   return mnemicContextsJSON;
 }
 
-export function procedureReferencesToProcedureReferencesJSON(procedureReferences) {
-  const procedureReferencesJSON = procedureReferences.map((procedureReference) => {
-    const procedureReferenceJSON = procedureReference.toJSON();
-
-    return procedureReferenceJSON;
-  });
-
-  return procedureReferencesJSON;
-}
-
 export function declaredVariablesToDeclaredVariablesJSON(declaredVariables) {
   const declaredVariablesJSON = declaredVariables.map((declaredVariable) => {
     const declaredVariableJSON = declaredVariable.toJSON();
@@ -985,6 +987,16 @@ export function declaredVariablesToDeclaredVariablesJSON(declaredVariables) {
   });
 
   return declaredVariablesJSON;
+}
+
+export function procedureReferencesToProcedureReferencesJSON(procedureReferences) {
+  const procedureReferencesJSON = procedureReferences.map((procedureReference) => {
+    const procedureReferenceJSON = procedureReference.toJSON();
+
+    return procedureReferenceJSON;
+  });
+
+  return procedureReferencesJSON;
 }
 
 export function declaredMetavariablesToDeclaredMetavariablesJSON(declaredMetavariables) {

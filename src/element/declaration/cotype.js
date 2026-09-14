@@ -159,16 +159,18 @@ export default define(class CotypeDeclaration extends Declaration {
   verifySuperTypes(superTypes, context, forward, back) {
     const cotypeDeclarationString = this.getString(); ///
 
-    context.trace(`Verifying the '${cotypeDeclarationString}' cotype declaration's super-types...`);
-
     const superTypesLength = this.superTypes.length;
 
     if (superTypesLength === 0) {
       const baseType = baseTypeFromNothing(),
             superType = baseType;  ///
 
-      this.superTypes.push(superType);
+      superTypes.push(superType);
+
+      return forward(superTypes, context, back);
     }
+
+    context.trace(`Verifying the '${cotypeDeclarationString}' cotype declaration's super-types...`);
 
     return every(this.superTypes, (superType, context, forward, back) => {
       return this.verifySuperType(superTypes, superType, context, forward, back);
@@ -202,8 +204,6 @@ export default define(class CotypeDeclaration extends Declaration {
 
       return back();
     }
-
-    superTypes.push(superType);
 
     context.debug(`...verified the '${cotypeDeclarationString}' cotype declaration's '${superTypeString}' super-type.`);
 

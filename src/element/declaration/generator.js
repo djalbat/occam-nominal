@@ -101,10 +101,11 @@ export default define(class GeneratorDeclaration extends Declaration {
       return back();
     }
 
-    const typeCotype = type.isCotype();
+    const typeOpen = type.isOpen(),
+          typeCotype = type.isCotype();
 
-    if (!typeCotype) {
-      context.debug(`The '${typeString}' type is a type.`);
+    if (!typeOpen || !typeCotype) {
+      context.debug(`The '${typeString}' type is not an open cotype.`);
 
       return back();
     }

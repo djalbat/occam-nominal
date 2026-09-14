@@ -23,6 +23,7 @@ export function typeFromTypeNode(typeNode, context) {
     const { Type } = elements,
           node = typeNode,  ///
           name = nameFromTypeNode(typeNode, context),
+          closed = closedFromTypeNode(typeNode, context),
           prefixName = prefixNameFromTypeNode(typeNode, context),
           superTypes = superTypesFromTypeNode(typeNode, context),
           properties = propertiesFromTypeNode(typeNode, context),
@@ -34,7 +35,7 @@ export function typeFromTypeNode(typeNode, context) {
 
     context = null;
 
-    type = new Type(context, string, node, breakPoint, name, prefixName, superTypes, properties, provisional);
+    type = new Type(context, string, node, breakPoint, name, closed, prefixName, superTypes, properties, provisional);
   }
 
   return type;
@@ -615,12 +616,13 @@ export function typeDeclarationFromTypeDeclarationNode(typeDeclarationNode, cont
         string = context.nodeAsString(node),
         breakPoint = null,
         type = typeFromTypeDeclarationNode(typeDeclarationNode, context),
+        closed = closedFromTypeDeclarationNode(typeDeclarationNode, context),
         superTypes = superTypesFromTypeDeclarationNode(typeDeclarationNode, context),
         provisional = provisionalFromTypeDeclarationNode(typeDeclarationNode, context);
 
   context = null;
 
-  const typeDeclaration = new TypeDeclaration(context, string, node, breakPoint, type, superTypes, provisional);
+  const typeDeclaration = new TypeDeclaration(context, string, node, breakPoint, type, closed, superTypes, provisional);
 
   return typeDeclaration;
 }
@@ -950,6 +952,12 @@ export function proofFromRuleNode(ruleNode, context) {
   return proof;
 }
 
+export function closedFromTypeNode(typeNode, context) {
+  const closed = null;
+
+  return closed;
+}
+
 export function proofFromClaimNode(claimNode, context) {
   let proof = null;
 
@@ -1095,12 +1103,6 @@ export function referenceFromStepNode(stepNode, context) {
   }
 
   return reference;
-}
-
-export function nameFromParaneterNode(parameterNode, context) {
-  const name = parameterNode.getName();
-
-  return name;
 }
 
 export function termFromGeneratorNode(generatorNode, context) {
@@ -1480,12 +1482,6 @@ export function provisionalFromVariableNode(variableNode, context) {
   return provisional;
 }
 
-export function identifierFromParameterNode(parameterNode, context) {
-  const identifier = parameterNode.getIdentifier();
-
-  return identifier;
-}
-
 export function hypothesesFromGeneratorNode(generatorNode, context) {
   const hypotheses = [];
 
@@ -1640,16 +1636,10 @@ export function hypothesesFromConstructorNode(constructorNode, context) {
   return hypotheses;
 }
 
-export function termFromJDefinedAssertionNode(definedAssertionNode, context) {
-  let term = null;
+export function closedFromTypeDeclarationNode(typeDeclarationNode, context) {
+  const closed = typeDeclarationNode.isClosed();
 
-  const termNode = definedAssertionNode.getTermNode();
-
-  if (termNode !== null) {
-    term = termFromTermNode(termNode, context);
-  }
-
-  return term
+  return closed;
 }
 
 export function typeFromCotypeDeclarationNode(cotypeDeclarationNode, context) {
@@ -1754,12 +1744,6 @@ export function typeFromVariableDeclarationNode(variableDeclarationNode, context
         type = typeFromTypeNode(typeNode, context);
 
   return type;
-}
-
-export function negatedFromJDefinedAssertionNode(definedAssertionNode, context) {
-  const negated = definedAssertionNode.isNegated();
-
-  return negated
 }
 
 export function termFromBracketedConstructorNode(bracketedCcnstructorNode, context) {

@@ -13,7 +13,7 @@ export default class CotypeDeclarationNode extends DeclarationNode {
       const childNodeTerminalNode = childNode.isTerminalNode();
 
       if (childNodeTerminalNode) {
-        const terminalNode = childNode,
+        const terminalNode = childNode, ///
               content = terminalNode.getContent(),
               contentProvisional = (content === PROVISIONAL);
 

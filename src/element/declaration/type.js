@@ -11,16 +11,21 @@ const { breakable } = breakPointUtilities,
       { cut, all, every } = continuationUtilities;
 
 export default define(class TypeDeclaration extends Declaration {
-  constructor(context, string, node, breakPoint, type, superTypes, provisional) {
+  constructor(context, string, node, breakPoint, type, closed, superTypes, provisional) {
     super(context, string, node, breakPoint);
 
     this.type = type;
+    this.closed = closed;
     this.superTypes = superTypes;
     this.provisional = provisional;
   }
 
   getType() {
     return this.type;
+  }
+
+  isClosed() {
+    return this.closed;
   }
 
   getSuperTypes() {
@@ -53,13 +58,15 @@ export default define(class TypeDeclaration extends Declaration {
 
     const superTypes = [],
           verifyType = this.verifyType.bind(this),
+          verifyCModality = this.verifyCModality.bind(this),
           verifySuperTypes = this.verifySuperTypes.bind(this),
           verifyTypePrefix = this.verifyTypePrefix.bind(this);
 
     return all([
       verifyType,
       verifySuperTypes,
-      verifyTypePrefix
+      verifyTypePrefix,
+      verifyCModality
     ], superTypes, context, (superTypes, context, back) => {
       const properties = this.getProperties(),
             typePrefix = context.getTypePrefix(),
@@ -67,13 +74,15 @@ export default define(class TypeDeclaration extends Declaration {
                            typePrefix.getPrefixName() :
                              null;
 
-      this.type.setProvisional(this.provisional);
+      this.type.setClosed(this.closed);
 
       this.type.setProperties(properties);
 
       this.type.setPrefixName(prefixName);
 
       this.type.setSuperTypes(superTypes);
+
+      this.type.setProvisional(this.provisional);
 
       context.addType(this.type);
 
@@ -93,14 +102,14 @@ export default define(class TypeDeclaration extends Declaration {
 
   verifyType(superTypes, context, forward, back) {
     const typeString = this.type.getString(),
-          typeDeclarationString = this.getString(); ///
+      typeDeclarationString = this.getString(); ///
 
     context.trace(`Verifying the '${typeDeclarationString}' type declaration's '${typeString}' type...`);
 
     let typePresent;
 
     const typeName = this.type.getName(),
-          includeRelease = false;
+      includeRelease = false;
 
     typePresent = context.isTypePresentByTypeName(typeName, includeRelease);
 
@@ -121,6 +130,45 @@ export default define(class TypeDeclaration extends Declaration {
     }
 
     context.debug(`...verified the '${typeDeclarationString}' type declaration's '${typeString}' type`);
+
+    return forward(superTypes, context, back);
+  }
+
+  verifyCModality(superTypes, context, forward, back) {
+    const typeString = this.type.getString(),
+          typeDeclarationString = this.getString(); ///
+
+    context.trace(`Verifying the '${typeDeclarationString}' type declaration's modality...`);
+
+    let implicitCotype = false,
+        implicitlyClosed = false;
+
+    superTypes.forEach((superType) => {
+      const cotype = superType.isCotype(),
+            closed = superType.isClosed();
+
+      if (cotype) {
+        implicitCotype = true;
+      }
+
+      if (closed) {
+        implicitlyClosed = true;
+      }
+    });
+
+    if (this.closed && !implicitCotype) {
+      context.trace(`The '${typeDeclarationString}' type declaration is closed but the '${typeString}' type is not implicitly a cotype.`);
+
+      return back();
+    }
+
+    if (implicitlyClosed && !this.closed) {
+      context.trace(`The '${typeDeclarationString}' type declaration is not closed but the '${typeString}' type is implicitly closed.`);
+
+      return back();
+    }
+
+    context.debug(`...verified the '${typeDeclarationString}' type declaration's modality.`);
 
     return forward(superTypes, context, back);
   }
@@ -147,16 +195,18 @@ export default define(class TypeDeclaration extends Declaration {
   verifySuperTypes(superTypes, context, forward, back) {
     const typeDeclarationString = this.getString(); ///
 
-    context.trace(`Verifying the '${typeDeclarationString}' type declaration's super-types...`);
-
     const superTypesLength = this.superTypes.length;
 
     if (superTypesLength === 0) {
       const baseType = baseTypeFromNothing(),
             superType = baseType;  ///
 
-      this.superTypes.push(superType);
+      superTypes.push(superType);
+
+      return forward(superTypes, context, back);
     }
+
+    context.trace(`Verifying the '${typeDeclarationString}' type declaration's super-types...`);
 
     return every(this.superTypes, (superType, context, forward, back) => {
       return this.verifySuperType(superTypes, superType, context, forward, back);

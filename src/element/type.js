@@ -9,11 +9,13 @@ import { instantiateType } from "../process/instantiate";
 import { BASE_TYPE_SYMBOL } from "../constants";
 import { nameFromTypeNode } from "../utilities/element";
 import { baseTypeFromNothing } from "../utilities/type";
-import { propertiesFromJSON,
+import { closedFromJSON,
+         closedToClosedJSON,
+         propertiesFromJSON,
          prefixNameFromJSON,
          superTypesFromJSON,
          provisionalFromJSON,
-         prefixnameToPrevixNameJSON,
+         prefixNameToPrevixNameJSON,
          superTypesToSuperTypesJSON,
          propertiesToPropertiesJSON,
          provisionalToProvisionalJSON } from "../utilities/json";
@@ -21,10 +23,11 @@ import { propertiesFromJSON,
 const { push, first, intersection } = arrayUtilities;
 
 export default define(class Type extends Element {
-  constructor(context, string, node, breakPoint, name, prefixName, superTypes, properties, provisional) {
+  constructor(context, string, node, breakPoint, name, closed, prefixName, superTypes, properties, provisional) {
     super(context, string, node, breakPoint);
 
     this.name = name;
+    this.closed = closed;
     this.prefixName = prefixName;
     this.superTypes = superTypes;
     this.properties = properties;
@@ -33,6 +36,10 @@ export default define(class Type extends Element {
 
   getName() {
     return this.name;
+  }
+
+  isClosed() {
+    return this.closed;
   }
 
   getPrefixName() {
@@ -70,6 +77,10 @@ export default define(class Type extends Element {
     this.name = name;
   }
 
+  setClosed(closed) {
+    this.closed = closed;
+  }
+
   setPrefixName(prefixName) {
     this.prefixName = prefixName;
   }
@@ -90,6 +101,12 @@ export default define(class Type extends Element {
     this.superTypes = [
       superType
     ];
+  }
+
+  isOpen() {
+    const open = !this.closed;
+
+    return open;
   }
 
   isBaseType() {
@@ -128,6 +145,13 @@ export default define(class Type extends Element {
     return ancestorTypes;
   }
 
+  isStrict() {
+    const cotype = this.isCotype(),
+          strict = !cotype;
+
+    return strict;
+  }
+
   isCotype() {
     const properties = this.getProperties(),
           propertiesLength = properties.length,
@@ -161,42 +185,6 @@ export default define(class Type extends Element {
                                 this.name;
 
     return nominalTypeName;
-  }
-
-  isBasic() {
-    let basic = false;
-
-    const superTypesLength = this.superTypes.length;
-
-    if (superTypesLength === 1) {
-      const firstSuperType = first(this.superTypes),
-            superType = firstSuperType, ///
-            baseType = baseTypeFromNothing();
-
-      if (superType === baseType) {
-        basic = true;
-      }
-    }
-
-    return basic;
-  }
-
-  isRefined() {
-    let refined = false;
-
-    const superTypesLength = this.superTypes.length;
-
-    if (superTypesLength === 1) {
-      const firstSuperType = first(this.superTypes),
-            superType = firstSuperType, ///
-            superTypeName = superType.getName();
-
-      if (superTypeName === this.name) {
-        refined = true;
-      }
-    }
-
-    return refined;
   }
 
   isJoinedTo(type) {
@@ -343,7 +331,8 @@ export default define(class Type extends Element {
     };
 
     if (!abridged) {
-      const prefixNameJSON = prefixnameToPrevixNameJSON(this.prefixName),
+      const closedJSON = closedToClosedJSON(this.closed),
+            prefixNameJSON = prefixNameToPrevixNameJSON(this.prefixName),
             superTypesJSON = superTypesToSuperTypesJSON(this.superTypes),
             propertiesJSON = propertiesToPropertiesJSON(this.properties),
             provisinoalJSOM = provisionalToProvisionalJSON(this.provisional),
@@ -353,6 +342,7 @@ export default define(class Type extends Element {
             provisional = provisinoalJSOM;  ///
 
       Object.assign(json, {
+        closedJSON,
         prefixName,
         superTypes,
         properties,
@@ -374,6 +364,7 @@ export default define(class Type extends Element {
             node = typeNode, ///
             breakPoint = null,
             name = nameFromTypeNode(typeNode, context),
+            closed = closedFromJSON(json, context),
             prefixName = prefixNameFromJSON(json, context),
             superTypes = superTypesFromJSON(json, context),
             properties = propertiesFromJSON(json, context),
@@ -381,7 +372,7 @@ export default define(class Type extends Element {
 
       context = null; ///
 
-      type = new Type(context, string, node, breakPoint, name, prefixName, superTypes, properties, provisional);
+      type = new Type(context, string, node, breakPoint, name, closed, prefixName, superTypes, properties, provisional);
     }, context);
 
     return type;
@@ -390,6 +381,7 @@ export default define(class Type extends Element {
   static fromName(name, context) {
     const string = name,  ///
           node = null,
+          closed = null,
           breakPoint = null,
           prefixName = null,
           superTypes = [],
@@ -398,7 +390,7 @@ export default define(class Type extends Element {
 
     context = null;
 
-    const type = new Type(context, string, node, breakPoint, name, prefixName, superTypes, properties, provisional);
+    const type = new Type(context, string, node, breakPoint, name, closed, prefixName, superTypes, properties, provisional);
 
     return type;
   }

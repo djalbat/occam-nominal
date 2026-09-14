@@ -101,10 +101,11 @@ export default define(class ConstructorDeclaration extends Declaration {
       return back();
     }
 
-    const typeCotype = type.isCotype();
+    const typeOpen = type.isOpen(),
+          typeCotype = type.isCotype();
 
-    if (typeCotype) {
-      context.debug(`The '${typeString}' type is a cotype.`);
+    if (typeOpen && typeCotype) {
+      context.debug(`The '${typeString}' type is an open cotype.`);
 
       return back();
     }

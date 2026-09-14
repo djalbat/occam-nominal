@@ -2,6 +2,7 @@
 
 export const S = "s";
 export const NULL = "null";
+export const CLOSED = "Closed";
 export const DERIVED = 0b01;
 export const MISSING = "missing";
 export const NOT_EQUAL = "!=";

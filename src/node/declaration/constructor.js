@@ -31,7 +31,7 @@ export default class ConstructorDeclarationNode extends DeclarationNode {
       const childNodeTerminalNode = childNode.isTerminalNode();
 
       if (childNodeTerminalNode) {
-        const terminalNode = childNode,
+        const terminalNode = childNode, ///
               content = terminalNode.getContent(),
               contentProvisionally = (content === PROVISIONALLY);
 
