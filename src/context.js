@@ -392,6 +392,13 @@ export default class Context extends ContextBase {
     return type;
   }
 
+  findTypeByPrefixedTypeName(prefixedTypeName, includeRelease = true, includeDependencies = true) {
+    const context = this.getContext(),
+          type = context.findTypeByPrefixedTypeName(prefixedTypeName, includeRelease, includeDependencies);
+
+    return type;
+  }
+
   findMetaTypeByMetaTypeName(metaTypeName) {
     const context = this.getContext(),
           metaType = context.findMetaTypeByMetaTypeName(metaTypeName);
@@ -448,6 +455,13 @@ export default class Context extends ContextBase {
     return framePresent;
   }
 
+  isTypePresentByPrefixedTypeName(prefixedTypeName, includeRelease = true, includeDependencies = true) {
+    const context = this.getContext(),
+          typePresent = context.isTypePresentByPrefixedTypeName(prefixedTypeName, includeRelease, includeDependencies);
+
+    return typePresent;
+  }
+
   isEqualityPresentByEqualityNode(equalityNode) {
     const context = this.getContext(),
           equalityPresent = context.isEqualityPresentByEqualityNode(equalityNode);
@@ -483,18 +497,18 @@ export default class Context extends ContextBase {
     return metavariablePresent;
   }
 
-  isProcedureReferencePresentByProcedureReferenceNode(procedureReferencetNode) {
-    const context = this.getContext(),
-          procedureReferencetPresent = context.isProcedureReferencePresentByProcedureReferenceNode(procedureReferencetNode);
-
-    return procedureReferencetPresent;
-  }
-
   isProcedurePresentByProcedureName(procedureName) {
     const context = this.getContext(),
           procedurePresent = context.isProcedurePresentByProcedureName(procedureName);
 
     return procedurePresent;
+  }
+
+  isProcedureReferencePresentByProcedureReferenceNode(procedureReferencetNode) {
+    const context = this.getContext(),
+          procedureReferencetPresent = context.isProcedureReferencePresentByProcedureReferenceNode(procedureReferencetNode);
+
+    return procedureReferencetPresent;
   }
 
   isDeclaredMetavariablePresentByMetavariableName(metavariableName) {

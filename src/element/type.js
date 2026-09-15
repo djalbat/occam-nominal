@@ -167,16 +167,16 @@ export default define(class Type extends Element {
     return prefixed;
   }
 
-  getPrefixedName() {
-    let prefixedName = null;
+  getPrefixedTypeName() {
+    let prefixedTypeName = null;
 
     const prefixed = this.isPrefixed();
 
     if (prefixed) {
-      prefixedName = `${this.prefixName}${this.name}`;
+      prefixedTypeName = `${this.prefixName}${this.name}`;
     }
 
-    return prefixedName;
+    return prefixedTypeName;
   }
 
   isJoinedTo(type) {
@@ -281,10 +281,13 @@ export default define(class Type extends Element {
     const prefixed = this.isPrefixed();
 
     if (prefixed) {
-      const prefixedName = this.getPrefixedName(),
-            prefixedTypeNamePrefixedName = (prefixedTypeName === prefixedName);
+      const prefixedTypeNameA = prefixedTypeName; ///
 
-      if (prefixedTypeNamePrefixedName) {
+      prefixedTypeName = this.getPrefixedTypeName();
+
+      const prefixedTypeNameB = prefixedTypeName; ///
+
+      if (prefixedTypeNameA === prefixedTypeNameB) {
         comparesToPrefixedTypeName = true;
       }
     }
@@ -344,28 +347,36 @@ export default define(class Type extends Element {
     const prefixed = this.isPrefixed();
 
     if (!prefixed) {
-      const includeRelease = true,
-            includeDependencies = false;
+      const baseType = baseTypeFromNothing(),
+            typeName = this.name, ///
+            baseTypeCompareTypeNameTypeName = baseType.compareTypeName(typeName);
 
-      type = context.findTypeByTypeName(this.name, includeRelease, includeDependencies); ///
+      if (baseTypeCompareTypeNameTypeName) {
+        type = baseType;  ///
+      } else {
+        const includeRelease = true,
+              includeDependencies = false;
 
-      const typePresent = (type !== null);
+        type = context.findTypeByTypeName(this.name, includeRelease, includeDependencies); ///
 
-      if (!typePresent) {
-        context.trace(`The '${typeString}' type is not present locally.`);
+        const typePresent = (type !== null);
 
-        return back();
+        if (!typePresent) {
+          context.trace(`The '${typeString}' type is not present locally.`);
+
+          return back();
+        }
       }
     } else {
       let typePresent,
           includeDependencies;
 
-      const prefixedName = this.getPrefixedName(),
-            includeRelease = true;
+      const includeRelease = true,
+            prefixedTypeName = this.getPrefixedTypeName();
 
       includeDependencies = false;
 
-      typePresent = context.isTypePresentByPrefixedTypeName(prefixedName, includeRelease, includeDependencies);
+      typePresent = context.isTypePresentByPrefixedTypeName(prefixedTypeName, includeRelease, includeDependencies);
 
       if (typePresent) {
         context.trace(`The '${typeString}' type is present locally.`);
@@ -375,7 +386,7 @@ export default define(class Type extends Element {
 
       includeDependencies = true;
 
-      type = context.findTypeByPrefixedTypeName(prefixedName, includeRelease, includeDependencies);
+      type = context.findTypeByPrefixedTypeName(prefixedTypeName, includeRelease, includeDependencies);
 
       typePresent = (type !== null);
 

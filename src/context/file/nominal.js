@@ -39,7 +39,7 @@ const { push } = arrayUtilities,
       { nominalLexerFromCombinedCustomGrammar, nominalParserFromCombinedCustomGrammar } = nominalUtilities;
 
 export default class NominalFileContext extends FileContext {
-  constructor(context, fileContent, filePath, tokens, node, json, lexer, parser, types, rules, axioms, lemmas, schemas, theorems, generators, conjectures, combinators, typePrefixes, constructors, declaredVariables, declaredMetavariables) {
+  constructor(context, fileContent, filePath, tokens, node, json, lexer, parser, types, rules, axioms, lemmas, schemas, theorems, generators, conjectures, combinators, typeAliases, typePrefixes, constructors, declaredVariables, declaredMetavariables) {
     super(context, fileContent, filePath, tokens, node, json);
 
     this.lexer = lexer;
@@ -57,6 +57,7 @@ export default class NominalFileContext extends FileContext {
     this.generators = generators;
     this.conjectures = conjectures;
     this.combinators = combinators;
+    this.typeAliases = typeAliases;
     this.typePrefixes = typePrefixes;
     this.constructors = constructors;
     this.declaredVariables = declaredVariables;
@@ -751,11 +752,12 @@ export default class NominalFileContext extends FileContext {
           generators = [],
           conjectures = [],
           combinators = [],
+          typeAliases = [],
           typePrefixes = [],
           constructors = [],
           declaredVariables = [],
           declaredMetavariables = [],
-          nominalFileContext = FileContext.fromFile(NominalFileContext, file, lexer, parser, types, rules, axioms, lemmas, schemas, theorems, generators, conjectures, combinators, typePrefixes, constructors, declaredVariables, declaredMetavariables, context);
+          nominalFileContext = FileContext.fromFile(NominalFileContext, file, lexer, parser, types, rules, axioms, lemmas, schemas, theorems, generators, conjectures, combinators, typeAliases, typePrefixes, constructors, declaredVariables, declaredMetavariables, context);
 
     return nominalFileContext;
   }
@@ -776,11 +778,12 @@ export default class NominalFileContext extends FileContext {
           generators = null,
           conjectures = null,
           combinators = null,
+          typeAliases = null,
           typePrefixes = null,
           constructors = null,
           declaredVariables = null,
           declaredMetavariables = null,
-          nominalFileContext = FileContext.fromJSON(NominalFileContext, json, lexer, parser, types, rules, axioms, lemmas, schemas, theorems, generators, conjectures, combinators, typePrefixes, constructors, declaredVariables, declaredMetavariables, context);
+          nominalFileContext = FileContext.fromJSON(NominalFileContext, json, lexer, parser, types, rules, axioms, lemmas, schemas, theorems, generators, conjectures, combinators, typeAliases, typePrefixes, constructors, declaredVariables, declaredMetavariables, context);
 
     return nominalFileContext;
   }

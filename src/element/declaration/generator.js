@@ -91,41 +91,34 @@ export default define(class GeneratorDeclaration extends Declaration {
 
     context.trace(`Verifying the '${generatorDeclarationString}' generator declaration's type...`);
 
-    const nominalTypeName = this.type.getNominalTypeName(),
-          typeString = this.type.getString(),
-          type = context.findTypeByNominalTypeName(nominalTypeName);
+    return this.type.verify(context, (type, context, back) => {
+      const typeOpen = type.isOpen(),
+            typeCotype = type.isCotype(),
+            typeString = type.getString();
 
-    if (type === null) {
-      context.debug(`The '${typeString}' type is not present.`);
+      if (!typeOpen || !typeCotype) {
+        context.debug(`The '${typeString}' type is not an open cotype.`);
 
-      return back();
-    }
+        return back();
+      }
 
-    const typeOpen = type.isOpen(),
-          typeCotype = type.isCotype();
+      const provisional = this.isProvisional(),
+            typeComparesToProvisional = type.compareProvisional(provisional);
 
-    if (!typeOpen || !typeCotype) {
-      context.debug(`The '${typeString}' type is not an open cotype.`);
+      if (!typeComparesToProvisional) {
+        provisional ?
+          context.debug(`The '${typeString}' type is present but not provisional.`) :
+            context.debug(`The '${typeString}' type is present but provisional.`);
 
-      return back();
-    }
+        return back();
+      }
 
-    const provisional = this.isProvisional(),
-          typeComparesToProvisional = type.compareProvisional(provisional);
+      this.type = type;
 
-    if (!typeComparesToProvisional) {
-      provisional ?
-        context.debug(`The '${typeString}' type is present but not provisional.`) :
-          context.debug(`The '${typeString}' type is present but provisional.`);
+      context.debug(`...verified the '${generatorDeclarationString}' generator declaration's type.`);
 
-      return back();
-    }
-
-    this.type = type;
-
-    context.debug(`...verified the '${generatorDeclarationString}' generator declaration's type.`);
-
-    return forward(context, back);
+      return forward(context, back);
+    }, back);
   }
 
   verifyGenerator(context, forward, back) {

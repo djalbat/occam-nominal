@@ -3,8 +3,7 @@
 import elements from "../elements";
 
 import { baseTypeFromNothing } from "../utilities/type";
-import { typeStringFromNameAndPrefixName,
-         rulsStringFromLabelsPremisesAndConclusion,
+import { rulsStringFromLabelsPremisesAndConclusion,
          procedureReferenceStringFromNameAndParameters,
          schemaStringFromLabelSuppositionsAndDeduction,
          subproofStringFromSuppositionsAndSubDerivation,
@@ -15,26 +14,32 @@ import { typeStringFromNameAndPrefixName,
 export function typeFromTypeNode(typeNode, context) {
   let type;
 
-  if (typeNode === null) {
-    const baseType = baseTypeFromNothing();
+  const baseType = baseTypeFromNothing();
 
+  if (typeNode === null) {
     type = baseType;  ///
   } else {
-    const { Type } = elements,
-          node = typeNode,  ///
-          name = nameFromTypeNode(typeNode, context),
-          closed = closedFromTypeNode(typeNode, context),
-          prefixName = prefixNameFromTypeNode(typeNode, context),
-          superTypes = superTypesFromTypeNode(typeNode, context),
-          properties = propertiesFromTypeNode(typeNode, context),
-          provisional = provisionalFromTypeNode(typeNode, context),
-          typeString = typeStringFromNameAndPrefixName(name, prefixName),
-          string = typeString,  ///
-          breakPoint = null;
+    const node = typeNode,  ///
+          string = context.nodeAsString(node),
+          baseTypeString = baseType.getString(),
+          stringBaseTypeString = (string === baseTypeString);
 
-    context = null;
+    if (stringBaseTypeString) {
+      type = baseType;  ///
+    } else {
+      const { Type } = elements,
+            name = nameFromTypeNode(typeNode, context),
+            closed = closedFromTypeNode(typeNode, context),
+            prefixName = prefixNameFromTypeNode(typeNode, context),
+            superTypes = superTypesFromTypeNode(typeNode, context),
+            properties = propertiesFromTypeNode(typeNode, context),
+            provisional = provisionalFromTypeNode(typeNode, context),
+            breakPoint = null;
 
-    type = new Type(context, string, node, breakPoint, name, closed, prefixName, superTypes, properties, provisional);
+      context = null;
+
+      type = new Type(context, string, node, breakPoint, name, closed, prefixName, superTypes, properties, provisional);
+    }
   }
 
   return type;

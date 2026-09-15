@@ -154,18 +154,6 @@ export function signatureStringFromSignature(signature) {
   return signatureString;
 }
 
-export function typeStringFromNameAndPrefixName(name, prefixName) {
-  let typeString;
-
-  typeString = `${name}`;
-
-  if (prefixName !== null) {
-    typeString = `${typeString}${prefixName}`;
-  }
-
-  return typeString;
-}
-
 export function implicitAssumptionStringFromStatement(stastement) {
   const statementString = stastement.getString(),
         implicitAssumptionString = `. :: ${statementString}`;

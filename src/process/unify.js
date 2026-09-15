@@ -5,6 +5,7 @@ import { queryUtilities } from "occam-query";
 import { ContinuationZipPass } from "occam-languages";
 
 import { declare } from "../utilities/state";
+import { typeFromTypeNode } from "../utilities/element";
 import { FRAME_META_TYPE_NAME, STATEMENT_META_TYPE_NAME } from "../metaTypeNames";
 import { termFromTermNode, frameFromFrameNode, statementFromStatementNode } from "../utilities/element";
 
@@ -134,31 +135,28 @@ class UnifyTermWithPropertyPass extends ContinuationZipPass {
       specificNodeQuery: termNodeQuery,
       run: (generalTypeNode, specificTermNode, generalContext, specificContext, forward, back) => {
         const typeNode = generalTypeNode, ///
-              termNode = specificTermNode, ///
-              nominalTypeName = typeNode.getNominalTypeName();
+              termNode = specificTermNode; ///
 
         let context;
 
         context = generalContext; ///
 
-        const type = context.findTypeByNominalTypeName(nominalTypeName);
-
-        if (type === null) {
-          return back();
-        }
+        const type = typeFromTypeNode(typeNode, context);
 
         context = specificContext;  ///
 
-        const term = termFromTermNode(termNode, context),
-              strict = false;
+        return type.validate(context, (type, context, back) => {
+          const term = termFromTermNode(termNode, context),
+                strict = false;
 
-        return declare((state) => {
-          return term.validateGivenType(strict, type, state, context, (term, context, back) => {
-            const specificContext = context;  ///
+          return declare((state) => {
+            return term.validateGivenType(strict, type, state, context, (term, context, back) => {
+              const specificContext = context;  ///
 
-            return forward(generalContext, specificContext, back);
-          }, back);
-        });
+              return forward(generalContext, specificContext, back);
+            }, back);
+          });
+        }, back);
       }
     }
   ];
@@ -171,31 +169,28 @@ class UnifyTermWithGeneratorPass extends ContinuationZipPass {
       specificNodeQuery: termNodeQuery,
       run: (generalTypeNode, specificTermNode, generalContext, specificContext, forward, back) => {
         const typeNode = generalTypeNode, ///
-              termNode = specificTermNode, ///
-              nominalTypeName = typeNode.getNominalTypeName();
+              termNode = specificTermNode; ///
 
         let context;
 
         context = generalContext; ///
 
-        const type = context.findTypeByNominalTypeName(nominalTypeName);
-
-        if (type === null) {
-          return back();
-        }
+        const type = typeFromTypeNode(typeNode, context);
 
         context = specificContext;  ///
 
-        const term = termFromTermNode(termNode, context),
-              strict = false;
+        return type.validate(context, (type, context, back) => {
+          const term = termFromTermNode(termNode, context),
+                strict = false;
 
-        return declare((state) => {
-          return term.validateGivenType(strict, type, state, context, (term, context, back) => {
-            const specificContext = context;  ///
+          return declare((state) => {
+            return term.validateGivenType(strict, type, state, context, (term, context, back) => {
+              const specificContext = context;  ///
 
-            return forward(generalContext, specificContext, back);
-          }, back);
-        });
+              return forward(generalContext, specificContext, back);
+            }, back);
+          });
+        }, back);
       }
     }
   ];
@@ -208,31 +203,28 @@ class UnifyTermWithConstructorPass extends ContinuationZipPass {
       specificNodeQuery: termNodeQuery,
       run: (generalTypeNode, specificTermNode, generalContext, specificContext, forward, back) => {
         const typeNode = generalTypeNode, ///
-              termNode = specificTermNode, ///
-              nominalTypeName = typeNode.getNominalTypeName();
+              termNode = specificTermNode; ///
 
         let context;
 
         context = generalContext; ///
 
-        const type = context.findTypeByNominalTypeName(nominalTypeName);
-
-        if (type === null) {
-          return back();
-        }
+        const type = typeFromTypeNode(typeNode, context);
 
         context = specificContext;  ///
 
-        const term = termFromTermNode(termNode, context),
-              strict = false;
+        return type.validate(context, (type, context, back) => {
+          const term = termFromTermNode(termNode, context),
+                strict = false;
 
-        return declare((state) => {
-          return term.validateGivenType(strict, type, state, context, (term, context, back) => {
-            const specificContext = context;  ///
+          return declare((state) => {
+            return term.validateGivenType(strict, type, state, context, (term, context, back) => {
+              const specificContext = context;  ///
 
-            return forward(generalContext, specificContext, back);
-          }, back);
-        });
+              return forward(generalContext, specificContext, back);
+            }, back);
+          });
+        }, back);
       }
     }
   ];
@@ -295,31 +287,28 @@ class UnifyStatementWithCombinatorPass extends ContinuationZipPass {
       specificNodeQuery: termNodeQuery,
       run: (generalTypeNode, specificTermNode, generalContext, specificContext, forward, back) => {
         const typeNode = generalTypeNode, ///
-              termNode = specificTermNode, ///
-              nominalTypeName = typeNode.getNominalTypeName();
+          termNode = specificTermNode; ///
 
         let context;
 
         context = generalContext; ///
 
-        const type = context.findTypeByNominalTypeName(nominalTypeName);
-
-        if (type === null) {
-          return back();
-        }
+        const type = typeFromTypeNode(typeNode, context);
 
         context = specificContext;  ///
 
-        const term = termFromTermNode(termNode, context),
-              strict = false;
+        return type.validate(context, (type, context, back) => {
+          const term = termFromTermNode(termNode, context),
+                strict = false;
 
-        return declare((state) => {
-          return term.validateGivenType(strict, type, state, context, (term, context, back) => {
-            const specificContext = context;  ///
+          return declare((state) => {
+            return term.validateGivenType(strict, type, state, context, (term, context, back) => {
+              const specificContext = context;  ///
 
-            return forward(generalContext, specificContext, back);
-          }, back);
-        });
+              return forward(generalContext, specificContext, back);
+            }, back);
+          });
+        }, back);
       }
     }
   ];

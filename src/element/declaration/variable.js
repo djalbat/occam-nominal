@@ -70,45 +70,31 @@ export default define(class VariableDeclaration extends Declaration {
   });
 
   verifyType(context, forward, back) {
-    let typeVerifies = false;
-
     const variableDeclarationString = this.getString(); ///
 
     context.trace(`Verifying the '${variableDeclarationString}' variable declaration's type...`);
 
-    const nominalTypeName = this.type.getNominalTypeName(),
-          type = context.findTypeByNominalTypeName(nominalTypeName),
-          typePresent = (type !== null)
-
-    if (!typePresent) {
-      const typeString = this.type.getString();
-
-      context.debug(`The '${typeString}' type is not present.`);
-    } else {
+    return this.type.verify(context, (type, context, back) => {
       const typeComparesToProvisional = type.compareProvisional(this.provisional);
 
       if (!typeComparesToProvisional) {
-        const typeString = this.type.getString();
+        const typeString = type.getString();
 
         this.provisional ?
           context.debug(`The '${variableDeclarationString}' variable declaration's '${typeString}' type is present but not provisional.`) :
             context.debug(`The '${variableDeclarationString}' variable declaration's '${typeString}' type is present but provisional.`);
-      } else {
-        this.variable.setType(type);
 
-        this.variable.setProvisional(this.provisional);
-
-        typeVerifies = true;
+        return back();
       }
-    }
 
-    if (!typeVerifies) {
-      return back();
-    }
+      this.variable.setType(type);
 
-    context.debug(`...verified the '${variableDeclarationString}' variable declaration's type.`);
+      this.variable.setProvisional(this.provisional);
 
-    return forward(context, back);
+      context.debug(`...verified the '${variableDeclarationString}' variable declaration's type.`);
+
+      return forward(context, back);
+    }, back);
   }
 
   verifyVariable(context, forward, back) {
