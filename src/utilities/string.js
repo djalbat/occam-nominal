@@ -154,8 +154,14 @@ export function signatureStringFromSignature(signature) {
   return signatureString;
 }
 
-export function typeStringFromNominalTypeName(nominalTypeName) {
-  const typeString = nominalTypeName;  ///
+export function typeStringFromNameAndPrefixName(name, prefixName) {
+  let typeString;
+
+  typeString = `${name}`;
+
+  if (prefixName !== null) {
+    typeString = `${typeString}${prefixName}`;
+  }
 
   return typeString;
 }

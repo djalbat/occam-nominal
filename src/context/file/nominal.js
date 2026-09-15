@@ -7,8 +7,8 @@ import NominalLexer from "../../nominal/lexer";
 import NominalParser from "../../nominal/parser";
 
 import { isolate } from "../../utilities/context";
-import { findType } from "../../utilities/type";
 import { verifyFile } from "../../process/verify";
+import { findType, findTypes } from "../../utilities/type";
 import { findMetaTypeByMetaTypeName } from "../../metaTypes";
 import { typesFromJSON,
          rulesFromJSON,
@@ -119,9 +119,9 @@ export default class NominalFileContext extends FileContext {
     return labels;
   }
 
-  getTypes(includeRelease = true) {
+  getTypes(includeRelease = true, includeDependencies = true) {
     const types = includeRelease ?
-                    this.context.getTypes() :
+                    this.context.getTypes(includeDependencies) :
                       this.types;
 
     return types;
@@ -467,50 +467,8 @@ export default class NominalFileContext extends FileContext {
     return claim;
   }
 
-  findLemmaByReference(reference) {
-    const lemmas = this.getLemmas(),
-          metavariableNode = reference.getMetavariableNode(),
-          lemma = lemmas.find((lemma) => {
-            const metavariableNodeMatches = lemma.matchMetavariableNode(metavariableNode);
-
-            if (metavariableNodeMatches) {
-              return true;
-            }
-          }) || null;
-
-    return lemma;
-  }
-
-  findTheoremByReference(reference) {
-    const theorems = this.getTheorems(),
-          metavariableNode = reference.getMetavariableNode(),
-          theorem = theorems.find((theorem) => {
-            const metavariableNodeMatches = theorem.matchMetavariableNode(metavariableNode);
-
-            if (metavariableNodeMatches) {
-              return true;
-            }
-          }) || null;
-
-    return theorem;
-  }
-
-  findConjectureByReference(reference) {
-    const conjectures = this.getConjectures(),
-          metavariableNode = reference.getMetavariableNode(),
-          conjecture = conjectures.find((conjecture) => {
-            const metavariableNodeMatches = conjecture.matchMetavariableNode(metavariableNode);
-
-            if (metavariableNodeMatches) {
-              return true;
-            }
-          }) || null;
-
-    return conjecture;
-  }
-
-  findTypeByTypeName(typeName, includeRelease = true) {
-    const types = this.getTypes(includeRelease),
+  findTypeByTypeName(typeName, includeRelease = true, includeDependencies = true) {
+    const types = this.getTypes(includeRelease, includeDependencies),
           type = findType(types, (type) => {
             const typeComparesToTypeName = type.compareTypeName(typeName);
 
@@ -522,21 +480,8 @@ export default class NominalFileContext extends FileContext {
     return type;
   }
 
-  findTypeByNominalTypeName(nominalTypeName, includeRelease = true) {
-    const types = this.getTypes(includeRelease),
-          type = findType(types, (type) => {
-            const typeComparesToNominalTypeName = type.compareNominalTypeName(nominalTypeName);
-
-            if (typeComparesToNominalTypeName) {
-              return true;
-            }
-          });
-
-    return type;
-  }
-
-  findTypeByPrefixedTypeName(prefixedTypeName, includeRelease = true) {
-    const types = this.getTypes(includeRelease),
+  findTypeByPrefixedTypeName(prefixedTypeName, includeRelease = true, includeDependencies = true) {
+    const types = this.getTypes(includeRelease, includeDependencies),
           type = findType(types, (type) => {
             const typeComparesToPrefixedTypeName = type.comparePrefixedTypeName(prefixedTypeName);
 
@@ -631,22 +576,15 @@ export default class NominalFileContext extends FileContext {
     return labelPresent;
   }
 
-  isTypePresentByTypeName(typeName, includeRelease = true) {
-    const type = this.findTypeByTypeName(typeName, includeRelease),
+  isTypePresentByTypeName(typeName, includeRelease = true, includeDependencies = true) {
+    const type = this.findTypeByTypeName(typeName, includeRelease, includeDependencies),
           typePresent = (type !== null);
 
     return typePresent;
   }
 
-  isTypePresentByNominalTypeName(nominalTypeName, includeRelease = true) {
-    const type = this.findTypeByNominalTypeName(nominalTypeName, includeRelease),
-          typePresent = (type !== null);
-
-    return typePresent;
-  }
-
-  isTypePresentByPrefixedTypeName(prefixedTypeName, includeRelease = true) {
-    const type = this.findTypeByPrefixedTypeName(prefixedTypeName, includeRelease),
+  isTypePresentByPrefixedTypeName(prefixedTypeName, includeRelease = true, includeDependencies = true) {
+    const type = this.findTypeByPrefixedTypeName(prefixedTypeName, includeRelease, includeDependencies),
           typePresent = (type !== null);
 
     return typePresent;

@@ -3,7 +3,7 @@
 import elements from "../elements";
 
 import { baseTypeFromNothing } from "../utilities/type";
-import { typeStringFromNominalTypeName,
+import { typeStringFromNameAndPrefixName,
          rulsStringFromLabelsPremisesAndConclusion,
          procedureReferenceStringFromNameAndParameters,
          schemaStringFromLabelSuppositionsAndDeduction,
@@ -28,8 +28,7 @@ export function typeFromTypeNode(typeNode, context) {
           superTypes = superTypesFromTypeNode(typeNode, context),
           properties = propertiesFromTypeNode(typeNode, context),
           provisional = provisionalFromTypeNode(typeNode, context),
-          nominalTypeName = nominalTypeNameFromTypeNode(typeNode, context),
-          typeString = typeStringFromNominalTypeName(nominalTypeName),
+          typeString = typeStringFromNameAndPrefixName(name, prefixName),
           string = typeString,  ///
           breakPoint = null;
 
@@ -1456,12 +1455,6 @@ export function stepFromStepOrSubproofNode(stepOrSubproofNode, context) {
   }
 
   return step;
-}
-
-export function nominalTypeNameFromTypeNode(typeNode, context) {
-  const nominalTypeName = typeNode.getNominalTypeName();
-
-  return nominalTypeName;
 }
 
 export function schemaAssertionFromStepNode(stepNode, context) {

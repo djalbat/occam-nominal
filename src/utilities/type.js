@@ -1,8 +1,12 @@
 "use strict";
 
+import { arrayUtilities } from "necessary";
+
 import elements from "../elements";
 
 import { BASE_TYPE_SYMBOL } from "../constants";
+
+const { find } = arrayUtilities;
 
 let baseType = null;
 
@@ -16,6 +20,25 @@ export function baseTypeFromNothing() {
   }
 
   return baseType;
+}
+
+export function findTypes(types, callback) {
+  const baseType = baseTypeFromNothing();
+
+  types = [
+    ...types,
+    baseType
+  ];
+
+  types = find(types, (type) => { ///
+    const found = callback(type)
+
+    if (found) {
+      return true;
+    }
+  });
+
+  return types;
 }
 
 export function findType(types, callback) {

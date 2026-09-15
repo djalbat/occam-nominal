@@ -30,18 +30,6 @@ export default class PropertyDeclarationNode extends DeclarationNode {
     return propertyName;
   }
 
-  getNominalTypeName() {
-    let nominalTypeName = null;
-
-    const typeNode = this.getTypeNode();
-
-    if (typeNode !== null) {
-      nominalTypeName = typeNode.getNominalTypeName();
-    }
-
-    return nominalTypeName;
-  }
-
   getTypeNode() {
     const ruleName = TYPE_RULE_NAME,
           typeNode = this.getNodeByRuleName(ruleName);

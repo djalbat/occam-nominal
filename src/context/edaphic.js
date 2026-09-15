@@ -31,22 +31,6 @@ export default class EdaphicContext extends Context {
     return this.parser;
   }
 
-  findTypeByNominalTypeName(nominalTypeName) {
-    let type = null;
-
-    if (baseType === null) {
-      baseType = baseTypeFromNothing();
-    }
-
-    const comparesToNominalTypeName = baseType.compareNominalTypeName(nominalTypeName);
-
-    if (comparesToNominalTypeName) {
-      type = baseType;  ///
-    }
-
-    return type;
-  }
-
   findMetaTypeByMetaTypeName(metaTypeName) { return findMetaTypeByMetaTypeName(metaTypeName); }
 
   static fromNothing() {

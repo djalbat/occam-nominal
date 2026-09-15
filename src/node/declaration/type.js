@@ -71,13 +71,6 @@ export default class TypeDeclarationNode extends DeclarationNode {
     return superTypeNodes;
   }
 
-  getNominalTypeName() {
-    const typeNode = this.getTypeNode(),
-          nominalTypeName = typeNode.getNominalTypeName();
-
-    return nominalTypeName;
-  }
-
   getTypeName() {
     let typeName = null;
 

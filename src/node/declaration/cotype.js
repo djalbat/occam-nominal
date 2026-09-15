@@ -70,13 +70,6 @@ export default class CotypeDeclarationNode extends DeclarationNode {
     return typePrefixName;
   }
 
-  getNominalTypeName() {
-    const typeNode = this.getTypeNode(),
-          nominalTypeName = typeNode.getNominalTypeName();
-
-    return nominalTypeName;
-  }
-
   getPropertyDeclarationNodes() {
     const ruleName = PROPERTY_DECLARATION_RULE_NAME,
           propertyDeclarationNodes = this.getNodesByRuleName(ruleName);

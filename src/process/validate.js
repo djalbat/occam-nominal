@@ -3,6 +3,8 @@
 import { queryUtilities } from "occam-query";
 import { ContinuationPass } from "occam-languages";
 
+import { typeFromTypeNode} from "../utilities/element";
+
 import { declare } from "../utilities/state";
 import { termFromTermNode, statementFromStatementNode } from "../utilities/element";
 
@@ -37,14 +39,11 @@ class ValidateTermPass extends ContinuationPass {
     {
       nodeQuery: typeNodeQuery,
       run: (typeNode, context, forward, back) => {
-        const nominalTypeName = typeNode.getNominalTypeName(),
-              typePresent = context.isTypePresentByNominalTypeName(nominalTypeName);
+        const type = typeFromTypeNode(typeNode, context);
 
-        if (!typePresent) {
-          return back();
-        }
-
-        return forward(context, back);
+        return type.validate(context, (type, context, back) => {
+          return forward(context, back);
+        }, back);
       }
     }
   ];
@@ -85,14 +84,11 @@ class ValidateStatementPass extends ContinuationPass {
     {
       nodeQuery: typeNodeQuery,
       run: (typeNode, context, forward, back) => {
-        const nominalTypeName = typeNode.getNominalTypeName(),
-              typePresent = context.isTypePresentByNominalTypeName(nominalTypeName);
+        const type = typeFromTypeNode(typeNode, context);
 
-        if (!typePresent) {
-          return back();
-        }
-
-        return forward(context, back);
+        return type.validate(context, (type, context, back) => {
+          return forward(context, back);
+        }, back);
       }
     }
   ];

@@ -170,12 +170,12 @@ export default define(class Hypothesis extends Element {
 
     const generalContext = context; ///
 
-    return this.statement.discharge(generalContext, specificContext, (generalContext, specificContext, bcak) => {
+    return this.statement.discharge(generalContext, specificContext, (generalContext, specificContext, back) => {
       context = specificContext;  ///
 
       context.debug(`...discharged the '${hypothesisString}' hypothesis' statement.`);
 
-      return forward(context, bcak);
+      return forward(context, back);
     }, back);
   }
 

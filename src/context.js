@@ -385,16 +385,9 @@ export default class Context extends ContextBase {
     return constraint;
   }
 
-  findTypeByTypeName(typeName) {
+  findTypeByTypeName(typeName, includeRelease = true, includeDependencies = true) {
     const context = this.getContext(),
-          type = context.findTypeByTypeName(typeName);
-
-    return type;
-  }
-
-  findTypeByNominalTypeName(nominalTypeName) {
-    const context = this.getContext(),
-          type = context.findTypeByNominalTypeName(nominalTypeName);
+          type = context.findTypeByTypeName(typeName, includeRelease, includeDependencies);
 
     return type;
   }
@@ -495,13 +488,6 @@ export default class Context extends ContextBase {
           procedureReferencetPresent = context.isProcedureReferencePresentByProcedureReferenceNode(procedureReferencetNode);
 
     return procedureReferencetPresent;
-  }
-
-  isTypePresentByNominalTypeName(nominalTypeName) {
-    const context = this.getContext(),
-          typePresent = context.isTypePresentByNominalTypeName(nominalTypeName);
-
-    return typePresent;
   }
 
   isProcedurePresentByProcedureName(procedureName) {

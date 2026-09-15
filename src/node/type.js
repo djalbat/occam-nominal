@@ -53,22 +53,5 @@ export default class TypeNode extends NonTerminalNode {
     return typePrefixName;
   }
 
-  getNominalTypeName() {
-    let nominalTypeName;
-
-    const prefixed = this.isPrefixed(),
-          typeName = this.getTypeName();
-
-    if (prefixed) {
-      const typePrefixName = this.getTypePrefixName();
-
-      nominalTypeName = `${typePrefixName}${typeName}`;
-    } else {
-      nominalTypeName = typeName;  ///
-    }
-
-    return nominalTypeName;
-  }
-
   static fromRuleNameChildNodesOpacityAndPrecedence(ruleName, childNodes, opacity, precedence) { return NonTerminalNode.fromRuleNameChildNodesOpacityAndPrecedence(TypeNode, ruleName, childNodes, opacity, precedence); }
 }

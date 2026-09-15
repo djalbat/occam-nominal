@@ -1,7 +1,7 @@
 "use strict";
 
-import { Element } from "occam-languages";
 import { arrayUtilities } from "necessary";
+import {Element, continuationUtilities, breakPointUtilities} from "occam-languages";
 
 import { define } from "../elements";
 import { instantiate } from "../utilities/context";
@@ -20,7 +20,8 @@ import { closedFromJSON,
          propertiesToPropertiesJSON,
          provisionalToProvisionalJSON } from "../utilities/json";
 
-const { push, first, intersection } = arrayUtilities;
+const { unbreakable } = breakPointUtilities,
+      { push, intersection } = arrayUtilities;
 
 export default define(class Type extends Element {
   constructor(context, string, node, breakPoint, name, closed, prefixName, superTypes, properties, provisional) {
@@ -178,15 +179,6 @@ export default define(class Type extends Element {
     return prefixedName;
   }
 
-  getNominalTypeName() {
-    const prefixed = this.isPrefixed(),
-          nominalTypeName = prefixed ?
-                             `${this.prefixName}${this.name}` :
-                                this.name;
-
-    return nominalTypeName;
-  }
-
   isJoinedTo(type) {
     let joinedTo = false;
 
@@ -283,29 +275,6 @@ export default define(class Type extends Element {
     return comparesToProvisional;
   }
 
-  compareNominalTypeName(nominalTypeName) {
-    let comparesToNominalTypeName = false;
-
-    const nameNominalTypeName = (this.name === nominalTypeName);
-
-    if (nameNominalTypeName) {
-      comparesToNominalTypeName = true;
-    } else {
-      const prefixed = this.isPrefixed();
-
-      if (prefixed) {
-        const prefixedName = this.getPrefixedName(),
-              prefixedNameNominalTypeName = (prefixedName === nominalTypeName);
-
-        if (prefixedNameNominalTypeName) {
-          comparesToNominalTypeName = true;
-        }
-      }
-    }
-
-    return comparesToNominalTypeName;
-  }
-
   comparePrefixedTypeName(prefixedTypeName) {
     let comparesToPrefixedTypeName = false;
 
@@ -351,6 +320,75 @@ export default define(class Type extends Element {
     }
 
     return json;
+  }
+
+  verify = unbreakable(function (context, forward, back) {
+    const typeString = this.getString();
+
+    context.trace(`Verifying the '${typeString}' type...`);
+
+    return this.validate(context, (type, context, back) => {
+      context.debug(`...verified the '${typeString}' type.`);
+
+      return forward(type, context, back);
+    }, back);
+  });
+
+  validate(context, forward, back) {
+    let type = null;
+
+    const typeString = this.getString();
+
+    context.trace(`Validating the '${typeString}' type...`);
+
+    const prefixed = this.isPrefixed();
+
+    if (!prefixed) {
+      const includeRelease = true,
+            includeDependencies = false;
+
+      type = context.findTypeByTypeName(this.name, includeRelease, includeDependencies); ///
+
+      const typePresent = (type !== null);
+
+      if (!typePresent) {
+        context.trace(`The '${typeString}' type is not present locally.`);
+
+        return back();
+      }
+    } else {
+      let typePresent,
+          includeDependencies;
+
+      const prefixedName = this.getPrefixedName(),
+            includeRelease = true;
+
+      includeDependencies = false;
+
+      typePresent = context.isTypePresentByPrefixedTypeName(prefixedName, includeRelease, includeDependencies);
+
+      if (typePresent) {
+        context.trace(`The '${typeString}' type is present locally.`);
+
+        return back();
+      }
+
+      includeDependencies = true;
+
+      type = context.findTypeByPrefixedTypeName(prefixedName, includeRelease, includeDependencies);
+
+      typePresent = (type !== null);
+
+      if (!typePresent) {
+        context.trace(`The '${typeString}' type is not present globally.`);
+
+        return back();
+      }
+    }
+
+    context.debug(`...validated the '${typeString}' type.`);
+
+    return forward(type, context, back);
   }
 
   static name = "Type";

@@ -106,22 +106,10 @@ export default define(class TypeDeclaration extends Declaration {
 
     context.trace(`Verifying the '${typeDeclarationString}' type declaration's '${typeString}' type...`);
 
-    let typePresent;
-
     const typeName = this.type.getName(),
-          includeRelease = false;
-
-    typePresent = context.isTypePresentByTypeName(typeName, includeRelease);
-
-    if (typePresent) {
-      context.debug(`The '${typeString}' type is already present.`);
-
-      return back();
-    }
-
-    const prefixedTypeName = typeName; ///
-
-    typePresent = context.isTypePresentByPrefixedTypeName(prefixedTypeName);
+          includeRelease = true,
+          includeDependencies = false,
+          typePresent = context.isTypePresentByTypeName(typeName, includeRelease, includeDependencies);
 
     if (typePresent) {
       context.debug(`The '${typeString}' type is already present.`);
@@ -223,29 +211,13 @@ export default define(class TypeDeclaration extends Declaration {
 
     context.trace(`Verifying the '${typeDeclarationString}' type declaration's '${superTypeString}' super-type...`);
 
-    const nominalTypeName = superType.getNominalTypeName(),
-          typeName = nominalTypeName, ///
-          typeComparesToTypeName = this.type.compareTypeName(typeName);
+    return superType.verify(context, (superType, context, back) => { ///
+      superTypes.push(superType);
 
-    if (typeComparesToTypeName) {
-      context.debug(`The '${superTypeString}' super-type's name compares to the ${typeName}' type's name.`);
+      context.debug(`...verified the '${typeDeclarationString}' type declaration's '${superTypeString}' super-type.`);
 
-      return back();
-    }
-
-    superType = context.findTypeByNominalTypeName(nominalTypeName);
-
-    if (superType === null) {
-      context.debug(`The '${superTypeString}' super-type is not present.`);
-
-      return back();
-    }
-
-    superTypes.push(superType);
-
-    context.debug(`...verified the '${typeDeclarationString}' type declaration's '${superTypeString}' super-type.`);
-
-    return forward(context, back);
+      return forward(context, back);
+    }, back);
   }
 
   static name = "TypeDeclaration";

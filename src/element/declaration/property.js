@@ -82,21 +82,13 @@ export default define(class PropertyDeclaration extends Declaration {
 
     context.trace(`Verifying the '${propertyDeclarationString}' property declaration's type...`);
 
-    const nominalTypeName = this.type.getNominalTypeName(),
-          typeString = this.type.getString(),
-          type = context.findTypeByNominalTypeName(nominalTypeName);
+    return this.type.verify(context, (type, context, back) => {
+      this.type = type;
 
-    if (type === null) {
-      context.debug(`The '${typeString}' type is not present.`);
+      context.debug(`...verified the '${propertyDeclarationString}' property declaration's type.`);
 
-      return back();
-    }
-
-    this.type = type;
-
-    context.debug(`...verified the '${propertyDeclarationString}' property declaration's type.`);
-
-    return forward(context, back);
+      return forward(context, back);
+    }, back);
   }
 
   verifyProperty(context, forward, back) {
