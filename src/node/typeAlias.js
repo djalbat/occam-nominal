@@ -9,6 +9,8 @@ const { first, second } = arrayUtilities;
 
 export default class TypeAliasNode extends NonTerminalNode {
   getAliasTypeNode() {
+    let typeName;
+
     const typeNodes = this.getTypeNodes(),
           firstTypeNode = first(typeNodes),
           aliasTypeNode = firstTypeNode;  ///
@@ -17,18 +19,10 @@ export default class TypeAliasNode extends NonTerminalNode {
   }
 
   getTypeNode() {
-    const typeNodes = this.getTypeNodes(),
-          secondTypeNode = second(typeNodes),
-          typeNode = secondTypeNode;  ///
+    const ruleName = TYPE_RULE_NAME,
+          typeNode = this.getNodeByRuleName(ruleName);
 
     return typeNode;
-  }
-
-  getTypeNodes() {
-    const ruleName = TYPE_RULE_NAME,
-          typeNodes = this.getNodesByRuleName(ruleName);
-
-    return typeNodes;
   }
 
   static fromRuleNameChildNodesOpacityAndPrecedence(ruleName, childNodes, opacity, precedence) { return NonTerminalNode.fromRuleNameChildNodesOpacityAndPrecedence(TypeAliasNode, ruleName, childNodes, opacity, precedence); }
