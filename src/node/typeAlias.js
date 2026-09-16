@@ -1,21 +1,22 @@
 "use strict";
 
-import { arrayUtilities } from "necessary";
 import { NonTerminalNode } from "occam-languages";
 
 import { TYPE_RULE_NAME } from "../ruleNames";
 
-const { first, second } = arrayUtilities;
-
 export default class TypeAliasNode extends NonTerminalNode {
-  getAliasTypeNode() {
+  getTypeName() {
     let typeName;
 
-    const typeNodes = this.getTypeNodes(),
-          firstTypeNode = first(typeNodes),
-          aliasTypeNode = firstTypeNode;  ///
+    this.someTerminalNode((terminalNode) => {
+      const content = terminalNode.getContent();
 
-    return aliasTypeNode;
+      typeName = content; ///
+
+      return true;
+    });
+
+    return typeName;
   }
 
   getTypeNode() {

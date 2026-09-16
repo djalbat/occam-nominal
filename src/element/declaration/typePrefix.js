@@ -34,11 +34,9 @@ export default define(class TypePrefixDeclaration extends Declaration {
 
     context.trace(`Verifying the '${typePrefixDeclarationString}' type prefix declaration...`);
 
-    const verifyTypes = this.verifyTypes.bind(this),
-          verifyTypePrefix = this.verifyTypePrefix.bind(this);
+    const verifyTypePrefix = this.verifyTypePrefix.bind(this);
 
     return all([
-      verifyTypes,
       verifyTypePrefix
     ], context, (context, back) => {
       context.addTypePrefix(this.typePrefix);
@@ -57,41 +55,10 @@ export default define(class TypePrefixDeclaration extends Declaration {
     });
   });
 
-  verifyTypes(context, forward, back) {
-    const typePrefixDeclarationString = this.getString();  ///
-
-    context.trace(`Verifying the '${typePrefixDeclarationString}' type prefix declaration's ypes...`);
-
-    const includeRelease = true,
-          includeDependencies = false,
-          types = context.getTypes(includeRelease, includeDependencies),
-          typesLength = types.length;
-
-    if (typesLength !== 0) {
-      context.debug(`Unable to verify the '${typePrefixDeclarationString}' type prefix declaration because types have already been declared.`);
-
-      return back();
-    }
-
-    context.trace(`...verified the '${typePrefixDeclarationString}' type prefix declaration's types.`);
-
-    return forward(context, back);
-  }
-
   verifyTypePrefix(context, forward, back) {
     const typePrefixDeclarationString = this.getString();  ///
 
     context.trace(`Verifiying the '${typePrefixDeclarationString}' type prefix declaration's type prefix...`);
-
-    const typePrefix = context.getTypePrefix();
-
-    if (typePrefix !== null) {
-      const typePrefixString = typePrefix.getString();
-
-      context.trace(`The package already has a '${typePrefixString}' type prefix.`);
-
-      return back();
-    }
 
     return this.typePrefix.verify(context, (context, back) => {
       context.debug(`...verified the '${typePrefixDeclarationString}' type prefix declaration's type prefix.`);

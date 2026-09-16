@@ -42,17 +42,12 @@ export default class MetavariableNode extends NonTerminalNode {
   getMetavariableName() {
     let metavariableName;
 
-    this.someChildNode((childNode) => {
-      const childNodeTerminalNode = childNode.isTerminalNode();
+    this.someTerminalNode((terminalNode) => {
+      const content = terminalNode.getContent();
 
-      if (childNodeTerminalNode) {
-        const terminalNode = childNode, ///
-              content = terminalNode.getContent();
+      metavariableName = content; ///
 
-        metavariableName = content; ///
-
-        return true;
-      }
+      return true;
     });
 
     return metavariableName;

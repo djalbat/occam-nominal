@@ -203,9 +203,9 @@ export default class NominalFileContext extends FileContext {
     return typeAliases;
   }
 
-  getTypePrefixes(includeRelease = true) {
+  getTypePrefixes(includeRelease = true, includeDependencies = true) {
     const typePrefixes = includeRelease ?
-                           this.context.getTypePrefixes() :
+                           this.context.getTypePrefixes(includeDependencies) :
                              this.typePrefixes;
 
     return typePrefixes;
@@ -530,8 +530,8 @@ export default class NominalFileContext extends FileContext {
     return type;
   }
 
-  findTypePrefixByTypePrefixName(typePrefixName, includeRelease = true) {
-    const typePrefixes = this.getTypePrefixes(includeRelease),
+  findTypePrefixByTypePrefixName(typePrefixName, includeRelease = true, includeDependencies = true) {
+    const typePrefixes = this.getTypePrefixes(includeRelease, includeDependencies),
           typePrefix = typePrefixes.find((typePrefix) => {
             const typePrefixComparesToTypePrefixName = typePrefix.compareTypePrefixName(typePrefixName);
 

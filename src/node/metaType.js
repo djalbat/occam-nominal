@@ -6,17 +6,12 @@ export default class MetaTypeNode extends NonTerminalNode {
   getMetaTypeName() {
     let metaTypeName;
 
-    this.someChildNode((childNode) => {
-      const childNodeTerminalNode = childNode.isTerminalNode();
+    this.someTerminalNode((terminalNode) => {
+      const content = terminalNode.getContent();
 
-      if (childNodeTerminalNode) {
-        const terminalNode = childNode, ///
-              content = terminalNode.getContent();
+      metaTypeName = content; ///
 
-        metaTypeName = content; ///
-
-        return true;
-      }
+      return true;
     });
 
     return metaTypeName;

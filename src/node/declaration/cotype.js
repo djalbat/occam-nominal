@@ -9,19 +9,14 @@ export default class CotypeDeclarationNode extends DeclarationNode {
   isProvisional() {
     let provisional = false;
 
-    this.someChildNode((childNode) => {
-      const childNodeTerminalNode = childNode.isTerminalNode();
+    this.someTerminalNode((terminalNode) => {
+      const content = terminalNode.getContent(),
+            contentProvisional = (content === PROVISIONAL);
 
-      if (childNodeTerminalNode) {
-        const terminalNode = childNode, ///
-              content = terminalNode.getContent(),
-              contentProvisional = (content === PROVISIONAL);
+      if (contentProvisional) {
+        provisional = true;
 
-        if (contentProvisional) {
-          provisional = true;
-
-          return true;
-        }
+        return true;
       }
     });
 

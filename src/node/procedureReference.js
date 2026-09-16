@@ -9,23 +9,15 @@ export default class ProcedureReferenceNode extends NonTerminalNode {
   getName() {
     let name;
 
-    this.someChildNode((childNode) => {
-      const childNodeTerminalNode = childNode.isTerminalNode();
+    const tokenType = NAME_TOKEN_TYPE;
 
-      if (childNodeTerminalNode) {
-        const terminalNode = childNode, ///
-              type = terminalNode.getType(),
-              typeNameTokenType = (type === NAME_TOKEN_TYPE);
+    this.someTerminalNode((terminalNode) => {
+      const content = terminalNode.getContent();
 
-        if (typeNameTokenType) {
-          const content = terminalNode.getContent();
+      name = content; ///
 
-          name = content; ///
-
-          return true;
-        }
-      }
-    });
+      return true;
+    }, tokenType);
 
     return name;
   }

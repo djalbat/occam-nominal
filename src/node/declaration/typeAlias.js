@@ -1,42 +1,15 @@
 "use strict";
 
-import { arrayUtilities } from "necessary";
-
 import DeclarationNode from "../../node/declaration";
 
-import { TYPE_RULE_NAME } from "../../ruleNames";
-
-const { first, last } = arrayUtilities;
+import { TYPE_ALIAS_RULE_NAME } from "../../ruleNames";
 
 export default class TypeAliasDeclarationNode extends DeclarationNode {
-  getTypeNode() {
-    const typeNodes = this.getTypeNodes(),
-          lastTypeNode = last(typeNodes),
-          typeNode = lastTypeNode;  ///
+  getTypeAliasNode() {
+    const ruleName = TYPE_ALIAS_RULE_NAME,
+          typeAliasNode = this.getNodeByRuleName(ruleName);
 
-    return typeNode;
-  }
-
-  getAliasTypeNode() {
-    let aliasTypeNode = null;
-
-    const typeNodes = this.getTypeNodes(),
-          typeNodesLength = typeNodes.length;
-
-    if (typeNodesLength === 2) {
-      const firstTypeNode = first(typeNodes);
-
-      aliasTypeNode = firstTypeNode;  ///
-    }
-
-    return aliasTypeNode;
-  }
-
-  getTypeNodes() {
-    const ruleName = TYPE_RULE_NAME,
-          typeNodes = this.getNodesByRuleName(ruleName);
-
-    return typeNodes;
+    return typeAliasNode;
   }
 
   static fromRuleNameChildNodesOpacityAndPrecedence(ruleName, childNodes, opacity, precedence) { return DeclarationNode.fromRuleNameChildNodesOpacityAndPrecedence(TypeAliasDeclarationNode, ruleName, childNodes, opacity, precedence); }

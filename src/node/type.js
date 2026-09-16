@@ -2,6 +2,8 @@
 
 import { NonTerminalNode } from "occam-languages";
 
+import { TYPE_TOKEN_TYPE } from "../tokenTypes";
+
 export default class TypeNode extends NonTerminalNode {
   isPrefixed() {
     const multiplicity = this.getMultiplicity(),
@@ -14,18 +16,18 @@ export default class TypeNode extends NonTerminalNode {
     let typeName;
 
     const prefixed = this.isPrefixed(),
-          nameIndex = prefixed ? 2 : 0;
+          tokenType = TYPE_TOKEN_TYPE,
+          typeNameIndex = prefixed ? 1 : 0;
 
-    this.someChildNode((childNode, index) => {
-      if (index === nameIndex) {
-        const typeTerminalNode = childNode, ///
-              content = typeTerminalNode.getContent();
+    this.someTerminalNode((terminalNode, index) => {
+      if (index === typeNameIndex) {
+        const content = terminalNode.getContent();
 
         typeName = content; ///
 
         return true;
       }
-    });
+    }, tokenType);
 
     return typeName;
   }
@@ -36,18 +38,15 @@ export default class TypeNode extends NonTerminalNode {
     const prefixed = this.isPrefixed();
 
     if (prefixed) {
-      const prefixIndex = 0;
+      const tokenType = TYPE_TOKEN_TYPE;
 
-      this.someChildNode((childNode, index) => {
-        if (index === prefixIndex) {
-          const typeTerminalNode = childNode, ///
-                content = typeTerminalNode.getContent();
+      this.someTerminalNode((terminalNode) => {
+        const content = terminalNode.getContent();
 
-          typePrefixName = content; ///
+        typePrefixName = content; ///
 
-          return true;
-        }
-      });
+        return true;
+      }, tokenType);
     }
 
     return typePrefixName;

@@ -9,19 +9,14 @@ export default class ContainedAssertionNode extends AssertionNode {
   isNegated() {
     let negated = false;
 
-    this.someChildNode((childNode) => {
-      const childNodeTerminalNode = childNode.isTerminalNode();
+    this.someTerminalNode((terminalNode) => {
+      const content = terminalNode.getContent(),
+            contentMessing = (content === MISSING);
 
-      if (childNodeTerminalNode) {
-        const terminalNode = childNode, ///
-              content = terminalNode.getContent(),
-              contentMessing = (content === MISSING);
+      if (contentMessing) {
+        negated = true;
 
-        if (contentMessing) {
-          negated = true;
-
-          return true;
-        }
+        return true;
       }
     });
 

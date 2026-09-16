@@ -9,19 +9,14 @@ export default class VariableDeclarationNode extends DeclarationNode {
   isProvisional() {
     let provisional = false;
 
-    this.someChildNode((childNode) => {
-      const childNodeTerminalNode = childNode.isTerminalNode();
+    this.someTerminalNode((terminalNode) => {
+      const content = terminalNode.getContent(),
+            contentProvisionally = (content === PROVISIONALLY);
 
-      if (childNodeTerminalNode) {
-        const terminalNode = childNode, ///
-              content = terminalNode.getContent(),
-              contentProvisionally = (content === PROVISIONALLY);
+      if (contentProvisionally) {
+        provisional = true;
 
-        if (contentProvisionally) {
-          provisional = true;
-
-          return true;
-        }
+        return true;
       }
     });
 

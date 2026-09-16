@@ -415,6 +415,21 @@ export function generatorFromGeneratorNode(generatorNode, context) {
   return generator;
 }
 
+export function typeAliasFromTypeAliasNode(typeAliasNode, context) {
+  const { TypeAlias } = elements,
+        node = typeAliasNode, ///
+        string = context.nodeAsString(node),
+        breakPoint = null,
+        type = typeFromTypeAliasNode(typeAliasNode, context),
+        typeName = typeNameFromTypeAliasNode(typeAliasNode, context);
+
+  context = null;
+
+  const typeAlias = new TypeAlias(context, string, node, breakPoint, type, typeName);
+
+  return typeAlias;
+}
+
 export function hypothesisFromHypothesisNode(hypotheseNode, context) {
   const { Hypothesis } = elements,
         node = hypotheseNode, ///
@@ -859,12 +874,11 @@ export function typeAliasDeclarationFromTypeAliasDeclarationNode(typeAliasDeclar
         node = typeAliasDeclarationNode, ///
         string = context.nodeAsString(node),
         breakPoint = null,
-        type = typeFromTypeAliasDeclarationNode(typeAliasDeclarationNode, context),
-        aliasType = aliasTypeFromTypeAliasDeclarationNode(typeAliasDeclarationNode, context);
+        typeAlias = typeAliasFromTypeAliasDeclarationNode(typeAliasDeclarationNode, context);
 
   context = null;
 
-  const typeAliasDeclaration = new TypeAliasDeclaration(context, string, node, breakPoint, type, aliasType);
+  const typeAliasDeclaration = new TypeAliasDeclaration(context, string, node, breakPoint, typeAlias);
 
   return typeAliasDeclaration;
 }
@@ -1142,6 +1156,18 @@ export function typeFromGeneratorNode(generatorNode, context) {
   return type;
 }
 
+export function typeFromTypeAliasNode(typeAliasNode, context) {
+  let type = null;
+
+  const typeNode = typeAliasNode.getTypeNode();
+
+  if (typeNode !== null) {
+    type = typeFromTypeNode(typeNode, context);
+  }
+
+  return type;
+}
+
 export function superTypesFromTypeNode(typeNode, context) {
   const superTypes = null;
 
@@ -1395,6 +1421,12 @@ export function rightTermFromEqualityNode(equalityNode, context) {
         rightTerm = termFromTermNode(rightTermNode, context);
 
   return rightTerm;
+}
+
+export function typeNameFromTypeAliasNode(typeAliasNode, context) {
+  const typeName = typeAliasNode.getTypeName();
+
+  return typeName;
 }
 
 export function equalityFromStatementNode(statementNode, context) {
@@ -1780,13 +1812,6 @@ export function typeFromGeneratorDeclarationNode(generatorDeclarationNode, conte
   return type;
 }
 
-export function typeFromTypeAliasDeclarationNode(typeAliasDeclarationNode, context) {
-  const typeNode = typeAliasDeclarationNode.getTypeNode(),
-        type = typeFromTypeNode(typeNode, context);
-
-  return type;
-}
-
 export function procedureReferenceFromPremiseNode(premiseNode, context) {
   let procedureReference = null;
 
@@ -2049,16 +2074,11 @@ export function generatorFromGeneratorDeclarationNode(generatorDeclarationNode, 
   return generator;
 }
 
-export function aliasTypeFromTypeAliasDeclarationNode(typeAliasDeclarationNode, context) {
-  let aliasType = null;
+export function typeAliasFromTypeAliasDeclarationNode(typeAliasDeclarationNode, context) {
+  const typeAliasNode = typeAliasDeclarationNode.getTypeAliasNode(),
+        typeAlias = typeAliasFromTypeAliasNode(typeAliasNode, context);
 
-  const aliasTypeNode = typeAliasDeclarationNode.getAliasTypeNode();
-
-  if (aliasTypeNode !== null) {
-    aliasType = typeFromTypeNode(aliasTypeNode, context);
-  }
-
-  return aliasType;
+  return typeAlias;
 }
 
 export function provisionalFromVariableDeclarationNode(variableDeclarationNode, context) {

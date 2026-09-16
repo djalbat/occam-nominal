@@ -9,19 +9,14 @@ export default class TypeDeclarationNode extends DeclarationNode {
   isClosed() {
     let closed = false;
 
-    this.someChildNode((childNode) => {
-      const childNodeTerminalNode = childNode.isTerminalNode();
+    this.someTerminalNode((terminalNode) => {
+      const content = terminalNode.getContent(),
+            contentProvisional = (content === CLOSED);
 
-      if (childNodeTerminalNode) {
-        const terminalNode = childNode, ///
-              content = terminalNode.getContent(),
-              contentProvisional = (content === CLOSED);
+      if (contentProvisional) {
+        closed = true;
 
-        if (contentProvisional) {
-          closed = true;
-
-          return true;
-        }
+        return true;
       }
     });
 
@@ -31,19 +26,14 @@ export default class TypeDeclarationNode extends DeclarationNode {
   isProvisional() {
     let provisional = false;
 
-    this.someChildNode((childNode) => {
-      const childNodeTerminalNode = childNode.isTerminalNode();
+    this.someTerminalNode((terminalNode) => {
+      const content = terminalNode.getContent(),
+            contentProvisional = (content === PROVISIONAL);
 
-      if (childNodeTerminalNode) {
-        const terminalNode = childNode, ///
-              content = terminalNode.getContent(),
-              contentProvisional = (content === PROVISIONAL);
+      if (contentProvisional) {
+        provisional = true;
 
-        if (contentProvisional) {
-          provisional = true;
-
-          return true;
-        }
+        return true;
       }
     });
 

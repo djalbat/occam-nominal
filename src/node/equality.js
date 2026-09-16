@@ -12,19 +12,14 @@ export default class EqualityNode extends NonTerminalNode {
   isNegated() {
     let negated = false;
 
-    this.someChildNode((childNode) => {
-      const childNodeTerminalNode = childNode.isTerminalNode();
+    this.someTerminalNode((terminalNode) => {
+      const content = terminalNode.getContent(),
+            contentNotEqual = (content === NOT_EQUAL);
 
-      if (childNodeTerminalNode) {
-        const terminalNode = childNode, ///
-              content = terminalNode.getContent(),
-              contentNotEqual = (content === NOT_EQUAL);
+      if (contentNotEqual) {
+        negated = true;
 
-        if (contentNotEqual) {
-          negated = true;
-
-          return true;
-        }
+        return true;
       }
     });
 

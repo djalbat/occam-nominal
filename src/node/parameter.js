@@ -8,9 +8,8 @@ export default class ParameterNode extends NonTerminalNode {
   getName() {
     let name = null;
 
-    this.someChildNode((childNode, index) => {
-      const terminalNode = childNode, ///
-            type = terminalNode.getType();
+    this.someTerminalNode((terminalNode, index) => {
+      const type = terminalNode.getType();
 
       if (type === NAME_TOKEN_TYPE) {
         const content = terminalNode.getContent();
@@ -29,9 +28,8 @@ export default class ParameterNode extends NonTerminalNode {
   getIdentifier() {
     let identifier = null;
 
-    this.someChildNode((childNode, index) => {
-      const terminalNode = childNode, ///
-            type = terminalNode.getType();
+    this.someTerminalNode((terminalNode, index) => {
+      const type = terminalNode.getType();
 
       if (type === IDENTIFIER_TOKEN_TYPE) {
         const content = terminalNode.getContent();

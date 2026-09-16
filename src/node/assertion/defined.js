@@ -9,19 +9,14 @@ export default class DefinedAssertionNode extends AssertionNode {
   isNegated() {
     let negated = false;
 
-    this.someChildNode((childNode) => {
-      const childNodeTerminalNode = childNode.isTerminalNode();
+    this.someTerminalNode((terminalNode) => {
+      const content = terminalNode.getContent(),
+            contentUndefined = (content === UNDEFINED);
 
-      if (childNodeTerminalNode) {
-        const terminalNode = childNode, ///
-              content = terminalNode.getContent(),
-              contentUndefined = (content === UNDEFINED);
+      if (contentUndefined) {
+        negated = true;
 
-        if (contentUndefined) {
-          negated = true;
-
-          return true;
-        }
+        return true;
       }
     });
 
