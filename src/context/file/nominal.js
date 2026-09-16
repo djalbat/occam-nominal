@@ -32,6 +32,7 @@ import { typesFromJSON,
          generatorsToGeneratorsJSON,
          conjecturesToConjecturesJSON,
          combinatorsToCombinatorsJSON,
+         typeAliasesToTypeAliasesJSON,
          declaredMetavariablesFromJSON,
          typePrefixesToTypePrefixesJSON,
          constructorsToConstructorsJSON,
@@ -486,6 +487,24 @@ export default class NominalFileContext extends FileContext {
           }) || null;
 
     return claim;
+  }
+
+  findaliasedTypeByTypeName(typeName, includeRelease = true) {
+    let aliasedType = null;
+
+    const typeAliases = this.getTypeAliases(includeRelease);
+
+    typeAliases.some((typeAlias) => {
+      const typeNameCompares = typeAlias.compareTypeName(typeName);
+
+      if (typeNameCompares) {
+        aliasedType = typeAlias.getAliasedType();
+
+        return true;
+      }
+    })
+
+    return aliasedType;
   }
 
   findTypeByTypeName(typeName, includeRelease = true, includeDependencies = true) {

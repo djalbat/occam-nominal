@@ -1,18 +1,31 @@
 "use strict";
 
-import { Element, breakPointUtilities } from "occam-languages";
+import { arrayUtilities } from "necessary";
+import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
 
 import { define } from "../elements";
 import { instantiate } from "../utilities/context";
 import { instantiateTypeAlias } from "../process/instantiate";
+import { typeFromJSON, typeToTypeJSON } from "../utilities/json";
 
-const { unbreakable } = breakPointUtilities;
+const { all } = continuationUtilities,
+      { first } = arrayUtilities,
+      { unbreakable } = breakPointUtilities;
 
 export default define(class TypeAlias extends Element {
-  constructor(context, string, node, breakPoint, name) {
+  constructor(context, string, node, breakPoint, type, typeName) {
     super(context, string, node, breakPoint);
 
-    ///
+    this.type = type;
+    this.typeName = typeName;
+  }
+
+  getType() {
+    return this.type;
+  }
+
+  getTypeName() {
+    return this.typeName;
   }
 
   getTypeAliasNode() {
@@ -23,7 +36,7 @@ export default define(class TypeAlias extends Element {
   }
 
   isImplicit() {
-    const implicit = (this.aliasType === null);
+    const implicit = (this.type === null);
 
     return implicit;
   }
@@ -35,27 +48,31 @@ export default define(class TypeAlias extends Element {
     return explicit;
   }
 
+  getAliasedType() {
+    const aliasedType = this.type;
+
+    return aliasedType;
+  }
+
+  compareTypeName(typeName) {
+    const typeNameCompares = (this.typeName === typeName);
+
+    return typeNameCompares;
+  }
+
   verify = unbreakable(function (context, forward, back) {
-    forward = cut(forward, back); ///
+    const typeAliasString = this.getString();  ///
 
-    const typeAliasDeclarationString = this.getString();  ///
+    context.trace(`Verifying the '${typeAliasString}' type alias...`);
 
-    context.trace(`Verifying the '${typeAliasDeclarationString}' type alias...`);
-
-    const verifyAliasType = this.verifyAliasType.bind(this),
-      verifyImplicitType = this.verifyImplicitType.bind(this),
-      verifyExplicitType = this.verifyExplicitType.bind(this);
+    const verifyType = this.verifyType.bind(this),
+          verifyTypeName = this.verifyTypeName.bind(this);
 
     return all([
-      verifyAliasType,
-      verifyImplicitType,
-      verifyExplicitType
+      verifyType,
+      verifyTypeName
     ], context, (context, back) => {
-      debugger
-
-      context.addTypeAlias(this.typeAlias);
-
-      context.debug(`...verified the '${typeAliasDeclarationString}' type alias.`);
+      context.debug(`...verified the '${typeAliasString}' type alias.`);
 
       return forward(context, back);
     }, (exception) => {
@@ -63,104 +80,64 @@ export default define(class TypeAlias extends Element {
         return back(exception);
       }
 
-      context.trace(`Unable to verify the '${typeAliasDeclarationString}' type alias.`);
+      context.trace(`Unable to verify the '${typeAliasString}' type alias.`);
 
       return back();
     });
   });
 
-  verifyAliasType(context, forward, back) {
-    const implicit = this.isImplicit();
+  verifyType(context, forward, back) {
+    const typeAliasString = this.getString();  ///
 
-    if (implicit) {
-      return forward(context, back);
-    }
+    context.trace(`Verifying the '${typeAliasString}' type alias's type...`);
 
-    const typeAliasDeclarationString = this.getString();  ///
-
-    context.trace(`Verifiying the '${typeAliasDeclarationString}' type alias's alias type...`);
-
-    debugger
-
-    context.debug(`...verified the '${typeAliasDeclarationString}' type alias's alias type.`);
-
-    return forward(context, back);
-  }
-
-  verifyImplicitType(context, forward, back) {
-    const implicit = this.isImplicit();
-
-    if (!implicit) {
-      return forward(context, back);
-    }
-
-    const typeAliasDeclarationString = this.getString();  ///
-
-    context.trace(`Verifying the '${typeAliasDeclarationString}' type alias's implicit type...`);
-
-    const strict = this.type.isStrict();
-
-    if (!strict) {
-      context.trace(`The '${typeAliasDeclarationString}' type alias's implicit type is not strictly defined.`);
-
-      return back();
-    }
-
-    let includeDependencies;
-
-    includeDependencies = false;
-
-    const includeRelease = true,
-      typeName = this.type.getName(),
-      typePresent = context.findTypeByTypeName(typeName, includeRelease, includeDependencies); ///
-
-    if (typePresent) {
-      context.trace(`The '${typeAliasDeclarationString}' type alias's implicit type is present locally.`);
-
-      return back();
-    }
-
-    includeDependencies = true;
-
-    const types = context.findTypesByTypeName(typeName, includeRelease, includeDependencies),
-      typesLength = types.length;
+    const implicit = this.isImplicit(),
+          typeName = implicit ?
+                        this.typeName :
+                          this.type.getName(),
+          includeRelease = true,
+          includeDependencies = true,
+          types = context.findTypesByTypeName(typeName, includeRelease, includeDependencies),
+          typesLength = types.length;
 
     if (typesLength === 0) {
-      context.trace(`The '${typeAliasDeclarationString}' type alias's implicit type is not present globally.`);
+      context.trace(`The '${typeName}' type is not present globally.`);
 
       return back();
     }
 
     if (typesLength > 1) {
-      context.trace(`The '${typeAliasDeclarationString}' type alias's implicit type is ambiguous globally.`);
+      context.trace(`The '${typeName}' type is ambiguous globally.`);
 
       return back();
     }
 
     const firstType = first(types),
-      type = firstType; ///
+          type = firstType; ///
 
     this.type = type; ///
 
-    context.trace(`...verified the '${typeAliasDeclarationString}' type alias's implicit type.`);
+    context.debug(`...verified the '${typeAliasString}' type alias's type.`);
 
     return forward(context, back);
   }
 
-  verifyExplicitType(context, forward, back) {
-    const explicit = this.isExplicit();
+  verifyTypeName(context, forward, back) {
+    const typeAliasString = this.getString();  ///
 
-    if (!explicit) {
-      return forward(context, back);
+    context.trace(`Verifying the '${typeAliasString}' type alias's type name...`);
+
+    const includeRelease = true,
+          includeDependencies = false,
+          typePresent = context.isTypePresentByTypeName(this.typeName, includeRelease, includeDependencies); ///
+
+    if (typePresent) {
+      context.trace(`The '${this.typeName}' type is present locally.`);
+
+      return back();
     }
 
-    const typeAliasDeclarationString = this.getString();  ///
-
-    context.trace(`Verifying the '${typeAliasDeclarationString}' type alias's explicit type...`);
-
-    debugger
-
-    context.trace(`...verified the '${typeAliasDeclarationString}' type alias's explicit type.`);
+    context.debug(`...verified the '${typeAliasString}' type alias's type name.`);
 
     return forward(context, back);
   }
@@ -168,10 +145,13 @@ export default define(class TypeAlias extends Element {
   toJSON() {
     let json;
 
-    const string = this.getString();
+    const string = this.getString(),
+          typeJSON = typeToTypeJSON(this.type),
+          type = typeJSON;  ///
 
     json = {
-      string
+      string,
+      type
     };
 
     return json;
@@ -186,11 +166,13 @@ export default define(class TypeAlias extends Element {
       const { string } = json,
             typeAliasNode = instantiateTypeAlias(string, context),
             node = typeAliasNode, ///
-            breakPoint = null;
+            breakPoint = null,
+            type = typeFromJSON(json, context),
+            typeName = typeAliasNode.getTypeName();
 
       context = null; ///
 
-      typeAlias = new TypeAlias(context, string, node, breakPoint);
+      typeAlias = new TypeAlias(context, string, node, breakPoint, type, typeName);
     }, context);
 
     return typeAlias;

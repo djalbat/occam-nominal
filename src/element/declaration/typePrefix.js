@@ -58,7 +58,7 @@ export default define(class TypePrefixDeclaration extends Declaration {
   verifyTypePrefix(context, forward, back) {
     const typePrefixDeclarationString = this.getString();  ///
 
-    context.trace(`Verifiying the '${typePrefixDeclarationString}' type prefix declaration's type prefix...`);
+    context.trace(`Verifying the '${typePrefixDeclarationString}' type prefix declaration's type prefix...`);
 
     return this.typePrefix.verify(context, (context, back) => {
       context.debug(`...verified the '${typePrefixDeclarationString}' type prefix declaration's type prefix.`);

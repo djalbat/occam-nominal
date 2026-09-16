@@ -385,6 +385,13 @@ export default class Context extends ContextBase {
     return constraint;
   }
 
+  findaliasedTypeByTypeName(typeName, includeRelease = true) {
+    const context = this.getContext(),
+          aliasedType = context.findaliasedTypeByTypeName(typeName, includeRelease);
+
+    return aliasedType;
+  }
+
   findTypeByTypeName(typeName, includeRelease = true, includeDependencies = true) {
     const context = this.getContext(),
           type = context.findTypeByTypeName(typeName, includeRelease, includeDependencies);

@@ -20,6 +20,7 @@ import { TERM_RULE_NAME,
          CONCLUSION_RULE_NAME,
          HYPOTHESIS_RULE_NAME,
          CONSTRAINT_RULE_NAME,
+         TYPE_ALIAS_RULE_NAME,
          TYPE_PREFIX_RULE_NAME,
          SUPPOSITION_RULE_NAME,
          CONSTRUCTOR_RULE_NAME,
@@ -52,6 +53,7 @@ const termPlaceholderRule = ruleFromRuleName(TERM_RULE_NAME),
       parameterPlaceholderRule = ruleFromRuleName(PARAMETER_RULE_NAME),
       statementPlaceholderRule = ruleFromRuleName(STATEMENT_RULE_NAME),
       signaturePlaceholderRule = ruleFromRuleName(SIGNATURE_RULE_NAME),
+      typeAliasPlaceholderRule = ruleFromRuleName(TYPE_ALIAS_RULE_NAME),
       constraintPlaceholderRule = ruleFromRuleName(CONSTRAINT_RULE_NAME),
       combinatorPlaceholderRule = ruleFromRuleName(COMBINATOR_RULE_NAME),
       conclusionPlaceholderRule = ruleFromRuleName(CONCLUSION_RULE_NAME),
@@ -130,6 +132,8 @@ export function instantiateParameter(string, context) { return instantiate(param
 export function instantiateStatement(string, context) { return instantiate(statementPlaceholderRule, string, context); }
 
 export function instantiateSignature(string, context) { return instantiate(signaturePlaceholderRule, string, context); }
+
+export function instantiateTypeAlias(string, context) { return instantiate(typeAliasPlaceholderRule, string, context); }
 
 export function instantiateCombinator(string, context) { return instantiate(combinatorPlaceholderRule, string, context); }
 

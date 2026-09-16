@@ -58,7 +58,7 @@ export default define(class TypeAliasDeclaration extends Declaration {
   verifyTypeAlias(context, forward, back) {
     const typeAliasDeclarationString = this.getString();  ///
 
-    context.trace(`Verifiying the '${typeAliasDeclarationString}' type alias declaration's type alias...`);
+    context.trace(`Verifying the '${typeAliasDeclarationString}' type alias declaration's type alias...`);
 
     return this.typeAlias.verify(context, (context, back) => {
       context.debug(`...verified the '${typeAliasDeclarationString}' type alias declaration's type alias.`);

@@ -1,7 +1,7 @@
 "use strict";
 
 import { arrayUtilities } from "necessary";
-import {Element, continuationUtilities, breakPointUtilities} from "occam-languages";
+import { Element, breakPointUtilities, continuationUtilities } from "occam-languages";
 
 import { define } from "../elements";
 import { instantiate } from "../utilities/context";
@@ -20,7 +20,8 @@ import { closedFromJSON,
          propertiesToPropertiesJSON,
          provisionalToProvisionalJSON } from "../utilities/json";
 
-const { unbreakable } = breakPointUtilities,
+const { all } = continuationUtilities,
+      { unbreakable } = breakPointUtilities,
       { push, intersection } = arrayUtilities;
 
 export default define(class Type extends Element {
@@ -338,67 +339,110 @@ export default define(class Type extends Element {
   });
 
   validate(context, forward, back) {
-    let type = null;
+    const typeString = this.getString();  ///
+
+    context.trace(`Valiading the '${typeString}' type...`);
+
+    const type = null,
+          validateWhenStrict = this.validateWhenStrict.bind(this),
+          validateWhenPrefixed = this.validateWhenPrefixed.bind(this);
+
+    return all([
+      validateWhenStrict,
+      validateWhenPrefixed
+    ], type, context, (type, context, back) => {
+      context.debug(`...validated the '${typeString}' type.`);
+
+      return forward(type, context, back);
+    }, (exception) => {
+      if (exception) {
+        return back(exception);
+      }
+
+      context.trace(`Unable to validate the '${typeString}' type.`);
+
+      return back();
+    });
+  }
+
+  validateWhenStrict(type, context, forward, back) {
+    const strict = this.isStrict();
+
+    if (!strict) {
+      return forward(type, context, back);
+    }
 
     const typeString = this.getString();
 
-    context.trace(`Validating the '${typeString}' type...`);
+    context.trace(`Validating the '${typeString}' strict type...`);
 
-    const prefixed = this.isPrefixed();
+    const typeName = this.name, ///
+          baseType = baseTypeFromNothing(),
+          baseTypeCompareTypeNameTypeName = baseType.compareTypeName(typeName);
 
-    if (!prefixed) {
-      const baseType = baseTypeFromNothing(),
-            typeName = this.name, ///
-            baseTypeCompareTypeNameTypeName = baseType.compareTypeName(typeName);
+    if (baseTypeCompareTypeNameTypeName) {
+      type = baseType;  ///
+    } else {
+      const alisedType = context.findaliasedTypeByTypeName(typeName);
 
-      if (baseTypeCompareTypeNameTypeName) {
-        type = baseType;  ///
+      if (alisedType !== null) {
+        type = alisedType;  ///
       } else {
-        const typeName = this.name, ///
-              includeRelease = true,
+        const includeRelease = true,
               includeDependencies = false;
 
         type = context.findTypeByTypeName(typeName, includeRelease, includeDependencies); ///
 
-        const typePresent = (type !== null);
-
-        if (!typePresent) {
-          context.trace(`The '${typeString}' type is not present locally.`);
+        if (type === null) {
+          context.trace(`The '${typeString}' strict type is not present locally.`);
 
           return back();
         }
       }
-    } else {
-      let typePresent,
-          includeDependencies;
-
-      const includeRelease = true,
-            prefixedTypeName = this.getPrefixedTypeName();
-
-      includeDependencies = false;
-
-      typePresent = context.isTypePresentByPrefixedTypeName(prefixedTypeName, includeRelease, includeDependencies);
-
-      if (typePresent) {
-        context.trace(`The '${typeString}' type is present locally.`);
-
-        return back();
-      }
-
-      includeDependencies = true;
-
-      type = context.findTypeByPrefixedTypeName(prefixedTypeName, includeRelease, includeDependencies);
-
-      typePresent = (type !== null);
-
-      if (!typePresent) {
-        context.trace(`The '${typeString}' type is not present globally.`);
-
-        return back();
-      }
     }
 
-    context.debug(`...validated the '${typeString}' type.`);
+    context.debug(`...validated the '${typeString}' strict type.`);
+
+    return forward(type, context, back);
+  }
+
+  validateWhenPrefixed(type, context, forward, back) {
+    const prefixed = this.isPrefixed();
+
+    if (!prefixed) {
+      return forward(type, context, back);
+    }
+
+    const typeString = this.getString();
+
+    context.trace(`Validating the '${typeString}' prefixed type...`);
+
+    const prefixedTypeName = this.getPrefixedTypeName(),
+          includeRelease = true;
+
+    let includeDependencies;
+
+    includeDependencies = false;
+
+    const typePresent = context.isTypePresentByPrefixedTypeName(prefixedTypeName, includeRelease, includeDependencies);
+
+    if (typePresent) {
+      context.trace(`The '${typeString}' prefixed type is present locally.`);
+
+      return back();
+    }
+
+    includeDependencies = true;
+
+    type = context.findTypeByPrefixedTypeName(prefixedTypeName, includeRelease, includeDependencies);
+
+    if (type === null) {
+      context.trace(`The '${typeString}' prefixed type is not present globally.`);
+
+      return back();
+    }
+
+    context.debug(`...validated the '${typeString}' prefixed type.`);
 
     return forward(type, context, back);
   }
