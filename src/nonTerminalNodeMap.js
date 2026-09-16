@@ -33,6 +33,7 @@ import SignatureNode from "./node/signature";
 import AxiomBodyNode from "./node/body/axiom";
 import LemmaBodyNode from "./node/body/lemma";
 import GeneratorNode from "./node/generator";
+import TypeAliasNode from "./node/typeAlias";
 import ConstraintNode from "./node/constraint";
 import DerivationNode from "./node/derivation";
 import CombinatorNode from "./node/combinator";
@@ -73,10 +74,11 @@ import ProcedureReferenceNode from "./node/procedureReference";
 import ParenthesisedLabelsNode from "./node/parenthesisedLabels"
 import PropertyDeclarationNode from "./node/declaration/property";
 import VariableDeclarationNode from "./node/declaration/variable";
+import TypeAliasDeclarationNode from "./node/declaration/typeAlias";
 import GeneratorDeclarationNode from "./node/declaration/generator";
+import TypePrefixDeclarationNode from "./node/declaration/typePrefix";
 import CombinatorDeclarationNode from "./node/declaration/combinator";
 import StatementSubstitutionNode from "./node/substitution/statement";
-import TypePrefixDeclarationNode from "./node/declaration/typePrefix";
 import DonstructorDeclarationNode from "./node/declaration/constructor";
 import MetavariableDeclarationNode from "./node/declaration/metavariable";
 
@@ -121,6 +123,7 @@ import {
   LEMMA_BODY_RULE_NAME,
   ASSUMPTION_RULE_NAME,
   CONSTRAINT_RULE_NAME,
+  TYPE_ALIAS_RULE_NAME,
   PLACEHOLDER_RULE_NAME,
   TYPE_PREFIX_RULE_NAME,
   SUPPOSITION_RULE_NAME,
@@ -155,10 +158,11 @@ import {
   PROPERTY_DECLARATION_RULE_NAME,
   VARIABLE_DECLARATION_RULE_NAME,
   GENERATOR_DECLARATION_RULE_NAME,
+  TYPE_ALIAS_DECLARATION_RULE_NAME,
   COMBINATOR_DECLARATION_RULE_NAME,
   STATEMENT_SUBSTITUTION_RULE_NAME,
-  CONSTRUCTOR_DECLARATION_RULE_NAME,
   TYPE_PREFIX_DECLARATION_RULE_NAME,
+  CONSTRUCTOR_DECLARATION_RULE_NAME,
   METAVARIABLE_DECLARATION_RULE_NAME } from "./ruleNames";
 
 const NonTerminalNodeMap = {
@@ -195,6 +199,7 @@ const NonTerminalNodeMap = {
   [GENERATOR_RULE_NAME]: GeneratorNode,
   [AXIOM_BODY_RULE_NAME]: AxiomBodyNode,
   [LEMMA_BODY_RULE_NAME]: LemmaBodyNode,
+  [TYPE_ALIAS_RULE_NAME]: TypeAliasNode,
   [COMBINATOR_RULE_NAME]: CombinatorNode,
   [CONCLUSION_RULE_NAME]: ConclusionNode,
   [CONJECTURE_RULE_NAME]: ConjectureNode,
@@ -236,6 +241,7 @@ const NonTerminalNodeMap = {
   [VARIABLE_DECLARATION_RULE_NAME]: VariableDeclarationNode,
   [PROPERTY_DECLARATION_RULE_NAME]: PropertyDeclarationNode,
   [GENERATOR_DECLARATION_RULE_NAME]: GeneratorDeclarationNode,
+  [TYPE_ALIAS_DECLARATION_RULE_NAME]: TypeAliasDeclarationNode,
   [COMBINATOR_DECLARATION_RULE_NAME]: CombinatorDeclarationNode,
   [STATEMENT_SUBSTITUTION_RULE_NAME]: StatementSubstitutionNode,
   [TYPE_PREFIX_DECLARATION_RULE_NAME]: TypePrefixDeclarationNode,

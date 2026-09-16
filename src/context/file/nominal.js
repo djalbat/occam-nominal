@@ -12,15 +12,18 @@ import { findType, findTypes } from "../../utilities/type";
 import { findMetaTypeByMetaTypeName } from "../../metaTypes";
 import { typesFromJSON,
          rulesFromJSON,
+         lemmasFromJSON,
          axiomsFromJSON,
          schemasFromJSON,
          typesToTypesJSON,
          theoremsFromJSON,
          rulesToRulesJSON,
+         lemmasToLemmasJSON,
          axiomsToAxiomsJSON,
          generatorsFromJSON,
          conjecturesFromJSON,
          combinatorsFromJSON,
+         typeAliasesFromJSON,
          typePrefixesFromJSON,
          constructorsFromJSON,
          schemasToSchemasJSON,
@@ -190,6 +193,14 @@ export default class NominalFileContext extends FileContext {
                             this.combinators;
 
     return combinators;
+  }
+
+  getTypeAliases(includeRelease = true) {
+    const typeAliases = includeRelease ?
+                          this.context.getTypeAliases() :
+                            this.typeAliases;
+
+    return typeAliases;
   }
 
   getTypePrefixes(includeRelease = true) {
@@ -390,13 +401,22 @@ export default class NominalFileContext extends FileContext {
     this.trace(`Added the '${combinatorString}' combinator to the '${filePath}' file context.`)
   }
 
+  addTypeAlias(typeAlias) {
+    this.typeAliases.push(typeAlias);
+
+    const filePath = this.getFilePath(),
+          typeAliasString = typeAlias.getString();
+
+    this.trace(`Added the '${typeAliasString}' type alias to the '${filePath}' file context.`)
+  }
+
   addTypePrefix(typePrefix) {
     this.typePrefixes.push(typePrefix);
 
     const filePath = this.getFilePath(),
           typePrefixString = typePrefix.getString();
 
-    this.trace(`Added the '${typePrefixString}' type-prefix to the '${filePath}' file context.`)
+    this.trace(`Added the '${typePrefixString}' type prefix to the '${filePath}' file context.`)
   }
 
   addConstructor(constructor) {
@@ -481,6 +501,22 @@ export default class NominalFileContext extends FileContext {
     return type;
   }
 
+  findTypesByTypeName(typeName, includeRelease = true, includeDependencies = true) {
+    let types;
+
+    types = this.getTypes(includeRelease, includeDependencies);
+
+    types = findTypes(types, (type) => {  ///
+      const typeComparesToTypeName = type.compareTypeName(typeName);
+
+      if (typeComparesToTypeName) {
+        return true;
+      }
+    });
+
+    return types;
+  }
+
   findTypeByPrefixedTypeName(prefixedTypeName, includeRelease = true, includeDependencies = true) {
     const types = this.getTypes(includeRelease, includeDependencies),
           type = findType(types, (type) => {
@@ -494,8 +530,8 @@ export default class NominalFileContext extends FileContext {
     return type;
   }
 
-  findTypePrefixByTypePrefixName(typePrefixName) {
-    const typePrefixes = this.getTypePrefixes(),
+  findTypePrefixByTypePrefixName(typePrefixName, includeRelease = true) {
+    const typePrefixes = this.getTypePrefixes(includeRelease),
           typePrefix = typePrefixes.find((typePrefix) => {
             const typePrefixComparesToTypePrefixName = typePrefix.compareTypePrefixName(typePrefixName);
 
@@ -591,8 +627,8 @@ export default class NominalFileContext extends FileContext {
     return typePresent;
   }
 
-  isTypePrefixPresentByTypePrefixName(typePrefixName) {
-    const typePrefix = this.findTypePrefixByTypePrefixName(typePrefixName),
+  isTypePrefixPresentByTypePrefixName(typePrefixName, includeRelease = true) {
+    const typePrefix = this.findTypePrefixByTypePrefixName(typePrefixName, includeRelease),
           typePrefixPresent = (typePrefix !== null);
 
     return typePrefixPresent;
@@ -635,6 +671,7 @@ export default class NominalFileContext extends FileContext {
     this.generators = [];
     this.conjectures = [];
     this.combinators = [];
+    this.typeAliases = [];
     this.typePrefixes = [];
     this.constructors = [];
     this.declaredVariables = [];
@@ -670,11 +707,12 @@ export default class NominalFileContext extends FileContext {
 
     typesFromJSON(json, this.types, fileContext);
 
-    this.lemmas = [];
+    this.lemmas = lemmasFromJSON(json, fileContext);
+    this.typeAliases = typeAliasesFromJSON(json, fileContext);
+    this.typePrefixes = typePrefixesFromJSON(json, fileContext);
 
     this.declaredMetavariables = declaredMetavariablesFromJSON(json, fileContext);
     this.declaredVariables = declaredVariablesFromJSON(json, fileContext);
-    this.typePrefixes = typePrefixesFromJSON(json, fileContext);
     this.generators = generatorsFromJSON(json, fileContext);
     this.combinators = combinatorsFromJSON(json, fileContext);
     this.constructors = constructorsFromJSON(json, fileContext);
@@ -691,12 +729,14 @@ export default class NominalFileContext extends FileContext {
 
     const typesJSON = typesToTypesJSON(this.types),
           rulesJSON = rulesToRulesJSON(this.rules),
+          lemmasJSON = lemmasToLemmasJSON(this.lemmas),
           axiomsJSON = axiomsToAxiomsJSON(this.axioms),
           schemasJSON = schemasToSchemasJSON(this.schemas),
           theoremsJSON = theoremsToTheoremsJSON(this.theorems),
           generatorsJSON = generatorsToGeneratorsJSON(this.generators),
           conjecturesJSON = conjecturesToConjecturesJSON(this.conjectures),
           combinatorsJSON = combinatorsToCombinatorsJSON(this.combinators),
+          typeAliasesJSON = typeAliasesToTypeAliasesJSON(this.typeAliases),
           typePrefixesJSON = typePrefixesToTypePrefixesJSON(this.typePrefixes),
           constructorsJSON = constructorsToConstructorsJSON(this.constructors),
           declaredVariablesJSON = declaredVariablesToDeclaredVariablesJSON(this.declaredVariables),
@@ -705,12 +745,14 @@ export default class NominalFileContext extends FileContext {
           filePath = this.getFilePath(),
           types = typesJSON,  ///
           rules = rulesJSON,  ///
+          lemmas = lemmasJSON,  ///
           axioms = axiomsJSON,  ///
           schemas = schemasJSON,  ///
           theorems = theoremsJSON,  ///
           generators = generatorsJSON,  ///
           conjectures = conjecturesJSON,  ///
           combinators = combinatorsJSON,  ///
+          typeAliases = typeAliasesJSON,  ///
           typePrefixes = typePrefixesJSON,  ///
           constructors = constructorsJSON,  ///
           declaredVariables = declaredVariablesJSON,  ///
@@ -721,12 +763,14 @@ export default class NominalFileContext extends FileContext {
       filePath,
       types,
       rules,
+      lemmas,
       axioms,
       schemas,
       theorems,
       generators,
       conjectures,
       combinators,
+      typeAliases,
       typePrefixes,
       constructors,
       declaredVariables,

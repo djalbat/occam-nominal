@@ -15,6 +15,7 @@ import { ruleFromRuleNode,
          cotypeDeclarationFromCotypeDeclarationNode,
          variableDeclarationFromVariableDeclarationNode,
          generatorDeclarationFromGeneratorDeclarationNode,
+         typeAliasDeclarationFromTypeAliasDeclarationNode,
          typePrefixDeclarationFromTypePrefixDeclarationNode,
          combinatorDeclarationFromCombinatorDeclarationNode,
          constructorDeclarationFromConstructorDeclarationNode,
@@ -34,8 +35,9 @@ const ruleNodeQuery = nodeQuery("/rule"),
       cotypeDeclarationNodeQuery = nodeQuery("/cotypeDeclaration"),
       variableDeclarationNodeQuery = nodeQuery("/variableDeclaration"),
       generatorDeclarationNodeQuery = nodeQuery("/generatorDeclaration"),
-      combinatorDeclarationNodeQuery = nodeQuery("/combinatorDeclaration"),
+      typeAliasDeclarationNodeQuery = nodeQuery("/typeAliasDeclaration"),
       typePrefixDeclarationNodeQuery = nodeQuery("/typePrefixDeclaration"),
+      combinatorDeclarationNodeQuery = nodeQuery("/combinatorDeclaration"),
       constructorDeclarationNodeQuery = nodeQuery("/constructorDeclaration"),
       metavariableDeclarationNodeQuery = nodeQuery("/metavariableDeclaration");
 
@@ -135,6 +137,14 @@ class TopLevelPass extends ContinuationPass {
         const generatorDeclaration = generatorDeclarationFromGeneratorDeclarationNode(generatorDeclarationNode, context);
 
         return generatorDeclaration.verify(context, forward, back);
+      }
+    },
+    {
+      nodeQuery: typeAliasDeclarationNodeQuery,
+      run: (typeAliasDeclarationNode, context, forward, back) => {
+        const typeAliasDeclaration = typeAliasDeclarationFromTypeAliasDeclarationNode(typeAliasDeclarationNode, context);
+
+        return typeAliasDeclaration.verify(context, forward, back);
       }
     },
     {

@@ -854,10 +854,25 @@ export function generatorDeclarationFromGeneratorDeclarationNode(generatorDeclar
   return generatorDeclaration;
 }
 
+export function typeAliasDeclarationFromTypeAliasDeclarationNode(typeAliasDeclarationNode, context) {
+  const { TypeAliasDeclaration } = elements,
+        node = typeAliasDeclarationNode, ///
+        string = context.nodeAsString(node),
+        breakPoint = null,
+        type = typeFromTypeAliasDeclarationNode(typeAliasDeclarationNode, context),
+        aliasType = aliasTypeFromTypeAliasDeclarationNode(typeAliasDeclarationNode, context);
+
+  context = null;
+
+  const typeAliasDeclaration = new TypeAliasDeclaration(context, string, node, breakPoint, type, aliasType);
+
+  return typeAliasDeclaration;
+}
+
 export function typePrefixDeclarationFromTypePrefixDeclarationNode(typePrefixDeclarationNode, context) {
   const { TypePrefixDeclaration } = elements,
         node = typePrefixDeclarationNode, ///
-        string = context.nodeAsString(node),  ///
+        string = context.nodeAsString(node),
         breakPoint = null,
         typePrefix = typePrefixFromTypePrefixDeclarationNode(typePrefixDeclarationNode, context);
 
@@ -1765,6 +1780,13 @@ export function typeFromGeneratorDeclarationNode(generatorDeclarationNode, conte
   return type;
 }
 
+export function typeFromTypeAliasDeclarationNode(typeAliasDeclarationNode, context) {
+  const typeNode = typeAliasDeclarationNode.getTypeNode(),
+        type = typeFromTypeNode(typeNode, context);
+
+  return type;
+}
+
 export function procedureReferenceFromPremiseNode(premiseNode, context) {
   let procedureReference = null;
 
@@ -2025,6 +2047,18 @@ export function generatorFromGeneratorDeclarationNode(generatorDeclarationNode, 
         generator = generatorFromGeneratorNode(generatorNode, context);
 
   return generator;
+}
+
+export function aliasTypeFromTypeAliasDeclarationNode(typeAliasDeclarationNode, context) {
+  let aliasType = null;
+
+  const aliasTypeNode = typeAliasDeclarationNode.getAliasTypeNode();
+
+  if (aliasTypeNode !== null) {
+    aliasType = typeFromTypeNode(aliasTypeNode, context);
+  }
+
+  return aliasType;
 }
 
 export function provisionalFromVariableDeclarationNode(variableDeclarationNode, context) {

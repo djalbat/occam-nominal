@@ -147,8 +147,8 @@ export default define(class Type extends Element {
   }
 
   isStrict() {
-    const cotype = this.isCotype(),
-          strict = !cotype;
+    const prefixed = this.isPrefixed(),
+          strict = !prefixed;
 
     return strict;
   }
@@ -354,10 +354,11 @@ export default define(class Type extends Element {
       if (baseTypeCompareTypeNameTypeName) {
         type = baseType;  ///
       } else {
-        const includeRelease = true,
+        const typeName = this.name, ///
+              includeRelease = true,
               includeDependencies = false;
 
-        type = context.findTypeByTypeName(this.name, includeRelease, includeDependencies); ///
+        type = context.findTypeByTypeName(typeName, includeRelease, includeDependencies); ///
 
         const typePresent = (type !== null);
 

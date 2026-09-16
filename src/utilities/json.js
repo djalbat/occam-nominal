@@ -222,6 +222,12 @@ export function axiomsFromJSON(json, context) {
   return axioms;
 }
 
+export function lemmasFromJSON(json, context) {
+  const lemmas = [];
+
+  return lemmas;
+}
+
 export function schemasFromJSON(json, context) {
   let { schemas } = json;
 
@@ -472,6 +478,22 @@ export function constraintsFromJSON(json, context) {
   });
 
   return constraints;
+}
+
+export function typeAliasesFromJSON(json, context) {
+  let { typeAliases = [] } = json;
+
+  const { TypeAlias } = elements,
+        typeAliasesJSON = typeAliases; ///
+
+  typeAliases = typeAliasesJSON.map((typeAliasJSON) => {
+    const json = typeAliasJSON,  ///
+          typeAlias = TypeAlias.fromJSON(json, context);
+
+    return typeAlias;
+  });
+
+  return typeAliases;
 }
 
 export function typePrefixesFromJSON(json, context) {
@@ -726,6 +748,12 @@ export function rulesToRulesJSON(rules) {
   return rulesJSON;
 }
 
+export function lemmasToLemmasJSON(lemmas) {
+  const lemmasJSON = [];
+
+  return lemmasJSON;
+}
+
 export function closedToClosedJSON(closed) {
   const closedJSON = closed;  ///
 
@@ -917,6 +945,16 @@ export function assumptionsToAssumptionsJSON(assumptions) {
   });
 
   return assumptionsJSON;
+}
+
+export function typeAliasesToTypeAliasesJSON(typeAliases) {
+  const typeAliasesJSLON  = typeAliases.map((typeAliase) => {
+    const typeAliasesJSON = typeAliase.toJSON();
+
+    return typeAliasesJSON;
+  });
+
+  return typeAliasesJSLON;
 }
 
 export function suppositionsToSuppositionsJSON(suppositions) {

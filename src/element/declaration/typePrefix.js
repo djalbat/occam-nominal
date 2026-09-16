@@ -60,7 +60,7 @@ export default define(class TypePrefixDeclaration extends Declaration {
   verifyTypes(context, forward, back) {
     const typePrefixDeclarationString = this.getString();  ///
 
-    context.trace(`Verifying the '${typePrefixDeclarationString}' type prefix declaration's associated types...`);
+    context.trace(`Verifying the '${typePrefixDeclarationString}' type prefix declaration's ypes...`);
 
     const includeRelease = true,
           includeDependencies = false,
@@ -73,7 +73,7 @@ export default define(class TypePrefixDeclaration extends Declaration {
       return back();
     }
 
-    context.trace(`...verified the '${typePrefixDeclarationString}' type prefix declaration's associated types.`);
+    context.trace(`...verified the '${typePrefixDeclarationString}' type prefix declaration's types.`);
 
     return forward(context, back);
   }

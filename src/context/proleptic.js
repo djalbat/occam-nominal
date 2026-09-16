@@ -2,7 +2,7 @@
 
 import Context from "../context";
 
-import { findType } from "../utilities/type";
+import { findType, findTypes } from "../utilities/type";
 
 export default class ProlepticContext extends Context {
   constructor(context, type) {
@@ -52,6 +52,22 @@ export default class ProlepticContext extends Context {
           });
 
     return type;
+  }
+
+  findTypesByTypeName(typeName, includeRelease = true, includeDependencies = true) {
+    let types;
+
+    types = this.getTypes(includeRelease, includeDependencies);
+
+    types = findTypes(types, (type) => {  ///
+      const typeComparesToTypeName = type.compareTypeName(typeName);
+
+      if (typeComparesToTypeName) {
+        return true;
+      }
+    });
+
+    return types;
   }
 
   findTypeByPrefixedTypeName(prefixedTypeName, includeRelease = true, includeDependencies = true) {

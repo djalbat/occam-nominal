@@ -392,6 +392,13 @@ export default class Context extends ContextBase {
     return type;
   }
 
+  findTypesByTypeName(typeName, includeRelease = true, includeDependencies = true) {
+    const context = this.getContext(),
+          types = context.findTypesByTypeName(typeName, includeRelease, includeDependencies);
+
+    return types;
+  }
+
   findTypeByPrefixedTypeName(prefixedTypeName, includeRelease = true, includeDependencies = true) {
     const context = this.getContext(),
           type = context.findTypeByPrefixedTypeName(prefixedTypeName, includeRelease, includeDependencies);
