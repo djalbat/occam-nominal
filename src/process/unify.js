@@ -143,9 +143,9 @@ class UnifyTermWithPropertyPass extends ContinuationZipPass {
 
         const type = typeFromTypeNode(typeNode, context);
 
-        context = specificContext;  ///
-
         return type.validate(context, (type, context, back) => {
+          context = specificContext;  ///
+
           const term = termFromTermNode(termNode, context),
                 strict = false;
 
@@ -177,9 +177,9 @@ class UnifyTermWithGeneratorPass extends ContinuationZipPass {
 
         const type = typeFromTypeNode(typeNode, context);
 
-        context = specificContext;  ///
-
         return type.validate(context, (type, context, back) => {
+          context = specificContext;  ///
+
           const term = termFromTermNode(termNode, context),
                 strict = false;
 
@@ -211,9 +211,9 @@ class UnifyTermWithConstructorPass extends ContinuationZipPass {
 
         const type = typeFromTypeNode(typeNode, context);
 
-        context = specificContext;  ///
-
         return type.validate(context, (type, context, back) => {
+          context = specificContext;  ///
+
           const term = termFromTermNode(termNode, context),
                 strict = false;
 
@@ -287,7 +287,7 @@ class UnifyStatementWithCombinatorPass extends ContinuationZipPass {
       specificNodeQuery: termNodeQuery,
       run: (generalTypeNode, specificTermNode, generalContext, specificContext, forward, back) => {
         const typeNode = generalTypeNode, ///
-          termNode = specificTermNode; ///
+              termNode = specificTermNode; ///
 
         let context;
 
@@ -295,9 +295,9 @@ class UnifyStatementWithCombinatorPass extends ContinuationZipPass {
 
         const type = typeFromTypeNode(typeNode, context);
 
-        context = specificContext;  ///
-
         return type.validate(context, (type, context, back) => {
+          context = specificContext;  ///
+
           const term = termFromTermNode(termNode, context),
                 strict = false;
 

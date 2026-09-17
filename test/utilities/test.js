@@ -6,7 +6,7 @@ const { arrayUtilities } = require("necessary"),
 const { FileContextFromFilePath } = require("../utilities/fileContext"),
       { releaseContextFromDependency } = require("../utilities/releaseContext");
 
-const { first } = arrayUtilities,
+const { last } = arrayUtilities,
       { createReleaseContexts, verifyReleaseContexts, initialiseReleaseContexts } = verificationUtilities;
 
 function createSuite(logLevel, projectName, projectsDirectoryPath) {
@@ -49,6 +49,14 @@ function createSuite(logLevel, projectName, projectsDirectoryPath) {
 
   it("initialise", () => {
     initialiseReleaseContexts(context);
+
+    releaseContext = releaseContexts.find((releaseContext) => {
+      const name = releaseContext.getName();
+
+      if (name === projectName) {
+        return true;
+      }
+    }) || null;
   });
 
   it("verifies", (done) => {
@@ -56,10 +64,6 @@ function createSuite(logLevel, projectName, projectsDirectoryPath) {
 
     function forward() {
       assert.isTrue(true);
-
-      const firstReleaseContext = first(releaseContexts);
-
-      releaseContext = firstReleaseContext; ///
 
       done();
     }

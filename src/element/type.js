@@ -10,6 +10,7 @@ import { BASE_TYPE_SYMBOL } from "../constants";
 import { nameFromTypeNode } from "../utilities/element";
 import { baseTypeFromNothing } from "../utilities/type";
 import { closedFromJSON,
+         nameToNameJSON,
          closedToClosedJSON,
          propertiesFromJSON,
          prefixNameFromJSON,
@@ -296,36 +297,6 @@ export default define(class Type extends Element {
     return comparesToPrefixedTypeName;
   }
 
-  toJSON(abridged = false) {
-    const string = this.getString();
-
-    const json = {
-      string
-    };
-
-    if (!abridged) {
-      const closedJSON = closedToClosedJSON(this.closed),
-            prefixNameJSON = prefixNameToPrevixNameJSON(this.prefixName),
-            superTypesJSON = superTypesToSuperTypesJSON(this.superTypes),
-            propertiesJSON = propertiesToPropertiesJSON(this.properties),
-            provisinoalJSOM = provisionalToProvisionalJSON(this.provisional),
-            prefixName = prefixNameJSON,  ///
-            superTypes = superTypesJSON,  ///
-            properties = propertiesJSON,  ///
-            provisional = provisinoalJSOM;  ///
-
-      Object.assign(json, {
-        closedJSON,
-        prefixName,
-        superTypes,
-        properties,
-        provisional
-      });
-    }
-
-    return json;
-  }
-
   verify = unbreakable(function (context, forward, back) {
     const typeString = this.getString();
 
@@ -445,6 +416,39 @@ export default define(class Type extends Element {
     context.debug(`...validated the '${typeString}' prefixed type.`);
 
     return forward(type, context, back);
+  }
+
+  toJSON(abridged = false) {
+    const string = this.getString(),
+          nameJSON = nameToNameJSON(this.name),
+          prefixNameJSON = prefixNameToPrevixNameJSON(this.prefixName),
+          name = nameJSON,  ///
+          prefixName = prefixNameJSON;  ///
+
+    const json = {
+      string,
+      name,
+      prefixName
+    };
+
+    if (!abridged) {
+      const closedJSON = closedToClosedJSON(this.closed),
+            superTypesJSON = superTypesToSuperTypesJSON(this.superTypes),
+            propertiesJSON = propertiesToPropertiesJSON(this.properties),
+            provisinoalJSOM = provisionalToProvisionalJSON(this.provisional),
+            superTypes = superTypesJSON,  ///
+            properties = propertiesJSON,  ///
+            provisional = provisinoalJSOM;  ///
+
+      Object.assign(json, {
+        closedJSON,
+        superTypes,
+        properties,
+        provisional
+      });
+    }
+
+    return json;
   }
 
   static name = "Type";

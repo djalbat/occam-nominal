@@ -9,13 +9,18 @@ export function typeFromJSON(json, context) {
   if (type !== null) {
     json = type;  ///
 
-    const { string } = json,
-          name = string;  ///
+    const { name, prefixName } = json;
 
-    type = findTypeByName(name, context);
+    type = findTypeByNameAndPrefixName(name, prefixName, context);
   }
 
   return type;
+}
+
+export function nameToNameJSON(name) {
+  const nameJSON = name;  ///
+
+  return nameJSON;
 }
 
 export function labelFromJSON(json, context) {
@@ -335,9 +340,8 @@ export function superTypesFromJSON(json, context) {
 
   const superTypes = superTypesJSON.map((superTypeJSON) => {
     const json = superTypeJSON,  ///
-          { string } = json,
-          name = string,  ///
-          type = findTypeByName(name, context),
+          { name, prefixName } = json,
+          type = findTypeByNameAndPrefixName(name, prefixName, context),
           superType = type; ///
 
     return superType;
@@ -1047,9 +1051,19 @@ export function declaredMetavariablesToDeclaredMetavariablesJSON(declaredMetavar
   return declaredMetavariablesJSON;
 }
 
-function findTypeByName(name, context) {
-  const typeName = name,  ///
-        type = context.findTypeByTypeName(typeName);
+function findTypeByNameAndPrefixName(name, prefixName, context) {
+  let type;
+
+  const strict = (prefixName === null),
+        typeName = name;  ///
+
+  if (strict) {
+    type = context.findTypeByTypeName(typeName);
+  } else {
+    const prefixedTypeName = `${prefixName}${name}`;
+
+    type = context.findTypeByPrefixedTypeName(prefixedTypeName);
+  }
 
   return type;
 }
