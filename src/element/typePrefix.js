@@ -55,11 +55,10 @@ export default define(class TypePrefix extends Element {
       return back();
     }
 
-    const typePrefixes = context.getTypePrefixes(includeRelease, includeDependencies),
-          typePrefixesLength = typePrefixes.length;
+    const typePrefixPresent = context.isTypePrefixPresentByTypePrefixName(includeRelease);
 
-    if (typePrefixesLength > 0) {
-      context.debug(`Unable to verify the '${typePrefixString}' type prefix because a type prefix has already been declared.`);
+    if (typePrefixPresent) {
+      context.debug(`Unable to verify the '${typePrefixString}' type prefix because a type prefix is already present.`);
 
       return back();
     }

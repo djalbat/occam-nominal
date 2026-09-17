@@ -536,6 +536,19 @@ export default class NominalFileContext extends FileContext {
     return types;
   }
 
+  findTypeAliasByTypeName(typeName, includeRelease = true) {
+    const typeAliases = this.getTypeAliases(includeRelease),
+          typeAlias = typeAliases.find((typeAlias) => {
+            const typeAliasComparesToTypeName = typeAlias.compareTypeName(typeName);
+
+            if (typeAliasComparesToTypeName) {
+              return true;
+            }
+          }) || null;
+
+    return typeAlias;
+  }
+
   findTypeByPrefixedTypeName(prefixedTypeName, includeRelease = true, includeDependencies = true) {
     const types = this.getTypes(includeRelease, includeDependencies),
           type = findType(types, (type) => {
@@ -544,9 +557,25 @@ export default class NominalFileContext extends FileContext {
             if (typeComparesToPrefixedTypeName) {
               return true;
             }
-          });
+          }) || null;
 
     return type;
+  }
+
+  findTypesByPrefixedTypeName(prefixedTypeName, includeRelease = true, includeDependencies = true) {
+    let types;
+
+    types = this.getTypes(includeRelease, includeDependencies);
+
+    types = findTypes(types, (type) => {  ///
+      const typeComparesToTypeName = type.comparePrefixedTypeName(prefixedTypeName);
+
+      if (typeComparesToTypeName) {
+        return true;
+      }
+    });
+
+    return types;
   }
 
   findTypePrefixByTypePrefixName(typePrefixName, includeRelease = true, includeDependencies = true) {
@@ -621,13 +650,13 @@ export default class NominalFileContext extends FileContext {
 
   isLabelPresentByLabelNode(labelNode) {
     const labels = this.getLabels(),
-      labelPresent = labels.some((label) => {
-        const labelNodeMatches = label.matchLabelNode(labelNode);
+          labelPresent = labels.some((label) => {
+            const labelNodeMatches = label.matchLabelNode(labelNode);
 
-        if (labelNodeMatches) {
-          return true;
-        }
-      });
+            if (labelNodeMatches) {
+              return true;
+            }
+          });
 
     return labelPresent;
   }
@@ -637,6 +666,13 @@ export default class NominalFileContext extends FileContext {
           typePresent = (type !== null);
 
     return typePresent;
+  }
+
+  isTypeAliasPresentByTypeName(typeName, includeRelease = true) {
+    const typeAlias = this.findTypeAliasByTypeName(typeName, includeRelease),
+          typeAlisPresent = (typeAlias !== null);
+
+    return typeAlisPresent;
   }
 
   isTypePresentByPrefixedTypeName(prefixedTypeName, includeRelease = true, includeDependencies = true) {

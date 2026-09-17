@@ -406,11 +406,25 @@ export default class Context extends ContextBase {
     return types;
   }
 
+  findTypeAliasByTypeName(typeName, includeRelease = true) {
+    const context = this.getContext(),
+          typeAlias = context.findTypeAliasByTypeName(typeName, includeRelease);
+
+    return typeAlias;
+  }
+
   findTypeByPrefixedTypeName(prefixedTypeName, includeRelease = true, includeDependencies = true) {
     const context = this.getContext(),
           type = context.findTypeByPrefixedTypeName(prefixedTypeName, includeRelease, includeDependencies);
 
     return type;
+  }
+
+  findTypesByPrefixedTypeName(prefixedTypeName, includeRelease = true, includeDependencies = true) {
+    const context = this.getContext(),
+          types = context.findTypesByPrefixedTypeName(prefixedTypeName, includeRelease, includeDependencies);
+
+    return types;
   }
 
   findMetaTypeByMetaTypeName(metaTypeName) {
@@ -469,9 +483,23 @@ export default class Context extends ContextBase {
     return framePresent;
   }
 
+  isTypePresentByTypeName(typeName, includeRelease = true, includeDependencies = true) {
+    const context = this.getContext(),
+      typePresent = context.isTypePresentByTypeName(typeName, includeRelease, includeDependencies);
+
+    return typePresent;
+  }
+
+  isTypeAliasPresentByTypeName(typeName, includeRelease = true) {
+    const context = this.getContext(),
+          typeAliasPresent = context.isTypeAliasPresentByTypeName(typeName, includeRelease);
+
+    return typeAliasPresent;
+  }
+
   isTypePresentByPrefixedTypeName(prefixedTypeName, includeRelease = true, includeDependencies = true) {
     const context = this.getContext(),
-          typePresent = context.isTypePresentByPrefixedTypeName(prefixedTypeName, includeRelease, includeDependencies);
+      typePresent = context.isTypePresentByPrefixedTypeName(prefixedTypeName, includeRelease, includeDependencies);
 
     return typePresent;
   }
