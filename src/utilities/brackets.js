@@ -6,12 +6,12 @@ import { bracketedConstructorFromNothing, bracketedCombinatorFromNothing } from 
 
 export function stripBracketsFromTerm(term, context) {
   let termNode = term.getNode(),
-      bracketedTermChildNode = bracketedTermChildNodeFromTermNode(termNode);
+      bracketedTermChildNode = bracketedTermChildNodeFromTermNode(termNode, context);
 
   while (bracketedTermChildNode !== null) {
     termNode = bracketedTermChildNode;  ///
 
-    bracketedTermChildNode = bracketedTermChildNodeFromTermNode(termNode);
+    bracketedTermChildNode = bracketedTermChildNodeFromTermNode(termNode, context);
   }
 
   term = termFromTermNode(termNode, context);
@@ -19,13 +19,13 @@ export function stripBracketsFromTerm(term, context) {
   return term;
 }
 
-export function stripBracketsFromTermNode(termNode) {
-  let bracketedTermChildNode = bracketedTermChildNodeFromTermNode(termNode);
+export function stripBracketsFromTermNode(termNode, context) {
+  let bracketedTermChildNode = bracketedTermChildNodeFromTermNode(termNode, context);
 
   while (bracketedTermChildNode !== null) {
     termNode = bracketedTermChildNode;  ///
 
-    bracketedTermChildNode = bracketedTermChildNodeFromTermNode(termNode);
+    bracketedTermChildNode = bracketedTermChildNodeFromTermNode(termNode, context);
   }
 
   return termNode;
@@ -33,12 +33,12 @@ export function stripBracketsFromTermNode(termNode) {
 
 export function stripBracketsFromStatement(statement, context) {
   let statementNode = statement.getNode(),
-        bracketedStatementChildNode = bracketedStatementChildNodeFromStatementNode(statementNode);
+      bracketedStatementChildNode = bracketedStatementChildNodeFromStatementNode(statementNode, context);
 
   while (bracketedStatementChildNode !== null) {
     statementNode = bracketedStatementChildNode;  ///
 
-    bracketedStatementChildNode = bracketedStatementChildNodeFromStatementNode(statementNode);
+    bracketedStatementChildNode = bracketedStatementChildNodeFromStatementNode(statementNode, context);
   }
 
   statement = statementFromStatementNode(statementNode, context);
@@ -46,23 +46,23 @@ export function stripBracketsFromStatement(statement, context) {
   return statement;
 }
 
-export function stripBracketsFromStatementNode(statementNode) {
-  let bracketedStatementChildNode = bracketedStatementChildNodeFromStatementNode(statementNode);
+export function stripBracketsFromStatementNode(statementNode, context) {
+  let bracketedStatementChildNode = bracketedStatementChildNodeFromStatementNode(statementNode, context);
 
   while (bracketedStatementChildNode !== null) {
     statementNode = bracketedStatementChildNode;  ///
 
-    bracketedStatementChildNode = bracketedStatementChildNodeFromStatementNode(statementNode);
+    bracketedStatementChildNode = bracketedStatementChildNodeFromStatementNode(statementNode, context);
   }
 
   return statementNode;
 }
 
-function bracketedTermChildNodeFromTermNode(termNode) {
+function bracketedTermChildNodeFromTermNode(termNode, context) {
   let bracketedTermChildNode = null;
 
   const depth = BRACKETED_TERM_DEPTH,
-        bracketedConstructor = bracketedConstructorFromNothing(),
+        bracketedConstructor = bracketedConstructorFromNothing(context),
         bracketedConstructorTerm = bracketedConstructor.getTerm(),
         bracketedConstructorTermNode = bracketedConstructorTerm.getNode(),
         termNodeMatchBracketedConstructorNode = termNode.match(bracketedConstructorTermNode, depth);
@@ -76,11 +76,11 @@ function bracketedTermChildNodeFromTermNode(termNode) {
   return bracketedTermChildNode;
 }
 
-function bracketedStatementChildNodeFromStatementNode(statementNode) {
+function bracketedStatementChildNodeFromStatementNode(statementNode, context) {
   let bracketedStatementChildNode = null;
 
   const depth = BRACKETED_STATEMENT_DEPTH,
-        bracketedCombinator = bracketedCombinatorFromNothing(),
+        bracketedCombinator = bracketedCombinatorFromNothing(context),
         bracketedCombinatorStatement = bracketedCombinator.getStatement(),
         bracketedCombinatorStatementnNode = bracketedCombinatorStatement.getNode(),
         statementNodeMatchBracketedCombinatorStatementNode = statementNode.match(bracketedCombinatorStatementnNode, depth);

@@ -52,6 +52,7 @@ import ImplicitAssumption from "./element/assumption/implicit";
 import procedureReference from "./element/procedureReference";
 import ContainedAssertion from "./element/assertion/contained";
 import signatureAssertion from "./element/assertion/signature";
+import BracketedGenerator from "./element/generator/bracketed";
 import PropertyDeclaration from "./element/declaration/property";
 import VariableDeclaration from "./element/declaration/variable";
 import BracketedCombinator from "./element/combinator/bracketed";

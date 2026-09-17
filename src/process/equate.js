@@ -19,8 +19,9 @@ class EquationalPass extends ZipPass {
       run: (leftTermNode, rightTermNode, context) => {
         let success = false;
 
-        leftTermNode = stripBracketsFromTermNode(leftTermNode); ///
-        rightTermNode = stripBracketsFromTermNode(rightTermNode); ///
+        leftTermNode = stripBracketsFromTermNode(leftTermNode, context); ///
+
+        rightTermNode = stripBracketsFromTermNode(rightTermNode, context); ///
 
         if (!success) {
           const equivalences = context.getEquivalences(),

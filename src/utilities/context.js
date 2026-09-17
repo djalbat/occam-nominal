@@ -18,10 +18,8 @@ import { mnemicContextFromJSON, mnemicContextsFromJSON, mnemicContextToMnemicCon
 
 export const { isolate } = continuationUtilities;
 
-export function ground(innerFunction) {
-  let context;
-
-  const edaphicContext = EdaphicContext.fromNothing();
+export function ground(innerFunction, context) {
+  const edaphicContext = EdaphicContext.fromNothing(context);
 
   context = edaphicContext; ///
 

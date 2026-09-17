@@ -3,38 +3,52 @@
 import { ground } from "../utilities/context";
 import { BASE_TYPE_SYMBOL } from "../constants";
 import { STATEMENT_META_TYPE_NAME } from "../metaTypeNames";
-import { instantiateCombinator, instantiateConstructor } from "../process/instantiate";
-import { bracketedCombinatorFromBracketedCombinatorNode, bracketedConstructorFromBracketedConstructorNode } from "../utilities/element";
+import { instantiateGenerator, instantiateCombinator, instantiateConstructor } from "../process/instantiate";
+import { bracketedGeneratorFromBracketedGeneratorNode,
+         bracketedCombinatorFromBracketedCombinatorNode,
+         bracketedConstructorFromBracketedConstructorNode } from "../utilities/element";
 
-let bracketedCombinator = null,
-    bracketedConstructor = null;
+export function bracketedGeneratorFromNothing(context) {
+  let bracketedGenerator;
 
-export function bracketedCombinatorFromNothing() {
-  if (bracketedCombinator === null) {
-    ground((context) => {
-      const bracketedCombinatorString = `(${STATEMENT_META_TYPE_NAME})`,
-            string = bracketedCombinatorString, ///
-            combinatorNode = instantiateCombinator(string, context),
-            bracketedCombinatorNode = combinatorNode; ///
+  ground((context) => {
+    const bracketedGeneratorString = `(${BASE_TYPE_SYMBOL})`,
+          string = bracketedGeneratorString,  ///
+          constructorNode = instantiateGenerator(string, context),
+          bracketedGeneratorNode = constructorNode;
 
-      bracketedCombinator = bracketedCombinatorFromBracketedCombinatorNode(bracketedCombinatorNode, context);
-    });
-  }
+    bracketedGenerator = bracketedGeneratorFromBracketedGeneratorNode(bracketedGeneratorNode, context);
+  }, context);
+
+  return bracketedGenerator;
+}
+
+export function bracketedCombinatorFromNothing(context) {
+  let bracketedCombinator;
+
+  ground((context) => {
+    const bracketedCombinatorString = `(${STATEMENT_META_TYPE_NAME})`,
+          string = bracketedCombinatorString, ///
+          combinatorNode = instantiateCombinator(string, context),
+          bracketedCombinatorNode = combinatorNode; ///
+
+    bracketedCombinator = bracketedCombinatorFromBracketedCombinatorNode(bracketedCombinatorNode, context);
+  }, context);
 
   return bracketedCombinator;
 }
 
-export function bracketedConstructorFromNothing() {
-  if (bracketedConstructor === null) {
-    ground((context) => {
-      const bracketedConstructorString = `(${BASE_TYPE_SYMBOL})`,
-            string = bracketedConstructorString,  ///
-            constructorNode = instantiateConstructor(string, context),
-            bracketedConstructorNode = constructorNode;
+export function bracketedConstructorFromNothing(context) {
+  let bracketedConstructor;
 
-      bracketedConstructor = bracketedConstructorFromBracketedConstructorNode(bracketedConstructorNode, context);
-    });
-  }
+  ground((context) => {
+    const bracketedConstructorString = `(${BASE_TYPE_SYMBOL})`,
+          string = bracketedConstructorString,  ///
+          constructorNode = instantiateConstructor(string, context),
+          bracketedConstructorNode = constructorNode;
+
+    bracketedConstructor = bracketedConstructorFromBracketedConstructorNode(bracketedConstructorNode, context);
+  }, context);
 
   return bracketedConstructor;
 }

@@ -13,8 +13,6 @@ const { nominalLexerFromNothing, nominalParserFromNothing } = nominalUtilities;
 const nominalLexer = nominalLexerFromNothing(NominalLexer),
       nominalParser = nominalParserFromNothing(NominalParser); ///
 
-let baseType = null;
-
 export default class EdaphicContext extends Context {
   constructor(context, lexer, parser) {
     super(context);
@@ -33,9 +31,8 @@ export default class EdaphicContext extends Context {
 
   findMetaTypeByMetaTypeName(metaTypeName) { return findMetaTypeByMetaTypeName(metaTypeName); }
 
-  static fromNothing() {
-    const context = null,
-          lexer = nominalLexer, ///
+  static fromNothing(context) {
+    const lexer = nominalLexer, ///
           parser = nominalParser, ///
           edapicContext = Context.fromNothing(EdaphicContext, lexer, parser, context);
 

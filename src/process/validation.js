@@ -5,7 +5,7 @@ import { continuationUtilities } from "occam-languages";
 import elements from "../elements";
 
 import { choose } from "../utilities/context";
-import { bracketedConstructorFromNothing, bracketedCombinatorFromNothing } from "../utilities/instance";
+import { bracketedGeneratorFromNothing, bracketedConstructorFromNothing, bracketedCombinatorFromNothing } from "../utilities/instance";
 
 const { some } = continuationUtilities;
 
@@ -87,8 +87,16 @@ function unifyTermWithConstructors(term, state, context, forward, back) {
   }, back);
 }
 
+function unifyTermWithBracketedGenerator(term, state, context, forward, back) {
+  const bracketedGenerator = bracketedGeneratorFromNothing(context);
+
+  return bracketedGenerator.unifyTerm(term, state, context, (term, context, back) => {
+    return forward(term, state, context, back);
+  }, back);
+}
+
 function unifyTermWithBracketedConstructor(term, state, context, forward, back) {
-  const bracketedConstructor = bracketedConstructorFromNothing();
+  const bracketedConstructor = bracketedConstructorFromNothing(context);
 
   return bracketedConstructor.unifyTerm(term, state, context, (term, context, back) => {
     return forward(term, state, context, back);
@@ -140,7 +148,7 @@ function unifyStatementWithCombinators(statement, state, context, forward, back)
 }
 
 function unifyStatementWithBracketedCombinator(statement, state, context, forward, back) {
-  const bracketedCombinator = bracketedCombinatorFromNothing();
+  const bracketedCombinator = bracketedCombinatorFromNothing(context);
 
   return bracketedCombinator.unifyStatement(statement, state, context, (statement, context, back) => {
     return forward(statement, state, context, back);
@@ -284,6 +292,7 @@ export const validateTerms = [
   validateTermAsVariable,
   unifyTermWithGenerators,
   unifyTermWithConstructors,
+  unifyTermWithBracketedGenerator,
   unifyTermWithBracketedConstructor
 ];
 

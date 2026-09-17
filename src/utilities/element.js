@@ -798,6 +798,19 @@ export function implicitAssumptionFromImplicitAssumptionNode(implicitAssumptionN
   return implicitAssumption;
 }
 
+export function bracketedGeneratorFromBracketedGeneratorNode(bracketedGeneratorNode, context) {
+  const { BracketedGenerator } = elements,
+        node = bracketedGeneratorNode, ///
+        string = context.nodeAsString(node),
+        breakPoint = null,
+        term = termFromBracketedGeneratorNode(bracketedGeneratorNode, context),
+        type = typeFromBracketedGeneratorNode(bracketedGeneratorNode, context),
+        hypotheses = hypothesesFromBracketedGeneratorNode(bracketedGeneratorNode, context),
+        bracketedGenerator = new BracketedGenerator(context, string, node, breakPoint, term, type, hypotheses);
+
+  return bracketedGenerator;
+}
+
 export function propertyDeclarationFromPropertyDeclarationNode(propertyDeclarationNode, context) {
   const { PropertyDeclaration } = elements,
         node = propertyDeclarationNode,  ///
@@ -1731,6 +1744,20 @@ export function metavariableFromConstraintNode(constraintNode, context) {
   return metavarible;
 }
 
+export function termFromBracketedGeneratorNode(bracketedGeneratorNode, context) {
+  const termNode = bracketedGeneratorNode.getTermNode(),
+        term = termFromTermNode(termNode, context);
+
+  return term;
+}
+
+export function typeFromBracketedGeneratorNode(bracketedGeneratorNode, context) {
+  const baseType = baseTypeFromNothing(),
+        type = baseType;  ///
+
+  return type;
+}
+
 export function subproofFromStepOrSubproofNode(subproofOrSubproofNode, context) {
   let subproof = null;
 
@@ -1791,14 +1818,14 @@ export function typeFromVariableDeclarationNode(variableDeclarationNode, context
   return type;
 }
 
-export function termFromBracketedConstructorNode(bracketedCcnstructorNode, context) {
-  const termNode = bracketedCcnstructorNode.getTermNode(),
+export function termFromBracketedConstructorNode(bracketedConstructorNode, context) {
+  const termNode = bracketedConstructorNode.getTermNode(),
         term = termFromTermNode(termNode, context);
 
   return term;
 }
 
-export function typeFromBracketedConstructorNode(bracketedCcnstructorNode, context) {
+export function typeFromBracketedConstructorNode(bracketedConstructorNode, context) {
   const baseType = baseTypeFromNothing(),
         type = baseType;  ///
 
@@ -2034,6 +2061,12 @@ export function parametersFromProcedureReferenceNode(procedureReferenceNode, con
         parameters = parametersFromParameterNodes(parameterNodes, context);
 
   return parameters;
+}
+
+export function hypothesesFromBracketedGeneratorNode(bracketedGeneratorNode, context) {
+  const hypotheses = [];
+
+  return hypotheses;
 }
 
 export function constructorDeclarationFromSectionNode(sectionNode, context) {
