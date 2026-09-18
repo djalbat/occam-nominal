@@ -65,7 +65,8 @@ export default define(class TypeAlias extends Element {
 
     context.trace(`Verifying the '${typeAliasString}' type alias...`);
 
-    const verifyTypeName = this.verifyTypeName.bind(this),
+    const implicit = this.isImplicit(),
+          verifyTypeName = this.verifyTypeName.bind(this),
           verifyImplicitType = this.verifyImplicitType.bind(this),
           verifyExplicitType = this.verifyExplicitType.bind(this);
 
@@ -73,7 +74,7 @@ export default define(class TypeAlias extends Element {
       verifyTypeName,
       verifyImplicitType,
       verifyExplicitType
-    ], context, (context, back) => {
+    ], implicit, context, (implicit, context, back) => {
       context.debug(`...verified the '${typeAliasString}' type alias.`);
 
       return forward(context, back);
@@ -88,7 +89,7 @@ export default define(class TypeAlias extends Element {
     });
   });
 
-  verifyTypeName(context, forward, back) {
+  verifyTypeName(implicit, context, forward, back) {
     const typeAliasString = this.getString();  ///
 
     context.trace(`Verifying the '${typeAliasString}' type alias's type name...`);
@@ -113,14 +114,12 @@ export default define(class TypeAlias extends Element {
 
     context.debug(`...verified the '${typeAliasString}' type alias's type name.`);
 
-    return forward(context, back);
+    return forward(implicit, context, back);
   }
 
-  verifyImplicitType(context, forward, back) {
-    const implicit = this.isImplicit();
-
+  verifyImplicitType(implicit, context, forward, back) {
     if (!implicit) {
-      return forward(context, back);
+      return forward(implicit, context, back);
     }
 
     const typeAliasString = this.getString();  ///
@@ -151,14 +150,12 @@ export default define(class TypeAlias extends Element {
 
     context.debug(`...verified the '${typeAliasString}' type alias's implicit type...`);
 
-    return forward(context, back);
+    return forward(implicit, context, back);
   }
 
-  verifyExplicitType(context, forward, back) {
-    const explicit = this.isExplicit();
-
-    if (!explicit) {
-      return forward(context, back);
+  verifyExplicitType(implicit, context, forward, back) {
+    if (implicit) {
+      return forward(implicit, context, back);
     }
 
     const typeAliasString = this.getString();  ///
@@ -198,7 +195,7 @@ export default define(class TypeAlias extends Element {
 
     context.debug(`...verified the '${typeAliasString}' type alias's explicittype.`);
 
-    return forward(context, back);
+    return forward(implicit, context, back);
   }
 
   toJSON() {
