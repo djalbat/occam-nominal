@@ -1,7 +1,7 @@
 {
   "name": "occam-nominal",
   "author": "James Smith",
-  "version": "1.0.641",
+  "version": "1.0.642",
   "license": "MIT, Anti-996",
   "homepage": "https://github.com/djalbat/occam-nominal",
   "description": "Occam's Nominal language.",
@@ -18,7 +18,7 @@
   },
   "devDependencies": {
     "@swc/core": "1.13.20",
-    "decaf-cli": "^1.0.38",
+    "decaf-cli": "^1.1.1",
     "easy": "^25.0.8",
     "easy-layout": "^6.0.342",
     "easy-with-style": "^3.0.582",
