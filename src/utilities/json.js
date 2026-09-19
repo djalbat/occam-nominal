@@ -485,7 +485,7 @@ export function constraintsFromJSON(json, context) {
 }
 
 export function typeAliasesFromJSON(json, context) {
-  let { typeAliases = [] } = json;
+  let { typeAliases } = json;
 
   const { TypeAlias } = elements,
         typeAliasesJSON = typeAliases; ///

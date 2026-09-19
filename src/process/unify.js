@@ -13,7 +13,6 @@ const { nodeQuery } = queryUtilities;
 
 const typeNodeQuery = nodeQuery("/type"),
       termNodeQuery = nodeQuery("/term"),
-      frameNodeQuery = nodeQuery("/frame"),
       metaTypeNodeQuery = nodeQuery("/metaType"),
       statementNodeQuery = nodeQuery("/statement"),
       termVariableNodeQuery = nodeQuery("/term/variable!"),
@@ -250,31 +249,6 @@ class UnifyStatementWithCombinatorPass extends ContinuationZipPass {
 
         return declare((state) => {
           return statement.validate(state, context, (statement, context, back) => {
-            const specificContext = context;  ///
-
-            return forward(generalContext, specificContext, back);
-          }, back);
-        });
-      }
-    },
-    {
-      generalNodeQuery: metaTypeNodeQuery,
-      specificNodeQuery: frameNodeQuery,
-      run: (generalMetaTypeNode, specificFrameNode, generalContext, specificContext, forward, back) => {
-        const metaTypeNode = generalMetaTypeNode, ///
-              metaTypeName = metaTypeNode.getMetaTypeName(),
-              metaTypeNameFrameMetaTypeName = (metaTypeName === FRAME_META_TYPE_NAME);
-
-        if (metaTypeNameFrameMetaTypeName) {
-          return back();
-        }
-
-        const frameNode = specificFrameNode,  ///
-              context = specificContext,  ///
-              frame = frameFromFrameNode(frameNode, context);
-
-        return declare((state) => {
-          return frame.validate(state, context, (frame, context, back) => {
             const specificContext = context;  ///
 
             return forward(generalContext, specificContext, back);
