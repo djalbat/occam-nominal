@@ -8,20 +8,26 @@ import elements from "../elements";
 import { define } from "../elements";
 import { instantiate } from "../utilities/context";
 import { instantiateTerm } from "../process/instantiate";
+import { getNarrowestTypes } from "../utilities/equality";
 import { stripBracketsFromTerm } from "../utilities/brackets";
 import { equivalenceStringFromTerms } from "../utilities/string";
 
 const { first, second, compress } = arrayUtilities;
 
 export default define(class Equivalence extends Element {
-  constructor(context, string, node, breakPoint, terms) {
+  constructor(context, string, node, breakPoint, terms, types) {
     super(context, string, node, breakPoint);
 
     this.terms = terms;
+    this.types = types;
   }
 
   getTerms() {
     return this.terms;
+  }
+
+  getTypes() {
+    return this.types;
   }
 
   getGroundedTerms(definedVariables, groundedTerms, context) {
@@ -162,8 +168,21 @@ export default define(class Equivalence extends Element {
     return combinedTerms;
   }
 
+  combineTypes(terms) {
+    const types = terms.map((term) => {
+            const type = term.getType();
+
+            return type;
+          }),
+          narrowestTypes = getNarrowestTypes(...types),
+          combinedTypes = narrowestTypes; ///
+
+    return combinedTypes;
+  }
+
   mergedWith(equivalence, context) {
-    let terms;
+    let terms,
+        types;
 
     terms = equivalence.getTerms();
 
@@ -173,7 +192,11 @@ export default define(class Equivalence extends Element {
 
     terms = reinstantiateTerms(terms, context); ///
 
-    equivalence = equivalenceFromTerms(terms, context);
+    const combinedTypes = this.combineTypes(terms);
+
+    types =- combinedTypes; ///
+
+    equivalence = equivalenceFromTermsAndTypes(terms, types, context);
 
     return equivalence;
   }
@@ -198,48 +221,69 @@ export default define(class Equivalence extends Element {
   static name = "Equivalence";
 
   static fromEquality(equality, context) {
-    let equivalence;
-
-    let terms;
-
-    terms = equality.getTerms();
-
-    terms = terms.map((term) => { ///
-      term = stripBracketsFromTerm(term, context);
-
-      return term;
-    });
-
-    terms = reinstantiateTerms(terms, context); ///
-
-    const firstTerm = first(terms),
-          secondTerm = second(terms),
-          firstTermEqualToSecondTerm = firstTerm.isEqualTo(secondTerm);
-
-    if (firstTermEqualToSecondTerm) {
-      const term = firstTerm; ///
-
-      terms = [
-        term
-      ];
-    }
-
-    equivalence = equivalenceFromTerms(terms, context);
+    const terms = termsFromEquality(equality, context),
+          types = typesFromEquality(equality, context),
+          equivalence = equivalenceFromTermsAndTypes(terms, types, context);
 
     return equivalence;
   }
 });
 
-function equivalenceFromTerms(terms, context) {
+function equivalenceFromTermsAndTypes(terms, types, context) {
   const { Equivalence } = elements,
         equivalenceString = equivalenceStringFromTerms(terms),
         string = equivalenceString, ///
         node = null,
-        breakPoint = null;
-
-  const equivalence = new Equivalence(context, string, node, breakPoint, terms);
+        breakPoint = null,
+        equivalence = new Equivalence(context, string, node, breakPoint, terms, types);
 
   return equivalence;
+}
+
+function termsFromEquality(equality, context) {
+  let terms;
+
+  terms = equality.getTerms();
+
+  terms = terms.map((term) => { ///
+    term = stripBracketsFromTerm(term, context);
+
+    return term;
+  });
+
+  terms = reinstantiateTerms(terms, context); ///
+
+  const firstTerm = first(terms),
+        secondTerm = second(terms),
+        firstTermEqualToSecondTerm = firstTerm.isEqualTo(secondTerm);
+
+  if (firstTermEqualToSecondTerm) {
+    const term = firstTerm; ///
+
+    terms = [
+      term
+    ];
+  }
+
+  return terms;
+}
+
+function typesFromEquality(equality, context) {
+  let types;
+
+  const terms = equality.getTerms();
+
+  types = terms.map((term) => {
+    const type = term.getType();
+
+    return type;
+  });
+
+  const narrowestTypes = getNarrowestTypes(...types);
+
+  types = narrowestTypes; ///
+
+  return types;
 }
 
 function reinstantiateTerms(terms, context) {
@@ -260,7 +304,7 @@ function reinstantiateTerm(term, context) {
           termNode = instantiateTerm(string, context),
           node = termNode,  ///
           breakPoint = null,
-          type = null,
+          type = term.getType(),
           provisional = null;
 
     context = null;

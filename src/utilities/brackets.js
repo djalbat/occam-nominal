@@ -5,6 +5,8 @@ import { BRACKETED_TERM_DEPTH, BRACKETED_STATEMENT_DEPTH } from "../constants";
 import { bracketedConstructorFromNothing, bracketedCombinatorFromNothing } from "../utilities/instance";
 
 export function stripBracketsFromTerm(term, context) {
+  const type = term.getType();
+
   let termNode = term.getNode(),
       bracketedTermChildNode = bracketedTermChildNodeFromTermNode(termNode, context);
 
@@ -15,6 +17,8 @@ export function stripBracketsFromTerm(term, context) {
   }
 
   term = termFromTermNode(termNode, context);
+
+  term.setType(type);
 
   return term;
 }

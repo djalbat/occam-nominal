@@ -249,8 +249,19 @@ export default define(class TypeAssertion extends Assertion {
 
 function validateWhenDerived(term, type, state, context, forward, back) {
   return term.validate(state, context, (term, context, back) => {
-    const termType = term.getType(),
-          termTypeEqualToOrSubTypeOfType = termType.isEqualToOrSubTypeOf(type);
+    const equivalenceTypes = findEquivalenceTypes(term, context),
+          termType = term.getType(),
+          termTypes = [ ///
+            ...equivalenceTypes,
+            termType
+          ],
+          termTypeEqualToOrSubTypeOfType = termTypes.some((termType) => {
+            const termTypeEqualToOrSubTypeOfType = termType.isEqualToOrSubTypeOf(type);
+
+            if (termTypeEqualToOrSubTypeOfType) {
+              return true;
+            }
+          });
 
     if (!termTypeEqualToOrSubTypeOfType) {
       return back();
@@ -264,6 +275,25 @@ function validateWhenDerived(term, type, state, context, forward, back) {
 
     return forward(term, context, back);
   }, back);
+}
+
+function findEquivalenceTypes(term, context) {
+  let equivalenceTypes = [];
+
+  const equivalences = context.getEquivalences(),
+        equivalence = equivalences.find((equivalence) => {
+          const termEquates = equivalence.equateTerm(term);
+
+          if (termEquates) {
+            return true;
+          }
+        }) || null;
+
+  if (equivalence !== null) {
+    equivalenceTypes = equivalence.getTypes();
+  }
+
+  return equivalenceTypes;
 }
 
 function termFromTypeAssertionNode(typeAssertionNode, context) {

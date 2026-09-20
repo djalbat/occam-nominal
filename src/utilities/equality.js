@@ -6,13 +6,18 @@ import { baseTypeFromNothing } from "../utilities/type";
 
 const { intersection } = arrayUtilities;
 
-export function getNarrowestCommonAncestorTypes(typeA, typeB) {
+export function getNarrowestCommonAncestorTypes(...types) {
   let narrowestCommonAncestorTypes;
 
-  const typeABaseType = typeA.isBaseType(),
-        typeBBaseType = typeB.isBaseType();
+  const typeBaseType = types.some((type) => {
+    const typeBaseType = type.isBaseType();
 
-  if (typeABaseType || typeBBaseType) {
+    if (typeBaseType) {
+      return true;
+    }
+  });
+
+  if (typeBaseType) {
     const baseType = baseTypeFromNothing(),
           narrowestCommonAncestorType = baseType; ///
 
@@ -20,7 +25,7 @@ export function getNarrowestCommonAncestorTypes(typeA, typeB) {
       narrowestCommonAncestorType
     ];
   } else {
-    const commonAncestorTypes = getCommonAncestorTypes(typeA, typeB);
+    const commonAncestorTypes = getCommonAncestorTypes(...types);
 
     narrowestCommonAncestorTypes = commonAncestorTypes.filter((commonAncestorType) => {
       const narrowerCommonAncestorType = someOtherType(commonAncestorTypes, commonAncestorType, (otherCommonAncestorType) => {
@@ -40,18 +45,43 @@ export function getNarrowestCommonAncestorTypes(typeA, typeB) {
   return narrowestCommonAncestorTypes;
 }
 
-export function getCommonAncestorTypes(typeA, typeB) {
-  const ancestorTypesA = typeA.retrieveAncestorTypes(),
-        ancestorTypesB = typeB.retrieveAncestorTypes(),
-        commonAncestorTypes = intersection(ancestorTypesA, ancestorTypesB, (ancestorTypeA, ancestorTypeB) => {
-          const ancestorTypeAEqualToAncestorTypeB = ancestorTypeA.isEqualTo(ancestorTypeB);
+export function getCommonAncestorTypes(...types) {
+  const ancestorTypesArray = types.map((type) => {
+          const ancestorTypes = type.retrieveAncestorTypes();
 
-          if (ancestorTypeAEqualToAncestorTypeB) {
-            return true;
-          }
+          return ancestorTypes;
+        }),
+        commonAncestorTypes = ancestorTypesArray.reduce((commonAncestorTypes, ancestorTypes) => {
+          commonAncestorTypes = intersection(commonAncestorTypes, ancestorTypes, (commonAncestorType, ancestorType) => {  ///
+            const commonAncestorTypeEqualToAancestorType = commonAncestorType.isEqualTo(ancestorType);
+
+            if (commonAncestorTypeEqualToAancestorType) {
+              return true;
+            }
+          });
+
+          return commonAncestorTypes;
         });
 
   return commonAncestorTypes;
+}
+
+export function getNarrowestTypes(...types) {
+  const narrowestTypes = types.filter((type) => {
+    const narrowerType = someOtherType(types, type, (otherType) => {
+      const typeSuperTypeOfOtherType = type.isSuperTypeOf(otherType);
+
+      if (typeSuperTypeOfOtherType) {
+        return true;
+      }
+    });
+
+    if (!narrowerType) {
+      return true;
+    }
+  });
+
+  return narrowestTypes;
 }
 
 function someOtherType(types, type, callback) {
