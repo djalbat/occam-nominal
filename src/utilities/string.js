@@ -1,6 +1,5 @@
 "use strict";
 
-import { baseTypeFromNothing } from "../utilities/type";
 import { EMPTY_STRING, PROVISIONAL } from "../constants";
 
 export function termsStringFromTerms(terms, quoted = false) {
@@ -68,15 +67,15 @@ export function hypothesesStringFromHypotheses(hypotheses) {
 export function superTypesStringFromSuperTypes(superTypes) {
   let superTypesString;
 
-  const baseType = baseTypeFromNothing();
-
   superTypesString = superTypes.reduce((superTypesString, superType) => {
-    if (superType !== baseType) {
+    const superTypeBaseType = superType.isBaseType();
+
+    if (!superTypeBaseType) {
       const superTypeString = superType.getString();
 
       superTypesString = (superTypesString === null) ?
-                           `'${superTypeString}'` :
-                              `${superTypesString}, '${superTypeString}'`;
+                          `'${superTypeString}'` :
+                             `${superTypesString}, '${superTypeString}'`;
     }
 
     return superTypesString;

@@ -128,27 +128,11 @@ export default define(class TypeAssertion extends Assertion {
     context.trace(`Validating the '${typeAssertionString}' declared type assertion...`);
 
     return this.term.validate(state, context, (term, context, back) => {
-      let validatesWhenDeclared = false;
+      const termType = term.getType(),
+            termTypeEqualToType = termType.isEqualTo(this.type),
+            termTypeSuperTypeOfType = termType.isSuperTypeOf(this.type);
 
-      if (term !== null) {
-        const termType = term.getType(),
-              termTypeEqualToType = termType.isEqualTo(this.type),
-              termTypeSuperTypeOfType = termType.isSuperTypeOf(this.type);
-
-        if (false) {
-          ///
-        } else if (termTypeEqualToType) {
-          validatesWhenDeclared = true;
-        } else if (termTypeSuperTypeOfType) {
-          const termEstablished = term.isEstablished();
-
-          if (termEstablished) {
-            validatesWhenDeclared = true;
-          }
-        }
-      }
-
-      if (!validatesWhenDeclared) {
+      if (!termTypeSuperTypeOfType && !termTypeEqualToType) {
         return back();
       }
 
@@ -272,9 +256,9 @@ function validateWhenDerived(term, type, state, context, forward, back) {
       return back();
     }
 
-    const termEstablished = term.isEstablished();
+    const termPProvisional = term.isProvisional();
 
-    if (!termEstablished) {
+    if (termPProvisional) {
       return back();
     }
 

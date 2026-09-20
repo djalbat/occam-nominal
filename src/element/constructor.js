@@ -4,7 +4,7 @@ import { Element, breakPointUtilities, continuationUtilities } from "occam-langu
 
 import { define } from "../elements";
 import { declare, desist } from "../utilities/state";
-import { baseTypeFromNothing } from "../utilities/type";
+import { BASE_TYPE_SYMBOL } from "../constants";
 import { instantiateConstructor } from "../process/instantiate";
 import { unifyTermWithConstructor } from "../process/unify";
 import { validateTermAsConstructor } from "../process/validate";
@@ -148,11 +148,11 @@ export default define(class Constructor extends Element {
 
     return this.term.validateAsVariable(state, context, (term, context, back) => {
       const type = term.getType(),
-            baseType = baseTypeFromNothing();
+            typeBaseType = type.isBaseType();
 
-      if (type !== baseType) {
+      if (!typeBaseType) {
         const typeString = type.getString(),
-              baseTypeString = baseType.getString();
+              baseTypeString = `${BASE_TYPE_SYMBOL}`;
 
         context.debug(`The '${typeString}' type of the '${constructorString}' constructor's term is not the '${baseTypeString}' base type.`);
 

@@ -9,6 +9,7 @@ import { instantiateType } from "../process/instantiate";
 import { BASE_TYPE_SYMBOL } from "../constants";
 import { nameFromTypeNode } from "../utilities/element";
 import { baseTypeFromNothing } from "../utilities/type";
+import { getNarrowestCommonAncestorTypes } from "../utilities/equality";
 import { closedFromJSON,
          nameToNameJSON,
          closedToClosedJSON,
@@ -22,8 +23,8 @@ import { closedFromJSON,
          provisionalToProvisionalJSON } from "../utilities/json";
 
 const { all } = continuationUtilities,
-      { unbreakable } = breakPointUtilities,
-      { push, intersection } = arrayUtilities;
+      { push } = arrayUtilities,
+      { unbreakable } = breakPointUtilities;
 
 export default define(class Type extends Element {
   constructor(context, string, node, breakPoint, name, closed, prefixName, superTypes, properties, provisional) {
@@ -182,22 +183,11 @@ export default define(class Type extends Element {
   }
 
   isJoinedTo(type) {
-    let joinedTo = false;
-
-    const ancestorTypes = this.retrieveAncestorTypes(),
-          typeAncestorTypes = type.retrieveAncestorTypes(),
-          intersectingAncestorTypes = intersection(ancestorTypes, typeAncestorTypes, (ancestorType, typeAncestorType) => {
-            const ancestorTypeEqualToATypencestorType = ancestorType.isEqualTo(typeAncestorType);
-
-            if (ancestorTypeEqualToATypencestorType) {
-              return true;
-            }
-          }),
-          intersectingAncestorTypesLength = intersectingAncestorTypes.length;
-
-    if (intersectingAncestorTypesLength > 0) {
-      joinedTo = true;
-    }
+    const typeA = this, ///
+          typeB = type, ///
+          narrowestCommonAncestorTypes = getNarrowestCommonAncestorTypes(typeA, typeB),
+          narrowestCommonAncestorTypesLength = narrowestCommonAncestorTypes.length,
+          joinedTo = (narrowestCommonAncestorTypesLength > 0);
 
     return joinedTo;
   }
@@ -211,9 +201,9 @@ export default define(class Type extends Element {
   isSubTypeOf(type) {
     let subTypeOf;
 
-    const baseType = baseTypeFromNothing();
+    const baseType = this.isBaseType();
 
-    if (this === baseType) {
+    if (baseType) {
       subTypeOf = false;
     } else {
       subTypeOf = this.superTypes.some((superType) => { ///
@@ -494,3 +484,4 @@ export default define(class Type extends Element {
     return type;
   }
 });
+
