@@ -313,18 +313,32 @@ export function equalitiesFromJSON(json, context) {
   return equalities;
 }
 
-export function propertiesFromJSON(json, context) {
-  let { properties } = json;
+export function propertiesFromJSON(strict, json, context) {
+  if (context === undefined) {
+    context = json; ///
 
-  const { Property } = elements,
-        propertiesJSON = properties; ///
+    json = strict;  ///
 
-  properties = propertiesJSON.map((propertyJSON) => {
-    const json = propertyJSON,  ///
-          property = Property.fromJSON(json, context);
+    strict = false;
+  }
 
-    return property;
-  });
+  let properties;
+
+  if (strict) {
+    ({ properties } = json);
+
+    const { Property } = elements,
+          propertiesJSON = properties; ///
+
+    properties = propertiesJSON.map((propertyJSON) => {
+      const json = propertyJSON,  ///
+            property = Property.fromJSON(json, context);
+
+      return property;
+    });
+  } else {
+    properties = [];
+  }
 
   return properties;
 }
@@ -595,6 +609,29 @@ export function mnemicContextsFromJSON(json, context) {
   });
 
   return mnemicContexts;
+}
+
+export function typePropertiesFromJSON(json, types, context) {
+  const { types: typesJSON } = json;
+
+  typesJSON.forEach((typeJSON) => {
+    let type;
+
+    type = typeJSON;  ///
+
+    json = {
+      type
+    };
+
+    type = typeFromJSON(json, context);
+
+    json = typeJSON;  ///
+
+    const strict = true,
+          properties = propertiesFromJSON(strict, json, context);
+
+    type.setProperties(properties);
+  });
 }
 
 export function declaredVariablesFromJSON(json, context) {

@@ -2,9 +2,42 @@
 
 import { NonTerminalNode } from "occam-languages";
 
-import { TYPE_TOKEN_TYPE } from "../tokenTypes";
+import { BASE_TYPE_SYMBOL } from "../constants";
+import { TYPE_TOKEN_TYPE, PRIMITIVE_TOKEN_TYPE } from "../tokenTypes";
 
 export default class TypeNode extends NonTerminalNode {
+  getString() {
+    let string;
+
+    const baseType = this.isBaseType();
+
+    if (baseType) {
+      string = `${BASE_TYPE_SYMBOL}`;
+    } else {
+      const prefixed = this.isPrefixed(),
+            typeName = this.getTypeName();
+
+      if (prefixed) {
+        const typePrefixName = this.getTypePrefixName();
+
+        string = `${typePrefixName}${typeName}`;
+      } else {
+        string = `${typeName}`;
+      }
+    }
+
+    return string;
+  }
+
+  isBaseType() {
+    const tokenType = PRIMITIVE_TOKEN_TYPE,
+          baseType = this.someTerminalNode((terminalNode) => {
+            return true;
+          }, tokenType);
+
+    return baseType;
+  }
+
   isPrefixed() {
     const multiplicity = this.getMultiplicity(),
           prefixed = (multiplicity > 1);

@@ -28,6 +28,7 @@ import { typesFromJSON,
          constructorsFromJSON,
          schemasToSchemasJSON,
          theoremsToTheoremsJSON,
+         typePropertiesFromJSON,
          declaredVariablesFromJSON,
          generatorsToGeneratorsJSON,
          conjecturesToConjecturesJSON,
@@ -761,6 +762,8 @@ export default class NominalFileContext extends FileContext {
     this.types = [];
 
     typesFromJSON(json, this.types, fileContext);
+
+    typePropertiesFromJSON(json, this.types, fileContext);
 
     this.lemmas = lemmasFromJSON(json, fileContext);
     this.typeAliases = typeAliasesFromJSON(json, fileContext);

@@ -20,7 +20,7 @@ export function typeFromTypeNode(typeNode, context) {
     type = baseType;  ///
   } else {
     const node = typeNode,  ///
-          string = context.nodeAsString(node),
+          string = typeNode.getString(),
           baseTypeString = baseType.getString(),
           stringBaseTypeString = (string === baseTypeString);
 
@@ -1376,10 +1376,10 @@ export function termFromMetavariableNode(metavariableNode, context) {
 export function typeFromMetavariableNode(metavariableNode, context) {
   let type = null;
 
-  const typemNode = metavariableNode.getTypeNode();
+  const typeNode = metavariableNode.getTypeNode();
 
-  if (typemNode !== null) {
-    type = typeFromTypeNode(typemNode, context);
+  if (typeNode !== null) {
+    type = typeFromTypeNode(typeNode, context);
   }
 
   return type;

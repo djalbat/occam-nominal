@@ -436,12 +436,13 @@ export default define(class Type extends Element {
             superTypesJSON = superTypesToSuperTypesJSON(this.superTypes),
             propertiesJSON = propertiesToPropertiesJSON(this.properties),
             provisinoalJSOM = provisionalToProvisionalJSON(this.provisional),
+            closed = closedJSON,  ///
             superTypes = superTypesJSON,  ///
             properties = propertiesJSON,  ///
             provisional = provisinoalJSOM;  ///
 
       Object.assign(json, {
-        closedJSON,
+        closed,
         superTypes,
         properties,
         provisional
@@ -471,14 +472,6 @@ export default define(class Type extends Element {
       context = null; ///
 
       type = new Type(context, string, node, breakPoint, name, closed, prefixName, superTypes, properties, provisional);
-
-      properties.forEach((property) => {
-        const propertyType = property.getType();
-
-        if (propertyType === null) {
-          property.setType(type);
-        }
-      });
     }, context);
 
     return type;
