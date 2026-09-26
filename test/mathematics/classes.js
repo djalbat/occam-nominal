@@ -2,7 +2,7 @@
 
 const { levels } = require("necessary");
 
-const { createSuite } = require("../utilities/test");
+const { createSuite } = require("../helpers/test");
 
 const { ERROR_LEVEL } = levels;
 
