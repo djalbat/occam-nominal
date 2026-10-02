@@ -3,5 +3,5 @@
 import { NonTerminalNode } from "occam-languages";
 
 export default class DocumentNode extends NonTerminalNode {
-  static fromRuleNameChildNodesOpacityAndPrecedence(ruleName, childNodes, opacity, precedence) { return NonTerminalNode.fromRuleNameChildNodesOpacityAndPrecedence(DocumentNode, ruleName, childNodes, opacity, precedence); }
+  static fromRuleNameChildNodesPrecedenceAndOpacity(ruleName, childNodes, precedence, opacity) { return NonTerminalNode.fromRuleNameChildNodesPrecedenceAndOpacity(DocumentNode, ruleName, childNodes, precedence, opacity); }
 }

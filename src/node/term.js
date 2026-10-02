@@ -72,7 +72,7 @@ class TermNode extends NonTerminalNode {
     return singularVariableNode;
   }
 
-  static fromRuleNameChildNodesOpacityAndPrecedence(ruleName, childNodes, opacity, precedence) { return NonTerminalNode.fromRuleNameChildNodesOpacityAndPrecedence(TermNode, ruleName, childNodes, opacity, precedence); }
+  static fromRuleNameChildNodesPrecedenceAndOpacity(ruleName, childNodes, precedence, opacity) { return NonTerminalNode.fromRuleNameChildNodesPrecedenceAndOpacity(TermNode, ruleName, childNodes, precedence, opacity); }
 }
 
 Object.assign(TermNode.prototype, nodeMixins);

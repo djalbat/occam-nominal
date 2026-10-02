@@ -9,5 +9,5 @@ export default class TheoremNode extends ClaimNode {
 
   static headerRuleName = THEOREM_HEADER_RULE_NAME;
 
-  static fromRuleNameChildNodesOpacityAndPrecedence(ruleName, childNodes, opacity, precedence) { return ClaimNode.fromRuleNameChildNodesOpacityAndPrecedence(TheoremNode, ruleName, childNodes, opacity, precedence); }
+  static fromRuleNameChildNodesPrecedenceAndOpacity(ruleName, childNodes, precedence, opacity) { return ClaimNode.fromRuleNameChildNodesPrecedenceAndOpacity(TheoremNode, ruleName, childNodes, precedence, opacity); }
 }

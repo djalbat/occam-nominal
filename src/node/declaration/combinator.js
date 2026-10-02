@@ -19,5 +19,5 @@ export default class ContainedDeclarationNode extends DeclarationNode {
     return combinatorNode;
   }
 
-  static fromRuleNameChildNodesOpacityAndPrecedence(ruleName, childNodes, opacity, precedence) { return DeclarationNode.fromRuleNameChildNodesOpacityAndPrecedence(ContainedDeclarationNode, ruleName, childNodes, opacity, precedence); }
+  static fromRuleNameChildNodesPrecedenceAndOpacity(ruleName, childNodes, precedence, opacity) { return DeclarationNode.fromRuleNameChildNodesPrecedenceAndOpacity(ContainedDeclarationNode, ruleName, childNodes, precedence, opacity); }
 }

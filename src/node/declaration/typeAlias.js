@@ -12,6 +12,6 @@ export default class TypeAliasDeclarationNode extends DeclarationNode {
     return typeAliasNode;
   }
 
-  static fromRuleNameChildNodesOpacityAndPrecedence(ruleName, childNodes, opacity, precedence) { return DeclarationNode.fromRuleNameChildNodesOpacityAndPrecedence(TypeAliasDeclarationNode, ruleName, childNodes, opacity, precedence); }
+  static fromRuleNameChildNodesPrecedenceAndOpacity(ruleName, childNodes, precedence, opacity) { return DeclarationNode.fromRuleNameChildNodesPrecedenceAndOpacity(TypeAliasDeclarationNode, ruleName, childNodes, precedence, opacity); }
 }
 

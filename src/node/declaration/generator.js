@@ -62,5 +62,5 @@ export default class GeneratorDeclarationNode extends DeclarationNode {
     return generatorNode;
   }
 
-  static fromRuleNameChildNodesOpacityAndPrecedence(ruleName, childNodes, opacity, precedence) { return DeclarationNode.fromRuleNameChildNodesOpacityAndPrecedence(GeneratorDeclarationNode, ruleName, childNodes, opacity, precedence); }
+  static fromRuleNameChildNodesPrecedenceAndOpacity(ruleName, childNodes, precedence, opacity) { return DeclarationNode.fromRuleNameChildNodesPrecedenceAndOpacity(GeneratorDeclarationNode, ruleName, childNodes, precedence, opacity); }
 }

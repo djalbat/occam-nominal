@@ -9,5 +9,5 @@ export default class ConjectureNode extends ClaimNode {
 
   static headerRuleName = CONJECTURE_HEADER_RULE_NAME;
 
-  static fromRuleNameChildNodesOpacityAndPrecedence(ruleName, childNodes, opacity, precedence) { return ClaimNode.fromRuleNameChildNodesOpacityAndPrecedence(ConjectureNode, ruleName, childNodes, opacity, precedence); }
+  static fromRuleNameChildNodesPrecedenceAndOpacity(ruleName, childNodes, precedence, opacity) { return ClaimNode.fromRuleNameChildNodesPrecedenceAndOpacity(ConjectureNode, ruleName, childNodes, precedence, opacity); }
 }

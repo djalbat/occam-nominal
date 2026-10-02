@@ -12,5 +12,5 @@ export default class PremiseNode extends FactNode {
     return procedureReferenceNode;
   }
 
-  static fromRuleNameChildNodesOpacityAndPrecedence(ruleName, childNodes, opacity, precedence) { return FactNode.fromRuleNameChildNodesOpacityAndPrecedence(PremiseNode, ruleName, childNodes, opacity, precedence); }
+  static fromRuleNameChildNodesPrecedenceAndOpacity(ruleName, childNodes, precedence, opacity) { return FactNode.fromRuleNameChildNodesPrecedenceAndOpacity(PremiseNode, ruleName, childNodes, precedence, opacity); }
 }

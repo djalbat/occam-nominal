@@ -60,5 +60,6 @@ export default class StepNode extends FactNode {
     return qualificationNode;
   }
 
-  static fromRuleNameChildNodesOpacityAndPrecedence(ruleName, childNodes, opacity, precedence) { return FactNode.fromRuleNameChildNodesOpacityAndPrecedence(StepNode, ruleName, childNodes, opacity, precedence); }
+
+  static fromRuleNameChildNodesPrecedenceAndOpacity(ruleName, childNodes, precedence, opacity) { return FactNode.fromRuleNameChildNodesPrecedenceAndOpacity(StepNode, ruleName, childNodes, precedence, opacity); }
 }

@@ -72,5 +72,5 @@ export default class CotypeDeclarationNode extends DeclarationNode {
     return propertyDeclarationNodes;
   }
 
-  static fromRuleNameChildNodesOpacityAndPrecedence(ruleName, childNodes, opacity, precedence) { return DeclarationNode.fromRuleNameChildNodesOpacityAndPrecedence(CotypeDeclarationNode, ruleName, childNodes, opacity, precedence); }
+  static fromRuleNameChildNodesPrecedenceAndOpacity(ruleName, childNodes, precedence, opacity) { return DeclarationNode.fromRuleNameChildNodesPrecedenceAndOpacity(CotypeDeclarationNode, ruleName, childNodes, precedence, opacity); }
 }

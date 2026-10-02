@@ -3,5 +3,5 @@
 import HeaderNode from "../../node/header";
 
 export default class LemmaHeaderNode extends HeaderNode {
-  static fromRuleNameChildNodesOpacityAndPrecedence(ruleName, childNodes, opacity, precedence) { return HeaderNode.fromRuleNameChildNodesOpacityAndPrecedence(LemmaHeaderNode, ruleName, childNodes, opacity, precedence); }
+  static fromRuleNameChildNodesPrecedenceAndOpacity(ruleName, childNodes, precedence, opacity) { return HeaderNode.fromRuleNameChildNodesPrecedenceAndOpacity(LemmaHeaderNode, ruleName, childNodes, precedence, opacity); }
 }

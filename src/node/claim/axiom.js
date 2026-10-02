@@ -9,5 +9,5 @@ export default class AxiomNode extends ClaimNode {
 
   static headerRuleName = AXIOM_HEADER_RULE_NAME;
 
-  static fromRuleNameChildNodesOpacityAndPrecedence(ruleName, childNodes, opacity, precedence) { return ClaimNode.fromRuleNameChildNodesOpacityAndPrecedence(AxiomNode, ruleName, childNodes, opacity, precedence); }
+  static fromRuleNameChildNodesPrecedenceAndOpacity(ruleName, childNodes, precedence, opacity) { return ClaimNode.fromRuleNameChildNodesPrecedenceAndOpacity(AxiomNode, ruleName, childNodes, precedence, opacity); }
 }

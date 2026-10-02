@@ -59,5 +59,5 @@ export default class StatementSubstitutionNode extends SubstitutionNode {
     return firstStatementNode;
   }
 
-  static fromRuleNameChildNodesOpacityAndPrecedence(ruleName, childNodes, opacity, precedence) { return SubstitutionNode.fromRuleNameChildNodesOpacityAndPrecedence(StatementSubstitutionNode, ruleName, childNodes, opacity, precedence); }
+  static fromRuleNameChildNodesPrecedenceAndOpacity(ruleName, childNodes, precedence, opacity) { return SubstitutionNode.fromRuleNameChildNodesPrecedenceAndOpacity(StatementSubstitutionNode, ruleName, childNodes, precedence, opacity); }
 }

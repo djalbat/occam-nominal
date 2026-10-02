@@ -33,5 +33,5 @@ export default class HypothesisNode extends NonTerminalNode {
     return procedureReferenceNode;
   }
 
-  static fromRuleNameChildNodesOpacityAndPrecedence(ruleName, childNodes, opacity, precedence) { return NonTerminalNode.fromRuleNameChildNodesOpacityAndPrecedence(HypothesisNode, ruleName, childNodes, opacity, precedence); }
+  static fromRuleNameChildNodesPrecedenceAndOpacity(ruleName, childNodes, precedence, opacity) { return NonTerminalNode.fromRuleNameChildNodesPrecedenceAndOpacity(HypothesisNode, ruleName, childNodes, precedence, opacity); }
 }

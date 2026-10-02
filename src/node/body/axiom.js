@@ -3,5 +3,5 @@
 import BodyNode from "../../node/body";
 
 export default class AxiomBodyNode extends BodyNode {
-  static fromRuleNameChildNodesOpacityAndPrecedence(ruleName, childNodes, opacity, precedence) { return BodyNode.fromRuleNameChildNodesOpacityAndPrecedence(AxiomBodyNode, ruleName, childNodes, opacity, precedence); }
+  static fromRuleNameChildNodesPrecedenceAndOpacity(ruleName, childNodes, precedence, opacity) { return BodyNode.fromRuleNameChildNodesPrecedenceAndOpacity(AxiomBodyNode, ruleName, childNodes, precedence, opacity); }
 }

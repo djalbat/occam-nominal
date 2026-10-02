@@ -19,5 +19,5 @@ export default class SchemaAssertionNode extends AssertionNode {
     return frameNode;
   }
 
-  static fromRuleNameChildNodesOpacityAndPrecedence(ruleName, childNodes, opacity, precedence) { return AssertionNode.fromRuleNameChildNodesOpacityAndPrecedence(SchemaAssertionNode, ruleName, childNodes, opacity, precedence); }
+  static fromRuleNameChildNodesPrecedenceAndOpacity(ruleName, childNodes, precedence, opacity) { return AssertionNode.fromRuleNameChildNodesPrecedenceAndOpacity(SchemaAssertionNode, ruleName, childNodes, precedence, opacity); }
 }

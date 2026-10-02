@@ -3,5 +3,5 @@
 import { NonTerminalNode } from "occam-languages";
 
 export default class ErrorNode extends NonTerminalNode {
-  static fromRuleNameChildNodesOpacityAndPrecedence(ruleName, childNodes, opacity, precedence) { return NonTerminalNode.fromRuleNameChildNodesOpacityAndPrecedence(ErrorNode, ruleName, childNodes, opacity, precedence); }
+  static fromRuleNameChildNodesPrecedenceAndOpacity(ruleName, childNodes, precedence, opacity) { return NonTerminalNode.fromRuleNameChildNodesPrecedenceAndOpacity(ErrorNode, ruleName, childNodes, precedence, opacity); }
 }

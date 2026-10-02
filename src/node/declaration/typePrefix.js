@@ -19,6 +19,6 @@ export default class TypePrefixDeclarationNode extends DeclarationNode {
     return typePrefixNode;
   }
 
-  static fromRuleNameChildNodesOpacityAndPrecedence(ruleName, childNodes, opacity, precedence) { return DeclarationNode.fromRuleNameChildNodesOpacityAndPrecedence(TypePrefixDeclarationNode, ruleName, childNodes, opacity, precedence); }
+  static fromRuleNameChildNodesPrecedenceAndOpacity(ruleName, childNodes, precedence, opacity) { return DeclarationNode.fromRuleNameChildNodesPrecedenceAndOpacity(TypePrefixDeclarationNode, ruleName, childNodes, precedence, opacity); }
 }
 

@@ -3,5 +3,5 @@
 import ResolutionNode from "../../node/resolution";
 
 export default class DeductionNode extends ResolutionNode {
-  static fromRuleNameChildNodesOpacityAndPrecedence(ruleName, childNodes, opacity, precedence) { return ResolutionNode.fromRuleNameChildNodesOpacityAndPrecedence(DeductionNode, ruleName, childNodes, opacity, precedence); }
+  static fromRuleNameChildNodesPrecedenceAndOpacity(ruleName, childNodes, precedence, opacity) { return ResolutionNode.fromRuleNameChildNodesPrecedenceAndOpacity(DeductionNode, ruleName, childNodes, precedence, opacity); }
 }

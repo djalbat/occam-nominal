@@ -33,6 +33,6 @@ export default class TermSubstitutionNode extends SubstitutionNode {
     return firstTermNode;
   }
 
-  static fromRuleNameChildNodesOpacityAndPrecedence(ruleName, childNodes, opacity, precedence) { return SubstitutionNode.fromRuleNameChildNodesOpacityAndPrecedence(TermSubstitutionNode, ruleName, childNodes, opacity, precedence); }
+  static fromRuleNameChildNodesPrecedenceAndOpacity(ruleName, childNodes, precedence, opacity) { return SubstitutionNode.fromRuleNameChildNodesPrecedenceAndOpacity(TermSubstitutionNode, ruleName, childNodes, precedence, opacity); }
 }
 
