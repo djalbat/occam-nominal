@@ -4,14 +4,16 @@ const bnf = `document                             ::=  ( variableDeclaration
                                            
                                           | metavariableDeclaration 
                                                           
-                                          | combinatorDeclaration 
-                                                          
                                           | constructorDeclaration 
+                                                          
+                                          | combinatorDeclaration 
                                                           
                                           | generatorDeclaration 
                                                           
                                           | typePrefixDeclaration  
-                                                                                                     
+                                                                   
+                                          | typeAliasDeclaration  
+                                                                   
                                           | typeDeclaration 
                                                           
                                           | cotypeDeclaration 
@@ -66,9 +68,11 @@ error.                               ::=  . ;
 
 variableDeclaration                  ::=  "Variable" variable ( ":" type "provisionally"? )? <END_OF_LINE> ;
  
-metavariableDeclaration              ::=  "Metavariable" metavariable... ":" metaType <END_OF_LINE> ;
+metavariableDeclaration              ::=  "Metavariable" ( metavariable ... ( ":" metaType <END_OF_LINE> ) ) ;
  
 typePrefixDeclaration                ::=  "TypePrefix" typePrefix <END_OF_LINE> ;
+
+typeAliasDeclaration                 ::=  "TypeAlias" typeAlias <END_OF_LINE> ;
 
 typeDeclaration                      ::=  "Provisional"? "Closed"? "Type" type ( ":" types )? <END_OF_LINE> ;
  
@@ -86,14 +90,14 @@ cotypeDeclaration                    ::=  "Provisional"? "Type" <END_OF_LINE>
                                              
                                           );
 
-combinatorDeclaration                ::=  "Combinator" combinator... <END_OF_LINE> ;
+constructorDeclaration               ::=  "Constructor" ( constructor ... ( ( ":" ( type | stuff ) "provisionally"? )? <END_OF_LINE> ) ) ;
  
-propertyDeclaration.                 ::=  property... ( ":" ( type | stuff ) )? <END_OF_LINE> ;
+combinatorDeclaration                ::=  "Combinator" ( combinator ... <END_OF_LINE> ) ;
+ 
+generatorDeclaration                 ::=  "Generator" ( generator ... ( ( ":" ( type | stuff ) "provisionally"? )? <END_OF_LINE> ) ) ;
+ 
+propertyDeclaration.                 ::=  ( property ... ( ( ":" ( type | stuff ) )? <END_OF_LINE> ) ) ;
 
-generatorDeclaration                 ::=  "Generator" generator... ( ":" ( type | stuff ) "provisionally"? )? <END_OF_LINE> ;
- 
-constructorDeclaration               ::=  "Constructor" constructor... ( ":" ( type | stuff ) "provisionally"? )? <END_OF_LINE> ;
- 
 
 
   
@@ -111,17 +115,21 @@ schema                               ::=  schemaHeader schemaBody ;
 
 
 
-ruleHeader                          ::=  "Rule" parenthesisedLabels... <END_OF_LINE> ; 
+ruleHeader                          ::=  "Rule" ( parenthesisedLabels ... <END_OF_LINE> ) ; 
 
-schemaHeader                        ::=  "Schema" parenthesisedLabel... <END_OF_LINE> ;
+schemaHeader                        ::=  "Schema" ( parenthesisedLabel ... <END_OF_LINE> ) ;
 
-axiomHeader                         ::=  "Axiom" signature? parenthesisedLabels... <END_OF_LINE> ; 
+axiomHeader                         ::=  "Axiom" signature? ( parenthesisedLabels ... <END_OF_LINE> ) ; 
 
-lemmaHeader                         ::=  "Lemma" parenthesisedLabels... <END_OF_LINE> | "Lemma" <END_OF_LINE> ; 
+lemmaHeader                         ::=  "Lemma" ( parenthesisedLabels ... <END_OF_LINE> ) 
 
-theoremHeader                       ::=  "Theorem" parenthesisedLabels... <END_OF_LINE> ; 
+                                      |  "Lemma" <END_OF_LINE> 
+                                      
+                                      ; 
 
-conjectureHeader                    ::=  "Conjecture" parenthesisedLabels... <END_OF_LINE> ;
+theoremHeader                       ::=  "Theorem" ( parenthesisedLabels ... <END_OF_LINE> ) ; 
+
+conjectureHeader                    ::=  "Conjecture" ( parenthesisedLabels ... <END_OF_LINE> ) ;
 
 
 
@@ -227,49 +235,49 @@ subDerivation                        ::=  (
 
 
 
-premise.                             ::=  procedureReferece <END_OF_LINE>  
+premise.                             ::=  procedureReference <END_OF_LINE>  
 
-                                       |  statement... <END_OF_LINE>  
+                                       |  ( statement ... <END_OF_LINE> )  
 
-                                       |  nonsense... <END_OF_LINE>
+                                       |  ( nonsense ... <END_OF_LINE> )
                                        
                                        ;
 
-supposition.                         ::=  procedureReferece <END_OF_LINE>  
+supposition.                         ::=  procedureReference <END_OF_LINE>  
 
-                                       |  statement... <END_OF_LINE>  
+                                       |  ( statement ... <END_OF_LINE> )  
 
-                                       |  nonsense... <END_OF_LINE>
+                                       |  ( nonsense ... <END_OF_LINE> )
                                        
                                        ;
 
-conclusion.                          ::=  statement... <END_OF_LINE>  
+conclusion.                          ::=  ( statement ... <END_OF_LINE> )  
 
-                                       |  nonsense... <END_OF_LINE>
+                                       |  ( nonsense ... <END_OF_LINE> )
                                        
                                        ;
 
-deduction.                           ::=  statement... <END_OF_LINE>  
+deduction.                           ::=  ( statement ... <END_OF_LINE> )  
 
-                                       |  nonsense... <END_OF_LINE>
+                                       |  ( nonsense ... <END_OF_LINE> )
                                        
                                        ;
 
-hypothesis.                          ::=  procedureReferece <END_OF_LINE>  
+hypothesis.                          ::=  procedureReference <END_OF_LINE>  
 
-                                       |  statement... <END_OF_LINE>  
+                                       |  ( statement ... <END_OF_LINE> )  
 
-                                       |  nonsense... <END_OF_LINE>
+                                       |  ( nonsense ... <END_OF_LINE> )
                                        
                                        ;
 
 
 
-step.                                ::=  statement... qualification? <END_OF_LINE>  
+step.                                ::=  ( statement ... ( qualification? <END_OF_LINE> ) )  
 
-                                       |  nonsense... qualification <END_OF_LINE>
+                                       |  ( nonsense ... ( qualification <END_OF_LINE> ) )
                                        
-                                       |  nonsense... <END_OF_LINE>
+                                       |  ( nonsense ... <END_OF_LINE> )
                                        
                                        ;
 
@@ -285,7 +293,7 @@ qualification                        ::=  "because" signatureAssertion
 
 
 
-procedureReferece                    ::=  "@"<NO_WHITESPACE>[name]<NO_WHITESPACE>"(" parameter ( "," parameter )* ")" ;
+procedureReference                   ::=  "@"<NO_WHITESPACE>[name]<NO_WHITESPACE>"(" parameter ( "," parameter )* ")" ;
 
 
 
@@ -319,13 +327,17 @@ metaArgument                         ::=  statement ( )
                                        
                                        ;
 
+
+
 reference.                           ::=  metavariable ;
 
 label.                               ::=  metavariable ;
 
+link.                                ::=  metavariable ;
 
 
-equality                             ::=  term ( "=" | "!=" ) term ;
+
+equality                             ::=  term ( "=" | "!=" ) \` term ;
 
 typeAssertion                        ::=  term ":" type ;
 
@@ -335,17 +347,17 @@ definedAssertion                     ::=  term "is" ( "defined" | "undefined" ) 
 
 containedAssertion                   ::=  term "is" ( "present" | "missing" ) "in" statement ;
 
-signatureAssertion                   ::=  "[" term ( "," term )* "]" "satisfies" metavariable ;  
+signatureAssertion                   ::=  "[" term ( "," term )* "]" "satisfies" link ;  
 
 subproofAssertion                    ::=  "[" statement ( "," statement )* "]" "..." statement ;
 
-schemaAssertion                      ::=  metavariable "-"<NO_WHITESPACE>"|" frame ;
+schemaAssertion                      ::=  link "-"<NO_WHITESPACE>"|" frame ;
 
 frame                                ::=  "[" ( ( metavariable | assumption ) ( "," assumption )* ) "]" ;
  
-assumption                           ::=  metavariable "::" statement ;
+assumption                           ::=  link "::" statement ;
 
-constraint                           ::=  reference "::" statement ;
+constraint                           ::=  metavariable "::" statement ;
  
 implicitAssumption                   ::=  "." "::" statement ;
 
@@ -374,6 +386,8 @@ variable.                            ::=  [identifier] ;
 metaType.                            ::=  [meta-type] ;
 
 typePrefix.                          ::=  [type] ;
+
+typeAlias.                           ::=  [type] ( ":" type )? ;
 
 type.                                ::=  [type] ( <NO_WHITESPACE>[type] )? 
 
