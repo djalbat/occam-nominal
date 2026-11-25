@@ -4,9 +4,9 @@ const { levels } = require("necessary");
 
 const { createSuite } = require("../helpers/test");
 
-const { TRACE_LEVEL } = levels;
+const { ERROR_LEVEL } = levels;
 
-const logLevel = TRACE_LEVEL,
+const logLevel = ERROR_LEVEL,
       projectName = "first-order-logic",
       projectsDirectoryPath = "../../Logic";
 
