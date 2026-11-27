@@ -59,13 +59,11 @@ export default define(class TypeDeclaration extends Declaration {
     const superTypes = [],
           verifyType = this.verifyType.bind(this),
           verifyCModality = this.verifyCModality.bind(this),
-          verifySuperTypes = this.verifySuperTypes.bind(this),
-          verifyTypePrefix = this.verifyTypePrefix.bind(this);
+          verifySuperTypes = this.verifySuperTypes.bind(this);
 
     return all([
       verifyType,
       verifySuperTypes,
-      verifyTypePrefix,
       verifyCModality
     ], superTypes, context, (superTypes, context, back) => {
       const properties = this.getProperties(),
@@ -161,28 +159,7 @@ export default define(class TypeDeclaration extends Declaration {
     return forward(superTypes, context, back);
   }
 
-  verifyTypePrefix(superTypes, context, forward, back) {
-    const typeString = this.type.getString(),
-          typeDeclarationString = this.getString(); ///
-
-    context.trace(`Verifying the '${typeDeclarationString}' type declaration's '${typeString}' type's prefix...`);
-
-    const typePrefixed = this.type.isPrefixed();
-
-    if (typePrefixed) {
-      context.debug(`The '${typeDeclarationString}' type declaration's '${typeString}' type is prefixed.`);
-
-      return back();
-    }
-
-    context.debug(`...verified the '${typeDeclarationString}' type declaration's '${typeString}' type's prefix.`);
-
-    return forward(superTypes, context, back);
-  }
-
   verifySuperTypes(superTypes, context, forward, back) {
-    const typeDeclarationString = this.getString(); ///
-
     const superTypesLength = this.superTypes.length;
 
     if (superTypesLength === 0) {
@@ -193,6 +170,8 @@ export default define(class TypeDeclaration extends Declaration {
 
       return forward(superTypes, context, back);
     }
+
+    const typeDeclarationString = this.getString(); ///
 
     context.trace(`Verifying the '${typeDeclarationString}' type declaration's super-types...`);
 

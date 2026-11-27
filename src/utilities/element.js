@@ -38,7 +38,7 @@ export function typeFromTypeNode(typeNode, context) {
 
       context = null;
 
-      type = new Type(context, string, node, breakPoint, name, closed, prefixName, superTypes, properties, provisional);
+      type = new Type(context, string, node, breakPoint, name, prefixName, closed, superTypes, properties, provisional);
     }
   }
 
@@ -1194,8 +1194,7 @@ export function propertiesFromTypeNode(typeNode, context) {
 }
 
 export function prefixNameFromTypeNode(typeNode, context) {
-  const typePrefixName = typeNode.getTypePrefixName(),
-        prefixName = typePrefixName;  ///
+  const prefixName = null;  ///
 
   return prefixName;
 }
