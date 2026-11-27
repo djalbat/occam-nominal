@@ -98,6 +98,22 @@ export function provisionalFromJSON(json, context) {
   return provisional;
 }
 
+export function prefixedTypeFromJSON(json, context) {
+  let { prefixedType } = json;
+
+  if (prefixedType !== null) {
+    json = prefixedType;  ///
+
+    const { name } = json,
+          prefixName = null,
+          type = findTypeByNameAndPrefixName(name, prefixName, context);
+
+    prefixedType = type;  ///
+  }
+
+  return prefixedType;
+}
+
 export function mnemicContextFromJSON(json, context) {
   const releaseContext = context; ///
 
@@ -730,10 +746,32 @@ export function conclusionToConclusionJSON(conclusion) {
   return conclusionJSON;
 }
 
+export function typePrefixToTypePrefixJSON(typePrefix) {
+  let typePrefixJSON = null;
+
+  if (typePrefix !== null) {
+    typePrefixJSON = typePrefix.toJSON();
+  }
+
+  return typePrefixJSON;
+}
+
 export function provisionalToProvisionalJSON(provisional) {
   const provisionalJSON = provisional;  ///
 
   return provisionalJSON;
+}
+
+export function prefixedTypeToPrefixedTypeJSON(prefixedType) {
+  let prefixedTypeJSON = null;
+
+  if (prefixedType !== null) {
+    const abridged = true;
+
+    prefixedTypeJSON = prefixedType.toJSON(abridged);
+  }
+
+  return prefixedTypeJSON;
 }
 
 export function mnemicContextToMnemicContextJSON(mnemicContext) {

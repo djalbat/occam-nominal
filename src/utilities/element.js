@@ -421,11 +421,12 @@ export function typeAliasFromTypeAliasNode(typeAliasNode, context) {
         string = context.nodeAsString(node),
         breakPoint = null,
         type = typeFromTypeAliasNode(typeAliasNode, context),
-        typeName = typeNameFromTypeAliasNode(typeAliasNode, context);
+        typePrefix = typePrefixFromTypeAliasNode(typeAliasNode, context),
+        prefixedType = prefixedTypeFromTypeAliasNode(typeAliasNode, context);
 
   context = null;
 
-  const typeAlias = new TypeAlias(context, string, node, breakPoint, type, typeName);
+  const typeAlias = new TypeAlias(context, string, node, breakPoint, type, typePrefix, prefixedType);
 
   return typeAlias;
 }
@@ -1170,13 +1171,8 @@ export function typeFromGeneratorNode(generatorNode, context) {
 }
 
 export function typeFromTypeAliasNode(typeAliasNode, context) {
-  let type = null;
-
-  const typeNode = typeAliasNode.getTypeNode();
-
-  if (typeNode !== null) {
-    type = typeFromTypeNode(typeNode, context);
-  }
+  const typeNode = typeAliasNode.getTypeNode(),
+        type = typeFromTypeNode(typeNode, context);
 
   return type;
 }
@@ -1435,12 +1431,6 @@ export function rightTermFromEqualityNode(equalityNode, context) {
   return rightTerm;
 }
 
-export function typeNameFromTypeAliasNode(typeAliasNode, context) {
-  const typeName = typeAliasNode.getTypeName();
-
-  return typeName;
-}
-
 export function equalityFromStatementNode(statementNode, context) {
   let equality = null;
 
@@ -1484,7 +1474,7 @@ export function declarationFromSectionNode(sectionNode, context) {
 
 export function identifierFromVariableNode(variableNode, context) {
   const variableIdentifier = variableNode.getVariableIdentifier(),
-    identifier = variableIdentifier;  ///
+        identifier = variableIdentifier;  ///
 
   return identifier;
 }
@@ -1609,6 +1599,18 @@ export function linkFromSchemaAssertionNode(schemaAssertionNode, context) {
   return link;
 }
 
+export function typePrefixFromTypeAliasNode(typePrefixAliasNode, context) {
+  let typePrefix = null;
+
+  const typePrefixNode = typePrefixAliasNode.getTypePrefixNode();
+
+  if (typePrefixNode !== null) {
+    typePrefix = typePrefixFromTypePrefixNode(typePrefixNode, context);
+  }
+
+  return typePrefix;
+}
+
 export function suppositionsFromSubproofNode(subproofNode, context) {
   const suppositionNodes = subproofNode.getSuppositionNodes(),
         suppositions = suppositionsFromSuppositionNodes(suppositionNodes, context);
@@ -1658,6 +1660,18 @@ export function subDerivationFromSubproofNode(subproofNode, context) {
         subDerviation = subDerivationFromSubDerivationNode(subDerivationNode, context);
 
   return subDerviation;
+}
+
+export function prefixedTypeFromTypeAliasNode(typeAliasNode, context) {
+  let prefixedType = null;
+
+  const prefixedTypeNode = typeAliasNode.getPrefixedTypeNode();
+
+  if (prefixedTypeNode !== null) {
+    prefixedType = typeFromTypeNode(prefixedTypeNode, context);
+  }
+
+  return prefixedType;
 }
 
 export function metavariableFromStatementNode(statementNode, context) {
